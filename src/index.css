@@ -1,0 +1,219 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer base {
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-blur: 12px;
+    /* Surface hierarchy - Light mode */
+    --surface-1: theme('colors.slate.50');
+    --surface-2: theme('colors.white');
+    --surface-3: theme('colors.slate.100');
+    /* Status colors - Light */
+    --status-success: theme('colors.emerald.500');
+    --status-error: theme('colors.rose.500');
+    --status-warning: theme('colors.amber.500');
+    /* Focus ring */
+    --focus-ring: theme('colors.cyan.500');
+  }
+
+  .dark {
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-blur: 20px;
+    /* Surface hierarchy - Dark mode (Navy nautical theme) */
+    --surface-1: #0a0f1a;
+    /* Deep navy background */
+    --surface-2: #0f172a;
+    /* Cards/containers (slate-900) */
+    --surface-3: #1e293b;
+    /* Inputs/modals (slate-800) */
+    /* Status colors - Dark mode friendly (glowing) */
+    --status-success: theme('colors.emerald.400');
+    --status-error: #f87171;
+    /* Coral/salmon */
+    --status-warning: theme('colors.amber.400');
+    /* Focus ring - Cyan glow */
+    --focus-ring: theme('colors.cyan.400');
+  }
+
+  html {
+    font-size: 16px;
+    height: 100%;
+    overflow: hidden;
+
+    @media (min-width: 640px) {
+      font-size: 17px;
+    }
+
+    @media (min-width: 1024px) {
+      font-size: 18px;
+    }
+  }
+
+  body {
+    @apply antialiased text-slate-900 bg-slate-50 dark:text-slate-100 transition-colors duration-300 font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--surface-1);
+  }
+
+  .dark body {
+    background-color: var(--surface-1);
+  }
+
+  .adaptive-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+
+    @media (min-width: 768px) {
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+  }
+
+  /* Glowing focus ring for accessibility */
+  input:focus,
+  button:focus-visible,
+  select:focus,
+  textarea:focus,
+  [tabindex]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring), 0 0 20px -5px var(--focus-ring);
+  }
+
+  /* Reduce focus glow for elements with their own ring */
+  .focus\:ring-4:focus {
+    box-shadow: none;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)] border border-[var(--glass-border)] transition-all duration-300;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300/50 dark:hover:border-white/10;
+    background-color: var(--surface-2);
+  }
+
+  .dark .glass-card {
+    background-color: rgba(15, 23, 42, 0.8);
+  }
+
+  .glass-interactive {
+    @apply glass hover:bg-white/80 dark:hover:bg-slate-800/80 active:scale-[0.98];
+  }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-slate-900 via-slate-950 to-black;
+  }
+
+  .vibrant-gradient {
+    @apply bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500;
+  }
+
+  /* Monospace for financial figures - vertical alignment */
+  .font-financial {
+    font-family: 'Roboto Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.025em;
+  }
+
+  /* Status colors */
+  .text-success {
+    color: var(--status-success);
+  }
+
+  .text-error {
+    color: var(--status-error);
+  }
+
+  .bg-success {
+    background-color: var(--status-success);
+  }
+
+  .bg-error {
+    background-color: var(--status-error);
+  }
+
+  /* Neon glow for dark mode charts */
+  .dark .chart-bar-income {
+    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+  }
+
+  .dark .chart-bar-expense {
+    filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.4));
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 dark:bg-slate-800 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-300 dark:bg-slate-700;
+}
+
+/* Global scrollbar styling - subtle, thin, rounded */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+  /* slate-400 at 30% */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.5);
+  /* slate-400 at 50% */
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(71, 85, 105, 0.4);
+  /* slate-600 at 40% */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(71, 85, 105, 0.6);
+  /* slate-600 at 60% */
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(71, 85, 105, 0.4) transparent;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  height: 100%;
+  overflow-y: auto;
+}
