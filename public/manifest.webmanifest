@@ -1,0 +1,43 @@
+{
+    "name": "Anchor OS",
+    "short_name": "Anchor",
+    "description": "Premium Shared Asset Management & Family Finance",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#020617",
+    "theme_color": "#020617",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "finance",
+        "productivity"
+    ],
+    "shortcuts": [
+        {
+            "name": "Finance",
+            "url": "/finance",
+            "icons": [
+                {
+                    "src": "/favicon.svg",
+                    "sizes": "any"
+                }
+            ]
+        },
+        {
+            "name": "Tasks",
+            "url": "/tasks",
+            "icons": [
+                {
+                    "src": "/favicon.svg",
+                    "sizes": "any"
+                }
+            ]
+        }
+    ]
+}
