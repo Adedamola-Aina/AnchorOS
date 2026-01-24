@@ -477,6 +477,81 @@ items.forEach(item => batch.set(ref, item));
 await batch.commit();
 ```
 
+### 6.5 Firestore Infrastructure Standards
+
+**CARDINAL RULE: All Firestore indexes must be pre-deployed before the code that requires them.**
+
+Firestore composite indexes take 1-10 minutes to build. In a production-grade system, users should NEVER encounter "index required" errors. This is achieved through Index-First Development.
+
+#### 6.5.1 Index-First Development
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  BEFORE writing any query with WHERE + ORDER BY:                    │
+│                                                                     │
+│  1. IDENTIFY  │ The collection, filter fields, and sort order       │
+│  2. DEFINE    │ Add the index to firestore.indexes.json             │
+│  3. DEPLOY    │ Deploy indexes BEFORE deploying code                │
+│  4. VERIFY    │ Check Firebase Console that index is ENABLED        │
+│  5. IMPLEMENT │ Only then write the query in code                   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### 6.5.2 Index Definition Pattern
+
+All indexes are defined in `firestore.indexes.json`:
+
+```json
+{
+  "indexes": [
+    {
+      "collectionGroup": "finance",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "accountId", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "DESCENDING" }
+      ]
+    }
+  ]
+}
+```
+
+**When is an index required?**
+- Any query with `where()` + `orderBy()` on different fields
+- Any query with multiple `where()` clauses on different fields
+- Any Collection Group query (across user boundaries)
+
+#### 6.5.3 CI/CD Index Deployment
+
+The deployment workflow MUST deploy indexes before hosting:
+
+```bash
+# Correct deployment order:
+firebase deploy --only firestore:indexes   # 1. Deploy indexes FIRST
+# Wait for indexes to build (check status in CI)
+firebase deploy --only firestore:rules     # 2. Deploy rules
+firebase deploy --only hosting             # 3. Deploy app LAST
+```
+
+#### 6.5.4 Index Monitoring Checklist
+
+```
+[ ] All required indexes defined in firestore.indexes.json
+[ ] Indexes deployed to ALL environments (dev, staging, prod)
+[ ] No "index required" errors in production logs
+[ ] New queries reviewed for index requirements before merge
+[ ] Collection Group indexes enabled for family sharing queries
+```
+
+#### 6.5.5 Common Index Scenarios
+
+| Query Pattern | Index Required |
+|---------------|----------------|
+| `where('userId', '==', x)` | ❌ No (single field) |
+| `where('status', '==', x).orderBy('date')` | ✅ Yes (compound) |
+| `where('a', '==', x).where('b', '==', y)` | ✅ Yes (compound) |
+| `collectionGroup('accounts').where(...)` | ✅ Yes + field override |
+
 ---
 
 # PART VII: CODE STYLE GUIDE

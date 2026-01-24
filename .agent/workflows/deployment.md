@@ -17,10 +17,13 @@ DEV (development) → STAGING → PRODUCTION
 
 ## 🔧 Automated Deployment Commands
 
+**CRITICAL: Indexes must be deployed FIRST to prevent runtime "index required" errors.**
+
 ### Deploy to DEV
 // turbo
 ```bash
 firebase use anchor-os-dev-1c6ec
+firebase deploy --only firestore:indexes   # INDEXES FIRST
 npm run build:dev
 firebase deploy --only hosting,firestore:rules
 node scripts/seed-dev-data.cjs dev
@@ -30,6 +33,7 @@ node scripts/seed-dev-data.cjs dev
 // turbo
 ```bash
 firebase use anchor-os-staging
+firebase deploy --only firestore:indexes   # INDEXES FIRST
 npm run build:staging
 firebase deploy --only hosting,firestore:rules
 node scripts/seed-dev-data.cjs staging
@@ -38,6 +42,7 @@ node scripts/seed-dev-data.cjs staging
 ### Deploy to PRODUCTION (requires staging verification first)
 ```bash
 firebase use anchor-os
+firebase deploy --only firestore:indexes   # INDEXES FIRST
 npm run build:production
 firebase deploy --only hosting,firestore:rules
 ```
