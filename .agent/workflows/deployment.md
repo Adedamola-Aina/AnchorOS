@@ -23,7 +23,7 @@ DEV (development) → STAGING → PRODUCTION
 firebase use anchor-os-dev-1c6ec
 npm run build:dev
 firebase deploy --only hosting,firestore:rules
-node scripts/seed-users.cjs dev
+node scripts/seed-dev-data.cjs dev
 ```
 
 ### Deploy to STAGING  
@@ -32,7 +32,7 @@ node scripts/seed-users.cjs dev
 firebase use anchor-os-staging
 npm run build:staging
 firebase deploy --only hosting,firestore:rules
-node scripts/seed-users.cjs staging
+node scripts/seed-dev-data.cjs staging
 ```
 
 ### Deploy to PRODUCTION (requires staging verification first)
