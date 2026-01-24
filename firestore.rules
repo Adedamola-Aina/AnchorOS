@@ -92,7 +92,11 @@ service cloud.firestore {
           allow write: if request.auth.uid == userId;
         }
         
-        // Legacy family config removed
+        // Family config subcollection (for developer tools simulation)
+        match /family/{docId} {
+          allow read: if request.auth.uid == userId;
+          allow write: if request.auth.uid == userId;
+        }
 
 
         // ====================================================================
@@ -184,15 +188,15 @@ service cloud.firestore {
         }
 
         // ====================================================================
-        // Notifications: User can read/dismiss their own
+        // Notifications: User can read/dismiss/create their own
         // ====================================================================
         match /notifications/{notificationId} {
           allow read: if request.auth.uid == userId;
-          // User can only update read/dismissed flags, Cloud Functions create
+          // User can update read/dismissed flags
           allow update: if request.auth.uid == userId
                         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'dismissed']);
-          // Cloud Functions create notifications
-          allow create: if false;
+          // Owner can create (for developer tools), Cloud Functions use Admin SDK
+          allow create: if request.auth.uid == userId;
           allow delete: if request.auth.uid == userId;
         }
         
