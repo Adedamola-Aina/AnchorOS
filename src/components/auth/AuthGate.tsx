@@ -79,14 +79,16 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
             setPassword('');
             setAuthError('');
             setMfaResolver(null);
-            if (authMode !== 'reset') setAuthMode('login');
+            // Only reset to login mode on actual logout, not on mode changes
+            setAuthMode('login');
 
             // Redirect to root if on any protected route
             if (location.pathname !== '/' && location.pathname !== '/accept-invite') {
                 navigate('/', { replace: true });
             }
         }
-    }, [user, loading, location.pathname, navigate, authMode]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, loading, location.pathname, navigate]);
 
     if (loading) return (
         <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 gap-6">
