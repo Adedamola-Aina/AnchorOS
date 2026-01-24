@@ -99,9 +99,12 @@ service cloud.firestore {
           
           allow create: if request.auth.uid == userId && isValidAccount(request.resource.data);
           
-          // Update: owner or manage permission, sharedWith can only be changed by owner
-          allow update: if (request.auth.uid == userId || resource.data.get('shares', {})[request.auth.uid] == 'manage')
-                        && isValidAccount(request.resource.data)
+          // Update: owner, manage permission, or connected family member (for balance updates)
+          // sharedWith and shares can only be changed by owner
+          allow update: if isValidAccount(request.resource.data)
+                        && (request.auth.uid == userId 
+                            || resource.data.get('shares', {})[request.auth.uid] == 'manage'
+                            || isConnectedFamilyMember(userId))
                         && (request.auth.uid == userId || 
                             (request.resource.data.get('sharedWith', {}) == resource.data.get('sharedWith', {}) &&
                              request.resource.data.get('shares', {}) == resource.data.get('shares', {})));
