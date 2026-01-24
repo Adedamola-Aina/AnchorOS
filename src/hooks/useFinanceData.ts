@@ -16,8 +16,13 @@ import { useTransactionsQuery, useAccountsQuery, useRecentTransactionsQuery } fr
 import { useSharedAccounts } from './useSharedAccounts';
 import { useFamilySharing } from './useFamilySharing';
 
-/** Safe date parsing for sorting */
-const getTime = (d: string | Date | undefined): number => {
+/** 
+ * Get the effective date for sorting/display
+ * Uses transactionDate (actual date of transaction) if available,
+ * otherwise falls back to date (entry creation date)
+ */
+const getEffectiveDate = (tx: { transactionDate?: string | Date; date?: string | Date }): number => {
+    const d = tx.transactionDate || tx.date;
     if (!d) return 0;
     if (d instanceof Date) return d.getTime();
     return new Date(d).getTime();
@@ -66,7 +71,8 @@ export const useFinanceData = (user: User | null) => {
         for (const tx of all) {
             if (!uniqueMap.has(tx.id)) uniqueMap.set(tx.id, tx);
         }
-        return Array.from(uniqueMap.values()).sort((a, b) => getTime(b.date) - getTime(a.date));
+        // Sort by effective date (transactionDate if available, else entry date)
+        return Array.from(uniqueMap.values()).sort((a, b) => getEffectiveDate(b) - getEffectiveDate(a));
     }, [ownTransactions, sharedTransactions]);
 
     const accounts = useMemo(() => {
@@ -85,7 +91,7 @@ export const useFinanceData = (user: User | null) => {
         const ownTx = Array.isArray(recentOwn) ? recentOwn : [];
         const combined = [...ownTx, ...sharedTx.slice(0, 20)]
             .filter(t => t && !t.isSoftDeleted)
-            .sort((a, b) => getTime(b.date) - getTime(a.date));
+            .sort((a, b) => getEffectiveDate(b) - getEffectiveDate(a));
 
         const seen = new Set<string>();
         const unique: AnchorTransaction[] = [];
