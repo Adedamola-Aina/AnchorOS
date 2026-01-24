@@ -28,7 +28,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     const rowVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 72, // Approximate height of TransactionItem
+        estimateSize: () => 100, // Height of Card-based TransactionItem + spacing
         overscan: 5, // Render 5 extra items above/below viewport
     });
 
@@ -78,7 +78,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                 height: `${virtualRow.size}px`,
                                 transform: `translateY(${virtualRow.start}px)`,
                             }}
-                            className="border-b border-slate-100 dark:border-slate-700"
+                            className="pb-3" // Spacing between cards
                         >
                             <TransactionItem
                                 transaction={tx}
