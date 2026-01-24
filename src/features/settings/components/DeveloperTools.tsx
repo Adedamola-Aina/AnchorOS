@@ -244,21 +244,14 @@ export const DeveloperTools: React.FC<DeveloperToolsProps> = ({ userUid }) => {
                                     confirmedAt: timestamp
                                 });
 
-                                // Update both profiles
-                                const ownerRef = doc(db, 'artifacts', APP_ID, 'users', inviteData.ownerUid);
-                                batch.update(ownerRef, {
-                                    familyMode: true,
-                                    familyMemberId: userUid,
-                                    familyMemberEmail: currentUserEmail,
-                                    familyConnectionStatus: 'connected',
-                                    familyConnectedAt: timestamp
-                                });
-
+                                // Only update current user's profile (member)
+                                // Owner's profile will be updated when they view the connection
                                 const memberRef = doc(db, 'artifacts', APP_ID, 'users', userUid);
                                 batch.update(memberRef, {
                                     familyMode: true,
                                     familyMemberId: inviteData.ownerUid,
                                     familyMemberEmail: inviteData.ownerEmail,
+                                    familyMemberName: inviteData.ownerDisplayName,
                                     familyConnectionStatus: 'connected',
                                     familyConnectedAt: timestamp
                                 });
