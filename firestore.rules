@@ -57,16 +57,22 @@ service cloud.firestore {
         // Both parties can read their connection
         allow read: if request.auth != null && (
           resource.data.ownerUid == request.auth.uid ||
-          resource.data.memberUid == request.auth.uid
+          resource.data.memberUid == request.auth.uid ||
+          resource.data.ownerEmail == request.auth.token.email ||
+          resource.data.memberEmail == request.auth.token.email
         );
-        // Owner or member can create/update connection (for dev tools)
+        // Owner or member can create/update connection (check UID or email)
         allow create: if request.auth != null && (
           request.resource.data.ownerUid == request.auth.uid ||
-          request.resource.data.memberUid == request.auth.uid
+          request.resource.data.memberUid == request.auth.uid ||
+          request.resource.data.ownerEmail == request.auth.token.email ||
+          request.resource.data.memberEmail == request.auth.token.email
         );
         allow update: if request.auth != null && (
           resource.data.ownerUid == request.auth.uid ||
-          resource.data.memberUid == request.auth.uid
+          resource.data.memberUid == request.auth.uid ||
+          resource.data.ownerEmail == request.auth.token.email ||
+          resource.data.memberEmail == request.auth.token.email
         );
         // Only Cloud Functions can delete
         allow delete: if false;
