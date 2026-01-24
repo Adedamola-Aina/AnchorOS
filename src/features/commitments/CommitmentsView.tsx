@@ -131,7 +131,7 @@ const CommitmentsView = () => {
       />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mb-2">
           {(['all', 'daily', 'weekly', 'monthly', 'todo'] as const).map((f) => (
             <Button
               key={f}

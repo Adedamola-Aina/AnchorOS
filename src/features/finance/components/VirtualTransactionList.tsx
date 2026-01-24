@@ -54,7 +54,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     return (
         <div
             ref={parentRef}
-            className={`max-h-[600px] overflow-y-auto ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
+            className={`md:max-h-[600px] overflow-y-auto ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
         >
             <div
                 style={{
