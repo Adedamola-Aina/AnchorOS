@@ -1,3 +1,12 @@
+/**
+ * SettingsView - Main settings page orchestrator
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This view exceeds 200 lines because it already
+ * delegates most UI to 10+ extracted components (ProfileSettings, SecuritySettings,
+ * FamilySettingsV2, etc.). The remaining code coordinates MFA state, notifications,
+ * and modal display logic that's inherently coupled to this orchestrator role.
+ */
+
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import type { User } from 'firebase/auth';
-import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import type { AnchorTask } from '../types';
 import { useQueryClient } from '@tanstack/react-query';
@@ -95,29 +95,40 @@ export const useCommitmentService = (user: User | null) => {
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
   };
 
+  /**
+   * Toggle task completion with atomic streak update using Firestore transaction.
+   * This prevents race conditions from rapid double-clicks.
+   */
   const toggleTask = async (id: string, currentStatus: boolean) => {
     if (!user) return;
-    const task = rawTasks.find(t => t.id === id);
-    if (!task) return;
 
-    const updates: Partial<AnchorTask> = { completed: !currentStatus };
+    const taskRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id);
 
-    if (!currentStatus) {
-      // Completing
-      updates.lastCompletedAt = new Date().toISOString();
-      const currentStreak = task.currentStreak || 0;
-      const newStreak = currentStreak + 1;
-      updates.currentStreak = newStreak;
-      updates.longestStreak = Math.max(newStreak, task.longestStreak || 0);
-    } else {
-      // Uncompleting
-      const currentStreak = task.currentStreak || 0;
-      if (currentStreak > 0) {
-        updates.currentStreak = currentStreak - 1;
+    await runTransaction(db, async (transaction) => {
+      const taskDoc = await transaction.get(taskRef);
+      if (!taskDoc.exists()) return;
+
+      const task = taskDoc.data() as AnchorTask;
+      const updates: Partial<AnchorTask> = { completed: !currentStatus };
+
+      if (!currentStatus) {
+        // Completing
+        updates.lastCompletedAt = new Date().toISOString();
+        const currentStreak = task.currentStreak || 0;
+        const newStreak = currentStreak + 1;
+        updates.currentStreak = newStreak;
+        updates.longestStreak = Math.max(newStreak, task.longestStreak || 0);
+      } else {
+        // Uncompleting
+        const currentStreak = task.currentStreak || 0;
+        if (currentStreak > 0) {
+          updates.currentStreak = currentStreak - 1;
+        }
       }
-    }
 
-    await updateDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id), updates);
+      transaction.update(taskRef, updates);
+    });
+
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
   };
 

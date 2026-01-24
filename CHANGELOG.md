@@ -9,12 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Onboarding
+- **Skip Option**: Users can now skip onboarding and explore the app first via "Skip for now" link.
+- **Progress Indicator**: Added "Step X of 3" indicator with visual progress bar on all onboarding steps.
+- **Account Type Selection**: Users can now choose account type (Checking, Savings, Salary, Investment) during onboarding instead of hardcoded 'checking'.
+
+#### Dashboard
+- **Interactive Widgets**: Cash Flow, Recent Activity, and Portfolio widgets now navigate to Finance when clicked.
+- **Dynamic Currency**: Dashboard displays actual account currency instead of hardcoded NGN.
+- **Smart Greeting**: Time-based greeting (Good morning/afternoon/evening).
+- **Daily Focus Widget**: Shows incomplete daily tasks only when relevant.
+
 #### Finance Module
-- **Virtualization**: Implemented `react-window` / `@tanstack/react-virtual` for the transaction list to handle thousands of records without performance degradation.
+- **Virtual Scrolling**: Implemented `@tanstack/react-virtual` for transaction list to handle thousands of records without performance degradation.
 - **Enhanced Transfer UX**: Added clear "From" and "To" visual indicators in the transaction form.
 - **Currency Conversion**: Automatic "Manual Exchange Rate" field appears when transferring between accounts of different currencies.
 - **Overdraft Protection**: Real-time warning banner when a proposed transaction would result in a negative balance.
 - **Custom Categories**: Replaced static category dropdown with a flexible input + datalist, allowing both preset and custom categories.
+
+#### Authentication & Security
+- **MFA Step-by-Step Wizard**: Replaced confusing single-screen MFA setup with a guided 3-step wizard (Download App → Scan QR → Verify Code).
+- **Session Expiry Handling**: Users now see "Session expired" message instead of silent failures when tokens expire.
+- **Client-Side Rate Limiting**: Login button locks after 5 failed attempts within 60 seconds to prevent hammering.
 
 #### Commitments Module
 - **Streak Tracking**: Added "🔥 [Count]" badge to commitment cards to gamify consistency.
@@ -22,12 +38,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **View Toggles**: Added toggle buttons to switch between List and Weekly/Calendar views.
 - **Reminders System**: Implemented system-wide notifications. Users now receive in-app toasts and browser notifications for task reminders, regardless of their current page.
 
+#### Fabric v1.5 - Intelligent Suggestions
+- **Smart Suggestions Hook**: New `useFabricSuggestions` hook detects financially-relevant completed commitments
+- **Amount Parsing**: Automatically extracts dollar amounts ($150, NGN 5000, 50 dollars) from task titles
+- **Category Detection**: Smart detection of categories (Bills, Rent, Groceries, Transportation, etc.)
+- **Suggestion Toast**: Beautiful animated toast appears when completing financial tasks, with 8-second auto-dismiss
+- **Command Palette Actions**: Added "Add Expense", "Add Income", "New Commitment" quick actions
+- **Skeleton Components**: Loading skeletons for transactions, accounts, commitments, and dashboard widgets
+- **Keyboard Shortcuts Help**: Modal showing all available keyboard shortcuts (Ctrl+K, etc.)
+- **Full Integration**: FabricSuggestionManager integrated into App.tsx, suggestions trigger automatically on task completion
+
 ### Fixed
+- **Dashboard Navigation**: `navigateTo` now uses React Router's `navigate()` for proper URL changes.
 - **E2E Tests**: Updated `finance_regressions.spec.ts` to align with the new Transaction Form UI.
 - **Settings Page**: Verified functionality of `SettingsView.tsx` via `SecuritySettings.test.tsx` (Passing).
+- **Test Suite**: 219 tests passing (10 skipped with documented reasons).
+- **Firestore Mocks**: Updated onSnapshot mocks to support both collection and document snapshots.
 
 ### Changed
 - **Architecture**: Moved `useTaskReminders` from `CommitmentsView` to `TaskContext` to ensure global notification availability.
+- **Barrel Exports**: Added comprehensive `index.ts` barrel exports to finance components for cleaner imports.
+- **Documentation**: Created comprehensive `ARCHITECTURE.md` documenting layer architecture and code standards.
+- **TransactionForm Refactor**: Split 477-line form into 5 smaller components (~280 lines main + focused sub-components):
+  - `TransactionTypeSelector.tsx` - Type toggle (expense/income/transfer)
+  - `AccountSelector.tsx` - Account selection grid
+  - `TransferDetails.tsx` - Transfer-specific fields & exchange rate
+  - `CategorySelector.tsx` - Category input with smart suggestions
+  - `OverdraftWarning.tsx` - Overdraft risk indicator
+
+### Performance Optimizations
+- **Bundle Size Reduced**: Main bundle reduced from 360KB to 279KB (22% reduction)
+- **Enhanced Code Splitting**: Separate chunks for vendor, query, virtual, recharts, and firebase
+- **Firestore Query Limits**: Added limits to prevent over-fetching:
+  - Transactions: 500 per month
+  - Accounts: 50 maximum
+  - Tasks: 100 maximum
+  - Recent Transactions: 20 maximum
+
+### Security & Code Quality Audit
+- **XSS Protection**: TransactionForm now uses `containsDangerousPatterns` from validation.ts
+- **Secure IDs**: Transfer linkId now uses `crypto.randomUUID()` instead of predictable `Math.random()`
+- **Race Condition Fix**: TaskContext captures task data before async toggle to prevent stale closure
+- **Atomic Streak Updates**: toggleTask now uses Firestore runTransaction for streak counting
+- **Memory Leak Fix**: FabricSuggestionToast properly clears timer on action/dismiss
+- **Null Safety**: VirtualTransactionList adds bounds check for array access
+- **O(n) Deduplication**: useFinanceService now uses Map instead of Set+loop for better performance
+- **Safe Date Parsing**: Transaction sorting handles both Date objects and ISO strings
+- **Network Timeouts**: All finance operations now have 10s timeout via `withTimeout` wrapper
+- **Category Suggestion Debounce**: 300ms debounce prevents running on every keystroke
+- **Modal Accessibility**: Focus trap, ESC key handling, ARIA attributes, focus restoration
 
 ## [1.2.6] - 2026-01-19
 

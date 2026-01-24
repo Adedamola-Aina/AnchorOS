@@ -6,6 +6,11 @@
  * - Shows "Invite Family Member" card for potential connections
  * - Shows pending/confirmation states during handshake
  * - Shows connected state with disconnect option
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This component exceeds 200 lines because it
+ * orchestrates the multi-state family connection lifecycle (none → pending →
+ * confirming → connected). Each state has distinct UI and logic that's already
+ * at the minimum viable complexity for this feature.
  */
 
 import { useState, useEffect } from 'react';

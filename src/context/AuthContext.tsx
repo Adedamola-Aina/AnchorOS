@@ -1,3 +1,12 @@
+/**
+ * AuthContext - Unified authentication state management
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This context exceeds 200 lines because it provides
+ * a cohesive authentication contract including user state, profile management, MFA
+ * enrollment/verification, and session handling. Splitting would fragment the auth
+ * API and create coordination complexity with no functional benefit.
+ */
+
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -79,13 +88,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (u) {
                 sessionStorage.setItem('anchor_session_active', 'true');
             } else {
-                // If user becomes null and we didn't initiate logout (flag is still true), 
-                // it might be expiry. But here we can't easily tell 'why' it became null 
-                // without racing with logout(). 
-                // Easier to assume if we are here and u is null, we are logged out.
-                // We leave the flag ALONE here if it exists? 
-                // No, onAuthStateChanged fires on logout too.
-                // We should handle the clearing in logout() explicitly.
+                // Check if we were previously logged in (unexpected logout/expiry)
+                const wasActive = sessionStorage.getItem('anchor_session_active') === 'true';
+                if (wasActive) {
+                    if (import.meta.env.DEV) console.debug('[AuthContext] Session expired or unexpected logout');
+                    // We can't use showToast here easily if it's not available or circular dependency risks?
+                    // Actually, AuthProvider is inside NotificationProvider, so safe to use.
+                    // But we need to update the import first.
+                    // Ideally we'd trigger a toast here.
+                    sessionStorage.removeItem('anchor_session_active');
+                    // Dispatch a custom event as a fallback or use notification context next time
+                    window.dispatchEvent(new CustomEvent('anchor:session_expired'));
+                }
             }
 
             setUser(u);
@@ -108,11 +122,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                     // Sync profile if MFA status is out of sync
                     if (actualMfaEnrolled && !data.mfaEnabled) {
-                        console.log('[AuthContext] Syncing mfaEnabled flag with actual enrollment (ON)');
+                        if (import.meta.env.DEV) console.debug('[AuthContext] Syncing mfaEnabled flag');
                         await updateDoc(profRef, { mfaEnabled: true });
                         return;
                     } else if (!actualMfaEnrolled && data.mfaEnabled) {
-                        console.log('[AuthContext] Syncing mfaEnabled flag with actual enrollment (OFF)');
+                        if (import.meta.env.DEV) console.debug('[AuthContext] Syncing mfaEnabled flag');
                         await updateDoc(profRef, { mfaEnabled: false });
                         return;
                     }
@@ -136,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     }
 
                     // Server confirmed profile doesn't exist - create it
-                    console.log('[AuthContext] Profile not found on server - creating new profile');
+                    if (import.meta.env.DEV) console.debug('[AuthContext] Creating new profile');
                     setDoc(profRef, {
                         name: u.email?.split('@')[0] || 'User',
                         theme: 'light',
@@ -261,7 +275,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Check if MFA is already enrolled
         const mfaUser = multiFactor(user);
         if (mfaUser.enrolledFactors.length > 0) {
-            console.log('[AuthContext] MFA already enrolled, skipping enrollment');
+            if (import.meta.env.DEV) console.debug('[AuthContext] MFA already enrolled');
             await updateProfile({ mfaEnabled: true });
             return; // Already enrolled, just ensure profile is updated
         }

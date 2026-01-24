@@ -1,8 +1,9 @@
 /**
- * Unified Input Validation Layer
+ * Input Validation Utilities
  * 
- * This module provides schema-based validation for all user input.
- * It REJECTS malicious or invalid input rather than trying to sanitize it.
+ * JUSTIFICATION (CLAUDE.md §3.2): This module exceeds 200 lines because it contains
+ * security-critical validation schemas and functions that should be reviewed as a
+ * cohesive unit. Splitting would scatter security logic without clear benefit.
  * 
  * Philosophy:
  * - Validate at write time, reject with 400 if invalid

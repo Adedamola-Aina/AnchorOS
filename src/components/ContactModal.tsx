@@ -1,3 +1,11 @@
+/**
+ * ContactModal - User feedback form with dual-delivery strategy
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This modal exceeds 200 lines because it implements
+ * a resilient dual-delivery system (Firestore + Formspree) with proper error handling.
+ * The form JSX is inherently verbose due to accessibility requirements.
+ */
+
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Send, MessageSquare, Check } from 'lucide-react';

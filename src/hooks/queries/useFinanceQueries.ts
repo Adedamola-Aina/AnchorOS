@@ -37,7 +37,8 @@ export const useTransactionsQuery = (userId: string | undefined, start: string, 
             collection(db, 'artifacts', APP_ID, 'users', userId, 'finance'),
             where('date', '>=', start),
             where('date', '<=', end),
-            orderBy('date', 'desc')
+            orderBy('date', 'desc'),
+            limit(500) // Performance: limit per-month fetch to 500 transactions
         );
 
         const unsubscribe = onSnapshot(q, { includeMetadataChanges: true },
@@ -76,7 +77,10 @@ export const useAccountsQuery = (userId: string | undefined) => {
     useEffect(() => {
         if (!userId) return;
 
-        const q = collection(db, 'artifacts', APP_ID, 'users', userId, 'accounts');
+        const q = query(
+            collection(db, 'artifacts', APP_ID, 'users', userId, 'accounts'),
+            limit(50) // Performance: limit to 50 accounts
+        );
 
         const unsubscribe = onSnapshot(q, { includeMetadataChanges: true },
             (snapshot) => {

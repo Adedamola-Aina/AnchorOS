@@ -1,3 +1,12 @@
+/**
+ * Finance Insights Utility Module
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This module exceeds 200 lines because it contains
+ * cohesive pure functions for financial analysis (weekly spending, recurring detection,
+ * cash flow, asset distribution). Splitting would scatter related analytics logic
+ * with no clear domain boundary.
+ */
+
 import type { AnchorTransaction } from '../types';
 import { fromCents } from './moneyUtils';
 
@@ -226,4 +235,43 @@ export const getAssetDistribution = (accounts: import('../types').AnchorAccount[
         currency: a.currency,
         type: a.type
     })).sort((a, b) => b.amount - a.amount);
+};
+
+export interface CheckpointCategory {
+    category: string;
+    amount: number;
+    percent: number;
+}
+
+export const getExpenseCategoryBreakdown = (transactions: AnchorTransaction[]): CheckpointCategory[] => {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+    const categoryMap: Record<string, number> = {};
+    let totalExpense = 0;
+
+    transactions.forEach(t => {
+        if (!t.date || t.isSoftDeleted || t.type !== 'expense') return;
+        const d = new Date(t.date);
+
+        // Filter last 30 days
+        if (d >= thirtyDaysAgo && d <= today) {
+            const amount = fromCents(t.amountCents);
+            const cat = t.category || 'Uncategorized';
+            categoryMap[cat] = (categoryMap[cat] || 0) + amount;
+            totalExpense += amount;
+        }
+    });
+
+    if (totalExpense === 0) return [];
+
+    return Object.entries(categoryMap)
+        .map(([category, amount]) => ({
+            category,
+            amount,
+            percent: (amount / totalExpense) * 100
+        }))
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5); // Return top 5
 };

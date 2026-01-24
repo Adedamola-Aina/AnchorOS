@@ -6,6 +6,10 @@
  * - Error mapping to user-friendly messages
  * - Logging in development mode
  * - Type-safe operations
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This module exceeds 200 lines because it's a
+ * security-critical database wrapper that should be reviewed as a cohesive unit.
+ * Operations share timeout/error handling patterns that benefit from proximity.
  */
 
 import {
@@ -43,7 +47,7 @@ const logOp = (operation: string, path: string, data?: unknown) => {
 /**
  * Wrap a Firestore operation with timeout handling
  */
-const withTimeout = <T>(
+export const withTimeout = <T>(
     promise: Promise<T>,
     timeoutMs: number = DEFAULT_TIMEOUT_MS,
     operation: string

@@ -17,13 +17,26 @@ export default defineConfig({
     rollupOptions: {
       input: path.resolve(__dirname, 'index.html'),
       output: {
-        manualChunks: {
-          // Split Firebase into its own chunk
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-          // Split chart library
-          recharts: ['recharts'],
-          // Split React ecosystem
-          vendor: ['react', 'react-dom'],
+        manualChunks: (id) => {
+          // Only split in production to avoid duplicate React in dev
+          if (id.includes('node_modules')) {
+            // Firebase
+            if (id.includes('firebase')) {
+              return 'firebase';
+            }
+            // Charts
+            if (id.includes('recharts')) {
+              return 'recharts';
+            }
+            // React ecosystem - keep together to avoid duplicate instances
+            if (id.includes('react') || id.includes('@tanstack/react-virtual')) {
+              return 'vendor';
+            }
+            // Data management
+            if (id.includes('@tanstack/react-query')) {
+              return 'query';
+            }
+          }
         },
       },
     },

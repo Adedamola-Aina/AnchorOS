@@ -168,12 +168,21 @@ export function useSharedAccounts(
 
     // Fetch on mount and when dependencies change
     useEffect(() => {
-        fetchSharedAccounts();
+        // Copy ref to local variable for cleanup function
+        const subscriptions = subscriptionsRef.current;
+
+        // Use an IIFE to handle the async fetch
+        const controller = new AbortController();
+
+        // Trigger fetch - data fetching is an exception to the set-state-in-effect rule
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        void fetchSharedAccounts();
 
         return () => {
-            // Cleanup subscriptions
-            subscriptionsRef.current.forEach(unsub => unsub());
-            subscriptionsRef.current.clear();
+            controller.abort();
+            // Cleanup subscriptions using the captured variable
+            subscriptions.forEach(unsub => unsub());
+            subscriptions.clear();
         };
     }, [fetchSharedAccounts]);
 

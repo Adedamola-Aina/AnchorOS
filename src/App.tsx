@@ -126,6 +126,8 @@ const shouldDehydrateQuery = (query: { queryKey: readonly unknown[] }) => {
   return true;
 };
 
+import { FabricSuggestionManager } from './features/fabric/FabricSuggestionManager';
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -146,6 +148,8 @@ export default function App() {
               <FinanceProvider>
                 <TaskProvider>
                   <AppContent />
+                  {/* Fabric v1.5: Smart suggestions when completing financial tasks */}
+                  <FabricSuggestionManager />
                 </TaskProvider>
               </FinanceProvider>
             </AppProvider>
