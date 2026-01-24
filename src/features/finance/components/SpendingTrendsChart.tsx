@@ -92,43 +92,51 @@ export const SpendingTrendsChart = ({
                 </div>
             </div>
 
-            {/* Compact Weekly Chart */}
-            <div className="h-24 flex items-end gap-1">
-                {weeklyData.map((d, i) => {
-                    const isSelected = selectedWeekStart && d.weekStart.getTime() === selectedWeekStart.getTime();
-                    const isDimmed = selectedWeekStart && !isSelected;
-                    const incomeHeight = (d.income / maxAmount) * 100;
-                    const expenseHeight = (d.expense / maxAmount) * 100;
+            {/* Weekly Chart with clear label */}
+            <div className="mt-1">
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 mb-2 text-center">
+                    Week by week breakdown
+                </p>
+                <div className="h-20 flex items-end gap-1">
+                    {weeklyData.map((d, i) => {
+                        const isSelected = selectedWeekStart && d.weekStart.getTime() === selectedWeekStart.getTime();
+                        const isDimmed = selectedWeekStart && !isSelected;
+                        const incomeHeight = (d.income / maxAmount) * 100;
+                        const expenseHeight = (d.expense / maxAmount) * 100;
+                        const weekNum = i + 1;
+                        const weekEnd = new Date(d.weekStart);
+                        weekEnd.setDate(weekEnd.getDate() + 6);
 
-                    return (
-                        <button
-                            key={i}
-                            onClick={() => onSelectWeek(isSelected ? null : d.weekStart)}
-                            className={`flex-1 flex flex-col items-center gap-1 group transition-all ${isDimmed ? 'opacity-20' : 'opacity-100'}`}
-                            title={`Week of ${d.weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
-                        >
-                            <div className="w-full flex gap-0.5 items-end h-16">
-                                {/* Income Bar */}
-                                <div className="flex-1 h-full flex items-end">
-                                    <div
-                                        style={{ height: `${Math.max(incomeHeight, 4)}%` }}
-                                        className={`w-full rounded-t transition-colors ${isSelected ? 'bg-emerald-400' : 'bg-emerald-500/70 group-hover:bg-emerald-500'}`}
-                                    />
+                        return (
+                            <button
+                                key={i}
+                                onClick={() => onSelectWeek(isSelected ? null : d.weekStart)}
+                                className={`flex-1 flex flex-col items-center gap-1 group transition-all ${isDimmed ? 'opacity-20' : 'opacity-100'}`}
+                                title={`${d.weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                            >
+                                <div className="w-full flex gap-0.5 items-end h-14">
+                                    {/* Income Bar */}
+                                    <div className="flex-1 h-full flex items-end">
+                                        <div
+                                            style={{ height: `${Math.max(incomeHeight, 4)}%` }}
+                                            className={`w-full rounded-t transition-colors ${isSelected ? 'bg-emerald-400' : 'bg-emerald-500/70 group-hover:bg-emerald-500'}`}
+                                        />
+                                    </div>
+                                    {/* Expense Bar */}
+                                    <div className="flex-1 h-full flex items-end">
+                                        <div
+                                            style={{ height: `${Math.max(expenseHeight, 4)}%` }}
+                                            className={`w-full rounded-t transition-colors ${isSelected ? 'bg-rose-400' : 'bg-rose-500/70 group-hover:bg-rose-500'}`}
+                                        />
+                                    </div>
                                 </div>
-                                {/* Expense Bar */}
-                                <div className="flex-1 h-full flex items-end">
-                                    <div
-                                        style={{ height: `${Math.max(expenseHeight, 4)}%` }}
-                                        className={`w-full rounded-t transition-colors ${isSelected ? 'bg-rose-400' : 'bg-rose-500/70 group-hover:bg-rose-500'}`}
-                                    />
-                                </div>
-                            </div>
-                            <span className={`text-[8px] font-bold ${isSelected ? 'text-indigo-500' : 'text-slate-400'}`}>
-                                {d.weekStart.toLocaleDateString('en-US', { day: 'numeric' })}
-                            </span>
-                        </button>
-                    );
-                })}
+                                <span className={`text-[9px] font-bold ${isSelected ? 'text-indigo-500' : 'text-slate-400'}`}>
+                                    W{weekNum}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Compact Legend */}
