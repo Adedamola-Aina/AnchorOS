@@ -29,7 +29,7 @@ export const DeveloperTools: React.FC<DeveloperToolsProps> = ({ userUid }) => {
                 status: 'active'
             });
 
-            // 2. Inject Shared Account
+            // 2. Inject Shared Account (with current user having transact permission)
             const accountRef = doc(collection(db, 'artifacts', APP_ID, 'users', userUid, 'accounts'));
             batch.set(accountRef, {
                 name: 'Family Savings',
@@ -38,8 +38,11 @@ export const DeveloperTools: React.FC<DeveloperToolsProps> = ({ userUid }) => {
                 currency: 'NGN',
                 color: '#8b5cf6',
                 scope: 'family',
-                ownerId: 'simulated-sarah-uid',
-                isArchived: false
+                ownerId: userUid, // Current user owns it but simulates shared scenario
+                isArchived: false,
+                sharedWith: {
+                    'simulated-sarah-uid': { role: 'transact', sharedAt: timestamp }
+                }
             });
 
             // 3. Inject Shared Notifications
