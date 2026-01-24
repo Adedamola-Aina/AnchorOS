@@ -152,7 +152,7 @@ export const detectRecurring = (transactions: AnchorTransaction[]): RecurringTra
             recurring.push({
                 id: sorted[0].id, // Use latest ID as representative
                 title: sorted[0].title,
-                amountCents: sorted[0].amountCents,
+                amountCents: sorted[0].amountCents || 0,
                 frequency,
                 lastDate: sorted[0].date as string,
                 count: group.length,
@@ -161,7 +161,7 @@ export const detectRecurring = (transactions: AnchorTransaction[]): RecurringTra
         }
     });
 
-    return recurring.sort((a, b) => b.amountCents - a.amountCents);
+    return recurring.sort((a, b) => (b.amountCents || 0) - (a.amountCents || 0));
 };
 
 export interface CashFlowAnalysis {
@@ -186,9 +186,9 @@ export const getCashFlowAnalysis = (transactions: AnchorTransaction[]): CashFlow
     let prevExpense = 0;
 
     transactions.forEach(t => {
-        if (!t.date || t.isSoftDeleted) return;
+        if (!t || !t.date || t.isSoftDeleted) return;
         const d = new Date(t.date);
-        const amount = fromCents(t.amountCents);
+        const amount = fromCents(t.amountCents || 0);
 
         // Current 7 Days (Inclusive of today, exclusive of 7 days ago boundary roughly)
         // Simplification: strict timestamp comparison
@@ -252,12 +252,12 @@ export const getExpenseCategoryBreakdown = (transactions: AnchorTransaction[]): 
     let totalExpense = 0;
 
     transactions.forEach(t => {
-        if (!t.date || t.isSoftDeleted || t.type !== 'expense') return;
+        if (!t || !t.date || t.isSoftDeleted || t.type !== 'expense') return;
         const d = new Date(t.date);
 
         // Filter last 30 days
         if (d >= thirtyDaysAgo && d <= today) {
-            const amount = fromCents(t.amountCents);
+            const amount = fromCents(t.amountCents || 0);
             const cat = t.category || 'Uncategorized';
             categoryMap[cat] = (categoryMap[cat] || 0) + amount;
             totalExpense += amount;
