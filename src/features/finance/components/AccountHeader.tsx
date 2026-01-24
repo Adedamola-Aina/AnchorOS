@@ -3,7 +3,7 @@
  * Redesigned for a more modern, polished look
  */
 
-import { ArrowLeft, Trash2, Users, ArrowUpRight, Receipt, Pencil, Check, X, Sparkles } from 'lucide-react';
+import { ArrowLeft, Trash2, Users, ArrowUpRight, Pencil, Check, X, Sparkles } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
 import { formatCurrency } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
@@ -196,7 +196,9 @@ export const AccountHeader = ({
                         onClick={onPayBill}
                         className="flex-1 min-w-[140px] bg-white/15 hover:bg-white/25 backdrop-blur-xl px-6 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-white/10"
                     >
-                        <Receipt className="w-5 h-5" />
+                        <span className="w-5 h-5 flex items-center justify-center text-lg font-bold">
+                            {account.currency === 'USD' ? '$' : '₦'}
+                        </span>
                         Pay Bill
                     </button>
                 </div>

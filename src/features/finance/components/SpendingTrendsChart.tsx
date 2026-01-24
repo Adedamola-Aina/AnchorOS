@@ -1,9 +1,13 @@
 /**
- * SpendingTrendsChart - Weekly spending visualization
- * Extracted from AccountDetailsView for better maintainability
+ * SpendingTrendsChart - 30-day spending trends visualization
+ * 
+ * CLAUDE.md Design Philosophy:
+ * - Clarity over cleverness: Clear income vs expense comparison
+ * - Quiet over loud: Minimal visual noise
+ * - Useful over impressive: Actionable insights at a glance
  */
 
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { formatCurrency } from '../../../utils/format';
 import type { Currency } from '../../../types';
 
@@ -29,80 +33,112 @@ export const SpendingTrendsChart = ({
     onSelectWeek,
     maxAmount,
 }: SpendingTrendsChartProps) => {
+    // Calculate 30-day totals
+    const totals = weeklyData.reduce(
+        (acc, d) => ({
+            income: acc.income + d.income,
+            expense: acc.expense + d.expense,
+        }),
+        { income: 0, expense: 0 }
+    );
+    const net = totals.income - totals.expense;
+
     return (
-        <div className="lg:col-span-2 glass-card p-6">
-            <div className="flex justify-between items-start mb-6">
-                <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-slate-400" />
-                    <span>30 Day Trends</span>
+        <div className="glass-card p-5">
+            {/* Header with Summary */}
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    30 Day Summary
                 </h3>
                 {selectedWeekStart && (
                     <button
                         onClick={() => onSelectWeek(null)}
-                        className="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg transition-colors"
+                        className="text-[10px] font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400"
                     >
                         Clear Filter
                     </button>
                 )}
             </div>
 
-            <div className="h-48 flex items-end justify-between gap-4">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-3 gap-3 mb-5">
+                <div className="text-center p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                        <ArrowUpRight className="w-3 h-3 text-emerald-500" />
+                        <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">In</span>
+                    </div>
+                    <p className="font-bold text-sm text-emerald-600 dark:text-emerald-400 tabular-nums">
+                        {formatCurrency(totals.income, currency)}
+                    </p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                        <ArrowDownRight className="w-3 h-3 text-rose-500" />
+                        <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase">Out</span>
+                    </div>
+                    <p className="font-bold text-sm text-rose-600 dark:text-rose-400 tabular-nums">
+                        {formatCurrency(totals.expense, currency)}
+                    </p>
+                </div>
+                <div className={`text-center p-3 rounded-xl ${net >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                        {net >= 0 ? <TrendingUp className="w-3 h-3 text-blue-500" /> : <TrendingDown className="w-3 h-3 text-amber-500" />}
+                        <span className={`text-[9px] font-bold uppercase ${net >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>Net</span>
+                    </div>
+                    <p className={`font-bold text-sm tabular-nums ${net >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                        {net > 0 ? '+' : ''}{formatCurrency(net, currency)}
+                    </p>
+                </div>
+            </div>
+
+            {/* Compact Weekly Chart */}
+            <div className="h-24 flex items-end gap-1">
                 {weeklyData.map((d, i) => {
                     const isSelected = selectedWeekStart && d.weekStart.getTime() === selectedWeekStart.getTime();
                     const isDimmed = selectedWeekStart && !isSelected;
+                    const incomeHeight = (d.income / maxAmount) * 100;
+                    const expenseHeight = (d.expense / maxAmount) * 100;
 
                     return (
                         <button
                             key={i}
                             onClick={() => onSelectWeek(isSelected ? null : d.weekStart)}
-                            className={`flex-1 flex flex-col items-center gap-2 group transition-all ${isDimmed ? 'opacity-30 grayscale' : 'opacity-100 hover:scale-[1.02]'}`}
+                            className={`flex-1 flex flex-col items-center gap-1 group transition-all ${isDimmed ? 'opacity-20' : 'opacity-100'}`}
+                            title={`Week of ${d.weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                         >
-                            <div className="w-full flex gap-1 items-end justify-center h-full relative">
-                                {/* Net Annotation */}
-                                <div className={`absolute -top-6 text-[10px] font-black transition-transform group-hover:-translate-y-1 ${d.net >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                    {d.net > 0 ? '+' : ''}{formatCurrency(d.net, currency)}
+                            <div className="w-full flex gap-0.5 items-end h-16">
+                                {/* Income Bar */}
+                                <div className="flex-1 h-full flex items-end">
+                                    <div
+                                        style={{ height: `${Math.max(incomeHeight, 4)}%` }}
+                                        className={`w-full rounded-t transition-colors ${isSelected ? 'bg-emerald-400' : 'bg-emerald-500/70 group-hover:bg-emerald-500'}`}
+                                    />
                                 </div>
-
-                                {/* Hover Background */}
-                                <div className="absolute inset-x-[-8px] top-[-10px] bottom-[-10px] rounded-xl bg-slate-100 dark:bg-slate-800/50 opacity-0 group-hover:opacity-100 -z-10 transition-opacity" />
-
-                                {/* Bar Group Container */}
-                                <div className="w-full max-w-[60px] flex gap-1 items-end h-full relative">
-                                    {/* Income Bar */}
-                                    <div className="flex-1 h-full flex items-end">
-                                        <div
-                                            style={{ height: `${Math.max((d.income / maxAmount) * 100, 4)}%` }}
-                                            className="w-full bg-emerald-500 rounded-t-md relative group-hover:bg-emerald-400 transition-colors"
-                                        />
-                                    </div>
-
-                                    {/* Expense Bar */}
-                                    <div className="flex-1 h-full flex items-end">
-                                        <div
-                                            style={{ height: `${Math.max((d.expense / maxAmount) * 100, 4)}%` }}
-                                            className="w-full bg-rose-500 rounded-t-md relative group-hover:bg-rose-400 transition-colors"
-                                        />
-                                    </div>
+                                {/* Expense Bar */}
+                                <div className="flex-1 h-full flex items-end">
+                                    <div
+                                        style={{ height: `${Math.max(expenseHeight, 4)}%` }}
+                                        className={`w-full rounded-t transition-colors ${isSelected ? 'bg-rose-400' : 'bg-rose-500/70 group-hover:bg-rose-500'}`}
+                                    />
                                 </div>
                             </div>
-
-                            {/* Week Label */}
-                            <div className={`text-[9px] font-bold uppercase tracking-widest ${isSelected ? 'text-indigo-500' : 'text-slate-400'}`}>
-                                {d.weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </div>
+                            <span className={`text-[8px] font-bold ${isSelected ? 'text-indigo-500' : 'text-slate-400'}`}>
+                                {d.weekStart.toLocaleDateString('en-US', { day: 'numeric' })}
+                            </span>
                         </button>
                     );
                 })}
             </div>
 
-            {/* Legend */}
-            <div className="flex justify-center gap-6 mt-6 text-xs font-bold text-slate-500">
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-emerald-500 rounded-sm" />
+            {/* Compact Legend */}
+            <div className="flex justify-center gap-4 mt-3 text-[9px] font-bold text-slate-400">
+                <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-sm" />
                     <span>Income</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-rose-500 rounded-sm" />
+                <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-rose-500 rounded-sm" />
                     <span>Expenses</span>
                 </div>
             </div>
