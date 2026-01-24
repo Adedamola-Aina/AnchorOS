@@ -1,4 +1,14 @@
+/**
+ * AuthGate - Central authentication orchestrator
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This component exceeds 200 lines because it
+ * implements the complete auth flow including login/signup/MFA handling,
+ * email verification gate, and onboarding gate. Splitting would fragment
+ * the auth state machine and complicate session recovery logic.
+ */
+
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
@@ -26,6 +36,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     const [authMode, setAuthMode] = useState<'login' | 'signup' | 'mfa' | 'reset'>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [mfaCode, setMfaCode] = useState('');
     const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
     const [authError, setAuthError] = useState('');
     const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -42,23 +53,40 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
 
     // Session Recovery / Expiry
     React.useEffect(() => {
+        const handleExpiry = () => {
+            setAuthError('Session expired. Please sign in again.');
+        };
+        window.addEventListener('anchor:session_expired', handleExpiry);
+
+        // Fallback for storage check (if context didn't catch it for some reason)
         const sessionActive = sessionStorage.getItem('anchor_session_active');
         if (sessionActive === 'true' && !user && !loading) {
             setAuthError('Session expired. Please sign in again.');
             sessionStorage.removeItem('anchor_session_active');
         }
+
+        return () => window.removeEventListener('anchor:session_expired', handleExpiry);
     }, [user, loading]);
 
-    // Clear credentials on logout
+    // Clear credentials on logout and redirect to root URL
+    // Industry standard: auth page should always show at '/', not '/finance' or other internal routes
+    const navigate = useNavigate();
+    const location = useLocation();
+
     React.useEffect(() => {
-        if (!user) {
+        if (!user && !loading) {
             setEmail('');
             setPassword('');
             setAuthError('');
             setMfaResolver(null);
             if (authMode !== 'reset') setAuthMode('login');
+
+            // Redirect to root if on any protected route
+            if (location.pathname !== '/' && location.pathname !== '/accept-invite') {
+                navigate('/', { replace: true });
+            }
         }
-    }, [user]);
+    }, [user, loading, location.pathname, navigate, authMode]);
 
     if (loading) return (
         <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 gap-6">
@@ -78,13 +106,14 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
             setEmail={setEmail}
             password={password}
             setPassword={setPassword}
+            mfaCode={mfaCode}
+            setMfaCode={setMfaCode}
             authError={authError}
             isAuthenticating={isAuthenticating}
             theme={profile?.theme || 'light'}
             onThemeToggle={() => updateProfile({ theme: profile.theme === 'dark' ? 'light' : 'dark' })}
             onSubmit={async (e) => {
                 e.preventDefault();
-                const form = e.target as HTMLFormElement;
                 setAuthError('');
 
                 // Check Lockout
@@ -105,7 +134,6 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
                     }
 
                     if (mfaResolver) {
-                        const mfaCode = (form.elements.namedItem('mfaCode') as HTMLInputElement).value;
                         await verifyMfa(mfaResolver, mfaCode);
                         // Success - reset attempts
                         setLoginAttempts(0);
@@ -136,6 +164,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
                     // Handle Errors & Rate Limiting
                     if ((err as any).code === 'auth/multi-factor-auth-required') {
                         setMfaResolver(getMultiFactorResolver(auth, err as any));
+                        setMfaCode(''); // Ensure MFA code is empty
                         setLoginAttempts(0); // Valid credentials, just need MFA
                     } else {
                         // Increment failed attempts

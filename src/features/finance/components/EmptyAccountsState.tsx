@@ -1,0 +1,38 @@
+/**
+ * EmptyAccountsState - Empty state for when no accounts exist
+ * Extracted from FinanceView per CLAUDE.md 200-line rule
+ */
+
+import { Landmark, Plus } from 'lucide-react';
+import { Button } from '../../../components/ui';
+
+interface EmptyAccountsStateProps {
+    onCreateAccount: () => void;
+}
+
+export const EmptyAccountsState = ({ onCreateAccount }: EmptyAccountsStateProps) => {
+    return (
+        <div className="col-span-full flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl animate-in fade-in zoom-in-95 duration-500">
+            <div className="relative mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full flex items-center justify-center">
+                    <Landmark className="w-10 h-10 text-emerald-500/60 dark:text-emerald-400/60" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                    <Plus className="w-3.5 h-3.5 text-blue-500" />
+                </div>
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">No accounts yet</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-6 text-sm">
+                Create your first account to start tracking your finances.
+            </p>
+            <Button
+                variant="success"
+                onClick={onCreateAccount}
+                className="gap-2"
+            >
+                <Landmark className="w-4 h-4" />
+                <span>Create your first account</span>
+            </Button>
+        </div>
+    );
+};

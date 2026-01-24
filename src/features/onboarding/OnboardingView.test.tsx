@@ -101,17 +101,17 @@ const renderWithContexts = (mockOverrides?: ReturnType<typeof createMockContexts
         ...render(
             <QueryClientProvider client={queryClient}>
                 <AuthContext.Provider value={mocks.auth as any}>
-                    
-                        <AppContext.Provider value={mocks.app as any}>
-                            <FinanceContext.Provider value={mocks.finance as any}>
-                                <TaskContext.Provider value={mocks.tasks as any}>
-                                    <NotificationContext.Provider value={mocks.notifications as any}>
-                                        <OnboardingView />
-                                    </NotificationContext.Provider>
-                                </TaskContext.Provider>
-                            </FinanceContext.Provider>
-                        </AppContext.Provider>
-                    
+
+                    <AppContext.Provider value={mocks.app as any}>
+                        <FinanceContext.Provider value={mocks.finance as any}>
+                            <TaskContext.Provider value={mocks.tasks as any}>
+                                <NotificationContext.Provider value={mocks.notifications as any}>
+                                    <OnboardingView />
+                                </NotificationContext.Provider>
+                            </TaskContext.Provider>
+                        </FinanceContext.Provider>
+                    </AppContext.Provider>
+
                 </AuthContext.Provider>
             </QueryClientProvider>
         ),
@@ -195,6 +195,105 @@ describe('OnboardingView', () => {
                 title: 'Run 1 mile',
                 type: 'daily'
             }));
+        });
+    });
+
+    // ========================================
+    // NEW TESTS: Issue 5.1 - Skip Option
+    // ========================================
+    describe('Skip Functionality', () => {
+        it('shows skip link on Step 1', () => {
+            renderWithContexts();
+            expect(screen.getByText(/skip/i)).toBeInTheDocument();
+        });
+
+        it('shows skip link on Step 2', async () => {
+            renderWithContexts();
+            fireEvent.click(screen.getByText('Start Setup'));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+            expect(screen.getByText(/skip/i)).toBeInTheDocument();
+        });
+
+        it('clicking skip sets onboardingComplete to true', async () => {
+            const { mocks } = renderWithContexts();
+
+            const skipLink = screen.getByText(/skip/i);
+            fireEvent.click(skipLink);
+
+            await waitFor(() => {
+                expect(mocks.updateProfile).toHaveBeenCalledWith({ onboardingComplete: true });
+            });
+        });
+    });
+
+    // ========================================
+    // NEW TESTS: Progress Indicator
+    // ========================================
+    describe('Progress Indicator', () => {
+        it('shows Step 1 of 3 on first step', () => {
+            renderWithContexts();
+            expect(screen.getByText(/step 1 of 3/i)).toBeInTheDocument();
+        });
+
+        it('shows Step 2 of 3 on account step', async () => {
+            renderWithContexts();
+            fireEvent.click(screen.getByText('Start Setup'));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+            expect(screen.getByText(/step 2 of 3/i)).toBeInTheDocument();
+        });
+
+        it('shows Step 3 of 3 on habit step', async () => {
+            const { mocks } = renderWithContexts();
+
+            // Go to step 2
+            fireEvent.click(screen.getByText('Start Setup'));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+
+            // Fill and submit to go to step 3
+            fireEvent.change(screen.getByPlaceholderText('e.g. Chase Checking'), { target: { value: 'Bank' } });
+            fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '100' } });
+            fireEvent.click(screen.getByText('Continue'));
+
+            await waitFor(() => screen.getByText('One Small Habit'));
+            expect(screen.getByText(/step 3 of 3/i)).toBeInTheDocument();
+        });
+    });
+
+    // ========================================
+    // NEW TESTS: Account Type Selection
+    // ========================================
+    describe('Account Type Selection', () => {
+        it('shows account type selector on Step 2', async () => {
+            renderWithContexts();
+            fireEvent.click(screen.getByText('Start Setup'));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+
+            // Should have account type options
+            expect(screen.getByText('Checking')).toBeInTheDocument();
+            expect(screen.getByText('Savings')).toBeInTheDocument();
+        });
+
+        it('passes selected account type to addAccount', async () => {
+            const { mocks } = renderWithContexts();
+
+            fireEvent.click(screen.getByText('Start Setup'));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+
+            // Fill form
+            fireEvent.change(screen.getByPlaceholderText('e.g. Chase Checking'), { target: { value: 'My Savings' } });
+            fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '1000' } });
+
+            // Select Savings type
+            fireEvent.click(screen.getByText('Savings'));
+
+            // Submit
+            fireEvent.click(screen.getByText('Continue'));
+
+            await waitFor(() => {
+                expect(mocks.addAccount).toHaveBeenCalledWith(expect.objectContaining({
+                    type: 'savings',
+                }));
+            });
         });
     });
 });

@@ -115,6 +115,20 @@ service cloud.firestore {
                              request.resource.data.get('shares', {}) == resource.data.get('shares', {})));
           
           allow delete: if request.auth.uid == userId;
+
+          // Activity feed for shared accounts
+          match /activity/{activityId} {
+            // Read: owner or shared account members
+            allow read: if request.auth.uid == userId 
+                        || get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId)).data.get('sharedWith', {})[request.auth.uid] != null;
+            
+            // Create: users with access to the account can log activity
+            allow create: if request.auth.uid == userId
+                          || get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId)).data.get('sharedWith', {})[request.auth.uid] != null;
+            
+            // No update or delete - activity log is append-only
+            allow update, delete: if false;
+          }
         }
 
         // ====================================================================
@@ -206,6 +220,22 @@ service cloud.firestore {
     // ========================================================================
     match /{path=**}/accounts/{accountId} {
       allow read: if request.auth != null && request.auth.uid in resource.data.get('sharedWith', {}).keys();
+    }
+
+    // ========================================================================
+    // Collection Group Query: Transactions on Shared Accounts  
+    // Allows shared members to read transactions using collection group queries
+    // ========================================================================
+    match /{path=**}/finance/{txId} {
+      allow read: if request.auth != null && request.auth.uid in resource.data.get('accountShares', {}).keys();
+    }
+
+    // ========================================================================
+    // Collection Group Query: Activity on Shared Accounts
+    // Allows shared members to read activity using collection group queries
+    // ========================================================================
+    match /{path=**}/activity/{activityId} {
+      allow read: if request.auth != null;
     }
 
     // Rate limits (Cloud Functions only)

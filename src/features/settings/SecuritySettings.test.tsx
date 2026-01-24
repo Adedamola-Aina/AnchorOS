@@ -23,8 +23,18 @@ vi.mock('lucide-react', async (importOriginal) => {
         Shield: () => <div data-testid="shield-icon">Shield</div>,
         AlertCircle: () => <div data-testid="alert-icon">Alert</div>,
         Trash2: () => <div data-testid="trash-icon">Trash</div>,
+        Smartphone: () => <div data-testid="smartphone-icon">Smartphone</div>,
+        QrCode: () => <div data-testid="qrcode-icon">QrCode</div>,
+        Key: () => <div data-testid="key-icon">Key</div>,
+        ArrowRight: () => <div data-testid="arrow-right">→</div>,
+        ArrowLeft: () => <div data-testid="arrow-left">←</div>,
     };
 });
+
+// Mock QRCodeSVG
+vi.mock('qrcode.react', () => ({
+    QRCodeSVG: ({ value }: { value: string }) => <div data-testid="qr-code">{value}</div>,
+}));
 
 // Mock FamilyService
 vi.mock('./FamilyService', () => ({
@@ -54,8 +64,8 @@ const createMockContexts = (appOverrides = {}, authOverrides = {}) => {
         acceptInvite: vi.fn(),
         verifyMfa: vi.fn(),
         sendVerificationEmail: vi.fn(),
-        generateMfaSecret: vi.fn().mockResolvedValue({ qrCodeUrl: 'mock-url', manualKey: 'KVKF-KR3V-NM' }),
-        enrollMfa: vi.fn(),
+        generateMfaSecret: vi.fn().mockResolvedValue({ qrCodeUrl: 'otpauth://totp/Anchor?secret=KVKFKR3VNM', manualKey: 'KVKF-KR3V-NM' }),
+        enrollMfa: vi.fn().mockResolvedValue(undefined),
         unenrollMfa: vi.fn(),
         navigateTo: vi.fn(),
         activeTab: 'settings' as TabView,
@@ -70,8 +80,8 @@ const createMockContexts = (appOverrides = {}, authOverrides = {}) => {
         signIn: vi.fn(),
         signUp: vi.fn(),
         verifyMfa: vi.fn(),
-        generateMfaSecret: vi.fn().mockResolvedValue({ qrCodeUrl: 'mock-url', manualKey: 'KVKF-KR3V-NM' }),
-        enrollMfa: vi.fn(),
+        generateMfaSecret: vi.fn().mockResolvedValue({ qrCodeUrl: 'otpauth://totp/Anchor?secret=KVKFKR3VNM', manualKey: 'KVKF-KR3V-NM' }),
+        enrollMfa: vi.fn().mockResolvedValue(undefined),
         unenrollMfa: vi.fn(),
         logout: vi.fn(),
         sendVerificationEmail: vi.fn(),
@@ -93,19 +103,22 @@ const createMockContexts = (appOverrides = {}, authOverrides = {}) => {
 
 const renderWithContext = (ui: React.ReactElement, { app = {}, auth = {} } = {}) => {
     const mocks = createMockContexts(app, auth);
-    return render(
-        <AuthContext.Provider value={mocks.auth as any}>
-            <AppContext.Provider value={mocks.app as any}>
-                <FinanceContext.Provider value={mocks.finance as any}>
-                    <TaskContext.Provider value={mocks.tasks as any}>
-                        <NotificationContext.Provider value={mocks.notifications as any}>
-                            {ui}
-                        </NotificationContext.Provider>
-                    </TaskContext.Provider>
-                </FinanceContext.Provider>
-            </AppContext.Provider>
-        </AuthContext.Provider>
-    );
+    return {
+        ...render(
+            <AuthContext.Provider value={mocks.auth as any}>
+                <AppContext.Provider value={mocks.app as any}>
+                    <FinanceContext.Provider value={mocks.finance as any}>
+                        <TaskContext.Provider value={mocks.tasks as any}>
+                            <NotificationContext.Provider value={mocks.notifications as any}>
+                                {ui}
+                            </NotificationContext.Provider>
+                        </TaskContext.Provider>
+                    </FinanceContext.Provider>
+                </AppContext.Provider>
+            </AuthContext.Provider>
+        ),
+        mocks
+    };
 };
 
 describe('SettingsView - Security & MFA', () => {
@@ -139,19 +152,37 @@ describe('SettingsView - Security & MFA', () => {
         expect(screen.queryByText('Setup 2FA')).not.toBeInTheDocument();
     });
 
-    it('shows QR code setup flow when "Setup 2FA" is clicked', async () => {
-        renderWithContext(<SettingsView />);
+    it('shows the 3-step MFA wizard when "Setup 2FA" is clicked', async () => {
+        const { mocks } = renderWithContext(<SettingsView />);
 
         const setupButton = screen.getByText('Setup 2FA');
         fireEvent.click(setupButton);
 
-        expect(await screen.findByText('Configure Authenticator')).toBeInTheDocument();
-        // Check for QR code alt text
-        expect(screen.getByTitle('MFA QR Code')).toBeInTheDocument();
-        // Check for Account Bound placeholder code
-        expect(screen.getByText(/KVKF-KR3V-NM/)).toBeInTheDocument();
+        // Wait for generateMfaSecret to be called and step 1 to appear
+        await waitFor(() => {
+            expect(mocks.auth.generateMfaSecret).toHaveBeenCalled();
+        });
+
+        // Step 1: Get an Authenticator App
+        expect(await screen.findByText('Get an Authenticator App')).toBeInTheDocument();
+        expect(screen.getByText('I have the app')).toBeInTheDocument();
     });
 
+    it('navigates through the 3-step MFA wizard to step 2 (QR code)', async () => {
+        const { mocks } = renderWithContext(<SettingsView />);
+
+        // Click Setup 2FA
+        fireEvent.click(screen.getByText('Setup 2FA'));
+        await waitFor(() => expect(mocks.auth.generateMfaSecret).toHaveBeenCalled());
+
+        // Proceed to step 2
+        fireEvent.click(await screen.findByText('I have the app'));
+
+        // Step 2: Scan the QR Code
+        expect(await screen.findByText('Scan the QR Code')).toBeInTheDocument();
+        expect(screen.getByTestId('qr-code')).toBeInTheDocument();
+        expect(screen.getByText("Can't scan?")).toBeInTheDocument();
+    });
 
     it('displays account notification banner when MFA is recommended', () => {
         renderWithContext(<SettingsView />, {
@@ -165,37 +196,42 @@ describe('SettingsView - Security & MFA', () => {
         expect(buttons.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('calls enrollMfa when verifying 2FA setup', async () => {
-        // Mock window.alert
-        vi.spyOn(window, 'alert').mockImplementation(() => { });
+    it('calls enrollMfa when completing 3-step MFA wizard', async () => {
+        const { mocks } = renderWithContext(<SettingsView />, {
+            auth: { accountNotifications: ['enable_2fa'] }
+        });
 
-        const { auth } = createMockContexts({}, { accountNotifications: ['enable_2fa'] });
-        renderWithContext(<SettingsView />, { auth });
-
-        // Open Setup
+        // Click Setup 2FA
         fireEvent.click(screen.getByText('Setup 2FA'));
+        await waitFor(() => expect(mocks.auth.generateMfaSecret).toHaveBeenCalled());
 
-        // Enter valid code to enable button
+        // Step 1 -> Step 2
+        fireEvent.click(await screen.findByText('I have the app'));
+        await screen.findByText('Scan the QR Code');
+
+        // Step 2 -> Step 3
+        fireEvent.click(screen.getByText('Next'));
+        await screen.findByText('Verify Setup');
+
+        // Enter valid code
         const input = screen.getByPlaceholderText('000 000');
         fireEvent.change(input, { target: { value: '123456' } });
 
-        // Find Verify Button (inside the expanded area)
-        const verifyButton = await screen.findByText('Verify');
+        // Click Verify & Enable
+        const verifyButton = screen.getByText('Verify & Enable');
         expect(verifyButton).not.toBeDisabled();
-
         fireEvent.click(verifyButton);
 
         await waitFor(() => {
-            expect(auth.enrollMfa).toHaveBeenCalledWith('123456');
+            expect(mocks.auth.enrollMfa).toHaveBeenCalledWith('123456');
         });
     });
 
     it('calls sendVerificationEmail when verifying email from banner', async () => {
         vi.spyOn(window, 'alert').mockImplementation(() => { });
 
-        const { auth } = createMockContexts({}, { accountNotifications: ['verify_email'] });
-        renderWithContext(<SettingsView />, {
-            auth
+        const { mocks } = renderWithContext(<SettingsView />, {
+            auth: { accountNotifications: ['verify_email'] }
         });
 
         expect(screen.getByText('Email Not Verified')).toBeInTheDocument();
@@ -204,7 +240,7 @@ describe('SettingsView - Security & MFA', () => {
         fireEvent.click(verifyBtn);
 
         await waitFor(() => {
-            expect(auth.sendVerificationEmail).toHaveBeenCalled();
+            expect(mocks.auth.sendVerificationEmail).toHaveBeenCalled();
         });
     });
 });

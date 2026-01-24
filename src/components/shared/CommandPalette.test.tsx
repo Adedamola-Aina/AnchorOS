@@ -6,16 +6,17 @@ import { FinanceContext } from '../../context/FinanceContext';
 import { TaskContext } from '../../context/TaskContext';
 import type { TabView } from '../../types';
 
-// Mock Lucide icons
-vi.mock('lucide-react', () => ({
-    Search: () => <span data-testid="search-icon" />,
-    ArrowRight: () => <span data-testid="arrow-right" />,
-    LayoutDashboard: () => <span />,
-    CheckCircle2: () => <span />,
-    CreditCard: () => <span />,
-    Settings: () => <span />,
-    Wallet: () => <span />,
-}));
+// Mock Lucide icons - use importOriginal to get all real icons
+// This avoids breaking when new icons are added to the component
+vi.mock('lucide-react', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('lucide-react')>();
+    return {
+        ...actual,
+        // Override specific icons for testing if needed
+        Search: () => <span data-testid="search-icon" />,
+        ArrowRight: () => <span data-testid="arrow-right" />,
+    };
+});
 
 const mockNavigateTo = vi.fn();
 

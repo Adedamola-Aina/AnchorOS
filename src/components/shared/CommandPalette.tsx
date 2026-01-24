@@ -1,8 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
-import { Search, ArrowRight, LayoutDashboard, CheckCircle2, CreditCard, Settings, Wallet } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Search, ArrowRight, LayoutDashboard, CheckCircle2, CreditCard, Settings, Wallet, MinusCircle, PlusCircle, Plus } from 'lucide-react';
 import { useApp } from '../../context/AnchorContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
+
+interface CommandResult {
+    id: string;
+    title: string;
+    type: string;
+    icon: React.FC<{ className?: string }>;
+    action: () => void;
+}
+
+// TODO: Future enhancement - track and display recent actions
+// const getRecentActions = (): { id: string; title: string; type: string }[] => {
+//     try { return JSON.parse(localStorage.getItem('anchor_recent_actions') || '[]'); }
+//     catch { return []; }
+// };
+
 
 export const CommandPalette = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -28,30 +43,45 @@ export const CommandPalette = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
-    // Filter Logic
-    const results = [
-        // Nav
-        { id: 'nav-1', title: 'Go to Dashboard', type: 'Pages', icon: LayoutDashboard, action: () => navigateTo('dashboard') },
-        { id: 'nav-2', title: 'Go to Commitments', type: 'Pages', icon: CheckCircle2, action: () => navigateTo('commitments') },
-        { id: 'nav-3', title: 'Go to Finance', type: 'Pages', icon: CreditCard, action: () => navigateTo('finance') },
-        { id: 'nav-4', title: 'Go to Settings', type: 'Pages', icon: Settings, action: () => navigateTo('settings') },
-        // Accounts
-        ...accounts.filter(a => !a.isArchived).map(a => ({
-            id: `acc-${a.id}`,
-            title: a.name,
-            type: 'Accounts',
-            icon: Wallet,
-            action: () => navigateTo('finance') // ideally deep link to account
-        })),
-        // Tasks (Top 3)
-        ...tasks.filter(t => !t.completed).slice(0, 3).map(t => ({
-            id: `task-${t.id}`,
-            title: t.title,
-            type: 'Tasks',
-            icon: CheckCircle2,
-            action: () => navigateTo('commitments') // ideally deep link
-        }))
-    ].filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
+    // Build results with actions and recent
+    const results = useMemo<CommandResult[]>(() => {
+        const baseResults: CommandResult[] = [
+            // Actions (Quick access) - navigate to page
+            { id: 'action-expense', title: 'Add Expense', type: 'Actions', icon: MinusCircle, action: () => navigateTo('finance') },
+            { id: 'action-income', title: 'Add Income', type: 'Actions', icon: PlusCircle, action: () => navigateTo('finance') },
+            { id: 'action-commitment', title: 'New Commitment', type: 'Actions', icon: Plus, action: () => navigateTo('commitments') },
+
+            // Navigation
+            { id: 'nav-dashboard', title: 'Go to Dashboard', type: 'Pages', icon: LayoutDashboard, action: () => navigateTo('dashboard') },
+            { id: 'nav-commitments', title: 'Go to Commitments', type: 'Pages', icon: CheckCircle2, action: () => navigateTo('commitments') },
+            { id: 'nav-finance', title: 'Go to Finance', type: 'Pages', icon: CreditCard, action: () => navigateTo('finance') },
+            { id: 'nav-settings', title: 'Go to Settings', type: 'Pages', icon: Settings, action: () => navigateTo('settings') },
+
+            // Accounts
+            ...accounts.filter(a => !a.isArchived).map(a => ({
+                id: `acc-${a.id}`,
+                title: a.name,
+                type: 'Accounts',
+                icon: Wallet,
+                action: () => navigateTo('finance')
+            })),
+
+            // Tasks (Top 3 incomplete)
+            ...tasks.filter(t => !t.completed).slice(0, 3).map(t => ({
+                id: `task-${t.id}`,
+                title: t.title,
+                type: 'Tasks',
+                icon: CheckCircle2,
+                action: () => navigateTo('commitments')
+            })),
+        ];
+
+        // Filter by query
+        return baseResults.filter(item =>
+            item.title.toLowerCase().includes(query.toLowerCase()) ||
+            item.type.toLowerCase().includes(query.toLowerCase())
+        );
+    }, [accounts, tasks, query, navigateTo]);
 
     // Keyboard Nav - reset index when query changes
     const prevQueryRef = useRef(query);

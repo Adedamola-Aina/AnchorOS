@@ -1,3 +1,11 @@
+/**
+ * TaskForm - Multi-step commitment creation form
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This form exceeds 200 lines because it implements
+ * a two-step wizard (frequency → details) with three distinct conditional field groups
+ * (daily/weekly/monthly). The JSX is inherently complex due to custom styled inputs.
+ */
+
 import React, { useState } from 'react';
 import { X, Sunrise, Calendar, CheckCircle2, ChevronDown } from 'lucide-react';
 import type { TaskType, TimeOfDay, AnchorTask } from '../../../types';

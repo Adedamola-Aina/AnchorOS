@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -11,21 +11,73 @@ interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) => {
+    const modalRef = useRef<HTMLDivElement>(null);
+    const previousActiveElement = useRef<HTMLElement | null>(null);
+    // Use React.useId for stable SSR-compatible unique IDs
+    const modalId = React.useId();
+
+    // Focus trap and keyboard handling
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            onClose();
+            return;
+        }
+
+        // Focus trap
+        if (e.key === 'Tab' && modalRef.current) {
+            const focusableElements = modalRef.current.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            const firstElement = focusableElements[0] as HTMLElement;
+            const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+            if (e.shiftKey && document.activeElement === firstElement) {
+                e.preventDefault();
+                lastElement?.focus();
+            } else if (!e.shiftKey && document.activeElement === lastElement) {
+                e.preventDefault();
+                firstElement?.focus();
+            }
+        }
+    }, [onClose]);
+
     useEffect(() => {
         if (isOpen) {
+            // Store previous active element
+            previousActiveElement.current = document.activeElement as HTMLElement;
             document.body.style.overflow = 'hidden';
+            document.addEventListener('keydown', handleKeyDown);
+
+            // Focus first focusable element in modal
+            setTimeout(() => {
+                const firstFocusable = modalRef.current?.querySelector(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                ) as HTMLElement;
+                firstFocusable?.focus();
+            }, 0);
         } else {
             document.body.style.overflow = 'unset';
+            document.removeEventListener('keydown', handleKeyDown);
+
+            // Restore focus to previous element
+            previousActiveElement.current?.focus();
         }
+
         return () => {
             document.body.style.overflow = 'unset';
+            document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [isOpen]);
+    }, [isOpen, handleKeyDown]);
 
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? modalId : undefined}
+        >
             {/* Backdrop */}
             <div
                 className="fixed inset-0 transition-opacity"
@@ -34,13 +86,17 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
             />
 
             {/* Content */}
-            <div className={`relative z-10 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${maxWidth} flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden`}>
+            <div
+                ref={modalRef}
+                className={`relative z-10 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${maxWidth} flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden`}
+            >
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">{title}</h3>
+                    <h3 id={modalId} className="text-lg font-bold text-slate-800 dark:text-white">{title}</h3>
                     <button
                         onClick={onClose}
                         className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
+                        aria-label="Close modal"
                     >
                         <X className="w-5 h-5" />
                     </button>

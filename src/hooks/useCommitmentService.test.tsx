@@ -48,6 +48,28 @@ const firestoreMocks = vi.hoisted(() => {
       update: vi.fn(),
       delete: vi.fn(),
     })),
+    // Mock runTransaction for atomic operations
+    runTransaction: vi.fn(async (db: any, callback: Function) => {
+      // Create a mock transaction object
+      const mockTransaction = {
+        get: vi.fn(async (_docRef: unknown) => ({
+          exists: () => true,
+          data: () => ({
+            id: 'task-123',
+            title: 'Test Task',
+            completed: false,
+            currentStreak: 0,
+            longestStreak: 0,
+          }),
+        })),
+        update: vi.fn(),
+        set: vi.fn(),
+        delete: vi.fn(),
+      };
+      // Execute the transaction callback
+      await callback(mockTransaction);
+      return mockTransaction;
+    }),
   };
 });
 
@@ -77,6 +99,7 @@ vi.mock('firebase/firestore', () => ({
   where: vi.fn((...args) => ({ type: 'where', args })),
   orderBy: vi.fn((...args) => ({ type: 'orderBy', args })),
   limit: vi.fn((n) => ({ type: 'limit', n })),
+  runTransaction: firestoreMocks.runTransaction,
 }));
 
 // 3. Test Data
@@ -109,7 +132,7 @@ const createWrapper = () => {
     },
   });
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client= { queryClient } > { children } </QueryClientProvider>
+    <QueryClientProvider client={queryClient} > {children} </QueryClientProvider>
   );
 };
 
@@ -271,7 +294,7 @@ describe('useCommitmentService', () => {
       );
     });
 
-    it('should toggle task completion', async () => {
+    it('should toggle task completion with atomic transaction', async () => {
       const { result } = renderHook(() => useCommitmentService(mockUser), { wrapper: createWrapper() });
       await waitFor(() => expect(firestoreMocks.onSnapshot).toHaveBeenCalled());
 
@@ -279,7 +302,8 @@ describe('useCommitmentService', () => {
         await result.current.toggleTask('task-123', false);
       });
 
-      expect(firestoreMocks.updateDoc).toHaveBeenCalled();
+      // Verify runTransaction was called (atomic update)
+      expect(firestoreMocks.runTransaction).toHaveBeenCalled();
     });
 
     it('should delete task', async () => {

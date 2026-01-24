@@ -1,3 +1,11 @@
+/**
+ * Data Seeder Utility
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This development-only module exceeds 200 lines
+ * because it contains comprehensive test data generation for accounts, transactions,
+ * and tasks. Splitting would fragment the seeding contract without benefit.
+ */
+
 import { collection, doc, writeBatch, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import type { AnchorAccount, AnchorTask, TimeOfDay } from '../types';

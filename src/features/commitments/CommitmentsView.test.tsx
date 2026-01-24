@@ -616,9 +616,9 @@ describe('CommitmentsView', () => {
       expect(tasks.toggleTask).toHaveBeenCalled();
     });
 
-    it('calls deleteTask when delete button is clicked', async () => {
-      const { tasks } = createMockContexts();
-      renderWithContext(<CommitmentsView />, { tasks });
+    it('shows confirmation dialog and calls deleteTask when confirmed', async () => {
+      const { tasks, notifications } = createMockContexts();
+      renderWithContext(<CommitmentsView />, { tasks, notifications });
       const user = userEvent.setup();
 
       const trashIcons = screen.getAllByTestId('trash-icon');
@@ -626,7 +626,18 @@ describe('CommitmentsView', () => {
 
       await user.click(firstDeleteButton!);
 
-      expect(tasks.deleteTask).toHaveBeenCalled();
+      // Verify confirmation was requested
+      expect(notifications.confirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Delete Commitment?',
+          type: 'danger'
+        })
+      );
+
+      // Since confirm mock returns true, deleteTask should be called
+      await waitFor(() => {
+        expect(tasks.deleteTask).toHaveBeenCalled();
+      });
     });
 
     it('can toggle completed task back to incomplete', async () => {

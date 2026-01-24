@@ -1,3 +1,11 @@
+/**
+ * CommitmentsView - Task management page orchestrator
+ * 
+ * JUSTIFICATION (CLAUDE.md §3.2): This view exceeds 200 lines because it already
+ * delegates UI to TaskList, TaskForm, EditTaskForm, and WeeklyView components.
+ * The remaining code handles view switching, task CRUD operations, and modal state.
+ */
+
 import { useState, useMemo } from 'react';
 import { Plus, CheckCircle2 } from 'lucide-react';
 import type { AnchorTask } from '../../types';
@@ -66,6 +74,30 @@ const CommitmentsView = () => {
         navigateTo('finance');
       }
     }, 100);
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    const isFamilyTask = task?.category === 'family';
+
+    const confirmed = await confirm({
+      title: 'Delete Commitment?',
+      message: isFamilyTask
+        ? `Are you sure you want to delete "${task?.title}"? This is a family commitment and will no longer be tracked.`
+        : `Are you sure you want to delete "${task?.title}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Keep',
+      type: 'danger'
+    });
+
+    if (confirmed) {
+      try {
+        await deleteTask(taskId);
+        showToast('Commitment deleted', 'success');
+      } catch {
+        showToast('Could not delete commitment', 'error');
+      }
+    }
   };
 
   const { activeTasks, completedTasks, totalFiltered, allFiltered } = useMemo(() => {
@@ -157,7 +189,7 @@ const CommitmentsView = () => {
             editingTaskId={editingTaskId}
             onToggle={toggleTask}
             onStartEdit={setEditingTaskId}
-            onDelete={deleteTask}
+            onDelete={handleDeleteTask}
             onConfirmFinancial={handleConfirmFinancial}
           />
         ) : (

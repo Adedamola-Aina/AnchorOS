@@ -1,0 +1,163 @@
+/**
+ * TransactionService
+ * 
+ * Handles all transaction-related operations including creation, deletion,
+ * and updates with optimistic locking and transfer support.
+ * 
+ * @module services/TransactionService
+ */
+
+import { doc, increment, writeBatch, getDoc, runTransaction, type Firestore } from 'firebase/firestore';
+import { db, APP_ID } from '../config/firebase';
+import { AnchorError } from '../utils/error';
+import type { AnchorTransaction, AnchorAccount } from '../types';
+import { canAddTransaction, canDeleteTransaction, canEditTransaction } from '../features/finance/utils/permissions';
+import { processTransferTransaction, processStandardTransaction } from './TransferOperations';
+import type { CreateTransactionPayload, UpdateTransactionPayload } from './financeTypes';
+
+// Re-export types for backward compatibility
+export type { CreateTransactionPayload, UpdateTransactionPayload } from './financeTypes';
+
+/**
+ * TransactionService providing transaction management operations
+ */
+export class TransactionService {
+    private firestore: Firestore;
+
+    constructor(firestore: Firestore = db) {
+        this.firestore = firestore;
+    }
+
+    /** Add a new transaction (handles transfers and standard transactions) */
+    async addTransaction(userId: string, payload: CreateTransactionPayload, accounts: AnchorAccount[]): Promise<void> {
+        const sourceAccount = accounts.find(a => a.id === payload.accountId);
+        if (!sourceAccount) throw new AnchorError('Source account not found', 'VALIDATION');
+        if (!canAddTransaction(sourceAccount, userId)) {
+            throw new AnchorError(`Permission denied: You cannot add transactions to ${sourceAccount.name}.`, 'PERMISSION');
+        }
+
+        try {
+            const batch = writeBatch(this.firestore);
+            const now = new Date();
+            const createdAt = now.toISOString();
+            const transactionDate = payload.date || createdAt;
+            const isBackdated = payload.date ? new Date(payload.date).toDateString() !== now.toDateString() : false;
+
+            if (payload.type === 'transfer') {
+                processTransferTransaction(this.firestore, batch, userId, payload, sourceAccount, accounts, transactionDate, createdAt, isBackdated);
+            } else {
+                processStandardTransaction(this.firestore, batch, userId, payload, sourceAccount, transactionDate, createdAt, isBackdated);
+            }
+            await batch.commit();
+        } catch (error) {
+            if (error instanceof AnchorError) throw error;
+            throw new AnchorError('Failed to add transaction', 'DATABASE', error);
+        }
+    }
+
+    /** Delete a transaction (soft delete with balance reversal) */
+    async deleteTransaction(
+        userId: string, transactionId: string, accountId: string,
+        accounts: AnchorAccount[], transactions: AnchorTransaction[]
+    ): Promise<void> {
+        const account = accounts.find(a => a.id === accountId);
+        if (!account) throw new AnchorError('Account not found', 'VALIDATION');
+        if (!canDeleteTransaction(account, userId)) {
+            throw new AnchorError('Permission denied: You cannot delete transactions from this account.', 'PERMISSION');
+        }
+
+        const txToDelete = transactions.find(t => t.id === transactionId);
+        if (!txToDelete) throw new AnchorError('Transaction not found', 'VALIDATION');
+
+        try {
+            const batch = writeBatch(this.firestore);
+            const timestamp = new Date().toISOString();
+            const targetUserId = account.ownerId || userId;
+
+            const txRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'finance', transactionId);
+            batch.update(txRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
+
+            const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
+            const balanceAdj = txToDelete.type === 'income' ? -txToDelete.amountCents : txToDelete.amountCents;
+            batch.update(accRef, { balanceCents: increment(balanceAdj) });
+
+            if (txToDelete.linkedTransactionId && txToDelete.linkedUserId) {
+                await this.deleteLinkedTransaction(batch, txToDelete, userId, timestamp);
+            }
+            await batch.commit();
+        } catch (error) {
+            if (error instanceof AnchorError) throw error;
+            throw new AnchorError('Failed to delete transaction', 'DATABASE', error);
+        }
+    }
+
+    private async deleteLinkedTransaction(
+        batch: ReturnType<typeof writeBatch>, txToDelete: AnchorTransaction, userId: string, timestamp: string
+    ): Promise<void> {
+        const linkedTxRef = doc(this.firestore, 'artifacts', APP_ID, 'users', txToDelete.linkedUserId!, 'finance', txToDelete.linkedTransactionId!);
+        const linkedTxDoc = await getDoc(linkedTxRef);
+        if (linkedTxDoc.exists()) {
+            const pairedTx = linkedTxDoc.data() as AnchorTransaction;
+            batch.update(linkedTxRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
+            const linkedAccRef = doc(this.firestore, 'artifacts', APP_ID, 'users', txToDelete.linkedUserId!, 'accounts', pairedTx.accountId);
+            batch.update(linkedAccRef, { balanceCents: increment(pairedTx.type === 'income' ? -pairedTx.amountCents : pairedTx.amountCents) });
+        }
+    }
+
+    /** Update a transaction with optimistic locking */
+    async updateTransaction(
+        userId: string, transactionId: string, accountId: string,
+        updates: UpdateTransactionPayload, accounts: AnchorAccount[]
+    ): Promise<void> {
+        const account = accounts.find(a => a.id === accountId);
+        if (!account) throw new AnchorError('Account not found', 'VALIDATION');
+        if (!canEditTransaction(account, userId)) {
+            throw new AnchorError('Permission denied: You cannot edit transactions in this account.', 'PERMISSION');
+        }
+
+        try {
+            await runTransaction(this.firestore, async (transaction) => {
+                const targetUserId = account.ownerId || userId;
+                const txRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'finance', transactionId);
+                const txDoc = await transaction.get(txRef);
+                if (!txDoc.exists()) throw new AnchorError('Transaction does not exist', 'VALIDATION');
+                const currentData = txDoc.data() as AnchorTransaction;
+
+                if (updates.amountCents !== undefined && updates.amountCents !== currentData.amountCents) {
+                    const diff = updates.amountCents - currentData.amountCents;
+                    const correction = currentData.type === 'income' ? diff : -diff;
+                    const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
+                    transaction.update(accRef, { balanceCents: increment(correction) });
+                }
+                transaction.update(txRef, { ...updates, lastEditedBy: userId, updatedAt: new Date().toISOString() });
+
+                if (currentData.linkedTransactionId && currentData.linkedUserId) {
+                    await this.syncLinkedTransaction(transaction, currentData, updates);
+                }
+            });
+        } catch (error) {
+            if (error instanceof AnchorError) throw error;
+            throw new AnchorError('Failed to update transaction', 'DATABASE', error);
+        }
+    }
+
+    private async syncLinkedTransaction(
+        transaction: Parameters<Parameters<typeof runTransaction>[1]>[0],
+        currentData: AnchorTransaction, updates: UpdateTransactionPayload
+    ): Promise<void> {
+        const linkedTxRef = doc(this.firestore, 'artifacts', APP_ID, 'users', currentData.linkedUserId!, 'finance', currentData.linkedTransactionId!);
+        const linkedDoc = await transaction.get(linkedTxRef);
+        if (linkedDoc.exists()) {
+            const linkedData = linkedDoc.data() as AnchorTransaction;
+            if (updates.amountCents !== undefined && updates.amountCents !== linkedData.amountCents) {
+                const diff = updates.amountCents - linkedData.amountCents;
+                const correction = linkedData.type === 'income' ? diff : -diff;
+                const linkedAccRef = doc(this.firestore, 'artifacts', APP_ID, 'users', currentData.linkedUserId!, 'accounts', linkedData.accountId);
+                transaction.update(linkedAccRef, { balanceCents: increment(correction) });
+            }
+            transaction.update(linkedTxRef, { ...updates });
+        }
+    }
+}
+
+export const transactionService = new TransactionService();
