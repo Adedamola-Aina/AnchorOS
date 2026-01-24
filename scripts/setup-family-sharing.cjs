@@ -91,9 +91,9 @@ async function setupFamilySharing() {
             await doc.ref.update({
                 sharedWith: {
                     'test-member': {
-                        role: 'transact',
-                        sharedAt: connectedAt,
-                        sharedBy: 'test-owner'
+                        grantedAt: connectedAt,
+                        grantedBy: 'test-owner',
+                        permission: 'transact'
                     }
                 },
                 scope: 'family'
