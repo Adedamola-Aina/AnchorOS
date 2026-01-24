@@ -1,6 +1,7 @@
 /**
  * TransactionListVirtual - Virtualized transaction list with search/filter
- * Extracted from AccountDetailsView for better maintainability
+ * 
+ * Follows CLAUDE.md design system with Card-based transaction items
  */
 
 import { useRef } from 'react';
@@ -9,7 +10,9 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import type { AnchorTransaction, AnchorAccount, Currency } from '../../../types';
 import { formatCurrency } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
-import { CategoryIcon } from '../../../components/shared';
+import { CategoryIcon, Badge } from '../../../components/shared';
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
 
 interface TransactionListVirtualProps {
     transactions: AnchorTransaction[];
@@ -42,7 +45,7 @@ export const TransactionListVirtual = ({
     const rowVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 72,
+        estimateSize: () => 100, // Card-based height
         overscan: 5,
     });
 
@@ -76,8 +79,8 @@ export const TransactionListVirtual = ({
                                 key={type}
                                 onClick={() => onFilterChange(type)}
                                 className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${filterType === type
-                                        ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white'
-                                        : 'text-slate-400'
+                                    ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white'
+                                    : 'text-slate-400'
                                     }`}
                             >
                                 {type === 'all' ? 'All' : type === 'expense' ? 'Out' : 'In'}
@@ -116,7 +119,7 @@ export const TransactionListVirtual = ({
             )}
 
             {/* Virtualized Transaction List */}
-            <div ref={parentRef} className="max-h-[500px] overflow-y-auto">
+            <div ref={parentRef} className="max-h-[500px] overflow-y-auto p-3">
                 <div
                     style={{
                         height: `${rowVirtualizer.getTotalSize()}px`,
@@ -128,56 +131,98 @@ export const TransactionListVirtual = ({
                         const tx = transactions[virtualItem.index];
                         const txTitle = tx.title || 'Untitled';
                         const txCategory = tx.category || 'Other';
-                        const txDate = tx.date ? new Date(tx.date).toLocaleDateString() : 'Unknown Date';
+                        // Use transactionDate (actual) if available, else entry date
+                        const displayDate = tx.transactionDate || tx.date;
+                        const txDate = displayDate ? new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown';
                         const txAmount = tx.amountCents || 0;
                         const txCurrency = tx.currency || ('NGN' as Currency);
+
+                        // Check if backdated
+                        const isBackdated = tx.isBackdated ?? (() => {
+                            if (!tx.transactionDate) return false;
+                            const entryDate = new Date(tx.date).getTime();
+                            const actualDate = new Date(tx.transactionDate).getTime();
+                            return (entryDate - actualDate) > 24 * 60 * 60 * 1000;
+                        })();
+
+                        const amountColor = tx.type === 'income'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : tx.type === 'transfer'
+                                ? 'text-indigo-600 dark:text-indigo-400'
+                                : 'text-slate-900 dark:text-white';
 
                         return (
                             <div
                                 key={virtualItem.key}
                                 data-index={virtualItem.index}
                                 ref={rowVirtualizer.measureElement}
-                                className="flex items-center gap-4 p-4 border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors group absolute top-0 left-0 w-full"
+                                className="absolute top-0 left-0 w-full pb-3"
                                 style={{ transform: `translateY(${virtualItem.start}px)` }}
                             >
-                                <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                                    <CategoryIcon category={txCategory} size={18} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-slate-900 dark:text-white truncate">{txTitle}</p>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                        {txDate} • {txCategory}
-                                        {tx.createdByName && currentUserId && tx.createdBy !== currentUserId && (
-                                            <span className="text-indigo-500 ml-1">• by {tx.createdByName}</span>
-                                        )}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className={`font-mono font-black text-sm tabular-nums ${tx.type === 'income' ? 'text-emerald-500' : 'text-slate-900 dark:text-slate-200'
-                                        }`}>
-                                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(fromCents(txAmount), txCurrency)}
-                                    </p>
-                                </div>
-                                <div className="flex gap-1">
-                                    {onEdit && isOwner && (
-                                        <button
-                                            onClick={() => onEdit(tx)}
-                                            className="p-2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-indigo-500 transition-all"
-                                            aria-label="Edit"
-                                        >
-                                            <Pencil className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                    {isOwner && (
-                                        <button
-                                            onClick={() => onDelete(tx)}
-                                            className="p-2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 transition-all"
-                                            aria-label="Delete transaction"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                </div>
+                                <Card className="group p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        {/* Left: Icon + Info */}
+                                        <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                                            <CategoryIcon
+                                                category={txCategory}
+                                                className="shrink-0 mt-0.5 sm:mt-0"
+                                            />
+                                            <div className="min-w-0 flex-1">
+                                                <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate">
+                                                    {txTitle}
+                                                </h4>
+                                                <div className="flex gap-2 mt-2 flex-wrap">
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                                                        {txDate}
+                                                    </span>
+                                                    <Badge type="todo" variant="outline">
+                                                        {txCategory}
+                                                    </Badge>
+                                                    {tx.createdBy && currentUserId && tx.createdBy !== currentUserId && (
+                                                        <Badge type="family">
+                                                            {tx.createdByName || 'Family'}
+                                                        </Badge>
+                                                    )}
+                                                    {isBackdated && (
+                                                        <Badge type="warning" variant="outline">
+                                                            Backdated
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Right: Amount + Actions */}
+                                        <div className="flex items-center justify-between sm:justify-end gap-4">
+                                            <p className={`font-semibold text-sm tabular-nums ${amountColor}`}>
+                                                {tx.type === 'expense' ? '-' : tx.type === 'income' ? '+' : ''}
+                                                {formatCurrency(fromCents(txAmount), txCurrency)}
+                                            </p>
+                                            <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                                {onEdit && isOwner && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => onEdit(tx)}
+                                                        className="text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </Button>
+                                                )}
+                                                {isOwner && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => onDelete(tx)}
+                                                        className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
                             </div>
                         );
                     })}
