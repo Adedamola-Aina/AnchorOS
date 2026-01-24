@@ -149,17 +149,27 @@ const DashboardView = () => {
               </div>
             </div>
             <div className="space-y-4">
-              {recentActivity.slice(0, 3).map(tx => (
-                <div key={tx.id} className="flex justify-between items-center group cursor-default">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-slate-900 dark:text-white truncate pr-2">{tx.title}</p>
-                    <p className="text-[10px] text-slate-400">{new Date(tx.date).toLocaleDateString()}</p>
+              {recentActivity.slice(0, 3).map(tx => {
+                const displayDate = tx.transactionDate || tx.date;
+                return (
+                  <div key={tx.id} className="flex justify-between items-center group cursor-default p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-slate-900 dark:text-white truncate pr-2">{tx.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                        <span className="text-[10px] text-slate-400 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">
+                          {tx.category}
+                        </span>
+                      </div>
+                    </div>
+                    <span className={`font-mono font-bold text-sm ${tx.type === 'income' ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-300'}`}>
+                      {tx.type === 'income' ? '+' : ''}{formatCurrency(fromCents(tx.amountCents || 0), tx.currency)}
+                    </span>
                   </div>
-                  <span className={`font-mono font-bold text-sm ${tx.type === 'income' ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-300'}`}>
-                    {tx.type === 'income' ? '+' : ''}{formatCurrency(fromCents(tx.amountCents || 0), tx.currency)}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
               {recentActivity.length === 0 && (
                 <p className="text-center text-slate-400 text-xs italic py-4">No recent activity.</p>
               )}
