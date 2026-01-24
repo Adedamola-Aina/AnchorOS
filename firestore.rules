@@ -133,14 +133,6 @@ service cloud.firestore {
             return account.data.ownerId == request.auth.uid || account.data.get('shares', {})[request.auth.uid] == 'manage';
           }
 
-          function verifyCreatePermission() {
-            let accountId = request.resource.data.accountId;
-            let account = get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
-            return account.data.ownerId == request.auth.uid 
-                   || account.data.get('shares', {})[request.auth.uid] in ['transact', 'manage']
-                   || request.auth.uid in account.data.get('sharedWith', {}).keys();
-          }
-
           function isSharedAccountMember() {
             let accountId = resource.data.accountId;
             let account = get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
@@ -162,10 +154,10 @@ service cloud.firestore {
                         || isSharedAccountMember()
                         || (resource.data.scope == 'family' && isConnectedFamilyMember(userId));
           
-          // Create: must validate and have permission
+          // Create: owner, or connected family member (simplified for dev/staging)
           allow create: if request.auth != null
                         && isValidTransaction(request.resource.data)
-                        && verifyCreatePermission();
+                        && (request.auth.uid == userId || isConnectedFamilyMember(userId));
                         
           // Update: owner or manage permission, sharedWith members cannot update
           allow update: if (request.auth.uid == userId || verifyUpdatePermission())
