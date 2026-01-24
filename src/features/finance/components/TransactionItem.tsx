@@ -36,17 +36,17 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
     const displayDate = transaction.transactionDate || transaction.date;
 
     return (
-        <div className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
-            <div className="flex items-center gap-4 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
                 <CategoryIcon
                     category={transaction.category}
                     className="shrink-0"
                 />
-                <div className="min-w-0">
-                    <p className="font-medium text-slate-900 dark:text-white truncate">
+                <div className="min-w-0 flex-1">
+                    <p className="font-medium text-slate-900 dark:text-white truncate text-sm">
                         {transaction.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
                         <span className="text-xs text-slate-500 dark:text-slate-400">
                             {new Date(displayDate).toLocaleDateString('en-US', {
                                 month: 'short',
@@ -54,19 +54,14 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                             })}
                         </span>
                         {accountName && (
-                            <>
-                                <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[100px]">
-                                    {accountName}
-                                </span>
-                            </>
+                            <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[80px]">
+                                • {accountName}
+                            </span>
                         )}
                         {transaction.createdBy && currentUserId && transaction.createdBy !== currentUserId && (
-                            <>
-                                <span className="text-slate-300 dark:text-slate-700">•</span>
-                                <span className="text-xs font-medium text-indigo-500 dark:text-indigo-400">
-                                    {transaction.createdByName || 'Family Member'}
-                                </span>
-                            </>
+                            <span className="text-xs font-medium text-indigo-500 dark:text-indigo-400">
+                                • {transaction.createdByName || 'Family'}
+                            </span>
                         )}
                         {isBackdated && (
                             <Badge type="warning" variant="outline">
@@ -80,9 +75,9 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
-                <div className="text-right">
-                    <p className={`font-semibold ${transaction.type === 'income'
+            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                <div className="text-left sm:text-right">
+                    <p className={`font-semibold text-sm ${transaction.type === 'income'
                         ? 'text-emerald-600 dark:text-emerald-400'
                         : transaction.type === 'transfer'
                             ? 'text-indigo-600 dark:text-indigo-400'
@@ -93,7 +88,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                     </p>
                 </div>
 
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button
                         onClick={() => onEdit(transaction)}
                         className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors shadow-sm"
