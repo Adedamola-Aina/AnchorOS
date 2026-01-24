@@ -20,6 +20,8 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
     onDelete,
     currentUserId,
 }) => {
+    // Guard against undefined transaction
+    if (!transaction) return null;
     // Use the isBackdated flag if available (new transactions), otherwise calculate for legacy
     const isBackdated = transaction.isBackdated ?? (() => {
         if (!transaction.transactionDate) return false;
@@ -87,7 +89,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                             : 'text-slate-900 dark:text-white'
                         }`}>
                         {transaction.type === 'expense' ? '-' : transaction.type === 'income' ? '+' : ''}
-                        {formatCurrency(fromCents(transaction.amountCents), transaction.currency)}
+                        {formatCurrency(fromCents(transaction.amountCents || 0), transaction.currency || 'USD')}
                     </p>
                 </div>
 
