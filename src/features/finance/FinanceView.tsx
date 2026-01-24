@@ -40,7 +40,7 @@ const FinanceView = () => {
   const [mode, setMode] = useState<'view' | 'addTx' | 'addAcc' | 'editTx'>('view');
   const [editingTransaction, setEditingTransaction] = useState<AnchorTransaction | undefined>(undefined);
   const [initialTransactionType, setInitialTransactionType] = useState<'expense' | 'income' | 'transfer'>('expense');
-  const [selectedAccount, setSelectedAccount] = useState<AnchorAccount | null>(null);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [accountToDelete, setAccountToDelete] = useState<AnchorAccount | null>(null);
   const [accountToUnshare, setAccountToUnshare] = useState<AnchorAccount | null>(null);
   const [transactionToDelete, setTransactionToDelete] = useState<AnchorTransaction | null>(null);
@@ -49,6 +49,11 @@ const FinanceView = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const activeAccounts = useMemo(() => accounts.filter(a => !a.isArchived), [accounts]);
+  // Derive selectedAccount from reactive accounts array for real-time updates
+  const selectedAccount = useMemo(() =>
+    selectedAccountId ? accounts.find(a => a.id === selectedAccountId) || null : null,
+    [selectedAccountId, accounts]
+  );
   const showModal = accounts.length >= 3;
 
   // Keyboard shortcut for search
@@ -88,7 +93,7 @@ const FinanceView = () => {
         <ErrorBoundary componentName="Account Details">
           <AccountDetailsView
             account={selectedAccount}
-            onBack={() => setSelectedAccount(null)}
+            onBack={() => setSelectedAccountId(null)}
             familyMemberId={familyMemberUid}
             onShare={() => {
               if (!familyMemberUid) return;
@@ -126,7 +131,7 @@ const FinanceView = () => {
             if (accountToDelete) {
               deleteAccount(accountToDelete.id);
               setAccountToDelete(null);
-              setSelectedAccount(null);
+              setSelectedAccountId(null);
             }
           }}
           title="Delete Account"
@@ -177,7 +182,7 @@ const FinanceView = () => {
             userId={user?.uid || ''}
             isOwnerOfConnection={isFamilyOwner}
             familyMemberUid={familyMemberUid || undefined}
-            onEdit={setSelectedAccount}
+            onEdit={(acc) => setSelectedAccountId(acc.id)}
             onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)}
           />
         ))}
