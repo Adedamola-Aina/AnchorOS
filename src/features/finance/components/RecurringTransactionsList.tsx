@@ -46,7 +46,7 @@ export const RecurringTransactionsList = ({
                                 <p className="text-[10px] text-slate-500 uppercase font-black">{rec.frequency}</p>
                             </div>
                             <p className="font-mono font-bold text-slate-900 dark:text-white text-sm">
-                                {formatCurrency(fromCents(rec.amountCents), currency)}
+                                {formatCurrency(fromCents(rec.amountCents || 0), currency)}
                             </p>
                         </div>
                     ))
