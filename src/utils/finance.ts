@@ -132,11 +132,11 @@ export function calculateCashFlow(
 
     const incomeCents = filtered
         .filter(tx => tx.type === 'income')
-        .reduce((sum, tx) => sum + tx.amountCents, 0);
+        .reduce((sum, tx) => sum + (tx.amountCents || 0), 0);
 
     const expenseCents = filtered
         .filter(tx => tx.type === 'expense')
-        .reduce((sum, tx) => sum + tx.amountCents, 0);
+        .reduce((sum, tx) => sum + (tx.amountCents || 0), 0);
 
     const income = fromCents(incomeCents);
     const expense = fromCents(expenseCents);

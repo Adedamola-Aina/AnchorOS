@@ -50,7 +50,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
     // Initial state setup
     const initialAmount = initialData
-        ? fromCents(initialData.amountCents).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        ? fromCents(initialData.amountCents || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
         : '';
     const initialDate = initialData?.date
         ? new Date(initialData.date).toISOString().split('T')[0]
