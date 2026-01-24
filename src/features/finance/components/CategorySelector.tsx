@@ -38,20 +38,23 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             <div className="flex items-center gap-3 relative">
                 <CategoryIcon category={category} size={14} className="scale-110" />
                 <div className="flex-1 relative">
-                    <input
+                    <select
                         id="tx-category"
-                        list="category-suggestions"
                         value={category}
                         onChange={(e) => onChange(e.target.value)}
-                        placeholder="Select or type..."
-                        className={`w-full p-3 rounded-lg border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${error ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-300 dark:border-slate-600'
+                        className={`w-full p-3 rounded-lg border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white cursor-pointer appearance-none ${error ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-300 dark:border-slate-600'
                             }`}
-                    />
-                    <datalist id="category-suggestions">
+                    >
                         {DEFAULT_CATEGORIES.map(cat => (
-                            <option key={cat} value={cat} />
+                            <option key={cat} value={cat}>{cat}</option>
                         ))}
-                    </datalist>
+                    </select>
+                    {/* Custom dropdown arrow */}
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
 
                     {suggestedCategory && suggestedCategory !== category && (
                         <button
