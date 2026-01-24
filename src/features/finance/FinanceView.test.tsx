@@ -448,132 +448,80 @@ describe('FinanceView', () => {
   });
 
   describe('Add Transaction Form', () => {
-    it('shows add transaction form when "New Transaction" button is clicked', async () => {
+    // NOTE: Transaction creation was moved from main Finance view to Account Details view.
+    // The "New Transaction" button no longer exists on the main Finance page.
+    // Users now click into an account to add transactions for that account.
+    // These tests verify the core transaction list functionality instead.
+
+    it('transaction list is visible and displays transactions', async () => {
       renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
 
-      const addTxButton = screen.getByRole('button', { name: /New Transaction/i });
-      await user.click(addTxButton);
+      // Verify transaction list is rendered
+      const transactionList = screen.getByTestId('transaction-list');
+      expect(transactionList).toBeInTheDocument();
 
-      expect(screen.getAllByText('New Transaction')).not.toHaveLength(0);
+      // Verify transactions are displayed
+      expect(screen.getByText('Grocery Shopping')).toBeInTheDocument();
+      expect(screen.getAllByText('Salary').length).toBeGreaterThan(0);
     });
 
-    it('shows error message when no accounts exist', async () => {
-      renderWithContext(<FinanceView />, { finance: { accounts: [] } });
-      const user = userEvent.setup();
-
-      const addTxButton = screen.getByRole('button', { name: /New Transaction/i });
-      await user.click(addTxButton);
-
-      expect(screen.getByText('Please create an account first.')).toBeInTheDocument();
-    });
-
-    it('pre-selects first account for transactions (account selector hidden with default)', async () => {
-      // Note: When defaultAccountId is provided, AccountSelector is hidden and
-      // the first account is pre-selected for convenience. This is by design.
+    it('transaction list shows income transactions with correct formatting', async () => {
       renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
 
-      const addTxButton = screen.getByRole('button', { name: /New Transaction/i });
-      await user.click(addTxButton);
-
-      // The transaction form should be visible (in modal with 3+ accounts)
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      // The form should have the description field (verifying form rendered)
-      expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
+      // Income should have + sign
+      expect(screen.getByText((content) => content.includes('5,000.00') && content.includes('+'))).toBeInTheDocument();
     });
 
-    it('toggles between expense and income types', async () => {
+    it('transaction list shows expense transactions with correct formatting', async () => {
       renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
 
-      const addTxButton = screen.getByRole('button', { name: /New Transaction/i });
-      await user.click(addTxButton);
-
-      const expenseButton = screen.getByRole('button', { name: /^Expense$/i });
-      const incomeButton = screen.getByRole('button', { name: /^Income$/i });
-
-      expect(expenseButton).toBeInTheDocument();
-      expect(incomeButton).toBeInTheDocument();
-
-      await user.click(incomeButton);
-      // Income button should now be active (visual indication)
-
-      await user.click(expenseButton);
-      // Expense button should be active again
+      // Expenses should have - sign
+      expect(screen.getByText((content) => content.includes('150.50') && content.includes('-'))).toBeInTheDocument();
     });
 
-    it('calls addTransaction with correct data when form is submitted', async () => {
-      const { finance: mockFinance } = createMockContexts();
+    it('account cards are clickable to access account-specific transaction form', async () => {
+      renderWithContext(<FinanceView />);
 
-      renderWithContext(<FinanceView />, { finance: mockFinance });
-
-      const user = userEvent.setup();
-
-      const addTxButton = screen.getByRole('button', { name: /New Transaction/i });
-      await user.click(addTxButton);
-
-      // Fill in transaction details
-      const descInput = screen.getByPlaceholderText(/e.g. Groceries/);
-      await user.type(descInput, 'Test Expense');
-
-      const amountInput = screen.getByPlaceholderText('0.00');
-      await user.type(amountInput, '250.75');
-
-      const submitButton = screen.getByRole('button', { name: /Record Transaction/i });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockFinance.addTransaction).toHaveBeenCalledWith(
-          expect.objectContaining({
-            title: 'Test Expense',
-            amountCents: 25075,
-            type: 'expense',
-          })
-        );
-      });
+      // Verify account cards are clickable (leads to account details where transaction form is)
+      const accountCard = screen.getByText('Checking Account');
+      expect(accountCard.closest('button, [role="button"], div[class*="cursor-pointer"]')).toBeTruthy();
     });
 
-    it('rejects transaction description with XSS payload', async () => {
+    it('transaction list supports editing via edit button', async () => {
       const { finance: mockFinance } = createMockContexts();
       renderWithContext(<FinanceView />, { finance: mockFinance });
-      const user = userEvent.setup();
 
-      const addTxButton = screen.getByRole('button', { name: /New Transaction/i });
-      await user.click(addTxButton);
-
-      const descInput = screen.getByPlaceholderText(/e.g. Groceries/);
-      await user.type(descInput, '<script>alert("xss")</script>');
-
-      const amountInput = screen.getByPlaceholderText('0.00');
-      await user.type(amountInput, '100');
-
-      const submitButton = screen.getByRole('button', { name: /Record Transaction/i });
-      await user.click(submitButton);
-
-      // Should show validation error and NOT call addTransaction
-      await waitFor(() => {
-        expect(screen.getByText(/contains invalid content/i)).toBeInTheDocument();
-        expect(mockFinance.addTransaction).not.toHaveBeenCalled();
-      });
+      // Verify edit buttons are present
+      const editButtons = screen.getAllByTestId(/edit-tx/);
+      expect(editButtons.length).toBeGreaterThan(0);
     });
 
-    it('uses standard font scale for Amount field (no hero sizing)', async () => {
-      renderWithContext(<FinanceView />);
+    it('shows confirmation modal when deleting a transaction', async () => {
+      const { finance: mockFinance } = createMockContexts();
+      renderWithContext(<FinanceView />, { finance: mockFinance });
+
       const user = userEvent.setup();
 
-      const addTxButton = screen.getByRole('button', { name: /New Transaction/i });
-      await user.click(addTxButton);
+      const deleteButtons = screen.getAllByTestId('trash-icon');
+      const transactionDeleteButton = deleteButtons[deleteButtons.length - 1];
+      await user.click(transactionDeleteButton.closest('button')!);
 
-      const amountInput = screen.getByPlaceholderText('0.00');
-      // Verify it DOES NOT have text-3xl or h-14
-      expect(amountInput).not.toHaveClass('text-3xl');
-      expect(amountInput).not.toHaveClass('h-14');
-      // Verify it has the standard font-bold we added
-      expect(amountInput).toHaveClass('font-bold');
+      // Confirmation modal should appear
+      expect(screen.getByText(/This action cannot be undone/)).toBeInTheDocument();
+    });
+
+    it('transaction list correctly handles amount formatting', async () => {
+      renderWithContext(<FinanceView />);
+
+      // Check the rent payment (150000 cents = $1,500.00)
+      expect(screen.getByText((content) => content.includes('1,500.00') && content.includes('-'))).toBeInTheDocument();
+    });
+
+    it('transaction list displays categories for each transaction', async () => {
+      renderWithContext(<FinanceView />);
+
+      expect(screen.getAllByText('Food').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Housing').length).toBeGreaterThan(0);
     });
   });
 
@@ -633,9 +581,10 @@ describe('FinanceView', () => {
         auth: { profile: familyProfile }
       });
 
-      // Verify core elements are present - check for buttons that are always rendered
+      // Verify core elements are present
       expect(screen.getByRole('button', { name: /Add Account/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /New Transaction/i })).toBeInTheDocument();
+      // Verify transaction list is rendered
+      expect(screen.getByTestId('transaction-list')).toBeInTheDocument();
     });
   });
 });
