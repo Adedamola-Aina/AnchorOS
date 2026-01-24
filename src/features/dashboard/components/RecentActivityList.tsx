@@ -28,7 +28,7 @@ export function RecentActivityList({ recentActivity }: RecentActivityListProps) 
                                 </div>
                             </div>
                             <span className={`font-financial font-bold ${tx.type === 'income' ? 'text-emerald-500' : tx.type === 'expense' ? 'text-rose-500' : 'text-blue-500'}`}>
-                                {tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : ''}₦{fromCents(tx.amountCents).toLocaleString()}
+                                {tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : ''}₦{fromCents(tx.amountCents || 0).toLocaleString()}
                             </span>
                         </div>
                     ))
