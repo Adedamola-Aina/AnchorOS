@@ -16,12 +16,14 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
         const categories: Record<string, number> = {};
 
         transactions.forEach(tx => {
-            if (tx.isSoftDeleted) return;
+            if (!tx || tx.isSoftDeleted) return;
+            const amount = tx.amountCents || 0;
             if (tx.type === 'income') {
-                income += tx.amountCents;
+                income += amount;
             } else if (tx.type === 'expense') {
-                expense += tx.amountCents;
-                categories[tx.category] = (categories[tx.category] || 0) + tx.amountCents;
+                expense += amount;
+                const cat = tx.category || 'Other';
+                categories[cat] = (categories[cat] || 0) + amount;
             }
         });
 
