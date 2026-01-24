@@ -32,31 +32,44 @@ service cloud.firestore {
     match /artifacts/anchor-os {
       
       // ======================================================================
-      // Family Mode v2: Invitations (Cloud Functions only for writes)
+      // ======================================================================
+      // Family Mode v2: Invitations
       // ======================================================================
       match /family_invitations/{inviteId} {
         // Owner or invitee can read their invitations
-        // Note: list evaluates resource.data on each document in the result set
         allow read: if request.auth != null && (
           resource.data.ownerUid == request.auth.uid ||
           resource.data.inviteeEmail == request.auth.token.email
         );
-        // All writes through Cloud Functions only
-        allow write: if false;
+        // Owner can update their own invitations (for dev tools auto-accept)
+        allow update: if request.auth != null && (
+          resource.data.ownerUid == request.auth.uid ||
+          resource.data.inviteeEmail == request.auth.token.email
+        );
+        // Only Cloud Functions can create/delete
+        allow create, delete: if false;
       }
 
       // ======================================================================
-      // Family Mode v2: Connections (Cloud Functions only for writes)
+      // Family Mode v2: Connections
       // ======================================================================
       match /family_connections/{connectionId} {
         // Both parties can read their connection
-        // Note: list evaluates resource.data on each document in the result set
         allow read: if request.auth != null && (
           resource.data.ownerUid == request.auth.uid ||
           resource.data.memberUid == request.auth.uid
         );
-        // All writes through Cloud Functions only
-        allow write: if false;
+        // Owner or member can create/update connection (for dev tools)
+        allow create: if request.auth != null && (
+          request.resource.data.ownerUid == request.auth.uid ||
+          request.resource.data.memberUid == request.auth.uid
+        );
+        allow update: if request.auth != null && (
+          resource.data.ownerUid == request.auth.uid ||
+          resource.data.memberUid == request.auth.uid
+        );
+        // Only Cloud Functions can delete
+        allow delete: if false;
       }
 
       // ======================================================================
