@@ -67,8 +67,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                             <X className="w-5 h-5" />
                         </Button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[
+                            { id: 'todo', label: 'Todo', desc: 'One-time task', icon: <CheckCircle2 className="w-6 h-6 text-emerald-500" /> },
                             { id: 'daily', label: 'Daily', desc: 'Every single day', icon: <Sunrise className="w-6 h-6 text-blue-500" /> },
                             { id: 'weekly', label: 'Weekly', desc: 'On specific days', icon: <Calendar className="w-6 h-6 text-purple-500" /> },
                             { id: 'monthly', label: 'Monthly', desc: 'On a specific date', icon: <CheckCircle2 className="w-6 h-6 text-indigo-500" /> },
