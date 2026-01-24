@@ -74,7 +74,7 @@ async function setupFamilySharing() {
         memberUid: 'test-member',
         memberEmail: 'member@anchor.local',
         memberName: 'Jordan Member',
-        status: 'connected',
+        status: 'active',
         createdAt: connectedAt,
         confirmedAt: connectedAt
     });
