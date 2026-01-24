@@ -158,6 +158,9 @@ const FinanceView = () => {
     );
   }
 
+  // Is user actively searching?
+  const isSearching = debouncedSearch.length > 0;
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8 relative">
       <SectionHeader
@@ -170,32 +173,37 @@ const FinanceView = () => {
         }
       />
 
-      <FamilyNotificationBanner />
-      <NetWorthCards netWorth={netWorth} />
-      <MonthlyInsight transactions={transactions} currency={activeAccounts[0]?.currency || 'NGN'} />
+      {/* Hide decorative elements when searching (Progressive Disclosure - CLAUDE.md §4.1) */}
+      {!isSearching && (
+        <>
+          <FamilyNotificationBanner />
+          <NetWorthCards netWorth={netWorth} />
+          <MonthlyInsight transactions={transactions} currency={activeAccounts[0]?.currency || 'NGN'} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activeAccounts.map((acc) => (
-          <AccountCard
-            key={acc.id}
-            account={acc}
-            userId={user?.uid || ''}
-            isOwnerOfConnection={isFamilyOwner}
-            familyMemberUid={familyMemberUid || undefined}
-            onEdit={(acc) => setSelectedAccountId(acc.id)}
-            onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)}
-          />
-        ))}
-        {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
-      </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activeAccounts.map((acc) => (
+              <AccountCard
+                key={acc.id}
+                account={acc}
+                userId={user?.uid || ''}
+                isOwnerOfConnection={isFamilyOwner}
+                familyMemberUid={familyMemberUid || undefined}
+                onEdit={(acc) => setSelectedAccountId(acc.id)}
+                onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)}
+              />
+            ))}
+            {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
+          </div>
+        </>
+      )}
 
-      {!showModal && mode === 'addAcc' && (
+      {!showModal && mode === 'addAcc' && !isSearching && (
         <div className="animate-in fade-in zoom-in-95 duration-200">
           <AccountForm onClose={handleCloseForm} />
         </div>
       )}
 
-      {!showModal && (mode === 'addTx' || mode === 'editTx') && (
+      {!showModal && (mode === 'addTx' || mode === 'editTx') && !isSearching && (
         <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} />
       )}
 
@@ -217,6 +225,14 @@ const FinanceView = () => {
                 value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
           </div>
+          {/* Show search result count when searching */}
+          {isSearching && (
+            <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/30">
+              <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                Found {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''} matching "{debouncedSearch}"
+              </p>
+            </div>
+          )}
           <VirtualTransactionList transactions={filteredTransactions} currentUserId={user?.uid} onEdit={handleEdit} onDelete={setTransactionToDelete} loading={loadingFinance} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} />
         </div>
       )}
