@@ -32,7 +32,7 @@ const CommitmentsView = () => {
 
   const hasFamilyActive = !!connection;
   const [showAdd, setShowAdd] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'daily' | 'weekly' | 'monthly'>('all');
+  const [filter, setFilter] = useState<'all' | 'daily' | 'weekly' | 'monthly' | 'todo'>('all');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
@@ -132,7 +132,7 @@ const CommitmentsView = () => {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex flex-wrap gap-2">
-          {(['all', 'daily', 'weekly', 'monthly'] as const).map((f) => (
+          {(['all', 'daily', 'weekly', 'monthly', 'todo'] as const).map((f) => (
             <Button
               key={f}
               onClick={() => setFilter(f)}
