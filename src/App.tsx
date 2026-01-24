@@ -19,6 +19,7 @@ const APP_VERSION = (pkg as unknown as { version: string }).version;
 import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OfflineIndicator } from './components/shared/OfflineIndicator';
+import { useVersionCheck } from './hooks/useVersionCheck';
 
 // Environment Banner - Shows in non-production environments
 const EnvironmentBanner = () => {
@@ -129,6 +130,9 @@ const shouldDehydrateQuery = (query: { queryKey: readonly unknown[] }) => {
 import { FabricSuggestionManager } from './features/fabric/FabricSuggestionManager';
 
 export default function App() {
+  // Auto-refresh when new version is deployed (production only)
+  useVersionCheck();
+
   return (
     <ErrorBoundary>
       <EnvironmentBanner />
