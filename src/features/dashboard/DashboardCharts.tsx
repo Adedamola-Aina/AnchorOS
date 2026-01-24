@@ -45,8 +45,8 @@ const DashboardCharts = ({ accounts, transactions, tasks, navigateTo }: Dashboar
             const diffDays = Math.floor((new Date().getTime() - txDate.getTime()) / (1000 * 3600 * 24));
             if (diffDays < 7) {
                 const index = 6 - diffDays;
-                if (tx.type === 'income') last7Days[index].income += fromCents(tx.amountCents);
-                else if (tx.type === 'expense') last7Days[index].expense += fromCents(tx.amountCents);
+                if (tx.type === 'income') last7Days[index].income += fromCents(tx.amountCents || 0);
+                else if (tx.type === 'expense') last7Days[index].expense += fromCents(tx.amountCents || 0);
             }
         });
         return last7Days;

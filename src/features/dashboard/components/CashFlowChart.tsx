@@ -25,7 +25,7 @@ export function CashFlowChart({ financialTrend, cashFlowTotals, transactions, fu
     transactions.forEach(tx => {
         if (tx.type === 'transfer') return;
         const d = new Date(tx.date);
-        const amount = fromCents(tx.amountCents);
+        const amount = fromCents(tx.amountCents || 0);
         const val = tx.type === 'income' ? amount : -amount;
         if (d >= oneWeekAgo) currentNet += val;
         else if (d >= twoWeeksAgo) prevNet += val;

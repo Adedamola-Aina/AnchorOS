@@ -156,7 +156,7 @@ const DashboardView = () => {
                     <p className="text-[10px] text-slate-400">{new Date(tx.date).toLocaleDateString()}</p>
                   </div>
                   <span className={`font-mono font-bold text-sm ${tx.type === 'income' ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-300'}`}>
-                    {tx.type === 'income' ? '+' : ''}{formatCurrency(fromCents(tx.amountCents), tx.currency)}
+                    {tx.type === 'income' ? '+' : ''}{formatCurrency(fromCents(tx.amountCents || 0), tx.currency)}
                   </span>
                 </div>
               ))}
