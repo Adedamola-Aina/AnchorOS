@@ -119,7 +119,7 @@ export const TransactionListVirtual = ({
             )}
 
             {/* Virtualized Transaction List */}
-            <div ref={parentRef} className="max-h-[500px] overflow-y-auto p-3">
+            <div ref={parentRef} className="md:max-h-[500px] overflow-y-auto p-3">
                 <div
                     style={{
                         height: `${rowVirtualizer.getTotalSize()}px`,
