@@ -9,10 +9,12 @@
  */
 
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Landmark, Search, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
+import { useResponsive } from '../../hooks/useResponsive';
 import { SectionHeader } from '../../components/shared';
 import { Modal } from '../../components/shared/Modal';
 import { AccountForm } from './AccountForm';
@@ -35,6 +37,7 @@ const FinanceView = () => {
   } = useFinance();
   const { user } = useAuth();
   const { isOwner: isFamilyOwner, familyMemberUid, familyMemberName, shareAccount: toggleShareAccount } = useFamilySharing(user?.uid);
+  const { isMobile } = useResponsive();
 
   // UI State
   const [mode, setMode] = useState<'view' | 'addTx' | 'addAcc' | 'editTx'>('view');
@@ -46,6 +49,7 @@ const FinanceView = () => {
   const [transactionToDelete, setTransactionToDelete] = useState<AnchorTransaction | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [prefillData, setPrefillData] = useState<{ amount?: number; category?: string; title?: string } | undefined>(undefined);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const activeAccounts = useMemo(() => accounts.filter(a => !a.isArchived), [accounts]);
@@ -68,6 +72,25 @@ const FinanceView = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Check for Fabric Magic Params
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'new') {
+      const amountStr = searchParams.get('amount');
+      const amount = amountStr ? parseFloat(amountStr) : undefined;
+      const category = searchParams.get('category') || undefined;
+      const description = searchParams.get('description') || undefined;
+
+      if (amount || category || description) {
+        setPrefillData({ amount, category, title: description });
+        setMode('addTx');
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, setSearchParams]);
+
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
@@ -83,7 +106,7 @@ const FinanceView = () => {
     );
   }, [transactions, debouncedSearch]);
 
-  const handleCloseForm = () => { setMode('view'); setEditingTransaction(undefined); };
+  const handleCloseForm = () => { setMode('view'); setEditingTransaction(undefined); setPrefillData(undefined); };
   const handleEdit = (tx: AnchorTransaction) => { setEditingTransaction(tx); setMode('editTx'); };
 
   // Account Details View (with in-context modals for Transfer/Pay Bill)
@@ -162,7 +185,7 @@ const FinanceView = () => {
   const isSearching = debouncedSearch.length > 0;
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8 relative">
+    <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 relative ${isMobile ? 'space-y-5' : 'space-y-8'}`}>
       <SectionHeader
         title="Finance"
         subtitle="Multi-account asset management and cashflow tracking."
@@ -180,7 +203,7 @@ const FinanceView = () => {
           <NetWorthCards netWorth={netWorth} />
           <MonthlyInsight transactions={transactions} currency={activeAccounts[0]?.currency || 'NGN'} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-6'}`}>
             {activeAccounts.map((acc) => (
               <AccountCard
                 key={acc.id}
@@ -204,7 +227,7 @@ const FinanceView = () => {
       )}
 
       {!showModal && (mode === 'addTx' || mode === 'editTx') && !isSearching && (
-        <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} />
+        <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />
       )}
 
       {accounts.length > 0 && (
@@ -239,7 +262,7 @@ const FinanceView = () => {
 
       <Modal isOpen={showModal && mode !== 'view'} onClose={handleCloseForm} title={mode === 'addAcc' ? 'Create Account' : mode === 'editTx' ? 'Edit Transaction' : 'New Transaction'} maxWidth="max-w-2xl">
         {mode === 'addAcc' && <AccountForm onClose={handleCloseForm} />}
-        {(mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} />}
+        {(mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
       </Modal>
 
       <ConfirmationModal isOpen={!!transactionToDelete} onClose={() => setTransactionToDelete(null)} onConfirm={() => { if (transactionToDelete) { deleteTransaction(transactionToDelete.id, transactionToDelete.accountId); setTransactionToDelete(null); } }} title="Delete Transaction" message={`Are you sure you want to delete "${transactionToDelete?.title}"? This action cannot be undone.`} confirmLabel="Delete Transaction" isDestructive />

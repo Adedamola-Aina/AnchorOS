@@ -28,7 +28,7 @@ export interface FabricSuggestion {
 
 interface UseFabricSuggestionsResult {
     suggestions: FabricSuggestion[];
-    onCommitmentCompleted: (task: AnchorTask, navigateTo: (tab: TabView) => void) => void;
+    onCommitmentCompleted: (task: AnchorTask, navigateTo: (tab: TabView, params?: Record<string, string | number | undefined>) => void) => void;
     dismissSuggestion: (id: string) => void;
     clearAllSuggestions: () => void;
 }
@@ -110,7 +110,7 @@ export function useFabricSuggestions(): UseFabricSuggestionsResult {
 
     const onCommitmentCompleted = useCallback((
         task: AnchorTask,
-        navigateTo: (tab: TabView) => void
+        navigateTo: (tab: TabView, params?: Record<string, string | number | undefined>) => void
     ) => {
         // Only suggest for financially relevant tasks
         if (!isFinanciallyRelevant(task.title)) {
@@ -134,9 +134,13 @@ export function useFabricSuggestions(): UseFabricSuggestionsResult {
             title: 'Record Transaction?',
             message: `You completed "${task.title}". Want to record this in Finance?`,
             action: () => {
-                // Navigate to finance page
-                // TODO: Future enhancement - pass prefill data via URL params or global state
-                navigateTo('finance');
+                // Navigate to finance page with prefill data
+                navigateTo('finance', {
+                    amount: amount || undefined,
+                    category,
+                    description: task.title,
+                    action: 'new' // Trigger modal open
+                });
                 dismissSuggestion(suggestionId);
             },
             dismiss: () => dismissSuggestion(suggestionId),

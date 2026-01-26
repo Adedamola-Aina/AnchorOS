@@ -5,7 +5,7 @@ type TabType = 'dashboard' | 'finance' | 'commitments' | 'settings';
 
 interface AppContextType {
   activeTab: TabType;
-  navigateTo: (tab: TabType) => void;
+  navigateTo: (tab: TabType, params?: Record<string, string | number | undefined>) => void;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -17,7 +17,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return (saved as TabType) || 'dashboard';
   });
 
-  const navigateTo = (tab: TabType) => {
+  const navigateTo = (tab: TabType, params?: Record<string, string | number | undefined>) => {
     setActiveTab(tab);
     localStorage.setItem('anchor_active_tab', tab);
     // Map internal tab names to routes
@@ -27,7 +27,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'commitments': '/commitments',
       'settings': '/settings'
     };
-    navigate(routeMap[tab]);
+
+    let path = routeMap[tab];
+
+    // Append query params if present
+    if (params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, String(value));
+        }
+      });
+      const queryString = searchParams.toString();
+      if (queryString) {
+        path += `?${queryString}`;
+      }
+    }
+
+    navigate(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

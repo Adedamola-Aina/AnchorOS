@@ -36,13 +36,22 @@ interface TransactionFormProps {
     defaultAccountId?: string;
     defaultType?: TransactionType;
     initialData?: AnchorTransaction;
+    prefillData?: {
+        amount?: number; // Cents? No, usually raw text logic needs strings, but hook passed number. Let's check hook.
+        // Hook passes `amount: number | undefined` (parsed via parseAmountFromText).
+        // Form expects string in `useState` for amount input.
+        // Let's take number and convert.
+        title?: string;
+        category?: string;
+    };
 }
 
 export const TransactionForm: React.FC<TransactionFormProps> = ({
     onClose,
     defaultAccountId,
     defaultType = 'expense',
-    initialData
+    initialData,
+    prefillData
 }) => {
     const { transactions, accounts, addTransaction, updateTransaction } = useFinance();
     const { showToast } = useNotifications();
@@ -51,16 +60,18 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     // Initial state setup
     const initialAmount = initialData
         ? fromCents(initialData.amountCents || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : '';
+        : prefillData?.amount
+            ? prefillData.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : '';
     const initialDate = initialData?.date
         ? new Date(initialData.date).toISOString().split('T')[0]
         : new Date().toISOString().split('T')[0];
 
     // Form State
-    const [title, setTitle] = useState(initialData?.title || '');
+    const [title, setTitle] = useState(initialData?.title || prefillData?.title || '');
     const [amount, setAmount] = useState(initialAmount);
     const [type, setType] = useState<TransactionType>(initialData?.type || defaultType);
-    const [category, setCategory] = useState(initialData?.category || 'General');
+    const [category, setCategory] = useState(initialData?.category || prefillData?.category || 'General');
     const [selectedAccId, setSelectedAccId] = useState(initialData?.accountId || defaultAccountId || '');
     const [destinationAccId, setDestinationAccId] = useState(initialData?.destinationAccountId || '');
     const [transactionDate, setTransactionDate] = useState(initialDate);
