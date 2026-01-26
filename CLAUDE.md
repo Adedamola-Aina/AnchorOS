@@ -8,6 +8,17 @@ The philosophy is simple: **We build software that works like magic because we e
 
 ---
 
+## 🛠 Project Tracking (Single Source of Truth)
+
+- **Project Board (Status/Tasks)**: [PROJECT_BOARD.md](file:///root/anchor-os/PROJECT_BOARD.md) - *The Living Source of Truth*
+- **Architecture (System Design)**: [ARCHITECTURE.md](file:///root/anchor-os/ARCHITECTURE.md) - *Structural Reference*
+- **Changelog (History)**: [CHANGELOG.md](file:///root/anchor-os/CHANGELOG.md) - *Release Records*
+- **UX Standards**: [adaptive_layout_patterns.md](file:///root/.gemini/antigravity/knowledge/anchor_os_ux_ui/artifacts/adaptive_layout_patterns.md)
+
+Always consult these documents before starting new work.
+
+---
+
 # PART I: THE ENGINEERING MINDSET
 
 ## Article 1: The Distinguished Engineer Standard

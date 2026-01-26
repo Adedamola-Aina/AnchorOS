@@ -2,169 +2,106 @@
 description: Deployment workflow - MUST follow dev → staging → production pipeline
 ---
 
-# 🚨 CRITICAL: Deployment Protocol
+# Deployment Workflow
 
-**NEVER deploy untested changes directly to production.**
+## Pre-Deployment Checklist
 
-## Environment Hierarchy
-
-```
-DEV (development) → STAGING → PRODUCTION
-     ↓                ↓           ↓
-   Testing         Verification   Live Users
-   Experiments     Final QA       Stable Only
-```
-
-## 🔧 Automated Deployment Commands
-
-**CRITICAL: Indexes must be deployed FIRST to prevent runtime "index required" errors.**
-
-### Deploy to DEV
-// turbo
-```bash
-firebase use anchor-os-dev-1c6ec
-firebase deploy --only firestore:indexes   # INDEXES FIRST
-npm run build:dev
-firebase deploy --only hosting,firestore:rules
-node scripts/seed-dev-data.cjs dev
-```
-
-### Deploy to STAGING  
-// turbo
-```bash
-firebase use anchor-os-staging
-firebase deploy --only firestore:indexes   # INDEXES FIRST
-npm run build:staging
-firebase deploy --only hosting,firestore:rules
-node scripts/seed-dev-data.cjs staging
-```
-
-### Deploy to PRODUCTION (requires staging verification first)
-```bash
-firebase use anchor-os
-firebase deploy --only firestore:indexes   # INDEXES FIRST
-npm run build:production
-firebase deploy --only hosting,firestore:rules
-```
-
-## Rules (MUST BE FOLLOWED)
-
-### 1. Production is READ-ONLY for Development
-- ❌ NO fixes deployed directly to production
-- ❌ NO testing in production
-- ❌ NO experimental features in production
-- ✅ Production only receives verified, tested code
-
-### 2. Development Flow
-All changes MUST follow this order:
-
-1. **Develop locally**
-   ```bash
-   npm run dev -- --host 0.0.0.0  # Local development server
-   ```
-
-2. **Test locally**
-   - Run unit tests: `npm run test`
-   - Run E2E tests: `npm run test:e2e`
-   - Manual verification at http://localhost:5173
-
-3. **Deploy to DEV** (uses `build:dev` mode)
-   // turbo
-   ```bash
-   firebase use anchor-os-dev-1c6ec
-   npm run build:dev
-   firebase deploy --only hosting,firestore:rules
-   node scripts/seed-users.cjs dev
-   ```
-
-4. **Deploy to STAGING** (uses `build:staging` mode)
-   // turbo
-   ```bash
-   firebase use anchor-os-staging
-   npm run build:staging
-   firebase deploy --only hosting,firestore:rules
-   node scripts/seed-users.cjs staging
-   ```
-
-5. **Verify in STAGING**
-   - URL: https://anchor-os-staging.web.app
-   - Test with: `owner@anchor.local` / `password123`
-   - Manual smoke testing required
-
-6. **Deploy to PRODUCTION** (uses `build:production` mode)
-   ```bash
-   firebase use anchor-os
-   npm run build:production
-   firebase deploy --only hosting,firestore:rules
-   ```
-
-### 3. Emergency Hotfixes
-Even emergency fixes MUST go through staging first:
-1. Create fix locally
-2. Quick test locally
-3. Deploy to staging (automated)
-4. Verify fix works
-5. Only then deploy to production
-
-### 4. Pre-Production Checklist
-Before ANY production deployment:
-- [ ] All unit tests pass locally
-- [ ] Build completes without errors
-- [ ] Changes deployed and tested in staging
-- [ ] E2E smoke tests pass on staging
-- [ ] No debug/diagnostic code included
-- [ ] No console.log statements (except errors)
-- [ ] No hardcoded test data or IDs
-
-## Environment Configuration
-
-### Firebase Project IDs
-| Environment | Project ID | URL | Build Command |
-|-------------|------------|-----|---------------|
-| Production | `anchor-os` | https://anchor-os.web.app | `npm run build:production` |
-| Staging | `anchor-os-staging` | https://anchor-os-staging.web.app | `npm run build:staging` |
-| Development | `anchor-os-dev-1c6ec` | https://anchor-os-dev-1c6ec.web.app | `npm run build:dev` |
-| Local | N/A | http://localhost:5173 | `npm run dev` |
-
-### Test Credentials (DEV & STAGING only)
-| Email | Password | Role |
-|-------|----------|------|
-| `owner@anchor.local` | `password123` | Family Owner |
-| `member@anchor.local` | `password123` | Family Member |
-
-### Environment Variables
-Each environment uses its own `.env` file:
-- `.env.development` → Dev Firebase project
-- `.env.staging` → Staging Firebase project  
-- `.env.production` → Production Firebase project
-
-**CRITICAL:** Always use the correct build command for each environment:
-- `npm run build:dev` for dev
-- `npm run build:staging` for staging
-- `npm run build:production` for production
-
-Using the wrong build command will connect to the WRONG Firebase project!
-
-## Switching Environments
-```bash
-# Check current project
-firebase use
-
-# Switch to environment
-firebase use anchor-os           # Production
-firebase use anchor-os-staging   # Staging
-firebase use anchor-os-dev-1c6ec # Development
-```
-
-## Post-Deployment Verification
-
-After deploying to any environment, verify:
-1. ✅ Login works with test credentials
-2. ✅ All core features are functional (Dashboard, Finance, Commitments, Settings)
-3. ✅ URL shows correct path (logout should redirect to `/`)
-4. ✅ Console shows correct Firebase project connection
+Before deploying, ensure:
+1. All tests pass: `npm test`
+2. Build succeeds: `npm run build`
+3. CHANGELOG.md has `[Unreleased]` section with all changes
+4. KNOWN_ISSUES.md is up to date
 
 ---
 
-**Remember: Production is for USERS, not for TESTING.**
-**Dev and Staging should always mirror production features and behaviors.**
+## Deploy to Staging
+
+### 1. Bump Version
+```bash
+# Check current version
+cat package.json | grep '"version"'
+
+# Bump to appropriate version
+npm version minor --no-git-tag-version  # for features
+npm version patch --no-git-tag-version  # for bug fixes only
+```
+
+### 2. Update CHANGELOG.md
+Move `[Unreleased]` to versioned section:
+```markdown
+## [1.5.0] - 2026-01-26
+### Added
+- Mobile Optimization Phase 2
+...
+```
+
+### 3. Deploy
+// turbo
+```bash
+npm run deploy:staging
+```
+
+### 4. Update DEPLOYMENT_STATUS.md
+After successful deploy:
+- Update Staging version in "CURRENT STATE" table
+- Move items from "PENDING CHANGES (Dev → Staging)" to "PENDING CHANGES (Staging → Production)"
+- Add entry to "DEPLOYMENT HISTORY"
+
+### 5. Verify
+```bash
+# Open staging URL
+open https://anchor-os-staging.web.app
+```
+
+---
+
+## Deploy to Production
+
+### 1. Verify Staging
+Confirm all features work on staging before deploying.
+
+### 2. Deploy
+// turbo
+```bash
+npm run deploy:production
+```
+
+### 3. Update DEPLOYMENT_STATUS.md
+After successful deploy:
+- Update Production version in "CURRENT STATE" table
+- Clear "PENDING CHANGES (Staging → Production)" section
+- Add entry to "DEPLOYMENT HISTORY"
+
+### 4. Verify
+```bash
+open https://anchor-os.web.app
+```
+
+### 5. Tag Release
+```bash
+git add -A && git commit -m "release: v1.5.0"
+git tag v1.5.0
+git push origin v1.5.0
+```
+
+---
+
+## Dashboard Auto-Update
+
+The PM Dashboard reads from:
+- `docs/DEPLOYMENT_STATUS.md` for environment parity
+- `docs/ROADMAP.md` for kanban and progress
+- `docs/KNOWN_ISSUES.md` for bugs
+
+All updates are reflected automatically on refresh.
+
+---
+
+## Files Updated During Deploy
+
+| File | When Updated | Purpose |
+|------|--------------|---------|
+| `package.json` | Before deploy | Version bump |
+| `CHANGELOG.md` | Before deploy | Release notes |
+| `docs/DEPLOYMENT_STATUS.md` | After deploy | Parity tracking |
+| `docs/KNOWN_ISSUES.md` | After deploy | Mark bugs as deployed |
