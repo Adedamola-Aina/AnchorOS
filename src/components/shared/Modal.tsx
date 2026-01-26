@@ -8,9 +8,18 @@ interface ModalProps {
     title?: string;
     children: React.ReactNode;
     maxWidth?: string;
+    /** If true, modal takes full screen on mobile devices (default: true) */
+    fullScreenMobile?: boolean;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) => {
+export const Modal: React.FC<ModalProps> = ({
+    isOpen,
+    onClose,
+    title,
+    children,
+    maxWidth = 'max-w-lg',
+    fullScreenMobile = true
+}) => {
     const modalRef = useRef<HTMLDivElement>(null);
     const previousActiveElement = useRef<HTMLElement | null>(null);
     // Use React.useId for stable SSR-compatible unique IDs
@@ -73,7 +82,8 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
     return createPortal(
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 ${fullScreenMobile ? 'p-0 sm:p-6' : 'p-4 sm:p-6'
+                }`}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? modalId : undefined}
@@ -85,25 +95,30 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
                 aria-hidden="true"
             />
 
-            {/* Content */}
+            {/* Content - Full screen on mobile, centered modal on desktop */}
             <div
                 ref={modalRef}
-                className={`relative z-10 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${maxWidth} flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden`}
+                className={`relative z-10 bg-white dark:bg-slate-800 shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden ${fullScreenMobile
+                        ? `w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:${maxWidth} sm:rounded-2xl`
+                        : `w-full ${maxWidth} max-h-[90vh] rounded-2xl`
+                    }`}
             >
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
+                {/* Header - with safe area padding on mobile */}
+                <div className={`px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 shrink-0 ${fullScreenMobile ? 'pt-safe' : ''
+                    }`}>
                     <h3 id={modalId} className="text-lg font-bold text-slate-800 dark:text-white">{title}</h3>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
+                        className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
                         aria-label="Close modal"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                {/* Scrollable Body */}
-                <div className="p-6 overflow-y-auto">
+                {/* Scrollable Body - with safe area padding on mobile */}
+                <div className={`p-6 overflow-y-auto flex-1 ${fullScreenMobile ? 'pb-safe' : ''
+                    }`}>
                     {children}
                 </div>
             </div>

@@ -15,10 +15,10 @@ const buttonVariants = cva(
                 success: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100 dark:shadow-none',
             },
             size: {
-                sm: 'h-9 px-3 rounded-lg',
+                sm: 'h-11 md:h-9 px-3 rounded-lg',  // 44px on mobile, 36px on desktop
                 md: 'h-11 px-6',
                 lg: 'h-14 px-8 text-base',
-                icon: 'h-10 w-10',
+                icon: 'h-11 w-11 md:h-10 md:w-10',  // 44px on mobile, 40px on desktop
             },
         },
         defaultVariants: {
