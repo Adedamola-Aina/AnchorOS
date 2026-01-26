@@ -10,6 +10,8 @@ interface NotificationSettingsProps {
     userEmail: string;
     emailVerified: boolean;
     onUpdatePreferences: (prefs: any) => void;
+    pushPermissionStatus: NotificationPermission;
+    requestPushPermission: () => void;
 }
 
 export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
@@ -19,6 +21,8 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     userEmail,
     emailVerified,
     onUpdatePreferences,
+    pushPermissionStatus,
+    requestPushPermission,
 }) => {
     return (
         <Card className="overflow-hidden">
@@ -31,6 +35,41 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-8 space-y-6">
+                {/* Push Notifications Section */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Push Notifications</p>
+                        <div className="flex items-center gap-2 mt-1">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Real-time alerts for transactions and commitments.
+                            </p>
+                            {pushPermissionStatus === 'granted' && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">ON</span>
+                            )}
+                            {pushPermissionStatus === 'denied' && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">BLOCKED</span>
+                            )}
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => {
+                            if (pushPermissionStatus !== 'granted') {
+                                requestPushPermission();
+                            } else {
+                                // In a real app, this would delete the token from the backend
+                                // For now we just allow re-requesting/syncing
+                                requestPushPermission();
+                            }
+                        }}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${pushPermissionStatus === 'granted' ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                        disabled={pushPermissionStatus === 'denied'}
+                    >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${pushPermissionStatus === 'granted' ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                </div>
+
+                <div className="h-px bg-slate-100 dark:bg-slate-800" />
+
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Email Notifications</p>

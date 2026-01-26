@@ -35,7 +35,7 @@ const SettingsView = () => {
   } = useAuth();
   const { navigateTo } = useApp();
   const { connection: familyConnection, disconnectFamily } = useFamilySharing(user?.uid);
-  const { showToast } = useNotifications();
+  const { showToast, pushPermissionStatus, requestPushPermission } = useNotifications();
 
   const [isResending, setIsResending] = useState(false);
   const [show2FASetup, setShow2FASetup] = useState(false);
@@ -245,6 +245,8 @@ const SettingsView = () => {
         onUpdatePreferences={(prefs) => updateProfile({
           notificationPreferences: { ...(profile.notificationPreferences || {}), ...prefs }
         })}
+        pushPermissionStatus={pushPermissionStatus}
+        requestPushPermission={() => requestPushPermission()}
       />
 
       <FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} />

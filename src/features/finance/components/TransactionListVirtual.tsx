@@ -6,7 +6,8 @@
 
 import { useRef } from 'react';
 import { Search, Pencil, Trash2 } from 'lucide-react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
+import { useResponsive } from '../../../hooks/useResponsive';
 import type { AnchorTransaction, AnchorAccount, Currency } from '../../../types';
 import { formatCurrency } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
@@ -40,14 +41,24 @@ export const TransactionListVirtual = ({
     onDelete,
 }: TransactionListVirtualProps) => {
     const parentRef = useRef<HTMLDivElement>(null);
+    const { isMobile } = useResponsive();
     const isOwner = !account.ownerId || account.ownerId === currentUserId;
 
-    const rowVirtualizer = useVirtualizer({
+    const parentVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
         estimateSize: () => 100, // Card-based height
         overscan: 5,
     });
+
+    const windowVirtualizer = useWindowVirtualizer({
+        count: transactions.length,
+        estimateSize: () => 100,
+        overscan: 5,
+        scrollMargin: parentRef.current?.offsetTop ?? 0,
+    });
+
+    const rowVirtualizer = isMobile ? windowVirtualizer : parentVirtualizer;
 
     return (
         <div className="glass-card overflow-hidden">
@@ -119,7 +130,7 @@ export const TransactionListVirtual = ({
             )}
 
             {/* Virtualized Transaction List */}
-            <div ref={parentRef} className="md:max-h-[500px] overflow-y-auto p-3">
+            <div ref={parentRef} className={isMobile ? 'p-3' : 'md:max-h-[500px] overflow-y-auto p-3'}>
                 <div
                     style={{
                         height: `${rowVirtualizer.getTotalSize()}px`,
@@ -157,7 +168,7 @@ export const TransactionListVirtual = ({
                                 data-index={virtualItem.index}
                                 ref={rowVirtualizer.measureElement}
                                 className="absolute top-0 left-0 w-full pb-3"
-                                style={{ transform: `translateY(${virtualItem.start}px)` }}
+                                style={{ transform: `translateY(${virtualItem.start - (isMobile ? rowVirtualizer.options.scrollMargin : 0)}px)` }}
                             >
                                 <Card className="group p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

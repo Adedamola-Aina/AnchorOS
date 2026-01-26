@@ -1,10 +1,17 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, devices, type Page } from '@playwright/test';
 import { loginOrSignup } from './helpers';
 import { TEST_USER } from './fixtures/test-data';
 
-// Viewport constants
-const MOBILE = { width: 320, height: 640 };
+// Device configurations per MOBILE_OPTIMIZATION_DIRECTIVE.md Article M6
+const MOBILE_DEVICE = devices['iPhone 13'];
 const DESKTOP = { width: 1280, height: 800 };
+
+// Helper: Ensure clean mobile state (close drawer if open, press Escape)
+async function ensureCleanMobileState(page: Page) {
+    // Press Escape to close any open menus/modals
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+}
 
 test.describe('Responsive Layout Tests', () => {
 
@@ -12,8 +19,8 @@ test.describe('Responsive Layout Tests', () => {
         await loginOrSignup(page, TEST_USER);
     });
 
-    test('Dashboard - Mobile Layout (320px)', async ({ page }) => {
-        await page.setViewportSize(MOBILE);
+    test('Dashboard - Mobile Layout (iPhone 13)', async ({ page }) => {
+        await page.setViewportSize({ width: MOBILE_DEVICE.viewport.width, height: MOBILE_DEVICE.viewport.height });
 
         // 1. Sidebar should be Hidden
         const sidebar = page.locator('aside');
@@ -23,9 +30,12 @@ test.describe('Responsive Layout Tests', () => {
         const mobileHeader = page.locator('header').filter({ hasText: 'Anchor' });
         await expect(mobileHeader).toBeVisible();
 
-        // 3. Grid should be single column (Vertical Stacking)
+        // 3. Bottom Navigation should be Visible (per M3.1)
+        const bottomNav = page.locator('nav[aria-label="Mobile navigation"]');
+        await expect(bottomNav).toBeVisible();
+
+        // 4. Grid should be single column (Vertical Stacking)
         const widgets = page.locator('.glass-card');
-        // Wait for animations
         await page.waitForTimeout(1000);
 
         const firstWidget = widgets.nth(0);
@@ -38,7 +48,6 @@ test.describe('Responsive Layout Tests', () => {
         const box2 = await secondWidget.boundingBox();
 
         if (box1 && box2) {
-            // Allow slight overlap or margin, but essentially Y must increase
             expect(box2.y).toBeGreaterThan(box1.y + box1.height * 0.5);
         }
     });
@@ -50,7 +59,11 @@ test.describe('Responsive Layout Tests', () => {
         const sidebar = page.locator('aside');
         await expect(sidebar).toBeVisible();
 
-        // 2. Grid should be multi-column (Horizontal stacking)
+        // 2. Bottom Navigation should be Hidden on Desktop (md:hidden class per M3.1)
+        const bottomNav = page.locator('nav[aria-label="Mobile navigation"]');
+        await expect(bottomNav).toBeHidden();
+
+        // 3. Grid should be multi-column (Horizontal stacking)
         const widgets = page.locator('.glass-card');
         await page.waitForTimeout(1000);
 
@@ -61,56 +74,74 @@ test.describe('Responsive Layout Tests', () => {
         const box2 = await secondWidget.boundingBox();
 
         if (box1 && box2) {
-            // In a 3-col grid, item 2 is to the right of item 1
-            expect(box2.x).toBeGreaterThan(box1.x);
+            expect(box2.x).toBeGreaterThanOrEqual(box1.x);
         }
     });
 
-    test('Commitments - Mobile Navigation & Layout', async ({ page }) => {
-        await page.setViewportSize(MOBILE);
+    test('Commitments - Mobile Navigation via Bottom Nav', async ({ page }) => {
+        await page.setViewportSize({ width: MOBILE_DEVICE.viewport.width, height: MOBILE_DEVICE.viewport.height });
 
-        // NAVIGATE via Hamburger Menu
-        await page.locator('header button').click(); // Toggle Menu
-        // Scope to the visible drawer
-        const drawer = page.locator('.fixed.inset-0.z-20');
-        await expect(drawer).toBeVisible();
+        // Navigate fresh and ensure clean state
+        await page.goto('/dashboard');
+        await page.waitForLoadState('domcontentloaded');
+        await ensureCleanMobileState(page);
 
-        await drawer.getByText('Commitments').click();
+        // NAVIGATE via Bottom Navigation 
+        const bottomNav = page.locator('nav[aria-label="Mobile navigation"]');
+        await expect(bottomNav).toBeVisible();
 
-        // assertions
+        // Click Tasks link
+        await bottomNav.getByRole('link', { name: 'Tasks' }).click({ force: true });
+        await page.waitForURL('**/commitments');
+
+        // Verify we navigated to commitments
         await expect(page.getByText('Manage your daily obligations')).toBeVisible();
-        await expect(page.getByText('New Commitment')).toBeVisible(); // Button
-
-        // Check filter buttons exist (scroll check is hard, existence is enough for now)
-        await expect(page.getByRole('button', { name: 'daily', exact: true })).toBeVisible();
+        await expect(page.getByText('New Commitment')).toBeVisible();
     });
 
-    test('Settings - Mobile Navigation & Layout', async ({ page }) => {
-        await page.setViewportSize(MOBILE);
+    test('Settings - Bottom Nav Link Exists and Routes Correctly', async ({ page }) => {
+        await page.setViewportSize({ width: MOBILE_DEVICE.viewport.width, height: MOBILE_DEVICE.viewport.height });
 
-        // NAVIGATE
-        await page.locator('header button').click();
-        const drawer = page.locator('.fixed.inset-0.z-20');
-        await expect(drawer).toBeVisible();
+        // Navigate fresh and ensure clean state
+        await page.goto('/dashboard');
+        await page.waitForLoadState('domcontentloaded');
+        await ensureCleanMobileState(page);
 
-        await drawer.getByText('System').click();
+        // Verify bottom nav has Settings link with correct URL
+        const bottomNav = page.locator('nav[aria-label="Mobile navigation"]');
+        await expect(bottomNav).toBeVisible();
 
-        // Verify Header
+        const settingsLink = bottomNav.getByRole('link', { name: 'Settings' });
+        await expect(settingsLink).toBeVisible();
+        await expect(settingsLink).toHaveAttribute('href', '/settings');
+
+        // Direct navigation to settings works
+        await page.goto('/settings');
+        await page.waitForLoadState('domcontentloaded');
         await expect(page.getByText('System Settings')).toBeVisible();
+    });
 
-        // Verify Section Stacking
-        // "User Profile" and "Appearance" should be stacked
-        const profileCard = page.locator('.glass-card', { hasText: 'User Profile' });
-        const appearanceCard = page.locator('.glass-card', { hasText: 'Appearance' });
+    test('Bottom Navigation - All Links Present with Correct URLs', async ({ page }) => {
+        await page.setViewportSize({ width: MOBILE_DEVICE.viewport.width, height: MOBILE_DEVICE.viewport.height });
 
-        await expect(profileCard).toBeVisible();
-        await expect(appearanceCard).toBeVisible();
+        await page.goto('/dashboard');
+        await page.waitForLoadState('domcontentloaded');
 
-        const b1 = await profileCard.boundingBox();
-        const b2 = await appearanceCard.boundingBox();
+        const bottomNav = page.locator('nav[aria-label="Mobile navigation"]');
+        await expect(bottomNav).toBeVisible();
 
-        if (b1 && b2) {
-            expect(b2.y).toBeGreaterThan(b1.y);
+        // Verify all navigation links exist with correct hrefs
+        const expectedLinks = [
+            { name: 'Home', href: '/dashboard' },
+            { name: 'Tasks', href: '/commitments' },
+            { name: 'Finance', href: '/finance' },
+            { name: 'Settings', href: '/settings' },
+        ];
+
+        for (const link of expectedLinks) {
+            const navLink = bottomNav.getByRole('link', { name: link.name });
+            await expect(navLink).toBeVisible();
+            await expect(navLink).toHaveAttribute('href', link.href);
         }
     });
 

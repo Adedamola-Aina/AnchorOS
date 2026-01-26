@@ -64,10 +64,19 @@ export const db = initializeFirestore(app, {
   localCache: memoryLocalCache()
 });
 
+import { getMessaging } from "firebase/messaging";
 import { getFunctions } from "firebase/functions";
 
 // APP_ID is always 'anchor-os' for consistent Firestore data paths
 // The actual Firebase project is determined by projectId
 export const APP_ID = 'anchor-os';
 export const functions = getFunctions(app, 'us-central1'); // Region must match function deployment
+// Initialize Messaging safely (failed in tests/node env)
+let messagingInstance;
+try {
+  messagingInstance = getMessaging(app);
+} catch (e) {
+  console.warn('[Firebase] Messaging not initialized (environment may not support it)');
+}
+export const messaging = messagingInstance;
 console.log(`[Firebase] Connected to ${projectId}`);

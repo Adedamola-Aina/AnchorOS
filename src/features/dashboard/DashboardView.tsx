@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AnchorContext';
 import { useAuth } from '../../context/AuthContext';
+import { useResponsive } from '../../hooks/useResponsive';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
 import { SectionHeader } from '../../components/shared';
@@ -34,6 +35,7 @@ const DashboardView = () => {
   const { profile } = useAuth();
   const { tasks } = useTasks();
   const { accounts, recentActivity, cashFlow } = useFinance();
+  const { isMobile } = useResponsive();
 
   // Productivity Insights
   const productivity = getProductivityMetrics(tasks);
@@ -50,20 +52,20 @@ const DashboardView = () => {
   const primaryCurrency: Currency = accounts.length > 0 ? (accounts[0].currency as Currency) : 'NGN';
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500 pb-20">
+    <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 pb-20 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
       <SectionHeader
         title={`${getTimeGreeting()}, ${profile.name}`}
         subtitle="Life at a glance."
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className={`grid grid-cols-1 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-5'}`}>
 
         {/* Column 1: Wealth (Portfolio & Allocation) */}
         <div className="space-y-5">
           {/* Portfolio Snapshot */}
           <div
             onClick={() => navigateTo('finance')}
-            className="glass-card p-5 overflow-hidden relative group cursor-pointer hover:shadow-xl transition-all active:scale-[0.99]"
+            className={`glass-card overflow-hidden relative group cursor-pointer hover:shadow-xl transition-all active:scale-[0.99] ${isMobile ? 'p-4' : 'p-5'}`}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
 

@@ -13,6 +13,9 @@ export interface ConfirmOptions {
 export interface NotificationContextType {
     showToast: (message: string, type?: NotificationType) => void;
     confirm: (options: ConfirmOptions) => Promise<boolean>;
+    requestPushPermission: () => Promise<string | null>;
+    fcmToken: string | null;
+    pushPermissionStatus: NotificationPermission;
 }
 
 export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);

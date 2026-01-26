@@ -1,0 +1,61 @@
+{
+  "projectName": "Anchor OS",
+  "projectType": "fullstack-web-app",
+  "aiContextSources": {
+    "required": [
+      "docs/PROJECT_STATUS.md",
+      "docs/ROADMAP.md",
+      "docs/KNOWN_ISSUES.md",
+      "docs/DEPLOYMENT_STATUS.md",
+      "CLAUDE.md",
+      "CLAUDE_INSTRUCTIONS_ADDON.md"
+    ],
+    "optional": [
+      "docs/USER_FEEDBACK.md",
+      "docs/DEPENDENCIES.md",
+      "docs/DECISION_LOG.md",
+      "docs/TECHNICAL_DEBT.md"
+    ],
+    "architecture": [
+      "docs/architecture/OVERVIEW.md",
+      "docs/architecture/SECURITY.md",
+      "docs/architecture/DATABASE.md"
+    ]
+  },
+  "aiWorkflowRules": {
+    "beforeCodeChange": {
+      "mustRead": [
+        "docs/PROJECT_STATUS.md",
+        "docs/KNOWN_ISSUES.md"
+      ],
+      "shouldCheck": [
+        "docs/ROADMAP.md",
+        "docs/DEPENDENCIES.md"
+      ]
+    },
+    "afterCodeChange": {
+      "autoUpdate": [
+        "docs/PROJECT_STATUS.md",
+        "CHANGELOG.md"
+      ],
+      "conditionalUpdate": {
+        "bugFix": ["docs/KNOWN_ISSUES.md"],
+        "featureComplete": ["docs/ROADMAP.md"],
+        "deployment": ["docs/DEPLOYMENT_STATUS.md"]
+      }
+    },
+    "onSessionStart": {
+      "summaryFrom": ["docs/PROJECT_STATUS.md"],
+      "displayMetrics": true
+    }
+  },
+  "contextRefreshInterval": "on-file-change",
+  "aiMemoryPersistence": "enabled",
+  "proactiveSuggestions": {
+    "enabled": true,
+    "basedOn": [
+      "docs/ROADMAP.md",
+      "docs/KNOWN_ISSUES.md"
+    ]
+  }
+}
