@@ -5,9 +5,52 @@ All notable changes to Anchor OS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-01-23
+## [Unreleased] - 2026-01-26
 
 ### Added
+
+#### Mobile Optimization Phase 2
+- **iOS Keyboard Avoidance (BUG-002 Fix)**: New `useKeyboardAvoidance` hook using visualViewport API to auto-scroll focused inputs into view when virtual keyboard appears
+- **Full-Screen Modals on Mobile**: Updated `Modal.tsx` with `fullScreenMobile` prop (default: true) - modals now take full screen on mobile with safe area padding
+- **44px Touch Targets**: Verified all Button variants have minimum 44px height on mobile (per Apple HIG / WCAG 2.5.5)
+
+### Fixed
+
+#### Mobile UI Bugs (iPhone 15 Pro)
+- **Account Edit Buttons Hidden**: Renamed input/buttons now stack vertically on mobile with "Save"/"Cancel" labels
+- **Settings 2FA Alignment**: 2FA section now centers on mobile with improved "Setup 2FA" button styling  
+- **Settings Contact Button**: "Send Message" button now centers and takes full width on mobile
+
+### Fixed
+
+#### Fabric AI v1.5 - Data Wiring (GAP-001)
+- **Fabric Suggestion Pre-fill**: Clicking "Record Transaction?" from a completed commitment now correctly pre-fills the transaction form with detected amount, category, and description
+- **Navigation Enhancement**: `AnchorContext.navigateTo()` now supports URL parameters for cross-view data passing
+- **Technical Details**:
+  - Updated `src/context/AnchorContext.tsx` to accept optional `params` object
+  - Modified `src/hooks/useFabricSuggestions.ts` to pass `amount`, `category`, `description` via query params
+  - Enhanced `src/features/finance/FinanceView.tsx` to read `?action=new` and populate `prefillData`
+  - Extended `src/features/finance/TransactionForm.tsx` to accept `prefillData` prop
+  - Added test coverage: `src/features/finance/TransactionForm.test.tsx` (✅ Passing)
+
+### Added
+
+#### Internal PM Dashboard (tools/dashboard)
+- **Real-time Project Dashboard**: Built internal PM dashboard at http://localhost:3001 with 6 tabs:
+  - **Overview**: Sprint progress, bug count, git status, in-progress/completed tasks
+  - **Environment Parity**: Dev/Staging/Prod version comparison and feature deployment status
+  - **Documentation**: Freshness tracking for all docs/ files
+  - **Kanban Board**: Visual PROJECT_BOARD.md representation
+  - **Git Timeline**: Commit history grouped by day
+  - **Feature Backlog**: 82 feature suggestions with filtering and search
+- **Reliability**: PM2 process management with auto-restart, boot persistence, logging
+- **Control Script**: `tools/dashboard/dashboard.sh` for start/stop/restart/status/logs
+
+#### Codebase Audit (docs/FEATURE_SUGGESTIONS.md)
+- **Comprehensive Audit**: Analyzed entire codebase across 10 verticals
+- **82 Feature Suggestions**: Categorized by Architecture, Auth, UI/UX, Finance, Tasks, Family, Settings, Onboarding, Brand, Support
+- **Priority Matrix**: High/Medium/Low with effort estimates and impact assessments
+- **Top Candidates Identified**: AUTH-001 (Social Sign-In), FIN-001 (Budget Tracking), TASK-002 (Streaks)
 
 #### Onboarding
 - **Skip Option**: Users can now skip onboarding and explore the app first via "Skip for now" link.
