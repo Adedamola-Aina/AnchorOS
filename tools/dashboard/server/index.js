@@ -11,7 +11,7 @@ const cors = require('cors');
 const path = require('path');
 
 const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions } = require('./docReader');
-const { getRecentCommits, getDeploymentTimeline, getRepoStats, searchBugInCommits } = require('./gitAnalyzer');
+const { getRecentCommits, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
 const { getEnvironmentStatus, checkEnvParity } = require('./envChecker');
 
 const app = express();
@@ -194,6 +194,19 @@ app.get('/api/git/search/:bugId', async (req, res) => {
     try {
         const commits = await searchBugInCommits(req.params.bugId);
         res.json(commits);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/impact
+ * Returns impact analysis for recent changes
+ */
+app.get('/api/impact', async (req, res) => {
+    try {
+        const analysis = await getImpactAnalysis();
+        res.json(analysis);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
