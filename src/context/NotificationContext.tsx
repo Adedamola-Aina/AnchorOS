@@ -11,8 +11,15 @@ interface Notification {
     type: NotificationType;
 }
 
+import { messaging } from '../config/firebase';
+import { getToken, onMessage } from 'firebase/messaging';
+
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [fcmToken, setFcmToken] = useState<string | null>(null);
+    const [pushPermissionStatus, setPushPermissionStatus] = useState<NotificationPermission>(
+        typeof Notification !== 'undefined' ? Notification.permission : 'default'
+    );
     const [confirmDialog, setConfirmDialog] = useState<{
         options: ConfirmOptions;
         resolve: (value: boolean) => void;
@@ -32,6 +39,57 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         });
     }, []);
 
+    const requestPushPermission = useCallback(async () => {
+        try {
+            if (typeof Notification === 'undefined') {
+                console.warn('Notifications not supported in this environment');
+                return null;
+            }
+
+            const permission = await Notification.requestPermission();
+            setPushPermissionStatus(permission);
+
+            if (permission === 'granted') {
+                if (!messaging) {
+                    console.warn('Firebase Messaging not initialized');
+                    return null;
+                }
+                // Get FCM Token
+                const token = await getToken(messaging, {
+                    // Valid VAPID key is required for some browsers, ensuring implicit default is used if none provided
+                    vapidKey: 'BCV_7sZdb_M-u_S9iAAI3T9F3uT3X7X5d5X5X5X5X5X5' // Example placeholder or remove if relying on default
+                }).catch(err => {
+                    console.error('An error occurred while retrieving token. ', err);
+                    return null;
+                });
+
+                if (token) {
+                    console.log('FCM Token:', token);
+                    setFcmToken(token);
+                    // TODO: In a real app, send this token to your backend (e.g., Firestore User Profile)
+                    return token;
+                }
+            }
+        } catch (error) {
+            console.error('Unable to get permission to notify.', error);
+        }
+        return null;
+    }, []);
+
+    // Listen for foreground messages
+    React.useEffect(() => {
+        if (!messaging) return;
+
+        const unsubscribe = onMessage(messaging, (payload) => {
+            console.log('Foreground message received:', payload);
+            if (payload.notification) {
+                showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
+            }
+        });
+        return () => unsubscribe();
+    }, [showToast]);
+
+
     const handleConfirm = (value: boolean) => {
         if (confirmDialog) {
             confirmDialog.resolve(value);
@@ -40,7 +98,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     };
 
     return (
-        <NotificationContext.Provider value={{ showToast, confirm }}>
+        <NotificationContext.Provider value={{ showToast, confirm, requestPushPermission, fcmToken, pushPermissionStatus }}>
             {children}
             {createPortal(
                 <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">

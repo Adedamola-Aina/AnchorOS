@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
 import { Search } from 'lucide-react';
 import { TransactionItem } from './TransactionItem';
+import { useResponsive } from '../../../hooks/useResponsive';
 import type { AnchorTransaction } from '../../../types';
 
 interface VirtualTransactionListProps {
@@ -24,13 +25,23 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     onClearSearch,
 }) => {
     const parentRef = useRef<HTMLDivElement>(null);
+    const { isMobile } = useResponsive();
 
-    const rowVirtualizer = useVirtualizer({
+    const parentVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 100, // Height of Card-based TransactionItem + spacing
-        overscan: 5, // Render 5 extra items above/below viewport
+        estimateSize: () => 78, // Row height: ~60px card + 18px gap
+        overscan: 5,
     });
+
+    const windowVirtualizer = useWindowVirtualizer({
+        count: transactions.length,
+        estimateSize: () => 78,
+        overscan: 5,
+        scrollMargin: parentRef.current?.offsetTop ?? 0,
+    });
+
+    const rowVirtualizer = isMobile ? windowVirtualizer : parentVirtualizer;
 
     if (transactions.length === 0) {
         return (
@@ -54,7 +65,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     return (
         <div
             ref={parentRef}
-            className={`md:max-h-[600px] overflow-y-auto ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
+            className={`${isMobile ? '' : 'md:max-h-[600px] overflow-y-auto'} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
         >
             <div
                 style={{
@@ -75,10 +86,9 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                 top: 0,
                                 left: 0,
                                 width: '100%',
-                                height: `${virtualRow.size}px`,
-                                transform: `translateY(${virtualRow.start}px)`,
+                                transform: `translateY(${virtualRow.start - (isMobile ? rowVirtualizer.options.scrollMargin : 0)}px)`,
                             }}
-                            className="pb-3" // Spacing between cards
+                            className="pb-4" // Gap between cards
                         >
                             <TransactionItem
                                 transaction={tx}

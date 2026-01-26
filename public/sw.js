@@ -1,12 +1,42 @@
-const CACHE_NAME = 'anchor-os-v1.1';
+const CACHE_NAME = 'anchor-os-v1.3';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/favicon.svg',
-    '/manifest.webmanifest',
-    '/logo192.png',
-    '/logo512.png'
+    '/manifest.webmanifest'
 ];
+
+// Import Firebase Messaging scripts (Compat version is required for SW)
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+
+// Initialize Firebase in SW (using Production config as default)
+firebase.initializeApp({
+    apiKey: "AIzaSyBiJ9rSE11D29A-356F9KtzvnTV6Ajs_mQ",
+    authDomain: "anchor-os.firebaseapp.com",
+    projectId: "anchor-os",
+    storageBucket: "anchor-os.firebasestorage.app",
+    messagingSenderId: "501329205014",
+    appId: "1:501329205014:web:1092c50e54faa5216ea237",
+    measurementId: "G-LBNK80WWNS"
+});
+
+const messaging = firebase.messaging();
+
+// Handle background messages
+messaging.onBackgroundMessage((payload) => {
+    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+
+    // Customize notification here
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: '/favicon.svg',
+        badge: '/favicon.svg'
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});
 
 // Install: Cache core assets
 self.addEventListener('install', (event) => {

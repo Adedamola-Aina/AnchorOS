@@ -11,14 +11,18 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
+    "test:run": "vitest --run",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
+    "test:coverage": "vitest --coverage --run",
     "test:e2e": "npx playwright test",
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:headed": "npx playwright test --headed",
     "test:integration": "./scripts/test-with-emulator.sh",
     "emulator:start": "firebase emulators:start",
-    "build:dev": "tsc -b && vite build --mode development"
+    "build:dev": "tsc -b && vite build --mode development",
+    "deploy:dev": "npm run build:dev && firebase deploy --only hosting:dev",
+    "deploy:staging": "npm run build:staging && firebase deploy --only hosting:staging",
+    "deploy:production": "npm run build:production && firebase deploy --only hosting:production"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
