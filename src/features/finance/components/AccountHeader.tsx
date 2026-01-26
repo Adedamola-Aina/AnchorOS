@@ -130,30 +130,34 @@ export const AccountHeader = ({
                 {/* Account Info */}
                 <div className="mb-8">
                     {isEditingName ? (
-                        <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-200">
+                        <div className="animate-in fade-in slide-in-from-left-2 duration-200 space-y-3">
                             <input
                                 type="text"
                                 value={newName}
                                 onChange={(e) => onNameChange(e.target.value)}
-                                className="bg-white/10 backdrop-blur-xl rounded-2xl px-5 py-3 text-white text-2xl font-bold placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 border border-white/10 flex-1"
+                                className="w-full bg-white/10 backdrop-blur-xl rounded-2xl px-5 py-3 text-white text-2xl font-bold placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 border border-white/10"
                                 placeholder="Account name"
                                 autoFocus
                                 disabled={isRenaming}
                             />
-                            <button
-                                onClick={onConfirmRename}
-                                disabled={isRenaming || !newName.trim()}
-                                className="bg-emerald-500 hover:bg-emerald-400 p-3 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95"
-                            >
-                                <Check className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={onCancelRename}
-                                disabled={isRenaming}
-                                className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-all duration-200 border border-white/10"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={onConfirmRename}
+                                    disabled={isRenaming || !newName.trim()}
+                                    className="flex-1 bg-emerald-500 hover:bg-emerald-400 p-3 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 font-semibold"
+                                >
+                                    <Check className="w-5 h-5" />
+                                    <span className="sm:hidden">Save</span>
+                                </button>
+                                <button
+                                    onClick={onCancelRename}
+                                    disabled={isRenaming}
+                                    className="flex-1 bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-all duration-200 border border-white/10 flex items-center justify-center gap-2 font-semibold"
+                                >
+                                    <X className="w-5 h-5" />
+                                    <span className="sm:hidden">Cancel</span>
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <div className="space-y-2">

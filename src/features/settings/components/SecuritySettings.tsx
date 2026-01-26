@@ -65,7 +65,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:justify-between">
                     <div>
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Two-Factor Authentication (2FA)</p>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Secure your account with a secondary TOTP verification.</p>
@@ -73,7 +73,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({
                     {mfaEnabled ? (
                         <Button
                             variant="secondary"
-                            className="text-rose-500 hover:text-white hover:bg-rose-500 border-rose-200 dark:border-rose-900 gap-2"
+                            className="text-rose-500 hover:text-white hover:bg-rose-500 border-rose-200 dark:border-rose-900 gap-2 w-full sm:w-auto"
                             onClick={async () => {
                                 if (await confirm({
                                     title: 'Disable 2FA?',
@@ -99,8 +99,9 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({
                             <Button
                                 isLoading={isEnrolling}
                                 onClick={onGenerateMfaSecret}
-                                className="gap-2"
+                                className="gap-2 w-full sm:w-auto font-bold"
                             >
+                                <Shield className="w-4 h-4" />
                                 Setup 2FA
                             </Button>
                         )

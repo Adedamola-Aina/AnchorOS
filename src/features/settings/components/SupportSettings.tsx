@@ -18,7 +18,7 @@ export const SupportSettings = ({ onOpenContact }: SupportSettingsProps) => {
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="flex flex-col md:flex-row items-center text-center md:text-left gap-6 md:justify-between">
                     <div>
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Get in Touch</p>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -27,7 +27,7 @@ export const SupportSettings = ({ onOpenContact }: SupportSettingsProps) => {
                     </div>
                     <Button
                         onClick={onOpenContact}
-                        className="bg-cyan-500 hover:bg-cyan-600 text-white font-black text-[10px] uppercase tracking-[0.2em] px-6 h-10 shadow-cyan-500/20 whitespace-nowrap"
+                        className="bg-cyan-500 hover:bg-cyan-600 text-white font-black text-[10px] uppercase tracking-[0.2em] px-6 h-10 shadow-cyan-500/20 whitespace-nowrap w-full md:w-auto"
                     >
                         Send Message
                     </Button>
