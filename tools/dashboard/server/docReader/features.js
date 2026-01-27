@@ -146,20 +146,28 @@ async function getFeatureSuggestions() {
     try {
         const filePath = path.join(DOCS_PATH, 'FEATURE_SUGGESTIONS.md');
         const content = await fs.readFile(filePath, 'utf-8');
+        const stats = await fs.stat(filePath);
         const { content: markdown } = matter(content);
 
         return {
-            exists: true,
-            ...parseFeatureSuggestions(markdown)
+            filename: 'FEATURE_SUGGESTIONS.md',
+            lastModified: stats.mtime,
+            parsed: {
+                exists: true,
+                ...parseFeatureSuggestions(markdown)
+            }
         };
     } catch (error) {
         return {
-            exists: false,
+            filename: 'FEATURE_SUGGESTIONS.md',
             error: error.message,
-            features: [],
-            completedFeatures: [],
-            grouped: {},
-            summary: { total: 0, pending: 0, completed: 0, byPriority: {}, byCategory: [] }
+            parsed: {
+                exists: false,
+                features: [],
+                completedFeatures: [],
+                grouped: {},
+                summary: { total: 0, pending: 0, completed: 0, byPriority: {}, byCategory: [] }
+            }
         };
     }
 }
