@@ -1,28 +1,22 @@
 # ANCHOR OS ROADMAP
 
-**Last Updated**: 2026-01-26
+**Last Updated**: 2026-01-27
 
 ---
 
-## 🎯 CURRENT FOCUS: Mobile Optimization (v1.5.0)
+## 🎯 CURRENT FOCUS: Marketing Website
 
-**Why Now**: 96% of users access via mobile
+**Why Now**: Mobile optimization complete, need public presence
 
-**Success Criteria**:
-- [x] Bottom navigation on mobile
-- [x] Touch targets >= 44px
-- [x] Full-screen modals on mobile
-- [x] Zero desktop regressions
-- [x] Lighthouse mobile score > 90 ✅ (Score: 95)
-
-**Timeline**: 4 weeks (Jan 26 - Feb 23, 2026)
-**Status**: ✅ Complete - Deployed to Staging (Jan 26)
+**Timeline**: 5 weeks (Jan 27 - Mar 3, 2026)
+**Status**: 🚧 Not Started
 
 ---
 
 ## 📋 Q1 2026 (Jan - Mar)
 
-### ✅ Completed (v1.4.0)
+### ✅ Completed
+- [x] **ARCH-001** (Jan 27) - 22 files refactored, pre-commit hook enforces 200-line rule
 - [x] **Family Mode** - Spouse sharing, family accounts
 - [x] **Fabric AI Magic Suggestions** - GAP-001 fixed Jan 26
 - [x] **Internal PM Dashboard** (Jan 26) - http://localhost:3001
@@ -33,15 +27,27 @@
 - [ ] **Marketing Website**
   - Dependencies: Mobile Optimization ✅
   - Priority: P0
-
-### 📋 Planned
-- [ ] **Marketing Website**
-  - Dependencies: Mobile Optimization
-  - Priority: P0
   - Effort: 5 weeks
 
+- [ ] **Code Quality: 200-Line Compliance** (25 files)
+  - Priority: P2
+  - Effort: 4 weeks
+  - **Phase 1 (P0 - Critical)**:
+    - [x] Refactor `server/docReader.js` (756 lines → 4 files) ✅
+    - [ ] Refactor `server/index.js` (654 lines → 4 files)
+  - **Phase 2 (P1 - High)**:
+    - [ ] Refactor `CommitmentsView.test.tsx` (818 lines → 3 files)
+    - [ ] Refactor `FinanceView.test.tsx` (590 lines → 2 files)
+    - [ ] Refactor `useFinanceService.test.tsx` (502 lines → 2 files)
+    - [ ] Refactor `EnterpriseKanban.tsx` (468 lines → 3 files)
+    - [ ] Refactor `FeatureBacklog.tsx` (351 lines → 2 files)
+    - [ ] Refactor `gitAnalyzer.js` (337 lines → 2 files)
+  - **Phase 3 (P2 - Medium)**: 13 files (230-320 lines each)
+  - **Phase 4 (P3 - Low)**: 3 files (201-211 lines each)
+
+### 📋 Planned
 - [ ] **Enhanced Fabric AI**
-  - Dependencies: Mobile Optimization
+  - Dependencies: Mobile Optimization ✅
   - Priority: P1
   - Effort: 3 weeks
 
@@ -85,3 +91,4 @@ Full backlog tracked in: [docs/FEATURE_SUGGESTIONS.md](file:///root/anchor-os/do
 ---
 
 **Review**: Every Sunday at 10:00
+
