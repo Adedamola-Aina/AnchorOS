@@ -11,7 +11,7 @@ const cors = require('cors');
 const path = require('path');
 const cron = require('node-cron');
 
-const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions, getEnhancedKanbanBoard } = require('./docReader');
+const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions, getEnhancedKanbanBoard } = require('./docReader/index');
 const { getRecentCommits, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
 const { getEnvironmentStatus, checkEnvParity } = require('./envChecker');
 const { getPrioritySuggestions } = require('./prioritySuggester');
