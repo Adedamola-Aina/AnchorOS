@@ -15,6 +15,7 @@ import { getProductivityMetrics } from '../../utils/taskInsights';
 import { AssetAllocationWidget } from './components/AssetAllocationWidget';
 import { PortfolioWidget, CashFlowWidget, RecentActivityWidget, ProductivityWidget, TodaysFocusWidget } from './components/DashboardWidgets';
 import type { Currency } from '../../types';
+import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 
 const getTimeGreeting = () => {
   const hour = new Date().getHours();
@@ -37,29 +38,31 @@ const DashboardView = () => {
   const primaryCurrency: Currency = accounts.length > 0 ? (accounts[0].currency as Currency) : 'NGN';
 
   return (
-    <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 pb-20 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
-      <SectionHeader title={`${getTimeGreeting()}, ${profile.name}`} subtitle="Life at a glance." />
+    <FeatureErrorBoundary featureName="Dashboard">
+      <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 pb-20 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
+        <SectionHeader title={`${getTimeGreeting()}, ${profile.name}`} subtitle="Life at a glance." />
 
-      <div className={`grid grid-cols-1 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-5'}`}>
-        {/* Column 1: Wealth */}
-        <div className="space-y-5">
-          <PortfolioWidget assets={assets} onNavigate={() => navigateTo('finance')} accountCount={accounts.length} isMobile={isMobile} />
-          {accounts.length > 1 && <AssetAllocationWidget assets={assets} />}
-        </div>
+        <div className={`grid grid-cols-1 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-5'}`}>
+          {/* Column 1: Wealth */}
+          <div className="space-y-5">
+            <PortfolioWidget assets={assets} onNavigate={() => navigateTo('finance')} accountCount={accounts.length} isMobile={isMobile} />
+            {accounts.length > 1 && <AssetAllocationWidget assets={assets} />}
+          </div>
 
-        {/* Column 2: Activity */}
-        <div className="space-y-5">
-          <CashFlowWidget cashFlow={cashFlow} currency={primaryCurrency} onNavigate={() => navigateTo('finance')} />
-          <RecentActivityWidget activity={recentActivity} onNavigate={() => navigateTo('finance')} />
-        </div>
+          {/* Column 2: Activity */}
+          <div className="space-y-5">
+            <CashFlowWidget cashFlow={cashFlow} currency={primaryCurrency} onNavigate={() => navigateTo('finance')} />
+            <RecentActivityWidget activity={recentActivity} onNavigate={() => navigateTo('finance')} />
+          </div>
 
-        {/* Column 3: Focus */}
-        <div className="space-y-5">
-          <ProductivityWidget productivity={productivity} hasCommitments={hasCommitments} onNavigate={() => navigateTo('commitments')} />
-          <TodaysFocusWidget priorities={todaysPriorities} onNavigate={() => navigateTo('commitments')} />
+          {/* Column 3: Focus */}
+          <div className="space-y-5">
+            <ProductivityWidget productivity={productivity} hasCommitments={hasCommitments} onNavigate={() => navigateTo('commitments')} />
+            <TodaysFocusWidget priorities={todaysPriorities} onNavigate={() => navigateTo('commitments')} />
+          </div>
         </div>
       </div>
-    </div>
+    </FeatureErrorBoundary>
   );
 };
 

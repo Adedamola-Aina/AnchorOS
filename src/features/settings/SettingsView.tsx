@@ -25,6 +25,7 @@ import { DangerZone } from './components/DangerZone';
 import { VerifyEmailBanner, EnableMfaBanner } from './components/SettingsBanners';
 import { ReauthModal } from './components/ReauthModal';
 import { Button } from '../../components/ui/Button';
+import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 
 const SettingsView = () => {
   const {
@@ -101,42 +102,44 @@ const SettingsView = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-500 pb-20">
-      <div className="flex flex-col gap-2 mb-2">
-        <h2 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">System Settings</h2>
-        <p className="text-slate-500 dark:text-slate-400">Manage your preferences and environment.</p>
-      </div>
-
-      {accountNotifications.length > 0 && (
-        <div className="grid gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
-          {accountNotifications.includes('verify_email') && <VerifyEmailBanner isResending={isResending} onResend={handleResendVerification} />}
-          {accountNotifications.includes('enable_2fa') && <EnableMfaBanner onEnable={handleGenerateMfaSecret} />}
+    <FeatureErrorBoundary featureName="Settings">
+      <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-500 pb-20">
+        <div className="flex flex-col gap-2 mb-2">
+          <h2 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">System Settings</h2>
+          <p className="text-slate-500 dark:text-slate-400">Manage your preferences and environment.</p>
         </div>
-      )}
 
-      <ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => updateProfile({ name })} />
-      <AppearanceSettings theme={profile.theme} onToggleTheme={() => updateProfile({ theme: profile.theme === 'dark' ? 'light' : 'dark' })} />
-      <SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={isEnrolling} show2FASetup={show2FASetup} mfaQrUrl={mfaQrUrl} mfaManualKey={mfaManualKey}
-        mfaCode={mfaCode} mfaError={mfaError} onSetShow2FASetup={setShow2FASetup} onSetMfaCode={setMfaCode} onGenerateMfaSecret={handleGenerateMfaSecret}
-        onEnrollMfa={handleEnrollMfa} onUnenrollMfa={unenrollMfa} />
-      <NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
-        frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
-        onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || {}), ...prefs } })}
-        pushPermissionStatus={pushPermissionStatus} requestPushPermission={() => requestPushPermission()} />
-      <FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} />
-      <SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} />
-      {import.meta.env.VITE_APP_ENV !== 'production' && <DeveloperTools userUid={user?.uid || ''} />}
-      <DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={handleWipeData} />
-      <DangerZone onDeleteAccount={handleDeleteAccount} />
+        {accountNotifications.length > 0 && (
+          <div className="grid gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+            {accountNotifications.includes('verify_email') && <VerifyEmailBanner isResending={isResending} onResend={handleResendVerification} />}
+            {accountNotifications.includes('enable_2fa') && <EnableMfaBanner onEnable={handleGenerateMfaSecret} />}
+          </div>
+        )}
 
-      <div className="mt-8 flex justify-center gap-6 pb-8">
-        <Button variant="ghost" size="sm" onClick={() => logout()} className="text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
+        <ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => updateProfile({ name })} />
+        <AppearanceSettings theme={profile.theme} onToggleTheme={() => updateProfile({ theme: profile.theme === 'dark' ? 'light' : 'dark' })} />
+        <SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={isEnrolling} show2FASetup={show2FASetup} mfaQrUrl={mfaQrUrl} mfaManualKey={mfaManualKey}
+          mfaCode={mfaCode} mfaError={mfaError} onSetShow2FASetup={setShow2FASetup} onSetMfaCode={setMfaCode} onGenerateMfaSecret={handleGenerateMfaSecret}
+          onEnrollMfa={handleEnrollMfa} onUnenrollMfa={unenrollMfa} />
+        <NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
+          frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
+          onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || {}), ...prefs } })}
+          pushPermissionStatus={pushPermissionStatus} requestPushPermission={() => requestPushPermission()} />
+        <FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} />
+        <SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} />
+        {import.meta.env.VITE_APP_ENV !== 'production' && <DeveloperTools userUid={user?.uid || ''} />}
+        <DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={handleWipeData} />
+        <DangerZone onDeleteAccount={handleDeleteAccount} />
+
+        <div className="mt-8 flex justify-center gap-6 pb-8">
+          <Button variant="ghost" size="sm" onClick={() => logout()} className="text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
+        </div>
+
+        {showContactModal && <ContactModal onClose={() => setShowContactModal(false)} currentPage="settings" initialSubject={initialSubject} />}
+        <ReauthModal show={showReauthModal} password={reauthPassword} isLoading={isReauthenticating}
+          onPasswordChange={setReauthPassword} onConfirm={handleReauthenticate} onClose={() => setShowReauthModal(false)} />
       </div>
-
-      {showContactModal && <ContactModal onClose={() => setShowContactModal(false)} currentPage="settings" initialSubject={initialSubject} />}
-      <ReauthModal show={showReauthModal} password={reauthPassword} isLoading={isReauthenticating}
-        onPasswordChange={setReauthPassword} onConfirm={handleReauthenticate} onClose={() => setShowReauthModal(false)} />
-    </div>
+    </FeatureErrorBoundary>
   );
 };
 
