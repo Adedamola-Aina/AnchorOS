@@ -88,7 +88,7 @@ export const FabricSuggestionToast: React.FC<FabricSuggestionToastProps> = ({ su
                 <div className="flex items-start gap-3">
                     {/* Icon */}
                     <div className="p-2 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl flex-shrink-0">
-                        <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                        <Sparkles className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                     </div>
 
                     {/* Content */}
@@ -102,7 +102,7 @@ export const FabricSuggestionToast: React.FC<FabricSuggestionToastProps> = ({ su
 
                         {/* Amount preview if available */}
                         {suggestion.metadata?.amount && (
-                            <p className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-2">
+                            <p className="text-sm font-mono font-bold text-finance-600 dark:text-finance-400 mt-2">
                                 ${suggestion.metadata.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             </p>
                         )}

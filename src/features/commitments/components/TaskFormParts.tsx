@@ -14,7 +14,7 @@ export const FrequencyStep: React.FC<FrequencyStepProps> = ({ onSelectType, onCl
         { id: 'todo', label: 'Todo', desc: 'One-time task', icon: <CheckCircle2 className="w-6 h-6 text-emerald-500" /> },
         { id: 'daily', label: 'Daily', desc: 'Every single day', icon: <Sunrise className="w-6 h-6 text-blue-500" /> },
         { id: 'weekly', label: 'Weekly', desc: 'On specific days', icon: <Calendar className="w-6 h-6 text-purple-500" /> },
-        { id: 'monthly', label: 'Monthly', desc: 'On a specific date', icon: <CheckCircle2 className="w-6 h-6 text-indigo-500" /> },
+        { id: 'monthly', label: 'Monthly', desc: 'On a specific date', icon: <CheckCircle2 className="w-6 h-6 text-task-500" /> },
     ];
     return (
         <div className="space-y-6">
@@ -78,7 +78,7 @@ export const MonthlyDatesField: React.FC<MonthlyDatesFieldProps> = ({ value, onC
         <div className="grid grid-cols-7 gap-1">
             {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
                 <button key={d} type="button" onClick={() => onChange(value.includes(d) ? value.filter(day => day !== d) : [...value, d])}
-                    className={`w-8 h-8 rounded-lg text-[10px] font-bold border transition-all flex items-center justify-center ${value.includes(d) ? 'bg-indigo-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}>{d}</button>
+                    className={`w-8 h-8 rounded-lg text-[10px] font-bold border transition-all flex items-center justify-center ${value.includes(d) ? 'bg-task-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-task-300'}`}>{d}</button>
             ))}
         </div>
     </div>

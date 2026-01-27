@@ -152,8 +152,8 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                                         );
                                     }}
                                     className={`w-8 h-8 rounded-lg text-[10px] font-bold border transition-all flex items-center justify-center ${editDaysOfMonth.includes(d)
-                                        ? 'bg-indigo-600 text-white border-transparent shadow-md'
-                                        : 'bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+                                        ? 'bg-task-600 text-white border-transparent shadow-md'
+                                        : 'bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-task-300'
                                         }`}
                                 >
                                     {d}

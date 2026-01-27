@@ -34,8 +34,8 @@ const getAccountStyle = (account: AnchorAccount) => {
     if (account.currency === 'USD') {
         return {
             gradient: 'from-slate-900 via-slate-800 to-slate-900',
-            accent: 'bg-emerald-500',
-            accentText: 'text-emerald-400',
+            accent: 'bg-finance-500',
+            accentText: 'text-finance-400',
             glow: 'shadow-emerald-500/20',
         };
     }

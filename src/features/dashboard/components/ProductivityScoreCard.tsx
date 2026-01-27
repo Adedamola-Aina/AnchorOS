@@ -21,8 +21,8 @@ export function ProductivityScoreCard({ commitmentStats, navigateTo }: Productiv
     if (!commitmentStats) {
         return (
             <div className="glass-card p-6 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mb-3">
-                    <Activity className="w-6 h-6 text-indigo-500" />
+                <div className="w-12 h-12 bg-primary-50 dark:bg-primary-900/20 rounded-full flex items-center justify-center mb-3">
+                    <Activity className="w-6 h-6 text-primary-500" />
                 </div>
                 <h3 className="font-bold text-slate-900 dark:text-white mb-1">Boost Productivity</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-[200px]">
@@ -30,7 +30,7 @@ export function ProductivityScoreCard({ commitmentStats, navigateTo }: Productiv
                 </p>
                 <button
                     onClick={() => navigateTo && navigateTo('commitments')}
-                    className="text-xs font-bold text-indigo-500 hover:text-indigo-600 uppercase tracking-widest"
+                    className="text-xs font-bold text-primary-500 hover:text-primary-600 uppercase tracking-widest"
                 >
                     + Set Commitments
                 </button>

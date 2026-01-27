@@ -102,7 +102,7 @@ export const InstallPrompt = () => {
                 {!isIOS && (
                     <button
                         onClick={handleInstall}
-                        className="mt-3 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
+                        className="mt-3 w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
                     >
                         Install App
                     </button>

@@ -38,9 +38,9 @@ export const NetWorthCards = ({ netWorth }: NetWorthCardsProps) => {
             {hasUSD && (
                 <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-indigo-600 to-indigo-800">
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
-                        <DollarSign className="w-16 h-16 text-indigo-300" />
+                        <DollarSign className="w-16 h-16 text-primary-300" />
                     </div>
-                    <p className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-1">Net Worth (USD)</p>
+                    <p className="text-xs font-bold text-primary-200 uppercase tracking-widest mb-1">Net Worth (USD)</p>
                     <h2 className="text-3xl font-black text-white tracking-tight tabular-nums">
                         {formatCurrency(netWorth.USD, 'USD')}
                     </h2>

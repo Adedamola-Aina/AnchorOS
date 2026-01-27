@@ -78,9 +78,9 @@ export const NotificationBanner = ({ accountId }: NotificationBannerProps) => {
                 return (
                     <div
                         key={latest.id} // Use latest ID as key for group
-                        className="pointer-events-auto bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-indigo-100 dark:border-indigo-500/30 p-3 rounded-2xl shadow-lg shadow-indigo-500/10 flex items-center gap-3 max-w-2xl mx-auto w-full group transition-all hover:scale-[1.01]"
+                        className="pointer-events-auto bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-primary-100 dark:border-primary-500/30 p-3 rounded-2xl shadow-lg shadow-primary-500/10 flex items-center gap-3 max-w-2xl mx-auto w-full group transition-all hover:scale-[1.01]"
                     >
-                        <div className={`p-2 rounded-xl shrink-0 ${isGroup ? 'bg-indigo-500 text-white' : 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'}`}>
+                        <div className={`p-2 rounded-xl shrink-0 ${isGroup ? 'bg-primary-500 text-white' : 'bg-primary-50 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400'}`}>
                             {isGroup ? <span className="font-bold text-xs">{count}x</span> : <Bell className="w-4 h-4" />}
                         </div>
 
@@ -111,7 +111,7 @@ export const NotificationBanner = ({ accountId }: NotificationBannerProps) => {
             })}
 
             {overflowCount > 0 && (
-                <div className="pointer-events-auto bg-indigo-600 text-white p-2 rounded-xl shadow-lg mx-auto flex items-center gap-2 px-4 animate-in fade-in slide-in-from-top-2">
+                <div className="pointer-events-auto bg-primary-600 text-white p-2 rounded-xl shadow-lg mx-auto flex items-center gap-2 px-4 animate-in fade-in slide-in-from-top-2">
                     <Mail className="w-4 h-4" />
                     <span className="text-xs font-bold">{overflowCount} more notifications sent to your email.</span>
                 </div>

@@ -54,7 +54,7 @@ export const SpendingTrendsChart = ({
                 {selectedWeekStart && (
                     <button
                         onClick={() => onSelectWeek(null)}
-                        className="text-[10px] font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400"
+                        className="text-[10px] font-bold text-primary-500 hover:text-primary-600 dark:text-primary-400"
                     >
                         Clear Filter
                     </button>
@@ -63,12 +63,12 @@ export const SpendingTrendsChart = ({
 
             {/* Summary Stats */}
             <div className="grid grid-cols-3 gap-3 mb-5">
-                <div className="text-center p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
+                <div className="text-center p-3 rounded-xl bg-finance-50 dark:bg-finance-900/20">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                        <ArrowUpRight className="w-3 h-3 text-emerald-500" />
-                        <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">In</span>
+                        <ArrowUpRight className="w-3 h-3 text-finance-500" />
+                        <span className="text-[9px] font-bold text-finance-600 dark:text-finance-400 uppercase">In</span>
                     </div>
-                    <p className="font-bold text-sm text-emerald-600 dark:text-emerald-400 tabular-nums">
+                    <p className="font-bold text-sm text-finance-600 dark:text-finance-400 tabular-nums">
                         {formatCurrency(totals.income, currency)}
                     </p>
                 </div>
@@ -119,7 +119,7 @@ export const SpendingTrendsChart = ({
                                     <div className="flex-1 h-full flex items-end">
                                         <div
                                             style={{ height: `${Math.max(incomeHeight, 4)}%` }}
-                                            className={`w-full rounded-t transition-colors ${isSelected ? 'bg-emerald-400' : 'bg-emerald-500/70 group-hover:bg-emerald-500'}`}
+                                            className={`w-full rounded-t transition-colors ${isSelected ? 'bg-finance-400' : 'bg-finance-500/70 group-hover:bg-finance-500'}`}
                                         />
                                     </div>
                                     {/* Expense Bar */}
@@ -130,7 +130,7 @@ export const SpendingTrendsChart = ({
                                         />
                                     </div>
                                 </div>
-                                <span className={`text-[9px] font-bold ${isSelected ? 'text-indigo-500' : 'text-slate-400'}`}>
+                                <span className={`text-[9px] font-bold ${isSelected ? 'text-primary-500' : 'text-slate-400'}`}>
                                     W{weekNum}
                                 </span>
                             </button>
@@ -142,7 +142,7 @@ export const SpendingTrendsChart = ({
             {/* Compact Legend */}
             <div className="flex justify-center gap-4 mt-3 text-[9px] font-bold text-slate-400">
                 <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-sm" />
+                    <div className="w-2 h-2 bg-finance-500 rounded-sm" />
                     <span>Income</span>
                 </div>
                 <div className="flex items-center gap-1">

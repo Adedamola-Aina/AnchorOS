@@ -27,7 +27,7 @@ export const TransactionTypeSelector: React.FC<TransactionTypeSelectorProps> = (
             <button
                 type="button"
                 onClick={() => onChange('income')}
-                className={`flex-1 rounded-md text-xs font-medium py-2 transition-all ${type === 'income' ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+                className={`flex-1 rounded-md text-xs font-medium py-2 transition-all ${type === 'income' ? 'bg-white dark:bg-slate-600 text-finance-600 dark:text-finance-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
             >
                 Income
             </button>
