@@ -22,6 +22,8 @@ const { getVelocityStats, getHistoricalData, recordCompletion, predictCompletion
 const { archiveOldItems, getArchivedItems, restoreItem, detectCompletedItems } = require('./archiveManager');
 const { analyzeBugsFromKnownIssues, getPrioritySuggestionStats } = require('./bugPrioritizer');
 const { runFullSync, getSyncStatus } = require('./docUpdater');
+const { startFileWatchers, stopFileWatchers } = require('./fileWatcher');
+const { watchMarkerFiles, initializeDashboardDir } = require('./conversationProcessor');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -571,14 +573,32 @@ cron.schedule('0 * * * *', async () => {
 // Start server with error handling
 const server = app.listen(PORT, () => {
     console.log(`
-╔════════════════════════════════════════════════╗
-║     Anchor OS - Internal PM Dashboard          ║
-║                                                ║
-║     API Server running on port ${PORT}            ║
-║     http://localhost:${PORT}                      ║
-╚════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════╗
+║                  🚀 Anchor OS PM Dashboard                     ║
+║                                                                ║
+║  📊 Dashboard: http://localhost:${PORT}                        ║
+║  🔄 Auto-refresh: Enabled                                      ║
+║  📁 Watching: ROADMAP.md, KNOWN_ISSUES.md, FEATURE_SUGGESTIONS ║
+║                                                                ║
+║  ⚡ Features:                                                   ║
+║     • Velocity Tracking (auto-detect completions)             ║
+║     • Auto-Archive (daily at 2 AM)                            ║
+║     • Bug Prioritization (ML-based)                           ║
+║     • Doc Sync (hourly at :00)                                ║
+║     • Real-time File Watching (instant updates)               ║
+╚════════════════════════════════════════════════════════════════╝
     `);
 
+    // Start file watchers for real-time updates
+    startFileWatchers();
+
+    // Start conversation processor for AI-detected bugs/features
+    initializeDashboardDir();
+    watchMarkerFiles((type, result) => {
+        console.log(`[CONVERSATION AI] Auto-filed ${result.processed} ${type}, skipped ${result.skipped} duplicates`);
+        // Trigger full sync after filing
+        runFullSync().catch(err => console.error('[CONVERSATION AI] Sync failed:', err.message));
+    });
     // Signal PM2 that we're ready
     if (process.send) {
         process.send('ready');
@@ -596,6 +616,25 @@ server.on('error', (err) => {
         console.error('Server error:', err);
         process.exit(1);
     }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('\n[SHUTDOWN] Received SIGTERM, shutting down gracefully...');
+    stopFileWatchers();
+    server.close(() => {
+        console.log('[SHUTDOWN] Server closed');
+        process.exit(0);
+    });
+});
+
+process.on('SIGINT', () => {
+    console.log('\n[SHUTDOWN] Received SIGINT, shutting down gracefully...');
+    stopFileWatchers();
+    server.close(() => {
+        console.log('[SHUTDOWN] Server closed');
+        process.exit(0);
+    });
 });
 
 // Graceful shutdown
