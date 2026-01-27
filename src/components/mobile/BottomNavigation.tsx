@@ -37,7 +37,7 @@ export const BottomNavigation = ({ accountNotifications }: BottomNavigationProps
                         to={to}
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center gap-1 relative transition-all min-h-[44px] ${isActive
-                                ? 'text-blue-600 dark:text-blue-400'
+                                ? 'text-primary-600 dark:text-primary-400'
                                 : 'text-slate-400 dark:text-slate-500'
                             }`
                         }

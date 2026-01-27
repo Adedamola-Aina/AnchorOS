@@ -93,7 +93,7 @@ Component Stack: ${errorInfo?.componentStack}
                         <div className="p-4 flex gap-3">
                             <button
                                 onClick={this.handleReset}
-                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
                             >
                                 <RefreshCw className="w-4 h-4" />
                                 Try Again

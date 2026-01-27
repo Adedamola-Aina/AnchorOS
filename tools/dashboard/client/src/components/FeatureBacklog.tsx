@@ -10,14 +10,32 @@ interface Feature {
     effort: string;
     impact: string;
     description: string;
+    status?: 'pending' | 'completed';
+}
+
+interface CompletedFeature {
+    id: string;
+    title: string;
+    completedDate?: string;
+    summary?: string;
+    status: 'completed';
+    // Optional fields from Feature for compatibility
+    category?: string;
+    priority?: 'high' | 'medium' | 'low';
+    effort?: string;
+    impact?: string;
+    description?: string;
 }
 
 interface FeaturesData {
     parsed: {
         features: Feature[];
+        completedFeatures?: CompletedFeature[];
         grouped: Record<string, Feature[]>;
         summary: {
             total: number;
+            pending: number;
+            completed: number;
             byPriority: { high: number; medium: number; low: number };
             byCategory: { category: string; count: number }[];
         };
@@ -29,6 +47,7 @@ export function FeatureBacklog() {
     const [data, setData] = useState<FeaturesData | null>(null);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
     const [categoryFilter, setCategoryFilter] = useState<string>('all');
     const [search, setSearch] = useState('');
     const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -59,10 +78,17 @@ export function FeatureBacklog() {
         return <div className="card">Failed to load feature suggestions</div>;
     }
 
-    const { features, summary } = data.parsed;
+    const { features, summary, completedFeatures } = data.parsed;
+
+    // Combine pending and completed based on status filter
+    const allFeatures = statusFilter === 'completed'
+        ? (completedFeatures || [])
+        : statusFilter === 'pending'
+            ? features
+            : [...features, ...(completedFeatures || [])];
 
     // Apply filters
-    const filteredFeatures = features.filter(f => {
+    const filteredFeatures = allFeatures.filter(f => {
         if (filter !== 'all' && f.priority !== filter) return false;
         if (categoryFilter !== 'all' && f.category !== categoryFilter) return false;
         if (search && !f.title.toLowerCase().includes(search.toLowerCase()) &&
@@ -92,13 +118,28 @@ export function FeatureBacklog() {
     return (
         <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="card">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div
+                    className="card cursor-pointer hover:bg-slate-700/30 transition-colors"
+                    onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
+                >
                     <div className="flex items-center gap-2 mb-2">
                         <Lightbulb className="w-5 h-5 text-amber-400" />
-                        <span className="text-sm font-medium text-slate-300">Total Ideas</span>
+                        <span className="text-sm font-medium text-slate-300">Pending Ideas</span>
                     </div>
-                    <p className="text-3xl font-bold text-white">{summary.total}</p>
+                    <p className="text-3xl font-bold text-white">{summary.pending ?? summary.total}</p>
+                </div>
+                <div
+                    className="card bg-emerald-900/20 border-emerald-500/30 cursor-pointer hover:bg-emerald-900/30 transition-colors"
+                    onClick={() => setStatusFilter(statusFilter === 'completed' ? 'all' : 'completed')}
+                >
+                    <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-sm font-medium text-emerald-300">Completed</span>
+                    </div>
+                    <p className="text-3xl font-bold text-emerald-400">{summary.completed ?? 0}</p>
                 </div>
                 <div className="card cursor-pointer hover:bg-slate-700/30 transition-colors" onClick={() => setFilter('high')}>
                     <div className="flex items-center gap-2 mb-2">
@@ -173,9 +214,9 @@ export function FeatureBacklog() {
                     </div>
 
                     {/* Clear Filters */}
-                    {(filter !== 'all' || categoryFilter !== 'all' || search) && (
+                    {(filter !== 'all' || statusFilter !== 'all' || categoryFilter !== 'all' || search) && (
                         <button
-                            onClick={() => { setFilter('all'); setCategoryFilter('all'); setSearch(''); }}
+                            onClick={() => { setFilter('all'); setStatusFilter('all'); setCategoryFilter('all'); setSearch(''); }}
                             className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors"
                         >
                             Clear Filters
@@ -234,12 +275,17 @@ export function FeatureBacklog() {
                                             <span className="text-xs text-slate-400">{feature.category}</span>
                                         </td>
                                         <td className="table-cell text-center">
-                                            <div className="flex items-center justify-center gap-1">
-                                                <PriorityIcon priority={feature.priority} />
-                                                <span className={`badge ${priorityColors[feature.priority]} capitalize`}>
-                                                    {feature.priority}
-                                                </span>
-                                            </div>
+                                            {feature.priority && (
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <PriorityIcon priority={feature.priority} />
+                                                    <span className={`badge ${priorityColors[feature.priority]} capitalize`}>
+                                                        {feature.priority}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {!feature.priority && (
+                                                <span className="text-xs text-slate-500">Completed</span>
+                                            )}
                                         </td>
                                         <td className="table-cell">
                                             <span className="text-xs text-slate-400">{feature.effort}</span>

@@ -154,9 +154,9 @@ export const CommandPalette = () => {
                                 <button
                                     key={item.id}
                                     onClick={() => { item.action(); setIsOpen(false); setQuery(''); }}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                                 >
-                                    <Icon className={`w-4 h-4 ${isSelected ? 'text-indigo-500' : 'text-slate-400'}`} />
+                                    <Icon className={`w-4 h-4 ${isSelected ? 'text-primary-500' : 'text-slate-400'}`} />
                                     <span className="flex-1 text-left line-clamp-1 font-medium">{item.title}</span>
                                     {isSelected && <ArrowRight className="w-3.5 h-3.5 opacity-50" />}
                                 </button>

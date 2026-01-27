@@ -1,5 +1,8 @@
-import { CheckCircle, XCircle, Clock, TrendingUp, Bug, GitCommit, Target, ChevronRight, Wrench, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, TrendingUp, Bug, GitCommit, Target, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+import { PrioritySuggestions } from './PrioritySuggestions';
+import { DependencyHealth } from './DependencyHealth';
+import { ProactiveAlerts } from './ProactiveAlerts';
 
 interface BugItem {
     id: string;
@@ -220,103 +223,12 @@ export function DashboardSummary({ summary, onNavigateToTab }: SummaryProps) {
                 </div>
             </div>
 
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* In Progress */}
-                <div className="card">
-                    <h3 className="card-header flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-amber-400" />
-                        In Progress
-                    </h3>
-                    <div className="space-y-2">
-                        {projectStatus?.inProgress?.length ? (
-                            projectStatus.inProgress.slice(0, 5).map((item, i) => (
-                                <div key={i} className="flex items-start gap-2 text-sm">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                                    <span className="text-slate-300">{item.text}</span>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-sm text-slate-500">No items in progress</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Recently Completed */}
-                <div className="card">
-                    <h3 className="card-header flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-400" />
-                        Recently Completed
-                    </h3>
-                    <div className="space-y-2">
-                        {projectStatus?.completed?.length ? (
-                            projectStatus.completed.slice(0, 5).map((item, i) => (
-                                <div key={i} className="flex items-start gap-2 text-sm">
-                                    <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                                    <span className="text-slate-300">{item.text}</span>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-sm text-slate-500">No recent completions</p>
-                        )}
-                    </div>
-                </div>
+            {/* Smart Automation Widgets */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <PrioritySuggestions />
+                <DependencyHealth />
+                <ProactiveAlerts />
             </div>
-
-            {/* Critical Bugs - Clickable */}
-            {(projectStatus?.criticalBugs?.length ?? 0) > 0 && (
-                <div className="card border-red-500/30">
-                    <h3 className="card-header flex items-center gap-2 text-red-400">
-                        <XCircle className="w-4 h-4" />
-                        Critical Bugs ({projectStatus?.criticalBugs?.length})
-                    </h3>
-                    <div className="space-y-2">
-                        {bugs?.critical?.map((bug, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setSelectedBug(bug)}
-                                className="w-full flex items-center justify-between p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-left group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="badge badge-red">{bug.id}</span>
-                                    <span className="text-slate-300">{bug.title}</span>
-                                </div>
-                                <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-red-400 transition-colors" />
-                            </button>
-                        )) || projectStatus?.criticalBugs?.map((bug, i) => (
-                            <div key={i} className="flex items-center gap-3 text-sm p-2">
-                                <span className="badge badge-red">{bug.id}</span>
-                                <span className="text-slate-300">{bug.description}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Recently Fixed Bugs */}
-            {(bugs?.recentlyFixed?.length ?? 0) > 0 && (
-                <div className="card border-emerald-500/30">
-                    <h3 className="card-header flex items-center gap-2 text-emerald-400">
-                        <Wrench className="w-4 h-4" />
-                        Recently Fixed ({bugs?.recentlyFixed?.length})
-                    </h3>
-                    <div className="space-y-2">
-                        {bugs?.recentlyFixed?.map((bug, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setSelectedBug(bug)}
-                                className="w-full flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors text-left group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="badge badge-green">{bug.id}</span>
-                                    <span className="text-slate-300">{bug.title}</span>
-                                </div>
-                                <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
 
             {/* Bug Detail Modal */}
             {selectedBug && (

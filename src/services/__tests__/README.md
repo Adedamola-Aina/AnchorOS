@@ -332,12 +332,17 @@ it('uses runTransaction for optimistic updates', async () => {
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Line Coverage | 80%+ | TBD* | ⏳ Pending |
-| Branch Coverage | 70%+ | TBD* | ⏳ Pending |
-| Function Coverage | 90%+ | ~95% | ✅ On Track |
+| Statement Coverage | 80%+ | **95.13%** | ✅ **Exceeds (+15%)** |
+| Branch Coverage | 70%+ | **77.68%** | ✅ **Exceeds (+7%)** |
+| Function Coverage | 90%+ | **100%** | ✅ **Perfect** |
+| Line Coverage | 80%+ | **96.36%** | ✅ **Exceeds (+16%)** |
 | Integration Tests | 10+ | 15 | ✅ Exceeds |
 
-\* Run `npm run test:coverage` to generate full report
+**Coverage by File**:
+- **FinanceService.ts**: 100% across all metrics (perfect score)
+- **TransferOperations.ts**: 100% line coverage
+- **AccountService.ts**: 96.55% line coverage
+- **TransactionService.ts**: 94.73% line coverage
 
 ---
 

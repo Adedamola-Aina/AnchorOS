@@ -93,22 +93,40 @@ async function detectAnomalies() {
             });
         }
 
-        // Check for uncommitted changes
+
+        // Check for uncommitted changes (Anchor OS files only, not dashboard/tooling)
         const { stdout: gitStatus } = await execAsync('git status --porcelain', {
             cwd: ROOT_PATH,
             timeout: 5000
         });
 
         if (gitStatus.trim()) {
-            const changedFiles = gitStatus.trim().split('\n').length;
+            // Filter out dashboard internal tooling and build artifacts
+            const anchorOsFiles = gitStatus.trim().split('\n').filter(line => {
+                const file = line.substring(3); // Remove git status prefix
+                return !file.startsWith('tools/dashboard/') &&
+                    !file.startsWith('.agent/') &&
+                    !file.startsWith('scripts/') &&
+                    !file.startsWith('.husky/') &&
+                    !file.startsWith('.firebase/');
+            });
+
+            const changedFiles = anchorOsFiles.length;
             if (changedFiles > 10) {
                 alerts.push({
                     type: 'uncommitted_changes',
                     severity: 'warning',
-                    message: `${changedFiles} uncommitted files in working directory`
+                    message: `${changedFiles} uncommitted Anchor OS files in working directory`
+                });
+            } else if (changedFiles > 0) {
+                alerts.push({
+                    type: 'uncommitted_changes',
+                    severity: 'info',
+                    message: `${changedFiles} uncommitted Anchor OS file${changedFiles > 1 ? 's' : ''}`
                 });
             }
         }
+
 
         return {
             alerts,

@@ -174,10 +174,19 @@ async function getRepoStats() {
             git.log({ maxCount: 1 })
         ]);
 
+        // Filter to count only Anchor OS production files (not dashboard/tooling)
+        const anchorOsModified = status.modified.filter(file =>
+            !file.startsWith('tools/dashboard/') &&
+            !file.startsWith('.agent/') &&
+            !file.startsWith('scripts/') &&
+            !file.startsWith('.husky/') &&
+            !file.startsWith('.firebase/')
+        );
+
         return {
             branch: status.current,
             isClean: status.isClean(),
-            modifiedFiles: status.modified.length,
+            modifiedFiles: anchorOsModified.length,
             stagedFiles: status.staged.length,
             lastCommit: log.latest ? {
                 hash: log.latest.hash.substring(0, 7),
