@@ -130,3 +130,8 @@ _No regressions detected_
 
 **Triage**: Daily review at 09:00
 **Update**: Real-time as bugs reported/fixed
+
+
+## Medium Priority
+- [ ] [P2] 10 files exceed the 200-line limit - need refactoring to meet code quality standards (Code quality issue - files should be split into smaller, more maintainable modules) - Added 2026-01-27
+- [ ] [P2] Velocity chart shows incorrect data when timezone changes (User traveling across timezones reported velocity spikes) - Added 2026-01-27
