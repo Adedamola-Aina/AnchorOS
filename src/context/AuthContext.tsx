@@ -41,7 +41,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
-    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('anchor_theme') as 'light' | 'dark' | null : null;
+    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('anchor_theme') as 'light' | 'dark' | 'oled' | null : null;
     const [profile, setProfile] = useState<UserProfile>({ name: 'User', theme: savedTheme || 'light', familyMode: false, onboardingComplete: false });
     const [loading, setLoading] = useState(true);
     const [profileLoaded, setProfileLoaded] = useState(false);

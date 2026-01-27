@@ -13,6 +13,8 @@ import { AuthLeftPanel } from './AuthLeftPanel';
 import { AuthFormFields } from './AuthFormFields';
 import { AuthSubmitButton } from './AuthSubmitButton';
 
+export type Theme = 'light' | 'dark' | 'oled';
+
 interface AuthViewProps {
     authMode: 'login' | 'signup' | 'mfa' | 'reset';
     setAuthMode: (mode: 'login' | 'signup' | 'mfa' | 'reset') => void;
@@ -25,8 +27,8 @@ interface AuthViewProps {
     authError: string;
     isAuthenticating: boolean;
     onSubmit: (e: React.FormEvent) => void;
-    theme?: 'light' | 'dark';
-    onThemeToggle?: () => void;
+    theme?: Theme;
+    onSetTheme?: (theme: Theme) => void;
 }
 
 const titles = { login: 'Welcome back', signup: 'Create your account', mfa: 'Security Challenge', reset: 'Reset Password' };
@@ -36,7 +38,7 @@ const subtitles = {
 
 const AuthView: React.FC<AuthViewProps> = ({
     authMode, setAuthMode, email, setEmail, password, setPassword,
-    mfaCode, setMfaCode, authError, isAuthenticating, onSubmit, theme = 'light', onThemeToggle
+    mfaCode, setMfaCode, authError, isAuthenticating, onSubmit, theme = 'light', onSetTheme
 }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
@@ -134,7 +136,7 @@ const AuthView: React.FC<AuthViewProps> = ({
                         )}
 
                         <div className="mt-auto pt-8 flex flex-col items-center animate-in fade-in duration-1000 delay-500">
-                            <ThemeToggle variant="minimal" theme={theme} onToggle={() => onThemeToggle?.()} />
+                            <ThemeToggle variant="minimal" theme={theme} onSetTheme={(t) => onSetTheme?.(t)} />
                             <p className="mt-6 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em] opacity-50">&copy; 2026 Anchor OS</p>
                         </div>
                     </div>

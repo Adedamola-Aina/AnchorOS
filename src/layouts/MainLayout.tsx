@@ -31,7 +31,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon, accountNotific
             to={to}
             onClick={() => setMobileMenuOpen(false)}
             className={({ isActive }) =>
-                `w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'}`
+                `w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-slate-800 dark:bg-slate-700 oled:bg-zinc-900 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 oled:hover:bg-zinc-900 hover:text-slate-800 dark:hover:text-slate-200'}`
             }
         >
             {({ isActive }) => (
