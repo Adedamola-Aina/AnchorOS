@@ -12,6 +12,7 @@
 |----|---------|-----------|---------|
 | ARCH-001 | 200-Line Rule Enforcement | 2026-01-27 | 51 files modularized, 100% compliance achieved |
 | ARCH-002 | Feature-Level Error Boundaries | 2026-01-27 | Implemented FeatureErrorBoundary component across all 4 major views (Finance, Commitments, Dashboard, Settings) for graceful failure isolation |
+| ARCH-003 | Service Layer Tests | 2026-01-27 | Created 69 unit tests across 4 service files (AccountService, TransactionService, TransferOperations, FinanceService) with 100% pass rate |
 
 ---
 
@@ -50,12 +51,16 @@
 - **Achievement**: Prevents feature-level errors from crashing entire app, provides user recovery options
 - **Commit**: `e0fdb9c`
 
-#### [ARCH-003] Add Service Layer Tests
-- **Current State**: Most tests are component-level
-- **Problem**: Service logic (TransactionService, AccountService) under-tested
-- **Suggestion**: Create `services/__tests__/` with unit tests for all service functions
-- **Impact**: Catch business logic bugs earlier
-- **Effort**: Medium (3-4 days)
+#### [ARCH-003] ~~Service Layer Tests~~ ✅ COMPLETED
+- **Status**: ✅ COMPLETED (Jan 27, 2026)
+- **Result**: Created 69 unit tests across 4 service files (100% pass rate, <100ms execution)
+- **Files Created**:
+  - `AccountService.test.ts` (20 tests)
+  - `TransactionService.test.ts` (21 tests)
+  - `TransferOperations.test.ts` (16 tests)
+  - `FinanceService.test.ts` (12 tests)
+- **Achievement**: Comprehensive coverage of business logic, permissions, error handling, and batch operations
+- **Commits**: `fbb214a`, `cd478ca`, `05c32c2`, `2512cfa`
 
 #### [ARCH-004] Implement Feature Flags System
 - **Current State**: No feature flags infrastructure
@@ -107,17 +112,65 @@
 
 ### LOW Priority
 
-#### [ARCH-010] Add Bundle Analysis to CI
+#### [ARCH-010] Test Coverage Reporting
+- ** Origin**: Follow-up from ARCH-003 completion
+- **Current State**: Tests run locally without coverage metrics
+- **Suggestion**: Implement comprehensive coverage tracking:
+  - Add `vitest --coverage` to CI pipeline
+  - Track coverage trends over time (e.g., Codecov integration)
+  - Enforce minimum coverage thresholds (80%+ for services)
+  - Generate HTML reports for PR reviews
+- **Impact**: Visibility into test effectiveness, prevent coverage regressions
+- **Effort**: Low (1 day)
+
+#### [ARCH-011] Mutation Testing for Service Layer
+- **Origin**: Follow-up from ARCH-003 completion
+- **Current State**: Line coverage exists, but test effectiveness unknown
+- **Suggestion**: Add mutation testing with Stryker.js:
+  - Run on service layer tests (AccountService, TransactionService, etc.)
+  - Verify tests catch actual bugs (not just line coverage)
+  - Identify weak test assertions
+  - Target 80%+ mutation score
+- **Impact**: Higher confidence in test suite quality
+- **Effort**: Medium (2 days)
+
+#### [ARCH-012] Performance Benchmarking for Services
+- **Origin**: Follow-up from ARCH-003 completion
+- **Current State**: No performance regression tracking
+- **Suggestion**: Add benchmarks for critical operations:
+  - Batch operations (400+ transaction renames)
+  - Transfer transaction creation
+  - Large dataset queries
+  - Track execution time trends in CI
+  - Alert on >20% regression
+- **Impact**: Catch performance regressions early
+- **Effort**: Low (1 day)
+
+#### [ARCH-013] Expanded Integration Tests
+- **Origin**: Phase 5 from ARCH-003 (deferred to backlog)
+- **Current State**: 4 integration tests (basic CRUD flows)
+- **Suggestion**: Add comprehensive integration scenarios:
+  - Concurrent update scenarios (optimistic locking)
+  - 500+ transaction batch operations
+  - Shared account permission workflows
+  - Multi-user transfer edge cases
+- **Impact**: Catch real-world edge cases, improve production reliability
+- **Effort**: Medium (2-3 days)
+
+#### [ARCH-014] Add Bundle Analysis to CI
 - **Suggestion**: Add `vite-bundle-visualizer` to CI pipeline
 - **Impact**: Prevent bundle size regressions
+- **Effort**: Low (1 day)
 
-#### [ARCH-011] Create Architecture Decision Records (ADRs)
+#### [ARCH-015] Create Architecture Decision Records (ADRs)
 - **Suggestion**: Document major architecture decisions in `/docs/adr/`
 - **Impact**: Better onboarding, historical context
+- **Effort**: Low (ongoing)
 
-#### [ARCH-012] Add OpenTelemetry Tracing
+#### [ARCH-016] Add OpenTelemetry Tracing
 - **Suggestion**: Instrument critical paths for performance monitoring
 - **Impact**: Production debugging capability
+- **Effort**: Medium (3 days)
 
 ---
 
