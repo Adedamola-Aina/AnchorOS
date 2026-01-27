@@ -440,6 +440,123 @@ vi.mocked(getDoc).mockResolvedValueOnce({
 });
 ```
 
+### Service Layer Testing Patterns
+
+**Reference Implementation**: See [src/services/__tests__/README.md](../src/services/__tests__/README.md) for comprehensive examples.
+
+Service tests validate business logic in isolation. All Firebase dependencies are mocked for fast execution (<100ms per suite).
+
+#### Pattern 1: Testing Service Methods with Mocked Dependencies
+
+```typescript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { AccountService } from '../AccountService';
+import { writeBatch } from 'firebase/firestore';
+
+// Mock Firebase at module level
+vi.mock('firebase/firestore');
+
+describe('AccountService', () => {
+  let service: AccountService;
+  let mockBatch: any;
+
+  beforeEach(() => {
+    mockBatch = {
+      update: vi.fn(),
+      set: vi.fn(),
+      commit: vi.fn(() => Promise.resolve()),
+    };
+    vi.mocked(writeBatch).mockReturnValue(mockBatch);
+    service = new AccountService();
+  });
+
+  it('soft-deletes account by setting isArchived flag', async () => {
+    // Arrange
+    const userId = 'user-123';
+    const account = { id: 'acc-1', name: 'Checking', ownerId: userId };
+
+    // Act
+    await service.deleteAccount(userId, 'John Doe', account);
+
+    // Assert
+    expect(mockBatch.update).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ isArchived: true })
+    );
+    expect(mockBatch.commit).toHaveBeenCalled();
+  });
+});
+```
+
+#### Pattern 2: Testing Error Propagation
+
+```typescript
+it('propagates AnchorError with correct error type', async () => {
+  const invalidAccount = null;
+
+  await expect(
+    service.deleteAccount('user-1', 'User', invalidAccount)
+  ).rejects.toThrow(AnchorError);
+
+  await expect(
+    service.deleteAccount('user-1', 'User', invalidAccount)
+  ).rejects.toThrow('Account not found');
+});
+```
+
+#### Pattern 3: Testing Batch Operations
+
+```typescript
+it('handles batch chunking for 400+ transactions', async () => {
+  // Firestore batch limit is 500 operations
+  const largeTxSet = Array.from({ length: 500 }, (_, i) => 
+    createMockTransaction(`tx-${i}`, 'expense', 1000)
+  );
+
+  vi.mocked(getDocs).mockResolvedValue({
+    docs: largeTxSet,
+    size: 500,
+  } as any);
+
+  await service.renameAccount(userId, userName, account, 'New Name');
+
+  // Expect 2 batches: 400 + 100
+  expect(mockBatch.commit).toHaveBeenCalledTimes(2);
+});
+```
+
+#### Pattern 4: Testing Facade Delegation
+
+```typescript
+// For facade services that delegate to other services
+describe('FinanceService', () => {
+  let mockAccountService: any;
+
+  beforeEach(() => {
+    mockAccountService = {
+      addAccount: vi.fn(),
+      deleteAccount: vi.fn(),
+    };
+
+    vi.spyOn(AccountService.prototype, 'addAccount')
+      .mockImplementation(mockAccountService.addAccount);
+  });
+
+  it('delegates to AccountService.addAccount', async () => {
+    const payload = { name: 'Savings', type: 'savings' };
+
+    await service.addAccount(userId, payload);
+
+    expect(mockAccountService.addAccount).toHaveBeenCalledWith(userId, payload);
+    expect(mockAccountService.addAccount).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+**Performance**: All service tests must run in <100ms per file (ARCH-003 achieves ~14ms avg).
+
+**Reference**: See ARCH-003 implementation for 69 unit tests covering AccountService, TransactionService, TransferOperations, and FinanceService.
+
 ### React Component Testing Patterns
 
 ```typescript
