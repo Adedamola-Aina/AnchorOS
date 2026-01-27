@@ -17,6 +17,7 @@
 
 ### ✅ Completed
 - [x] **ARCH-001** (Jan 27) - 22 files refactored, pre-commit hook enforces 200-line rule
+- [x] **ARCH-002** (Jan 27) - Feature error boundaries implemented across all major views
 - [x] **Family Mode** - Spouse sharing, family accounts
 - [x] **Fabric AI Magic Suggestions** - GAP-001 fixed Jan 26
 - [x] **Internal PM Dashboard** (Jan 26) - http://localhost:3001
