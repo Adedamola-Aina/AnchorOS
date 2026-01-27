@@ -122,7 +122,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
     return (
         <div className="bg-white dark:bg-slate-800 p-1 rounded-xl">
-            <h3 className="font-bold text-slate-800 dark:text-white mb-4">{getTransactionLabel(formState.type).header}</h3>
+            <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4">{getTransactionLabel(formState.type).header}</h3>
             {isOverdraft && <OverdraftWarning projectedBalance={projectedBalance} amountCents={toCents(amount)} />}
 
             <form onSubmit={handleSubmit} className="space-y-4">

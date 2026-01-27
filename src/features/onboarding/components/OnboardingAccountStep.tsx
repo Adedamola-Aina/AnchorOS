@@ -38,7 +38,7 @@ export function OnboardingAccountStep({
                     <Wallet className="w-6 h-6" />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Add Primary Account</h2>
+                    <h2 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white">Add Primary Account</h2>
                     <p className="text-slate-500 text-sm">Where does your money live?</p>
                 </div>
             </div>

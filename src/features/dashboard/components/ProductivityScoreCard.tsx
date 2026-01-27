@@ -24,7 +24,7 @@ export function ProductivityScoreCard({ commitmentStats, navigateTo }: Productiv
                 <div className="w-12 h-12 bg-primary-50 dark:bg-primary-900/20 rounded-full flex items-center justify-center mb-3">
                     <Activity className="w-6 h-6 text-primary-500" />
                 </div>
-                <h3 className="font-bold text-slate-900 dark:text-white mb-1">Boost Productivity</h3>
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-1">Boost Productivity</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-[200px]">
                     Set daily or weekly commitments to track your consistency across life domains.
                 </p>

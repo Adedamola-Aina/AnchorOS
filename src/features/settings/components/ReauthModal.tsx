@@ -25,7 +25,7 @@ export const ReauthModal: React.FC<ReauthModalProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
             <Card className="max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-200 shadow-2xl">
                 <div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Verify Identity</h3>
+                    <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Verify Identity</h3>
                     <p className="text-slate-500 text-sm mt-1">Please enter your password to confirm this security change.</p>
                 </div>
                 <input

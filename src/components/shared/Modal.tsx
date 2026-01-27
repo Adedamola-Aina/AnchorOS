@@ -99,14 +99,14 @@ export const Modal: React.FC<ModalProps> = ({
             <div
                 ref={modalRef}
                 className={`relative z-10 bg-white dark:bg-slate-800 shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden ${fullScreenMobile
-                        ? `w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:${maxWidth} sm:rounded-2xl`
-                        : `w-full ${maxWidth} max-h-[90vh] rounded-2xl`
+                    ? `w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:${maxWidth} sm:rounded-2xl`
+                    : `w-full ${maxWidth} max-h-[90vh] rounded-2xl`
                     }`}
             >
                 {/* Header - with safe area padding on mobile */}
                 <div className={`px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 shrink-0 ${fullScreenMobile ? 'pt-safe' : ''
                     }`}>
-                    <h3 id={modalId} className="text-lg font-bold text-slate-800 dark:text-white">{title}</h3>
+                    <h3 id={modalId} className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white">{title}</h3>
                     <button
                         onClick={onClose}
                         className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"

@@ -24,7 +24,7 @@ export const EmailVerificationGate: React.FC<EmailVerificationGateProps> = ({ em
         <div className="w-full max-w-md bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl text-center space-y-6">
             <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto text-primary-400"><Mail className="w-8 h-8" /></div>
             <div>
-                <h2 className="text-2xl font-bold mb-2">Verify your Email</h2>
+                <h2 className="text-h2 lg:text-h2-lg mb-2">Verify your Email</h2>
                 <p className="text-slate-400">We've sent a verification link to <span className="text-white font-medium">{email}</span>. Please check your inbox to continue.</p>
             </div>
             <div className="space-y-3">

@@ -23,7 +23,7 @@ export const SingleAccountTransferMessage: React.FC<SingleAccountTransferMessage
             <span className="text-3xl">💸</span>
         </div>
         <div>
-            <h3 className="font-bold text-slate-800 dark:text-white mb-2">Need 2 Accounts for Transfers</h3>
+            <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-2">Need 2 Accounts for Transfers</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
                 Transfers move money between your accounts. You currently have only one account.
                 <br />

@@ -26,7 +26,7 @@ export function InviteCodeEntry({
     return (
         <form onSubmit={onSubmit} className="space-y-6">
             <div className="text-center">
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Enter Verification Code</h1>
+                <h1 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white">Enter Verification Code</h1>
                 <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
                     Enter the 6-digit code found in your invitation email.
                 </p>

@@ -75,7 +75,7 @@ export class FeatureErrorBoundary extends Component<Props, State> {
                         </div>
 
                         {/* Error Message */}
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center mb-2">
+                        <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white text-center mb-2">
                             Unable to load {this.props.featureName}
                         </h3>
                         <p className="text-sm text-slate-600 dark:text-slate-400 text-center mb-6">

@@ -29,7 +29,7 @@ export function AuthLeftPanel() {
                     <AnchorLogo className="w-10 h-10 text-white" />
                     <span className="text-xl font-bold tracking-tight text-white transition-colors">Anchor</span>
                 </div>
-                <h2 className="text-4xl font-light text-white leading-tight">
+                <h2 className="text-h1 lg:text-h1-lg text-white leading-tight font-light">
                     Stay grounded.
                     <br />
                     <span className="text-cyan-400 font-medium">Track what matters.</span>
