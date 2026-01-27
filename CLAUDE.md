@@ -216,7 +216,7 @@ const FinanceView = () => (
 ### 3.2 The 200-Line Rule
 No single file should exceed 200 lines of code. If it does, it's doing too much. Split it.
 
-Exceptions require explicit justification in a comment at the top of the file.
+**There are NO exceptions.** This rule is enforced by a pre-commit hook in `.husky/pre-commit`.
 
 ### 3.3 Dependency Direction
 Dependencies flow DOWN, never UP or SIDEWAYS.

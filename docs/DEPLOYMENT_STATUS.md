@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-26 22:37 UTC
+**Last Updated**: 2026-01-26 22:50 UTC
 
 ---
 
@@ -9,20 +9,27 @@
 | Environment | Version | Firebase Site | URL | Health |
 |-------------|---------|---------------|-----|--------|
 | **Production** | v1.4.0 | anchor-os | https://anchor-os.web.app | ✅ |
-| **Staging** | v1.4.0 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ |
+| **Staging** | v1.5.0-dev | anchor-os-staging | https://anchor-os-staging.web.app | ✅ |
 | **Dev** | v1.5.0-dev | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ |
 
 ---
 
 ## ⏳ PENDING CHANGES (Dev → Staging)
 
-These changes are in Dev but NOT deployed to Staging:
+No pending changes. Dev and Staging are in sync.
+
+---
+
+## ⏳ PENDING CHANGES (Staging → Production)
+
+These changes are on Staging but NOT deployed to Production:
 
 ### Features
 - [ ] Mobile Optimization Phase 2 (iOS keyboard, full-screen modals)
 - [ ] Fabric AI Data Wiring (GAP-001 fix)
 - [ ] PM Dashboard enhancements (Recently Fixed, clickable bugs)
 - [ ] Single Source of Truth (ROADMAP.md consolidation)
+- [ ] Intake Workflow (Rule 8 enhancement)
 
 ### Bug Fixes (5 total)
 - [ ] BUG-002: Mobile keyboard covers input fields
@@ -31,7 +38,7 @@ These changes are in Dev but NOT deployed to Staging:
 - [ ] BUG-005: Settings Contact button misaligned
 - [ ] GAP-001: Fabric AI Data Wiring
 
-**Ready to deploy**: Run `npm run deploy:staging` to move these to staging.
+**Ready to deploy**: Run `npm run deploy:production` after verifying staging.
 
 ---
 
