@@ -699,3 +699,10 @@
 - **Context**: Requested for quarterly reporting
 - **Status**: Backlog
 - **Added**: 2026-01-27
+
+### Integration Test Feature
+- **Priority**: low
+- **Description**: Testing that conversational AI auto-files features correctly
+- **Context**: Integration verification
+- **Status**: Backlog
+- **Added**: 2026-01-27

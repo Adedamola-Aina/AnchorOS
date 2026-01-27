@@ -1,18 +1,21 @@
 /**
  * AccountHeader - Premium header section with balance and action buttons
  * Redesigned for a more modern, polished look
+ * 
+ * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Sub-components extracted to AccountHeaderParts.tsx
  */
 
-import { ArrowLeft, Trash2, Users, ArrowUpRight, Pencil, Check, X, Sparkles } from 'lucide-react';
+import { ArrowLeft, Trash2, Users, Pencil, Sparkles } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
 import { formatCurrency } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
+import { AccountRenameInput, AccountActionButtons } from './AccountHeaderParts';
 
 interface AccountHeaderProps {
     account: AnchorAccount;
     isOwner: boolean;
     familyMemberId?: string | null;
-    // Rename state
     isEditingName: boolean;
     newName: string;
     isRenaming: boolean;
@@ -27,7 +30,6 @@ interface AccountHeaderProps {
     onNameChange: (name: string) => void;
 }
 
-// Premium gradient color sets based on currency/type
 const getAccountStyle = (account: AnchorAccount) => {
     if (account.currency === 'USD') {
         return {
@@ -37,7 +39,6 @@ const getAccountStyle = (account: AnchorAccount) => {
             glow: 'shadow-emerald-500/20',
         };
     }
-    // NGN - vibrant gradient
     return {
         gradient: 'from-indigo-600 via-purple-600 to-pink-500',
         accent: 'bg-white',
@@ -47,21 +48,10 @@ const getAccountStyle = (account: AnchorAccount) => {
 };
 
 export const AccountHeader = ({
-    account,
-    isOwner,
-    familyMemberId,
-    isEditingName,
-    newName,
-    isRenaming,
-    onBack,
-    onDelete,
-    onShare,
-    onTransfer,
-    onPayBill,
-    onStartRename,
-    onCancelRename,
-    onConfirmRename,
-    onNameChange,
+    account, isOwner, familyMemberId,
+    isEditingName, newName, isRenaming,
+    onBack, onDelete, onShare, onTransfer, onPayBill,
+    onStartRename, onCancelRename, onConfirmRename, onNameChange,
 }: AccountHeaderProps) => {
     const style = getAccountStyle(account);
     const isShared = account.sharedWith && Object.keys(account.sharedWith).length > 0;
@@ -71,8 +61,6 @@ export const AccountHeader = ({
             {/* Decorative Elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
-
-            {/* Subtle grid pattern */}
             <div
                 className="absolute inset-0 opacity-[0.03]"
                 style={{
@@ -83,10 +71,7 @@ export const AccountHeader = ({
             <div className="relative z-10">
                 {/* Top Bar */}
                 <div className="flex items-center justify-between mb-8">
-                    <button
-                        onClick={onBack}
-                        className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-3 rounded-2xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10"
-                    >
+                    <button onClick={onBack} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-3 rounded-2xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10">
                         <ArrowLeft className="w-5 h-5" />
                     </button>
 
@@ -98,29 +83,17 @@ export const AccountHeader = ({
                             </div>
                         )}
                         {isOwner && (
-                            <button
-                                onClick={onStartRename}
-                                className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10"
-                                title="Rename account"
-                            >
+                            <button onClick={onStartRename} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10" title="Rename account">
                                 <Pencil className="w-4 h-4" />
                             </button>
                         )}
                         {onShare && familyMemberId && !account.ownerId && (
-                            <button
-                                onClick={onShare}
-                                className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10"
-                                title="Manage Sharing"
-                            >
+                            <button onClick={onShare} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10" title="Manage Sharing">
                                 <Users className="w-4 h-4" />
                             </button>
                         )}
                         {onDelete && isOwner && (
-                            <button
-                                onClick={onDelete}
-                                className="bg-white/10 hover:bg-red-500/80 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10"
-                                title="Delete account"
-                            >
+                            <button onClick={onDelete} className="bg-white/10 hover:bg-red-500/80 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10" title="Delete account">
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         )}
@@ -130,35 +103,7 @@ export const AccountHeader = ({
                 {/* Account Info */}
                 <div className="mb-8">
                     {isEditingName ? (
-                        <div className="animate-in fade-in slide-in-from-left-2 duration-200 space-y-3">
-                            <input
-                                type="text"
-                                value={newName}
-                                onChange={(e) => onNameChange(e.target.value)}
-                                className="w-full bg-white/10 backdrop-blur-xl rounded-2xl px-5 py-3 text-white text-2xl font-bold placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 border border-white/10"
-                                placeholder="Account name"
-                                autoFocus
-                                disabled={isRenaming}
-                            />
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={onConfirmRename}
-                                    disabled={isRenaming || !newName.trim()}
-                                    className="flex-1 bg-emerald-500 hover:bg-emerald-400 p-3 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 font-semibold"
-                                >
-                                    <Check className="w-5 h-5" />
-                                    <span className="sm:hidden">Save</span>
-                                </button>
-                                <button
-                                    onClick={onCancelRename}
-                                    disabled={isRenaming}
-                                    className="flex-1 bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-all duration-200 border border-white/10 flex items-center justify-center gap-2 font-semibold"
-                                >
-                                    <X className="w-5 h-5" />
-                                    <span className="sm:hidden">Cancel</span>
-                                </button>
-                            </div>
-                        </div>
+                        <AccountRenameInput newName={newName} isRenaming={isRenaming} onNameChange={onNameChange} onConfirmRename={onConfirmRename} onCancelRename={onCancelRename} />
                     ) : (
                         <div className="space-y-2">
                             <div className="flex items-center gap-3">
@@ -166,12 +111,8 @@ export const AccountHeader = ({
                                 <Sparkles className="w-5 h-5 opacity-50" />
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-xs font-semibold uppercase tracking-wider border border-white/10">
-                                    {account.type}
-                                </span>
-                                <span className="text-white/50 text-sm font-medium">
-                                    {account.currency === 'USD' ? '🇺🇸 US Dollar' : '🇳🇬 Nigerian Naira'}
-                                </span>
+                                <span className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-xs font-semibold uppercase tracking-wider border border-white/10">{account.type}</span>
+                                <span className="text-white/50 text-sm font-medium">{account.currency === 'USD' ? '🇺🇸 US Dollar' : '🇳🇬 Nigerian Naira'}</span>
                             </div>
                         </div>
                     )}
@@ -180,32 +121,13 @@ export const AccountHeader = ({
                 {/* Balance Display */}
                 <div className="mb-10">
                     <p className="text-xs font-semibold opacity-60 uppercase tracking-[0.2em] mb-2">Available Balance</p>
-                    <div className="flex items-baseline gap-2">
-                        <h2 className="text-5xl sm:text-6xl font-black tabular-nums tracking-tight">
-                            {formatCurrency(fromCents(account.balanceCents), account.currency)}
-                        </h2>
-                    </div>
+                    <h2 className="text-5xl sm:text-6xl font-black tabular-nums tracking-tight">
+                        {formatCurrency(fromCents(account.balanceCents), account.currency)}
+                    </h2>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3">
-                    <button
-                        onClick={onTransfer}
-                        className="flex-1 min-w-[140px] bg-white text-slate-900 hover:bg-white/90 px-6 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
-                    >
-                        <ArrowUpRight className="w-5 h-5" />
-                        Transfer
-                    </button>
-                    <button
-                        onClick={onPayBill}
-                        className="flex-1 min-w-[140px] bg-white/15 hover:bg-white/25 backdrop-blur-xl px-6 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-white/10"
-                    >
-                        <span className="w-5 h-5 flex items-center justify-center text-lg font-bold">
-                            {account.currency === 'USD' ? '$' : '₦'}
-                        </span>
-                        Pay Bill
-                    </button>
-                </div>
+                <AccountActionButtons account={account} onTransfer={onTransfer} onPayBill={onPayBill} />
             </div>
         </div>
     );

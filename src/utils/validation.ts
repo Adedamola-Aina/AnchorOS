@@ -1,9 +1,8 @@
 /**
  * Input Validation Utilities
  * 
- * JUSTIFICATION (CLAUDE.md §3.2): This module exceeds 200 lines because it contains
- * security-critical validation schemas and functions that should be reviewed as a
- * cohesive unit. Splitting would scatter security logic without clear benefit.
+ * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Entity validation schemas moved to entityValidation.ts
  * 
  * Philosophy:
  * - Validate at write time, reject with 400 if invalid
@@ -57,27 +56,14 @@ export function validateString(
     const { minLength = 0, maxLength = Infinity, required = true, rejectDangerous = true } = options;
 
     if (value === undefined || value === null || value === '') {
-        if (required) {
-            return { field, message: `${field} is required` };
-        }
+        if (required) return { field, message: `${field} is required` };
         return null;
     }
 
-    if (typeof value !== 'string') {
-        return { field, message: `${field} must be a string` };
-    }
-
-    if (value.length < minLength) {
-        return { field, message: `${field} must be at least ${minLength} characters` };
-    }
-
-    if (value.length > maxLength) {
-        return { field, message: `${field} must be ${maxLength} characters or fewer` };
-    }
-
-    if (rejectDangerous && containsDangerousPatterns(value)) {
-        return { field, message: `${field} contains invalid content` };
-    }
+    if (typeof value !== 'string') return { field, message: `${field} must be a string` };
+    if (value.length < minLength) return { field, message: `${field} must be at least ${minLength} characters` };
+    if (value.length > maxLength) return { field, message: `${field} must be ${maxLength} characters or fewer` };
+    if (rejectDangerous && containsDangerousPatterns(value)) return { field, message: `${field} contains invalid content` };
 
     return null;
 }
@@ -93,27 +79,14 @@ export function validateNumber(
     const { min = -Infinity, max = Infinity, required = true, integer = false } = options;
 
     if (value === undefined || value === null) {
-        if (required) {
-            return { field, message: `${field} is required` };
-        }
+        if (required) return { field, message: `${field} is required` };
         return null;
     }
 
-    if (typeof value !== 'number' || isNaN(value)) {
-        return { field, message: `${field} must be a valid number` };
-    }
-
-    if (integer && !Number.isInteger(value)) {
-        return { field, message: `${field} must be a whole number` };
-    }
-
-    if (value < min) {
-        return { field, message: `${field} must be at least ${min}` };
-    }
-
-    if (value > max) {
-        return { field, message: `${field} must be at most ${max}` };
-    }
+    if (typeof value !== 'number' || isNaN(value)) return { field, message: `${field} must be a valid number` };
+    if (integer && !Number.isInteger(value)) return { field, message: `${field} must be a whole number` };
+    if (value < min) return { field, message: `${field} must be at least ${min}` };
+    if (value > max) return { field, message: `${field} must be at most ${max}` };
 
     return null;
 }
@@ -129,92 +102,18 @@ export function validateDate(
     const { required = true } = options;
 
     if (value === undefined || value === null || value === '') {
-        if (required) {
-            return { field, message: `${field} is required` };
-        }
+        if (required) return { field, message: `${field} is required` };
         return null;
     }
 
-    if (typeof value !== 'string') {
-        return { field, message: `${field} must be a date string` };
-    }
-
+    if (typeof value !== 'string') return { field, message: `${field} must be a date string` };
     const date = new Date(value);
-    if (isNaN(date.getTime())) {
-        return { field, message: `${field} is not a valid date` };
-    }
+    if (isNaN(date.getTime())) return { field, message: `${field} is not a valid date` };
 
     return null;
 }
 
-// =============================================================================
-// ENTITY SCHEMAS
-// =============================================================================
-
-/**
- * Validate account creation/update input
- */
-export function validateAccount(data: Record<string, unknown>): ValidationResult {
-    const errors: ValidationError[] = [];
-
-    const nameError = validateString(data.name, 'Account name', { minLength: 1, maxLength: 255 });
-    if (nameError) errors.push(nameError);
-
-    const typeError = validateString(data.type, 'Account type', { maxLength: 50 });
-    if (typeError) errors.push(typeError);
-
-    const currencyError = validateString(data.currency, 'Currency', { maxLength: 10 });
-    if (currencyError) errors.push(currencyError);
-
-    if (data.balanceCents !== undefined) {
-        const balanceError = validateNumber(data.balanceCents, 'Balance', { integer: true });
-        if (balanceError) errors.push(balanceError);
-    }
-
-    return { valid: errors.length === 0, errors };
-}
-
-/**
- * Validate transaction creation/update input
- */
-export function validateTransaction(data: Record<string, unknown>): ValidationResult {
-    const errors: ValidationError[] = [];
-
-    const titleError = validateString(data.title, 'Description', { minLength: 1, maxLength: 500 });
-    if (titleError) errors.push(titleError);
-
-    const amountError = validateNumber(data.amountCents, 'Amount', { min: 1, integer: true });
-    if (amountError) errors.push(amountError);
-
-    const typeError = validateString(data.type, 'Transaction type', { maxLength: 20 });
-    if (typeError) errors.push(typeError);
-
-    const categoryError = validateString(data.category, 'Category', { maxLength: 50, required: false });
-    if (categoryError) errors.push(categoryError);
-
-    const dateError = validateDate(data.transactionDate, 'Date', { required: false });
-    if (dateError) errors.push(dateError);
-
-    return { valid: errors.length === 0, errors };
-}
-
-/**
- * Validate profile update input
- */
-export function validateProfileUpdate(data: Record<string, unknown>): ValidationResult {
-    const errors: ValidationError[] = [];
-
-    if (data.name !== undefined) {
-        const nameError = validateString(data.name, 'Display name', { minLength: 1, maxLength: 100 });
-        if (nameError) errors.push(nameError);
-    }
-
-    return { valid: errors.length === 0, errors };
-}
-
-/**
- * Format validation errors for display
- */
-export function formatValidationErrors(errors: ValidationError[]): string {
-    return errors.map(e => e.message).join('. ');
-}
+// Re-export entity schemas for backward compatibility
+export {
+    validateAccount, validateTransaction, validateProfileUpdate, formatValidationErrors
+} from './entityValidation';
