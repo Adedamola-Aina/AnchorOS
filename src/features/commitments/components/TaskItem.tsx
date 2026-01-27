@@ -71,7 +71,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                         variant="ghost"
                         size="icon"
                         onClick={() => onStartEdit(task.id)}
-                        className="text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        className="text-slate-400 hover:text-task-500 hover:bg-task-50 dark:hover:bg-task-900/20"
                     >
                         <Pencil className="w-4 h-4" />
                     </Button>

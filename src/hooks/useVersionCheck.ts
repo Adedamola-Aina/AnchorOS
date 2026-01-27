@@ -68,7 +68,7 @@ export function useVersionCheck(enabled: boolean = true) {
 
                 // Brief notification before reload
                 const toast = document.createElement('div');
-                toast.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg z-[9999] animate-pulse font-bold text-sm';
+                toast.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-primary-600 text-white px-6 py-3 rounded-full shadow-lg z-[9999] animate-pulse font-bold text-sm';
                 toast.textContent = '🚀 New version available! Refreshing...';
                 document.body.appendChild(toast);
 

@@ -33,10 +33,10 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
                     });
 
                     return (
-                        <div key={idx} className={`flex flex-col gap-2 rounded-xl border transition-colors ${isToday ? 'bg-blue-50/50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30 p-2' : 'border-transparent p-2'}`}>
+                        <div key={idx} className={`flex flex-col gap-2 rounded-xl border transition-colors ${isToday ? 'bg-task-50/50 border-task-100 dark:bg-task-900/10 dark:border-task-900/30 p-2' : 'border-transparent p-2'}`}>
                             <div className="text-center mb-1">
-                                <div className={`text-[10px] font-bold uppercase tracking-wider ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}>{dayName}</div>
-                                <div className={`text-xl font-bold ${isToday ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>{dayNum}</div>
+                                <div className={`text-[10px] font-bold uppercase tracking-wider ${isToday ? 'text-task-600 dark:text-task-400' : 'text-slate-400'}`}>{dayName}</div>
+                                <div className={`text-xl font-bold ${isToday ? 'text-task-700 dark:text-task-300' : 'text-slate-700 dark:text-slate-300'}`}>{dayNum}</div>
                             </div>
 
                             <div className="space-y-2 flex-1">

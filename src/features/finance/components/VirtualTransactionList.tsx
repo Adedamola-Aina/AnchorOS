@@ -53,7 +53,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                 {searchQuery && onClearSearch && (
                     <button
                         onClick={onClearSearch}
-                        className="mt-4 text-blue-500 text-sm font-bold hover:underline"
+                        className="mt-4 text-primary-500 text-sm font-bold hover:underline"
                     >
                         Clear Search
                     </button>
