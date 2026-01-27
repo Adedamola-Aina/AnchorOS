@@ -51,7 +51,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     if (loading) return <AuthLoadingScreen />;
 
     if (!user) return (
-        <AuthView authMode={mfaResolver ? 'mfa' : authMode} setAuthMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} mfaCode={mfaCode} setMfaCode={setMfaCode} authError={authError} isAuthenticating={isAuthenticating} theme={profile?.theme || 'light'} onThemeToggle={() => updateProfile({ theme: profile.theme === 'dark' ? 'light' : 'dark' })}
+        <AuthView authMode={mfaResolver ? 'mfa' : authMode} setAuthMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} mfaCode={mfaCode} setMfaCode={setMfaCode} authError={authError} isAuthenticating={isAuthenticating} theme={profile?.theme || 'light'} onSetTheme={(theme) => updateProfile({ theme })}
             onSubmit={async (e) => {
                 e.preventDefault(); setAuthError('');
                 if (Date.now() < lockoutUntil) { setAuthError(`Too many attempts. Please try again in ${Math.ceil((lockoutUntil - Date.now()) / 1000)}s.`); return; }

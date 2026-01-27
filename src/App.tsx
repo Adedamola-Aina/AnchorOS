@@ -41,13 +41,20 @@ const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
   useLocation();
 
-  // Sync theme to root element
+  // Sync theme to root element (UX-002: Added OLED support)
   React.useEffect(() => {
-    if (profile?.theme === 'dark') {
+    const theme = profile?.theme || 'light';
+
+    // Remove all theme classes first
+    document.documentElement.classList.remove('dark', 'oled');
+
+    // Apply theme classes
+    if (theme === 'dark') {
       document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    } else if (theme === 'oled') {
+      document.documentElement.classList.add('dark', 'oled'); // OLED needs both
     }
+    // light theme = no classes
   }, [profile?.theme]);
 
   // Wait for auth AND profile to fully load before making onboarding decision
@@ -80,7 +87,7 @@ const AppContent = () => {
     <Routes>
       <Route path="/accept-invite" element={
         <ErrorBoundary componentName="Accept Invite">
-          <div className={`${profile?.theme === 'dark' ? 'dark' : ''} bg-slate-50 dark:bg-slate-900 min-h-screen`}>
+          <div className={`${profile?.theme === 'dark' ? 'dark' : profile?.theme === 'oled' ? 'dark oled' : ''} bg-slate-50 dark:bg-slate-900 oled:bg-black min-h-screen`}>
             <AcceptInviteView />
           </div>
         </ErrorBoundary>
