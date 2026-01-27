@@ -19,6 +19,7 @@ import { EditTaskForm } from './components/EditTaskForm';
 import { Button } from '../../components/ui';
 import { WeeklyView } from './components/WeeklyView';
 import { CommitmentsEmptyState, CommitmentsFilterBar } from './components/CommitmentsViewParts';
+import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 
 const CommitmentsView = () => {
   const { tasks, addTask, toggleTask, deleteTask, updateTask, loadingTasks } = useTasks();
@@ -64,16 +65,18 @@ const CommitmentsView = () => {
   const editingTask = useMemo(() => editingTaskId ? tasks.find(t => t.id === editingTaskId) : null, [editingTaskId, tasks]);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8">
-      <SectionHeader title="Commitments" subtitle={hasFamilyActive ? "Manage your daily obligations, goals, and family duties." : "Manage your daily obligations and goals."} action={<Button onClick={() => setShowAdd(!showAdd)} variant={showAdd ? 'secondary' : 'primary'} className="gap-2"><Plus className="w-4 h-4" /> <span>{showAdd ? 'Close' : 'New Commitment'}</span></Button>} />
-      <CommitmentsFilterBar filter={filter} viewMode={viewMode} onFilterChange={setFilter} onViewChange={setViewMode} />
-      {showAdd && <TaskForm onClose={() => setShowAdd(false)} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} />}
-      {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}
-      <div className={loadingTasks ? 'opacity-50 pointer-events-none' : ''}>
-        {viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={toggleTask} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} onConfirmFinancial={handleConfirmFinancial} /> : <WeeklyView tasks={allFiltered} onToggle={toggleTask} />}
+    <FeatureErrorBoundary featureName="Commitments">
+      <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8">
+        <SectionHeader title="Commitments" subtitle={hasFamilyActive ? "Manage your daily obligations, goals, and family duties." : "Manage your daily obligations and goals."} action={<Button onClick={() => setShowAdd(!showAdd)} variant={showAdd ? 'secondary' : 'primary'} className="gap-2"><Plus className="w-4 h-4" /> <span>{showAdd ? 'Close' : 'New Commitment'}</span></Button>} />
+        <CommitmentsFilterBar filter={filter} viewMode={viewMode} onFilterChange={setFilter} onViewChange={setViewMode} />
+        {showAdd && <TaskForm onClose={() => setShowAdd(false)} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} />}
+        {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}
+        <div className={loadingTasks ? 'opacity-50 pointer-events-none' : ''}>
+          {viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={toggleTask} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} onConfirmFinancial={handleConfirmFinancial} /> : <WeeklyView tasks={allFiltered} onToggle={toggleTask} />}
+        </div>
+        {totalFiltered === 0 && !showAdd && <CommitmentsEmptyState filter={filter} hasFamilyActive={hasFamilyActive} onCreateFirst={() => setShowAdd(true)} onLearnMore={() => showToast('Commitment exports will be available in the next update.', 'info')} />}
       </div>
-      {totalFiltered === 0 && !showAdd && <CommitmentsEmptyState filter={filter} hasFamilyActive={hasFamilyActive} onCreateFirst={() => setShowAdd(true)} onLearnMore={() => showToast('Commitment exports will be available in the next update.', 'info')} />}
-    </div>
+    </FeatureErrorBoundary>
   );
 };
 
