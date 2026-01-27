@@ -17,7 +17,7 @@ export function OnboardingWelcome({ userName, onStart, onSkip }: OnboardingWelco
             <div className="flex justify-center mb-6">
                 <AnchorLogo className="w-20 h-20 text-slate-900 dark:text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white tracking-tight">
                 Welcome aboard, <span className="text-blue-500">{userName}</span>.
             </h1>
             <p className="text-xl text-slate-500 dark:text-slate-400 leading-relaxed">

@@ -11,7 +11,7 @@ export { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
 export const SectionHeader = ({ title, subtitle, action }: { title: string, subtitle: string, action?: React.ReactNode }) => (
   <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-in fade-in slide-in-from-left-4 duration-700">
     <div>
-      <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{title}</h2>
+      <h2 className="text-h2 lg:text-h2-lg tracking-tight text-slate-900 dark:text-white">{title}</h2>
       <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{subtitle}</p>
     </div>
     {action}

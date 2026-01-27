@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     <div className="p-4 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full mb-6">
                         <AlertCircle className="w-12 h-12" />
                     </div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Something went wrong</h1>
+                    <h1 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white mb-2">Something went wrong</h1>
                     <p className="text-slate-500 dark:text-slate-400 max-w-md mb-8">
                         We encountered an unexpected error. Please try reloading the application.
                     </p>
