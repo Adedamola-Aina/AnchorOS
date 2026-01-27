@@ -59,8 +59,8 @@ describe('FeatureErrorBoundary', () => {
             </FeatureErrorBoundary>
         );
 
-        expect(screen.getByRole('button', { name: /Try Again/i })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /Report Issue/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Retry loading Finance/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Report this issue/i })).toBeInTheDocument();
     });
 
     it('calls onReset callback when "Try Again" is clicked', async () => {
@@ -73,7 +73,7 @@ describe('FeatureErrorBoundary', () => {
             </FeatureErrorBoundary>
         );
 
-        const tryAgainButton = screen.getByRole('button', { name: /Try Again/i });
+        const tryAgainButton = screen.getByRole('button', { name: /Retry loading Finance/i });
         await user.click(tryAgainButton);
 
         expect(onReset).toHaveBeenCalledTimes(1);
@@ -103,7 +103,7 @@ describe('FeatureErrorBoundary', () => {
         shouldThrow = false;
 
         // Click retry
-        const tryAgainButton = screen.getByRole('button', { name: /Try Again/i });
+        const tryAgainButton = screen.getByRole('button', { name: /Retry loading Finance/i });
         await user.click(tryAgainButton);
 
         // Should show recovered content
