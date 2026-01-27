@@ -58,61 +58,92 @@ async function getEnvironmentVersions() {
 
 /**
  * Check environment parity - what features are where
+ * Reads from DEPLOYMENT_STATUS.md for accurate parity data
  */
 async function checkEnvParity() {
     const versions = await getEnvironmentVersions();
-    const recentCommits = await getRecentCommits(50);
 
-    // Group commits by feature
-    const featureMap = new Map();
-    for (const commit of recentCommits) {
-        const feature = commit.feature || commit.message.substring(0, 40);
-        if (!featureMap.has(feature)) {
-            featureMap.set(feature, {
-                name: feature,
-                type: commit.type,
-                commits: [],
-                firstDate: commit.date,
-                lastDate: commit.date
-            });
+    // Read DEPLOYMENT_STATUS.md for pending changes
+    let devToStagingItems = [];
+    let stagingToProductionItems = [];
+
+    try {
+        const status = await readDoc('DEPLOYMENT_STATUS.md');
+        const content = status.content || '';
+
+        // Parse "Dev → Staging" section (ends at --- or next ## section)
+        const devToStagingMatch = content.match(/## ⏳ PENDING CHANGES \(Dev → Staging\)([\s\S]*?)(?=\n---|\n## )/);
+        if (devToStagingMatch) {
+            const section = devToStagingMatch[1];
+            // Check if it's "No pending changes" or empty
+            if (!section.includes('No pending changes') && !section.includes('in sync')) {
+                const items = section.match(/- \[[ x\/]\] .+/g) || [];
+                devToStagingItems = items.map(item => ({
+                    name: item.replace(/- \[[ x\/]\] /, '').trim(),
+                    completed: item.includes('[x]')
+                }));
+            }
         }
-        featureMap.get(feature).commits.push(commit);
-        featureMap.get(feature).lastDate = commit.date;
+
+        // Parse "Staging → Production" section (ends at --- or next ## section)
+        const stagingToProdMatch = content.match(/## ⏳ PENDING CHANGES \(Staging → Production\)([\s\S]*?)(?=\n---|\n## )/);
+        if (stagingToProdMatch) {
+            const section = stagingToProdMatch[1];
+            // Check if it's "No pending changes" or empty
+            if (!section.includes('No pending changes') && !section.includes('in sync')) {
+                const items = section.match(/- \[[ x\/]\] .+/g) || [];
+                stagingToProductionItems = items.map(item => ({
+                    name: item.replace(/- \[[ x\/]\] /, '').trim(),
+                    completed: item.includes('[x]')
+                }));
+            }
+        }
+    } catch (error) {
+        console.error('Error parsing DEPLOYMENT_STATUS.md:', error.message);
     }
 
-    // Determine deployment status for each feature
-    const features = Array.from(featureMap.values()).map(feature => {
-        // Simple heuristic: if feature commit is recent (< 7 days), it's only in dev
-        // This is a simplified version - real implementation would compare git history
-        const featureDate = new Date(feature.firstDate);
-        const now = new Date();
-        const daysOld = (now - featureDate) / (1000 * 60 * 60 * 24);
+    // Build features list from pending changes
+    const features = [];
 
-        return {
-            name: feature.name,
-            type: feature.type,
-            commitCount: feature.commits.length,
-            latestCommit: feature.commits[0]?.hash,
-            dev: { deployed: true, hash: feature.commits[0]?.hash },
-            staging: {
-                deployed: daysOld > 2,  // Assume staging gets updates after 2 days
-                hash: daysOld > 2 ? feature.commits[0]?.hash : null
-            },
-            production: {
-                deployed: daysOld > 7,  // Assume production after 7 days
-                hash: daysOld > 7 ? feature.commits[0]?.hash : null
-            }
-        };
-    });
+    // Items only in dev (pending staging)
+    for (const item of devToStagingItems) {
+        features.push({
+            name: item.name,
+            type: item.name.startsWith('BUG-') || item.name.startsWith('REG-') ? 'bugfix' : 'feature',
+            commitCount: 1,
+            latestCommit: null,
+            dev: { deployed: true, hash: null },
+            staging: { deployed: false, hash: null },
+            production: { deployed: false, hash: null }
+        });
+    }
+
+    // Items in staging (pending production)
+    for (const item of stagingToProductionItems) {
+        features.push({
+            name: item.name,
+            type: item.name.startsWith('BUG-') || item.name.startsWith('REG-') ? 'bugfix' : 'feature',
+            commitCount: 1,
+            latestCommit: null,
+            dev: { deployed: true, hash: null },
+            staging: { deployed: true, hash: null },
+            production: { deployed: false, hash: null }
+        });
+    }
+
+    // Count parity stats
+    const devOnly = devToStagingItems.filter(i => !i.completed).length;
+    const stagingPending = stagingToProductionItems.filter(i => !i.completed).length;
+    const fullyDeployed = stagingToProductionItems.filter(i => i.completed).length;
 
     return {
         versions,
-        features: features.slice(0, 20), // Top 20 features
+        features: features.slice(0, 20),
         summary: {
             total: features.length,
-            devOnly: features.filter(f => f.dev.deployed && !f.staging.deployed).length,
-            stagingPending: features.filter(f => f.staging.deployed && !f.production.deployed).length,
-            fullyDeployed: features.filter(f => f.production.deployed).length
+            devOnly,
+            stagingPending,
+            fullyDeployed
         }
     };
 }
