@@ -9,10 +9,19 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const cron = require('node-cron');
 
-const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions } = require('./docReader');
+const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions, getEnhancedKanbanBoard } = require('./docReader');
 const { getRecentCommits, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
 const { getEnvironmentStatus, checkEnvParity } = require('./envChecker');
+const { getPrioritySuggestions } = require('./prioritySuggester');
+const { getDependencyHealth } = require('./dependencyChecker');
+const { getProgressReport } = require('./progressTracker');
+const { getHealthReport } = require('./fileHealthMonitor');
+const { getVelocityStats, getHistoricalData, recordCompletion, predictCompletionDate, autoDetectCompletions } = require('./velocityTracker');
+const { archiveOldItems, getArchivedItems, restoreItem, detectCompletedItems } = require('./archiveManager');
+const { analyzeBugsFromKnownIssues, getPrioritySuggestionStats } = require('./bugPrioritizer');
+const { runFullSync, getSyncStatus } = require('./docUpdater');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -174,6 +183,19 @@ app.get('/api/git/timeline', async (req, res) => {
 });
 
 /**
+ * GET /api/kanban-enhanced
+ * Returns enhanced Kanban board with bugs + features merged
+ */
+app.get('/api/kanban-enhanced', async (req, res) => {
+    try {
+        const kanban = await getEnhancedKanbanBoard();
+        res.json(kanban);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * GET /api/git/stats
  * Returns repo stats (branch, status, last commit)
  */
@@ -207,6 +229,243 @@ app.get('/api/impact', async (req, res) => {
     try {
         const analysis = await getImpactAnalysis();
         res.json(analysis);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/suggestions
+ * Returns prioritized "What to Build Next" suggestions
+ */
+app.get('/api/suggestions', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 5;
+        const suggestions = await getPrioritySuggestions(limit);
+        res.json(suggestions);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/dependencies
+ * Returns dependency health report (outdated packages + security)
+ */
+app.get('/api/dependencies', async (req, res) => {
+    try {
+        const health = await getDependencyHealth();
+        res.json(health);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/progress
+ * Returns task progress from ROADMAP.md markers
+ */
+app.get('/api/progress', async (req, res) => {
+    try {
+        const progress = await getProgressReport();
+        res.json(progress);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/health
+ * Returns file health report (200-line warnings) and anomaly detection
+ */
+app.get('/api/health', async (req, res) => {
+    try {
+        const health = await getHealthReport();
+        res.json(health);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/velocity/stats
+ * Returns current velocity statistics
+ */
+app.get('/api/velocity/stats', (req, res) => {
+    try {
+        const stats = getVelocityStats();
+        res.json(stats);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/velocity/history
+ * Returns historical velocity data for charts
+ */
+app.get('/api/velocity/history', (req, res) => {
+    try {
+        const weeks = parseInt(req.query.weeks) || 12;
+        const history = getHistoricalData(weeks);
+        res.json(history);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/velocity/record
+ * Manually record a completion
+ */
+app.post('/api/velocity/record', (req, res) => {
+    try {
+        const { itemId, completedDate, startDate } = req.body;
+
+        if (!itemId || !completedDate) {
+            return res.status(400).json({ error: 'itemId and completedDate are required' });
+        }
+
+        const completion = recordCompletion(itemId, completedDate, startDate);
+        res.json({ success: true, completion });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/velocity/predict
+ * Predict completion date based on remaining items
+ */
+app.post('/api/velocity/predict', (req, res) => {
+    try {
+        const { remainingItems } = req.body;
+
+        if (!remainingItems || remainingItems <= 0) {
+            return res.status(400).json({ error: 'remainingItems must be a positive number' });
+        }
+
+        const prediction = predictCompletionDate(remainingItems);
+        res.json(prediction);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/velocity/auto-detect
+ * Auto-detect completions from ROADMAP.md
+ */
+app.post('/api/velocity/auto-detect', async (req, res) => {
+    try {
+        const roadmapData = await readDoc('ROADMAP.md');
+        const newCompletions = autoDetectCompletions(roadmapData);
+        res.json({ success: true, newCompletions });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/archive/items
+ * List archived items
+ */
+app.get('/api/archive/items', (req, res) => {
+    try {
+        const items = getArchivedItems();
+        res.json({ items });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/archive/run
+ * Manually trigger archival
+ */
+app.post('/api/archive/run', (req, res) => {
+    try {
+        const { daysThreshold, dryRun } = req.body;
+        const result = archiveOldItems(daysThreshold || 30, dryRun || false);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/archive/restore/:itemId
+ * Restore item from archive to roadmap
+ */
+app.post('/api/archive/restore', (req, res) => {
+    try {
+        const { itemText } = req.body;
+
+        if (!itemText) {
+            return res.status(400).json({ error: 'itemText is required' });
+        }
+
+        const result = restoreItem(itemText);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/archive/preview
+ * Preview items that would be archived
+ */
+app.get('/api/archive/preview', (req, res) => {
+    try {
+        const daysThreshold = parseInt(req.query.days) || 30;
+        const result = archiveOldItems(daysThreshold, true); // dry run
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/bugs/priority-suggestions
+ * Returns priority suggestions for all bugs
+ */
+app.get('/api/bugs/priority-suggestions', async (req, res) => {
+    try {
+        const knownIssuesData = await readDoc('KNOWN_ISSUES.md');
+        const suggestions = analyzeBugsFromKnownIssues(knownIssuesData);
+        const stats = getPrioritySuggestionStats(suggestions);
+
+        res.json({
+            suggestions,
+            stats
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/docs/sync
+ * Manually trigger full documentation sync
+ */
+app.post('/api/docs/sync', async (req, res) => {
+    try {
+        const results = await runFullSync();
+        res.json(results);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/docs/sync/status
+ * Get sync status and history
+ */
+app.get('/api/docs/sync/status', (req, res) => {
+    try {
+        const status = getSyncStatus();
+        res.json(status);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -272,9 +531,41 @@ app.post('/api/refresh', (req, res) => {
     });
 });
 
-// Catch-all: serve React app for any other routes
+/**
+ * Catch-all route - serve index.html for client-side routing
+ */
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
+/**
+ * Schedule daily archival at 2 AM
+ */
+cron.schedule('0 2 * * *', () => {
+    console.log('[CRON] Running daily archival...');
+    try {
+        const result = archiveOldItems(30, false);
+        console.log(`[CRON] Archival complete: ${result.message}`);
+    } catch (error) {
+        console.error('[CRON] Archival failed:', error.message);
+    }
+});
+
+/**
+ * Schedule hourly documentation sync
+ */
+cron.schedule('0 * * * *', async () => {
+    console.log('[CRON] Running hourly documentation sync...');
+    try {
+        const results = await runFullSync();
+        console.log('[CRON] Doc sync complete:', {
+            velocity: results.velocity.newCompletions || 0,
+            priority: results.priority.totalBugs || 0,
+            archive: results.archive.archivedCount || 0
+        });
+    } catch (error) {
+        console.error('[CRON] Doc sync failed:', error.message);
+    }
 });
 
 // Start server with error handling

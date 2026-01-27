@@ -3,7 +3,7 @@ import axios from 'axios';
 import { RefreshCw, Clock, GitBranch, FileText, Server, CheckSquare, AlertTriangle, Lightbulb } from 'lucide-react';
 import { EnvironmentParity } from './components/EnvironmentParity';
 import { DocumentHealth } from './components/DocumentHealth';
-import { KanbanBoard } from './components/KanbanBoard';
+import { EnterpriseKanban } from './components/EnterpriseKanban';
 import { GitTimeline } from './components/GitTimeline';
 import { DashboardSummary } from './components/DashboardSummary';
 import { FeatureBacklog } from './components/FeatureBacklog';
@@ -151,7 +151,7 @@ function App() {
                         {activeTab === 'overview' && <DashboardSummary summary={summary as any} onNavigateToTab={(tab) => setActiveTab(tab as TabType)} />}
                         {activeTab === 'parity' && <EnvironmentParity />}
                         {activeTab === 'docs' && <DocumentHealth />}
-                        {activeTab === 'kanban' && <KanbanBoard />}
+                        {activeTab === 'kanban' && <EnterpriseKanban />}
                         {activeTab === 'timeline' && <GitTimeline />}
                         {activeTab === 'features' && <FeatureBacklog />}
                     </>
