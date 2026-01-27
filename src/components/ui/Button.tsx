@@ -3,16 +3,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const buttonVariants = cva(
-    'inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50 active:scale-95',
+    'inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]',
     {
         variants: {
             variant: {
-                primary: 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-200 dark:shadow-none dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200',
-                secondary: 'bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700',
-                ghost: 'hover:bg-slate-100 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
-                danger: 'bg-rose-500 text-white hover:bg-rose-600 shadow-lg shadow-rose-100 dark:shadow-none',
-                outline: 'border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-colors dark:border-slate-100 dark:text-slate-100 dark:hover:bg-slate-100 dark:hover:text-slate-900',
-                success: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100 dark:shadow-none',
+                primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-md shadow-primary-100 dark:shadow-none focus-visible:ring-primary-500',
+                secondary: 'border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 focus-visible:ring-slate-400',
+                ghost: 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 focus-visible:ring-slate-400',
             },
             size: {
                 sm: 'h-11 md:h-9 px-3 rounded-lg',  // 44px on mobile, 36px on desktop
