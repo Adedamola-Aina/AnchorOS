@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { suggestCategory } from '../../../utils/finance';
-import type { TransactionType, AnchorTransaction, AnchorAccount } from '../../../types';
+import { suggestCategory } from '../../../../utils/finance';
+import type { TransactionType, AnchorTransaction, AnchorAccount } from '../../../../types';
 
 interface UseTransactionFormStateProps {
     accounts: AnchorAccount[];
