@@ -53,7 +53,7 @@ export const TaskContextBadge = ({ task }: { task: AnchorTask }) => {
     if (task.type === 'monthly' && (task.daysOfMonth?.length || task.dayOfMonth)) {
       const dates = task.daysOfMonth?.length ? task.daysOfMonth : (task.dayOfMonth ? [task.dayOfMonth] : []);
       const formatted = [...dates].sort((a, b) => a - b).join(', ');
-      return <span className={`${commonStyles} text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20`}><Calendar className="w-3 h-3" /> {dates.length > 1 ? 'Days' : 'Day'} {formatted}</span>;
+      return <span className={`${commonStyles} text-task-600 dark:text-task-400 bg-task-50 dark:bg-task-900/20`}><Calendar className="w-3 h-3" /> {dates.length > 1 ? 'Days' : 'Day'} {formatted}</span>;
     }
     return null;
   })();

@@ -88,7 +88,7 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
 
             {summary.topCategory && (
                 <div className="glass-card p-4 flex items-center gap-4">
-                    <div className="p-3 bg-indigo-100 dark:bg-indigo-900/20 rounded-2xl text-indigo-600">
+                    <div className="p-3 bg-primary-100 dark:bg-primary-900/20 rounded-2xl text-primary-600">
                         <PieChart className="w-5 h-5" />
                     </div>
                     <div className="truncate">

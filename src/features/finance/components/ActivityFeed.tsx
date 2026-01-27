@@ -134,7 +134,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                             <p className="text-sm text-slate-700 dark:text-slate-200">
-                                <span className={`font-semibold ${isCurrentUser ? 'text-indigo-600 dark:text-indigo-400' : ''}`}>
+                                <span className={`font-semibold ${isCurrentUser ? 'text-primary-600 dark:text-primary-400' : ''}`}>
                                     {isCurrentUser ? 'You' : activity.actorName}
                                 </span>
                                 {' '}
@@ -146,7 +146,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                             {/* Amount display for transaction activities */}
                             {showAmount && (
                                 <p className={`text-xs font-semibold mt-0.5 ${activity.details.type === 'income'
-                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        ? 'text-finance-600 dark:text-finance-400'
                                         : 'text-slate-600 dark:text-slate-400'
                                     }`}>
                                     {activity.details.type === 'income' ? '+' : '-'}

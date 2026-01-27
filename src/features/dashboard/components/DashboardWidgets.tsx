@@ -13,9 +13,9 @@ import type { AssetClass } from '../../../utils/financeInsights';
 interface PortfolioWidgetProps { assets: AssetClass[]; onNavigate: () => void; accountCount: number; isMobile?: boolean; }
 export const PortfolioWidget: React.FC<PortfolioWidgetProps> = ({ assets, onNavigate, accountCount, isMobile }) => (
     <div onClick={onNavigate} className={`glass-card overflow-hidden relative group cursor-pointer hover:shadow-xl transition-all active:scale-[0.99] ${isMobile ? 'p-4' : 'p-5'}`}>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
         <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400"><Wallet className="w-5 h-5" /></div>
+            <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600 dark:text-primary-400"><Wallet className="w-5 h-5" /></div>
             <h3 className="font-bold text-slate-700 dark:text-slate-200">Portfolio</h3>
         </div>
         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total across {accountCount} accounts</p>
@@ -59,7 +59,7 @@ export const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ acti
     <div onClick={onNavigate} className="glass-card p-5 cursor-pointer hover:shadow-xl transition-all group active:scale-[0.99]">
         <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"><Activity className="w-3 h-3" /> Recent Activity</h3>
-            <div className="text-indigo-500 group-hover:text-indigo-600 transition-colors"><ArrowRight className="w-4 h-4" /></div>
+            <div className="text-primary-500 group-hover:text-primary-600 transition-colors"><ArrowRight className="w-4 h-4" /></div>
         </div>
         <div className="space-y-4">
             {activity.slice(0, 3).map(tx => {
@@ -103,7 +103,7 @@ export const ProductivityWidget: React.FC<ProductivityWidgetProps> = ({ producti
                 </div>
             </>
         ) : (
-            <div className="text-center py-8"><p className="font-bold text-slate-900 dark:text-white mb-1">No Commitments</p><button className="text-xs font-bold text-indigo-500 uppercase tracking-wide hover:text-indigo-400">Setup Commitments &rarr;</button></div>
+            <div className="text-center py-8"><p className="font-bold text-slate-900 dark:text-white mb-1">No Commitments</p><button className="text-xs font-bold text-primary-500 uppercase tracking-wide hover:text-primary-400">Setup Commitments &rarr;</button></div>
         )}
     </div>
 );

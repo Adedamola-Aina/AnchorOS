@@ -13,8 +13,8 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme, o
         <Card className="overflow-hidden">
             <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/20">
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-indigo-500/10' : 'bg-amber-500/10'}`}>
-                        {theme === 'dark' ? <Moon className="w-5 h-5 text-indigo-500" /> : <Sun className="w-5 h-5 text-amber-500" />}
+                    <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-primary-500/10' : 'bg-amber-500/10'}`}>
+                        {theme === 'dark' ? <Moon className="w-5 h-5 text-primary-500" /> : <Sun className="w-5 h-5 text-amber-500" />}
                     </div>
                     Appearance
                 </CardTitle>

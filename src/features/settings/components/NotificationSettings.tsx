@@ -26,10 +26,10 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
 }) => {
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-indigo-50/30 dark:bg-indigo-900/10">
+            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-primary-50/30 dark:bg-primary-900/10">
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                    <div className="p-2 bg-indigo-500/10 rounded-lg">
-                        <Bell className="w-5 h-5 text-indigo-500" />
+                    <div className="p-2 bg-primary-500/10 rounded-lg">
+                        <Bell className="w-5 h-5 text-primary-500" />
                     </div>
                     Notifications
                 </CardTitle>
@@ -61,7 +61,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                                 requestPushPermission();
                             }
                         }}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${pushPermissionStatus === 'granted' ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${pushPermissionStatus === 'granted' ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                         disabled={pushPermissionStatus === 'denied'}
                     >
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${pushPermissionStatus === 'granted' ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -77,7 +77,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                     </div>
                     <button
                         onClick={() => onUpdatePreferences({ enabled: !emailEnabled })}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${emailEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${emailEnabled ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                     >
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${emailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
@@ -109,7 +109,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                                         variant={frequency === freq ? 'primary' : 'secondary'}
                                         size="sm"
                                         onClick={() => onUpdatePreferences({ frequency: freq })}
-                                        className={`capitalize ${frequency === freq ? 'bg-indigo-500 hover:bg-indigo-600 shadow-indigo-100 dark:shadow-none' : ''}`}
+                                        className={`capitalize ${frequency === freq ? 'bg-primary-500 hover:bg-primary-600 shadow-primary-100 dark:shadow-none' : ''}`}
                                     >
                                         {freq}
                                     </Button>

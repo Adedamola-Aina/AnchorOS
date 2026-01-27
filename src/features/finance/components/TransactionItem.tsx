@@ -46,9 +46,9 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
 
     // Determine amount color based on transaction type
     const amountColor = transaction.type === 'income'
-        ? 'text-emerald-600 dark:text-emerald-400'
+        ? 'text-finance-600 dark:text-finance-400'
         : transaction.type === 'transfer'
-            ? 'text-indigo-600 dark:text-indigo-400'
+            ? 'text-primary-600 dark:text-primary-400'
             : 'text-slate-900 dark:text-white';
 
     const amountPrefix = transaction.type === 'expense' ? '-' : transaction.type === 'income' ? '+' : '';

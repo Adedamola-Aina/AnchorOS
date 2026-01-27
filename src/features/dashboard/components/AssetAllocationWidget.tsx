@@ -16,10 +16,10 @@ export const AssetAllocationWidget = ({ assets }: AssetAllocationWidgetProps) =>
 
     // Colors for visualization
     const COLORS = [
-        'bg-indigo-500',
+        'bg-primary-500',
         'bg-emerald-500',
         'bg-blue-500',
-        'bg-violet-500',
+        'bg-task-500',
         'bg-amber-500',
         'bg-rose-500',
         'bg-cyan-500',
@@ -82,7 +82,7 @@ export const AssetAllocationWidget = ({ assets }: AssetAllocationWidgetProps) =>
                 {!expanded && sortedAssets.length > 4 && (
                     <button
                         onClick={() => setExpanded(true)}
-                        className="w-full text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-indigo-500 mt-2 py-2 border-t border-dashed border-slate-200 dark:border-slate-800"
+                        className="w-full text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-primary-500 mt-2 py-2 border-t border-dashed border-slate-200 dark:border-slate-800"
                     >
                         View {sortedAssets.length - 4} More
                     </button>

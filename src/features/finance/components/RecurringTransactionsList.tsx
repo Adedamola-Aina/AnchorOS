@@ -73,8 +73,8 @@ export const RecurringTransactionsList = ({
                             className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-                                    <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                                <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
+                                    <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
                                         {currencySymbol}
                                     </span>
                                 </div>

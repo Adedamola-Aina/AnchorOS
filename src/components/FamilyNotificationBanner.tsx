@@ -110,7 +110,7 @@ export function FamilyNotificationBanner({ onNavigate }: FamilyNotificationBanne
             case 'account_shared':
                 return 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
             case 'invitation_accepted':
-                return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
+                return 'bg-family-50 dark:bg-family-900/20 border-family-200 dark:border-family-800';
             default:
                 return 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700';
         }
@@ -123,7 +123,7 @@ export function FamilyNotificationBanner({ onNavigate }: FamilyNotificationBanne
             case 'account_shared':
                 return 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30';
             case 'invitation_accepted':
-                return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30';
+                return 'text-family-600 dark:text-family-400 bg-family-100 dark:bg-family-900/30';
             default:
                 return 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800';
         }

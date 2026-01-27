@@ -29,7 +29,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onToggle, varia
                         : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                     }`}
             >
-                <Moon className={`w-3.5 h-3.5 ${theme === 'dark' ? 'text-indigo-400' : ''}`} />
+                <Moon className={`w-3.5 h-3.5 ${theme === 'dark' ? 'text-primary-400' : ''}`} />
                 {variant === 'full' && <span>Dark</span>}
             </button>
         </div>

@@ -29,7 +29,7 @@ interface ContactHeaderProps { onClose: () => void; }
 export const ContactHeader: React.FC<ContactHeaderProps> = ({ onClose }) => (
     <div className="sticky top-0 bg-white dark:bg-slate-900 p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between rounded-t-3xl">
         <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/10 rounded-xl"><MessageSquare className="w-5 h-5 text-blue-500" /></div>
+            <div className="p-2 bg-primary-500/10 rounded-xl"><MessageSquare className="w-5 h-5 text-primary-500" /></div>
             <div>
                 <h3 className="font-bold text-slate-900 dark:text-white">Get in Touch</h3>
                 <p className="text-xs text-slate-500">Share feedback, report bugs, or request features</p>
@@ -83,7 +83,7 @@ export const IdentityFields: React.FC<IdentityFieldsProps> = ({ name, email, onN
 interface SubmitButtonProps { isSubmitting: boolean; disabled: boolean; }
 export const SubmitButton: React.FC<SubmitButtonProps> = ({ isSubmitting, disabled }) => (
     <button type="submit" disabled={disabled}
-        className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 active:scale-[0.98]">
+        className="w-full py-4 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 active:scale-[0.98]">
         <Send className="w-5 h-5" />
         <span className="uppercase tracking-widest text-[10px] font-black">{isSubmitting ? 'Sending...' : 'Send Message'}</span>
     </button>

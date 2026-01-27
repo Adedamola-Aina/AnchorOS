@@ -39,10 +39,10 @@ export const AccountCard: React.FC<AccountCardProps> = ({
     return (
         <div
             onClick={() => onEdit(account)}
-            className={`cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all group overflow-hidden relative ${account.currency === 'USD' ? 'hover:border-indigo-500/30' : 'hover:border-emerald-500/30'}`}
+            className={`cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all group overflow-hidden relative ${account.currency === 'USD' ? 'hover:border-primary-500/30' : 'hover:border-finance-500/30'}`}
         >
             <div className="flex justify-between items-start mb-4 relative z-10">
-                <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 ${account.currency === 'USD' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'}`}>
+                <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 ${account.currency === 'USD' ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'bg-finance-50 dark:bg-finance-900/30 text-finance-600 dark:text-finance-400'}`}>
                     {account.currency === 'USD' ? <DollarSign size={22} /> : <Banknote size={22} />}
                 </div>
                 {/* Share toggle button - only shown to owner with active connection */}
@@ -90,7 +90,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
             </div>
 
             {/* Decorative accent */}
-            <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-full pointer-events-none opacity-10 ${account.currency === 'USD' ? 'bg-indigo-500' : 'bg-emerald-500'}`} />
+            <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-full pointer-events-none opacity-10 ${account.currency === 'USD' ? 'bg-primary-500' : 'bg-finance-500'}`} />
         </div>
     );
 };
