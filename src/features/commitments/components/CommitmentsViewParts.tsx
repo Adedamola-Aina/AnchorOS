@@ -12,7 +12,7 @@ export const CommitmentsEmptyState: React.FC<EmptyStateProps> = ({ filter, hasFa
     <div className="flex flex-col items-center justify-center py-16 px-4">
         <div className="relative mb-8">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="w-12 h-12 text-blue-500/60 dark:text-blue-400/60" />
+                <CheckCircle2 className="w-12 h-12 text-task-500/60 dark:text-task-400/60" />
             </div>
             <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center"><Plus className="w-4 h-4 text-emerald-500" /></div>
         </div>
@@ -36,8 +36,8 @@ export const CommitmentsFilterBar: React.FC<FilterBarProps> = ({ filter, viewMod
             ))}
         </div>
         <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start sm:self-auto">
-            <button onClick={() => onViewChange('list')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-400'}`} title="List View" aria-label="List View"><LayoutList className="w-4 h-4" /></button>
-            <button onClick={() => onViewChange('calendar')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-400'}`} title="Week View" aria-label="Week View"><CalendarDays className="w-4 h-4" /></button>
+            <button onClick={() => onViewChange('list')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-400'}`} title="List View" aria-label="List View"><LayoutList className="w-4 h-4" /></button>
+            <button onClick={() => onViewChange('calendar')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-400'}`} title="Week View" aria-label="Week View"><CalendarDays className="w-4 h-4" /></button>
         </div>
     </div>
 );

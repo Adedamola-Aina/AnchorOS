@@ -12,7 +12,7 @@ interface FrequencyStepProps { onSelectType: (type: TaskType) => void; onClose: 
 export const FrequencyStep: React.FC<FrequencyStepProps> = ({ onSelectType, onClose }) => {
     const options = [
         { id: 'todo', label: 'Todo', desc: 'One-time task', icon: <CheckCircle2 className="w-6 h-6 text-emerald-500" /> },
-        { id: 'daily', label: 'Daily', desc: 'Every single day', icon: <Sunrise className="w-6 h-6 text-blue-500" /> },
+        { id: 'daily', label: 'Daily', desc: 'Every single day', icon: <Sunrise className="w-6 h-6 text-task-500" /> },
         { id: 'weekly', label: 'Weekly', desc: 'On specific days', icon: <Calendar className="w-6 h-6 text-purple-500" /> },
         { id: 'monthly', label: 'Monthly', desc: 'On a specific date', icon: <CheckCircle2 className="w-6 h-6 text-task-500" /> },
     ];
@@ -24,7 +24,7 @@ export const FrequencyStep: React.FC<FrequencyStepProps> = ({ onSelectType, onCl
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {options.map((option) => (
-                    <button key={option.id} onClick={() => onSelectType(option.id as TaskType)} className="flex flex-col items-center gap-4 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all text-center group">
+                    <button key={option.id} onClick={() => onSelectType(option.id as TaskType)} className="flex flex-col items-center gap-4 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 hover:border-task-500/50 hover:bg-task-50/50 dark:hover:bg-task-900/10 transition-all text-center group">
                         <div className="p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 group-hover:scale-110 transition-transform">{option.icon}</div>
                         <div><h4 className="font-bold text-slate-900 dark:text-white">{option.label}</h4><p className="text-xs text-slate-500 dark:text-slate-400">{option.desc}</p></div>
                     </button>
@@ -52,7 +52,7 @@ export const DailyTimeField: React.FC<DailyTimeFieldProps> = ({ value, onChange 
         <div className="grid grid-cols-2 gap-2">
             {['morning', 'afternoon', 'evening', 'any'].map((t) => (
                 <Button key={t} type="button" onClick={() => onChange(t as TimeOfDay)} variant={value === t ? 'secondary' : 'ghost'}
-                    className={`p-2.5 capitalize ${value === t ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : ''}`}>{t}</Button>
+                    className={`p-2.5 capitalize ${value === t ? 'bg-task-50 text-task-600 border-task-200 dark:bg-task-900/20 dark:border-task-800' : ''}`}>{t}</Button>
             ))}
         </div>
     </div>

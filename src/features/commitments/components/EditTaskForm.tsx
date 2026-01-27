@@ -52,7 +52,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     };
 
     return (
-        <Card className="space-y-4 p-5 border-blue-500/20 shadow-xl animate-in slide-in-from-top-2 duration-200">
+        <Card className="space-y-4 p-5 border-task-500/20 shadow-xl animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Editing {task.type} Commitment</span>
                 <Button variant="ghost" size="icon" onClick={onCancel} className="text-slate-400 h-8 w-8">
@@ -68,7 +68,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
                         placeholder="Commitment title"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all"
                         autoFocus
                     />
                 </div>
@@ -79,7 +79,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                         <select
                             value={editDomain}
                             onChange={(e) => setEditDomain(e.target.value)}
-                            className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none"
+                            className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none"
                         >
                             {domains.map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
@@ -90,7 +90,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                             <select
                                 value={editScope}
                                 onChange={(e) => setEditScope(e.target.value as 'personal' | 'family')}
-                                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none"
+                                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none"
                             >
                                 <option value="personal">Personal</option>
                                 <option value="family">Family</option>
@@ -110,7 +110,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                                     type="button"
                                     onClick={() => setEditTime(t)}
                                     variant={editTime === t ? 'secondary' : 'ghost'}
-                                    className={`px-0 text-[10px] capitalize h-9 ${editTime === t ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : ''}`}
+                                    className={`px-0 text-[10px] capitalize h-9 ${editTime === t ? 'bg-task-50 text-task-600 border-task-200 dark:bg-task-900/20 dark:border-task-800' : ''}`}
                                 >
                                     {t}
                                 </Button>
