@@ -19,7 +19,7 @@ export const ContactSuccessMessage: React.FC = () => (
             <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-8 h-8 text-emerald-500" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Message Received</h3>
+            <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-2">Message Received</h3>
             <p className="text-slate-500 dark:text-slate-400 text-sm">Thank you for reaching out. I'll get back to you soon.</p>
         </div>
     </div>
@@ -31,7 +31,7 @@ export const ContactHeader: React.FC<ContactHeaderProps> = ({ onClose }) => (
         <div className="flex items-center gap-3">
             <div className="p-2 bg-primary-500/10 rounded-xl"><MessageSquare className="w-5 h-5 text-primary-500" /></div>
             <div>
-                <h3 className="font-bold text-slate-900 dark:text-white">Get in Touch</h3>
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Get in Touch</h3>
                 <p className="text-xs text-slate-500">Share feedback, report bugs, or request features</p>
             </div>
         </div>

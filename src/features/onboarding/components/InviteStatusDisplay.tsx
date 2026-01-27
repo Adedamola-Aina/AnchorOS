@@ -31,7 +31,7 @@ export function InviteStatusDisplay({ status, error, ownerName }: InviteStatusDi
                     <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto">
                         <AlertCircle className="w-8 h-8 text-rose-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Invitation Invalid</h2>
+                    <h2 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white">Invitation Invalid</h2>
                     <p className="text-slate-500 dark:text-slate-400">{error}</p>
                     <button
                         onClick={() => window.location.href = '/'}
@@ -51,7 +51,7 @@ export function InviteStatusDisplay({ status, error, ownerName }: InviteStatusDi
                     <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto">
                         <Lock className="w-8 h-8 text-rose-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Invitation Locked</h2>
+                    <h2 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white">Invitation Locked</h2>
                     <p className="text-slate-500 dark:text-slate-400">
                         {error || 'Too many failed verification attempts. Please ask the sender to create a new invitation.'}
                     </p>
@@ -74,7 +74,7 @@ export function InviteStatusDisplay({ status, error, ownerName }: InviteStatusDi
                     <CheckCircle className="w-10 h-10 text-emerald-500" />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white">You're All Set!</h2>
+                    <h2 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white">You're All Set!</h2>
                     <p className="text-slate-500 dark:text-slate-400 mt-2">
                         Waiting for <span className="font-semibold">{ownerName}</span> to confirm the connection.
                     </p>

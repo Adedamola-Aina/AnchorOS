@@ -22,7 +22,7 @@ export function InviteDetails({ user, ownerName, isVerifying, hasVerificationCod
                 <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Family Invitation</h1>
+                <h1 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white">Family Invitation</h1>
                 <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm leading-relaxed">
                     <strong className="text-slate-900 dark:text-white">{ownerName}</strong> invited you to join their household.
                 </p>

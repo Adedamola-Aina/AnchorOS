@@ -22,7 +22,7 @@ export function OnboardingHabitStep({ taskTitle, setTaskTitle, loading, onSubmit
                     <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">One Small Habit</h2>
+                    <h2 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white">One Small Habit</h2>
                     <p className="text-slate-500 text-sm">Consistency starts with one daily action.</p>
                 </div>
             </div>

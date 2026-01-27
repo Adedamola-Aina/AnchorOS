@@ -28,7 +28,7 @@ export function InviteSuccessStep({
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-4">
                     <Check className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Invitation Sent!</h3>
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Invitation Sent!</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                     An email has been sent to <span className="font-semibold">{inviteeEmail}</span>
                 </p>

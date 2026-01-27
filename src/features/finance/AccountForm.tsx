@@ -68,7 +68,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
 
     return (
         <div className="bg-slate-50 dark:bg-slate-800 p-1 rounded-xl">
-            <h3 className="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+            <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                 <Landmark className="w-5 h-5" /> Setup New Account
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">

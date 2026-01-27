@@ -21,14 +21,14 @@ export const EmptyAccountsState = ({ onCreateAccount }: EmptyAccountsStateProps)
                     <Plus className="w-3.5 h-3.5 text-blue-500" />
                 </div>
             </div>
-            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">No accounts yet</h3>
+            <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-2">No accounts yet</h3>
             <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-6 text-sm">
                 Create your first account to start tracking your finances.
             </p>
             <Button
-                variant="success"
+                variant="secondary"
                 onClick={onCreateAccount}
-                className="gap-2"
+                className="gap-2 text-finance-600 border-finance-200 hover:bg-finance-50 dark:text-finance-400 dark:border-finance-800 dark:hover:bg-finance-950"
             >
                 <Landmark className="w-4 h-4" />
                 <span>Create your first account</span>

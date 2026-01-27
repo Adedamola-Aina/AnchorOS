@@ -19,7 +19,7 @@ export const FrequencyStep: React.FC<FrequencyStepProps> = ({ onSelectType, onCl
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Choose Frequency</h3>
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Choose Frequency</h3>
                 <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400"><X className="w-5 h-5" /></Button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -39,7 +39,7 @@ export const DetailsHeader: React.FC<DetailsHeaderProps> = ({ taskType, onBack, 
     <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
             <Button type="button" variant="ghost" size="icon" onClick={onBack} className="text-slate-400"><ChevronDown className="w-5 h-5 rotate-90" /></Button>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white capitalize">{taskType} Commitment</h3>
+            <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white capitalize">{taskType} Commitment</h3>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400"><X className="w-5 h-5" /></Button>
     </div>

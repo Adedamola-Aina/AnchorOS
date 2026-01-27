@@ -16,7 +16,7 @@ export const CommitmentsEmptyState: React.FC<EmptyStateProps> = ({ filter, hasFa
             </div>
             <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center"><Plus className="w-4 h-4 text-emerald-500" /></div>
         </div>
-        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{filter === 'all' ? 'Welcome to your Commitments' : `No ${filter} commitments`}</h3>
+        <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-2">{filter === 'all' ? 'Welcome to your Commitments' : `No ${filter} commitments`}</h3>
         <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-8">
             {filter === 'all' ? (hasFamilyActive ? "This is where you'll build consistency. Commitments are recurring obligations that keep you and your family on track." : "This is where you'll build consistency. Commitments are recurring obligations that keep you on track.") : `You don't have any ${filter} commitments. Create one to get started.`}
         </p>

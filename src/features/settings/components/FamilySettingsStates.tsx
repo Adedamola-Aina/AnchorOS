@@ -29,7 +29,7 @@ export const FamilyPostConnectionMessage: React.FC<PostConnectionProps> = ({ mes
                 <Check className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">🎉 Connected!</h3>
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">🎉 Connected!</h3>
                 <p className="text-slate-600 dark:text-slate-300 mt-2">{message}</p>
             </div>
             <Button onClick={onGoToFinance} className="gap-2">Go to Finance <ArrowRight className="w-4 h-4" /></Button>

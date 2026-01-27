@@ -13,7 +13,7 @@ export const MfaStep1GetApp: React.FC<Step1Props> = ({ onNext }) => (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-right-4 duration-300">
         <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto text-blue-600 dark:text-blue-400"><Smartphone className="w-8 h-8" /></div>
         <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Get an Authenticator App</h3>
+            <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-2">Get an Authenticator App</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Download a free authenticator app like <strong>Google Authenticator</strong>, <strong>Microsoft Authenticator</strong>, or <strong>Authy</strong> on your phone.</p>
         </div>
         <div className="flex justify-center pt-4"><Button onClick={onNext} className="w-full sm:w-auto gap-2 group">I have the app <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Button></div>
@@ -25,7 +25,7 @@ export const MfaStep2ScanQR: React.FC<Step2Props> = ({ qrUrl, manualKey, onBack,
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-right-4 duration-300">
         <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto text-purple-600 dark:text-purple-400"><QrCode className="w-8 h-8" /></div>
         <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Scan the QR Code</h3>
+            <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-2">Scan the QR Code</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Open your authenticator app and choose "Add Account" or "Scan QR Code".</p>
         </div>
         <div className="flex justify-center py-2">
@@ -43,7 +43,7 @@ export const MfaStep3Verify: React.FC<Step3Props> = ({ mfaCode, mfaError, isEnro
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-right-4 duration-300">
         <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400"><Key className="w-8 h-8" /></div>
         <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Verify Setup</h3>
+            <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-2">Verify Setup</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Enter the 6-digit code from your app to confirm everything is working.</p>
         </div>
         <div className="max-w-xs mx-auto space-y-4">
