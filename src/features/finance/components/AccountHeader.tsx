@@ -107,7 +107,7 @@ export const AccountHeader = ({
                     ) : (
                         <div className="space-y-2">
                             <div className="flex items-center gap-3">
-                                <h1 className="text-3xl font-bold tracking-tight">{account.name}</h1>
+                                <h1 className="text-h1 lg:text-h1-lg tracking-tight">{account.name}</h1>
                                 <Sparkles className="w-5 h-5 opacity-50" />
                             </div>
                             <div className="flex items-center gap-3">

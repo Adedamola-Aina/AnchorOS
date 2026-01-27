@@ -65,7 +65,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
             {/* Desktop Sidebar - UNCHANGED per M3.2 */}
             <aside className={`hidden md:flex flex-col bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 sticky ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'top-6 h-[calc(100vh-24px)]' : 'top-0 h-screen'}`}>
                 <div className="mb-8 px-4 py-2 shrink-0">
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                    <h1 className="text-h2 lg:text-h2-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
                         <AnchorLogo className="w-8 h-8 text-slate-900 dark:text-white" />
                         Anchor
                     </h1>

@@ -99,8 +99,36 @@ module.exports = {
             dark: '#2e1065', // violet-900
           }
         }
-      }
-    },
+      },
+
+      fontSize: {
+        // Semantic Typography Scale - UX-013
+        // Built-in responsive sizing, line-height, and font-weight
+        // Usage: text-h1 (mobile), lg:text-h1-lg (desktop)
+
+        // Display: Hero sections, marketing (48px desktop / 36px mobile)
+        'display': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '900' }],      // 36px mobile
+        'display-lg': ['3rem', { lineHeight: '1', fontWeight: '900' }],           // 48px desktop
+
+        // H1: Page titles (36px desktop / 30px mobile)
+        'h1': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],         // 30px mobile
+        'h1-lg': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '700' }],        // 36px desktop
+
+        // H2: Section headers (30px desktop / 24px mobile)
+        'h2': ['1.5rem', { lineHeight: '2rem', fontWeight: '700' }],              // 24px mobile
+        'h2-lg': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],      // 30px desktop
+
+        // H3: Subsections (24px desktop / 20px mobile)
+        'h3': ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],          // 20px mobile
+        'h3-lg': ['1.5rem', { lineHeight: '2rem', fontWeight: '600' }],           // 24px desktop
+
+        // Body: Main text (16px all breakpoints)
+        'body': ['1rem', { lineHeight: '1.5rem', fontWeight: '400' }],            // 16px
+
+        // Small: Captions, labels (14px all breakpoints)
+        'small': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '500' }],      // 14px
+      },
+    }
   },
   plugins: [require("tailwindcss-animate")],
 }

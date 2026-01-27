@@ -92,7 +92,7 @@ const AuthView: React.FC<AuthViewProps> = ({
                             <AnchorLogo className="w-10 h-10 text-slate-900 dark:text-white" />
                             <span className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white transition-colors">Anchor</span>
                         </div>
-                        <h2 className="text-3xl font-light text-slate-900 dark:text-white transition-colors">{titles[authMode]}</h2>
+                        <h2 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white transition-colors font-light">{titles[authMode]}</h2>
                         <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm transition-colors">{subtitles[authMode]}</p>
                     </div>
 
