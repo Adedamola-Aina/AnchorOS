@@ -80,6 +80,14 @@ _No regressions detected_
 
 ## ✅ RECENTLY FIXED
 
+### [BUG-007] Modal inputs unresponsive on mobile (FIXED 2026-01-28)
+- **Issue**: Cannot type in input fields within modals (Transfer, Bills, Add Account) on mobile devices. Commitment form name field also affected.
+- **Root Cause**: `PullToRefresh` and `SwipeableRow` components intercepting touch events on input elements, preventing focus and text entry
+- **Fix**: Added check in `handleTouchStart` to ignore touch events from interactive elements (INPUT, TEXTAREA, SELECT, BUTTON, A)
+- **Files**: `PullToRefresh.tsx`, `SwipeableRow.tsx`
+- **Verified By**: Agent
+- **Deployment**: Local (Ready for Dev/Staging)
+
 ### [BUG-006] Text overflow in Dashboard and Finance widgets (FIXED 2026-01-28)
 - **Issue**: Text overflowing from widgets on dashboard and finance pages, breaking layout on narrow viewports and with long text strings
 - **Root Cause**: Inconsistent application of truncate utilities and missing flex constraints (min-w-0) on parent containers
@@ -133,10 +141,10 @@ _No regressions detected_
 ## 📊 BUG STATISTICS
 
 - **Total Active**: 4
-- **Critical (P0)**: 2 (BUG-001, REG-001)
+- **Critical (P0)**: 1 (REG-001)
 - **High (P1)**: 0
 - **Low (P2)**: 3 (GAP-002, GAP-003, GAP-004)
-- **Fixed This Month**: 6 (GAP-001, BUG-002, BUG-003, BUG-004, BUG-005, BUG-006)
+- **Fixed This Month**: 7 (GAP-001, BUG-002, BUG-003, BUG-004, BUG-005, BUG-006, BUG-007)
 - **Average Fix Time**: < 1 day
 
 ---
