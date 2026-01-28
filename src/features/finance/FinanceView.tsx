@@ -11,6 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
 import { useResponsive } from '../../hooks/useResponsive';
+import { useTransactionSearch } from '../../hooks/useTransactionSearch';
+import { useHaptic } from '../../hooks/useHaptic';
 import { SectionHeader } from '../../components/shared';
 import { Modal } from '../../components/shared/Modal';
 import { AccountForm } from './AccountForm';
@@ -25,12 +27,15 @@ import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { MonthlyInsight } from './MonthlyInsight';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
+import { PullToRefresh } from '../../components/mobile/PullToRefresh';
 
 const FinanceView = () => {
-  const { transactions, accounts, deleteTransaction, deleteAccount, currentMonth, nextMonth, prevMonth, loadingFinance, netWorth } = useFinance();
+  const { transactions, accounts, deleteTransaction, deleteAccount, currentMonth, nextMonth, prevMonth, loadingFinance, netWorth, refetch } = useFinance();
   const { user } = useAuth();
   const { isOwner: isFamilyOwner, familyMemberUid, familyMemberName, shareAccount: toggleShareAccount } = useFamilySharing(user?.uid);
   const { isMobile } = useResponsive();
+  const haptic = useHaptic();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [mode, setMode] = useState<'view' | 'addTx' | 'addAcc' | 'editTx'>('view');
   const [editingTransaction, setEditingTransaction] = useState<AnchorTransaction | undefined>(undefined);
@@ -65,14 +70,29 @@ const FinanceView = () => {
 
   useEffect(() => { const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300); return () => clearTimeout(timer); }, [searchQuery]);
 
-  const filteredTransactions = useMemo(() => {
-    const query = debouncedSearch.toLowerCase();
-    return transactions.filter(t => (t?.title || '').toLowerCase().includes(query) || (t?.accountName || '').toLowerCase().includes(query) || (t?.category || '').toLowerCase().includes(query));
-  }, [transactions, debouncedSearch]);
+  // Use optimized search hook (BUG-001 fix: sub-500ms for 1000+ transactions)
+  const { filteredTransactions, isSearching } = useTransactionSearch(transactions, debouncedSearch);
 
   const handleCloseForm = () => { setMode('view'); setEditingTransaction(undefined); setPrefillData(undefined); };
   const handleEdit = (tx: AnchorTransaction) => { setEditingTransaction(tx); setMode('editTx'); };
-  const isSearching = debouncedSearch.length > 0;
+  
+  // Pull-to-refresh handler
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    haptic.trigger('light');
+    await refetch();
+    haptic.trigger('success');
+    setIsRefreshing(false);
+  };
+
+  // Haptic feedback on delete confirmation
+  const handleDeleteConfirm = () => {
+    if (transactionToDelete) {
+      haptic.trigger('medium');
+      deleteTransaction(transactionToDelete.id, transactionToDelete.accountId);
+      setTransactionToDelete(null);
+    }
+  };
 
   if (selectedAccount) {
     return (
@@ -115,7 +135,13 @@ const FinanceView = () => {
               <div className="relative flex-1 w-full"><Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" strokeWidth={2.5} /><input ref={searchInputRef} type="text" placeholder={`Search in ${currentMonth.toLocaleDateString('en-US', { month: 'long' })}...`} className="w-full bg-white dark:bg-slate-900 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/50 dark:border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-medium" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
             </div>
             {isSearching && <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/30"><p className="text-xs font-medium text-blue-600 dark:text-blue-400">Found {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''} matching "{debouncedSearch}"</p></div>}
-            <VirtualTransactionList transactions={filteredTransactions} currentUserId={user?.uid} onEdit={handleEdit} onDelete={setTransactionToDelete} loading={loadingFinance} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} />
+            {isMobile ? (
+              <PullToRefresh onRefresh={handleRefresh} disabled={isRefreshing || loadingFinance}>
+                <VirtualTransactionList transactions={filteredTransactions} currentUserId={user?.uid} onEdit={handleEdit} onDelete={setTransactionToDelete} loading={loadingFinance || isRefreshing} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} />
+              </PullToRefresh>
+            ) : (
+              <VirtualTransactionList transactions={filteredTransactions} currentUserId={user?.uid} onEdit={handleEdit} onDelete={setTransactionToDelete} loading={loadingFinance} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} />
+            )}
           </div>
         )}
 
@@ -123,7 +149,7 @@ const FinanceView = () => {
           {mode === 'addAcc' && <AccountForm onClose={handleCloseForm} />}
           {(mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
         </Modal>
-        <ConfirmationModal isOpen={!!transactionToDelete} onClose={() => setTransactionToDelete(null)} onConfirm={() => { if (transactionToDelete) { deleteTransaction(transactionToDelete.id, transactionToDelete.accountId); setTransactionToDelete(null); } }} title="Delete Transaction" message={`Are you sure you want to delete "${transactionToDelete?.title}"? This action cannot be undone.`} confirmLabel="Delete Transaction" isDestructive />
+        <ConfirmationModal isOpen={!!transactionToDelete} onClose={() => setTransactionToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Transaction" message={`Are you sure you want to delete "${transactionToDelete?.title}"? This action cannot be undone.`} confirmLabel="Delete Transaction" isDestructive />
       </div>
     </FeatureErrorBoundary>
   );

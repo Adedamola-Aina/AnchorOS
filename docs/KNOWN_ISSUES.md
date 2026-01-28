@@ -1,21 +1,26 @@
 # KNOWN ISSUES
 
-**Last Updated**: 2026-01-26
+**Last Updated**: 2026-01-28
+
+---
+
+## ✅ RESOLVED
+
+### [BUG-001] Transaction search slow on 1000+ transactions ✅ FIXED
+- **Reported**: 2026-01-25
+- **Reporter**: Family Member
+- **Impact**: Search takes 3-5 seconds
+- **Root Cause**: Client-side filtering with no search optimization
+- **Fix**: Created `useTransactionSearch` hook with pre-built search index
+- **Assigned**: Teeto
+- **Resolved**: 2026-01-28
+- **Status**: ✅ FIXED
+- **Results**: 1000 txns: 2ms (target: <500ms), 5000 txns: 9ms (target: <1000ms)
+- **Tests**: 18 unit tests, integrated into FinanceView
 
 ---
 
 ## 🔴 CRITICAL (P0)
-
-### [BUG-001] Transaction search slow on 1000+ transactions
-- **Reported**: 2026-01-25
-- **Reporter**: Family Member
-- **Impact**: Search takes 3-5 seconds
-- **Root Cause**: Client-side filtering, no Firestore indexes
-- **Fix**: Add composite index, implement pagination
-- **Assigned**: Teeto
-- **Target**: 2026-01-28
-- **Status**: Not Started
-- **Workaround**: Use month filter to reduce dataset
 
 ### [REG-001] XSS Validation Failure in E2E Tests
 - **Reported**: 2026-01-26 (Codebase Audit)
@@ -75,6 +80,14 @@ _No regressions detected_
 
 ## ✅ RECENTLY FIXED
 
+### [BUG-006] Text overflow in Dashboard and Finance widgets (FIXED 2026-01-28)
+- **Issue**: Text overflowing from widgets on dashboard and finance pages, breaking layout on narrow viewports and with long text strings
+- **Root Cause**: Inconsistent application of truncate utilities and missing flex constraints (min-w-0) on parent containers
+- **Fix**: Applied proper `min-w-0` flex constraints and `truncate` utilities across all affected widgets
+- **Files**: DashboardWidgets.tsx, RecentActivityList.tsx, AssetDistributionChart.tsx, TransactionItem.tsx, AccountCard.tsx
+- **Verified By**: Agent
+- **Deployment**: Dev (2026-01-28)
+
 ### [BUG-003] Account edit buttons hidden on mobile (FIXED 2026-01-26)
 - **Issue**: Cancel/Accept buttons hidden when editing account name on iPhone 15 Pro
 - **Root Cause**: Flex row layout pushed buttons off-screen on narrow devices
@@ -119,11 +132,11 @@ _No regressions detected_
 
 ## 📊 BUG STATISTICS
 
-- **Total Active**: 5
+- **Total Active**: 4
 - **Critical (P0)**: 2 (BUG-001, REG-001)
 - **High (P1)**: 0
 - **Low (P2)**: 3 (GAP-002, GAP-003, GAP-004)
-- **Fixed This Month**: 5 (GAP-001, BUG-002, BUG-003, BUG-004, BUG-005)
+- **Fixed This Month**: 6 (GAP-001, BUG-002, BUG-003, BUG-004, BUG-005, BUG-006)
 - **Average Fix Time**: < 1 day
 
 ---

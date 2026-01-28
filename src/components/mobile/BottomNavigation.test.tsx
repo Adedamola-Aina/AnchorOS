@@ -88,14 +88,14 @@ describe('BottomNavigation', () => {
             renderWithRouter(<BottomNavigation accountNotifications={[]} />, { route: '/dashboard' });
 
             const homeLink = screen.getByRole('link', { name: /home/i });
-            expect(homeLink.className).toContain('text-blue-600');
+            expect(homeLink.className).toContain('text-primary-600');
         });
 
         it('applies active styling when on commitments route', () => {
             renderWithRouter(<BottomNavigation accountNotifications={[]} />, { route: '/commitments' });
 
             const tasksLink = screen.getByRole('link', { name: /tasks/i });
-            expect(tasksLink.className).toContain('text-blue-600');
+            expect(tasksLink.className).toContain('text-primary-600');
         });
 
         it('applies inactive styling to non-active links', () => {

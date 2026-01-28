@@ -13,6 +13,7 @@ export { NetWorthSummary } from './NetWorthSummary';
 export { OverdraftWarning } from './OverdraftWarning';
 export { RecurringTransactionsList } from './RecurringTransactionsList';
 export { SpendingTrendsChart } from './SpendingTrendsChart';
+export { SwipeableTransactionItem } from './SwipeableTransactionItem';
 export { TransactionItem } from './TransactionItem';
 export { TransactionTypeSelector } from './TransactionTypeSelector';
 export { TransferDetails } from './TransferDetails';

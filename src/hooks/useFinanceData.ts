@@ -7,7 +7,8 @@
  * @module hooks/useFinanceData
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { User } from 'firebase/auth';
 import type { AnchorTransaction, AnchorAccount } from '../types';
 import { calculateNetWorth } from '../utils/finance';
@@ -30,6 +31,7 @@ const getEffectiveDate = (tx: { transactionDate?: string | Date; date?: string |
 
 export const useFinanceData = (user: User | null) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const queryClient = useQueryClient();
 
     const start = useMemo(() =>
         new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).toISOString(),
@@ -126,6 +128,11 @@ export const useFinanceData = (user: User | null) => {
 
     const jumpToMonth = (date: Date) => setCurrentMonth(date);
 
+    // Refetch all finance data (for pull-to-refresh)
+    const refetch = useCallback(async () => {
+        await queryClient.invalidateQueries({ queryKey: ['finance'] });
+    }, [queryClient]);
+
     return {
         transactions,
         accounts,
@@ -137,5 +144,6 @@ export const useFinanceData = (user: User | null) => {
         netWorth,
         recentActivity,
         cashFlow,
+        refetch,
     };
 };

@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { useHaptic } from '../../hooks/useHaptic';
 import { getTransactionLabel } from '../../utils/finance';
 import { toCents, fromCents } from '../../utils/moneyUtils';
 import { mapFirebaseError } from '../../utils/errorUtils';
@@ -33,6 +34,7 @@ interface TransactionFormProps {
 export const TransactionForm: React.FC<TransactionFormProps> = ({
     onClose, defaultAccountId, defaultType = 'expense', initialData, prefillData
 }) => {
+    const haptic = useHaptic();
     const { transactions, accounts, addTransaction, updateTransaction } = useFinance();
     const { showToast } = useNotifications();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,6 +96,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                 await updateTransaction(initialData.id, initialData.accountId, {
                     title: formState.title, amountCents, type: formState.type, category: finalCategory, date: transactionDate,
                 });
+                haptic.trigger('success');
                 showToast('Transaction updated successfully', 'success');
             } else {
                 const isoDate = new Date(transactionDate + 'T12:00:00').toISOString();
@@ -104,12 +107,14 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                     destinationAccountId: formState.type === 'transfer' ? formState.destinationAccId : undefined,
                     ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) })
                 } as any);
+                haptic.trigger('success');
                 showToast('Transaction recorded successfully', 'success');
             }
             if (!initialData) { formState.setTitle(''); setAmount(''); setTransactionDate(new Date().toISOString().split('T')[0]); }
             onClose();
         } catch (error) {
             console.error('[TransactionForm] Failed to save transaction:', error);
+            haptic.trigger('error');
             showToast(mapFirebaseError(error), 'error');
         } finally {
             setIsSubmitting(false);

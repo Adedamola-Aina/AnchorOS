@@ -143,7 +143,7 @@ describe('useFabricSuggestions', () => {
             expect(result.current.suggestions).toHaveLength(0);
         });
 
-        it('navigates to finance when action is called', () => {
+        it('navigates to finance with prefilled data when action is called', () => {
             const { result } = renderHook(() => useFabricSuggestions());
             const mockNavigate = vi.fn();
 
@@ -158,7 +158,12 @@ describe('useFabricSuggestions', () => {
                 result.current.suggestions[0].action();
             });
 
-            expect(mockNavigate).toHaveBeenCalledWith('finance');
+            expect(mockNavigate).toHaveBeenCalledWith('finance', {
+                amount: 75,
+                category: 'Groceries',
+                description: 'Pay groceries $75',
+                action: 'new'
+            });
         });
     });
 });

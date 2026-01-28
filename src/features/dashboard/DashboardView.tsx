@@ -4,11 +4,13 @@
  * Widget components extracted to DashboardWidgets.tsx
  */
 
+import { useState } from 'react';
 import { useApp } from '../../context/AnchorContext';
 import { useAuth } from '../../context/AuthContext';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
+import { useHaptic } from '../../hooks/useHaptic';
 import { SectionHeader } from '../../components/shared';
 import { getAssetDistribution } from '../../utils/financeInsights';
 import { getProductivityMetrics } from '../../utils/taskInsights';
@@ -16,6 +18,7 @@ import { AssetAllocationWidget } from './components/AssetAllocationWidget';
 import { PortfolioWidget, CashFlowWidget, RecentActivityWidget, ProductivityWidget, TodaysFocusWidget } from './components/DashboardWidgets';
 import type { Currency } from '../../types';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
+import { PullToRefresh } from '../../components/mobile/PullToRefresh';
 
 const getTimeGreeting = () => {
   const hour = new Date().getHours();
@@ -28,8 +31,10 @@ const DashboardView = () => {
   const { navigateTo } = useApp();
   const { profile } = useAuth();
   const { tasks } = useTasks();
-  const { accounts, recentActivity, cashFlow } = useFinance();
+  const { accounts, recentActivity, cashFlow, refetch } = useFinance();
   const { isMobile } = useResponsive();
+  const haptic = useHaptic();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const productivity = getProductivityMetrics(tasks);
   const hasCommitments = tasks.length > 0;
@@ -37,12 +42,20 @@ const DashboardView = () => {
   const assets = getAssetDistribution(accounts);
   const primaryCurrency: Currency = accounts.length > 0 ? (accounts[0].currency as Currency) : 'NGN';
 
-  return (
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    haptic.trigger('light');
+    await refetch();
+    haptic.trigger('success');
+    setIsRefreshing(false);
+  };
+
+  const dashboardContent = (
     <FeatureErrorBoundary featureName="Dashboard">
       <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 pb-20 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
         <SectionHeader title={`${getTimeGreeting()}, ${profile.name}`} subtitle="Life at a glance." />
 
-        <div className={`grid grid-cols-1 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-5'}`}>
+        <div className={`grid grid-cols-1 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-5'} ${isRefreshing ? 'opacity-60' : ''}`}>
           {/* Column 1: Wealth */}
           <div className="space-y-5">
             <PortfolioWidget assets={assets} onNavigate={() => navigateTo('finance')} accountCount={accounts.length} isMobile={isMobile} />
@@ -64,6 +77,17 @@ const DashboardView = () => {
       </div>
     </FeatureErrorBoundary>
   );
+
+  // Wrap with PullToRefresh on mobile
+  if (isMobile) {
+    return (
+      <PullToRefresh onRefresh={handleRefresh} disabled={isRefreshing}>
+        {dashboardContent}
+      </PullToRefresh>
+    );
+  }
+
+  return dashboardContent;
 };
 
 export default DashboardView;

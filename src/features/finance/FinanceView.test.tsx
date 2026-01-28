@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import FinanceView from './FinanceView';
 import { AppContext } from '../../context/AnchorContext';
 import { FinanceContext } from '../../context/FinanceContext';
@@ -222,17 +223,17 @@ const createMockContexts = (financeOverrides = {}, appOverrides = {}, authOverri
 const renderWithContext = (ui: React.ReactElement, { finance = {}, app = {}, auth = {}, family = {} } = {}) => {
   const { finance: mockFinance, app: mockApp, auth: mockAuth, family: mockFamily, notifications: mockNotifications } = createMockContexts(finance, app, auth, family);
   return render(
-    <AuthContext.Provider value={mockAuth as any}>
-
-      <AppContext.Provider value={mockApp as any}>
-        <FinanceContext.Provider value={mockFinance as any}>
-          <NotificationContext.Provider value={mockNotifications as any}>
-            {ui}
-          </NotificationContext.Provider>
-        </FinanceContext.Provider>
-      </AppContext.Provider>
-
-    </AuthContext.Provider>
+    <MemoryRouter>
+      <AuthContext.Provider value={mockAuth as any}>
+        <AppContext.Provider value={mockApp as any}>
+          <FinanceContext.Provider value={mockFinance as any}>
+            <NotificationContext.Provider value={mockNotifications as any}>
+              {ui}
+            </NotificationContext.Provider>
+          </FinanceContext.Provider>
+        </AppContext.Provider>
+      </AuthContext.Provider>
+    </MemoryRouter>
   );
 };
 
