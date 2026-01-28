@@ -10,7 +10,7 @@
 import React, { useState, useRef, useCallback, type ReactNode, type RefObject } from 'react';
 import { Loader2 } from 'lucide-react';
 
-interface PullToRefreshProps {
+export interface PullToRefreshProps {
   /** Callback triggered when refresh gesture completes */
   onRefresh: () => Promise<void>;
   /** Content to wrap with pull-to-refresh behavior */

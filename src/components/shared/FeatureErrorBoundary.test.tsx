@@ -158,6 +158,6 @@ describe('FeatureErrorBoundary', () => {
         expect(window.location.href).toContain('subject=%5BBug%5D%20Finance%20Error');
 
         // Restore
-        window.location = originalLocation;
+        Object.defineProperty(window, 'location', { value: originalLocation, writable: true });
     });
 });
