@@ -48,7 +48,7 @@ export function ArchiveViewer() {
             const res = await axios.get(`/api/archive/preview?days=${daysThreshold}`);
             setPreview(res.data);
             setShowPreview(true);
-        } catch (err) {
+        } catch {
             alert('Failed to preview archival');
         }
     };
@@ -63,7 +63,7 @@ export function ArchiveViewer() {
             alert(res.data.message);
             fetchArchivedItems();
             setShowPreview(false);
-        } catch (err) {
+        } catch {
             alert('Failed to run archival');
         }
     };
@@ -77,7 +77,7 @@ export function ArchiveViewer() {
             const res = await axios.post('/api/archive/restore', { itemText });
             alert(res.data.message);
             fetchArchivedItems();
-        } catch (err) {
+        } catch {
             alert('Failed to restore item');
         }
     };

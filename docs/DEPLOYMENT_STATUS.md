@@ -118,6 +118,10 @@ npm run deploy:production
 
 | Date | Version | Env | Type | Notes |
 |------|---------|-----|------|-------|
+| 2026-01-28 | v1.5.0-dev | Staging | Feature | UX improvements, Mobile gestures, OLED toggle |
+| 2026-01-28 | v1.5.0-dev | Dev | Feature | UX improvements, Mobile gestures, OLED toggle |
+| 2026-01-28 | v1.5.0-dev | Local | Bugfix | BUG-007: Modal inputs fix, Dashboard enhancements |
+| 2026-01-27 | v1.5.0-dev | Dev | Feature | ARCH-001-003: 200-line rule, Error boundaries, Tests |
 | 2026-01-26 | v1.5.0-dev | Dev | Feature | Mobile Optimization, 5 bug fixes |
 | 2026-01-26 | v1.5.0-dev | Dev | Feature | PM Dashboard, Codebase Audit |
 | 2026-01-24 | v1.4.0 | Staging | Hotfix | Testing |

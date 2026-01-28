@@ -24,6 +24,7 @@ const { analyzeBugsFromKnownIssues, getPrioritySuggestionStats } = require('./bu
 const { runFullSync, getSyncStatus } = require('./docUpdater');
 const { startFileWatchers, stopFileWatchers } = require('./fileWatcher');
 const { watchMarkerFiles, initializeDashboardDir } = require('./conversationProcessor');
+const { getCommandCenterData, getProactiveAlerts } = require('./commandCenter');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -284,6 +285,40 @@ app.get('/api/health', async (req, res) => {
     try {
         const health = await getHealthReport();
         res.json(health);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/command-center
+ * Returns unified dashboard data - single source of truth for everything
+ * Like Google's internal dashboards - one view of all project health
+ */
+app.get('/api/command-center', async (req, res) => {
+    try {
+        const data = await getCommandCenterData();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/alerts
+ * Returns proactive alerts - things that need attention
+ */
+app.get('/api/alerts', async (req, res) => {
+    try {
+        const alerts = await getProactiveAlerts();
+        res.json({ 
+            count: alerts.length,
+            critical: alerts.filter(a => a.severity === 'critical').length,
+            warning: alerts.filter(a => a.severity === 'warning').length,
+            info: alerts.filter(a => a.severity === 'info').length,
+            items: alerts,
+            generatedAt: new Date().toISOString()
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

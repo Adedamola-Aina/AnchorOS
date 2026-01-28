@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { RefreshCw, Clock, GitBranch, FileText, Server, CheckSquare, AlertTriangle, Lightbulb } from 'lucide-react';
+import { RefreshCw, Clock, GitBranch, FileText, CheckSquare, Lightbulb, Shield, AlertTriangle } from 'lucide-react';
 import { EnvironmentParity } from './components/EnvironmentParity';
 import { DocumentHealth } from './components/DocumentHealth';
 import { EnterpriseKanban } from './components/EnterpriseKanban';
 import { GitTimeline } from './components/GitTimeline';
-import { DashboardSummary } from './components/DashboardSummary';
 import { FeatureBacklog } from './components/FeatureBacklog';
+import { CommandCenter } from './components/CommandCenter';
 
-type TabType = 'overview' | 'parity' | 'docs' | 'kanban' | 'timeline' | 'features';
+type TabType = 'command' | 'kanban' | 'parity' | 'timeline' | 'docs' | 'features';
 
 interface Summary {
     projectStatus: unknown;
@@ -20,7 +20,7 @@ interface Summary {
 }
 
 function App() {
-    const [activeTab, setActiveTab] = useState<TabType>('overview');
+    const [activeTab, setActiveTab] = useState<TabType>('command');
     const [summary, setSummary] = useState<Summary | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -54,11 +54,11 @@ function App() {
     };
 
     const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
-        { id: 'overview', label: 'Overview', icon: <Server className="w-4 h-4" /> },
-        { id: 'parity', label: 'Environment Parity', icon: <GitBranch className="w-4 h-4" /> },
-        { id: 'docs', label: 'Documentation', icon: <FileText className="w-4 h-4" /> },
+        { id: 'command', label: 'Command Center', icon: <Shield className="w-4 h-4" /> },
         { id: 'kanban', label: 'Kanban Board', icon: <CheckSquare className="w-4 h-4" /> },
+        { id: 'parity', label: 'Environment Parity', icon: <GitBranch className="w-4 h-4" /> },
         { id: 'timeline', label: 'Git Timeline', icon: <Clock className="w-4 h-4" /> },
+        { id: 'docs', label: 'Documentation', icon: <FileText className="w-4 h-4" /> },
         { id: 'features', label: 'Feature Backlog', icon: <Lightbulb className="w-4 h-4" /> },
     ];
 
@@ -148,11 +148,11 @@ function App() {
                     </div>
                 ) : (
                     <>
-                        {activeTab === 'overview' && <DashboardSummary summary={summary as any} onNavigateToTab={(tab) => setActiveTab(tab as TabType)} />}
-                        {activeTab === 'parity' && <EnvironmentParity />}
-                        {activeTab === 'docs' && <DocumentHealth />}
+                        {activeTab === 'command' && <CommandCenter onNavigate={(tab) => setActiveTab(tab as TabType)} />}
                         {activeTab === 'kanban' && <EnterpriseKanban />}
+                        {activeTab === 'parity' && <EnvironmentParity />}
                         {activeTab === 'timeline' && <GitTimeline />}
+                        {activeTab === 'docs' && <DocumentHealth />}
                         {activeTab === 'features' && <FeatureBacklog />}
                     </>
                 )}

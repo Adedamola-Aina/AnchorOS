@@ -5,10 +5,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { db, APP_ID } from '../config/firebase';
-import { collection, query, where, onSnapshot, orderBy, doc, FirestoreError } from 'firebase/firestore';
-import type { DocumentSnapshot, QuerySnapshot, DocumentData } from 'firebase/firestore';
 import type { AnchorAccount, AnchorTransaction } from '../types';
+import { subscribeToTransactions, subscribeToAccountDetails } from './sharedAccountSubscriptions';
 
 interface SharedAccountFromServer {
     id: string;
@@ -94,66 +92,21 @@ export function useSharedAccounts(
 
             accounts.forEach(acc => {
                 const key = `${acc.ownerUid}:${acc.id}`;
+                const accountInfo = { id: acc.id, ownerUid: acc.ownerUid };
 
-                // 1. Transaction Subscription
-                const txQuery = query(
-                    collection(db, 'artifacts', APP_ID, 'users', acc.ownerUid, 'finance'),
-                    where('accountId', '==', acc.id),
-                    orderBy('date', 'desc')
+                // Transaction Subscription
+                const txUnsubscribe = subscribeToTransactions(
+                    accountInfo,
+                    allTransactions,
+                    setSharedTransactions
                 );
-
-                const txUnsubscribe = onSnapshot(txQuery,
-                    (snapshot: QuerySnapshot<DocumentData>) => {
-                        const txs = snapshot.docs.map(doc => ({
-                            id: doc.id,
-                            ...doc.data(),
-                            accountOwnerId: acc.ownerUid,
-                        } as AnchorTransaction));
-
-                        allTransactions.set(key, txs);
-
-                        // Merge all transactions
-                        const merged: AnchorTransaction[] = [];
-                        allTransactions.forEach(txList => merged.push(...txList));
-                        merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                        setSharedTransactions(merged);
-                    },
-                    (err: FirestoreError) => console.error(`Transaction subscription error for ${key}:`, err)
-                );
-
                 subscriptionsRef.current.set(key + ':tx', txUnsubscribe);
 
-                // 2. Account Details Subscription (Real-time Balance)
-                const accRef = doc(db, 'artifacts', APP_ID, 'users', acc.ownerUid, 'accounts', acc.id);
-                const accUnsubscribe = onSnapshot(accRef,
-                    (snapshot: DocumentSnapshot<DocumentData>) => {
-                        if (snapshot.exists()) {
-                            const data = snapshot.data();
-                            setSharedAccounts(prev => {
-                                const idx = prev.findIndex(a => a.id === acc.id);
-                                if (idx === -1) return prev; // Should not happen given we initialized it
-
-                                const updatedAccount: AnchorAccount = {
-                                    id: snapshot.id,
-                                    ...data as any,
-                                    ownerId: acc.ownerUid,
-                                    // Ensure sharedWith is preserved or updated from doc
-                                    // We default to the doc's sharedWith, but fallback to initial match if missing (unlikely)
-                                    sharedWith: data.sharedWith || prev[idx].sharedWith
-                                };
-
-                                const newArr = [...prev];
-                                newArr[idx] = updatedAccount;
-                                return newArr;
-                            });
-                        } else {
-                            // Account deleted
-                            setSharedAccounts(prev => prev.filter(a => a.id !== acc.id));
-                        }
-                    },
-                    (err: FirestoreError) => console.error(`Account subscription error for ${key}:`, err)
+                // Account Details Subscription (Real-time Balance)
+                const accUnsubscribe = subscribeToAccountDetails(
+                    accountInfo,
+                    setSharedAccounts
                 );
-
                 subscriptionsRef.current.set(key + ':acc', accUnsubscribe);
             });
 

@@ -22,16 +22,7 @@
 
 ## 🔴 CRITICAL (P0)
 
-### [REG-001] XSS Validation Failure in E2E Tests
-- **Reported**: 2026-01-26 (Codebase Audit)
-- **Reporter**: Agent (Automated Test)
-- **Impact**: E2E test `XSS Protection: Transaction Title` failing on Staging
-- **Root Cause**: Validation logic timeout or selector issue
-- **Fix**: Debug test selector, verify `containsDangerousPatterns` is called
-- **Assigned**: Unassigned
-- **Target**: 2026-01-28
-- **Status**: Investigating
-- **Workaround**: Backend Firestore Rules should still block malicious content
+_No critical issues at this time_
 
 ---
 
@@ -79,6 +70,26 @@ _No regressions detected_
 ---
 
 ## ✅ RECENTLY FIXED
+
+### [ARCH-001] Files Approaching 200-Line Limit (FIXED 2026-01-28)
+- **Issue**: 6 files were approaching the 200-line architecture limit
+- **Files Refactored**:
+  - `useSharedAccounts.ts`: 196 → 149 lines (extracted `sharedAccountSubscriptions.ts`)
+  - `FamilyNotificationBanner.tsx`: 189 → 157 lines (extracted `notificationStyles.ts`)
+  - `ActivityFeed.tsx`: 188 → 141 lines (extracted `activityHelpers.ts`)
+  - `EditTaskForm.tsx`: 186 → 136 lines (extracted `EditTaskFormFields.tsx`)
+  - `useFinanceOperations.ts`: 183 → 165 lines (extracted `financeActivityLogging.ts`)
+  - `InviteFamilyMember.tsx`: 187 lines (already well-structured, acceptable)
+- **Verified By**: Agent (434 tests passing)
+- **Deployment**: Local
+
+### [REG-001] XSS E2E Test Failures (FIXED 2026-01-28)
+- **Issue**: E2E tests `XSS Protection: Transaction Title` and `XSS Payload Neutralization` failing on Staging
+- **Root Cause**: Test selectors outdated - looking for "New Transaction" button that no longer exists. UI changed to require clicking into an account first before adding transactions. Also `text=Net Worth` selector matched 2 elements (strict mode violation).
+- **Fix**: Updated test selectors to match current UI flow (click account → Pay Bill), used `.first()` for ambiguous locators
+- **Files**: `e2e/backlog_advanced.spec.ts`, `e2e/comprehensive.spec.ts`
+- **Verified By**: Agent (3/3 XSS tests passing)
+- **Deployment**: Local
 
 ### [BUG-007] Modal inputs unresponsive on mobile (FIXED 2026-01-28)
 - **Issue**: Cannot type in input fields within modals (Transfer, Bills, Add Account) on mobile devices. Commitment form name field also affected.

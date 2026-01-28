@@ -6,21 +6,13 @@
  */
 
 import React from 'react';
-import {
-    PlusCircle,
-    Pencil,
-    Trash2,
-    Type,
-    UserPlus,
-    UserMinus,
-    Activity,
-    Clock
-} from 'lucide-react';
+import { Activity, Clock } from 'lucide-react';
 import type { AccountActivity } from '../../../types/activity';
 import { formatActivityMessage, getActivityColor } from '../../../types/activity';
 import { formatCurrency } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { Currency } from '../../../types';
+import { formatRelativeTime, getActivityIcon } from './activityHelpers';
 
 interface ActivityFeedProps {
     activities: AccountActivity[];
@@ -28,45 +20,6 @@ interface ActivityFeedProps {
     loading?: boolean;
     maxItems?: number;
 }
-
-const getIcon = (action: AccountActivity['action']) => {
-    const iconClass = "w-4 h-4";
-    switch (action) {
-        case 'transaction_added':
-            return <PlusCircle className={iconClass} />;
-        case 'transaction_edited':
-            return <Pencil className={iconClass} />;
-        case 'transaction_deleted':
-            return <Trash2 className={iconClass} />;
-        case 'account_renamed':
-            return <Type className={iconClass} />;
-        case 'account_shared':
-            return <UserPlus className={iconClass} />;
-        case 'account_unshared':
-            return <UserMinus className={iconClass} />;
-        default:
-            return <Activity className={iconClass} />;
-    }
-};
-
-const formatRelativeTime = (timestamp: string): string => {
-    const now = new Date();
-    const activityTime = new Date(timestamp);
-    const diffMs = now.getTime() - activityTime.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-
-    return activityTime.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric'
-    });
-};
 
 export const ActivityFeed: React.FC<ActivityFeedProps> = ({
     activities,
@@ -128,7 +81,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
               w-8 h-8 rounded-full flex items-center justify-center shrink-0
               ${colorClasses}
             `}>
-                            {getIcon(activity.action)}
+                            {getActivityIcon(activity.action)}
                         </div>
 
                         {/* Content */}

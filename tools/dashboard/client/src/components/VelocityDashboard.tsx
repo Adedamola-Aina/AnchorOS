@@ -52,7 +52,7 @@ export function VelocityDashboard() {
             } else {
                 alert('No new completions detected.');
             }
-        } catch (err) {
+        } catch {
             alert('Failed to auto-detect completions');
         }
     };
@@ -61,7 +61,7 @@ export function VelocityDashboard() {
         try {
             const res = await axios.post('/api/velocity/predict', { remainingItems });
             setPrediction(res.data);
-        } catch (err) {
+        } catch {
             alert('Failed to predict completion date');
         }
     };
