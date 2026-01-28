@@ -2,6 +2,7 @@ import React, { useContext, useCallback } from 'react';
 import { useCommitmentService } from '../hooks/useCommitmentService';
 import { useAuth } from './AuthContext';
 import { useApp } from './AnchorContext';
+import { useHaptic } from '../hooks/useHaptic';
 import { TaskContext } from './TaskContextDefinition';
 export { TaskContext };
 
@@ -12,6 +13,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // We need the user from the AuthContext
     const { user } = useAuth();
     const { navigateTo } = useApp();
+    const haptic = useHaptic();
 
     // Use the existing hook
     const commitmentService = useCommitmentService(user);
@@ -30,6 +32,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Execute the toggle
         await commitmentService.toggleTask(id, currentStatus);
 
+        // Haptic feedback: heavy for completion, light for uncomplete
+        haptic.trigger(currentStatus ? 'light' : 'heavy');
+
         // If completing a task (currentStatus was false, now true)
         // Trigger suggestion with pre-toggle task data
         if (!currentStatus && task) {
@@ -40,7 +45,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.warn('[Fabric] Suggestion trigger failed:', err);
             }
         }
-    }, [commitmentService, onCommitmentCompleted, navigateTo]);
+    }, [commitmentService, onCommitmentCompleted, navigateTo, haptic]);
 
     return (
         <TaskContext.Provider value={{

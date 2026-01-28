@@ -49,6 +49,7 @@ export const useFinanceService = (
     netWorth,
     recentActivity,
     cashFlow,
+    refetch,
   } = useFinanceData(user);
 
   // Operations layer
@@ -72,6 +73,7 @@ export const useFinanceService = (
     netWorth,
     recentActivity,
     cashFlow,
+    refetch,
     // Navigation
     nextMonth,
     prevMonth,

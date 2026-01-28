@@ -22,7 +22,7 @@ export const PortfolioWidget: React.FC<PortfolioWidgetProps> = ({ assets, onNavi
         <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-slate-800/50">
             {assets.slice(0, 3).map(asset => (
                 <div key={asset.id} className="flex justify-between items-center text-xs">
-                    <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" /><span className="font-medium text-slate-600 dark:text-slate-400 truncate max-w-[120px]">{asset.name}</span></div>
+                    <div className="flex items-center gap-2 min-w-0 flex-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0" /><span className="font-medium text-slate-600 dark:text-slate-400 truncate">{asset.name}</span></div>
                     <div className="text-right">
                         <p className="text-xs font-bold font-mono text-slate-900 dark:text-white tabular-nums">{formatCurrency(asset.amount, asset.currency as Currency)}</p>
                         <p className="text-[10px] font-bold text-slate-400 tabular-nums">{asset.percent.toFixed(1)}%</p>
@@ -67,10 +67,10 @@ export const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ acti
                 return (
                     <div key={tx.id} className="flex justify-between items-center group cursor-default p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate pr-2">{tx.title}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                                <span className="text-[10px] text-slate-400">{new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                                <span className="text-[10px] text-slate-400 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">{tx.category}</span>
+                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{tx.title}</p>
+                            <div className="flex items-center gap-2 mt-1 min-w-0">
+                                <span className="text-[10px] text-slate-400 shrink-0">{new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                <span className="text-[10px] text-slate-400 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded truncate">{tx.category}</span>
                             </div>
                         </div>
                         <span className={`font-mono font-bold text-sm ${tx.type === 'income' ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-300'}`}>
@@ -119,8 +119,8 @@ export const TodaysFocusWidget: React.FC<TodaysFocusWidgetProps> = ({ priorities
             </div>
             <div className="space-y-3">
                 {priorities.map(task => (
-                    <div key={task.id} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" /><span className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{task.title}</span>
+                    <div key={task.id} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50 min-w-0">
+                        <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" /><span className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate min-w-0">{task.title}</span>
                     </div>
                 ))}
             </div>

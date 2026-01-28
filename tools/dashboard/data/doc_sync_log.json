@@ -1,8 +1,8 @@
 {
-  "lastSync": "2026-01-27T18:00:00.054Z",
+  "lastSync": "2026-01-28T09:15:55.622Z",
   "syncHistory": [
     {
-      "timestamp": "2026-01-27T18:00:00.054Z",
+      "timestamp": "2026-01-28T09:15:55.622Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -10,7 +10,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T18:00:00.054Z",
+      "timestamp": "2026-01-28T09:15:55.622Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -19,14 +19,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T18:00:00.053Z",
+      "timestamp": "2026-01-28T09:15:55.622Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T17:00:00.008Z",
+      "timestamp": "2026-01-28T09:15:55.622Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -34,7 +34,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T17:00:00.007Z",
+      "timestamp": "2026-01-28T09:15:55.620Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -43,14 +43,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T17:00:00.007Z",
+      "timestamp": "2026-01-28T09:15:55.620Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T16:00:00.008Z",
+      "timestamp": "2026-01-28T09:15:51.068Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -58,7 +58,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T16:00:00.008Z",
+      "timestamp": "2026-01-28T09:15:51.067Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -67,14 +67,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T16:00:00.007Z",
+      "timestamp": "2026-01-28T09:15:51.067Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T15:23:09.471Z",
+      "timestamp": "2026-01-28T09:15:51.067Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -82,7 +82,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:23:09.471Z",
+      "timestamp": "2026-01-28T09:15:51.067Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -91,14 +91,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:23:09.471Z",
+      "timestamp": "2026-01-28T09:15:51.066Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T15:23:09.470Z",
+      "timestamp": "2026-01-28T09:15:26.336Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -106,7 +106,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:23:09.470Z",
+      "timestamp": "2026-01-28T09:15:26.335Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -115,14 +115,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:23:09.470Z",
+      "timestamp": "2026-01-28T09:15:26.335Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T15:11:05.388Z",
+      "timestamp": "2026-01-28T09:15:26.335Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -130,7 +130,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:11:05.387Z",
+      "timestamp": "2026-01-28T09:15:26.335Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -139,14 +139,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:11:05.387Z",
+      "timestamp": "2026-01-28T09:15:26.334Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T15:11:05.387Z",
+      "timestamp": "2026-01-28T09:15:20.242Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -154,7 +154,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:11:05.386Z",
+      "timestamp": "2026-01-28T09:15:20.242Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -163,14 +163,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:11:05.385Z",
+      "timestamp": "2026-01-28T09:15:20.242Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T15:00:00.006Z",
+      "timestamp": "2026-01-28T09:15:20.242Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -178,7 +178,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:00:00.005Z",
+      "timestamp": "2026-01-28T09:15:20.240Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -187,14 +187,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T15:00:00.005Z",
+      "timestamp": "2026-01-28T09:15:20.240Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:46.590Z",
+      "timestamp": "2026-01-28T09:15:08.754Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -202,7 +202,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:46.588Z",
+      "timestamp": "2026-01-28T09:15:08.754Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -211,14 +211,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:46.588Z",
+      "timestamp": "2026-01-28T09:15:08.754Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:43.733Z",
+      "timestamp": "2026-01-28T09:15:08.754Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -226,7 +226,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:43.733Z",
+      "timestamp": "2026-01-28T09:15:08.752Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -235,14 +235,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:43.732Z",
+      "timestamp": "2026-01-28T09:15:08.752Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:43.732Z",
+      "timestamp": "2026-01-28T09:14:56.017Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -250,7 +250,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:43.731Z",
+      "timestamp": "2026-01-28T09:14:56.016Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -259,14 +259,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:43.731Z",
+      "timestamp": "2026-01-28T09:14:56.016Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:35.720Z",
+      "timestamp": "2026-01-28T09:14:56.016Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -274,7 +274,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:35.720Z",
+      "timestamp": "2026-01-28T09:14:56.015Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -283,14 +283,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:35.720Z",
+      "timestamp": "2026-01-28T09:14:56.014Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:35.720Z",
+      "timestamp": "2026-01-28T09:14:51.667Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -298,7 +298,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:35.718Z",
+      "timestamp": "2026-01-28T09:14:51.667Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -307,14 +307,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:38:35.718Z",
+      "timestamp": "2026-01-28T09:14:51.667Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:58.568Z",
+      "timestamp": "2026-01-28T09:14:51.666Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -322,7 +322,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:58.568Z",
+      "timestamp": "2026-01-28T09:14:51.666Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -331,14 +331,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:58.568Z",
+      "timestamp": "2026-01-28T09:14:51.666Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:58.568Z",
+      "timestamp": "2026-01-28T09:14:41.008Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -346,7 +346,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:58.566Z",
+      "timestamp": "2026-01-28T09:14:41.008Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -355,14 +355,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:58.566Z",
+      "timestamp": "2026-01-28T09:14:41.008Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:15.464Z",
+      "timestamp": "2026-01-28T09:14:41.007Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -370,7 +370,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:15.464Z",
+      "timestamp": "2026-01-28T09:14:41.006Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -379,14 +379,14 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:15.463Z",
+      "timestamp": "2026-01-28T09:14:41.006Z",
       "type": "velocity",
       "details": {
         "message": "Detected undefined new completions"
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:15.463Z",
+      "timestamp": "2026-01-28T09:14:39.324Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -394,7 +394,7 @@
       }
     },
     {
-      "timestamp": "2026-01-27T14:14:15.463Z",
+      "timestamp": "2026-01-28T09:14:39.324Z",
       "type": "priority",
       "details": {
         "totalBugs": 0,
@@ -404,9 +404,9 @@
     }
   ],
   "stats": {
-    "totalSyncs": 192,
-    "lastVelocityUpdate": "2026-01-27T18:00:00.053Z",
-    "lastPriorityUpdate": "2026-01-27T18:00:00.054Z",
-    "lastArchiveRun": "2026-01-27T18:00:00.054Z"
+    "totalSyncs": 381,
+    "lastVelocityUpdate": "2026-01-28T09:15:55.622Z",
+    "lastPriorityUpdate": "2026-01-28T09:15:55.622Z",
+    "lastArchiveRun": "2026-01-28T09:15:55.622Z"
   }
 }

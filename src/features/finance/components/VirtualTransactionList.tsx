@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
 import { Search } from 'lucide-react';
 import { TransactionItem } from './TransactionItem';
+import { SwipeableTransactionItem } from './SwipeableTransactionItem';
 import { useResponsive } from '../../../hooks/useResponsive';
 import type { AnchorTransaction } from '../../../types';
 
@@ -90,13 +91,23 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                             }}
                             className="pb-4" // Gap between cards
                         >
-                            <TransactionItem
-                                transaction={tx}
-                                accountName={tx.accountName}
-                                currentUserId={currentUserId}
-                                onEdit={onEdit}
-                                onDelete={onDelete}
-                            />
+                            {isMobile ? (
+                                <SwipeableTransactionItem
+                                    transaction={tx}
+                                    accountName={tx.accountName}
+                                    currentUserId={currentUserId}
+                                    onEdit={onEdit}
+                                    onDelete={onDelete}
+                                />
+                            ) : (
+                                <TransactionItem
+                                    transaction={tx}
+                                    accountName={tx.accountName}
+                                    currentUserId={currentUserId}
+                                    onEdit={onEdit}
+                                    onDelete={onDelete}
+                                />
+                            )}
                         </div>
                     );
                 })}

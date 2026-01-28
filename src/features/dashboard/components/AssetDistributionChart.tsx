@@ -46,7 +46,7 @@ export function AssetDistributionChart({ accountData }: AssetDistributionChartPr
                 <div className="md:w-1/2 overflow-y-auto pr-2 custom-scrollbar space-y-2">
                     {accountData.map((item, idx) => (
                         <div key={idx} className="flex items-center justify-between text-xs group">
-                            <div className="flex items-center gap-2 truncate pr-2">
+                            <div className="flex items-center gap-2 pr-2 min-w-0 flex-1">
                                 <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                                 <span className="text-slate-600 dark:text-slate-400 font-medium truncate group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
                                     {item.name}

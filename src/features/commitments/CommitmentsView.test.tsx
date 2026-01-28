@@ -747,7 +747,7 @@ describe('CommitmentsView', () => {
       await user.click(editButtons[0].closest('button')!);
 
       expect(screen.getByDisplayValue('Morning Meditation')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /morning/i })).toHaveClass('text-blue-600');
+      expect(screen.getByRole('button', { name: /morning/i })).toHaveClass('text-task-600');
     });
 
     it('cancels edit without saving changes', async () => {

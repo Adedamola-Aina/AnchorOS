@@ -64,7 +64,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
 
             <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
+                    <h3 className="font-semibold text-slate-900 dark:text-white truncate flex-1 min-w-0">
                         {account.name}
                     </h3>
                     {/* Show 👥 emoji for shared accounts (v2) */}

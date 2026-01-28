@@ -77,25 +77,25 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                     </div>
 
                     {/* Metadata row - simplified for mobile */}
-                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400">
-                        <span>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400 min-w-0">
+                        <span className="shrink-0">
                             {new Date(displayDate).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric'
                             })}
                         </span>
-                        <span>•</span>
+                        <span className="shrink-0">•</span>
                         <span className="truncate">{transaction.category}</span>
                         {transaction.createdBy && currentUserId && transaction.createdBy !== currentUserId && (
                             <>
-                                <span>•</span>
+                                <span className="shrink-0">•</span>
                                 <span className="text-blue-500 truncate">{transaction.createdByName || 'Family'}</span>
                             </>
                         )}
                         {isBackdated && (
                             <>
-                                <span>•</span>
-                                <span className="text-amber-500">Backdated</span>
+                                <span className="shrink-0">•</span>
+                                <span className="text-amber-500 shrink-0">Backdated</span>
                             </>
                         )}
                     </div>
