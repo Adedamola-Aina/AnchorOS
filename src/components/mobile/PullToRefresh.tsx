@@ -63,6 +63,13 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
     if (disabled || isRefreshing) return;
     if (!isAtTop()) return;
     
+    // Ignore touch events from interactive elements (inputs, buttons, etc.)
+    const target = e.target as HTMLElement;
+    const interactiveElements = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'];
+    if (interactiveElements.includes(target.tagName) || target.closest('input, textarea, select, button, a, [role="button"]')) {
+      return;
+    }
+    
     startY.current = e.touches[0].clientY;
     setIsPulling(true);
   }, [disabled, isRefreshing, isAtTop]);

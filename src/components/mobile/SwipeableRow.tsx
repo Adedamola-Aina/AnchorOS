@@ -59,6 +59,14 @@ export function SwipeableRow({
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (disabled) return;
+      
+      // Ignore touch events from interactive elements (inputs, buttons, etc.)
+      const target = e.target as HTMLElement;
+      const interactiveElements = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'];
+      if (interactiveElements.includes(target.tagName) || target.closest('input, textarea, select, button, a, [role="button"]')) {
+        return;
+      }
+      
       startXRef.current = e.touches[0].clientX;
       currentXRef.current = 0;
       setIsDragging(true);
