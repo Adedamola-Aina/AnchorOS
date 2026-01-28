@@ -2,11 +2,37 @@ const fs = require('fs');
 const path = require('path');
 const { runFullSync } = require('./docUpdater');
 
-const ROADMAP_PATH = path.join(__dirname, '../../../docs/ROADMAP.md');
-const KNOWN_ISSUES_PATH = path.join(__dirname, '../../../docs/KNOWN_ISSUES.md');
-const FEATURE_SUGGESTIONS_PATH = path.join(__dirname, '../../../docs/FEATURE_SUGGESTIONS.md');
+const DOCS_PATH = path.join(__dirname, '../../../docs');
+const ROADMAP_PATH = path.join(DOCS_PATH, 'ROADMAP.md');
+const KNOWN_ISSUES_PATH = path.join(DOCS_PATH, 'KNOWN_ISSUES.md');
+const FEATURE_SUGGESTIONS_PATH = path.join(DOCS_PATH, 'FEATURE_SUGGESTIONS.md');
+const DEPLOYMENT_STATUS_PATH = path.join(DOCS_PATH, 'DEPLOYMENT_STATUS.md');
+const PROJECT_STATUS_PATH = path.join(DOCS_PATH, 'PROJECT_STATUS.md');
+const GIT_DIR = path.join(__dirname, '../../../.git');
 
 let watchers = [];
+let debounceTimers = {};
+
+/**
+ * Debounced sync to prevent multiple triggers
+ */
+function debouncedSync(source) {
+    if (debounceTimers[source]) {
+        clearTimeout(debounceTimers[source]);
+    }
+    debounceTimers[source] = setTimeout(() => {
+        console.log(`[FILE WATCHER] Syncing due to: ${source}`);
+        runFullSync().then(results => {
+            console.log(`[FILE WATCHER] Sync complete (${source}):`, {
+                velocity: results.velocity?.newCompletions || 0,
+                archive: results.archive?.archivedCount || 0,
+                priority: results.priority?.totalBugs || 0
+            });
+        }).catch(err => {
+            console.error('[FILE WATCHER] Sync failed:', err.message);
+        });
+    }, 1000);
+}
 
 /**
  * Start watching files for changes
@@ -14,67 +40,42 @@ let watchers = [];
 function startFileWatchers() {
     console.log('[FILE WATCHER] Starting file watchers...');
 
-    // Watch ROADMAP.md for task completions
-    if (fs.existsSync(ROADMAP_PATH)) {
-        const roadmapWatcher = fs.watch(ROADMAP_PATH, { persistent: true }, (eventType, filename) => {
-            if (eventType === 'change') {
-                console.log('[FILE WATCHER] ROADMAP.md changed - triggering sync...');
-                setTimeout(() => {
-                    runFullSync().then(results => {
-                        console.log('[FILE WATCHER] Auto-sync complete:', {
-                            velocity: results.velocity.newCompletions || 0,
-                            archive: results.archive.archivedCount || 0
-                        });
-                    }).catch(err => {
-                        console.error('[FILE WATCHER] Auto-sync failed:', err.message);
-                    });
-                }, 1000); // Debounce 1 second
-            }
-        });
-        watchers.push(roadmapWatcher);
-        console.log('[FILE WATCHER] Watching ROADMAP.md for changes');
+    const filesToWatch = [
+        { path: ROADMAP_PATH, name: 'ROADMAP.md' },
+        { path: KNOWN_ISSUES_PATH, name: 'KNOWN_ISSUES.md' },
+        { path: FEATURE_SUGGESTIONS_PATH, name: 'FEATURE_SUGGESTIONS.md' },
+        { path: DEPLOYMENT_STATUS_PATH, name: 'DEPLOYMENT_STATUS.md' },
+        { path: PROJECT_STATUS_PATH, name: 'PROJECT_STATUS.md' }
+    ];
+
+    for (const file of filesToWatch) {
+        if (fs.existsSync(file.path)) {
+            const watcher = fs.watch(file.path, { persistent: true }, (eventType, filename) => {
+                if (eventType === 'change') {
+                    console.log(`[FILE WATCHER] ${file.name} changed`);
+                    debouncedSync(file.name);
+                }
+            });
+            watchers.push(watcher);
+            console.log(`[FILE WATCHER] Watching ${file.name}`);
+        }
     }
 
-    // Watch KNOWN_ISSUES.md for bug updates
-    if (fs.existsSync(KNOWN_ISSUES_PATH)) {
-        const bugsWatcher = fs.watch(KNOWN_ISSUES_PATH, { persistent: true }, (eventType, filename) => {
-            if (eventType === 'change') {
-                console.log('[FILE WATCHER] KNOWN_ISSUES.md changed - triggering priority analysis...');
-                setTimeout(() => {
-                    runFullSync().then(results => {
-                        console.log('[FILE WATCHER] Priority analysis complete:', {
-                            totalBugs: results.priority.totalBugs || 0,
-                            needsReview: results.priority.needsReview || 0
-                        });
-                    }).catch(err => {
-                        console.error('[FILE WATCHER] Priority analysis failed:', err.message);
-                    });
-                }, 1000); // Debounce 1 second
+    // Watch git HEAD for commit changes
+    const gitHeadPath = path.join(GIT_DIR, 'HEAD');
+    if (fs.existsSync(gitHeadPath)) {
+        const gitWatcher = fs.watch(GIT_DIR, { persistent: true, recursive: true }, (eventType, filename) => {
+            // Only trigger on relevant git changes (commits, merges)
+            if (filename && (filename.includes('HEAD') || filename.includes('refs/heads') || filename.includes('COMMIT_EDITMSG'))) {
+                console.log(`[FILE WATCHER] Git state changed: ${filename}`);
+                debouncedSync('git-commit');
             }
         });
-        watchers.push(bugsWatcher);
-        console.log('[FILE WATCHER] Watching KNOWN_ISSUES.md for changes');
+        watchers.push(gitWatcher);
+        console.log('[FILE WATCHER] Watching .git for commits');
     }
 
-    // Watch FEATURE_SUGGESTIONS.md for feature updates
-    if (fs.existsSync(FEATURE_SUGGESTIONS_PATH)) {
-        const featuresWatcher = fs.watch(FEATURE_SUGGESTIONS_PATH, { persistent: true }, (eventType, filename) => {
-            if (eventType === 'change') {
-                console.log('[FILE WATCHER] FEATURE_SUGGESTIONS.md changed - triggering sync...');
-                setTimeout(() => {
-                    runFullSync().then(results => {
-                        console.log('[FILE WATCHER] Feature sync complete');
-                    }).catch(err => {
-                        console.error('[FILE WATCHER] Feature sync failed:', err.message);
-                    });
-                }, 1000); // Debounce 1 second
-            }
-        });
-        watchers.push(featuresWatcher);
-        console.log('[FILE WATCHER] Watching FEATURE_SUGGESTIONS.md for changes');
-    }
-
-    console.log(`[FILE WATCHER] ${watchers.length} file watchers active`);
+    console.log(`[FILE WATCHER] ${watchers.length} watchers active`);
 }
 
 /**

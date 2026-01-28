@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-26 22:50 UTC
+**Last Updated**: 2026-01-28 10:30 UTC
 
 ---
 
@@ -24,14 +24,33 @@ No pending changes. Dev and Staging are in sync.
 
 These changes are on Staging but NOT deployed to Production:
 
-### Features
+### Features (New - Jan 28)
+- [ ] UX-006: Haptic Feedback (useHaptic hook with 5 patterns)
+- [ ] UX-008: Pull-to-Refresh (PullToRefresh component)
+- [ ] UX-009: Transaction Swipe Actions (SwipeableRow + SwipeableTransactionItem)
+- [ ] ThemeToggle hideOled option (OLED hidden on auth page)
+
+### Features (Jan 27)
+- [ ] UX-001: Unified Color Token System (semantic tokens)
+- [ ] UX-002: Dark Mode Polish + OLED variant
+- [ ] UX-003: Skeleton Loading States (6 variants)
+- [ ] UX-004: Empty State Illustrations
+- [ ] UX-011: Consistent Button Styles (CVA-based)
+- [ ] UX-012: Animation System (tailwindcss-animate)
+- [ ] UX-013: Typography Scale Audit
+- [ ] UX-014: Icon Consistency Audit
+- [ ] ARCH-001: 200-Line Rule Enforcement
+- [ ] ARCH-002: Feature-Level Error Boundaries
+- [ ] ARCH-003: Service Layer Tests (84 tests)
+- [ ] BUG-006: Text Overflow Fix
+
+### Previous Sprint
 - [ ] Mobile Optimization Phase 2 (iOS keyboard, full-screen modals)
 - [ ] Fabric AI Data Wiring (GAP-001 fix)
 - [ ] PM Dashboard enhancements (Recently Fixed, clickable bugs)
 - [ ] Single Source of Truth (ROADMAP.md consolidation)
-- [ ] Intake Workflow (Rule 8 enhancement)
 
-### Bug Fixes (5 total)
+### Bug Fixes
 - [ ] BUG-002: Mobile keyboard covers input fields
 - [ ] BUG-003: Account edit buttons hidden on mobile
 - [ ] BUG-004: Settings 2FA text misaligned
