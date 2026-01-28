@@ -16,7 +16,7 @@ import type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionP
 import { handleError } from '../utils/error';
 import { withTimeout } from '../utils/secureDb';
 import { canDeleteTransaction } from '../features/finance/utils/permissions';
-import { logAccountActivity } from '../utils/activityLogger';
+import { logTransactionAdded, logTransactionDeleted, logTransactionEdited } from './financeActivityLogging';
 
 const OPERATION_TIMEOUT = 10000;
 
@@ -70,12 +70,8 @@ export const useFinanceOperations = (
         try {
             await withTimeout(financeService.addTransaction(user.uid, tx, accounts), OPERATION_TIMEOUT, 'addTransaction');
             const account = accounts.find(a => a.id === tx.accountId);
-            if (account && (account.sharedWith || account.ownerId !== user.uid)) {
-                logAccountActivity({
-                    action: 'transaction_added', accountId: tx.accountId, accountOwnerId: account.ownerId || user.uid,
-                    actorId: user.uid, actorName: userName,
-                    details: { transactionTitle: tx.title, amountCents: tx.amountCents, currency: tx.currency, type: tx.type },
-                });
+            if (account) {
+                logTransactionAdded(user, userName, account, tx);
             }
         } catch (err) {
             throw handleError(err);
@@ -92,13 +88,7 @@ export const useFinanceOperations = (
         const txToDelete = transactions.find(t => t.id === id);
         try {
             await withTimeout(financeService.deleteTransaction(user.uid, id, accountId, accounts, transactions), OPERATION_TIMEOUT, 'deleteTransaction');
-            if (account.sharedWith || account.ownerId !== user.uid) {
-                logAccountActivity({
-                    action: 'transaction_deleted', accountId, accountOwnerId: account.ownerId || user.uid,
-                    actorId: user.uid, actorName: userName,
-                    details: { transactionId: id, transactionTitle: txToDelete?.title || 'Unknown', amountCents: txToDelete?.amountCents, currency: txToDelete?.currency, type: txToDelete?.type },
-                });
-            }
+            logTransactionDeleted(user, userName, account, id, txToDelete);
         } catch (err) {
             throw handleError(err);
         }
@@ -110,16 +100,8 @@ export const useFinanceOperations = (
         const account = accounts.find(a => a.id === accountId);
         try {
             await withTimeout(financeService.updateTransaction(user.uid, id, accountId, updates, accounts), OPERATION_TIMEOUT, 'updateTransaction');
-            if (account && (account.sharedWith || account.ownerId !== user.uid)) {
-                logAccountActivity({
-                    action: 'transaction_edited', accountId, accountOwnerId: account.ownerId || user.uid,
-                    actorId: user.uid, actorName: userName,
-                    details: {
-                        transactionId: id, transactionTitle: updates.title || originalTx?.title || 'Unknown',
-                        amountCents: updates.amountCents || originalTx?.amountCents, previousTitle: originalTx?.title,
-                        previousAmountCents: originalTx?.amountCents, currency: originalTx?.currency, type: originalTx?.type,
-                    },
-                });
+            if (account) {
+                logTransactionEdited(user, userName, account, id, updates, originalTx);
             }
         } catch (err) {
             throw handleError(err);

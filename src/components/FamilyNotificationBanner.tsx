@@ -6,10 +6,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, Users, Bell, ArrowRight } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import { db, APP_ID } from '../config/firebase';
 import { collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { getNotificationIcon, getNotificationBgColor, getNotificationIconColor } from './notificationStyles';
 
 interface FamilyNotification {
     id: string;
@@ -92,48 +93,15 @@ export function FamilyNotificationBanner({ onNavigate }: FamilyNotificationBanne
     const notification = notifications[currentIndex];
     if (!notification) return null;
 
-    const getIcon = () => {
-        switch (notification.type) {
-            case 'family_connected':
-            case 'invitation_accepted':
-            case 'account_shared':
-                return <Users className="w-5 h-5" />;
-            default:
-                return <Bell className="w-5 h-5" />;
-        }
-    };
-
-    const getBgColor = () => {
-        switch (notification.type) {
-            case 'family_connected':
-                return 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800';
-            case 'account_shared':
-                return 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
-            case 'invitation_accepted':
-                return 'bg-family-50 dark:bg-family-900/20 border-family-200 dark:border-family-800';
-            default:
-                return 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700';
-        }
-    };
-
-    const getIconColor = () => {
-        switch (notification.type) {
-            case 'family_connected':
-                return 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30';
-            case 'account_shared':
-                return 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30';
-            case 'invitation_accepted':
-                return 'text-family-600 dark:text-family-400 bg-family-100 dark:bg-family-900/30';
-            default:
-                return 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800';
-        }
-    };
+    const Icon = getNotificationIcon(notification.type);
+    const bgColor = getNotificationBgColor(notification.type);
+    const iconColor = getNotificationIconColor(notification.type);
 
     return (
-        <div className={`mb-6 p-4 rounded-2xl border ${getBgColor()} animate-in slide-in-from-top-2 duration-300`}>
+        <div className={`mb-6 p-4 rounded-2xl border ${bgColor} animate-in slide-in-from-top-2 duration-300`}>
             <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-xl shrink-0 ${getIconColor()}`}>
-                    {getIcon()}
+                <div className={`p-2 rounded-xl shrink-0 ${iconColor}`}>
+                    <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-slate-900 dark:text-white text-sm">

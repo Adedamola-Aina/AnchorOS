@@ -14,12 +14,35 @@ test.describe('Advanced Security (Staging)', () => {
         await page.locator('aside').locator('text=Finance').click();
         await page.waitForTimeout(1000);
 
-        // Try to add Transaction with XSS payload
+        // Click into an account first (the new UI requires selecting an account)
+        const accountCard = page.locator('[data-testid="account-card"]').first().or(page.locator('.cursor-pointer').filter({ hasText: /\$|₦|€|£/ }).first());
+        if (await accountCard.isVisible({ timeout: 3000 })) {
+            await accountCard.click();
+            await page.waitForTimeout(1000);
+        }
+
+        // Try to add Transaction with XSS payload via Pay Bill button
         console.log("[E2E] Attempt Transaction with XSS payload...");
-        await page.getByRole('button', { name: 'New Transaction' }).first().click();
-        await page.fill('input[placeholder="e.g. Groceries, Upwork Salary"]', payload);
-        await page.fill('input[placeholder="0.00"]', '100');
-        await page.click('button:has-text("Record Transaction")');
+        const payBillBtn = page.getByRole('button', { name: 'Pay Bill' });
+        if (await payBillBtn.isVisible({ timeout: 3000 })) {
+            await payBillBtn.click();
+        } else {
+            // Fallback: try transfer button or any transaction trigger
+            const transferBtn = page.getByRole('button', { name: 'Transfer' });
+            if (await transferBtn.isVisible({ timeout: 2000 })) {
+                await transferBtn.click();
+            }
+        }
+        await page.waitForTimeout(500);
+
+        // Fill in the XSS payload in title field
+        const titleInput = page.locator('input[placeholder*="Groceries"]').or(page.locator('input[placeholder*="title"]')).or(page.getByLabel(/title/i));
+        await titleInput.first().fill(payload);
+        await page.fill('input[placeholder*="0.00"]', '100');
+        
+        // Try to submit
+        const submitBtn = page.getByRole('button', { name: /Record|Save|Create|Submit/i });
+        await submitBtn.first().click();
 
         // EXPECT: Error message about invalid content
         await page.waitForTimeout(2000);

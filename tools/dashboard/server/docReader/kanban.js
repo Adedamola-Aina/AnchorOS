@@ -78,11 +78,57 @@ async function getEnhancedKanbanBoard() {
         const roadmap = parseRoadmap(roadmapContent);
         const bugs = parseKnownIssues(bugsContent);
 
+        // Counter for generating unique IDs when none extracted from text
+        let idCounter = 1;
+
         // Helper to extract ID from text like "[BUG-001]" or "**ARCH-001**"
         const extractId = (text) => {
             if (!text || typeof text !== 'string') return null;
             const match = text.match(/\[([A-Z]+-\d+)\]|\*\*([A-Z]+-\d+)\*\*/);
             return match ? (match[1] || match[2]) : null;
+        };
+
+        // Helper to generate a unique fallback ID
+        const generateId = (prefix) => `${prefix}-GEN-${idCounter++}`;
+
+        // Helper to extract a clean title from markdown text
+        const extractTitle = (text) => {
+            if (!text || typeof text !== 'string') return 'Untitled';
+            // Try to extract bold text like "**Feature Name**"
+            const boldMatch = text.match(/\*\*([^*]+)\*\*/);
+            if (boldMatch) {
+                return boldMatch[1].trim();
+            }
+            // Otherwise use first line, stripped of markdown
+            return text.split('\n')[0].replace(/\[.*?\]/g, '').replace(/^-\s*\[.\]\s*/, '').trim();
+        };
+
+        // Helper to extract date from text (e.g., "2026-01-28" or "Jan 28")
+        const extractDate = (text) => {
+            if (!text || typeof text !== 'string') return null;
+            // Try ISO format first: 2026-01-28
+            const isoMatch = text.match(/(\d{4}-\d{2}-\d{2})/);
+            if (isoMatch) return isoMatch[1];
+            // Try "Jan 28" format
+            const monthMatch = text.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})/i);
+            if (monthMatch) {
+                const months = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', 
+                                 jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' };
+                const month = months[monthMatch[1].toLowerCase()];
+                const day = monthMatch[2].padStart(2, '0');
+                return `2026-${month}-${day}`; // Assume current year
+            }
+            return null;
+        };
+
+        // Helper to get text content from bug object (handles both formats)
+        const getBugText = (bug) => {
+            if (!bug) return null;
+            // extractIssues returns { id, title, content }
+            if (bug.content) return `[${bug.id}] ${bug.title}\n${bug.content}`;
+            // Some code may pass { text: ... }
+            if (bug.text) return bug.text;
+            return null;
         };
 
         // Helper to extract priority from bug section
@@ -96,15 +142,28 @@ async function getEnhancedKanbanBoard() {
         // Helper to extract assignee from bug text
         const extractAssignee = (text) => {
             if (!text || typeof text !== 'string') return 'Unassigned';
-            const match = text.match(/Assigned[:\s]+([^\n]+)/i);
-            return match ? match[1].trim() : 'Unassigned';
+            // Match patterns like "**Assigned**: John" or "- **Assigned**: John"
+            const match = text.match(/\*\*Assigned\*\*[:\s]+([^\n-]+)/i) || 
+                          text.match(/Assigned[:\s]+([^\n-]+)/i);
+            if (match) {
+                const assignee = match[1].trim();
+                // Filter out "Unassigned" and make sure we don't capture next field
+                return assignee === 'Unassigned' || assignee.startsWith('**') ? 'Unassigned' : assignee;
+            }
+            return 'Unassigned';
         };
 
         // Helper to extract status from bug text
         const extractStatus = (text) => {
             if (!text || typeof text !== 'string') return 'Not Started';
-            const match = text.match(/Status[:\s]+([^\n]+)/i);
-            return match ? match[1].trim() : 'Not Started';
+            // Match patterns like "**Status**: In Progress" or "Status: In Progress"
+            const match = text.match(/\*\*Status\*\*[:\s]+([^\n-]+)/i) ||
+                          text.match(/Status[:\s]+([^\n-]+)/i);
+            if (match) {
+                const status = match[1].trim();
+                return status.startsWith('**') ? 'Not Started' : status;
+            }
+            return 'Not Started';
         };
 
         // Helper to determine column from status
@@ -143,26 +202,29 @@ async function getEnhancedKanbanBoard() {
             if (!bugs[section] || !Array.isArray(bugs[section])) return;
 
             bugs[section].forEach(bug => {
-                if (!bug || !bug.text || typeof bug.text !== 'string') return;
+                const bugText = getBugText(bug);
+                if (!bugText) return;
 
-                const id = extractId(bug.text) || `BUG-${Date.now()}`;
+                // Use bug.id directly if available, otherwise extract from text
+                const id = bug.id || extractId(bugText) || generateId('BUG');
                 const priority = getPriorityFromSection(section);
-                const assignee = extractAssignee(bug.text);
-                const status = extractStatus(bug.text);
+                const assignee = extractAssignee(bugText);
+                const status = extractStatus(bugText);
                 const column = getColumnFromStatus(status, false);
-                const label = extractLabel(bug.text);
+                const label = extractLabel(bugText);
+                const createdDate = extractDate(bugText);
 
                 const item = {
                     id,
-                    title: bug.text.split('\n')[0].replace(/\[.*?\]/, '').replace(/###/, '').trim(),
+                    title: bug.title || extractTitle(bugText),
                     type: id.startsWith('BUG') ? 'bug' : id.startsWith('GAP') ? 'gap' : id.startsWith('REG') ? 'regression' : 'task',
                     priority,
                     assignee,
                     status,
                     label,
-                    description: bug.text,
-                    createdDate: null, // Could parse from "Reported" field
-                    dueDate: null      // Could parse from "Target" field
+                    description: bugText,
+                    createdDate,
+                    dueDate: null
                 };
 
                 items[id] = item;
@@ -173,19 +235,23 @@ async function getEnhancedKanbanBoard() {
         // Process completed bugs
         if (bugs.recentlyFixed && Array.isArray(bugs.recentlyFixed)) {
             bugs.recentlyFixed.forEach(bug => {
-                if (!bug || !bug.text || typeof bug.text !== 'string') return;
+                const bugText = getBugText(bug);
+                if (!bugText) return;
 
-                const id = extractId(bug.text) || `FIXED-${Date.now()}`;
+                // Use bug.id directly if available, otherwise extract from text
+                const id = bug.id || extractId(bugText) || generateId('FIXED');
+                const fixedDate = extractDate(bugText);
+                
                 const item = {
                     id,
-                    title: bug.text.split('\n')[0].replace(/\[.*?\]/, '').replace(/###/, '').trim(),
-                    type: 'bug',
+                    title: bug.title || extractTitle(bugText),
+                    type: id.startsWith('GAP') ? 'gap' : 'bug',
                     priority: 'P2',
                     assignee: 'Agent',
                     status: 'Fixed',
-                    label: extractLabel(bug.text),
-                    description: bug.text,
-                    createdDate: null,
+                    label: extractLabel(bugText),
+                    description: bugText,
+                    createdDate: fixedDate,
                     dueDate: null
                 };
                 items[id] = item;
@@ -198,17 +264,18 @@ async function getEnhancedKanbanBoard() {
             roadmap.completed.forEach(item => {
                 if (!item || !item.text || typeof item.text !== 'string') return;
 
-                const id = extractId(item.text) || `FEAT-${Date.now()}`;
+                const id = extractId(item.text) || generateId('FEAT');
+                const completedDate = extractDate(item.text);
                 items[id] = {
                     id,
-                    title: item.text.replace(/\[.*?\]/, '').replace(/\*\*.*?\*\*/, '').trim(),
+                    title: extractTitle(item.text),
                     type: 'feature',
                     priority: 'P1',
                     assignee: 'Teeto',
                     status: 'Completed',
                     label: extractLabel(item.text),
                     description: item.text,
-                    createdDate: null,
+                    createdDate: completedDate,
                     dueDate: null
                 };
                 columns.done.push(id);
@@ -219,17 +286,17 @@ async function getEnhancedKanbanBoard() {
             roadmap.inProgress.forEach(item => {
                 if (!item || !item.text || typeof item.text !== 'string') return;
 
-                const id = extractId(item.text) || `TASK-${Date.now()}`;
+                const id = extractId(item.text) || generateId('TASK');
                 items[id] = {
                     id,
-                    title: item.text.replace(/\[.*?\]/, '').replace(/\*\*.*?\*\*/, '').trim(),
+                    title: extractTitle(item.text),
                     type: 'task',
                     priority: 'P1',
                     assignee: 'Teeto',
                     status: 'In Progress',
                     label: extractLabel(item.text),
                     description: item.text,
-                    createdDate: null,
+                    createdDate: extractDate(item.text),
                     dueDate: null
                 };
                 columns.inProgress.push(id);
@@ -240,10 +307,10 @@ async function getEnhancedKanbanBoard() {
             roadmap.planned.forEach(item => {
                 if (!item || !item.text || typeof item.text !== 'string') return;
 
-                const id = extractId(item.text) || `PLAN-${Date.now()}`;
+                const id = extractId(item.text) || generateId('PLAN');
                 items[id] = {
                     id,
-                    title: item.text.replace(/\[.*?\]/, '').replace(/\*\*.*?\*\*/, '').trim(),
+                    title: extractTitle(item.text),
                     type: 'task',
                     priority: 'P2',
                     assignee: 'Unassigned',

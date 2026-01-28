@@ -658,7 +658,6 @@ describe('TransferOperations', () => {
                 name: 'Shared Account',
                 balanceCents: 50000,
                 type: 'checking',
-                currency: 'USD',
                 color: '#FF0000',
                 scope: 'family',
                 currency: 'NGN',
