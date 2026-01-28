@@ -1,6 +1,6 @@
 # PROJECT STATUS
 
-**Last Updated**: 2026-01-28 09:15 UTC
+**Last Updated**: 2026-01-28 10:40 UTC
 **Updated By**: Teeto
 **Sprint**: Week of Jan 26 - Feb 1, 2026
 
@@ -17,6 +17,17 @@ _No active work items_
 _No blockers at this time_
 
 ### ✅ Recently Completed (Last 7 Days)
+
+- [x] **BUG-007: Modal Input Fix** ✅ 2026-01-28
+  - Fixed: Mobile inputs in modals (Transfer, Bills, Add Account) now work
+  - Root cause: PullToRefresh/SwipeableRow touch event interception
+  - Files: `PullToRefresh.tsx`, `SwipeableRow.tsx`
+
+- [x] **Dashboard Auto-Sync Enhancement** ✅ 2026-01-28
+  - Fixed duplicate completed features in Feature Backlog
+  - Added full metadata (category, effort, impact) to completed features
+  - Enhanced file watchers for git commits + all doc files
+  - PM Dashboard now auto-syncs on changes
 
 - [x] **UX/Design System Verification** ✅ 2026-01-28
   - Verified 15 implementations from Jan 27 work
