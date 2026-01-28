@@ -5,8 +5,8 @@
  * Refactored per CLAUDE.md §3.2 - core helpers extracted to secureDbCore.ts
  */
 
-import { getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, where, type QueryConstraint } from 'firebase/firestore';
-import { withTimeout, logOp, getUserDocRef, getUserCollectionPath, mapSecureDbError } from './secureDbCore';
+import { getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, type QueryConstraint } from 'firebase/firestore';
+import { withTimeout, logOp, getUserDocRef, getUserCollectionPath } from './secureDbCore';
 
 interface SecureDbOptions { timeoutMs?: number; }
 

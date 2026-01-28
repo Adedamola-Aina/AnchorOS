@@ -69,6 +69,8 @@ describe('TransactionService', () => {
                 type: 'expense',
                 category: 'food',
                 title: 'Groceries',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             const mockBatch = {
@@ -107,6 +109,8 @@ describe('TransactionService', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             const mockBatch = {
@@ -142,6 +146,8 @@ describe('TransactionService', () => {
                 type: 'expense',
                 category: 'misc',
                 title: 'Test',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             // Act & Assert
@@ -160,6 +166,8 @@ describe('TransactionService', () => {
                 type: 'expense',
                 category: 'food',
                 title: 'Unauthorized',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             // Mock permission check to deny
@@ -180,6 +188,8 @@ describe('TransactionService', () => {
                 type: 'income',
                 category: 'salary',
                 title: 'Paycheck',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             const mockBatch = {
@@ -214,7 +224,6 @@ describe('TransactionService', () => {
             createdBy: 'user-1',
             isSoftDeleted: false,
             accountOwnerId: 'user-1',
-            accountShares: {},
         });
 
         it('soft-deletes transaction successfully', async () => {

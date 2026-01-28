@@ -6,7 +6,6 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
 import { toCents, fromCents } from '../../../../utils/moneyUtils';
-import type { AnchorAccount } from '../../../../types';
 
 interface DescriptionFieldProps {
     value: string;

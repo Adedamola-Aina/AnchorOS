@@ -22,6 +22,8 @@ export interface FinanceContextType {
     netWorth: { NGN: number; USD: number };
     recentActivity: AnchorTransaction[];
     cashFlow: { income: number; expense: number; net: number; trend: 'better' | 'worse' | 'neutral' };
+    // Refetch data
+    refetch: () => Promise<void>;
 }
 
 export const FinanceContext = createContext<FinanceContextType | undefined>(undefined);

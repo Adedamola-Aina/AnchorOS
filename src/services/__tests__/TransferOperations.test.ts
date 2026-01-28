@@ -64,6 +64,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             // Mock doc/collection to return refs with IDs
@@ -121,6 +123,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-id', path: 'path' } as any);
@@ -158,6 +162,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-id', path: 'path' } as any);
@@ -195,6 +201,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-id', path: 'path' } as any);
@@ -233,6 +241,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             let callCount = 0;
@@ -274,6 +284,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             // Act & Assert
@@ -317,6 +329,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             // Act & Assert
@@ -362,6 +376,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                currency: 'NGN',
+                scope: 'personal',
             };
 
             const { canAddTransaction } = await import('../../features/finance/utils/permissions');
@@ -405,6 +421,8 @@ describe('TransferOperations', () => {
             const sourceAccount: AnchorAccount = {
                 ...createMockAccount('acc-source', ownerId1, 'Source'),
                 shares: { [userId]: 'manage' as const },
+                currency: 'NGN',
+                scope: 'personal',
             };
             const destAccount: AnchorAccount = {
                 ...createMockAccount('acc-dest', ownerId2, 'Dest'),
@@ -442,7 +460,9 @@ describe('TransferOperations', () => {
             expect(destTxCall.accountOwnerId).toBe(ownerId2);
         });
 
-        it('handles backdated transactions correctly', () => {
+        it('    currency: 'NGN',
+                scope: 'personal',
+            handles backdated transactions correctly', () => {
             // Arrange
             const userId = 'user-backdate';
             const sourceAccount = createMockAccount('acc-source', userId, 'Source');
@@ -495,7 +515,9 @@ describe('TransferOperations', () => {
             color: '#000000',
             scope: 'personal',
             ownerId,
-        });
+        });    currency: 'NGN',
+                scope: 'personal',
+            
 
         it('creates single transaction successfully', () => {
             // Arrange
@@ -534,7 +556,9 @@ describe('TransferOperations', () => {
                     title: 'Groceries',
                 })
             );
-        });
+        });    currency: 'NGN',
+                scope: 'personal',
+            
 
         it('increases balance for income transactions', () => {
             // Arrange
@@ -569,7 +593,9 @@ describe('TransferOperations', () => {
                     balanceCents: expect.objectContaining({ _increment: 100000 }),
                 })
             );
-        });
+        });    currency: 'NGN',
+                scope: 'personal',
+            
 
         it('decreases balance for expense transactions', () => {
             // Arrange
@@ -605,7 +631,9 @@ describe('TransferOperations', () => {
                 })
             );
         });
-
+    currency: 'NGN',
+                scope: 'personal',
+            
         it('excludes destinationAccountId from transaction data', () => {
             // Arrange
             const userId = 'user-exclude';
@@ -650,6 +678,8 @@ describe('TransferOperations', () => {
                 currency: 'USD',
                 color: '#FF0000',
                 scope: 'family',
+                currency: 'NGN',
+                scope: 'personal',
                 ownerId,
                 shares: {
                     'spouse-1': 'read' as const,
@@ -682,7 +712,9 @@ describe('TransferOperations', () => {
             const txData = mockBatch.set.mock.calls[0][1];
             expect(txData.accountOwnerId).toBe(ownerId);
             expect(txData.accountShares).toEqual(account.shares);
-        });
+        });    currency: 'NGN',
+                scope: 'personal',
+            
 
         it('handles backdated transactions correctly', () => {
             // Arrange
