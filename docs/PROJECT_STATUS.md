@@ -18,6 +18,16 @@ _No blockers at this time_
 
 ### ✅ Recently Completed (Last 7 Days)
 
+- [x] **REG-002: Virtual List Offset Fix** ✅ 2026-01-29
+  - Fixed: Transaction list items stacking on top of each other on mobile
+  - Root Cause: `offsetTop` relative to parent vs global window offset for virtualization
+  - Fix: Updated `scrollMargin` calculation to use `getBoundingClientRect()`
+
+- [x] **Finance UI Refinements** ✅ 2026-01-29
+  - Unified Transaction Items (Centered Layout, Pill Badges)
+  - Added End-of-List indicator
+  - Standardized Account Details view (parity with Finance view)
+
 - [x] **BUG-007: Modal Input Fix** ✅ 2026-01-28
   - Fixed: Mobile inputs in modals (Transfer, Bills, Add Account) now work
   - Root cause: PullToRefresh/SwipeableRow touch event interception

@@ -24,6 +24,7 @@
 | UX-012 | Animation System | 2026-01-27 | tailwindcss-animate plugin with fade-in, zoom-in, slide-in-* utilities |
 | UX-013 | Typography Scale Audit | 2026-01-27 | Semantic scale (display, h1-h3, body, small) with responsive variants |
 | UX-014 | Icon Consistency Audit | 2026-01-27 | 100% lucide-react usage across codebase |
+| UX-016 | Finance UI Refinement | 2026-01-29 | Visual overhaul: Centered layout, pill badges, virtual list parity, mobile fixes |
 | BUG-006 | Text Overflow Fix | 2026-01-27 | truncate/line-clamp classes throughout UI components |
 
 ---

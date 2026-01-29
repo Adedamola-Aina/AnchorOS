@@ -88,9 +88,15 @@ export function useVersionCheck(enabled: boolean = true) {
     useEffect(() => {
         if (!enabled) return;
 
-        // Don't run in development mode
-        if (import.meta.env.DEV) {
-            console.debug('[VersionCheck] Disabled in development mode');
+        // Only run on deployed environments (dev, staging, production Firebase hosting)
+        // Skip if running locally via Vite dev server (localhost or Tailscale)
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname.startsWith('192.168.') ||
+                           window.location.hostname.startsWith('100.'); // Tailscale IPs
+        
+        if (isLocalhost) {
+            console.debug('[VersionCheck] Disabled for local development');
             return;
         }
 

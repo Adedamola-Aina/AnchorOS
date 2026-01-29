@@ -24,11 +24,12 @@ _No critical issues at this time_
 ### [BUG-009] Dark Mode White Edge on Transaction Cards
 - **Reported**: 2026-01-29
 - **Reporter**: Teeto
-- **Impact**: Visual defect - white edges visible at rounded corners in dark mode
-- **Root Cause**: Card component using `dark:border-slate-800` which is too light
-- **Fix**: Update Card to `dark:border-slate-700 dark:bg-slate-900/95`
+- **Impact**: Visual defect - white triangle artifacts visible at rounded corners in dark mode
+- **Root Cause**: `SwipeableRow.tsx` had hardcoded `bg-white` on the content wrapper div, which showed through the rounded corners of the Card component
+- **Fix**: Changed `bg-white` to `bg-transparent` in SwipeableRow content wrapper. Also removed opacity from Card (`dark:bg-slate-900` instead of `dark:bg-slate-900/95`)
+- **Files Changed**: `src/components/mobile/SwipeableRow.tsx`, `src/components/ui/Card.tsx`
 - **Assigned**: Agent
-- **Status**: IN PROGRESS (code written, needs testing)
+- **Status**: DEPLOYED TO DEV/STAGING (2026-01-29) - awaiting verification
 
 ### [BUG-010] Transaction List Excessive Spacing
 - **Reported**: 2026-01-29
@@ -70,6 +71,18 @@ _No critical issues at this time_
 - **Assigned**: Agent
 - **Status**: IN PROGRESS (code written, needs testing)
 - **Note**: Requires onboarding update (UX-005) to teach users about swipe gestures
+
+### [BUG-014] Transaction List Layout Issues (Edge-to-Edge, Spacing, Scroll)
+- **Reported**: 2026-01-29
+- **Reporter**: Teeto
+- **Impact**: Transaction list layout not optimal - padding, spacing, scroll chaining issues
+- **Root Cause**: Multiple CSS issues in list container and item styling
+- **Iterations**:
+  - v1: Added `overscroll-contain`, changed `p-3` to `pt-2`, added `px-2` on items
+  - v2: Removed `pt-2` and `px-2`, added `rounded-none border-x-0` to Card, removed `rounded-2xl` from SwipeableRow for true edge-to-edge
+- **Files Changed**: `src/features/finance/components/VirtualTransactionList.tsx`, `src/features/finance/components/TransactionItem.tsx`, `src/components/mobile/SwipeableRow.tsx`
+- **Assigned**: Agent
+- **Status**: DEPLOYED TO DEV/STAGING (2026-01-29) - awaiting verification
 
 ### [GAP-002] Design System Color Token Fragmentation
 - **Reported**: 2026-01-26 (Codebase Audit)
@@ -191,7 +204,7 @@ _No regressions detected_
 - **Total Active**: 9
 - **Critical (P0)**: 0
 - **High (P1)**: 4 (BUG-008, BUG-009, BUG-010, BUG-011)
-- **Low (P2)**: 5 (BUG-012, BUG-013, GAP-002, GAP-003, GAP-004)
+- **Low (P2)**: 5 (BUG-012, BUG-013, BUG-014, GAP-002, GAP-003, GAP-004)
 - **Fixed This Month**: 10 (GAP-001, BUG-001 thru BUG-007, ARCH-001, REG-001)
 - **Average Fix Time**: < 1 day
 

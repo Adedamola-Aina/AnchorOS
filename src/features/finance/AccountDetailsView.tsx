@@ -12,8 +12,9 @@ import { NotificationBanner } from './NotificationBanner';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { useAccountActivity } from '../../hooks/useAccountActivity';
 import { AccountHeader, RecurringTransactionsList, SpendingTrendsChart } from './components';
-import { TransactionListVirtual } from './components/TransactionListVirtual';
 import { SharedActivitySection } from './components/SharedActivitySection';
+import { VirtualTransactionList } from './components/VirtualTransactionList';
+import { TransactionFilterHeader } from './components/TransactionListParts';
 
 interface AccountDetailsViewProps { account: AnchorAccount; onBack: () => void; onDelete?: () => void; onShare?: () => void; onTransfer?: () => void; onPayBill?: () => void; onEdit?: (tx: AnchorTransaction) => void; familyMemberId?: string | null; }
 
@@ -65,7 +66,13 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
                     <RecurringTransactionsList recurring={recurring} currency={account.currency} />
                 </div>
                 {isSharedAccount && <SharedActivitySection activities={activities} currentUserId={user?.uid} loading={loadingActivities} />}
-                <TransactionListVirtual transactions={filteredList} account={account} currentUserId={user?.uid} searchQuery={searchQuery} filterType={filterType} selectedWeekStart={selectedWeekStart} onSearchChange={setSearchQuery} onFilterChange={setFilterType} onEdit={onEdit} onDelete={setTransactionToDelete} />
+                {/* Standardized VirtualTransactionList used in FinanceView for consistency */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+                    <TransactionFilterHeader searchQuery={searchQuery} filterType={filterType} hasWeekFilter={!!selectedWeekStart} onSearchChange={setSearchQuery} onFilterChange={setFilterType} />
+                    <div className="pt-0">
+                        <VirtualTransactionList transactions={filteredList} onEdit={onEdit || (() => { })} onDelete={setTransactionToDelete} loading={loadingActivities} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} />
+                    </div>
+                </div>
             </div>
             <ConfirmationModal isOpen={!!transactionToDelete} onClose={() => setTransactionToDelete(null)} onConfirm={() => { if (transactionToDelete) { deleteTransaction(transactionToDelete.id, transactionToDelete.accountId); setTransactionToDelete(null); } }} title="Delete Transaction" message={`Are you sure you want to delete "${transactionToDelete?.title}"? This action cannot be undone.`} confirmLabel="Delete Transaction" isDestructive />
         </>

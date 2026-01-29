@@ -19,7 +19,14 @@ interface SecuritySettingsProps {
 export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, isEnrolling, show2FASetup, mfaQrUrl, mfaManualKey, mfaCode, mfaError, onSetShow2FASetup, onSetMfaCode, onGenerateMfaSecret, onEnrollMfa, onUnenrollMfa }) => {
     const { showToast, confirm } = useNotifications();
     const [step, setStep] = useState(1);
-    useEffect(() => { if (!show2FASetup) setStep(1); }, [show2FASetup]);
+    // Reset step when dialog closes - using a ref to track open state would be better, but for now just depend on mount cycle
+    useEffect(() => {
+        if (!show2FASetup) {
+            // Setup closed, reset step after animation
+            const timer = setTimeout(() => setStep(1), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [show2FASetup]);
 
     const handleDisableMfa = async () => {
         if (await confirm({ title: 'Disable 2FA?', message: 'Are you sure you want to disable 2-Factor Authentication? This will significantly reduce your account security.', type: 'danger', confirmText: 'Disable Security', cancelText: 'Keep Enabled' })) {

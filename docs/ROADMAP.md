@@ -24,6 +24,8 @@
 - [x] **Internal PM Dashboard** (Jan 26) - http://localhost:3001
 - [x] **Codebase Audit** (Jan 26) - 82 suggestions documented
 - [x] **Mobile Optimization Phase 1** (v1.5.0) - iOS keyboard fix, full-screen modals, Lighthouse 95
+- [x] **Finance UI Refinements** (Jan 29) - Unified transaction list, pill badges, centered layout
+- [x] **REG-002: Virtual List Offset Fix** (Jan 29) - Fixed mobile stacking regression
 - [x] **Mobile Optimization Phase 2** (v1.5.1 - Jan 28):
   - BUG-001 Fixed: Transaction search 2ms for 1000+ txns (was 3-5s)
   - UX-006: Haptic feedback hook (`useHaptic`)

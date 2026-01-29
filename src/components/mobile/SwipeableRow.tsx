@@ -113,7 +113,7 @@ export function SwipeableRow({
   return (
     <div
       data-testid="swipeable-row"
-      className={`relative overflow-hidden ${className}`}
+      className={`relative overflow-hidden rounded-2xl ${className}`}
     >
       {/* Left action (revealed when swiping right) */}
       {leftAction && (
@@ -141,10 +141,10 @@ export function SwipeableRow({
         </div>
       )}
 
-      {/* Content wrapper */}
+      {/* Content wrapper - matches Card background to hide action buttons when not swiping */}
       <div
         data-testid="swipeable-content"
-        className={`relative bg-white transition-transform ${isDragging ? 'duration-0' : 'duration-200'}`}
+        className={`relative bg-white dark:bg-slate-900 rounded-2xl transition-transform ${isDragging ? 'duration-0' : 'duration-200'}`}
         style={{ transform: `translateX(${translateX}px)` }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

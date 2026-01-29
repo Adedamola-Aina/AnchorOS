@@ -907,6 +907,43 @@ refactor(hooks): extract shared account logic
 - [ ] Monitoring checked
 ```
 
+### 9.5 The MANDATORY Deployment Script
+
+**⚠️ CRITICAL: NEVER run build/deploy commands manually. ALWAYS use the deployment script.**
+
+```bash
+# Use the deployment script - it ensures correct build for each environment
+./scripts/deploy.sh dev       # Deploy to dev (blue banner)
+./scripts/deploy.sh staging   # Deploy to staging (yellow banner)
+./scripts/deploy.sh prod      # Deploy to production (requires confirmation)
+./scripts/deploy.sh all       # Deploy to dev AND staging (rebuilds for each)
+```
+
+**WHY THIS MATTERS:**
+The dist/ folder contains the LAST built artifact. If you:
+1. Run `npm run build:dev`
+2. Run `firebase deploy --only hosting:dev`  
+3. Run `firebase deploy --only hosting:staging` ← **WRONG! Still uses dev build!**
+
+You've just deployed the dev build to staging. The deployment script prevents this by:
+- **Building immediately before deploying** for each environment
+- **Never reusing the dist/ folder** across environments
+- **Color-coded output** to confirm which environment you're deploying to
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  🚫 FORBIDDEN - Never do this:                                      │
+│     npm run build:dev && firebase deploy --only hosting:dev         │
+│     firebase deploy --only hosting:staging  ← WRONG BUILD!          │
+├─────────────────────────────────────────────────────────────────────┤
+│  ✅ CORRECT - Always do this:                                       │
+│     ./scripts/deploy.sh dev                                         │
+│     ./scripts/deploy.sh staging                                     │
+│  OR                                                                 │
+│     ./scripts/deploy.sh all  ← Deploys both with correct builds     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 # PART X: EMERGENCY PROTOCOLS
