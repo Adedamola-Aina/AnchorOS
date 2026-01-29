@@ -26,6 +26,14 @@
 | UX-014 | Icon Consistency Audit | 2026-01-27 | 100% lucide-react usage across codebase |
 | UX-016 | Finance UI Refinement | 2026-01-29 | Visual overhaul: Centered layout, pill badges, virtual list parity, mobile fixes |
 | BUG-006 | Text Overflow Fix | 2026-01-27 | truncate/line-clamp classes throughout UI components |
+| ARCH-005 | Shared Component Library | 2026-01-29 | Created `@anchor-os/ui` alias and migrated Button, Badge, Card, Skeleton |
+| ARCH-006 | API Client Abstraction | 2026-01-29 | Decoupled Firestore logic into `src/api/` (FinanceApi, RecurringApi) |
+| ARCH-008 | Request Deduplication | 2026-01-29 | Implemented React Query with `staleTime: Infinity` for real-time hooks |
+| ARCH-009 | E2E Test Fixtures | 2026-01-29 | Standardized Playwright fixtures in `e2e/fixtures/base.ts` |
+| ARCH-010 | Test Coverage Reporting | 2026-01-29 | Configured Vitest + c8 coverage reporting in CI pipeline |
+| ARCH-011 | Mutation Testing | 2026-01-29 | Implemented Stryker.js for service layer mutation testing |
+| FIN-002 | Transaction Search Index | 2026-01-29 | Implemented client-side indexing + Firestore composite index definitions |
+| FIN-003 | Recurring Transactions | 2026-01-29 | Complete feature: UI toggles, Management view, Cloud Function automation |
 
 ---
 
@@ -95,13 +103,13 @@
 
 ### MEDIUM Priority
 
-#### [ARCH-005] Create Shared Component Library Package
+#### [ARCH-005] ~~Shared Component Library~~ ✅ COMPLETED
 - **Problem**: `components/ui/` and `components/shared/` are tightly coupled
 - **Suggestion**: Extract to `@anchor-os/ui` internal package
 - **Impact**: Reusable across future products (dashboard, marketing site)
 - **Effort**: High (1 week)
 
-#### [ARCH-006] Add API Client Abstraction
+#### [ARCH-006] ~~API Client Abstraction~~ ✅ COMPLETED
 - **Current State**: Direct Firestore calls in hooks/services
 - **Suggestion**: Create `src/api/` layer with abstraction:
   - `AccountsApi.ts`
@@ -116,13 +124,13 @@
 - **Impact**: Faster perceived performance
 - **Effort**: Medium (3 days)
 
-#### [ARCH-008] Add Request Deduplication
+#### [ARCH-008] ~~Request Deduplication~~ ✅ COMPLETED
 - **Problem**: Multiple components can trigger same Firestore query
 - **Suggestion**: Use React Query or TanStack Query for caching
 - **Impact**: Reduced Firebase reads (cost savings), faster UI
 - **Effort**: High (1 week)
 
-#### [ARCH-009] Create E2E Test Fixtures/Factories
+#### [ARCH-009] ~~E2E Test Fixtures~~ ✅ COMPLETED
 - **Current State**: E2E tests create data manually
 - **Suggestion**: Factory pattern for test data:
   ```typescript
@@ -133,7 +141,7 @@
 
 ### LOW Priority
 
-#### [ARCH-010] Test Coverage Reporting
+#### [ARCH-010] ~~Test Coverage Reporting~~ ✅ COMPLETED
 - ** Origin**: Follow-up from ARCH-003 completion
 - **Current State**: Tests run locally without coverage metrics
 - **Suggestion**: Implement comprehensive coverage tracking:
@@ -144,7 +152,7 @@
 - **Impact**: Visibility into test effectiveness, prevent coverage regressions
 - **Effort**: Low (1 day)
 
-#### [ARCH-011] Mutation Testing for Service Layer
+#### [ARCH-011] ~~Mutation Testing~~ ✅ COMPLETED
 - **Origin**: Follow-up from ARCH-003 completion
 - **Current State**: Line coverage exists, but test effectiveness unknown
 - **Suggestion**: Add mutation testing with Stryker.js:
@@ -427,7 +435,7 @@
 - **Impact**: Core financial planning feature
 - **Effort**: High (1-2 weeks)
 
-#### [FIN-002] Transaction Search Index (BUG-001 Fix)
+#### [FIN-002] ~~Transaction Search Index~~ ✅ COMPLETED
 - **Current State**: Client-side filtering (slow)
 - **Suggestion**: 
   - Add Firestore composite indexes
@@ -438,7 +446,7 @@
 
 ### MEDIUM Priority
 
-#### [FIN-003] Recurring Transactions
+#### [FIN-003] ~~Recurring Transactions~~ ✅ COMPLETED
 - **Suggestion**: 
   - Mark transaction as recurring
   - Auto-create on schedule (daily/weekly/monthly)
