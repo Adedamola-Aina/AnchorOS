@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-29 13:40 UTC
+**Last Updated**: 2026-01-29 14:35 UTC
 
 ---
 
@@ -10,25 +10,27 @@
 |-------------|---------|---------------|-----|--------|
 | **Production** | v1.5.0 | anchor-os | https://anchor-os.web.app | ✅ |
 | **Staging** | v1.5.0 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ |
-| **Dev** | v1.5.1-dev | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ |
+| **Dev** | v1.5.2-dev | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ |
 
-**Code Parity**: Staging/Prod at commit `c189779`, Dev ahead with OLED removal
+**Code Parity**: Staging/Prod at commit `c189779`, Dev ahead with UI harmonization changes
 
 ---
 
-## 🚀 LATEST DEPLOYMENT (Jan 29, 2026 ~13:40 UTC)
+## 🚀 LATEST DEPLOYMENT (Jan 29, 2026 ~14:35 UTC)
 
-### Deployed to DEV ONLY:
-- ✅ **OLED Theme Removed**: Simplified theme system to light/dark only
-- ✅ **Files Updated**: ThemeToggle, AppearanceSettings, App.tsx, MainLayout, AuthView, tailwind.config.js, types
+### Deployed to ALL environments:
+- ✅ **Transaction UI Harmonization**: Unified components across Finance and Account Detail views
+- ✅ **Mobile Swipe Actions**: Hidden edit/delete icons (swipe gestures handle actions)
+- ✅ **Dark Mode Fix**: Fixed white edge issue on Card rounded corners
+- ✅ **Compact Task Items**: Reduced padding, inline badges
 - ✅ **434 unit tests passing**
-- 📋 **Pending**: Staging/Production deployment (awaiting next release)
 
 ---
 
 ## ⏳ PENDING CHANGES (Dev → Staging)
 
 - [ ] **OLED Theme Removal** - Theme simplified to light/dark only (commit ce5dbb4)
+- [ ] **Transaction UI Harmonization** - Unified transaction list components (commit a232e4d)
 
 ---
 
