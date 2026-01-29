@@ -71,8 +71,34 @@ export const useCreateRecurringTransaction = () => {
     return useMutation({
         mutationFn: (data: Omit<RecurringTransaction, 'id'>) =>
             recurringApi.createRecurring(data),
-        onSuccess: (_, variables) => {
-            // Invalidate to ensure consistency, though subscription handles it
+        onMutate: async (newRecurring) => {
+            // Cancel any outgoing refetches
+            await queryClient.cancelQueries({ queryKey: ['recurring_transactions', newRecurring.userId] });
+
+            // Snapshot current data
+            const previousData = queryClient.getQueryData<RecurringTransaction[]>(
+                ['recurring_transactions', newRecurring.userId]
+            );
+
+            // Optimistically add the new recurring transaction
+            queryClient.setQueryData<RecurringTransaction[]>(
+                ['recurring_transactions', newRecurring.userId],
+                (old = []) => [...old, { ...newRecurring, id: `temp-${Date.now()}` } as RecurringTransaction]
+            );
+
+            return { previousData };
+        },
+        onError: (_, variables, context) => {
+            // Rollback on error
+            if (context?.previousData) {
+                queryClient.setQueryData(
+                    ['recurring_transactions', variables.userId],
+                    context.previousData
+                );
+            }
+        },
+        onSettled: (_, __, variables) => {
+            // Refetch to ensure consistency
             queryClient.invalidateQueries({
                 queryKey: ['recurring_transactions', variables.userId]
             });
@@ -89,7 +115,46 @@ export const useUpdateRecurringTransaction = () => {
     return useMutation({
         mutationFn: ({ id, updates }: { id: string; updates: Partial<RecurringTransaction> }) =>
             recurringApi.updateRecurring(id, updates),
-        onSuccess: () => {
+        onMutate: async ({ id, updates }) => {
+            // Cancel outgoing refetches
+            await queryClient.cancelQueries({ queryKey: ['recurring_transactions'] });
+
+            // We need to find the userId from the existing data
+            const allQueryData = queryClient.getQueriesData<RecurringTransaction[]>({
+                queryKey: ['recurring_transactions']
+            });
+
+            let previousData: RecurringTransaction[] | undefined;
+            let userId: string | undefined;
+
+            // Find the transaction and update it optimistically
+            for (const [key, data] of allQueryData) {
+                if (data) {
+                    const found = data.find(r => r.id === id);
+                    if (found) {
+                        previousData = data;
+                        userId = key[1] as string;
+                        queryClient.setQueryData<RecurringTransaction[]>(
+                            key,
+                            data.map(r => r.id === id ? { ...r, ...updates } : r)
+                        );
+                        break;
+                    }
+                }
+            }
+
+            return { previousData, userId };
+        },
+        onError: (_, __, context) => {
+            // Rollback on error
+            if (context?.previousData && context?.userId) {
+                queryClient.setQueryData(
+                    ['recurring_transactions', context.userId],
+                    context.previousData
+                );
+            }
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['recurring_transactions'] });
         }
     });
@@ -103,7 +168,45 @@ export const useDeleteRecurringTransaction = () => {
 
     return useMutation({
         mutationFn: (id: string) => recurringApi.deleteRecurring(id),
-        onSuccess: () => {
+        onMutate: async (id) => {
+            // Cancel outgoing refetches
+            await queryClient.cancelQueries({ queryKey: ['recurring_transactions'] });
+
+            const allQueryData = queryClient.getQueriesData<RecurringTransaction[]>({
+                queryKey: ['recurring_transactions']
+            });
+
+            let previousData: RecurringTransaction[] | undefined;
+            let userId: string | undefined;
+
+            // Find and remove the transaction optimistically
+            for (const [key, data] of allQueryData) {
+                if (data) {
+                    const found = data.find(r => r.id === id);
+                    if (found) {
+                        previousData = data;
+                        userId = key[1] as string;
+                        queryClient.setQueryData<RecurringTransaction[]>(
+                            key,
+                            data.filter(r => r.id !== id)
+                        );
+                        break;
+                    }
+                }
+            }
+
+            return { previousData, userId };
+        },
+        onError: (_, __, context) => {
+            // Rollback on error
+            if (context?.previousData && context?.userId) {
+                queryClient.setQueryData(
+                    ['recurring_transactions', context.userId],
+                    context.previousData
+                );
+            }
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['recurring_transactions'] });
         }
     });

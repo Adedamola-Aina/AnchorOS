@@ -17,8 +17,10 @@ import { handleError } from '../utils/error';
 import { withTimeout } from '../utils/secureDb';
 import { canDeleteTransaction } from '../features/finance/utils/permissions';
 import { logTransactionAdded, logTransactionDeleted, logTransactionEdited } from './financeActivityLogging';
+import { createTracer } from '../services/telemetry';
 
 const OPERATION_TIMEOUT = 10000;
+const financeTracer = createTracer('Finance');
 
 export const useFinanceOperations = (
     user: User | null,
@@ -29,11 +31,13 @@ export const useFinanceOperations = (
     // Account operations
     const addAccount = async (acc: CreateAccountPayload) => {
         if (!user) return;
-        try {
-            await withTimeout(financeService.addAccount(user.uid, acc), OPERATION_TIMEOUT, 'addAccount');
-        } catch (err) {
-            throw handleError(err);
-        }
+        return financeTracer.trace('addAccount', async () => {
+            try {
+                await withTimeout(financeService.addAccount(user.uid, acc), OPERATION_TIMEOUT, 'addAccount');
+            } catch (err) {
+                throw handleError(err);
+            }
+        }, { attributes: { currency: acc.currency } });
     };
 
     const deleteAccount = async (id: string) => {
@@ -67,15 +71,17 @@ export const useFinanceOperations = (
     // Transaction operations
     const addTransaction = async (tx: CreateTransactionPayload) => {
         if (!user) return;
-        try {
-            await withTimeout(financeService.addTransaction(user.uid, tx, accounts), OPERATION_TIMEOUT, 'addTransaction');
-            const account = accounts.find(a => a.id === tx.accountId);
-            if (account) {
-                logTransactionAdded(user, userName, account, tx);
+        return financeTracer.trace('addTransaction', async () => {
+            try {
+                await withTimeout(financeService.addTransaction(user.uid, tx, accounts), OPERATION_TIMEOUT, 'addTransaction');
+                const account = accounts.find(a => a.id === tx.accountId);
+                if (account) {
+                    logTransactionAdded(user, userName, account, tx);
+                }
+            } catch (err) {
+                throw handleError(err);
             }
-        } catch (err) {
-            throw handleError(err);
-        }
+        }, { attributes: { type: tx.type, category: tx.category } });
     };
 
     const deleteTransaction = async (id: string, accountId: string) => {

@@ -16,6 +16,9 @@ import { doc, onSnapshot, updateDoc, setDoc, addDoc, collection } from 'firebase
 import { auth, db, APP_ID } from '../config/firebase';
 import type { UserProfile } from '../types';
 import { useMfaOperations, getWelcomeEmailHtml } from './auth';
+import { createTracer } from '../services/telemetry';
+
+const authTracer = createTracer('Auth');
 
 interface AuthContextType {
     user: User | null;
@@ -95,17 +98,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => { unsubAuth(); if (unsubProfRef.current) unsubProfRef.current(); };
     }, [mfaOps]);
 
-    const signIn = async (e: string, p: string) => { await signInWithEmailAndPassword(auth, e, p); };
-
-    const signUp = async (e: string, p: string) => {
-        const cred = await createUserWithEmailAndPassword(auth, e, p);
-        const name = e.split('@')[0];
-        await setDoc(doc(db, 'artifacts', APP_ID, 'users', cred.user.uid), { name, theme: 'light', familyMode: false, onboardingComplete: false });
-        try { await addDoc(collection(db, 'mail'), { to: [e], message: { subject: 'Welcome to Anchor OS!', html: getWelcomeEmailHtml(name) } }); }
-        catch (err) { console.error('Failed to queue welcome email:', err); }
+    const signIn = async (e: string, p: string) => {
+        return authTracer.trace('signIn', async () => {
+            await signInWithEmailAndPassword(auth, e, p);
+        });
     };
 
-    const logout = async () => { sessionStorage.removeItem('anchor_session_active'); await signOut(auth); navigate('/', { replace: true }); };
+    const signUp = async (e: string, p: string) => {
+        return authTracer.trace('signUp', async () => {
+            const cred = await createUserWithEmailAndPassword(auth, e, p);
+            const name = e.split('@')[0];
+            await setDoc(doc(db, 'artifacts', APP_ID, 'users', cred.user.uid), { name, theme: 'light', familyMode: false, onboardingComplete: false });
+            try { await addDoc(collection(db, 'mail'), { to: [e], message: { subject: 'Welcome to Anchor OS!', html: getWelcomeEmailHtml(name) } }); }
+            catch (err) { console.error('Failed to queue welcome email:', err); }
+        });
+    };
+
+    const logout = async () => {
+        authTracer.logEvent('logout');
+        sessionStorage.removeItem('anchor_session_active');
+        await signOut(auth);
+        navigate('/', { replace: true });
+    };
     const sendVerificationEmail = async () => { if (auth.currentUser) await sendEmailVerification(auth.currentUser); };
     const sendPasswordReset = async (email: string) => { const { sendPasswordResetEmail } = await import('firebase/auth'); await sendPasswordResetEmail(auth, email); };
 
