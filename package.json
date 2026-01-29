@@ -20,9 +20,10 @@
     "test:integration": "./scripts/test-with-emulator.sh",
     "emulator:start": "firebase emulators:start",
     "build:dev": "tsc -b && vite build --mode development",
-    "deploy:dev": "npm run build:dev && firebase deploy --only hosting:dev",
-    "deploy:staging": "npm run build:staging && firebase deploy --only hosting:staging",
-    "deploy:production": "npm run build:production && firebase deploy --only hosting:production"
+    "deploy:dev": "./scripts/deploy.sh dev",
+    "deploy:staging": "./scripts/deploy.sh staging",
+    "deploy:production": "./scripts/deploy.sh prod",
+    "deploy:all": "./scripts/deploy.sh all"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

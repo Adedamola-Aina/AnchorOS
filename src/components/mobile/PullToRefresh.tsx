@@ -55,7 +55,10 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
     if (scrollRef?.current) {
       return scrollRef.current.scrollTop <= 0;
     }
-    // If no scrollRef, assume we're at top (for window scroll)
+    // If no scrollRef, check window scroll
+    if (typeof window !== 'undefined') {
+      return window.scrollY <= 0;
+    }
     return true;
   }, [scrollRef]);
 

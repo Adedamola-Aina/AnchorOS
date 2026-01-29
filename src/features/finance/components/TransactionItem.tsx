@@ -64,39 +64,44 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                 />
 
                 {/* Title + Meta */}
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 flex flex-col justify-center">
                     <div className="flex items-center justify-between gap-2">
-                        <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate">
+                        <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate leading-tight">
                             {transaction.title}
                         </h4>
-                        {/* Amount - always visible on right */}
+                        {/* Amount - centered with title line */}
                         <p className={`font-bold text-sm tabular-nums shrink-0 ${amountColor}`}>
                             {amountPrefix}
                             {formatCurrency(fromCents(transaction.amountCents || 0), transaction.currency || 'USD')}
                         </p>
                     </div>
 
-                    {/* Metadata row - simplified for mobile */}
-                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400 min-w-0">
-                        <span className="shrink-0">
+                    {/* Metadata row - badges/pills */}
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5 min-w-0">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">
                             {new Date(displayDate).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric'
                             })}
                         </span>
-                        <span className="shrink-0">•</span>
-                        <span className="truncate">{transaction.category}</span>
+
+                        {/* Category Pill */}
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 truncate max-w-[120px]">
+                            {transaction.category}
+                        </span>
+
+                        {/* Family Member Pill */}
                         {transaction.createdBy && currentUserId && transaction.createdBy !== currentUserId && (
-                            <>
-                                <span className="shrink-0">•</span>
-                                <span className="text-blue-500 truncate">{transaction.createdByName || 'Family'}</span>
-                            </>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 truncate max-w-[100px]">
+                                {transaction.createdByName || 'Family'}
+                            </span>
                         )}
+
+                        {/* Backdated Pill */}
                         {isBackdated && (
-                            <>
-                                <span className="shrink-0">•</span>
-                                <span className="text-amber-500 shrink-0">Backdated</span>
-                            </>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 border border-amber-100 dark:border-amber-800/50">
+                                Backdated
+                            </span>
                         )}
                     </div>
                 </div>
