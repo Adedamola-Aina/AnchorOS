@@ -317,6 +317,7 @@
 - **Suggestion**: Add contextual hints for new features:
   - "Did you know? Tap Magic to auto-fill transactions"
   - First-time feature discovery tooltips
+  - **Finance Mobile**: "Swipe left to delete, swipe right to edit transactions" (UX-009 implemented)
 - **Impact**: Feature adoption, reduced support
 - **Effort**: Medium (3 days)
 

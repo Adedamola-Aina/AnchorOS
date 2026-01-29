@@ -101,8 +101,8 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                     </div>
                 </div>
 
-                {/* Actions - visible on mobile, hover-only on desktop */}
-                <div className="flex items-center gap-0.5 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                {/* Actions - hidden on mobile (swipe gestures), hover-only on desktop */}
+                <div className="hidden sm:flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                         onClick={() => onEdit(transaction)}
                         className="p-2 text-slate-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
