@@ -5,7 +5,21 @@ All notable changes to Anchor OS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-01-26
+## [Unreleased] - 2026-01-29
+
+### Removed
+
+#### OLED Theme Option
+- **Removed OLED theme variant** - Did not provide meaningful value over standard dark mode
+- **Files Updated**: 
+  - `ThemeToggle.tsx` - Simplified to light/dark only
+  - `AppearanceSettings.tsx` - Updated UI and description
+  - `App.tsx` - Removed OLED class handling
+  - `MainLayout.tsx` - Removed `oled:` Tailwind classes
+  - `AuthView.tsx` - Removed `hideOled` prop usage
+  - `tailwind.config.js` - Removed OLED variant plugin
+  - `types/index.ts` - UserProfile.theme now `'light' | 'dark'`
+- **Tests**: 434 passing (no regressions)
 
 ### Added
 

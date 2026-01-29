@@ -132,11 +132,5 @@ module.exports = {
   },
   plugins: [
     require("tailwindcss-animate"),
-    // OLED Mode Variant (UX-002)
-    // Usage: oled:bg-black, oled:bg-zinc-950
-    // Applied when .oled class is on root element
-    function ({ addVariant }) {
-      addVariant('oled', '.oled &');
-    }
   ],
 }

@@ -14,7 +14,7 @@
 | ARCH-002 | Feature-Level Error Boundaries | 2026-01-27 | Implemented FeatureErrorBoundary component across all 4 major views (Finance, Commitments, Dashboard, Settings) for graceful failure isolation |
 | ARCH-003 | Service Layer Tests | 2026-01-27 | 84 unit tests across 5 service test files with 100% pass rate |
 | UX-001 | Unified Color Token System | 2026-01-27 | Semantic tokens (primary, finance, task, family) in tailwind.config.js |
-| UX-002 | Dark Mode Polish | 2026-01-27 | OLED variant plugin, contrast improvements, theme-specific accents |
+| UX-002 | Dark Mode Polish | 2026-01-27 | Contrast improvements, theme-specific accents (OLED removed Jan 29) |
 | UX-003 | Skeleton Loading States | 2026-01-27 | 6 skeleton variants (Base, Transaction, Account, Commitment, Widget, List) |
 | UX-004 | Empty State Illustrations | 2026-01-27 | Gradient circle + icon illustrations for EmptyAccountsState, CommitmentsEmptyState |
 | UX-006 | Haptic Feedback (Mobile) | 2026-01-28 | Created `useHaptic` hook with 5 vibration patterns (light, medium, heavy, error, success) - 12 tests |
@@ -280,13 +280,13 @@
 - **Impact**: Cohesive brand, easier theming
 
 #### [UX-002] ~~Dark Mode Polish~~ ✅ COMPLETED
-- **Status**: ✅ COMPLETED (Jan 27, 2026)
+- **Status**: ✅ COMPLETED (Jan 27, 2026), OLED removed (Jan 29, 2026)
 - **Implementation**: 
-  - OLED variant plugin in `tailwind.config.js`
-  - `oled:` prefix classes (oled:bg-black, oled:bg-zinc-900)
-  - Theme sync in `App.tsx` (light/dark/oled)
-- **Result**: True black OLED mode, improved contrast ratios
-- **Impact**: Premium feel, battery savings on OLED screens
+  - Dark mode with improved contrast ratios
+  - Theme sync in `App.tsx` (light/dark)
+  - ~~OLED variant removed (Jan 29) - did not provide value~~
+- **Result**: Clean light/dark toggle, improved contrast ratios
+- **Impact**: Premium feel, simplified theme system
 
 #### [UX-003] ~~Skeleton Loading States~~ ✅ COMPLETED
 - **Status**: ✅ COMPLETED (Jan 27, 2026)
