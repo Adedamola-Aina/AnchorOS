@@ -15,7 +15,14 @@ import { loginOrSignup } from './helpers';
 // Helper: Navigate to Dashboard
 async function goToDashboard(page: Page) {
     await loginOrSignup(page, TEST_USER, true);
-    await page.click('button:has-text("Dashboard")');
+    // After login, user lands on Finance by default. Navigate to Dashboard.
+    const dashboardLink = page.locator('aside').getByRole('link', { name: 'Dashboard' });
+    if (await dashboardLink.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await dashboardLink.click();
+    } else {
+        // Fallback: direct navigation
+        await page.goto('/dashboard');
+    }
     await page.waitForTimeout(500);
 }
 
@@ -71,7 +78,8 @@ test.describe('Dashboard', () => {
     });
 
     test('Navigation to Commitments works', async ({ page }) => {
-        await page.click('button:has-text("Commitments")');
+        const commitmentsLink = page.locator('aside').getByRole('link', { name: 'Commitments' });
+        await commitmentsLink.click();
 
         await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible();
     });
