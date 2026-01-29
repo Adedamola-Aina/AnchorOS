@@ -28,7 +28,15 @@
 
 ---
 
-## 📊 Summary
+## � REMOVED / DEPRECATED
+
+| ID | Feature | Removed | Reason |
+|----|---------|---------|--------|
+| UX-002-OLED | OLED Theme Variant | 2026-01-29 | Did not provide meaningful value over standard dark mode; simplified to light/dark only |
+
+---
+
+## �📊 Summary
 
 | Category | Suggestions | Priority Count | Implemented |
 |----------|-------------|----------------|-------------|
