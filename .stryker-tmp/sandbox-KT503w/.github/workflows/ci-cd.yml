@@ -1,0 +1,226 @@
+# CI/CD Pipeline - Runs tests and deploys to staging
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, staging, develop]
+  pull_request:
+    branches: [main, staging]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # Job 1: Run linting and unit tests
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm run test -- --run
+
+  # Job 2: Auto-bump version (only on main branch)
+  version-bump:
+    name: 📦 Version Bump
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip-version]')
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine version bump type
+        id: bump-type
+        run: |
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          if [[ "$COMMIT_MSG" == *"BREAKING CHANGE"* ]] || [[ "$COMMIT_MSG" == *"!"* ]]; then
+            echo "type=major" >> $GITHUB_OUTPUT
+          elif [[ "$COMMIT_MSG" == feat:* ]] || [[ "$COMMIT_MSG" == *"feat("* ]]; then
+            echo "type=minor" >> $GITHUB_OUTPUT
+          else
+            echo "type=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump version
+        id: bump
+        run: |
+          npm version ${{ steps.bump-type.outputs.type }} --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Prepare Release Notes
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          DATE=$(date +%Y-%m-%d)
+          
+          # Categorize change
+          if [[ "$COMMIT_MSG" == feat:* ]] || [[ "$COMMIT_MSG" == *"feat("* ]]; then
+             SECTION="### Added"
+             CLEAN_MSG=$(echo "$COMMIT_MSG" | sed -E 's/feat(\(.*\))?: //')
+          elif [[ "$COMMIT_MSG" == fix:* ]] || [[ "$COMMIT_MSG" == *"fix("* ]]; then
+             SECTION="### Fixed"
+             CLEAN_MSG=$(echo "$COMMIT_MSG" | sed -E 's/fix(\(.*\))?: //')
+          else
+             SECTION="### Changed"
+             CLEAN_MSG="$COMMIT_MSG"
+          fi
+          
+          # Construct new changelog entry
+          NEW_ENTRY="## [$NEW_VERSION] - $DATE\n\n$SECTION\n- $CLEAN_MSG\n"
+          
+          # Update CHANGELOG.md (Insert after header)
+          # Assuming standard header is 7 lines long
+          if [ -f CHANGELOG.md ]; then
+            head -n 7 CHANGELOG.md > temp_changelog.md
+            echo -e "$NEW_ENTRY" >> temp_changelog.md
+            tail -n +8 CHANGELOG.md >> temp_changelog.md
+            mv temp_changelog.md CHANGELOG.md
+          else
+            echo -e "# Changelog\n\n$NEW_ENTRY" > CHANGELOG.md
+          fi
+          
+          git add package.json CHANGELOG.md
+          git commit -m "chore: bump version to $NEW_VERSION [skip-version]"
+          git tag "v$NEW_VERSION"
+          git push --follow-tags
+
+  # Job 3: Build for staging
+  build-staging:
+    name: 🏗️ Build Staging
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for staging
+        run: npm run build:staging
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-build
+          path: dist/
+
+  # Job 3: Deploy to staging
+  deploy-staging:
+    name: 🚀 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-staging
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-build
+          path: dist/
+
+      - name: Deploy to Firebase Staging
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STAGING }}
+          projectId: anchor-os-staging
+          channelId: live
+
+  # Job 4: Build for production (only on main branch)
+  build-production:
+    name: 🏗️ Build Production
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for production
+        run: npm run build:production
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+
+  # Job 5: Deploy to production (requires manual approval)
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-production
+    if: github.ref == 'refs/heads/main'
+    environment: production  # This requires manual approval in GitHub settings
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+
+      - name: Deploy to Firebase Production
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRODUCTION }}
+          projectId: anchor-os
+          channelId: live

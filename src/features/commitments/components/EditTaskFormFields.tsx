@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Button } from '../../../components/ui/Button';
+import { Button } from '@anchor-os/ui';
 import type { TimeOfDay } from '../../../types';
 
 interface DailyFieldsProps {

@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@anchor-os/ui';
+import { Button } from '@anchor-os/ui';
 import { Users, Check, Loader2, UserMinus, ArrowRight } from 'lucide-react';
 
 interface FamilyConnection {

@@ -24,7 +24,7 @@ import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
 import { VerifyEmailBanner, EnableMfaBanner } from './components/SettingsBanners';
 import { ReauthModal } from './components/ReauthModal';
-import { Button } from '../../components/ui/Button';
+import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 
 const SettingsView = () => {

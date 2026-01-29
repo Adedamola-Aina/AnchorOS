@@ -6,7 +6,7 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Smartphone, QrCode, Key, ArrowRight, ArrowLeft } from 'lucide-react';
-import { Button } from '../../../components/ui/Button';
+import { Button } from '@anchor-os/ui';
 
 interface Step1Props { onNext: () => void; }
 export const MfaStep1GetApp: React.FC<Step1Props> = ({ onNext }) => (

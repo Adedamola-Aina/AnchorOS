@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { X, Sunrise, Calendar, CheckCircle2, ChevronDown } from 'lucide-react';
-import { Button } from '../../../components/ui/Button';
+import { Button } from '@anchor-os/ui';
 import type { TaskType, TimeOfDay } from '../../../types';
 
 interface FrequencyStepProps { onSelectType: (type: TaskType) => void; onClose: () => void; }

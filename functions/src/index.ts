@@ -1525,3 +1525,9 @@ export const fixSharedAccountScopes = functions.https.onCall(
 // - diagnoseFamilySharing (./diagnostic.ts)
 // - forceUpdateAccountScope (./forceUpdate.ts)
 // To use in development, import directly from files
+
+// ============================================================================
+// Finance Automation
+// ============================================================================
+
+export * from './recurring';

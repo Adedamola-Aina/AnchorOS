@@ -1,6 +1,6 @@
 import { MessageSquare } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
+import { Button } from '@anchor-os/ui';
 
 interface SupportSettingsProps {
     onOpenContact: () => void;

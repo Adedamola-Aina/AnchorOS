@@ -48,6 +48,8 @@ export function processTransferTransaction(
     const sourceTxRef = doc(collection(firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'finance'));
     const destTxRef = doc(collection(firestore, 'artifacts', APP_ID, 'users', destAccount.ownerId || userId, 'finance'));
 
+    const destAmount = payload.destinationAmountCents ?? payload.amountCents;
+
     // Record 1: Source (expense - money leaving)
     batch.set(sourceTxRef, {
         ...payload,
@@ -73,6 +75,7 @@ export function processTransferTransaction(
     batch.set(destTxRef, {
         ...payload,
         id: destTxRef.id,
+        amountCents: destAmount, // Use converted amount
         date: transactionDate,
         createdAt,
         isBackdated,
@@ -88,14 +91,15 @@ export function processTransferTransaction(
         accountShares: destAccount.shares || {},
         linkId,
         linkedTransactionId: sourceTxRef.id,
-        linkedUserId: sourceAccount.ownerId || userId
+        linkedUserId: sourceAccount.ownerId || userId,
+        exchangeRate: payload.exchangeRate
     });
 
     // Update balances
     const sourceAccRef = doc(firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'accounts', sourceAccount.id);
     const destAccRef = doc(firestore, 'artifacts', APP_ID, 'users', destAccount.ownerId || userId, 'accounts', destAccount.id);
     batch.update(sourceAccRef, { balanceCents: increment(-payload.amountCents) });
-    batch.update(destAccRef, { balanceCents: increment(payload.amountCents) });
+    batch.update(destAccRef, { balanceCents: increment(destAmount) });
 }
 
 /**

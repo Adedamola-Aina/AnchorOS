@@ -49,6 +49,24 @@ The following bug fixes are deployed to Dev/Staging for testing:
 
 ---
 
+## ⏳ PENDING CHANGES (Dev → Staging)
+- [ ] **FIN-003**: Recurring Transactions (UI + Automation)
+- [ ] **BUG-015**: Real-time Account Updates (Optimistic UI)
+- [ ] **BUG-016**: Exchange Rate Conversion
+- [ ] **BUG-017**: Transaction Form Interactivity
+
+## ⏳ PENDING CHANGES (Staging → Production)
+- [ ] **UX-017**: Independent Transaction Scroll
+- [ ] **BUG-008**: Transaction History UI Inconsistency
+- [ ] **BUG-009**: Dark Mode White Edge
+- [ ] **BUG-010**: Transaction List Spacing
+- [ ] **BUG-011**: Empty List Scroll
+- [ ] **BUG-012**: Commitment Task Box Sizing
+- [ ] **BUG-013**: Mobile Icon Redundancy
+- [ ] **BUG-014**: Transaction List Layout
+
+---
+
 ## ✅ VERIFICATION CHECKLIST (Before Staging → Prod)
 
 - [ ] Dev environment has blue "DEVELOPMENT ENVIRONMENT" banner
@@ -122,6 +140,7 @@ npm run deploy:production
 
 | Date | Version | Env | Type | Notes |
 |------|---------|-----|------|-------|
+| 2026-01-29 | v1.5.3-ui-fix | Dev/Staging | Feature | UX-017: Scrollable List, Fixed BUG-008/010/011/012/013/014 |
 | 2026-01-28 | v1.5.0 | **Production** | Release | Full code parity, all UX improvements |
 | 2026-01-28 | v1.5.0 | Staging | Feature | UX improvements, Mobile gestures, OLED toggle |
 | 2026-01-28 | v1.5.0 | Dev | Feature | UX improvements, Mobile gestures, OLED toggle |

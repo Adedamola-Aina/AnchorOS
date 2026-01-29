@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
-import { Button } from '../../../components/ui/Button';
+import { Button } from '@anchor-os/ui';
 
 interface VerifyEmailBannerProps {
     isResending: boolean;

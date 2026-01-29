@@ -30,6 +30,18 @@ service cloud.firestore {
     }
 
     match /artifacts/anchor-os {
+
+      // ======================================================================
+      // Recurring Transactions Collection
+      // ======================================================================
+      match /recurring_transactions/{ruleId} {
+        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        allow read: if request.auth != null && (
+          resource.data.userId == request.auth.uid || 
+          request.auth.uid in resource.data.sharedWith
+        );
+        allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      }
       
       // ======================================================================
       // Family Mode v2: Invitations (simplified for dev/staging)

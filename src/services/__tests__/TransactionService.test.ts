@@ -224,6 +224,7 @@ describe('TransactionService', () => {
             createdBy: 'user-1',
             isSoftDeleted: false,
             accountOwnerId: 'user-1',
+            scope: 'personal',
         });
 
         it('soft-deletes transaction successfully', async () => {

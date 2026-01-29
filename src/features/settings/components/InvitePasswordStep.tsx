@@ -5,7 +5,7 @@
  */
 
 import { Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
-import { Button } from '../../../components/ui/Button';
+import { Button } from '@anchor-os/ui';
 
 interface InvitePasswordStepProps {
     inviteeEmail: string;

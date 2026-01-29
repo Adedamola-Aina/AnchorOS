@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Button } from '../../../../components/ui/Button';
+import { Button } from '@anchor-os/ui';
 import { useNotifications } from '../../../../context/NotificationContext';
 
 interface AutoAcceptActionProps {

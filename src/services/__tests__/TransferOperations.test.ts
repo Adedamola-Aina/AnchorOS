@@ -65,6 +65,7 @@ describe('TransferOperations', () => {
                 category: 'Transfer',
                 title: 'Transfer',
                 currency: 'NGN',
+                scope: 'personal',
             };
 
             // Mock doc/collection to return refs with IDs
@@ -123,6 +124,7 @@ describe('TransferOperations', () => {
                 category: 'Transfer',
                 title: 'Transfer',
                 currency: 'NGN',
+                scope: 'personal',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-id', path: 'path' } as any);
@@ -161,6 +163,7 @@ describe('TransferOperations', () => {
                 category: 'Transfer',
                 title: 'Transfer',
                 currency: 'NGN',
+                scope: 'personal',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-id', path: 'path' } as any);
@@ -199,6 +202,7 @@ describe('TransferOperations', () => {
                 category: 'Transfer',
                 title: 'Transfer',
                 currency: 'NGN',
+                scope: 'personal',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-id', path: 'path' } as any);
@@ -238,6 +242,7 @@ describe('TransferOperations', () => {
                 category: 'Transfer',
                 title: 'Transfer',
                 currency: 'NGN',
+                scope: 'personal',
             };
 
             let callCount = 0;
@@ -280,6 +285,7 @@ describe('TransferOperations', () => {
                 category: 'Transfer',
                 title: 'Transfer',
                 currency: 'NGN',
+                scope: 'personal',
             };
 
             // Act & Assert
@@ -324,6 +330,7 @@ describe('TransferOperations', () => {
                 category: 'Transfer',
                 title: 'Transfer',
                 currency: 'NGN',
+                scope: 'personal',
             };
 
             // Act & Assert
@@ -370,6 +377,7 @@ describe('TransferOperations', () => {
                 category: 'Transfer',
                 title: 'Transfer',
                 currency: 'NGN',
+                scope: 'personal',
             };
 
             const { canAddTransaction } = await import('../../features/finance/utils/permissions');
@@ -426,6 +434,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Transfer',
+                scope: 'personal',
+                currency: 'NGN',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-id', path: 'path' } as any);
@@ -463,6 +473,8 @@ describe('TransferOperations', () => {
                 type: 'transfer',
                 category: 'Transfer',
                 title: 'Backdated Transfer',
+                scope: 'personal',
+                currency: 'NGN',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-id', path: 'path' } as any);
@@ -516,6 +528,8 @@ describe('TransferOperations', () => {
                 type: 'expense',
                 category: 'food',
                 title: 'Groceries',
+                scope: 'personal',
+                currency: 'USD',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-new', path: 'path' } as any);
@@ -544,7 +558,7 @@ describe('TransferOperations', () => {
                 })
             );
         });
-            
+
 
         it('increases balance for income transactions', () => {
             // Arrange
@@ -556,6 +570,8 @@ describe('TransferOperations', () => {
                 type: 'income',
                 category: 'salary',
                 title: 'Paycheck',
+                scope: 'personal',
+                currency: 'USD',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-income', path: 'path' } as any);
@@ -580,7 +596,7 @@ describe('TransferOperations', () => {
                 })
             );
         });
-            
+
 
         it('decreases balance for expense transactions', () => {
             // Arrange
@@ -592,6 +608,8 @@ describe('TransferOperations', () => {
                 type: 'expense',
                 category: 'shopping',
                 title: 'New Shoes',
+                scope: 'personal',
+                currency: 'USD',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-expense', path: 'path' } as any);
@@ -616,7 +634,7 @@ describe('TransferOperations', () => {
                 })
             );
         });
-            
+
         it('excludes destinationAccountId from transaction data', () => {
             // Arrange
             const userId = 'user-exclude';
@@ -628,6 +646,8 @@ describe('TransferOperations', () => {
                 type: 'expense',
                 category: 'misc',
                 title: 'Test',
+                scope: 'personal',
+                currency: 'USD',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-clean', path: 'path' } as any);
@@ -673,6 +693,8 @@ describe('TransferOperations', () => {
                 type: 'expense',
                 category: 'groceries',
                 title: 'Family Groceries',
+                scope: 'personal',
+                currency: 'NGN',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-shared', path: 'path' } as any);
@@ -694,7 +716,7 @@ describe('TransferOperations', () => {
             expect(txData.accountOwnerId).toBe(ownerId);
             expect(txData.accountShares).toEqual(account.shares);
         });
-            
+
 
         it('handles backdated transactions correctly', () => {
             // Arrange
@@ -706,6 +728,8 @@ describe('TransferOperations', () => {
                 type: 'income',
                 category: 'bonus',
                 title: 'Old Bonus',
+                scope: 'personal',
+                currency: 'USD',
             };
 
             vi.mocked(firestore.doc).mockReturnValue({ id: 'tx-old', path: 'path' } as any);

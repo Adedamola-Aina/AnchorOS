@@ -1,7 +1,7 @@
 import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { ThemeToggle } from '../../../components/shared';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 
 export type Theme = 'light' | 'dark';
 

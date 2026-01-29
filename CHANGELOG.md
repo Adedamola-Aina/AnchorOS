@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+#### Architecture & Reliability
+- **Transaction Form Interactivity**: Fixed z-index stacking issue causing unresponsive inputs in Account Details view; unlocked "From" account selection.
+- **BUG-015 (Real-time Updates)**: Fixed account balance latency by correctly awaiting Firestore operations and implementing optimistic updates.
+- **BUG-016 (Exchange Rates)**: Fixed cross-currency transfers ignoring calculated exchange rates in `TransferOperations`.
+
+### Added
+
+#### Finance Features
+- **FIN-003: Recurring Transactions**:
+  - **Automation**: Scheduled Cloud Function runs daily to process recurring rules.
+  - **UI**: Added "Make Recurring" toggle to Transaction Form with Frequency (Weekly/Monthly/Yearly) and Interval support.
+  - **Management**: New "Recurring" tab in Finance View to pause, resume, and delete recurring rules.
+
 #### Transaction History UI Harmonization
 - **Unified Transaction Components**: Finance page and Account Detail view now use the same `TransactionItem`/`SwipeableTransactionItem` components
 - **Mobile Swipe Actions**: Edit/delete icons hidden on mobile since swipe gestures handle these actions (swipe left = delete, swipe right = edit)
@@ -22,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **End of List**: Added "End of list" indicator to Transaction lists
 - **Unified Components**: Migrated Account Details to use the main `VirtualTransactionList` for consistency
 - **Virtual List Stacking Fix**: Resolved critical regression where transactions stacked on mobile. Fixed virtualization offset calculation.
+- **UX-017**: Independent transaction scrolling (container-based) for app-like feel. Height constrained to `calc(100vh - 320px)`.
 
 #### Commitments Task Box Sizing
 - **Compact Task Items**: Reduced padding from `p-4` to `p-3`, smaller toggle buttons (`p-1.5` from `p-2`)

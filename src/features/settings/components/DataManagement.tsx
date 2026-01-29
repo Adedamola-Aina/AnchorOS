@@ -1,8 +1,8 @@
 import React from 'react';
 import { Database } from 'lucide-react';
 import { useNotifications } from '../../../context/NotificationContext';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
+import { Button } from '@anchor-os/ui';
 
 interface DataManagementProps {
     userUid: string;

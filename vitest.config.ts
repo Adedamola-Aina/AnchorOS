@@ -1,32 +1,34 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@anchor-os/ui': path.resolve(__dirname, 'src/libs/ui'),
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    testTimeout: 30000, // 30 second timeout per test
-    hookTimeout: 10000, // 10 second timeout for hooks
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: [
-        'node_modules/',
-        'src/test/',
+        'coverage/**',
+        'dist/**',
+        '**/[.]**',
         '**/*.d.ts',
-        '**/*.config.*',
-        '**/mockData',
-        'dist/',
+        '**/*.test.{ts,tsx}',
+        '**/*.spec.{ts,tsx}',
+        '**/test-setup.ts',
       ],
     },
   },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-});
+})

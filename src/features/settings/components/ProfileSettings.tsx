@@ -1,6 +1,6 @@
 import React from 'react';
 import { User } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 
 interface ProfileSettingsProps {
     name: string;

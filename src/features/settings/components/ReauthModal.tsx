@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { Card } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
+import { Card } from '@anchor-os/ui';
+import { Button } from '@anchor-os/ui';
 
 interface ReauthModalProps {
     show: boolean;

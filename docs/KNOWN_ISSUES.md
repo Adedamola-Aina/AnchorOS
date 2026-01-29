@@ -12,77 +12,10 @@ _No critical issues at this time_
 
 ## 🟡 HIGH (P1)
 
-### [BUG-008] Transaction History UI Inconsistency
-- **Reported**: 2026-01-29
-- **Reporter**: Teeto
-- **Impact**: Confusing UX - Finance page and Account Detail view have different transaction row layouts
-- **Root Cause**: Two separate components (`TransactionItem` vs `TransactionRow`) with different styling
-- **Fix**: Unify to single `TransactionItem`/`SwipeableTransactionItem` component
-- **Assigned**: Agent
-- **Status**: IN PROGRESS (code written, needs testing)
-
-### [BUG-009] Dark Mode White Edge on Transaction Cards
-- **Reported**: 2026-01-29
-- **Reporter**: Teeto
-- **Impact**: Visual defect - white triangle artifacts visible at rounded corners in dark mode
-- **Root Cause**: `SwipeableRow.tsx` had hardcoded `bg-white` on the content wrapper div, which showed through the rounded corners of the Card component
-- **Fix**: Changed `bg-white` to `bg-transparent` in SwipeableRow content wrapper. Also removed opacity from Card (`dark:bg-slate-900` instead of `dark:bg-slate-900/95`)
-- **Files Changed**: `src/components/mobile/SwipeableRow.tsx`, `src/components/ui/Card.tsx`
-- **Assigned**: Agent
-- **Status**: DEPLOYED TO DEV/STAGING (2026-01-29) - awaiting verification
-
-### [BUG-010] Transaction List Excessive Spacing
-- **Reported**: 2026-01-29
-- **Reporter**: Teeto
-- **Impact**: Transactions appear separated/overlapping, not distinct enough
-- **Root Cause**: `pb-4` gap too large between transaction cards
-- **Fix**: Reduce to `pb-2` for denser, cleaner list
-- **Assigned**: Agent
-- **Status**: IN PROGRESS (code written, needs testing)
-
-### [BUG-011] Empty Transaction List Allows Infinite Scroll
-- **Reported**: 2026-01-29
-- **Reporter**: Teeto
-- **Impact**: Page continues scrolling when there are no/few transactions
-- **Root Cause**: `min-h-[300px]` on empty state forces unnecessary scroll space
-- **Fix**: Remove min-height constraint
-- **Assigned**: Agent
-- **Status**: IN PROGRESS (code written, needs testing)
 
 ---
 
-## 🟢 LOW (P2)
 
-### [BUG-012] Commitments Task Box Too Large
-- **Reported**: 2026-01-29
-- **Reporter**: Teeto
-- **Impact**: Task items take more space than necessary
-- **Root Cause**: Padding `p-4` and large toggle buttons `p-2`
-- **Fix**: Compact to `p-3` padding, inline badges, smaller toggles
-- **Assigned**: Agent
-- **Status**: IN PROGRESS (code written, needs testing)
-
-### [BUG-013] Redundant Edit/Delete Icons on Mobile
-- **Reported**: 2026-01-29
-- **Reporter**: Teeto
-- **Impact**: Cluttered UI - icons shown when swipe actions already handle edit/delete
-- **Root Cause**: Icons set to `opacity-100 sm:opacity-0` instead of hidden on mobile
-- **Fix**: Change to `hidden sm:flex` to hide on mobile completely
-- **Assigned**: Agent
-- **Status**: IN PROGRESS (code written, needs testing)
-- **Note**: Requires onboarding update (UX-005) to teach users about swipe gestures
-
-### [BUG-014] Transaction List Layout Issues (Edge-to-Edge, Spacing, Scroll)
-- **Reported**: 2026-01-29
-- **Reporter**: Teeto
-- **Impact**: Transaction list layout not optimal - padding, spacing, scroll chaining issues
-- **Root Cause**: Multiple CSS issues in list container and item styling
-- **Iterations**:
-  - v1: Added `overscroll-contain`, changed `p-3` to `pt-2`, added `px-2` on items
-  - v2: Removed `pt-2` and `px-2`, added `rounded-none border-x-0` to Card, removed `rounded-2xl` from SwipeableRow for true edge-to-edge
-- **Files Changed**: `src/features/finance/components/VirtualTransactionList.tsx`, `src/features/finance/components/TransactionItem.tsx`, `src/components/mobile/SwipeableRow.tsx`
-- **Assigned**: Agent
-- **Status**: DEPLOYED TO DEV/STAGING (2026-01-29) - awaiting verification
 
 ### [GAP-002] Design System Color Token Fragmentation
 - **Reported**: 2026-01-26 (Codebase Audit)
@@ -120,6 +53,47 @@ _No regressions detected_
 ---
 
 ## ✅ RECENTLY FIXED
+
+### [BUG-017] Transaction Form Inputs Unresponsive (FIXED 2026-01-29)
+- **Fix**: Added `isolate` for stacking context, enabled account selection
+- **Verified**: User verification pending
+
+### [BUG-016] Exchange Rate Conversion Failed(FIXED 2026-01-29)
+- **Fix**: Updated `TransferOperations` to use `destinationAmountCents`
+- **Verified**: Unit Tests
+
+### [BUG-015] Real-time Balance Lag (FIXED 2026-01-29)
+- **Fix**: Implemented optimistic updates
+- **Verified**: Manual Verification
+
+### [BUG-008] Transaction History UI Inconsistency (FIXED 2026-01-29)
+- **Fix**: Unified Finance and Account Details to use `VirtualTransactionList` + `TransactionItem`
+- **Verified**: Code review confirmed integration
+
+### [BUG-009] Dark Mode White Edge (FIXED 2026-01-29)
+- **Fix**: Removed background color from SwipeableRow wrapper
+- **Verified**: Deployed
+
+### [BUG-010] Transaction List Spacing (FIXED 2026-01-29)
+- **Fix**: Reduced padding from `pb-4` to `pb-2`
+- **Verified**: Code review
+
+### [BUG-011] Empty List Scroll (FIXED 2026-01-29)
+- **Fix**: Removed `min-h` constraint from empty state
+- **Verified**: Code review
+
+### [BUG-014] Transaction List Layout (FIXED 2026-01-29)
+- **Fix**: Container-based virtualization, edge-to-edge styling
+- **Verified**: Implemented in UX-017 work
+
+### [BUG-012] Task Box Sizing (FIXED 2026-01-29)
+- **Fix**: Reduced padding `p-3`, toggles `p-1.5`
+- **Verified**: Code review
+
+### [BUG-013] Redundant Mobile Icons (FIXED 2026-01-29)
+- **Fix**: Hidden icons on mobile (`hidden sm:flex`)
+- **Verified**: Code review
+
 
 ### [ARCH-001] Files Approaching 200-Line Limit (FIXED 2026-01-28)
 - **Issue**: 6 files were approaching the 200-line architecture limit
