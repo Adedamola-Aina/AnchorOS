@@ -28,7 +28,7 @@
 
 ## ⏳ PENDING CHANGES (Dev → Staging)
 
-- **OLED Theme Removal** - Theme simplified to light/dark only
+- [ ] **OLED Theme Removal** - Theme simplified to light/dark only (commit ce5dbb4)
 
 ---
 
