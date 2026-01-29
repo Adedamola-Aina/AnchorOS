@@ -41,6 +41,9 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fixSharedAccountScopes = exports.addTransactionToSharedAccount = exports.migrateFamilyConnectionsV2 = exports.sendTemplatedEmail = exports.cleanupExpiredInvitations = exports.onSharedTransactionWrite = exports.disconnectFamily = exports.dismissNotification = exports.getNotifications = exports.getSharedAccountsWithMe = exports.shareAccount = exports.confirmConnection = exports.acceptInvitation = exports.validateInvitationToken = exports.revokeInvitation = exports.createFamilyInvitation = exports.resetRateLimit = exports.checkRateLimit = void 0;
 const functions = __importStar(require("firebase-functions"));
@@ -1132,4 +1135,8 @@ exports.fixSharedAccountScopes = functions.https.onCall(async (_data, context) =
 // - diagnoseFamilySharing (./diagnostic.ts)
 // - forceUpdateAccountScope (./forceUpdate.ts)
 // To use in development, import directly from files
+// ============================================================================
+// Finance Automation
+// ============================================================================
+__exportStar(require("./recurring"), exports);
 //# sourceMappingURL=index.js.map

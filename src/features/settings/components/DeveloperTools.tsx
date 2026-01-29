@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Database } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import {
     SeedDataAction,
     SimulateFamilyAction,

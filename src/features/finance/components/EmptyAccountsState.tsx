@@ -4,7 +4,7 @@
  */
 
 import { Landmark, Plus } from 'lucide-react';
-import { Button } from '../../../components/ui';
+import { Button } from '@anchor-os/ui';
 
 interface EmptyAccountsStateProps {
     onCreateAccount: () => void;

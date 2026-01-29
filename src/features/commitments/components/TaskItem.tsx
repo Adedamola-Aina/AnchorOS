@@ -2,8 +2,8 @@ import React from 'react';
 import { Circle, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
 import { Badge, TaskContextBadge } from '../../../components/shared';
 import type { AnchorTask } from '../../../types';
-import { Card } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
+import { Card } from '@anchor-os/ui';
+import { Button } from '@anchor-os/ui';
 
 interface TaskItemProps {
     task: AnchorTask;

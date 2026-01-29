@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search } from 'lucide-react';
 import { TransactionItem } from './TransactionItem';
 import { SwipeableTransactionItem } from './SwipeableTransactionItem';
@@ -31,18 +31,11 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     const parentVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 68, // Row height: ~60px card + 8px gap
+        estimateSize: () => 88, // Row height: ~80px card + 8px gap
         overscan: 5,
     });
 
-    const windowVirtualizer = useWindowVirtualizer({
-        count: transactions.length,
-        estimateSize: () => 68,
-        overscan: 5,
-        scrollMargin: parentRef.current ? parentRef.current.getBoundingClientRect().top + window.scrollY : 0,
-    });
-
-    const rowVirtualizer = isMobile ? windowVirtualizer : parentVirtualizer;
+    const rowVirtualizer = parentVirtualizer;
 
     if (transactions.length === 0) {
         return (
@@ -69,7 +62,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     return (
         <div
             ref={parentRef}
-            className={`bg-transparent ${isMobile ? '' : 'md:max-h-[600px] overflow-y-auto overscroll-contain'} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
+            className={`bg-transparent overflow-y-auto overscroll-contain h-[calc(100vh-320px)] min-h-[400px] ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
         >
             <div
                 style={{
@@ -85,12 +78,14 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                     return (
                         <div
                             key={tx.id}
+                            data-index={virtualRow.index}
+                            ref={rowVirtualizer.measureElement}
                             style={{
                                 position: 'absolute',
                                 top: 0,
                                 left: 0,
                                 width: '100%',
-                                transform: `translateY(${virtualRow.start - (isMobile ? rowVirtualizer.options.scrollMargin : 0)}px)`,
+                                transform: `translateY(${virtualRow.start}px)`,
                             }}
                             className="pb-2" // Gap between transaction cards only
                         >

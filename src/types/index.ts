@@ -97,3 +97,24 @@ export interface AnchorNotification {
   actorId?: string;
   actorName?: string;
 }
+
+export type RecurringFrequency = 'weekly' | 'monthly' | 'yearly';
+export type RecurringStatus = 'active' | 'paused';
+
+export interface RecurringTransaction {
+  id: string;
+  title: string;
+  amountCents: number;
+  type: TransactionType;
+  category: string;
+  accountId: string;
+  accountName?: string; // Denormalized for display
+  frequency: RecurringFrequency;
+  interval: number; // e.g., 1 = every month, 2 = every 2 months
+  nextRunAt: string; // ISO date string
+  status: RecurringStatus;
+  userId: string;
+  createdAt: string;
+  lastRunAt?: string;
+  failureReason?: string; // If auto-creation failed
+}

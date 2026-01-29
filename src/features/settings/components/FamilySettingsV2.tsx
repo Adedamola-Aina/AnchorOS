@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotifications } from '../../../context/NotificationContext';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@anchor-os/ui';
 import { Users } from 'lucide-react';
 import { InviteFamilyMember } from './InviteFamilyMember';
 import { PendingConfirmation } from './PendingConfirmation';

@@ -7,7 +7,7 @@ import { useState, useMemo } from 'react';
 import type { AnchorAccount, AnchorTransaction } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
-import { getWeeklySpending, detectRecurring } from '../../utils/financeInsights';
+import { getWeeklySpending } from '../../utils/financeInsights';
 import { NotificationBanner } from './NotificationBanner';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { useAccountActivity } from '../../hooks/useAccountActivity';
@@ -36,7 +36,6 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
 
     const accountTransactions = useMemo(() => (transactions || []).filter(t => t?.accountId === account.id), [transactions, account.id]);
     const weeklyData = useMemo(() => getWeeklySpending(accountTransactions), [accountTransactions]);
-    const recurring = useMemo(() => detectRecurring(accountTransactions), [accountTransactions]);
     const maxWeeklyAmount = useMemo(() => Math.max(...weeklyData.flatMap(d => [d.income, d.expense]), 1), [weeklyData]);
 
     const filteredList = useMemo(() => {
@@ -63,7 +62,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
                 <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {accountTransactions.length > 0 && <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />}
-                    <RecurringTransactionsList recurring={recurring} currency={account.currency} />
+                    <RecurringTransactionsList />
                 </div>
                 {isSharedAccount && <SharedActivitySection activities={activities} currentUserId={user?.uid} loading={loadingActivities} />}
                 {/* Standardized VirtualTransactionList used in FinanceView for consistency */}

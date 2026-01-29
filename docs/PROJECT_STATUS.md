@@ -18,14 +18,42 @@ _No blockers at this time_
 
 ### ✅ Recently Completed (Last 7 Days)
 
+- [x] **FIN-003: Recurring Transactions** ✅ 2026-01-29
+  - Implemented "Make Recurring" toggle in Transaction Form
+  - Created Management UI (List/Pause/Delete)
+  - Implemented Cloud Function (`processRecurringTransactions`) for daily automation
+
+- [x] **BUG-016: Exchange Rate Conversion** ✅ 2026-01-29
+  - Fixed: Transfers between currencies (e.g., USD -> NGN) not converting amounts
+  - Fix: Updated `TransferOperations.ts` to respect `destinationAmountCents`
+
+- [x] **BUG-015: Real-time Account Updates** ✅ 2026-01-29
+  - Fixed: Balance not updating immediately after transaction
+  - Fix: Implemented optimistic updates in `useFinance` hooks
+
+- [x] **Transaction Form Interactivity Fix** ✅ 2026-01-29
+  - Fixed: "From" Account selection unlocked in Account Details view
+  - Fixed: Input fields unresponsive due to z-index stacking (added `isolate`)
+
+- [x] **UX-017: Independent Transaction Scroll** ✅ 2026-01-29
+  - Implemented container-based virtualization (`overflow-y-auto`)
+  - List scrolls independently from page (App-like feel)
+  - Height constrained to `calc(100vh - 320px)`
+
+- [x] **REG-003: Virtual List Dynamic Height Fix** ✅ 2026-01-29
+  - Fixed: Transaction items overlapping/stacking due to fixed height estimation
+  - Root Cause: Missing `measureElement` ref in virtualization loop
+  - Fix: Added `ref={rowVirtualizer.measureElement}` and updated base estimate
+
 - [x] **REG-002: Virtual List Offset Fix** ✅ 2026-01-29
   - Fixed: Transaction list items stacking on top of each other on mobile
   - Root Cause: `offsetTop` relative to parent vs global window offset for virtualization
   - Fix: Updated `scrollMargin` calculation to use `getBoundingClientRect()`
 
 - [x] **Finance UI Refinements** ✅ 2026-01-29
-  - Unified Transaction Items (Centered Layout, Pill Badges)
-  - Added End-of-List indicator
+  - Unified Transaction Items (Fixed **BUG-008**, **BUG-014**)
+  - Reduced List Spacing (Fixed **BUG-010**)
+  - Fixed Empty List Scroll (Fixed **BUG-011**)
   - Standardized Account Details view (parity with Finance view)
 
 - [x] **BUG-007: Modal Input Fix** ✅ 2026-01-28
@@ -38,6 +66,10 @@ _No blockers at this time_
   - Added full metadata (category, effort, impact) to completed features
   - Enhanced file watchers for git commits + all doc files
   - PM Dashboard now auto-syncs on changes
+
+- [x] **Commitments UI Polish** ✅ 2026-01-29
+  - Compact Task Items (Fixed **BUG-012**)
+  - Mobile Icon Cleanup (Fixed **BUG-013**)
 
 - [x] **UX/Design System Verification** ✅ 2026-01-28
   - Verified 15 implementations from Jan 27 work

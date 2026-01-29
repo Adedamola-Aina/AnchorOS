@@ -121,6 +121,48 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "finance",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "finance",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "amountCents",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "finance",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "accountId",
           "order": "ASCENDING"
         },

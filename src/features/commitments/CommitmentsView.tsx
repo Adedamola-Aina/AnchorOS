@@ -16,7 +16,7 @@ import { SectionHeader } from '../../components/shared';
 import { TaskList } from './components/TaskList';
 import { TaskForm } from './components/TaskForm';
 import { EditTaskForm } from './components/EditTaskForm';
-import { Button } from '../../components/ui';
+import { Button } from '@anchor-os/ui';
 import { WeeklyView } from './components/WeeklyView';
 import { CommitmentsEmptyState, CommitmentsFilterBar } from './components/CommitmentsViewParts';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';

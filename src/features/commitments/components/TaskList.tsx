@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { TaskItem } from './TaskItem';
 import type { AnchorTask } from '../../../types';
-import { Button } from '../../../components/ui/Button';
+import { Button } from '@anchor-os/ui';
 
 interface TaskListProps {
     activeTasks: AnchorTask[];

@@ -1,23 +1,19 @@
-/**
- * TransactionForm
- * 
- * Main form component for creating/editing transactions.
- * Refactored per CLAUDE.md §3.2 (200-line rule).
- */
-
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useHaptic } from '../../hooks/useHaptic';
+import { useAuth } from '../../context/AuthContext';
+import { useCreateRecurringTransaction } from '../../hooks/useRecurringQueries';
 import { getTransactionLabel } from '../../utils/finance';
 import { toCents, fromCents } from '../../utils/moneyUtils';
 import { mapFirebaseError } from '../../utils/errorUtils';
 import { containsDangerousPatterns } from '../../utils/validation';
-import type { TransactionType, AnchorTransaction } from '../../types';
+import type { TransactionType, AnchorTransaction, RecurringFrequency } from '../../types';
 import {
     AccountSelector, CategorySelector, OverdraftWarning,
     TransactionTypeSelector, TransferDetails
 } from './components';
+import { RecurringOptions } from './components/RecurringOptions';
 import {
     useTransactionFormState, NoAccountsMessage, SingleAccountTransferMessage,
     DescriptionField, AmountField, DateField
@@ -35,10 +31,17 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     onClose, defaultAccountId, defaultType = 'expense', initialData, prefillData
 }) => {
     const haptic = useHaptic();
-    const { transactions, accounts, addTransaction, updateTransaction } = useFinance();
+    const { user } = useAuth();
+    const { transactions, accounts, addTransaction, updateTransaction, refetch } = useFinance();
+    const { mutateAsync: createRecurring } = useCreateRecurringTransaction();
     const { showToast } = useNotifications();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<{ title?: string; amount?: string; destination?: string; category?: string }>({});
+
+    // Recurring State
+    const [isRecurring, setIsRecurring] = useState(false);
+    const [frequency, setFrequency] = useState<RecurringFrequency>('monthly');
+    const [interval, setInterval] = useState(1);
 
     // Initial values
     const initialAmount = initialData
@@ -78,7 +81,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (isSubmitting || !validate() || !sourceAccount) return;
+        if (isSubmitting || !validate() || !sourceAccount || !user) return;
         const amountCents = Math.abs(toCents(amount));
         if (!amountCents) return;
 
@@ -92,14 +95,35 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                 destinationAmountCents = Math.round(amountCents * rate);
             }
 
+            const isoDate = new Date(transactionDate + 'T12:00:00').toISOString();
+
+            // 1. Handle Recurring Rule Creation
+            if (isRecurring && !initialData) {
+                await createRecurring({
+                    title: formState.title,
+                    amountCents,
+                    type: formState.type,
+                    category: finalCategory,
+                    accountId: formState.selectedAccId,
+                    accountName: sourceAccount.name,
+                    frequency,
+                    interval,
+                    nextRunAt: isoDate, // First run date
+                    status: 'active',
+                    userId: user.uid,
+                    createdAt: new Date().toISOString()
+                });
+                showToast('Recurring rule created!', 'success');
+            }
+
+            // 2. Create Standard Transaction (Immediate)
             if (initialData) {
                 await updateTransaction(initialData.id, initialData.accountId, {
                     title: formState.title, amountCents, type: formState.type, category: finalCategory, date: transactionDate,
                 });
                 haptic.trigger('success');
-                showToast('Transaction updated successfully', 'success');
+                showToast('Transaction updated', 'success');
             } else {
-                const isoDate = new Date(transactionDate + 'T12:00:00').toISOString();
                 await addTransaction({
                     title: formState.title, amountCents, type: formState.type, category: finalCategory,
                     accountId: formState.selectedAccId, accountName: sourceAccount.name,
@@ -108,9 +132,16 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                     ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) })
                 } as any);
                 haptic.trigger('success');
-                showToast('Transaction recorded successfully', 'success');
+                showToast('Transaction recorded', 'success');
             }
-            if (!initialData) { formState.setTitle(''); setAmount(''); setTransactionDate(new Date().toISOString().split('T')[0]); }
+
+            await refetch();
+            if (!initialData) {
+                formState.setTitle('');
+                setAmount('');
+                setTransactionDate(new Date().toISOString().split('T')[0]);
+                setIsRecurring(false); // Reset recurring toggle
+            }
             onClose();
         } catch (error) {
             console.error('[TransactionForm] Failed to save transaction:', error);
@@ -126,14 +157,12 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     if (formState.type === 'transfer' && accounts.length === 1) return <SingleAccountTransferMessage onClose={onClose} />;
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-1 rounded-xl">
+        <div className="bg-white dark:bg-slate-800 p-1 rounded-xl isolate">
             <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4">{getTransactionLabel(formState.type).header}</h3>
             {isOverdraft && <OverdraftWarning projectedBalance={projectedBalance} amountCents={toCents(amount)} />}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                {!defaultAccountId && (
-                    <AccountSelector accounts={accounts} selectedId={formState.selectedAccId} onSelect={formState.setSelectedAccId} label={getTransactionLabel(formState.type).accountLabel} />
-                )}
+                <AccountSelector accounts={accounts} selectedId={formState.selectedAccId} onSelect={formState.setSelectedAccId} label={getTransactionLabel(formState.type).accountLabel} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <DescriptionField value={formState.title} onChange={formState.setTitle} error={errors.title} onClearError={() => setErrors({ ...errors, title: undefined })} />
@@ -156,10 +185,22 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                     <DateField value={transactionDate} onChange={setTransactionDate} />
                 </div>
 
+                {/* Recurring Options - Hidden during updates for now */}
+                {!initialData && (
+                    <RecurringOptions
+                        isRecurring={isRecurring} onChange={setIsRecurring}
+                        frequency={frequency} onFrequencyChange={setFrequency}
+                        interval={interval} onIntervalChange={setInterval}
+                    />
+                )}
+
                 <div className="flex justify-end gap-3 pt-2">
                     <button type="button" onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-sm">Cancel</button>
                     <button type="submit" disabled={isSubmitting} className="bg-slate-800 dark:bg-slate-600 hover:bg-slate-900 dark:hover:bg-slate-500 text-white px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-                        {isSubmitting ? 'Saving...' : initialData ? 'Update Transaction' : formState.type === 'transfer' ? 'Record Transfer' : 'Record Transaction'}
+                        {isSubmitting ? 'Saving...' : initialData ? 'Update Transaction' :
+                            (isRecurring ? 'Record & Schedule Recurring' :
+                                (formState.type === 'transfer' ? 'Record Transfer' : 'Record Transaction'))
+                        }
                     </button>
                 </div>
             </form>

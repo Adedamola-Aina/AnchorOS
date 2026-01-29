@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Plus, CheckCircle2, LayoutList, CalendarDays } from 'lucide-react';
-import { Button } from '../../../components/ui';
+import { Button } from '@anchor-os/ui';
 
 interface EmptyStateProps { filter: string; hasFamilyActive: boolean; onCreateFirst: () => void; onLearnMore: () => void; }
 export const CommitmentsEmptyState: React.FC<EmptyStateProps> = ({ filter, hasFamilyActive, onCreateFirst, onLearnMore }) => (

@@ -1,0 +1,35 @@
+{
+    "folders": [
+        {
+            "name": "Anchor OS",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/.git": true,
+            "**/.DS_Store": true,
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/.firebase": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/.firebase": true,
+            "**/playwright-report": true,
+            "**/test-results": true
+        },
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.tsdk": "node_modules/typescript/lib"
+    },
+    "extensions": {
+        "recommendations": [
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode",
+            "bradlc.vscode-tailwindcss",
+            "ms-playwright.playwright"
+        ]
+    }
+}

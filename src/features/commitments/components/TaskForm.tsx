@@ -6,8 +6,8 @@
 
 import React, { useState } from 'react';
 import type { TaskType, TimeOfDay, AnchorTask } from '../../../types';
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
+import { Button } from '@anchor-os/ui';
+import { Card } from '@anchor-os/ui';
 import { FrequencyStep, DetailsHeader, DailyTimeField, WeeklyDaysField, MonthlyDatesField } from './TaskFormParts';
 
 interface TaskFormProps { onClose: () => void; onAdd: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>; hasFamilyActive: boolean; }

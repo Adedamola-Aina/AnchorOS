@@ -1,27 +1,15 @@
-import { test, expect, type Page } from '@playwright/test';
-import { TEST_USER, TEST_ACCOUNT, TEST_TRANSACTION } from './fixtures/test-data';
-import { loginOrSignup } from './helpers';
+import { test, expect } from './fixtures/base';
+import { TEST_ACCOUNT } from './fixtures/test-data';
 
-/**
- * Finance E2E Tests
- * 
- * Comprehensive tests for finance features:
- * - Accounts (CRUD)
- * - Transactions (CRUD, search, filter)
- * - Transfers
- * - Backdated transactions
- */
-
-// Helper: Navigate to Finance page
-async function goToFinance(page: Page) {
-    await loginOrSignup(page, TEST_USER, true);
-    // Use text-based selector for sidebar navigation (matches smoke tests)
+// Helper: Navigate to Finance page (Login handled by fixture)
+async function goToFinance(page: any) {
+    // Login already handled by authedPage fixture
     await page.locator('aside').locator('text=Finance').click();
     await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible({ timeout: 10000 });
 }
 
 // Helper: Click on first account card
-async function openFirstAccount(page: Page) {
+async function openFirstAccount(page: any) {
     const accountCard = page.locator('[class*="glass-card"]').first();
     if (await accountCard.isVisible()) {
         await accountCard.click();
@@ -36,6 +24,7 @@ async function openFirstAccount(page: Page) {
 // ============================================================================
 
 test.describe('Finance - Accounts', () => {
+    // Login is automatic via base test
     test.beforeEach(async ({ page }) => {
         await goToFinance(page);
     });

@@ -5,7 +5,7 @@
  */
 
 import { AlertCircle } from 'lucide-react';
-import { Card, CardContent } from '../../../components/ui/Card';
+import { Card, CardContent } from '@anchor-os/ui';
 
 export function EmailVerificationWarning() {
     return (

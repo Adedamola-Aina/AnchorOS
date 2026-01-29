@@ -288,6 +288,7 @@ describe('FinanceService', () => {
                     createdBy: userId,
                     isSoftDeleted: false,
                     accountOwnerId: userId,
+                    scope: 'personal',
                 }];
                 mockTransactionService.deleteTransaction.mockResolvedValue(undefined);
 

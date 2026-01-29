@@ -7,8 +7,8 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Trash2, Check } from 'lucide-react';
 import { useNotifications } from '../../../context/NotificationContext';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
+import { Button } from '@anchor-os/ui';
 import { MfaStep1GetApp, MfaStep2ScanQR, MfaStep3Verify } from './SecuritySettingsParts';
 
 interface SecuritySettingsProps {

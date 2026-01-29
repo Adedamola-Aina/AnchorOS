@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import type { AnchorTask, TimeOfDay } from '../../../types';
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
+import { Button } from '@anchor-os/ui';
+import { Card } from '@anchor-os/ui';
 import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
 
 interface EditTaskFormProps {

@@ -6,8 +6,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
-import { collection, onSnapshot, query, where, orderBy, limit } from 'firebase/firestore';
-import { db, APP_ID } from '../../config/firebase';
+import { financeApi } from '../../api/FinanceApi';
 import type { AnchorTransaction, AnchorAccount } from '../../types';
 
 export const FINANCE_KEYS = {
@@ -33,25 +32,12 @@ export const useTransactionsQuery = (userId: string | undefined, start: string, 
     useEffect(() => {
         if (!userId) return;
 
-        const q = query(
-            collection(db, 'artifacts', APP_ID, 'users', userId, 'finance'),
-            where('date', '>=', start),
-            where('date', '<=', end),
-            orderBy('date', 'desc'),
-            limit(500) // Performance: limit per-month fetch to 500 transactions
-        );
-
-        const unsubscribe = onSnapshot(q, { includeMetadataChanges: true },
-            (snapshot) => {
-                const data = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                } as AnchorTransaction));
-                queryClient.setQueryData(queryKey, data);
-            },
-            (error) => {
-                console.error("Transactions Query Error:", error);
-            }
+        const unsubscribe = financeApi.subscribeToTransactions(
+            userId,
+            start,
+            end,
+            (data) => queryClient.setQueryData(queryKey, data),
+            (error) => console.error("Transactions Query Error:", error)
         );
 
         return () => unsubscribe();
@@ -77,23 +63,10 @@ export const useAccountsQuery = (userId: string | undefined) => {
     useEffect(() => {
         if (!userId) return;
 
-        const q = query(
-            collection(db, 'artifacts', APP_ID, 'users', userId, 'accounts'),
-            limit(50) // Performance: limit to 50 accounts
-        );
-
-        const unsubscribe = onSnapshot(q, { includeMetadataChanges: true },
-            (snapshot) => {
-                const data = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    ownerId: doc.data().ownerId || userId
-                } as AnchorAccount));
-                queryClient.setQueryData(queryKey, data);
-            },
-            (error) => {
-                console.error("Accounts Query Error:", error);
-            }
+        const unsubscribe = financeApi.subscribeToAccounts(
+            userId,
+            (data) => queryClient.setQueryData(queryKey, data),
+            (error) => console.error("Accounts Query Error:", error)
         );
 
         return () => unsubscribe();
@@ -122,23 +95,11 @@ export const useRecentTransactionsQuery = (userId: string | undefined, limitCoun
     useEffect(() => {
         if (!userId) return;
 
-        const q = query(
-            collection(db, 'artifacts', APP_ID, 'users', userId, 'finance'),
-            orderBy('date', 'desc'),
-            limit(limitCount)
-        );
-
-        const unsubscribe = onSnapshot(q, { includeMetadataChanges: true },
-            (snapshot) => {
-                const data = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                } as AnchorTransaction));
-                queryClient.setQueryData(queryKey, data);
-            },
-            (error) => {
-                console.error("Recent Transactions Query Error:", error);
-            }
+        const unsubscribe = financeApi.subscribeToRecentTransactions(
+            userId,
+            limitCount,
+            (data) => queryClient.setQueryData(queryKey, data),
+            (error) => console.error("Recent Transactions Query Error:", error)
         );
 
         return () => unsubscribe();

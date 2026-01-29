@@ -1,0 +1,46 @@
+{
+  "completions": [
+    {
+      "itemId": "BUG-001",
+      "completedDate": "2026-01-28",
+      "cycleTime": 3,
+      "recordedAt": "2026-01-28T07:35:00.000Z",
+      "description": "Transaction search performance fix - 2ms for 1000+ txns"
+    },
+    {
+      "itemId": "UX-006",
+      "completedDate": "2026-01-28",
+      "cycleTime": 1,
+      "recordedAt": "2026-01-28T07:35:00.000Z",
+      "description": "Haptic feedback hook (useHaptic) - 12 tests"
+    },
+    {
+      "itemId": "UX-008",
+      "completedDate": "2026-01-28",
+      "cycleTime": 1,
+      "recordedAt": "2026-01-28T07:35:00.000Z",
+      "description": "Pull-to-refresh component - 9 tests"
+    },
+    {
+      "itemId": "UX-009",
+      "completedDate": "2026-01-28",
+      "cycleTime": 1,
+      "recordedAt": "2026-01-28T07:35:00.000Z",
+      "description": "Transaction swipe actions (SwipeableRow, SwipeableTransactionItem) - 18 tests"
+    },
+    {
+      "itemId": "MOB-OPT-2",
+      "completedDate": "2026-01-28",
+      "cycleTime": 1,
+      "recordedAt": "2026-01-28T07:35:00.000Z",
+      "description": "Mobile Optimization Phase 2 complete - 67 new tests"
+    }
+  ],
+  "weeklyStats": [
+    {
+      "week": "2026-W05",
+      "completed": 5,
+      "velocity": 5.0
+    }
+  ]
+}

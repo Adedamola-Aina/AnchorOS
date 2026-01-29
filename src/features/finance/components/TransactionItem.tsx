@@ -13,7 +13,7 @@ import { CategoryIcon } from '../../../components/shared';
 import { formatCurrency } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { AnchorTransaction } from '../../../types';
-import { Card } from '../../../components/ui/Card';
+import { Card } from '@anchor-os/ui';
 
 interface TransactionItemProps {
     transaction: AnchorTransaction;

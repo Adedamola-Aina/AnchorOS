@@ -1,104 +1,126 @@
 /**
- * RecurringTransactionsList - Displays detected recurring payments
+ * RecurringTransactionsList
  * 
- * CLAUDE.md Design Philosophy:
- * - Clarity: Each recurring item clearly shows title, frequency, and amount
- * - Compact: Minimal vertical space usage
- * - Informative: Shows total monthly recurring expense
+ * Displays a list of active and paused recurring transaction rules.
+ * Allows users to pause, resume, or delete rules.
  */
 
-import { RefreshCw, AlertCircle } from 'lucide-react';
-import { formatCurrency } from '../../../utils/format';
+import React from 'react';
+import { format } from 'date-fns';
+import { CalendarClock, PauseCircle, PlayCircle, Trash2 } from 'lucide-react';
+import { useRecurringTransactions, useUpdateRecurringTransaction, useDeleteRecurringTransaction } from '../../../hooks/useRecurringQueries';
+import { useAuth } from '../../../context/AuthContext';
+import { useHaptic } from '../../../hooks/useHaptic';
 import { fromCents } from '../../../utils/moneyUtils';
-import type { Currency } from '../../../types';
+import type { RecurringTransaction } from '../../../types';
 
-interface RecurringItem {
-    id: string;
-    title: string;
-    amountCents: number;
-    frequency: string;
-}
+export const RecurringTransactionsList: React.FC = () => {
+    const { user } = useAuth();
+    const haptic = useHaptic();
+    const { data: rules, isLoading, isEmpty } = useRecurringTransactions(user?.uid);
+    const { mutateAsync: updateRule } = useUpdateRecurringTransaction();
+    const { mutateAsync: deleteRule } = useDeleteRecurringTransaction();
 
-interface RecurringTransactionsListProps {
-    recurring: RecurringItem[];
-    currency: Currency;
-    maxItems?: number;
-}
+    const handleToggleStatus = async (rule: RecurringTransaction) => {
+        haptic.trigger('medium');
+        const newStatus = rule.status === 'active' ? 'paused' : 'active';
+        await updateRule({ id: rule.id, updates: { status: newStatus } });
+    };
 
-export const RecurringTransactionsList = ({
-    recurring,
-    currency,
-    maxItems = 4,
-}: RecurringTransactionsListProps) => {
-    // Calculate estimated monthly total
-    const monthlyTotal = recurring.reduce((sum, r) => {
-        const amount = r.amountCents || 0;
-        // Estimate monthly: weekly*4, biweekly*2, monthly*1
-        if (r.frequency.toLowerCase().includes('week')) {
-            return sum + (r.frequency.toLowerCase().includes('bi') ? amount * 2 : amount * 4);
+    const handleDelete = async (id: string) => {
+        if (confirm('Are you sure you want to delete this recurring rule?')) {
+            haptic.trigger('heavy');
+            await deleteRule(id);
         }
-        return sum + amount;
-    }, 0);
+    };
 
-    const currencySymbol = currency === 'USD' ? '$' : '₦';
+    if (isLoading) {
+        return (
+            <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                    <div key={i} className="h-20 bg-slate-100 dark:bg-slate-800/50 rounded-xl animate-pulse" />
+                ))}
+            </div>
+        );
+    }
+
+    if (isEmpty) {
+        return (
+            <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+                <CalendarClock className="w-12 h-12 mb-3 opacity-50" />
+                <p className="text-sm font-medium">No recurring rules set up yet.</p>
+                <p className="text-xs text-center mt-1 max-w-xs">
+                    Toggle "Make Recurring" when adding a transaction to automate your bills.
+                </p>
+            </div>
+        );
+    }
 
     return (
-        <div className="glass-card p-5">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    Recurring
-                </h3>
-                {recurring.length > 0 && (
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                        ~{formatCurrency(fromCents(monthlyTotal), currency)}/mo
-                    </span>
-                )}
-            </div>
+        <div className="space-y-3">
+            {rules.map(rule => (
+                <div
+                    key={rule.id}
+                    className={`
+                        relative overflow-hidden bg-white dark:bg-slate-800 rounded-xl border transition-colors
+                        ${rule.status === 'paused' ? 'border-amber-200 dark:border-amber-900/30 opacity-75' : 'border-slate-100 dark:border-slate-700'}
+                    `}
+                >
+                    <div className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className={`
+                                w-10 h-10 rounded-full flex items-center justify-center shrink-0
+                                ${rule.status === 'paused' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-500' : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'}
+                            `}>
+                                <CalendarClock className="w-5 h-5" />
+                            </div>
 
-            {recurring.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                    <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-full mb-3">
-                        <AlertCircle className="w-5 h-5 text-slate-400" />
-                    </div>
-                    <p className="text-xs text-slate-400">No recurring payments detected</p>
-                    <p className="text-[10px] text-slate-400/70 mt-1">Add more transactions to detect patterns</p>
-                </div>
-            ) : (
-                <div className="space-y-2">
-                    {recurring.slice(0, maxItems).map(rec => (
-                        <div
-                            key={rec.id}
-                            className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                        >
-                            <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
-                                    <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
-                                        {currencySymbol}
-                                    </span>
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="font-bold text-slate-900 dark:text-white text-sm truncate">
-                                        {rec.title}
-                                    </p>
-                                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wide">
-                                        {rec.frequency}
-                                    </p>
+                            <div>
+                                <h4 className="font-medium text-slate-800 dark:text-white text-sm sm:text-base">
+                                    {rule.title}
+                                </h4>
+                                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                    <span className="capitalize">{rule.frequency}</span>
+                                    <span>•</span>
+                                    <span>Next: {format(new Date(rule.nextRunAt), 'MMM d, yyyy')}</span>
+                                    {rule.status === 'paused' && (
+                                        <span className="text-amber-600 dark:text-amber-500 font-medium bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide">
+                                            Paused
+                                        </span>
+                                    )}
                                 </div>
                             </div>
-                            <p className="font-mono font-bold text-slate-900 dark:text-white text-sm tabular-nums shrink-0">
-                                {formatCurrency(fromCents(rec.amountCents || 0), currency)}
-                            </p>
                         </div>
-                    ))}
-                    {recurring.length > maxItems && (
-                        <p className="text-center text-[10px] text-slate-400 pt-2">
-                            +{recurring.length - maxItems} more
-                        </p>
-                    )}
+
+                        <div className="flex flex-col items-end gap-1">
+                            <span className={`
+                                font-bold font-mono
+                                ${rule.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-white'}
+                            `}>
+                                {rule.type === 'income' ? '+' : ''}
+                                {fromCents(rule.amountCents).toLocaleString('en-US', { style: 'currency', currency: 'NGN' })}
+                            </span>
+
+                            <div className="flex items-center gap-1 mt-1">
+                                <button
+                                    onClick={() => handleToggleStatus(rule)}
+                                    className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                    title={rule.status === 'active' ? "Pause Rule" : "Resume Rule"}
+                                >
+                                    {rule.status === 'active' ? <PauseCircle className="w-4 h-4" /> : <PlayCircle className="w-4 h-4" />}
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(rule.id)}
+                                    className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400"
+                                    title="Delete Rule"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            )}
+            ))}
         </div>
     );
 };

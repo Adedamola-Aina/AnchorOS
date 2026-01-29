@@ -34,6 +34,8 @@ export interface CreateTransactionPayload {
     currency: string;
     scope: 'personal' | 'family';
     destinationAccountId?: string;
+    destinationAmountCents?: number;
+    exchangeRate?: number;
     date?: string;
 }
 

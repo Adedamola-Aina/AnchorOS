@@ -803,3 +803,16 @@
 - **Context**: Integration verification
 - **Status**: Backlog
 - **Added**: 2026-01-27
+
+---
+
+## 🧠 11. FABRIC AI (INTELLIGENCE)
+
+### HIGH Priority
+
+#### [FAB-001] Smart Recurring Transaction Detection
+- **Suggestion**: Automatically detect recurring patterns in transaction history and suggest creating a recurring rule.
+- **Example**: "I noticed you pay Netflix on the 28th every month. Automate this?"
+- **Context**: Moves detection from manual (v1) to intelligent (v2).
+- **Impact**: "Magic" user experience, improved forecasting accuracy.
+- **Effort**: High (machine learning/pattern matching heuristic required).
