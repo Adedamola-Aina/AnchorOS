@@ -1,15 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-29 15:00 UTC
-
----
-
-## ⚠️ DEPLOYMENT INCIDENT
-
-**Date**: 2026-01-29 ~14:35 UTC  
-**Issue**: Untested bug fixes (BUG-008 through BUG-013) were deployed to Production without approval  
-**Action Required**: Verify fixes work in production or rollback if issues found  
-**Status**: Monitoring
+**Last Updated**: 2026-01-29 15:30 UTC
 
 ---
 
@@ -17,37 +8,50 @@
 
 | Environment | Version | Firebase Site | URL | Health |
 |-------------|---------|---------------|-----|--------|
-| **Production** | v1.5.2-untested | anchor-os | https://anchor-os.web.app | ⚠️ Verify |
-| **Staging** | v1.5.2-untested | anchor-os-staging | https://anchor-os-staging.web.app | ⚠️ Verify |
-| **Dev** | v1.5.2-untested | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ⚠️ Verify |
+| **Production** | v1.5.0 (c189779) | anchor-os | https://anchor-os.web.app | ✅ Stable |
+| **Staging** | v1.5.2-dev | anchor-os-staging | https://anchor-os-staging.web.app | ⚠️ Testing |
+| **Dev** | v1.5.2-dev | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ⚠️ Testing |
 
-**Code Parity**: All environments at commit `a232e4d` (untested UI changes)
-
----
-
-## 🔴 BUGS IN PRODUCTION (Untested)
-
-The following bug fixes were deployed without proper E2E/manual testing:
-
-| Bug ID | Description | Status |
-|--------|-------------|--------|
-| BUG-008 | Transaction History UI Inconsistency | Code deployed, needs verification |
-| BUG-009 | Dark Mode White Edge on Cards | Code deployed, needs verification |
-| BUG-010 | Transaction List Excessive Spacing | Code deployed, needs verification |
-| BUG-011 | Empty Transaction List Scroll Issue | Code deployed, needs verification |
-| BUG-012 | Commitments Task Box Too Large | Code deployed, needs verification |
-| BUG-013 | Redundant Edit/Delete Icons on Mobile | Code deployed, needs verification |
+**Code Flow**: Dev → Staging → Production (with approval)
 
 ---
 
-## ⏳ PENDING VERIFICATION
+## ⚠️ INCIDENT RESOLVED
 
-- [ ] **Manual test Finance page** - Check transaction list appearance
-- [ ] **Manual test Account Detail** - Verify transaction history matches Finance page
-- [ ] **Manual test Dark Mode** - Check for white edges on cards
-- [ ] **Manual test Mobile** - Verify swipe actions work, no edit/delete icons
-- [ ] **Manual test Commitments** - Check task box sizing
-- [ ] **Manual test Empty States** - Verify no excessive scrolling
+**Date**: 2026-01-29  
+**Issue**: Untested code was deployed to production without approval  
+**Resolution**: Production rolled back to stable commit `c189779`  
+**Action Taken**: Staging/Dev redeployed with correct build modes (with environment banners)
+
+---
+
+## 🧪 BUGS IN DEV/STAGING (Testing Required)
+
+The following bug fixes are deployed to Dev/Staging for testing:
+
+| Bug ID | Description | Priority | Status |
+|--------|-------------|----------|--------|
+| BUG-008 | Transaction History UI Inconsistency | HIGH | Testing in Dev/Staging |
+| BUG-009 | Dark Mode White Edge on Cards | HIGH | Testing in Dev/Staging |
+| BUG-010 | Transaction List Excessive Spacing | HIGH | Testing in Dev/Staging |
+| BUG-011 | Empty Transaction List Scroll Issue | HIGH | Testing in Dev/Staging |
+| BUG-012 | Commitments Task Box Too Large | LOW | Testing in Dev/Staging |
+| BUG-013 | Redundant Edit/Delete Icons on Mobile | LOW | Testing in Dev/Staging |
+
+---
+
+## ✅ VERIFICATION CHECKLIST (Before Staging → Prod)
+
+- [ ] Dev environment has blue "DEVELOPMENT ENVIRONMENT" banner
+- [ ] Staging environment has yellow "STAGING ENVIRONMENT" banner
+- [ ] Manual test Finance page - Check transaction list appearance
+- [ ] Manual test Account Detail - Verify transaction history matches Finance page
+- [ ] Manual test Dark Mode - Check for white edges on cards
+- [ ] Manual test Mobile - Verify swipe actions work, no edit/delete icons visible
+- [ ] Manual test Commitments - Check task box sizing
+- [ ] Manual test Empty States - Verify no excessive scrolling
+- [ ] All E2E tests pass on Staging
+- [ ] Get explicit approval before production deployment
 
 ---
 
