@@ -25,48 +25,33 @@
 
 ---
 
-## 🧪 BUGS IN DEV/STAGING (Testing Required)
+## ✅ DEPLOYED TO PRODUCTION (v1.5.4)
 
-The following bug fixes are deployed to Dev/Staging for testing:
+### Bug Fixes
+| Bug ID | Description | Priority | Status |
+|--------|-------------|----------|--------|
+| BUG-008 | Transaction History UI Inconsistency | HIGH | ✅ **DEPLOYED** |
+| REG-002 | Virtual List Stacking (Mobile) | CRITICAL | ✅ **DEPLOYED** |
+| BUG-009 | Dark Mode White Edge on Cards | HIGH | ✅ **DEPLOYED** |
+| BUG-010 | Transaction List Excessive Spacing | HIGH | ✅ **DEPLOYED** |
+| BUG-011 | Empty Transaction List Scroll Issue | HIGH | ✅ **DEPLOYED** |
+| BUG-012 | Commitments Task Box Too Large | LOW | ✅ **DEPLOYED** |
+| BUG-013 | Redundant Edit/Delete Icons on Mobile | LOW | ✅ **DEPLOYED** |
+| BUG-014 | Transaction List Layout (Edge-to-Edge) | LOW | ✅ **DEPLOYED** |
+| BUG-015 | Real-time Updates Latency | HIGH | ✅ **DEPLOYED** |
+| BUG-016 | Exchange Rates Ignored | HIGH | ✅ **DEPLOYED** |
 
-| Bug ID | Description | Priority | Status | Last Deployed |
-|--------|-------------|----------|--------|---------------|
-| BUG-008 | Transaction History UI Inconsistency | HIGH | **FIXED** (Dev/Staging) | 2026-01-29 |
-| REG-002 | Virtual List Stacking (Mobile) | CRITICAL | **FIXED** (Dev/Staging) | 2026-01-29 |
-| BUG-009 | Dark Mode White Edge on Cards | HIGH | **FIXED** | 2026-01-29 |
-| BUG-010 | Transaction List Excessive Spacing | HIGH | **FIXED** | 2026-01-29 |
-| BUG-011 | Empty Transaction List Scroll Issue | HIGH | Testing in Dev/Staging | 2026-01-29 |
-| BUG-012 | Commitments Task Box Too Large | LOW | Testing in Dev/Staging | 2026-01-29 |
-| BUG-013 | Redundant Edit/Delete Icons on Mobile | LOW | Testing in Dev/Staging | 2026-01-29 |
-| BUG-014 | Transaction List Layout (Edge-to-Edge) | LOW | v2 deployed - Testing | 2026-01-29 |
-
-### Verification Environments
-| Environment | URLs |
-|-------------|------|
-| **Dev (Local)** | http://100.112.129.21:5173 • https://anchor.tail2fa2e.ts.net |
-| **Dev (Firebase)** | https://anchor-os-dev-1c6ec.web.app |
-| **Staging** | https://anchor-os-staging.web.app |
-
----
-
-## ⏳ PENDING CHANGES (Dev → Staging)
-- [ ] **ARCH-007**: Optimistic Updates (Recurring Transactions)
-- [ ] **ARCH-012**: Performance Benchmarking Infrastructure
-- [ ] **ARCH-014**: Bundle Analysis Tools
-- [ ] **ARCH-015**: Architecture Decision Records
-- [ ] **ARCH-016**: Telemetry Instrumentation
-- [ ] **BRAND-002**: App Icon Polish
-
-## ⏳ PENDING CHANGES (Staging → Production)
-- [ ] **UX-017**: Independent Transaction Scroll
-- [ ] **BUG-008**: Transaction History UI Inconsistency
-- [ ] **BUG-009**: Dark Mode White Edge
-- [ ] **BUG-010**: Transaction List Spacing
-- [ ] **BUG-011**: Empty List Scroll
-- [ ] **BUG-012**: Commitment Task Box Sizing
-- [ ] **BUG-013**: Mobile Icon Redundancy
-- [ ] **BUG-014**: Transaction List Layout
-- [ ] **FIN-003**: Recurring Transactions
+### Architecture & Features
+| Item | Description | Status |
+|------|-------------|--------|
+| ARCH-007 | Optimistic Updates (Recurring Transactions) | ✅ **DEPLOYED** |
+| ARCH-012 | Performance Benchmarking Infrastructure | ✅ **DEPLOYED** |
+| ARCH-014 | Bundle Analysis Tools | ✅ **DEPLOYED** |
+| ARCH-015 | Architecture Decision Records | ✅ **DEPLOYED** |
+| ARCH-016 | Telemetry Instrumentation | ✅ **DEPLOYED** |
+| BRAND-002 | App Icon Polish | ✅ **DEPLOYED** |
+| UX-017 | Independent Transaction Scroll | ✅ **DEPLOYED** |
+| FIN-003 | Recurring Transactions | ✅ **DEPLOYED** |
 
 ---
 
