@@ -1,16 +1,11 @@
 /**
  * TransactionListVirtual Parts
  * Extracted from TransactionListVirtual.tsx per CLAUDE.md §3.2
+ * Note: TransactionRow removed - using unified TransactionItem/SwipeableTransactionItem
  */
 
 import React from 'react';
-import { Search, Pencil, Trash2 } from 'lucide-react';
-import { CategoryIcon, Badge } from '../../../components/shared';
-import { Card } from '../../../components/ui/Card';
-import { Button } from '../../../components/ui/Button';
-import { formatCurrency } from '../../../utils/format';
-import { fromCents } from '../../../utils/moneyUtils';
-import type { AnchorTransaction, Currency } from '../../../types';
+import { Search, Pencil } from 'lucide-react';
 
 interface FilterHeaderProps { searchQuery: string; filterType: 'all' | 'income' | 'expense'; hasWeekFilter: boolean; onSearchChange: (q: string) => void; onFilterChange: (f: 'all' | 'income' | 'expense') => void; }
 export const TransactionFilterHeader: React.FC<FilterHeaderProps> = ({ searchQuery, filterType, hasWeekFilter, onSearchChange, onFilterChange }) => (
@@ -48,36 +43,4 @@ export const AccountNameHistory: React.FC<NameHistoryProps> = ({ entries }) => (
     </div>
 );
 
-interface TransactionRowProps { tx: AnchorTransaction; isOwner: boolean; currentUserId?: string; onEdit?: (tx: AnchorTransaction) => void; onDelete: (tx: AnchorTransaction) => void; }
-export const TransactionRow: React.FC<TransactionRowProps> = ({ tx, isOwner, currentUserId, onEdit, onDelete }) => {
-    const displayDate = tx.transactionDate || tx.date;
-    const txDate = displayDate ? new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown';
-    const isBackdated = tx.isBackdated ?? (() => { if (!tx.transactionDate) return false; const entryDate = new Date(tx.date).getTime(); const actualDate = new Date(tx.transactionDate).getTime(); return (entryDate - actualDate) > 24 * 60 * 60 * 1000; })();
-    const amountColor = tx.type === 'income' ? 'text-finance-600 dark:text-finance-400' : tx.type === 'transfer' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-white';
-
-    return (
-        <Card className="group p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                    <CategoryIcon category={tx.category || 'Other'} className="shrink-0 mt-0.5 sm:mt-0" />
-                    <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate">{tx.title || 'Untitled'}</h4>
-                        <div className="flex gap-2 mt-2 flex-wrap">
-                            <span className="text-xs text-slate-500 dark:text-slate-400">{txDate}</span>
-                            <Badge type="todo" variant="outline">{tx.category || 'Other'}</Badge>
-                            {tx.createdBy && currentUserId && tx.createdBy !== currentUserId && <Badge type="family">{tx.createdByName || 'Family'}</Badge>}
-                            {isBackdated && <Badge type="warning" variant="outline">Backdated</Badge>}
-                        </div>
-                    </div>
-                </div>
-                <div className="flex items-center justify-between sm:justify-end gap-4">
-                    <p className={`font-semibold text-sm tabular-nums ${amountColor}`}>{tx.type === 'expense' ? '-' : tx.type === 'income' ? '+' : ''}{formatCurrency(fromCents(tx.amountCents || 0), tx.currency as Currency)}</p>
-                    <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        {onEdit && isOwner && <Button variant="ghost" size="icon" onClick={() => onEdit(tx)} className="text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20"><Pencil className="w-4 h-4" /></Button>}
-                        {isOwner && <Button variant="ghost" size="icon" onClick={() => onDelete(tx)} className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20"><Trash2 className="w-4 h-4" /></Button>}
-                    </div>
-                </div>
-            </div>
-        </Card>
-    );
-};
+// TransactionRow removed - using unified TransactionItem/SwipeableTransactionItem instead

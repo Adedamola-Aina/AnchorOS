@@ -36,37 +36,39 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
     return (
         <Card
-            className={`group p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700 ${isEditing ? 'opacity-50 pointer-events-none' : ''}`}
+            className={`group p-3 transition-all hover:border-slate-300 dark:hover:border-slate-700 ${isEditing ? 'opacity-50 pointer-events-none' : ''}`}
         >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-start sm:items-center gap-4 min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                     <button
                         onClick={handleToggle}
-                        className={`p-2 rounded-full transition-all duration-300 shrink-0 ${task.completed ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-500'}`}
+                        className={`p-1.5 rounded-full transition-all duration-300 shrink-0 ${task.completed ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-500'}`}
                     >
-                        {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                        {task.completed ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
                     </button>
                     <div className="min-w-0 flex-1">
-                        <h4 className={`font-bold text-sm tracking-tight transition-all ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-white'}`}>
-                            {task.title}
-                        </h4>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className={`font-bold text-sm tracking-tight transition-all ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-white'}`}>
+                                {task.title}
+                            </h4>
                         {!task.completed && (
-                            <div className="flex gap-2 mt-2 flex-wrap">
+                            <div className="flex gap-1.5 flex-wrap">
                                 <Badge type={task.type}>{task.type}</Badge>
                                 <TaskContextBadge task={task} />
                                 {hasFamilyActive && task.category === 'family' && (
                                     <Badge type="family">Family</Badge>
                                 )}
                                 {(task.currentStreak || 0) > 0 && (
-                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                                         🔥 {task.currentStreak}
                                     </span>
                                 )}
                             </div>
                         )}
+                        </div>
                     </div>
                 </div>
-                <div className="flex items-center justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-0.5 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <Button
                         variant="ghost"
                         size="icon"

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-01-29
 
+### Fixed
+
+#### Transaction History UI Harmonization
+- **Unified Transaction Components**: Finance page and Account Detail view now use the same `TransactionItem`/`SwipeableTransactionItem` components
+- **Mobile Swipe Actions**: Edit/delete icons hidden on mobile since swipe gestures handle these actions (swipe left = delete, swipe right = edit)
+- **Dark Mode Edge Fix**: Fixed white edges showing on rounded corners in dark mode (`Card` now uses `dark:border-slate-700 dark:bg-slate-900/95`)
+- **Transaction Spacing**: Reduced gap between transaction cards from `pb-4` to `pb-2` for denser, cleaner lists
+- **Empty State Fix**: Removed excessive `min-h-[300px]` on empty transaction list to prevent unnecessary scroll space
+
+#### Commitments Task Box Sizing
+- **Compact Task Items**: Reduced padding from `p-4` to `p-3`, smaller toggle buttons (`p-1.5` from `p-2`)
+- **Inline Layout**: Task title and badges now display inline for more compact view
+- **Consistent Actions**: Edit/delete buttons use same pattern as transactions (hover-only on desktop)
+
 ### Removed
 
 #### OLED Theme Option

@@ -31,13 +31,13 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     const parentVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 78, // Row height: ~60px card + 18px gap
+        estimateSize: () => 68, // Row height: ~60px card + 8px gap
         overscan: 5,
     });
 
     const windowVirtualizer = useWindowVirtualizer({
         count: transactions.length,
-        estimateSize: () => 78,
+        estimateSize: () => 68,
         overscan: 5,
         scrollMargin: parentRef.current?.offsetTop ?? 0,
     });
@@ -46,11 +46,14 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
 
     if (transactions.length === 0) {
         return (
-            <div className="p-16 text-center flex flex-col items-center justify-center min-h-[300px]">
-                <Search className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" />
+            <div className="p-12 text-center flex flex-col items-center justify-center">
+                <Search className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
                 <h4 className="font-bold text-slate-800 dark:text-white mb-1">
                     {searchQuery ? 'No transactions found' : 'No transactions yet'}
                 </h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {searchQuery ? 'Try a different search term' : 'Add your first transaction to get started'}
+                </p>
                 {searchQuery && onClearSearch && (
                     <button
                         onClick={onClearSearch}
@@ -66,7 +69,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     return (
         <div
             ref={parentRef}
-            className={`${isMobile ? '' : 'md:max-h-[600px] overflow-y-auto'} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
+            className={`p-3 ${isMobile ? '' : 'md:max-h-[600px] overflow-y-auto'} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
         >
             <div
                 style={{
@@ -89,7 +92,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                 width: '100%',
                                 transform: `translateY(${virtualRow.start - (isMobile ? rowVirtualizer.options.scrollMargin : 0)}px)`,
                             }}
-                            className="pb-4" // Gap between cards
+                            className="pb-2" // Tight gap between transaction cards
                         >
                             {isMobile ? (
                                 <SwipeableTransactionItem

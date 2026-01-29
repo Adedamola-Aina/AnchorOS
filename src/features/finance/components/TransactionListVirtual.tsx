@@ -1,14 +1,16 @@
 /**
  * TransactionListVirtual - Virtualized transaction list with search/filter
  * Refactored per CLAUDE.md §3.2 (200-line rule).
- * UI components extracted to TransactionListParts.tsx
+ * Uses unified TransactionItem/SwipeableTransactionItem for consistency.
  */
 
 import { useRef } from 'react';
 import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useResponsive } from '../../../hooks/useResponsive';
 import type { AnchorTransaction, AnchorAccount } from '../../../types';
-import { TransactionFilterHeader, AccountNameHistory, TransactionRow } from './TransactionListParts';
+import { TransactionFilterHeader, AccountNameHistory } from './TransactionListParts';
+import { TransactionItem } from './TransactionItem';
+import { SwipeableTransactionItem } from './SwipeableTransactionItem';
 
 interface TransactionListVirtualProps {
     transactions: AnchorTransaction[]; account: AnchorAccount; currentUserId?: string; searchQuery: string;
@@ -20,11 +22,14 @@ interface TransactionListVirtualProps {
 export const TransactionListVirtual = ({ transactions, account, currentUserId, searchQuery, filterType, selectedWeekStart, onSearchChange, onFilterChange, onEdit, onDelete }: TransactionListVirtualProps) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const { isMobile } = useResponsive();
-    const isOwner = !account.ownerId || account.ownerId === currentUserId;
 
-    const parentVirtualizer = useVirtualizer({ count: transactions.length, getScrollElement: () => parentRef.current, estimateSize: () => 100, overscan: 5 });
-    const windowVirtualizer = useWindowVirtualizer({ count: transactions.length, estimateSize: () => 100, overscan: 5, scrollMargin: parentRef.current?.offsetTop ?? 0 });
+    const parentVirtualizer = useVirtualizer({ count: transactions.length, getScrollElement: () => parentRef.current, estimateSize: () => 68, overscan: 5 });
+    const windowVirtualizer = useWindowVirtualizer({ count: transactions.length, estimateSize: () => 68, overscan: 5, scrollMargin: parentRef.current?.offsetTop ?? 0 });
     const rowVirtualizer = isMobile ? windowVirtualizer : parentVirtualizer;
+
+    // Safe callbacks for owner check
+    const handleEdit = onEdit ? (tx: AnchorTransaction) => onEdit(tx) : () => {};
+    const handleDelete = (tx: AnchorTransaction) => onDelete(tx);
 
     return (
         <div className="glass-card overflow-hidden">
@@ -38,10 +43,15 @@ export const TransactionListVirtual = ({ transactions, account, currentUserId, s
                 <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
                     {rowVirtualizer.getVirtualItems().map((virtualItem) => {
                         const tx = transactions[virtualItem.index];
+                        if (!tx) return null;
                         return (
-                            <div key={virtualItem.key} data-index={virtualItem.index} ref={rowVirtualizer.measureElement} className="absolute top-0 left-0 w-full pb-3"
+                            <div key={tx.id} data-index={virtualItem.index} ref={rowVirtualizer.measureElement} className="absolute top-0 left-0 w-full pb-2"
                                 style={{ transform: `translateY(${virtualItem.start - (isMobile ? rowVirtualizer.options.scrollMargin : 0)}px)` }}>
-                                <TransactionRow tx={tx} isOwner={isOwner} currentUserId={currentUserId} onEdit={onEdit} onDelete={onDelete} />
+                                {isMobile ? (
+                                    <SwipeableTransactionItem transaction={tx} currentUserId={currentUserId} onEdit={handleEdit} onDelete={handleDelete} />
+                                ) : (
+                                    <TransactionItem transaction={tx} currentUserId={currentUserId} onEdit={handleEdit} onDelete={handleDelete} />
+                                )}
                             </div>
                         );
                     })}
