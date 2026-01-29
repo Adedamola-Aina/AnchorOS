@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-29 11:00 UTC
+**Last Updated**: 2026-01-29 13:40 UTC
 
 ---
 
@@ -10,37 +10,33 @@
 |-------------|---------|---------------|-----|--------|
 | **Production** | v1.5.0 | anchor-os | https://anchor-os.web.app | ✅ |
 | **Staging** | v1.5.0 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ |
-| **Dev** | v1.5.0 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ |
+| **Dev** | v1.5.1-dev | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ |
 
-**Code Parity**: All environments deployed from commit `c189779` (Jan 28, 2026)
+**Code Parity**: Staging/Prod at commit `c189779`, Dev ahead with OLED removal
 
 ---
 
-## 🚀 LATEST DEPLOYMENT (Jan 28, 2026 ~14:30 UTC)
+## 🚀 LATEST DEPLOYMENT (Jan 29, 2026 ~13:40 UTC)
 
-### Deployed to ALL ENVIRONMENTS (Dev, Staging, Production):
-- ✅ **Full Code Parity** achieved across all environments
-- ✅ **ARCH-001 Fix**: 6 files refactored under 200-line limit
-- ✅ **REG-001 Fix**: XSS E2E test selectors updated for new UI flow
-- ✅ **BUG-007 Fix**: Modal inputs on mobile now work
-- ✅ **UX Design System**: Color tokens, OLED mode, skeletons, buttons
-- ✅ **Mobile Gestures**: Pull-to-refresh, swipe actions, haptic feedback
-- ✅ **Dependency Updates**: React 19.2.4, Vitest 4.0.18
+### Deployed to DEV ONLY:
+- ✅ **OLED Theme Removed**: Simplified theme system to light/dark only
+- ✅ **Files Updated**: ThemeToggle, AppearanceSettings, App.tsx, MainLayout, AuthView, tailwind.config.js, types
 - ✅ **434 unit tests passing**
+- 📋 **Pending**: Staging/Production deployment (awaiting next release)
 
 ---
 
 ## ⏳ PENDING CHANGES (Dev → Staging)
 
-No pending changes. Dev and Staging are in sync.
+- **OLED Theme Removal** - Theme simplified to light/dark only
 
 ---
 
 ## ⏳ PENDING CHANGES (Staging → Production)
 
-No pending changes. All environments have code parity.
+No pending changes. Staging and Production are in sync at v1.5.0.
 
-**Next release will include**: Any new work after Jan 28, 2026.
+**Next release will include**: OLED removal + any additional bug fixes.
 
 ---
 

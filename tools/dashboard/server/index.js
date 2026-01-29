@@ -115,6 +115,14 @@ app.get('/api/board', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
+            // Serve index.html for all non-API, non-static routes (SPA fallback)
+            app.get('*', (req, res) => {
+                if (!req.path.startsWith('/api/')) {
+                    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+                } else {
+                    res.status(404).send('Not found');
+                }
+            });
     }
 });
 

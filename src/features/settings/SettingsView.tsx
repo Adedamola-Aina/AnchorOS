@@ -117,7 +117,7 @@ const SettingsView = () => {
         )}
 
         <ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => updateProfile({ name })} />
-        <AppearanceSettings theme={profile.theme as 'light' | 'dark' | 'oled'} onSetTheme={(theme) => updateProfile({ theme })} />
+        <AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => updateProfile({ theme })} />
         <SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={isEnrolling} show2FASetup={show2FASetup} mfaQrUrl={mfaQrUrl} mfaManualKey={mfaManualKey}
           mfaCode={mfaCode} mfaError={mfaError} onSetShow2FASetup={setShow2FASetup} onSetMfaCode={setMfaCode} onGenerateMfaSecret={handleGenerateMfaSecret}
           onEnrollMfa={handleEnrollMfa} onUnenrollMfa={unenrollMfa} />

@@ -1,6 +1,6 @@
 # ANCHOR OS ROADMAP
 
-**Last Updated**: 2026-01-28
+**Last Updated**: 2026-01-29
 
 ---
 
@@ -54,13 +54,17 @@
 
 ---
 
-## 💡 Feature Backlog (76 Remaining)
+## 💡 Feature Backlog (67 Remaining)
 
 Full backlog tracked in: [docs/FEATURE_SUGGESTIONS.md](file:///root/anchor-os/docs/FEATURE_SUGGESTIONS.md)
 
 **Dashboard View**: http://localhost:3001 → Feature Backlog tab
 
-**Completed**: 6 of 82 suggestions implemented (ARCH-001, ARCH-002, ARCH-003, UX-006, UX-008, UX-009)
+**Completed**: 15 of 82 suggestions implemented
+- Architecture: ARCH-001, ARCH-002, ARCH-003
+- UX/Design: UX-001, UX-002, UX-003, UX-004, UX-011, UX-012, UX-013, UX-014
+- Mobile: UX-006, UX-008, UX-009
+- Fixes: BUG-006
 
 ### Top Candidates for Q2 2026
 

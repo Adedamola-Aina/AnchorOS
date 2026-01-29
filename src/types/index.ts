@@ -74,7 +74,7 @@ export interface AnchorTransaction {
 export interface UserProfile {
   name: string;
   familyMode: boolean;
-  theme: 'light' | 'dark' | 'oled'; // UX-002: Added OLED support
+  theme: 'light' | 'dark';
   mfaEnabled?: boolean;
   onboardingComplete?: boolean;
   notificationPreferences?: {
