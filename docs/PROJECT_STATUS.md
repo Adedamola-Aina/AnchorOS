@@ -1,7 +1,7 @@
 # PROJECT STATUS
 
-**Last Updated**: 2026-01-28 10:40 UTC
-**Updated By**: Teeto
+**Last Updated**: 2026-01-29 11:00 UTC
+**Updated By**: Agent
 **Sprint**: Week of Jan 26 - Feb 1, 2026
 
 ---
@@ -83,11 +83,14 @@ _No blockers at this time_
 
 | Environment | Version | Last Deploy | Health | Notes |
 |-------------|---------|-------------|--------|-------|
-| **Production** | v1.4.0 | 2026-01-20 | ✅ | Stable |
-| **Staging** | v1.4.0 | 2026-01-24 | ✅ | Testing |
-| **Development** | v1.5.0-dev | 2026-01-26 | ✅ | Active |
+| **Production** | v1.5.0 | 2026-01-28 | ✅ | Stable (commit c189779) |
+| **Staging** | v1.5.0 | 2026-01-28 | ✅ | Testing (commit c189779) |
+| **Development** | v1.5.0-dev | 2026-01-28 | ✅ | Active (commit c189779) |
 
-**Production URL**: https://anchor.tail2fa2e.ts.net
+**Production URL**: https://anchor-os.web.app
+**Staging URL**: https://anchor-os-staging.web.app
+**Dev URL**: https://anchor-os-dev-1c6ec.web.app
+**Local Dev**: https://anchor.tail2fa2e.ts.net (Tailscale)
 **Monitoring**: https://beszel.tail2fa2e.ts.net
 
 ---
@@ -107,9 +110,9 @@ _No blockers at this time_
 | ID | Description | Priority | Assigned | Target | Status |
 |----|-------------|----------|----------|--------|--------|
 | **BUG-001** | ~~Search slow on 1000+ transactions~~ | ~~P0~~ | Teeto | 2026-01-28 | ✅ FIXED |
-| **REG-001** | XSS E2E test failing (Security) | P0 | Unassigned | 2026-01-28 | 🔴 Open |
+| **REG-001** | ~~XSS E2E test failing (Security)~~ | ~~P0~~ | Agent | 2026-01-28 | ✅ FIXED |
 
-_See KNOWN_ISSUES.md for all bugs_
+_No critical bugs. See KNOWN_ISSUES.md for backlog items._
 
 ---
 
