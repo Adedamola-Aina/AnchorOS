@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **UI**: Added "Make Recurring" toggle to Transaction Form with Frequency (Weekly/Monthly/Yearly) and Interval support.
   - **Management**: New "Recurring" tab in Finance View to pause, resume, and delete recurring rules.
 
+#### Architecture & Brand Sprint (2026-01-29)
+- **ARCH-007: Optimistic Updates**: Created `useOptimisticMutation` hook with automatic rollback; applied to all recurring transaction mutations.
+- **ARCH-012: Performance Benchmarking**: Added `src/benchmarks/` with Vitest bench; `npm run test:bench` script.
+- **ARCH-014: Bundle Analysis**: Added `rollup-plugin-visualizer`; `npm run build:analyze` generates `dist/stats.html`.
+- **ARCH-015: Architecture Decision Records**: Created `docs/adr/` with template and first ADR (Shared Component Library).
+- **ARCH-016: Telemetry Tracing**: Created `TelemetryService` in `src/services/telemetry/` with `trace()`, `logEvent()`, `createTracer()`.
+- **BRAND-002: App Icon Polish**: Generated premium anchor PWA icon (`public/pwa-512x512.png`).
+
 #### Transaction History UI Harmonization
 - **Unified Transaction Components**: Finance page and Account Detail view now use the same `TransactionItem`/`SwipeableTransactionItem` components
 - **Mobile Swipe Actions**: Edit/delete icons hidden on mobile since swipe gestures handle these actions (swipe left = delete, swipe right = edit)
