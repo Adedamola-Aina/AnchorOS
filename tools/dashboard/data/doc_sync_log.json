@@ -1,6 +1,54 @@
 {
-  "lastSync": "2026-01-29T22:17:40.203Z",
+  "lastSync": "2026-01-29T22:18:44.974Z",
   "syncHistory": [
+    {
+      "timestamp": "2026-01-29T22:18:44.974Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-01-29T22:18:44.972Z",
+      "type": "priority",
+      "details": {
+        "totalBugs": 0,
+        "needsReview": 0,
+        "message": "Analyzed 0 bugs, 0 need priority review"
+      }
+    },
+    {
+      "timestamp": "2026-01-29T22:18:44.972Z",
+      "type": "velocity",
+      "details": {
+        "message": "Detected undefined new completions"
+      }
+    },
+    {
+      "timestamp": "2026-01-29T22:17:58.733Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-01-29T22:17:58.732Z",
+      "type": "priority",
+      "details": {
+        "totalBugs": 0,
+        "needsReview": 0,
+        "message": "Analyzed 0 bugs, 0 need priority review"
+      }
+    },
+    {
+      "timestamp": "2026-01-29T22:17:58.731Z",
+      "type": "velocity",
+      "details": {
+        "message": "Detected undefined new completions"
+      }
+    },
     {
       "timestamp": "2026-01-29T22:17:40.203Z",
       "type": "archive",
@@ -353,60 +401,12 @@
         "needsReview": 0,
         "message": "Analyzed 0 bugs, 0 need priority review"
       }
-    },
-    {
-      "timestamp": "2026-01-29T20:55:52.775Z",
-      "type": "velocity",
-      "details": {
-        "message": "Detected undefined new completions"
-      }
-    },
-    {
-      "timestamp": "2026-01-29T20:52:56.307Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-01-29T20:52:56.305Z",
-      "type": "priority",
-      "details": {
-        "totalBugs": 0,
-        "needsReview": 0,
-        "message": "Analyzed 0 bugs, 0 need priority review"
-      }
-    },
-    {
-      "timestamp": "2026-01-29T20:52:56.305Z",
-      "type": "velocity",
-      "details": {
-        "message": "Detected undefined new completions"
-      }
-    },
-    {
-      "timestamp": "2026-01-29T20:52:32.552Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-01-29T20:52:32.551Z",
-      "type": "priority",
-      "details": {
-        "totalBugs": 0,
-        "needsReview": 0,
-        "message": "Analyzed 0 bugs, 0 need priority review"
-      }
     }
   ],
   "stats": {
-    "totalSyncs": 780,
-    "lastVelocityUpdate": "2026-01-29T22:17:40.203Z",
-    "lastPriorityUpdate": "2026-01-29T22:17:40.203Z",
-    "lastArchiveRun": "2026-01-29T22:17:40.203Z"
+    "totalSyncs": 786,
+    "lastVelocityUpdate": "2026-01-29T22:18:44.972Z",
+    "lastPriorityUpdate": "2026-01-29T22:18:44.972Z",
+    "lastArchiveRun": "2026-01-29T22:18:44.974Z"
   }
 }
