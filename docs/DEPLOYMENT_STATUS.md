@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-29 21:30 UTC
+**Last Updated**: 2026-01-29 22:17 UTC
 
 ---
 
@@ -8,9 +8,9 @@
 
 | Environment | Version | Firebase Site | URL | Health |
 |-------------|---------|---------------|-----|--------|
-| **Production** | v1.5.0 (c189779) | anchor-os | https://anchor-os.web.app | ✅ Stable |
-| **Staging** | v1.5.3-ui-fix | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Verified |
-| **Dev** | v1.5.3-ui-fix | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Verified |
+| **Production** | v1.5.4 | anchor-os | https://anchor-os.web.app | ✅ Stable |
+| **Staging** | v1.5.4 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Verified |
+| **Dev** | v1.5.4 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Verified |
 
 **Code Flow**: Dev → Staging → Production (with approval)
 
