@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, PartyPopper } from 'lucide-react';
 
 interface Feature {
     name: string;
@@ -106,6 +106,20 @@ export function EnvironmentParity() {
             {/* Feature Table */}
             <div className="card overflow-hidden">
                 <h3 className="card-header">Feature Parity</h3>
+                {data.features.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
+                            <PartyPopper className="w-8 h-8 text-emerald-400" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-emerald-400 mb-2">Full Parity Achieved! 🎉</h4>
+                        <p className="text-slate-400 max-w-md">
+                            All environments are running the same code. Dev, Staging, and Production are in sync at <span className="font-mono text-white">{data.versions.production}</span>.
+                        </p>
+                        <p className="text-slate-500 text-sm mt-4">
+                            No pending deployments. Ready for new development.
+                        </p>
+                    </div>
+                ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
@@ -167,6 +181,7 @@ export function EnvironmentParity() {
                         </tbody>
                     </table>
                 </div>
+                )}
             </div>
         </div>
     );
