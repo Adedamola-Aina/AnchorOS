@@ -4,22 +4,6 @@
 
 ---
 
-## ✅ RESOLVED
-
-### [BUG-001] Transaction search slow on 1000+ transactions ✅ FIXED
-- **Reported**: 2026-01-25
-- **Reporter**: Family Member
-- **Impact**: Search takes 3-5 seconds
-- **Root Cause**: Client-side filtering with no search optimization
-- **Fix**: Created `useTransactionSearch` hook with pre-built search index
-- **Assigned**: Teeto
-- **Resolved**: 2026-01-28
-- **Status**: ✅ FIXED
-- **Results**: 1000 txns: 2ms (target: <500ms), 5000 txns: 9ms (target: <1000ms)
-- **Tests**: 18 unit tests, integrated into FinanceView
-
----
-
 ## 🔴 CRITICAL (P0)
 
 _No critical issues at this time_
@@ -28,11 +12,64 @@ _No critical issues at this time_
 
 ## 🟡 HIGH (P1)
 
-_No high priority issues at this time_
+### [BUG-008] Transaction History UI Inconsistency
+- **Reported**: 2026-01-29
+- **Reporter**: Teeto
+- **Impact**: Confusing UX - Finance page and Account Detail view have different transaction row layouts
+- **Root Cause**: Two separate components (`TransactionItem` vs `TransactionRow`) with different styling
+- **Fix**: Unify to single `TransactionItem`/`SwipeableTransactionItem` component
+- **Assigned**: Agent
+- **Status**: IN PROGRESS (code written, needs testing)
+
+### [BUG-009] Dark Mode White Edge on Transaction Cards
+- **Reported**: 2026-01-29
+- **Reporter**: Teeto
+- **Impact**: Visual defect - white edges visible at rounded corners in dark mode
+- **Root Cause**: Card component using `dark:border-slate-800` which is too light
+- **Fix**: Update Card to `dark:border-slate-700 dark:bg-slate-900/95`
+- **Assigned**: Agent
+- **Status**: IN PROGRESS (code written, needs testing)
+
+### [BUG-010] Transaction List Excessive Spacing
+- **Reported**: 2026-01-29
+- **Reporter**: Teeto
+- **Impact**: Transactions appear separated/overlapping, not distinct enough
+- **Root Cause**: `pb-4` gap too large between transaction cards
+- **Fix**: Reduce to `pb-2` for denser, cleaner list
+- **Assigned**: Agent
+- **Status**: IN PROGRESS (code written, needs testing)
+
+### [BUG-011] Empty Transaction List Allows Infinite Scroll
+- **Reported**: 2026-01-29
+- **Reporter**: Teeto
+- **Impact**: Page continues scrolling when there are no/few transactions
+- **Root Cause**: `min-h-[300px]` on empty state forces unnecessary scroll space
+- **Fix**: Remove min-height constraint
+- **Assigned**: Agent
+- **Status**: IN PROGRESS (code written, needs testing)
 
 ---
 
 ## 🟢 LOW (P2)
+
+### [BUG-012] Commitments Task Box Too Large
+- **Reported**: 2026-01-29
+- **Reporter**: Teeto
+- **Impact**: Task items take more space than necessary
+- **Root Cause**: Padding `p-4` and large toggle buttons `p-2`
+- **Fix**: Compact to `p-3` padding, inline badges, smaller toggles
+- **Assigned**: Agent
+- **Status**: IN PROGRESS (code written, needs testing)
+
+### [BUG-013] Redundant Edit/Delete Icons on Mobile
+- **Reported**: 2026-01-29
+- **Reporter**: Teeto
+- **Impact**: Cluttered UI - icons shown when swipe actions already handle edit/delete
+- **Root Cause**: Icons set to `opacity-100 sm:opacity-0` instead of hidden on mobile
+- **Fix**: Change to `hidden sm:flex` to hide on mobile completely
+- **Assigned**: Agent
+- **Status**: IN PROGRESS (code written, needs testing)
+- **Note**: Requires onboarding update (UX-005) to teach users about swipe gestures
 
 ### [GAP-002] Design System Color Token Fragmentation
 - **Reported**: 2026-01-26 (Codebase Audit)
@@ -151,12 +188,28 @@ _No regressions detected_
 
 ## 📊 BUG STATISTICS
 
-- **Total Active**: 3
+- **Total Active**: 9
 - **Critical (P0)**: 0
-- **High (P1)**: 0
-- **Low (P2)**: 3 (GAP-002, GAP-003, GAP-004)
-- **Fixed This Month**: 10 (GAP-001, BUG-002, BUG-003, BUG-004, BUG-005, BUG-006, BUG-007, ARCH-001, REG-001)
+- **High (P1)**: 4 (BUG-008, BUG-009, BUG-010, BUG-011)
+- **Low (P2)**: 5 (BUG-012, BUG-013, GAP-002, GAP-003, GAP-004)
+- **Fixed This Month**: 10 (GAP-001, BUG-001 thru BUG-007, ARCH-001, REG-001)
 - **Average Fix Time**: < 1 day
+
+---
+
+## ✅ RESOLVED
+
+### [BUG-001] Transaction search slow on 1000+ transactions ✅ FIXED
+- **Reported**: 2026-01-25
+- **Reporter**: Family Member
+- **Impact**: Search takes 3-5 seconds
+- **Root Cause**: Client-side filtering with no search optimization
+- **Fix**: Created `useTransactionSearch` hook with pre-built search index
+- **Assigned**: Teeto
+- **Resolved**: 2026-01-28
+- **Status**: ✅ FIXED
+- **Results**: 1000 txns: 2ms (target: <500ms), 5000 txns: 9ms (target: <1000ms)
+- **Tests**: 18 unit tests, integrated into FinanceView
 
 ---
 
