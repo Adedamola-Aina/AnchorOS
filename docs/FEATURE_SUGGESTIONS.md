@@ -332,7 +332,7 @@
 
 ### MEDIUM Priority
 
-#### [UX-006] Haptic Feedback (Mobile) ✅ IMPLEMENTED
+#### [UX-006] ~~Haptic Feedback (Mobile)~~ ✅ COMPLETED
 - **Status**: Implemented 2026-01-28
 - **Implementation**: `src/hooks/useHaptic.ts`
 - **Patterns**:
@@ -354,7 +354,7 @@
 - **Impact**: Accessibility, power user experience
 - **Effort**: Medium (2 days)
 
-#### [UX-008] Pull-to-Refresh (Mobile) ✅ IMPLEMENTED
+#### [UX-008] ~~Pull-to-Refresh (Mobile)~~ ✅ COMPLETED
 - **Status**: Implemented 2026-01-28
 - **Implementation**: `src/components/mobile/PullToRefresh.tsx`
 - **Features**:
@@ -365,7 +365,7 @@
 - **Impact**: Expected mobile behavior
 - **Effort**: Low (1 day)
 
-#### [UX-009] Transaction Swipe Actions ✅ IMPLEMENTED
+#### [UX-009] ~~Transaction Swipe Actions~~ ✅ COMPLETED
 - **Status**: Implemented 2026-01-28
 - **Implementation**: 
   - `src/components/mobile/SwipeableRow.tsx`
