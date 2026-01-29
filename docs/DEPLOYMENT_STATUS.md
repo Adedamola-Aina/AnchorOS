@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-29 15:30 UTC
+**Last Updated**: 2026-01-29 21:30 UTC
 
 ---
 
@@ -50,10 +50,12 @@ The following bug fixes are deployed to Dev/Staging for testing:
 ---
 
 ## ⏳ PENDING CHANGES (Dev → Staging)
-- [ ] **FIN-003**: Recurring Transactions (UI + Automation)
-- [ ] **BUG-015**: Real-time Account Updates (Optimistic UI)
-- [ ] **BUG-016**: Exchange Rate Conversion
-- [ ] **BUG-017**: Transaction Form Interactivity
+- [ ] **ARCH-007**: Optimistic Updates (Recurring Transactions)
+- [ ] **ARCH-012**: Performance Benchmarking Infrastructure
+- [ ] **ARCH-014**: Bundle Analysis Tools
+- [ ] **ARCH-015**: Architecture Decision Records
+- [ ] **ARCH-016**: Telemetry Instrumentation
+- [ ] **BRAND-002**: App Icon Polish
 
 ## ⏳ PENDING CHANGES (Staging → Production)
 - [ ] **UX-017**: Independent Transaction Scroll
@@ -64,6 +66,7 @@ The following bug fixes are deployed to Dev/Staging for testing:
 - [ ] **BUG-012**: Commitment Task Box Sizing
 - [ ] **BUG-013**: Mobile Icon Redundancy
 - [ ] **BUG-014**: Transaction List Layout
+- [ ] **FIN-003**: Recurring Transactions
 
 ---
 
