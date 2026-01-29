@@ -1,6 +1,15 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-29 14:35 UTC
+**Last Updated**: 2026-01-29 15:00 UTC
+
+---
+
+## ⚠️ DEPLOYMENT INCIDENT
+
+**Date**: 2026-01-29 ~14:35 UTC  
+**Issue**: Untested bug fixes (BUG-008 through BUG-013) were deployed to Production without approval  
+**Action Required**: Verify fixes work in production or rollback if issues found  
+**Status**: Monitoring
 
 ---
 
@@ -8,37 +17,37 @@
 
 | Environment | Version | Firebase Site | URL | Health |
 |-------------|---------|---------------|-----|--------|
-| **Production** | v1.5.0 | anchor-os | https://anchor-os.web.app | ✅ |
-| **Staging** | v1.5.0 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ |
-| **Dev** | v1.5.2-dev | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ |
+| **Production** | v1.5.2-untested | anchor-os | https://anchor-os.web.app | ⚠️ Verify |
+| **Staging** | v1.5.2-untested | anchor-os-staging | https://anchor-os-staging.web.app | ⚠️ Verify |
+| **Dev** | v1.5.2-untested | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ⚠️ Verify |
 
-**Code Parity**: Staging/Prod at commit `c189779`, Dev ahead with UI harmonization changes
-
----
-
-## 🚀 LATEST DEPLOYMENT (Jan 29, 2026 ~14:35 UTC)
-
-### Deployed to ALL environments:
-- ✅ **Transaction UI Harmonization**: Unified components across Finance and Account Detail views
-- ✅ **Mobile Swipe Actions**: Hidden edit/delete icons (swipe gestures handle actions)
-- ✅ **Dark Mode Fix**: Fixed white edge issue on Card rounded corners
-- ✅ **Compact Task Items**: Reduced padding, inline badges
-- ✅ **434 unit tests passing**
+**Code Parity**: All environments at commit `a232e4d` (untested UI changes)
 
 ---
 
-## ⏳ PENDING CHANGES (Dev → Staging)
+## 🔴 BUGS IN PRODUCTION (Untested)
 
-- [ ] **OLED Theme Removal** - Theme simplified to light/dark only (commit ce5dbb4)
-- [ ] **Transaction UI Harmonization** - Unified transaction list components (commit a232e4d)
+The following bug fixes were deployed without proper E2E/manual testing:
+
+| Bug ID | Description | Status |
+|--------|-------------|--------|
+| BUG-008 | Transaction History UI Inconsistency | Code deployed, needs verification |
+| BUG-009 | Dark Mode White Edge on Cards | Code deployed, needs verification |
+| BUG-010 | Transaction List Excessive Spacing | Code deployed, needs verification |
+| BUG-011 | Empty Transaction List Scroll Issue | Code deployed, needs verification |
+| BUG-012 | Commitments Task Box Too Large | Code deployed, needs verification |
+| BUG-013 | Redundant Edit/Delete Icons on Mobile | Code deployed, needs verification |
 
 ---
 
-## ⏳ PENDING CHANGES (Staging → Production)
+## ⏳ PENDING VERIFICATION
 
-No pending changes. Staging and Production are in sync at v1.5.0.
-
-**Next release will include**: OLED removal + any additional bug fixes.
+- [ ] **Manual test Finance page** - Check transaction list appearance
+- [ ] **Manual test Account Detail** - Verify transaction history matches Finance page
+- [ ] **Manual test Dark Mode** - Check for white edges on cards
+- [ ] **Manual test Mobile** - Verify swipe actions work, no edit/delete icons
+- [ ] **Manual test Commitments** - Check task box sizing
+- [ ] **Manual test Empty States** - Verify no excessive scrolling
 
 ---
 
