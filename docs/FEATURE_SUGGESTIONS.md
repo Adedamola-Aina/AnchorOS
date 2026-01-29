@@ -34,6 +34,12 @@
 | ARCH-011 | Mutation Testing | 2026-01-29 | Implemented Stryker.js for service layer mutation testing |
 | FIN-002 | Transaction Search Index | 2026-01-29 | Implemented client-side indexing + Firestore composite index definitions |
 | FIN-003 | Recurring Transactions | 2026-01-29 | Complete feature: UI toggles, Management view, Cloud Function automation |
+| ARCH-007 | Optimistic Updates | 2026-01-29 | Created `useOptimisticMutation` hook with automatic rollback |
+| ARCH-012 | Performance Benchmarking | 2026-01-29 | Created `src/benchmarks/` with Vitest bench integration |
+| ARCH-014 | Bundle Analysis | 2026-01-29 | Added `rollup-plugin-visualizer` and `build:analyze` script |
+| ARCH-015 | Architecture Decision Records | 2026-01-29 | Created `docs/adr/` with template and first ADR |
+| ARCH-016 | OpenTelemetry Tracing | 2026-01-29 | Created `TelemetryService` abstraction in `src/services/telemetry/` |
+| BRAND-002 | App Icon Polish | 2026-01-29 | Generated premium anchor icon for PWA |
 
 ---
 

@@ -7,8 +7,7 @@
  * @module hooks/useOptimisticMutation
  */
 
-import { useMutation, useQueryClient, type MutationOptions } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface OptimisticMutationOptions<TData, TVariables, TContext> {
     /** Query key(s) to update optimistically */
