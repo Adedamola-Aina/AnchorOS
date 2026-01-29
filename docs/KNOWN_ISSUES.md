@@ -1,6 +1,6 @@
 # KNOWN ISSUES
 
-**Last Updated**: 2026-01-28
+**Last Updated**: 2026-01-29
 
 ---
 
@@ -151,11 +151,11 @@ _No regressions detected_
 
 ## 📊 BUG STATISTICS
 
-- **Total Active**: 4
-- **Critical (P0)**: 1 (REG-001)
+- **Total Active**: 3
+- **Critical (P0)**: 0
 - **High (P1)**: 0
 - **Low (P2)**: 3 (GAP-002, GAP-003, GAP-004)
-- **Fixed This Month**: 7 (GAP-001, BUG-002, BUG-003, BUG-004, BUG-005, BUG-006, BUG-007)
+- **Fixed This Month**: 10 (GAP-001, BUG-002, BUG-003, BUG-004, BUG-005, BUG-006, BUG-007, ARCH-001, REG-001)
 - **Average Fix Time**: < 1 day
 
 ---
