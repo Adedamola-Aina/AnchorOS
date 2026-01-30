@@ -88,9 +88,9 @@ export const Modal: React.FC<ModalProps> = ({
             aria-modal="true"
             aria-labelledby={title ? modalId : undefined}
         >
-            {/* Backdrop */}
+            {/* Backdrop - z-0 ensures it stays BELOW modal content (z-10) */}
             <div
-                className="fixed inset-0 transition-opacity"
+                className="fixed inset-0 z-0 transition-opacity"
                 onClick={onClose}
                 aria-hidden="true"
             />
