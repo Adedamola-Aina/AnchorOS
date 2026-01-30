@@ -82,15 +82,15 @@ export const Modal: React.FC<ModalProps> = ({
 
     return createPortal(
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 ${fullScreenMobile ? 'p-0 sm:p-6' : 'p-4 sm:p-6'
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 pointer-events-none ${fullScreenMobile ? 'p-0 sm:p-6' : 'p-4 sm:p-6'
                 }`}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? modalId : undefined}
         >
-            {/* Backdrop - z-0 ensures it stays BELOW modal content (z-10) */}
+            {/* Backdrop - catches clicks outside modal to close */}
             <div
-                className="fixed inset-0 z-0 transition-opacity"
+                className="fixed inset-0 z-0 pointer-events-auto"
                 onClick={onClose}
                 aria-hidden="true"
             />
@@ -98,7 +98,7 @@ export const Modal: React.FC<ModalProps> = ({
             {/* Content - Full screen on mobile, centered modal on desktop */}
             <div
                 ref={modalRef}
-                className={`relative z-10 bg-white dark:bg-slate-800 shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden ${fullScreenMobile
+                className={`relative z-10 pointer-events-auto bg-white dark:bg-slate-800 shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden ${fullScreenMobile
                     ? `w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:${maxWidth} sm:rounded-2xl`
                     : `w-full ${maxWidth} max-h-[90vh] rounded-2xl`
                     }`}
