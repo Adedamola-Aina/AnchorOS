@@ -11,7 +11,7 @@ import { getWeeklySpending } from '../../utils/financeInsights';
 import { NotificationBanner } from './NotificationBanner';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { useAccountActivity } from '../../hooks/useAccountActivity';
-import { AccountHeader, RecurringTransactionsList, SpendingTrendsChart } from './components';
+import { AccountHeader, SpendingTrendsChart } from './components';
 import { SharedActivitySection } from './components/SharedActivitySection';
 import { VirtualTransactionList } from './components/VirtualTransactionList';
 import { TransactionFilterHeader } from './components/TransactionListParts';
@@ -60,9 +60,8 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-6">
                 <NotificationBanner accountId={account.id} />
                 <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 gap-5">
                     {accountTransactions.length > 0 && <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />}
-                    <RecurringTransactionsList />
                 </div>
                 {isSharedAccount && <SharedActivitySection activities={activities} currentUserId={user?.uid} loading={loadingActivities} />}
                 {/* Standardized VirtualTransactionList used in FinanceView for consistency */}
