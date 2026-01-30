@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Landmark, Search, ChevronLeft, ChevronRight, Calendar, ArrowRightLeft, RefreshCw } from 'lucide-react';
+import { Landmark, Search, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
@@ -28,7 +28,7 @@ import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { MonthlyInsight } from './MonthlyInsight';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { PullToRefresh } from '../../components/mobile/PullToRefresh';
-import { RecurringTransactionsList } from './components/RecurringTransactionsList';
+
 
 const FinanceView = () => {
   const { transactions, accounts, deleteTransaction, deleteAccount, currentMonth, nextMonth, prevMonth, loadingFinance, netWorth, refetch } = useFinance();
@@ -39,7 +39,7 @@ const FinanceView = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [mode, setMode] = useState<'view' | 'addTx' | 'addAcc' | 'editTx'>('view');
-  const [activeTab, setActiveTab] = useState<'transactions' | 'recurring'>('transactions');
+
   const [editingTransaction, setEditingTransaction] = useState<AnchorTransaction | undefined>(undefined);
   const [initialTransactionType, setInitialTransactionType] = useState<'expense' | 'income' | 'transfer'>('expense');
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
@@ -126,28 +126,9 @@ const FinanceView = () => {
         {!showModal && mode === 'addAcc' && !isSearching && <div className="animate-in fade-in zoom-in-95 duration-200"><AccountForm onClose={handleCloseForm} /></div>}
         {!showModal && (mode === 'addTx' || mode === 'editTx') && !isSearching && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
 
-        {accounts.length > 0 && !isSearching && (
-          <div className="flex items-center gap-2 mb-2 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg w-fit">
-            <button
-              onClick={() => setActiveTab('transactions')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'transactions' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
-            >
-              <ArrowRightLeft className="w-4 h-4" /> Transactions
-            </button>
-            <button
-              onClick={() => setActiveTab('recurring')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'recurring' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
-            >
-              <RefreshCw className="w-4 h-4" /> Recurring
-            </button>
-          </div>
-        )}
 
-        {accounts.length > 0 && activeTab === 'recurring' && !isSearching && (
-          <RecurringTransactionsList />
-        )}
 
-        {accounts.length > 0 && activeTab === 'transactions' && (
+        {accounts.length > 0 && (
           <div className="glass-card overflow-hidden">
             <div className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/20 flex flex-col sm:flex-row items-center gap-4">
               <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-xl p-1 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
