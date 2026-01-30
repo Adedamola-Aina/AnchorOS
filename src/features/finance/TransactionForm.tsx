@@ -157,7 +157,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     if (formState.type === 'transfer' && accounts.length === 1) return <SingleAccountTransferMessage onClose={onClose} />;
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-1 rounded-xl isolate">
+        <div className="bg-white dark:bg-slate-800 p-1 rounded-xl">
             <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4">{getTransactionLabel(formState.type).header}</h3>
             {isOverdraft && <OverdraftWarning projectedBalance={projectedBalance} amountCents={toCents(amount)} />}
 
