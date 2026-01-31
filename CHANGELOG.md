@@ -5,6 +5,24 @@ All notable changes to Anchor OS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.6] - 2026-01-31
+
+### Fixed
+
+#### Critical Modal Bugs
+- **BUG-022 (Modal Keyboard Input)**: Fixed Transfer/Pay Bill modals not accepting keyboard input. Modal inputs were being intercepted by global keyboard handlers (CommandPalette Escape handler, FinanceView search shortcut). Added `e.stopPropagation()` to Modal's keyboard event handler and content div to prevent event bubbling.
+- **Service Worker Cache**: Bumped SW cache version from v1.5.5 to v1.5.6 to ensure immediate deployment of modal fix across all environments.
+
+### Removed
+
+#### Pull-to-Refresh on Finance Transaction List
+- **Removed PullToRefresh component** from Finance transaction history list - was causing transactions to disappear during refresh
+- **Rationale**: App already uses real-time Firestore listeners and optimistic updates, making manual refresh unnecessary and potentially harmful
+- **Files Updated**:
+  - `FinanceView.tsx` - Removed PullToRefresh wrapper, handleRefresh function, isRefreshing state
+  - `useFinanceData.ts` - Removed refetch function from hook exports
+- **User Impact**: Transactions now stay visible at all times; real-time updates continue to work seamlessly
+
 ## [1.5.4] - 2026-01-29
 
 ### Fixed

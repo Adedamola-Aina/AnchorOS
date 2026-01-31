@@ -1,6 +1,6 @@
 # KNOWN ISSUES
 
-**Last Updated**: 2026-01-29
+**Last Updated**: 2026-01-31
 
 ---
 
@@ -54,9 +54,20 @@ _No regressions detected_
 
 ## ✅ RECENTLY FIXED
 
-### [BUG-017] Transaction Form Inputs Unresponsive (FIXED 2026-01-29)
-- **Fix**: Added `isolate` for stacking context, enabled account selection
-- **Verified**: User verification pending
+### [BUG-022] Modal Keyboard Input Not Working (FIXED 2026-01-31)
+- **Root Cause**: Global keyboard handlers (CommandPalette, FinanceView search) intercepting keystrokes before modal inputs could receive them
+- **Fix**: Added `e.stopPropagation()` to Modal keyboard handler and content div to prevent event bubbling
+- **Additional**: Removed PullToRefresh from Finance transaction list (was causing transactions to disappear)
+- **Verified**: Deployed to staging and dev (v1.5.6)
+
+### [BUG-021] Transaction Modal Unresponsive - SW Cache Issue (FIXED 2026-01-30)
+- **Root Cause**: Service worker cache stuck at v1.3, serving stale JS bundles
+- **Fix**: Bumped CACHE_NAME to v1.5.5, added cache-buster to SW registration
+- **Verified**: E2E test passing, production deployed
+
+### [BUG-017] Transaction Form Inputs Unresponsive (FIXED 2026-01-30)
+- **Fix**: Multiple fixes - Modal pointer-events, isolate class removal, SW cache update
+- **Verified**: Production deployed v1.5.5
 
 ### [BUG-016] Exchange Rate Conversion Failed(FIXED 2026-01-29)
 - **Fix**: Updated `TransferOperations` to use `destinationAmountCents`
