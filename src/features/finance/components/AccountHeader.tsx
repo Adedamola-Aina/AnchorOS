@@ -8,7 +8,7 @@
 
 import { ArrowLeft, Trash2, Users, Pencil, Sparkles } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import { AccountRenameInput, AccountActionButtons } from './AccountHeaderParts';
 
@@ -122,7 +122,7 @@ export const AccountHeader = ({
                 <div className="mb-10">
                     <p className="text-xs font-semibold opacity-60 uppercase tracking-[0.2em] mb-2">Available Balance</p>
                     <h2 className="text-5xl sm:text-6xl font-black tabular-nums tracking-tight">
-                        {formatCurrency(fromCents(account.balanceCents), account.currency)}
+                        {formatCurrencyCompact(fromCents(account.balanceCents), account.currency)}
                     </h2>
                 </div>
 

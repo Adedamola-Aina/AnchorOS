@@ -317,4 +317,93 @@ describe('useCommitmentService', () => {
       expect(firestoreMocks.deleteDoc).toHaveBeenCalled();
     });
   });
+
+  describe('Optimistic Updates (BUG-023)', () => {
+    it('should update cache immediately without flash of empty state', async () => {
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useCommitmentService(mockUser), { wrapper });
+
+      // Setup initial tasks
+      const mockTasks = [
+        {
+          id: () => 'task-1',
+          data: () => ({
+            id: 'task-1',
+            title: 'Morning Task',
+            type: 'daily',
+            completed: false,
+            currentStreak: 5,
+            longestStreak: 10,
+          })
+        },
+        {
+          id: () => 'task-2',
+          data: () => ({
+            id: 'task-2',
+            title: 'Evening Task',
+            type: 'daily',
+            completed: false,
+            currentStreak: 0,
+            longestStreak: 0,
+          })
+        },
+      ];
+
+      await waitFor(() => {
+        firestoreMocks.triggerSnapshot('artifacts/anchor-os-test/users/test-user-123/commitments', mockTasks);
+      });
+
+      await waitFor(() => {
+        expect(result.current.tasks).toHaveLength(2);
+        expect(result.current.tasks[0].completed).toBe(false);
+      });
+
+      // Toggle task - should update immediately
+      await act(async () => {
+        await result.current.toggleTask('task-1', false);
+      });
+
+      // CRITICAL: Cache should update immediately (no flash of empty state)
+      // Task should be marked as completed instantly
+      expect(result.current.tasks).toHaveLength(2); // Still 2 tasks (no empty array)
+      expect(result.current.tasks.find(t => t.id === 'task-1')?.completed).toBe(true);
+      expect(result.current.tasks.find(t => t.id === 'task-1')?.currentStreak).toBe(6); // Incremented
+    });
+
+    it('should handle uncompleting task optimistically', async () => {
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useCommitmentService(mockUser), { wrapper });
+
+      const mockTasks = [
+        {
+          id: () => 'task-1',
+          data: () => ({
+            id: 'task-1',
+            title: 'Completed Task',
+            type: 'daily',
+            completed: true,
+            currentStreak: 5,
+            longestStreak: 10,
+          })
+        },
+      ];
+
+      await waitFor(() => {
+        firestoreMocks.triggerSnapshot('artifacts/anchor-os-test/users/test-user-123/commitments', mockTasks);
+      });
+
+      await waitFor(() => {
+        expect(result.current.tasks[0].completed).toBe(true);
+      });
+
+      // Uncomplete task
+      await act(async () => {
+        await result.current.toggleTask('task-1', true);
+      });
+
+      // Should update immediately
+      expect(result.current.tasks[0].completed).toBe(false);
+      expect(result.current.tasks[0].currentStreak).toBe(4); // Decremented
+    });
+  });
 });

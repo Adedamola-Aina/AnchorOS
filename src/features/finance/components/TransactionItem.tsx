@@ -4,13 +4,11 @@
  * Follows the Calm Computing design philosophy:
  * - Clarity over cleverness: obvious purpose for each element
  * - Quiet over loud: minimal decoration, semantic colors only
- * - Progressive disclosure: edit/delete appear on hover (desktop)
  */
 
 import React from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
 import { CategoryIcon } from '../../../components/shared';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { AnchorTransaction } from '../../../types';
 import { Card } from '@anchor-os/ui';
@@ -25,8 +23,6 @@ interface TransactionItemProps {
 
 export const TransactionItem: React.FC<TransactionItemProps> = ({
     transaction,
-    onEdit,
-    onDelete,
     currentUserId,
 }) => {
     // Guard against undefined transaction
@@ -70,9 +66,9 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                             {transaction.title}
                         </h4>
                         {/* Amount - centered with title line */}
-                        <p className={`font-bold text-sm tabular-nums shrink-0 ${amountColor}`}>
+                        <p className={`font-bold text-sm tabular-nums shrink-0 truncate ${amountColor}`}>
                             {amountPrefix}
-                            {formatCurrency(fromCents(transaction.amountCents || 0), transaction.currency || 'USD')}
+                            {formatCurrencyCompact(fromCents(transaction.amountCents || 0), transaction.currency || 'USD')}
                         </p>
                     </div>
 
@@ -104,24 +100,6 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                             </span>
                         )}
                     </div>
-                </div>
-
-                {/* Actions - hidden on mobile (swipe gestures), hover-only on desktop */}
-                <div className="hidden sm:flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                        onClick={() => onEdit(transaction)}
-                        className="p-2 text-slate-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                        aria-label="Edit transaction"
-                    >
-                        <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                        onClick={() => onDelete(transaction)}
-                        className="p-2 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
-                        aria-label="Delete transaction"
-                    >
-                        <Trash2 className="w-3.5 h-3.5" />
-                    </button>
                 </div>
             </div>
         </Card>

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { TrendingDown, TrendingUp, Target, PieChart } from 'lucide-react';
-import { formatCurrency } from '../../utils/format';
+import { formatCurrencyCompact } from '../../utils/format';
 import { fromCents } from '../../utils/moneyUtils';
 import type { AnchorTransaction, Currency } from '../../types';
 
@@ -48,10 +48,10 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                 <div className="p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-2xl text-emerald-600">
                     <TrendingUp className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                     <p className="text-[10px] uppercase font-bold text-slate-400">Total Income</p>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white">
-                        {formatCurrency(fromCents(summary.income), currency)}
+                    <p className="text-lg font-bold text-slate-900 dark:text-white tabular-nums truncate">
+                        {formatCurrencyCompact(fromCents(summary.income), currency)}
                     </p>
                 </div>
             </div>
@@ -60,10 +60,10 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                 <div className="p-3 bg-rose-100 dark:bg-rose-900/20 rounded-2xl text-rose-600">
                     <TrendingDown className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                     <p className="text-[10px] uppercase font-bold text-slate-400">Total Spent</p>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white">
-                        {formatCurrency(fromCents(summary.expense), currency)}
+                    <p className="text-lg font-bold text-slate-900 dark:text-white tabular-nums truncate">
+                        {formatCurrencyCompact(fromCents(summary.expense), currency)}
                     </p>
                 </div>
             </div>
@@ -75,13 +75,13 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                     }`}>
                     {isOverspending ? <TrendingDown className="w-5 h-5" /> : <Target className="w-5 h-5" />}
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                     <p className="text-[10px] uppercase font-bold text-slate-400">
                         {isOverspending ? 'Overspending' : 'Potential Savings'}
                     </p>
-                    <p className={`text-lg font-bold ${isOverspending ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
+                    <p className={`text-lg font-bold tabular-nums truncate ${isOverspending ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
                         }`}>
-                        {formatCurrency(fromCents(Math.abs(summary.savings)), currency)}
+                        {formatCurrencyCompact(fromCents(Math.abs(summary.savings)), currency)}
                     </p>
                 </div>
             </div>
@@ -91,10 +91,10 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                     <div className="p-3 bg-primary-100 dark:bg-primary-900/20 rounded-2xl text-primary-600">
                         <PieChart className="w-5 h-5" />
                     </div>
-                    <div className="truncate">
-                        <p className="text-[10px] uppercase font-bold text-slate-400">Top: {summary.topCategory.name}</p>
-                        <p className="text-lg font-bold text-slate-900 dark:text-white truncate">
-                            {formatCurrency(fromCents(summary.topCategory.amount), currency)}
+                    <div className="min-w-0 flex-1">
+                        <p className="text-[10px] uppercase font-bold text-slate-400 truncate">Top: {summary.topCategory.name}</p>
+                        <p className="text-lg font-bold text-slate-900 dark:text-white tabular-nums truncate">
+                            {formatCurrencyCompact(fromCents(summary.topCategory.amount), currency)}
                         </p>
                     </div>
                 </div>

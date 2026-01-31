@@ -96,40 +96,93 @@ export const useCommitmentService = (user: User | null) => {
   };
 
   /**
-   * Toggle task completion with atomic streak update using Firestore transaction.
-   * This prevents race conditions from rapid double-clicks.
+   * Toggle task completion with optimistic updates and atomic streak calculation.
+   * 
+   * BUG-023 FIX (COMPLETE): Uses optimistic updates with onSnapshot sync.
+   * - Updates React Query cache immediately for instant UI feedback
+   * - Executes Firestore transaction in background
+   * - onSnapshot listener automatically syncs changes from Firestore
+   * - Rolls back on error
+   * 
+   * This eliminates:
+   * - Multi-click requirement (optimistic update provides instant feedback)
+   * - State reversion (onSnapshot ensures sync with Firestore truth)
+   * - Janky animations (smooth transitions with optimistic updates)
    */
   const toggleTask = async (id: string, currentStatus: boolean) => {
     if (!user) return;
 
     const taskRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id);
 
-    await runTransaction(db, async (transaction) => {
-      const taskDoc = await transaction.get(taskRef);
-      if (!taskDoc.exists()) return;
+    // ✅ OPTIMISTIC UPDATE: Update cache immediately for instant UI feedback
+    queryClient.setQueryData<AnchorTask[]>(
+      TASK_KEYS.list(user.uid),
+      (old) => {
+        if (!old) return old;
 
-      const task = taskDoc.data() as AnchorTask;
-      const updates: Partial<AnchorTask> = { completed: !currentStatus };
+        return old.map(task => {
+          if (task.id !== id) return task;
 
-      if (!currentStatus) {
-        // Completing
-        updates.lastCompletedAt = new Date().toISOString();
-        const currentStreak = task.currentStreak || 0;
-        const newStreak = currentStreak + 1;
-        updates.currentStreak = newStreak;
-        updates.longestStreak = Math.max(newStreak, task.longestStreak || 0);
-      } else {
-        // Uncompleting
-        const currentStreak = task.currentStreak || 0;
-        if (currentStreak > 0) {
-          updates.currentStreak = currentStreak - 1;
-        }
+          // Calculate updates (same logic as Firestore transaction)
+          const updates: Partial<AnchorTask> = { completed: !currentStatus };
+
+          if (!currentStatus) {
+            // Completing
+            updates.lastCompletedAt = new Date().toISOString();
+            const currentStreak = task.currentStreak || 0;
+            const newStreak = currentStreak + 1;
+            updates.currentStreak = newStreak;
+            updates.longestStreak = Math.max(newStreak, task.longestStreak || 0);
+          } else {
+            // Uncompleting
+            const currentStreak = task.currentStreak || 0;
+            if (currentStreak > 0) {
+              updates.currentStreak = currentStreak - 1;
+            }
+          }
+
+          return { ...task, ...updates };
+        });
       }
+    );
 
-      transaction.update(taskRef, updates);
-    });
+    // Execute Firestore transaction
+    // onSnapshot listener will automatically sync the final state from Firestore
+    try {
+      await runTransaction(db, async (transaction) => {
+        const taskDoc = await transaction.get(taskRef);
+        if (!taskDoc.exists()) return;
 
-    queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
+        const task = taskDoc.data() as AnchorTask;
+        const updates: Partial<AnchorTask> = { completed: !currentStatus };
+
+        if (!currentStatus) {
+          // Completing
+          updates.lastCompletedAt = new Date().toISOString();
+          const currentStreak = task.currentStreak || 0;
+          const newStreak = currentStreak + 1;
+          updates.currentStreak = newStreak;
+          updates.longestStreak = Math.max(newStreak, task.longestStreak || 0);
+        } else {
+          // Uncompleting
+          const currentStreak = task.currentStreak || 0;
+          if (currentStreak > 0) {
+            updates.currentStreak = currentStreak - 1;
+          }
+        }
+
+        transaction.update(taskRef, updates);
+      });
+
+      // ✅ NO REFETCH NEEDED: onSnapshot listener handles real-time sync automatically
+      // The listener will fire when Firestore confirms the update, ensuring UI stays in sync
+
+    } catch (error) {
+      // ❌ ROLLBACK: If Firestore fails, invalidate cache to trigger onSnapshot refetch
+      console.error('[toggleTask] Firestore transaction failed, rolling back optimistic update:', error);
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
+      throw error;
+    }
   };
 
   const deleteTask = async (id: string) => {

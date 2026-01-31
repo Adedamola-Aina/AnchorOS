@@ -66,7 +66,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
             {displayActivities.map((activity, index) => {
                 const isCurrentUser = activity.actorId === currentUserId;
                 const colorClasses = getActivityColor(activity.action);
-                const showAmount = activity.details.amountCents !== undefined && activity.action !== 'transaction_deleted';
+                const showAmount = activity.details?.amountCents !== undefined && activity.action !== 'transaction_deleted';
 
                 return (
                     <div
@@ -99,8 +99,8 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                             {/* Amount display for transaction activities */}
                             {showAmount && (
                                 <p className={`text-xs font-semibold mt-0.5 ${activity.details.type === 'income'
-                                        ? 'text-finance-600 dark:text-finance-400'
-                                        : 'text-slate-600 dark:text-slate-400'
+                                    ? 'text-finance-600 dark:text-finance-400'
+                                    : 'text-slate-600 dark:text-slate-400'
                                     }`}>
                                     {activity.details.type === 'income' ? '+' : '-'}
                                     {formatCurrency(

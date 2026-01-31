@@ -5,6 +5,46 @@ All notable changes to Anchor OS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.8] - 2026-01-31
+
+### Fixed
+
+#### REG-004: Modal Focus Stealing Race Condition
+- **Issue**: Modal inputs still unresponsive after REG-003 fix - users could click but not type in Description/Amount fields
+- **Root Cause**: Modal's `useEffect` was forcing focus to first focusable element, creating race condition with input's `autoFocus` attribute
+- **Fix**: Removed auto-focus logic from Modal.tsx - child components handle their own focus
+- **Impact**: ✅ Users can now type in all modal input fields
+- **Files**: `src/components/shared/Modal.tsx`
+
+#### ActivityFeed Crash on Transaction View
+- **Issue**: Page crashed with `TypeError: Cannot read properties of undefined (reading 'amountCents')`
+- **Root Cause**: Accessing `activity.details.amountCents` without null check
+- **Fix**: Added optional chaining `activity.details?.amountCents`
+- **Files**: `src/features/finance/components/ActivityFeed.tsx`
+
+#### Duplicate Category Icons
+- **Issue**: Multiple categories shared same icons (Food/Groceries both used ShoppingBag, etc.)
+- **Fix**: Assigned unique Lucide icons to each category:
+  - Food → Utensils 🍴
+  - Groceries → ShoppingCart 🛒
+  - Investments → TrendingUp 📈
+  - Shopping → ShoppingBag 🛍️
+  - Personal Care → Heart 💖
+- **Files**: `src/components/shared/CategoryIcon.tsx`
+
+#### Transaction List Overflow UI
+- **Issue**: Lists with 2-6 transactions showed excessive whitespace instead of ending naturally
+- **Fix**: Changed "End of list" indicator to show for all non-empty lists (was only showing for >5 items)
+- **Files**: `src/features/finance/components/VirtualTransactionList.tsx`
+
+### Changed
+
+#### Edit/Delete Button Removal (Production Parity)
+- **Removed**: Visible edit/delete buttons from desktop transaction items
+- **Preserved**: Swipe gestures for edit/delete on mobile (via SwipeableTransactionItem)
+- **Rationale**: Matches production behavior - no visible buttons, mobile swipe gestures only
+- **Files**: `src/features/finance/components/TransactionItem.tsx`
+
 ## [1.5.7] - 2026-01-31
 
 ### Fixed

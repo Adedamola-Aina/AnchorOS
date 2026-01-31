@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-31 01:16 UTC
+**Last Updated**: 2026-01-31 04:20 UTC
 
 ---
 
@@ -9,8 +9,8 @@
 | Environment | Version | Firebase Site | URL | Health |
 |-------------|---------|---------------|-----|--------|
 | **Production** | v1.5.4 | anchor-os | https://anchor-os.web.app | ✅ Stable |
-| **Staging** | v1.5.7 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Deployed |
-| **Dev** | v1.5.7 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Deployed |
+| **Staging** | v1.5.8 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Deployed |
+| **Dev** | v1.5.8 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Deployed |
 
 **Code Flow**: Dev → Staging → Production (with approval)
 
@@ -153,6 +153,7 @@ npm run deploy:production
 
 | Date | Version | Env | Type | Notes |
 |------|---------|-----|------|-------|
+| 2026-01-31 | v1.5.8 | Dev/Staging | **UX FIXES** | REG-004: Modal focus stealing fix, ActivityFeed crash fix, Unique category icons, Transaction list overflow fix, Edit/delete button removal (swipe gestures preserved) |
 | 2026-01-31 | v1.5.7 | Dev/Staging | **CRITICAL FIX** | REG-003: Fixed modal inputs completely unresponsive (pointer-events-none blocking all interactions) |
 | 2026-01-31 | v1.5.6 | Dev/Staging | Bugfix | BUG-022: Modal keyboard fix, Removed PullToRefresh |
 | 2026-01-29 | v1.5.3-ui-fix | Dev/Staging | Feature | UX-017: Scrollable List, Fixed BUG-008/010/011/012/013/014 |

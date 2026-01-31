@@ -110,7 +110,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                     );
                 })}
             </div>
-            {!loading && transactions.length > 5 && (
+            {!loading && transactions.length > 0 && (
                 <div className="py-6 text-center">
                     <div className="inline-flex items-center justify-center p-2 rounded-full bg-slate-100 dark:bg-slate-800/50 text-xs font-medium text-slate-400 dark:text-slate-500">
                         <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 mr-2"></span>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { DollarSign, Banknote, Users } from 'lucide-react';
 import { Badge } from '../../../components/shared';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { AnchorAccount } from '../../../types';
 
@@ -62,7 +62,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
                 )}
             </div>
 
-            <div className="relative z-10">
+            <div className="relative z-10 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-slate-900 dark:text-white truncate flex-1 min-w-0">
                         {account.name}
@@ -78,8 +78,8 @@ export const AccountCard: React.FC<AccountCardProps> = ({
                         <Badge type="family" variant="outline">Shared</Badge>
                     )}
                 </div>
-                <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums">
-                    {formatCurrency(fromCents(account.balanceCents), account.currency)}
+                <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums truncate">
+                    {formatCurrencyCompact(fromCents(account.balanceCents), account.currency)}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                     <Badge type={account.type} variant="outline">
