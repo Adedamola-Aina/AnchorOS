@@ -16,6 +16,22 @@
 
 ---
 
+## ⏳ PENDING CHANGES (Dev → Staging)
+
+_Environments in sync - no pending changes_
+
+---
+
+## ⏳ PENDING CHANGES (Staging → Production)
+
+### v1.5.6 Features Awaiting Production Deployment
+
+- [ ] **BUG-022**: Modal keyboard input fix (Transfer/Pay Bill modals now accept keyboard input)
+- [ ] **Service Worker**: Cache version bump to v1.5.6 for immediate fix deployment
+- [ ] **PullToRefresh Removal**: Removed from Finance transaction list (was causing data to disappear)
+
+---
+
 ## ⚠️ INCIDENT RESOLVED
 
 **Date**: 2026-01-29  
