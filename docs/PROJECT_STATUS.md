@@ -1,6 +1,6 @@
 # PROJECT STATUS
 
-**Last Updated**: 2026-01-29 21:30 UTC
+**Last Updated**: 2026-01-31 01:35 UTC
 **Updated By**: Agent
 **Sprint**: Week of Jan 26 - Feb 1, 2026
 
@@ -17,6 +17,19 @@ _No active work items_
 _No blockers at this time_
 
 ### ✅ Recently Completed (Last 7 Days)
+
+#### v1.5.6 Release (2026-01-31)
+- [x] **BUG-022: Modal Keyboard Input Fix** ✅ - Fixed Transfer/Pay Bill modals not accepting keyboard input
+  - Root Cause: Global keyboard handlers (CommandPalette, FinanceView search) intercepting keystrokes
+  - Fix: Added `e.stopPropagation()` to Modal keyboard handler and content div
+  - Service Worker: Bumped cache to v1.5.6 for immediate deployment
+  - Deployed: Staging + Dev
+
+- [x] **PullToRefresh Removal** ✅ - Removed from Finance transaction list
+  - Issue: Pull-to-refresh was clearing transactions, requiring app reload
+  - Rationale: App uses real-time Firestore listeners + optimistic updates (manual refresh unnecessary)
+  - Files: `FinanceView.tsx`, `useFinanceData.ts`
+  - Deployed: Staging + Dev
 
 #### Architecture & Brand Sprint (2026-01-29)
 - [x] **ARCH-007: Optimistic Updates** ✅ - Created `useOptimisticMutation` hook; applied to recurring transactions
@@ -128,9 +141,9 @@ _No blockers at this time_
 
 | Environment | Version | Last Deploy | Health | Notes |
 |-------------|---------|-------------|--------|-------|
-| **Production** | v1.5.0 | 2026-01-28 | ✅ | Stable (commit c189779) |
-| **Staging** | v1.5.0 | 2026-01-28 | ✅ | Testing (commit c189779) |
-| **Development** | v1.5.0-dev | 2026-01-28 | ✅ | Active (commit c189779) |
+| **Production** | v1.5.4 | 2026-01-29 | ✅ | Stable |
+| **Staging** | v1.5.6 | 2026-01-31 | ✅ | Testing BUG-022 fix |
+| **Development** | v1.5.6 | 2026-01-31 | ✅ | Active |
 
 **Production URL**: https://anchor-os.web.app
 **Staging URL**: https://anchor-os-staging.web.app
