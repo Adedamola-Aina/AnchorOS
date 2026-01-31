@@ -152,21 +152,86 @@ I'm successful when:
 
 ## 📚 KEY DOCUMENTS (Always Available)
 
-**Constitution & Standards:**
-- `CLAUDE.md` - Development constitution
-- `CLAUDE_INSTRUCTIONS_ADDON.md` - Workflow instructions
+### 🏛️ Constitution & Core Standards
+- `CLAUDE.md` - **Development constitution (HIGHEST AUTHORITY)**
+- `CLAUDE_INSTRUCTIONS_ADDON.md` - **Mandatory workflow instructions**
+- `docs/ENGINEERING_EXECUTION_STANDARD.md` - Engineering excellence standards
 
-**Current State:**
-- `docs/PROJECT_STATUS.md` - What's happening now
-- `docs/ROADMAP.md` - What's planned and why
-- `docs/KNOWN_ISSUES.md` - Active bugs
-- `docs/DEPLOYMENT_STATUS.md` - What's deployed where
+### 📊 Current State & Planning
+- `docs/PROJECT_STATUS.md` - **What's happening now (READ FIRST)**
+- `docs/ROADMAP.md` - **What's planned and why**
+- `docs/KNOWN_ISSUES.md` - **Active bugs (check for duplicates!)**
+- `docs/DEPLOYMENT_STATUS.md` - **What's deployed where**
+- `docs/FEATURE_SUGGESTIONS.md` - Feature backlog (82 suggestions)
+- `docs/USER_FEEDBACK.md` - User feedback and requests
 
-**Technical Standards:**
-- `docs/TESTING_STRATEGY.md` - TDD protocol
-- `docs/FIRESTORE_SCHEMA.md` - Database schema
+### 🏗️ Architecture & Design
+- `docs/ARCHITECTURE_OVERVIEW.md` - System architecture (50KB - comprehensive!)
+- `docs/FIRESTORE_SCHEMA.md` - Database schema, 8 collections, security rules
+- `docs/ANCHOR_FINANCE_SPEC.md` - Finance module specification
+- `docs/FAMILY_SHARING_V3_REDESIGN.md` - Family sharing architecture
+- `docs/FAMILY_SHARING_V3_IMPLEMENTATION.md` - Family sharing implementation
+- `docs/architecture/` - Additional architecture docs
+
+### 🎨 Design System
+- `docs/DESIGN_PHILOSOPHY.md` - Calm computing principles
+- `docs/DESIGN_TOKENS.md` - Color system, spacing, typography tokens
+- `docs/BUTTON_GUIDELINES.md` - Button component standards
+- `docs/ICON_GUIDELINES.md` - Icon usage and consistency
+- `docs/TYPOGRAPHY_GUIDE.md` - Typography hierarchy and usage
+
+### 🧪 Testing & Quality
+- `docs/TESTING_STRATEGY.md` - **TDD protocol, 80% coverage goal**
+- `docs/ERROR_HANDLING.md` - ErrorBoundary patterns, error strategies
+
+### 🔒 Security & Performance
+- `docs/SECURITY.md` - **Zero-trust model, threat analysis, security checklist**
+- `docs/VERSIONING.md` - Semantic versioning policy
+
+### 🛠️ Development & Deployment
+- `docs/ENVIRONMENT_SETUP.md` - Firebase hosting, env vars, build commands
+- `docs/DEVELOPER_TOOLS.md` - Developer tools and simulation
+- `docs/DASHBOARD_AUTOMATION_PLAN.md` - Dashboard automation roadmap
+- `docs/DASHBOARD_AUTOMATION_SUMMARY.md` - Automation implementation status
+
+### 📝 Architecture Decision Records
+- `docs/adr/` - ADR templates and decisions
+
+---
+
+## 🎯 WHEN TO READ WHICH DOCS
+
+### Before ANY Task
+**ALWAYS READ:**
+1. `CLAUDE.md` - Constitution
+2. `docs/PROJECT_STATUS.md` - Current state
+3. `docs/ROADMAP.md` - Planned work
+4. `docs/KNOWN_ISSUES.md` - Active bugs
+
+### Before Implementing Features
+**ALSO READ:**
+- `docs/ARCHITECTURE_OVERVIEW.md` - Understand system design
+- `docs/FIRESTORE_SCHEMA.md` - Database structure
+- `docs/TESTING_STRATEGY.md` - Test requirements
+- Component-specific docs (Finance, Family, etc.)
+
+### Before UI/Design Work
+**ALSO READ:**
+- `docs/DESIGN_PHILOSOPHY.md` - Design principles
+- `docs/DESIGN_TOKENS.md` - Color/spacing system
+- `docs/BUTTON_GUIDELINES.md` - Component standards
+- `docs/TYPOGRAPHY_GUIDE.md` - Text hierarchy
+
+### Before Security-Sensitive Work
+**ALSO READ:**
 - `docs/SECURITY.md` - Security checklist
-- `docs/ERROR_HANDLING.md` - Error boundaries
+- `docs/FIRESTORE_SCHEMA.md` - Security rules
+
+### Before Deployment
+**ALSO READ:**
+- `docs/DEPLOYMENT_STATUS.md` - Current deployments
+- `docs/ENVIRONMENT_SETUP.md` - Deployment process
+- `docs/VERSIONING.md` - Version numbering
 
 ---
 
