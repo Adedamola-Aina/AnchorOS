@@ -86,43 +86,225 @@ Create `tools/dashboard/server/conversationAnalyzer.js`:
 
 **Features**:
 - Monitor conversation logs in `/root/.gemini/antigravity/brain/`
-- Use LLM (Claude/GPT) to classify user messages:
-  - **Bug Report**: "not working", "broken", "error", "issue"
-  - **Feature Request**: "would be nice", "can we add", "suggestion"
-  - **Question**: "how do I", "what is", "why"
-- Extract structured data:
-  - Title
-  - Description
-  - Priority (P0/P1/P2) based on keywords
-  - Affected component (Finance, Auth, Commitments, etc.)
+- Use LLM (Claude/GPT) to classify user messages into 5 categories:
+
+##### Classification Rules
+
+**1. BUG (BUG-XXX)** - Something broken that previously worked or should work
+- **Keywords**: "not working", "broken", "error", "issue", "fails", "doesn't work", "can't", "won't"
+- **Examples**:
+  - "The modal isn't accepting keyboard input"
+  - "Pull-to-refresh clears all account data"
+  - "Transaction form is unresponsive"
+
+**2. REGRESSION (REG-XXX)** - Something that worked before but broke after a change
+- **Keywords**: "used to work", "stopped working", "broke after", "since the update", "after deploying"
+- **Context**: Recent deployment or code change mentioned
+- **Examples**:
+  - "After deploying v1.5.5, the modal stopped working"
+  - "This used to work yesterday but now it's broken"
+  - "Since we updated the finance module, transfers fail"
+
+**3. FEATURE (FEAT-XXX)** - New functionality request
+- **Keywords**: "would be nice", "can we add", "suggestion", "feature request", "could we have", "I wish"
+- **Examples**:
+  - "Can we add a budget tracking feature?"
+  - "Would be nice to have dark mode"
+  - "Suggestion: Add export to CSV"
+
+**4. GAP (GAP-XXX)** - Missing functionality or technical debt
+- **Keywords**: "missing", "doesn't have", "no way to", "can't find", "should have", "needs"
+- **Context**: Expected functionality that doesn't exist
+- **Examples**:
+  - "There's no way to filter transactions by category"
+  - "The app doesn't have offline support"
+  - "Missing validation on email input"
+
+**5. TASK (TASK-XXX)** - Work item or improvement (not user-facing)
+- **Keywords**: "refactor", "optimize", "improve", "update", "upgrade", "clean up"
+- **Context**: Internal improvements, code quality, performance
+- **Examples**:
+  - "Refactor the finance hooks to reduce duplication"
+  - "Optimize the transaction search performance"
+  - "Update dependencies to latest versions"
+
+##### Priority Detection
+
+**P0 (Critical)** - Immediate action required
+- Data loss
+- Security vulnerability
+- App crashes
+- Complete feature failure
+- **Keywords**: "data loss", "security", "crash", "can't use", "completely broken"
+
+**P1 (High)** - Important, affects core functionality
+- Major feature broken
+- Poor UX
+- Affects multiple users
+- **Keywords**: "major", "important", "blocks", "prevents", "all users"
+
+**P2 (Medium)** - Nice to have, minor issues
+- Minor bugs
+- Edge cases
+- Cosmetic issues
+- **Keywords**: "minor", "sometimes", "occasionally", "cosmetic"
+
+**P3 (Low)** - Future consideration
+- Enhancement ideas
+- Nice-to-haves
+- **Keywords**: "eventually", "someday", "nice to have"
+
+##### Component Detection
+
+Automatically detect affected component from context:
+- **Finance**: "transaction", "account", "balance", "transfer", "pay bill"
+- **Auth**: "login", "signup", "password", "MFA", "authentication"
+- **Commitments**: "task", "commitment", "streak", "daily", "weekly"
+- **Dashboard**: "dashboard", "widget", "overview", "home"
+- **Family**: "family", "spouse", "sharing", "invitation"
+- **Settings**: "settings", "preferences", "profile"
+- **UI/UX**: "button", "modal", "form", "layout", "design"
+- **Architecture**: "performance", "bundle", "optimization", "refactor"
 
 **Example Classification**:
 ```javascript
 // User says: "the pull to refresh on transaction history clears all account data"
 {
-  type: "bug",
+  type: "BUG",
+  id: "BUG-023",
   title: "Pull-to-Refresh Clears Account Data",
   component: "Finance",
-  priority: "P1",  // Data loss = high priority
-  description: "Pull-to-refresh gesture on transaction history clears all account data, requiring full app reload"
+  priority: "P0",  // Data loss = critical
+  description: "Pull-to-refresh gesture on transaction history clears all account data, requiring full app reload",
+  keywords: ["data loss", "clears", "transaction history"],
+  reportedAt: "2026-01-31T01:41:00Z",
+  reporter: "User"
+}
+
+// User says: "after deploying v1.5.6, the modal stopped accepting input"
+{
+  type: "REGRESSION",
+  id: "REG-004",
+  title: "Modal Input Stopped Working After v1.5.6",
+  component: "UI/UX",
+  priority: "P1",
+  description: "Modal inputs became unresponsive after v1.5.6 deployment",
+  keywords: ["stopped working", "after deploying", "modal"],
+  triggerVersion: "v1.5.6",
+  reportedAt: "2026-01-31T01:41:00Z",
+  reporter: "User"
+}
+
+// User says: "can we add budget tracking to the finance module?"
+{
+  type: "FEATURE",
+  id: "FEAT-001",
+  title: "Budget Tracking",
+  component: "Finance",
+  priority: "P2",
+  description: "Add budget tracking functionality to finance module",
+  keywords: ["can we add", "budget tracking"],
+  reportedAt: "2026-01-31T01:41:00Z",
+  reporter: "User"
+}
+
+// User says: "there's no way to export transactions to CSV"
+{
+  type: "GAP",
+  id: "GAP-005",
+  title: "Missing Transaction Export",
+  component: "Finance",
+  priority: "P2",
+  description: "No functionality to export transactions to CSV format",
+  keywords: ["no way to", "export"],
+  reportedAt: "2026-01-31T01:41:00Z",
+  reporter: "User"
+}
+
+// User says: "we should refactor the finance hooks to reduce duplication"
+{
+  type: "TASK",
+  id: "TASK-001",
+  title: "Refactor Finance Hooks",
+  component: "Architecture",
+  priority: "P2",
+  description: "Refactor finance hooks to reduce code duplication and improve maintainability",
+  keywords: ["refactor", "reduce duplication"],
+  reportedAt: "2026-01-31T01:41:00Z",
+  reporter: "Agent"
 }
 ```
 
 #### 2.2 Auto-Documentation
-When a bug/feature is detected:
-1. **Generate Bug ID**: `BUG-023`, `FEAT-001`, etc.
-2. **Update `KNOWN_ISSUES.md`**:
-   ```markdown
-   ### [BUG-023] Pull-to-Refresh Clears Account Data
-   - **Reported**: 2026-01-31
-   - **Reporter**: User (via conversation)
-   - **Impact**: Data loss, requires app reload
-   - **Priority**: P1
-   - **Status**: Reported
-   ```
-3. **Update `FEATURE_SUGGESTIONS.md`** (for features)
-4. **Create GitHub Issue** (optional, if using GitHub)
-5. **Notify dashboard** to refresh
+When an issue is detected, route to appropriate documentation:
+
+##### BUG → KNOWN_ISSUES.md
+```markdown
+### [BUG-023] Pull-to-Refresh Clears Account Data
+- **Reported**: 2026-01-31
+- **Reporter**: User (via conversation)
+- **Component**: Finance
+- **Impact**: Data loss, requires app reload
+- **Priority**: P0
+- **Status**: Reported
+```
+
+##### REGRESSION → KNOWN_ISSUES.md (Regressions Section)
+```markdown
+## 🔵 REGRESSIONS
+
+### [REG-004] Modal Input Stopped Working After v1.5.6
+- **Reported**: 2026-01-31
+- **Trigger**: v1.5.6 deployment
+- **Component**: UI/UX
+- **Impact**: Modal inputs unresponsive
+- **Priority**: P1
+- **Status**: Investigating
+```
+
+##### FEATURE → FEATURE_SUGGESTIONS.md
+```markdown
+### FIN-004: Budget Tracking
+- **Category**: Finance
+- **Priority**: Medium
+- **Effort**: High (3-5 days)
+- **Impact**: High (frequently requested)
+- **Description**: Add budget tracking functionality to finance module
+- **User Story**: As a user, I want to set monthly budgets per category so I can track spending against goals
+- **Requested By**: User (2026-01-31)
+```
+
+##### GAP → KNOWN_ISSUES.md (Gaps Section)
+```markdown
+## 🟡 HIGH (P1)
+
+### [GAP-005] Missing Transaction Export
+- **Reported**: 2026-01-31
+- **Component**: Finance
+- **Impact**: Users cannot export data for external analysis
+- **Fix**: Implement CSV/Excel export functionality
+- **Priority**: P2
+- **Status**: Backlog
+```
+
+##### TASK → PROJECT_STATUS.md (This Week's Priorities)
+```markdown
+## 🎯 THIS WEEK'S PRIORITIES
+
+| Priority | Task | Owner | Target | Status |
+|----------|------|-------|--------|--------|
+| **P2** | TASK-001: Refactor Finance Hooks | Agent | 2026-02-07 | ⬜ Not Started |
+```
+
+##### Workflow
+1. **Detect issue type** from conversation
+2. **Generate unique ID** (BUG-023, REG-004, FEAT-001, GAP-005, TASK-001)
+3. **Route to correct file**:
+   - BUG/REG/GAP → `KNOWN_ISSUES.md`
+   - FEATURE → `FEATURE_SUGGESTIONS.md`
+   - TASK → `PROJECT_STATUS.md`
+4. **Update dashboard** (auto-refresh via post-commit hook)
+5. **Notify user** (optional: Slack/Discord webhook)
 
 ---
 
