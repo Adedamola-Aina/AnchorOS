@@ -34,18 +34,22 @@ export const TaskList: React.FC<TaskListProps> = ({
                 {activeTasks.length > 0 && (
                     <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Active Tasks</h3>
                 )}
-                <div className="space-y-3">
+                <div className="space-y-3 transition-all duration-300 ease-out">
                     {activeTasks.map((task) => (
-                        <TaskItem
+                        <div
                             key={task.id}
-                            task={task}
-                            hasFamilyActive={hasFamilyActive}
-                            isEditing={editingTaskId === task.id}
-                            onToggle={onToggle}
-                            onStartEdit={onStartEdit}
-                            onDelete={onDelete}
-                            onConfirmFinancial={onConfirmFinancial}
-                        />
+                            className="transition-all duration-200 ease-out"
+                        >
+                            <TaskItem
+                                task={task}
+                                hasFamilyActive={hasFamilyActive}
+                                isEditing={editingTaskId === task.id}
+                                onToggle={onToggle}
+                                onStartEdit={onStartEdit}
+                                onDelete={onDelete}
+                                onConfirmFinancial={onConfirmFinancial}
+                            />
+                        </div>
                     ))}
                 </div>
             </div>

@@ -60,13 +60,9 @@ export const Modal: React.FC<ModalProps> = ({
             document.body.style.overflow = 'hidden';
             document.addEventListener('keydown', handleKeyDown);
 
-            // Focus first focusable element in modal
-            setTimeout(() => {
-                const firstFocusable = modalRef.current?.querySelector(
-                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-                ) as HTMLElement;
-                firstFocusable?.focus();
-            }, 0);
+            // NOTE: Removed auto-focus logic here - child components with autoFocus
+            // attribute (like DescriptionField) should handle their own focus.
+            // The previous implementation was stealing focus from inputs.
         } else {
             document.body.style.overflow = 'unset';
             document.removeEventListener('keydown', handleKeyDown);

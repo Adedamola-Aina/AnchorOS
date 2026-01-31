@@ -1,6 +1,6 @@
 # PROJECT STATUS
 
-**Last Updated**: 2026-01-31 02:02 UTC
+**Last Updated**: 2026-01-31 04:12 UTC
 **Updated By**: Agent
 **Sprint**: Week of Jan 26 - Feb 1, 2026
 
@@ -17,6 +17,30 @@ _No active work items_
 _No blockers at this time_
 
 ### ✅ Recently Completed (Last 7 Days)
+
+#### v1.5.8 Release (2026-01-31)
+- [x] **REG-004: Modal Focus Stealing** ✅ - Fixed race condition preventing typing in modal inputs
+  - Issue: Modal's useEffect forcing focus to first element, overriding input autoFocus
+  - Fix: Removed auto-focus logic from Modal.tsx
+  - Impact: Users can now type in Description/Amount fields
+  - Files: `Modal.tsx`
+  
+- [x] **ActivityFeed Crash Fix** ✅ - Fixed TypeError on activity.details.amountCents
+  - Fix: Added null check with optional chaining `activity.details?.amountCents`
+  - Files: `ActivityFeed.tsx`
+  
+- [x] **Duplicate Category Icons** ✅ - Assigned unique icons to each category
+  - Food → Utensils, Groceries → ShoppingCart, Investments → TrendingUp, Shopping → ShoppingBag, Personal Care → Heart
+  - Files: `CategoryIcon.tsx`
+  
+- [x] **Transaction List Overflow** ✅ - Fixed excessive whitespace on short lists
+  - Changed "End of list" to show for all non-empty lists (was >5 only)
+  - Files: `VirtualTransactionList.tsx`
+  
+- [x] **Edit/Delete Button Removal** ✅ - Removed visible buttons from desktop (production parity)
+  - Swipe gestures preserved on mobile
+  - Files: `TransactionItem.tsx`
+  - Deployed: Ready for dev + staging
 
 #### v1.5.7 Release (2026-01-31)
 - [x] **REG-003: Modal Inputs Completely Unresponsive** ✅ - CRITICAL FIX

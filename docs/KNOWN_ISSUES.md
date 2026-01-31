@@ -54,6 +54,14 @@ _No regressions detected_
 
 ## ✅ RECENTLY FIXED
 
+### [BUG-023] Commitment Checkbox Requires Multiple Clicks (FIXED 2026-01-31)
+- **Root Cause**: Firestore `onSnapshot` listener failing with 400 errors on Listen stream. Optimistic updates worked but reverted when real-time sync failed.
+- **Impact**: Checkboxes required 2-3 clicks, state reverted after ~10 seconds
+- **Fix**: Replaced unreliable `onSnapshot` with polling-based `getDocs` (5s staleTime)
+- **Files**: `src/hooks/queries/useTaskQueries.ts`
+- **Verified**: Browser testing confirmed single-click works, state persists 15+ seconds
+- **Deployed**: Staging + Dev (2026-01-31)
+
 ### [REG-003] Modal Inputs Completely Unresponsive (FIXED 2026-01-31)
 - **Root Cause**: `pointer-events-none` on modal wrapper (line 88) blocked ALL pointer events including typing, clicking, selecting
 - **Impact**: Transfer and Pay Bill modals completely broken - couldn't type in description/amount, select categories/dates/accounts

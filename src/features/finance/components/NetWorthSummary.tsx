@@ -1,6 +1,6 @@
 import React from 'react';
 import { DollarSign, Landmark } from 'lucide-react';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 
 interface NetWorthSummaryProps {
     netWorth: { NGN: number; USD: number };
@@ -14,10 +14,10 @@ export const NetWorthSummary: React.FC<NetWorthSummaryProps> = ({ netWorth }) =>
                     <div className="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-xl">
                         <Landmark className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Net Worth (NGN)</p>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white mt-1">
-                            {formatCurrency(netWorth.NGN, 'NGN')}
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white mt-1 tabular-nums truncate">
+                            {formatCurrencyCompact(netWorth.NGN, 'NGN')}
                         </h3>
                     </div>
                 </div>
@@ -28,10 +28,10 @@ export const NetWorthSummary: React.FC<NetWorthSummaryProps> = ({ netWorth }) =>
                     <div className="p-3 bg-finance-50 dark:bg-finance-900/20 rounded-xl">
                         <DollarSign className="w-6 h-6 text-finance-600 dark:text-finance-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Net Worth (USD)</p>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white mt-1">
-                            {formatCurrency(netWorth.USD, 'USD')}
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white mt-1 tabular-nums truncate">
+                            {formatCurrencyCompact(netWorth.USD, 'USD')}
                         </h3>
                     </div>
                 </div>

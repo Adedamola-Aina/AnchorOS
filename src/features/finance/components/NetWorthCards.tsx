@@ -4,7 +4,7 @@
  */
 
 import { Landmark, DollarSign } from 'lucide-react';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 
 interface NetWorthCardsProps {
     netWorth: {
@@ -29,7 +29,7 @@ export const NetWorthCards = ({ netWorth }: NetWorthCardsProps) => {
                     </div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Net Worth (NGN)</p>
                     <h2 className="text-3xl font-black text-white tracking-tight tabular-nums">
-                        {formatCurrency(netWorth.NGN, 'NGN')}
+                        {formatCurrencyCompact(netWorth.NGN, 'NGN')}
                     </h2>
                 </div>
             )}
@@ -42,7 +42,7 @@ export const NetWorthCards = ({ netWorth }: NetWorthCardsProps) => {
                     </div>
                     <p className="text-xs font-bold text-primary-200 uppercase tracking-widest mb-1">Net Worth (USD)</p>
                     <h2 className="text-3xl font-black text-white tracking-tight tabular-nums">
-                        {formatCurrency(netWorth.USD, 'USD')}
+                        {formatCurrencyCompact(netWorth.USD, 'USD')}
                     </h2>
                 </div>
             )}
