@@ -5,6 +5,27 @@ All notable changes to Anchor OS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.9] - 2026-01-31
+
+### Fixed
+
+#### BUG-023: Commitment Checkbox Requires Multiple Clicks
+- **Issue**: Checkboxes required 2-3 clicks and state reverted after ~10 seconds
+- **Root Cause**: Firestore `onSnapshot` listener failing with 400 errors on Listen stream, causing optimistic updates to revert
+- **Fix**: Replaced unreliable `onSnapshot` with polling-based `getDocs` (5s staleTime, refetchOnWindowFocus)
+- **Impact**: Single-click now works reliably, state persists indefinitely
+- **Files**: `src/hooks/queries/useTaskQueries.ts`, `firestore.indexes.json`
+
+### Added
+
+#### UX-020: Task Completion Animation + Haptic Feedback
+- **Haptic Feedback**: Added Navigator Vibration API for subtle "tick-tick" confirmation (30ms-50ms-30ms pulse)
+- **Visual Animation**: 800ms visible green checkmark animation on task completion
+- **Pop Effect**: Button scales to 150% with emerald ring glow and shadow
+- **Feedback Badge**: "✓ Complete!" badge appears next to title during animation
+- **Title Highlight**: Task title turns green during animation
+- **Files**: `src/features/commitments/components/TaskItem.tsx`
+
 ## [1.5.8] - 2026-01-31
 
 ### Fixed
