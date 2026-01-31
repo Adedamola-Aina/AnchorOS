@@ -26,9 +26,18 @@ _Environments in sync - no pending changes_
 
 ### v1.5.6 Features Awaiting Production Deployment
 
-- [ ] **BUG-022**: Modal keyboard input fix (Transfer/Pay Bill modals now accept keyboard input)
-- [ ] **Service Worker**: Cache version bump to v1.5.6 for immediate fix deployment
-- [ ] **PullToRefresh Removal**: Removed from Finance transaction list (was causing data to disappear)
+#### Critical Bug Fixes
+- [ ] **BUG-022**: Modal keyboard input fix - Transfer/Pay Bill modals now accept keyboard input (global handlers were intercepting keystrokes)
+- [ ] **Service Worker Cache**: Bumped to v1.5.6 to ensure immediate deployment of modal fix across all environments
+
+#### UX Improvements  
+- [ ] **PullToRefresh Removal**: Removed from Finance transaction list - was causing transactions to disappear during refresh
+- [ ] **Real-time Updates**: App now relies solely on Firestore real-time listeners and optimistic updates (no manual refresh needed)
+
+#### Technical Details
+- [ ] Modal: Added `e.stopPropagation()` to keyboard handler and content div to prevent event bubbling
+- [ ] FinanceView: Removed PullToRefresh wrapper, handleRefresh function, isRefreshing state
+- [ ] useFinanceData: Removed refetch function from hook exports
 
 ---
 
