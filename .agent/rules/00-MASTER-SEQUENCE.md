@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # ANCHOR OS - MANDATORY WORKFLOW
 
 > ⚠️ **YOU MUST FOLLOW THIS WORKFLOW ON EVERY TASK. NO EXCEPTIONS.**

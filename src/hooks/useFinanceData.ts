@@ -128,9 +128,13 @@ export const useFinanceData = (user: User | null) => {
 
     const jumpToMonth = (date: Date) => setCurrentMonth(date);
 
-    // Refetch all finance data (for pull-to-refresh)
+    // Refetch transaction data only (for pull-to-refresh)
+    // Use refetchQueries instead of invalidateQueries to avoid clearing the cache
     const refetch = useCallback(async () => {
-        await queryClient.invalidateQueries({ queryKey: ['finance'] });
+        await Promise.all([
+            queryClient.refetchQueries({ queryKey: ['finance', 'transactions'] }),
+            queryClient.refetchQueries({ queryKey: ['finance', 'recentTransactions'] }),
+        ]);
     }, [queryClient]);
 
     return {

@@ -27,6 +27,9 @@ export const Modal: React.FC<ModalProps> = ({
 
     // Focus trap and keyboard handling
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        // Stop propagation to prevent global handlers (CommandPalette, search shortcuts) from intercepting modal input
+        e.stopPropagation();
+
         if (e.key === 'Escape') {
             onClose();
             return;
@@ -82,7 +85,7 @@ export const Modal: React.FC<ModalProps> = ({
 
     return createPortal(
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 pointer-events-none ${fullScreenMobile ? 'p-0 sm:p-6' : 'p-4 sm:p-6'
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 ${fullScreenMobile ? 'p-0 sm:p-6' : 'p-4 sm:p-6'
                 }`}
             role="dialog"
             aria-modal="true"
@@ -90,7 +93,7 @@ export const Modal: React.FC<ModalProps> = ({
         >
             {/* Backdrop - catches clicks outside modal to close */}
             <div
-                className="fixed inset-0 z-0 pointer-events-auto"
+                className="fixed inset-0 z-0"
                 onClick={onClose}
                 aria-hidden="true"
             />
@@ -98,6 +101,7 @@ export const Modal: React.FC<ModalProps> = ({
             {/* Content - Full screen on mobile, centered modal on desktop */}
             <div
                 ref={modalRef}
+                onKeyDown={(e) => e.stopPropagation()}
                 className={`relative z-10 pointer-events-auto bg-white dark:bg-slate-800 shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden ${fullScreenMobile
                     ? `w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:${maxWidth} sm:rounded-2xl`
                     : `w-full ${maxWidth} max-h-[90vh] rounded-2xl`

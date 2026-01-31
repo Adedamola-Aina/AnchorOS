@@ -6,7 +6,23 @@
 
 ## 🔴 CRITICAL (P0)
 
-_No critical issues at this time_
+### [REG-003] Modal Inputs Still Not Working (Transfer/Pay Bill)
+- **Reported**: 2026-01-31 02:15 UTC
+- **Reporter**: Teeto (Owner)
+- **Environment**: Staging + Dev (v1.5.6) - **REGRESSION after BUG-022 "fix"**
+- **Impact**: **Cannot use Transfer or Pay Bill features** - inputs completely unresponsive
+  - ❌ Cannot type in description field
+  - ❌ Cannot type in amount field
+  - ✅ Can select transaction type (expense/income/transfer)
+  - ❌ Cannot select category
+  - ❌ Cannot select date
+  - ❌ Transfer: Cannot select to/from accounts
+- **Root Cause**: UNKNOWN - BUG-022 fix (`e.stopPropagation()`) deployed but not working
+- **Previous Fix Attempt**: BUG-022 added `e.stopPropagation()` to Modal.tsx lines 31 & 104
+- **Status**: 🚨 **INVESTIGATING** - Fix verification failed, issue persists
+- **Priority**: P0 - Core feature completely broken
+- **Assigned**: Agent
+- **Target**: 2026-01-31 (IMMEDIATE)
 
 ---
 
