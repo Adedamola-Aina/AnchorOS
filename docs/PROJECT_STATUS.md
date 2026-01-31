@@ -1,6 +1,6 @@
 # PROJECT STATUS
 
-**Last Updated**: 2026-01-31 04:12 UTC
+**Last Updated**: 2026-01-31 06:28 UTC
 **Updated By**: Agent
 **Sprint**: Week of Jan 26 - Feb 1, 2026
 
@@ -17,6 +17,21 @@ _No active work items_
 _No blockers at this time_
 
 ### ✅ Recently Completed (Last 7 Days)
+
+#### v1.5.9 Release (2026-01-31)
+- [x] **BUG-023: Commitment Checkbox Fix** ✅ - Fixed checkbox requiring multiple clicks
+  - Issue: Firestore `onSnapshot` listener failing with 400 errors, causing optimistic updates to revert
+  - Root Cause: Firestore Listen stream transport errors (missing index + network issues)
+  - Fix: Replaced `onSnapshot` with polling-based `getDocs` (5s staleTime)
+  - Impact: Single-click now works reliably, state persists
+  - Files: `useTaskQueries.ts`, `firestore.indexes.json`
+
+- [x] **UX-020: Task Completion Animation + Haptic Feedback** ✅
+  - Added 800ms visible green checkmark animation on task completion
+  - Added haptic feedback via Navigator Vibration API (30-50-30ms pulse pattern)
+  - Scale-150 pop effect with emerald glow shadow
+  - "✓ Complete!" badge appears during animation
+  - Files: `TaskItem.tsx`
 
 #### v1.5.8 Release (2026-01-31)
 - [x] **REG-004: Modal Focus Stealing** ✅ - Fixed race condition preventing typing in modal inputs
@@ -191,8 +206,8 @@ _No blockers at this time_
 | Environment | Version | Last Deploy | Health | Notes |
 |-------------|---------|-------------|--------|-------|
 | **Production** | v1.5.4 | 2026-01-29 | ✅ | Stable |
-| **Staging** | v1.5.6 | 2026-01-31 | ✅ | Testing BUG-022 fix |
-| **Development** | v1.5.6 | 2026-01-31 | ✅ | Active |
+| **Staging** | v1.5.9 | 2026-01-31 | ✅ | BUG-023 + Haptic Animation |
+| **Development** | v1.5.9 | 2026-01-31 | ✅ | Parity with Staging |
 
 **Production URL**: https://anchor-os.web.app
 **Staging URL**: https://anchor-os-staging.web.app
