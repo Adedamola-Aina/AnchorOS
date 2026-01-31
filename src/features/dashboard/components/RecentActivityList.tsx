@@ -7,7 +7,7 @@
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import type { AnchorTransaction } from '../../../types';
 import { fromCents } from '../../../utils/moneyUtils';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 
 interface RecentActivityListProps {
     recentActivity: AnchorTransaction[];
@@ -66,7 +66,7 @@ export function RecentActivityList({ recentActivity }: RecentActivityListProps) 
                                         : 'text-blue-500'
                                     }`}>
                                     {tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : ''}
-                                    {formatCurrency(fromCents(tx.amountCents || 0), tx.currency || 'NGN')}
+                                    {formatCurrencyCompact(fromCents(tx.amountCents || 0), tx.currency || 'NGN')}
                                 </span>
                             </div>
                         );

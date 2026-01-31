@@ -8,7 +8,7 @@
  */
 
 import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 import type { Currency } from '../../../types';
 
 interface WeeklyData {
@@ -69,7 +69,7 @@ export const SpendingTrendsChart = ({
                         <span className="text-[9px] font-bold text-finance-600 dark:text-finance-400 uppercase">In</span>
                     </div>
                     <p className="font-bold text-sm text-finance-600 dark:text-finance-400 tabular-nums">
-                        {formatCurrency(totals.income, currency)}
+                        {formatCurrencyCompact(totals.income, currency)}
                     </p>
                 </div>
                 <div className="text-center p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20">
@@ -78,7 +78,7 @@ export const SpendingTrendsChart = ({
                         <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase">Out</span>
                     </div>
                     <p className="font-bold text-sm text-rose-600 dark:text-rose-400 tabular-nums">
-                        {formatCurrency(totals.expense, currency)}
+                        {formatCurrencyCompact(totals.expense, currency)}
                     </p>
                 </div>
                 <div className={`text-center p-3 rounded-xl ${net >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
@@ -87,7 +87,7 @@ export const SpendingTrendsChart = ({
                         <span className={`text-[9px] font-bold uppercase ${net >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>Net</span>
                     </div>
                     <p className={`font-bold text-sm tabular-nums ${net >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                        {net > 0 ? '+' : ''}{formatCurrency(net, currency)}
+                        {net > 0 ? '+' : ''}{formatCurrencyCompact(net, currency)}
                     </p>
                 </div>
             </div>

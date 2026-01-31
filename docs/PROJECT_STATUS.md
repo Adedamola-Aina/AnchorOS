@@ -33,6 +33,11 @@ _No blockers at this time_
   - "✓ Complete!" badge appears during animation
   - Files: `TaskItem.tsx`
 
+- [x] **UX-019: Currency Overflow Protection** ✅
+  - Replaced `formatCurrency` with `formatCurrencyCompact` across all finance components
+  - Large currency values now display as abbreviations (₦15.2M instead of ₦15,234,567)
+  - Files: `SpendingTrendsChart.tsx`, `DashboardWidgets.tsx`, `AssetAllocationWidget.tsx`, `RecentActivityList.tsx`, `ActivityFeed.tsx`
+
 #### v1.5.8 Release (2026-01-31)
 - [x] **REG-004: Modal Focus Stealing** ✅ - Fixed race condition preventing typing in modal inputs
   - Issue: Modal's useEffect forcing focus to first element, overriding input autoFocus

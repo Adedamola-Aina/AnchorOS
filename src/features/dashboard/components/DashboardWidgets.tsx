@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Wallet, TrendingUp, TrendingDown, Activity, CheckCircle2, ArrowRight, Target } from 'lucide-react';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { Currency, AnchorTask, AnchorTransaction } from '../../../types';
 import type { AssetClass } from '../../../utils/financeInsights';
@@ -24,7 +24,7 @@ export const PortfolioWidget: React.FC<PortfolioWidgetProps> = ({ assets, onNavi
                 <div key={asset.id} className="flex justify-between items-center text-xs">
                     <div className="flex items-center gap-2 min-w-0 flex-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0" /><span className="font-medium text-slate-600 dark:text-slate-400 truncate">{asset.name}</span></div>
                     <div className="text-right">
-                        <p className="text-xs font-bold font-mono text-slate-900 dark:text-white tabular-nums">{formatCurrency(asset.amount, asset.currency as Currency)}</p>
+                        <p className="text-xs font-bold font-mono text-slate-900 dark:text-white tabular-nums">{formatCurrencyCompact(asset.amount, asset.currency as Currency)}</p>
                         <p className="text-[10px] font-bold text-slate-400 tabular-nums">{asset.percent.toFixed(1)}%</p>
                     </div>
                 </div>
@@ -48,8 +48,8 @@ export const CashFlowWidget: React.FC<CashFlowWidgetProps> = ({ cashFlow, curren
             </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl"><p className="text-[10px] uppercase font-black text-slate-400 mb-1">Income</p><p className="font-mono font-bold text-emerald-500">{formatCurrency(cashFlow.income, currency)}</p></div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl"><p className="text-[10px] uppercase font-black text-slate-400 mb-1">Expenses</p><p className="font-mono font-bold text-rose-500">{formatCurrency(cashFlow.expense, currency)}</p></div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl"><p className="text-[10px] uppercase font-black text-slate-400 mb-1">Income</p><p className="font-mono font-bold text-emerald-500">{formatCurrencyCompact(cashFlow.income, currency)}</p></div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl"><p className="text-[10px] uppercase font-black text-slate-400 mb-1">Expenses</p><p className="font-mono font-bold text-rose-500">{formatCurrencyCompact(cashFlow.expense, currency)}</p></div>
         </div>
     </div>
 );
@@ -74,7 +74,7 @@ export const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ acti
                             </div>
                         </div>
                         <span className={`font-mono font-bold text-sm ${tx.type === 'income' ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-300'}`}>
-                            {tx.type === 'income' ? '+' : ''}{formatCurrency(fromCents(tx.amountCents || 0), tx.currency)}
+                            {tx.type === 'income' ? '+' : ''}{formatCurrencyCompact(fromCents(tx.amountCents || 0), tx.currency)}
                         </span>
                     </div>
                 );
