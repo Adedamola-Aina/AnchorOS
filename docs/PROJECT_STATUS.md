@@ -1,6 +1,6 @@
 # PROJECT STATUS
 
-**Last Updated**: 2026-01-31 01:35 UTC
+**Last Updated**: 2026-01-31 02:02 UTC
 **Updated By**: Agent
 **Sprint**: Week of Jan 26 - Feb 1, 2026
 
@@ -30,6 +30,21 @@ _No blockers at this time_
   - Rationale: App uses real-time Firestore listeners + optimistic updates (manual refresh unnecessary)
   - Files: `FinanceView.tsx`, `useFinanceData.ts`
   - Deployed: Staging + Dev
+
+#### Dashboard Automation (2026-01-31)
+- [x] **Phase 1: Git Hook Automation** ✅ - Auto-refresh dashboard after commits
+  - Created: `.git/hooks/post-commit` - Restarts PM2 dashboard automatically
+  - Result: No manual `pm2 restart` needed
+  - Impact: Dashboard always shows latest git commits
+
+- [x] **Phase 2: AI Conversation Analyzer** ✅ - Auto-classify and document issues
+  - Created: `tools/dashboard/server/conversationAnalyzer.js` - Classifies BUG/REGRESSION/FEATURE/GAP/TASK
+  - Created: `tools/dashboard/server/autoDocumenter.js` - Routes to correct markdown files
+  - Created: `tools/dashboard/server/analyze-message.js` - CLI testing tool
+  - Features: Keyword detection, priority assignment (P0-P3), component detection
+  - Testing: ✅ Verified with sample messages (bugs, features, regressions)
+  - Documentation: `DASHBOARD_AUTOMATION_PLAN.md`, `DASHBOARD_AUTOMATION_SUMMARY.md`
+  - Next: Phase 3 (real-time monitoring), Phase 4 (LLM integration)
 
 #### Architecture & Brand Sprint (2026-01-29)
 - [x] **ARCH-007: Optimistic Updates** ✅ - Created `useOptimisticMutation` hook; applied to recurring transactions
