@@ -9,7 +9,7 @@ import React from 'react';
 import { Activity, Clock } from 'lucide-react';
 import type { AccountActivity } from '../../../types/activity';
 import { formatActivityMessage, getActivityColor } from '../../../types/activity';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { Currency } from '../../../types';
 import { formatRelativeTime, getActivityIcon } from './activityHelpers';
@@ -103,14 +103,14 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                                     : 'text-slate-600 dark:text-slate-400'
                                     }`}>
                                     {activity.details.type === 'income' ? '+' : '-'}
-                                    {formatCurrency(
+                                    {formatCurrencyCompact(
                                         fromCents(activity.details.amountCents!),
                                         (activity.details.currency || 'USD') as Currency
                                     )}
                                     {activity.details.previousAmountCents !== undefined &&
                                         activity.details.previousAmountCents !== activity.details.amountCents && (
                                             <span className="text-slate-400 ml-1">
-                                                (was {formatCurrency(
+                                                (was {formatCurrencyCompact(
                                                     fromCents(activity.details.previousAmountCents),
                                                     (activity.details.currency || 'USD') as Currency
                                                 )})

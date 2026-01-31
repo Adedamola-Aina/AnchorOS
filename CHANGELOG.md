@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Title Highlight**: Task title turns green during animation
 - **Files**: `src/features/commitments/components/TaskItem.tsx`
 
+#### UX-019: Currency Overflow Protection
+- **Compact Formatting**: Large currency values now display as abbreviations (₦15.2M instead of ₦15,234,567.00)
+- **Components Updated**: SpendingTrendsChart, DashboardWidgets, AssetAllocationWidget, RecentActivityList, ActivityFeed
+- **Files**: 5 finance components migrated to `formatCurrencyCompact`
+
 ## [1.5.8] - 2026-01-31
 
 ### Fixed

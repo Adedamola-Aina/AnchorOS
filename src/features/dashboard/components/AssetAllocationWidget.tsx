@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PieChart, ChevronDown, ChevronUp } from 'lucide-react';
-import { formatCurrency } from '../../../utils/format';
+import { formatCurrencyCompact } from '../../../utils/format';
 import type { AssetClass } from '../../../utils/financeInsights';
 import type { Currency } from '../../../types';
 
@@ -70,7 +70,7 @@ export const AssetAllocationWidget = ({ assets }: AssetAllocationWidgetProps) =>
                         </div>
                         <div className="text-right">
                             <p className="text-xs font-bold font-mono text-slate-900 dark:text-white tabular-nums">
-                                {formatCurrency(asset.amount, asset.currency as Currency)}
+                                {formatCurrencyCompact(asset.amount, asset.currency as Currency)}
                             </p>
                             <p className="text-[10px] font-bold text-slate-400 tabular-nums">
                                 {asset.percent.toFixed(1)}%
