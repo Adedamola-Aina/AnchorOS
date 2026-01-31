@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-29 22:17 UTC
+**Last Updated**: 2026-01-31 01:16 UTC
 
 ---
 
@@ -9,8 +9,8 @@
 | Environment | Version | Firebase Site | URL | Health |
 |-------------|---------|---------------|-----|--------|
 | **Production** | v1.5.4 | anchor-os | https://anchor-os.web.app | ✅ Stable |
-| **Staging** | v1.5.4 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Verified |
-| **Dev** | v1.5.4 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Verified |
+| **Staging** | v1.5.6 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Verified |
+| **Dev** | v1.5.6 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Verified |
 
 **Code Flow**: Dev → Staging → Production (with approval)
 
@@ -128,6 +128,7 @@ npm run deploy:production
 
 | Date | Version | Env | Type | Notes |
 |------|---------|-----|------|-------|
+| 2026-01-31 | v1.5.6 | Dev/Staging | Bugfix | BUG-022: Modal keyboard fix, Removed PullToRefresh |
 | 2026-01-29 | v1.5.3-ui-fix | Dev/Staging | Feature | UX-017: Scrollable List, Fixed BUG-008/010/011/012/013/014 |
 | 2026-01-28 | v1.5.0 | **Production** | Release | Full code parity, all UX improvements |
 | 2026-01-28 | v1.5.0 | Staging | Feature | UX improvements, Mobile gestures, OLED toggle |
