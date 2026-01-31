@@ -18,6 +18,16 @@ _No blockers at this time_
 
 ### ✅ Recently Completed (Last 7 Days)
 
+#### v1.5.7 Release (2026-01-31)
+- [x] **REG-003: Modal Inputs Completely Unresponsive** ✅ - CRITICAL FIX
+  - Issue: Transfer and Pay Bill modals had completely unresponsive inputs (couldn't type, select, or interact)
+  - Root Cause: `pointer-events-none` on modal wrapper blocked ALL pointer events to inputs
+  - Fix: Removed `pointer-events-none` from Modal.tsx wrapper (line 88)
+  - Tests: Created Modal.test.tsx with 4 regression tests - all passing
+  - Impact: ✅ Inputs now work, ✅ Backdrop clicks work, ✅ Keyboard isolation works
+  - Deployed: Ready for staging + dev
+  - **This was a REGRESSION** - BUG-022 fix was incomplete
+
 #### v1.5.6 Release (2026-01-31)
 - [x] **BUG-022: Modal Keyboard Input Fix** ✅ - Fixed Transfer/Pay Bill modals not accepting keyboard input
   - Root Cause: Global keyboard handlers (CommandPalette, FinanceView search) intercepting keystrokes

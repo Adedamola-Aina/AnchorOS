@@ -5,6 +5,29 @@ All notable changes to Anchor OS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.7] - 2026-01-31
+
+### Fixed
+
+#### 🚨 CRITICAL REGRESSION: Modal Inputs Completely Unresponsive (REG-003)
+- **Issue**: Transfer and Pay Bill modals had completely unresponsive inputs - couldn't type in description/amount fields, couldn't select categories/dates/accounts
+- **Root Cause**: `pointer-events-none` CSS class on modal wrapper (line 88 of Modal.tsx) blocked ALL pointer events (clicks, touches, typing) to everything inside the modal
+- **Impact**: Core finance features (Transfer, Pay Bill) were completely broken in v1.5.6
+- **Fix**: 
+  - Removed `pointer-events-none` from modal wrapper div
+  - Removed `pointer-events-auto` from backdrop (not needed)
+  - Backdrop and content divs handle their own pointer events correctly
+- **Tests**: Created `Modal.test.tsx` with 4 comprehensive regression tests:
+  - ✅ Allows typing in input fields
+  - ✅ Allows clicking buttons
+  - ✅ Closes modal when clicking backdrop
+  - ✅ Stops keyboard event propagation to prevent global handler interference
+- **Files Changed**:
+  - `src/components/shared/Modal.tsx` - Removed pointer-events-none
+  - `src/components/shared/Modal.test.tsx` - New regression test suite
+  - `package.json` - Bumped to v1.5.7
+- **Note**: This was a REGRESSION introduced by incomplete BUG-022 fix. BUG-022 only addressed keyboard event propagation but didn't account for pointer-events CSS blocking all interactions.
+
 ## [1.5.6] - 2026-01-31
 
 ### Fixed

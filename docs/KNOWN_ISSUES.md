@@ -6,23 +6,7 @@
 
 ## 🔴 CRITICAL (P0)
 
-### [REG-003] Modal Inputs Still Not Working (Transfer/Pay Bill)
-- **Reported**: 2026-01-31 02:15 UTC
-- **Reporter**: Teeto (Owner)
-- **Environment**: Staging + Dev (v1.5.6) - **REGRESSION after BUG-022 "fix"**
-- **Impact**: **Cannot use Transfer or Pay Bill features** - inputs completely unresponsive
-  - ❌ Cannot type in description field
-  - ❌ Cannot type in amount field
-  - ✅ Can select transaction type (expense/income/transfer)
-  - ❌ Cannot select category
-  - ❌ Cannot select date
-  - ❌ Transfer: Cannot select to/from accounts
-- **Root Cause**: UNKNOWN - BUG-022 fix (`e.stopPropagation()`) deployed but not working
-- **Previous Fix Attempt**: BUG-022 added `e.stopPropagation()` to Modal.tsx lines 31 & 104
-- **Status**: 🚨 **INVESTIGATING** - Fix verification failed, issue persists
-- **Priority**: P0 - Core feature completely broken
-- **Assigned**: Agent
-- **Target**: 2026-01-31 (IMMEDIATE)
+_No critical issues at this time_
 
 ---
 
@@ -70,11 +54,20 @@ _No regressions detected_
 
 ## ✅ RECENTLY FIXED
 
+### [REG-003] Modal Inputs Completely Unresponsive (FIXED 2026-01-31)
+- **Root Cause**: `pointer-events-none` on modal wrapper (line 88) blocked ALL pointer events including typing, clicking, selecting
+- **Impact**: Transfer and Pay Bill modals completely broken - couldn't type in description/amount, select categories/dates/accounts
+- **Fix**: Removed `pointer-events-none` from Modal.tsx wrapper, removed `pointer-events-auto` from backdrop (not needed)
+- **Tests**: Created Modal.test.tsx with 4 regression tests - all passing
+- **Verified**: v1.5.7 ready for staging + dev deployment
+- **Note**: This was a REGRESSION - BUG-022 fix was incomplete (only addressed keyboard events, not pointer events)
+
 ### [BUG-022] Modal Keyboard Input Not Working (FIXED 2026-01-31)
 - **Root Cause**: Global keyboard handlers (CommandPalette, FinanceView search) intercepting keystrokes before modal inputs could receive them
 - **Fix**: Added `e.stopPropagation()` to Modal keyboard handler and content div to prevent event bubbling
 - **Additional**: Removed PullToRefresh from Finance transaction list (was causing transactions to disappear)
 - **Verified**: Deployed to staging and dev (v1.5.6)
+- **Note**: This fix was INCOMPLETE - see REG-003 for the full fix
 
 ### [BUG-021] Transaction Modal Unresponsive - SW Cache Issue (FIXED 2026-01-30)
 - **Root Cause**: Service worker cache stuck at v1.3, serving stale JS bundles
