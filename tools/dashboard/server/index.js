@@ -12,7 +12,7 @@ const path = require('path');
 const cron = require('node-cron');
 
 const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions, getEnhancedKanbanBoard } = require('./docReader/index');
-const { getRecentCommits, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
+const { getRecentCommits, getRecentCommitsFiltered, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
 const { getEnvironmentStatus, checkEnvParity, checkEnvParityByGit } = require('./envChecker');
 const { getPrioritySuggestions } = require('./prioritySuggester');
 const { getDependencyHealth } = require('./dependencyChecker');
@@ -189,6 +189,44 @@ app.get('/api/git/commits', async (req, res) => {
         const limit = parseInt(req.query.limit) || 30;
         const commits = await getRecentCommits(limit);
         res.json(commits);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/commits/anchorOS
+ * Returns only Anchor OS product commits (excludes dashboard/tooling)
+ */
+app.get('/api/git/commits/anchorOS', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 30;
+        const commits = await getRecentCommitsFiltered('anchorOS', limit);
+        res.json({
+            category: 'anchorOS',
+            description: 'Anchor OS product changes (src/, e2e/, public/, etc.)',
+            count: commits.length,
+            commits
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/commits/dashboard
+ * Returns only dashboard/tooling commits
+ */
+app.get('/api/git/commits/dashboard', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 30;
+        const commits = await getRecentCommitsFiltered('dashboard', limit);
+        res.json({
+            category: 'dashboard',
+            description: 'Internal Dashboard & tooling changes (tools/, docs/, .agent/, etc.)',
+            count: commits.length,
+            commits
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
