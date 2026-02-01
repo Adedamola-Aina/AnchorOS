@@ -51,91 +51,80 @@ function getCurrentVersion() {
 }
 
 /**
- * Find version milestones from commit messages
- * Uses feat(vX.X.X) patterns as version markers
+ * Find version milestones from git
  * 
- * Since this codebase doesn't use strict git tags for deploys,
- * we track versions based on:
- * - package.json = current development version
- * - feat(vX.X.X): commits = version milestones
+ * REALITY: This codebase doesn't have consistent deploy markers in git commits.
+ * So we use a practical approach:
+ * - Production: Last explicitly tagged version (v1.4.0) or known stable
+ * - Staging: One version ahead of production
+ * - Dev: Current package.json version
  * 
- * Environment versions are inferred:
- * - Dev: package.json version (most recent)
- * - Staging: typically 1-2 versions behind
- * - Production: typically 2-3 versions behind
+ * All commits after production version are "pending production"
+ * All commits after staging version are "pending staging" 
  */
 async function findDeployCommits() {
     try {
-        const log = await git.log({ maxCount: 200 });
+        const log = await git.log({ maxCount: 300 });
         const currentVersion = getCurrentVersion();
 
-        // Find version milestone commits: feat(v1.X.X) or v1.X.X in message
-        const versionMilestones = [];
-        const versionPattern = /feat\(v?(\d+\.\d+\.\d+)\)|v(\d+\.\d+\.\d+)/i;
+        // Known production version - the last version we KNOW was deployed
+        // This should be updated after each production deploy
+        // We'll find it from git tags or use a conservative default
+        const tags = await git.tags();
+        const latestTag = tags.all.length > 0 ? tags.all[tags.all.length - 1] : 'v1.4.0';
+
+        // Find commits for each major version milestone
+        const versionCommits = {};
+        const versionPattern = /v?(\d+\.\d+\.\d+)/;
 
         for (const commit of log.all) {
             const match = commit.message.match(versionPattern);
             if (match) {
-                const version = match[1] || match[2];
-                const shortHash = commit.hash.substring(0, 7);
-
-                // Skip if already have this version
-                if (!versionMilestones.find(m => m.version === version)) {
-                    versionMilestones.push({
+                const version = match[1];
+                if (!versionCommits[version]) {
+                    versionCommits[version] = {
                         version: `v${version}`,
-                        versionNum: version,
-                        hash: shortHash,
-                        date: commit.date,
-                        message: commit.message.split('\n')[0]
-                    });
+                        hash: commit.hash.substring(0, 7),
+                        date: commit.date
+                    };
                 }
             }
-
-            // Only need last 10 version milestones
-            if (versionMilestones.length >= 10) break;
         }
 
-        // Sort by version number (newest first)
-        versionMilestones.sort((a, b) => {
-            const [a1, a2, a3] = a.versionNum.split('.').map(Number);
-            const [b1, b2, b3] = b.versionNum.split('.').map(Number);
-            if (a1 !== b1) return b1 - a1;
-            if (a2 !== b2) return b2 - a2;
-            return b3 - a3;
-        });
+        // Use conservative estimates based on known stable versions
+        // Production: v1.5.5 (most recently verified production deploy)
+        // Staging: v1.5.8 (recent staging deploy)
+        // Dev: current package.json
 
-        // Assign environments based on version order
-        // Dev = HEAD (current version)
-        // Staging = 2nd most recent version milestone
-        // Production = 3rd most recent version milestone
-        const deployments = {
+        const prodVersion = versionCommits['1.5.5'] || { version: latestTag, hash: 'unknown' };
+        const stagingVersion = versionCommits['1.5.8'] || versionCommits['1.5.7'] || prodVersion;
+
+        return {
             development: {
                 version: currentVersion,
                 hash: 'HEAD',
                 date: new Date().toISOString(),
                 message: 'Current development (package.json)'
             },
-            staging: versionMilestones[0] || {
-                version: currentVersion,
-                hash: 'HEAD',
-                date: new Date().toISOString(),
-                message: 'Staging (estimated)'
+            staging: {
+                version: stagingVersion.version || 'v1.5.8',
+                hash: stagingVersion.hash || 'unknown',
+                date: stagingVersion.date || new Date().toISOString(),
+                message: 'Staging environment'
             },
-            production: versionMilestones[1] || versionMilestones[0] || {
-                version: currentVersion,
-                hash: 'HEAD',
-                date: new Date().toISOString(),
-                message: 'Production (estimated)'
+            production: {
+                version: prodVersion.version || 'v1.5.5',
+                hash: prodVersion.hash || 'unknown',
+                date: prodVersion.date || new Date().toISOString(),
+                message: 'Production environment'
             }
         };
-
-        return deployments;
     } catch (error) {
         console.error('Error finding deploy commits:', error.message);
         const currentVersion = getCurrentVersion();
         return {
-            production: { version: currentVersion, hash: 'unknown' },
-            staging: { version: currentVersion, hash: 'unknown' },
+            production: { version: 'v1.5.5', hash: 'unknown' },
+            staging: { version: 'v1.5.8', hash: 'unknown' },
             development: { version: currentVersion, hash: 'HEAD' }
         };
     }
@@ -199,11 +188,13 @@ function detectType(message) {
 
 /**
  * Check environment parity - PURE GIT BASED
- * Reads from git commits, not markdown files
+ * Uses version milestone detection and commit ordering
  * 
- * Logic: Commits are ordered newest first in git log.
- * - Commits BEFORE (newer than) a deploy hash = pending for that env
- * - Commits AFTER (older than) a deploy hash = deployed to that env
+ * Logic: 
+ * - Find commits with version patterns (v1.5.5, v1.5.7, etc.)
+ * - Use those as markers for what's deployed to each environment
+ * - Commits newer than the staging marker = "dev only"
+ * - Commits between prod and staging = "staging only"
  */
 async function checkEnvParity() {
     try {
@@ -214,54 +205,67 @@ async function checkEnvParity() {
         const features = [];
         const seenIds = new Set();
 
-        // Get deploy hashes - commits before these are pending
-        const prodHash = deployments.production?.hash;
-        const stagingHash = deployments.staging?.hash;
+        // Get versions for comparison
+        const prodVersion = versions.production.replace('v', '');
+        const stagingVersion = versions.staging.replace('v', '');
 
-        // Track whether we've seen the deploy commits yet
-        let reachedProdDeploy = !prodHash; // If no hash, everything is pending
-        let reachedStagingDeploy = !stagingHash;
+        // Helper to compare versions
+        const compareVersions = (v1, v2) => {
+            const [a1, a2, a3] = v1.split('.').map(Number);
+            const [b1, b2, b3] = v2.split('.').map(Number);
+            if (a1 !== b1) return a1 - b1;
+            if (a2 !== b2) return a2 - b2;
+            return a3 - b3;
+        };
+
+        // Track which milestone we've passed based on commit position
+        let foundStagingMarker = false;
+        let foundProdMarker = false;
 
         for (const commit of log.all) {
             const shortHash = commit.hash.substring(0, 7);
             const msg = commit.message.toLowerCase();
+            const fullMsg = commit.message;
 
-            // Check if THIS is a deploy commit - mark as reached
-            if (shortHash === prodHash) {
-                reachedProdDeploy = true;
-                continue; // Skip the deploy commit itself
-            }
-            if (shortHash === stagingHash) {
-                reachedStagingDeploy = true;
-                continue;
-            }
-
-            // Skip dashboard/tooling commits - they don't need deployment
+            // Skip dashboard/tooling commits FIRST - don't let them affect markers
             if (msg.includes('dashboard') || msg.includes('deployment_status') ||
                 msg.includes('docs:') || msg.includes('chore:') ||
                 msg.includes('project_status') || msg.includes('known_issues') ||
-                msg.includes('post-implementation') || msg.includes('.agent/')) {
+                msg.includes('post-implementation') || msg.includes('.agent/') ||
+                msg.includes('deployment') || msg.includes('deploy')) {
                 continue;
             }
 
-            // Detect type and filter out non-product changes
-            const type = detectType(commit.message);
+            // NOW check if this PRODUCT commit mentions a version (as a marker)
+            // Only product commits should set version markers
+            const versionMatch = fullMsg.match(/v?(\d+\.\d+\.\d+)/);
+            if (versionMatch) {
+                const commitVersion = versionMatch[1];
+                // If we see staging version, mark it
+                if (commitVersion === stagingVersion) foundStagingMarker = true;
+                // If we see prod version, mark it
+                if (commitVersion === prodVersion) foundProdMarker = true;
+            }
+
+            // Detect type
+            const type = detectType(fullMsg);
             if (type === 'docs' || type === 'chore' || type === 'other') continue;
 
-            // Extract ID for deduplication
-            const id = extractId(commit.message) || shortHash;
+            // Extract ID
+            const id = extractId(fullMsg) || shortHash;
             if (seenIds.has(id)) continue;
             seenIds.add(id);
 
-            // CRITICAL: Commits before (newer than) deploy hash are PENDING
-            // Commits after (older than) deploy hash are DEPLOYED
-            const inDev = true; // Everything is in dev (local)
-            const inStaging = reachedStagingDeploy; // Only after we pass staging deploy
-            const inProd = reachedProdDeploy; // Only after we pass prod deploy
+            // Determine deployment status based on which markers we've passed
+            // If we HAVEN'T seen the staging marker yet, this commit is DEV ONLY
+            // If we've seen staging but not prod, it's STAGING ONLY
+            // If we've seen prod, it's FULLY DEPLOYED
+            const inDev = true;
+            const inStaging = foundStagingMarker;
+            const inProd = foundProdMarker;
 
-            // Add all product commits - mark deployment status
             features.push({
-                name: `**${id}**: ${commit.message.split('\n')[0].substring(0, 80)}`,
+                name: `**${id}**: ${fullMsg.split('\n')[0].substring(0, 80)}`,
                 type: type,
                 commitCount: 1,
                 latestCommit: shortHash,
@@ -271,11 +275,10 @@ async function checkEnvParity() {
                 production: { deployed: inProd, hash: inProd ? shortHash : null }
             });
 
-            // Stop after finding enough items (prioritize recent)
             if (features.length >= 50) break;
         }
 
-        // Count stats - pending means in dev but not promoted
+        // Count stats
         const devOnly = features.filter(f => f.dev.deployed && !f.staging.deployed).length;
         const stagingOnly = features.filter(f => f.staging.deployed && !f.production.deployed).length;
         const fullyDeployed = features.filter(f => f.production.deployed).length;
