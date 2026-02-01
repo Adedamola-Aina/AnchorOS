@@ -26,6 +26,7 @@ const { startFileWatchers, stopFileWatchers } = require('./fileWatcher');
 const { watchMarkerFiles, initializeDashboardDir } = require('./conversationProcessor');
 const { getCommandCenterData, getProactiveAlerts } = require('./commandCenter');
 const { getDeduplicationStats, findDuplicates, getNextId } = require('./deduplicator');
+const gitData = require('./gitDataProvider');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -241,6 +242,99 @@ app.get('/api/git/timeline', async (req, res) => {
         const days = parseInt(req.query.days) || 14;
         const timeline = await getDeploymentTimeline(days);
         res.json(timeline);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============ GIT-BASED DATA ENDPOINTS (100% AUTOMATED) ============
+
+/**
+ * GET /api/git/bugs
+ * Returns all bugs from git (BUG-XXX, REG-XXX patterns)
+ */
+app.get('/api/git/bugs', async (req, res) => {
+    try {
+        const bugs = await gitData.getBugs();
+        res.json({
+            source: 'git-automated',
+            count: bugs.length,
+            bugs
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/features
+ * Returns all features from git (FEAT-XXX, UX-XXX, TASK-XXX, GAP-XXX patterns)
+ */
+app.get('/api/git/features', async (req, res) => {
+    try {
+        const features = await gitData.getFeatures();
+        res.json({
+            source: 'git-automated',
+            count: features.length,
+            features
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/kanban
+ * Returns Kanban board data from git (no markdown dependency)
+ */
+app.get('/api/git/kanban', async (req, res) => {
+    try {
+        const data = await gitData.getKanbanData();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/command-center
+ * Returns Command Center data from git (no markdown dependency)
+ */
+app.get('/api/git/command-center', async (req, res) => {
+    try {
+        const data = await gitData.getCommandCenterData();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/backlog
+ * Returns Feature Backlog from git (no markdown dependency)
+ */
+app.get('/api/git/backlog', async (req, res) => {
+    try {
+        const data = await gitData.getFeatureBacklog();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/all-items
+ * Returns all tracked items from git
+ */
+app.get('/api/git/all-items', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 200;
+        const items = await gitData.getAllTrackedItems(limit);
+        res.json({
+            source: 'git-automated',
+            count: items.length,
+            items
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
