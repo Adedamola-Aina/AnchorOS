@@ -13,7 +13,7 @@ const cron = require('node-cron');
 
 const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions, getEnhancedKanbanBoard } = require('./docReader/index');
 const { getRecentCommits, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
-const { getEnvironmentStatus, checkEnvParity } = require('./envChecker');
+const { getEnvironmentStatus, checkEnvParity, checkEnvParityByGit } = require('./envChecker');
 const { getPrioritySuggestions } = require('./prioritySuggester');
 const { getDependencyHealth } = require('./dependencyChecker');
 const { getProgressReport } = require('./progressTracker');
@@ -25,6 +25,7 @@ const { runFullSync, getSyncStatus } = require('./docUpdater');
 const { startFileWatchers, stopFileWatchers } = require('./fileWatcher');
 const { watchMarkerFiles, initializeDashboardDir } = require('./conversationProcessor');
 const { getCommandCenterData, getProactiveAlerts } = require('./commandCenter');
+const { getDeduplicationStats, findDuplicates, getNextId } = require('./deduplicator');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -115,14 +116,14 @@ app.get('/api/board', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
-            // Serve index.html for all non-API, non-static routes (SPA fallback)
-            app.get('*', (req, res) => {
-                if (!req.path.startsWith('/api/')) {
-                    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-                } else {
-                    res.status(404).send('Not found');
-                }
-            });
+        // Serve index.html for all non-API, non-static routes (SPA fallback)
+        app.get('*', (req, res) => {
+            if (!req.path.startsWith('/api/')) {
+                res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+            } else {
+                res.status(404).send('Not found');
+            }
+        });
     }
 });
 
@@ -146,6 +147,20 @@ app.get('/api/features', async (req, res) => {
 app.get('/api/parity', async (req, res) => {
     try {
         const parity = await checkEnvParity();
+        res.json(parity);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/parity-git
+ * Returns feature parity using GIT HISTORY as source of truth
+ * More accurate than markdown-based parity
+ */
+app.get('/api/parity-git', async (req, res) => {
+    try {
+        const parity = await checkEnvParityByGit();
         res.json(parity);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -188,6 +203,46 @@ app.get('/api/git/timeline', async (req, res) => {
         const days = parseInt(req.query.days) || 14;
         const timeline = await getDeploymentTimeline(days);
         res.json(timeline);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/dedup
+ * Returns deduplication statistics and health
+ */
+app.get('/api/dedup', async (req, res) => {
+    try {
+        const stats = await getDeduplicationStats();
+        res.json(stats);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/dedup/duplicates
+ * Returns all duplicates found
+ */
+app.get('/api/dedup/duplicates', async (req, res) => {
+    try {
+        const duplicates = await findDuplicates();
+        res.json({ duplicates, count: duplicates.length });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/dedup/next/:prefix
+ * Returns next available ID for a prefix (e.g., /api/dedup/next/BUG -> BUG-025)
+ */
+app.get('/api/dedup/next/:prefix', async (req, res) => {
+    try {
+        const prefix = req.params.prefix.toUpperCase();
+        const nextId = await getNextId(prefix);
+        res.json({ prefix, nextId });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -319,7 +374,7 @@ app.get('/api/command-center', async (req, res) => {
 app.get('/api/alerts', async (req, res) => {
     try {
         const alerts = await getProactiveAlerts();
-        res.json({ 
+        res.json({
             count: alerts.length,
             critical: alerts.filter(a => a.severity === 'critical').length,
             warning: alerts.filter(a => a.severity === 'warning').length,

@@ -6,7 +6,7 @@
  */
 
 const { readDoc } = require('./docReader');
-const { getCommitsBetweenVersions, getTags, getRecentCommits } = require('./gitAnalyzer');
+const { getCommitsBetweenVersions, getTags, getRecentCommits, getActualDeployments, getPendingChangesByGit } = require('./gitAnalyzer');
 
 // Environment URLs (for health checks)
 const ENVIRONMENTS = {
@@ -215,9 +215,120 @@ async function getEnvironmentStatus() {
     };
 }
 
+/**
+ * Check environment parity using GIT HISTORY as source of truth
+ * This is more accurate than markdown parsing as it reads actual commits
+ */
+async function checkEnvParityByGit() {
+    try {
+        const pendingChanges = await getPendingChangesByGit();
+        const deployments = await getActualDeployments();
+
+        // Helper to detect item type from commit message
+        const detectType = (msg) => {
+            if (msg.includes('BUG-')) return 'bug';
+            if (msg.includes('REG-')) return 'regression';
+            if (msg.includes('GAP-')) return 'gap';
+            if (msg.includes('UX-')) return 'enhancement';
+            if (msg.includes('TASK-')) return 'task';
+            if (msg.includes('ARCH-')) return 'architecture';
+            if (msg.includes('feat')) return 'feature';
+            if (msg.includes('fix')) return 'bugfix';
+            return 'other';
+        };
+
+        // Build features list from git commits
+        const features = [];
+        const seenIds = new Set(); // Deduplication
+
+        // Dev-only commits (pending staging)
+        for (const commit of pendingChanges.devToStaging || []) {
+            const id = commit.id || commit.hash;
+            if (seenIds.has(id)) continue;
+            seenIds.add(id);
+
+            features.push({
+                name: commit.title,
+                type: commit.type || detectType(commit.title),
+                commitCount: 1,
+                latestCommit: commit.hash,
+                dev: { deployed: true, hash: commit.hash },
+                staging: { deployed: false, hash: null },
+                production: { deployed: false, hash: null }
+            });
+        }
+
+        // Staging-only commits (pending production)
+        for (const commit of pendingChanges.stagingToProduction || []) {
+            const id = commit.id || commit.hash;
+            if (seenIds.has(id)) continue;
+            seenIds.add(id);
+
+            features.push({
+                name: commit.title,
+                type: commit.type || detectType(commit.title),
+                commitCount: 1,
+                latestCommit: commit.hash,
+                dev: { deployed: true, hash: commit.hash },
+                staging: { deployed: true, hash: commit.hash },
+                production: { deployed: false, hash: null }
+            });
+        }
+
+        // Count stats
+        const devOnly = features.filter(f => !f.staging.deployed).length;
+        const stagingPending = features.filter(f => f.staging.deployed && !f.production.deployed).length;
+        const fullyDeployed = features.filter(f => f.production.deployed).length;
+
+        return {
+            source: 'git',
+            versions: {
+                production: deployments.production?.version || 'unknown',
+                staging: deployments.staging?.version || 'unknown',
+                development: deployments.development?.version || 'unknown',
+                current: deployments.currentVersion
+            },
+            deployments: {
+                production: {
+                    version: deployments.production?.version,
+                    date: deployments.production?.date,
+                    hash: deployments.production?.hash
+                },
+                staging: {
+                    version: deployments.staging?.version,
+                    date: deployments.staging?.date,
+                    hash: deployments.staging?.hash
+                },
+                development: {
+                    version: deployments.development?.version,
+                    date: deployments.development?.date,
+                    hash: deployments.development?.hash
+                }
+            },
+            features,
+            summary: {
+                total: features.length,
+                devOnly,
+                stagingPending,
+                fullyDeployed
+            }
+        };
+    } catch (error) {
+        console.error('Error checking git-based parity:', error.message);
+        return {
+            source: 'git',
+            error: error.message,
+            versions: {},
+            features: [],
+            summary: { total: 0, devOnly: 0, stagingPending: 0, fullyDeployed: 0 }
+        };
+    }
+}
+
 module.exports = {
     getEnvironmentVersions,
     checkEnvParity,
+    checkEnvParityByGit,
     checkEnvironmentHealth,
     getEnvironmentStatus
 };
