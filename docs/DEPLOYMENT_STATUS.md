@@ -1,16 +1,16 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-02-01 05:35 UTC
+**Last Updated**: 2026-02-01 05:45 UTC
 
 ---
 
 ## 📊 CURRENT STATE
 
-| Environment | Version | Firebase Site | URL | Health | Last Deployed |
-|-------------|---------|---------------|-----|--------|---------------|
-| **Production** | v1.5.9 | anchor-os | https://anchor-os.web.app | ✅ Stable | 2026-01-30 08:19 |
-| **Staging** | v1.5.9 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Deployed | 2026-01-31 06:24 |
-| **Dev** | v1.6.0 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Deployed | 2026-02-01 05:32 |
+| Environment | Version | Firebase Site | URL | Last Deployed |
+|-------------|---------|---------------|-----|---------------|
+| **Production** | v1.5.5 | anchor-os | https://anchor-os.web.app | 2026-01-30 08:19 |
+| **Staging** | v1.5.8 | anchor-os-staging | https://anchor-os-staging.web.app | 2026-01-31 06:24 |
+| **Dev** | v1.6.0 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | 2026-02-01 05:32 |
 
 **Code Flow**: Dev → Staging → Production (with approval)
 
@@ -18,41 +18,84 @@
 
 ## ⏳ PENDING CHANGES (Dev → Staging)
 
-### v1.6.0 Multi-Team Sprint (Ready for Staging)
+### v1.6.0 Multi-Team Sprint (2026-02-01) - NOT YET ON STAGING
 
-#### GAP-002: Design System Color Token Fragmentation ✅
+#### GAP-002: Design System Color Token Fragmentation
 - Migrated `indigo-*` to `primary-*` tokens across 4 components
 - Files: `CategoryIcon.tsx`, `RecurringTransactionsList.tsx`, `RecurringOptions.tsx`, `NotificationSettings.tsx`
 
-#### GAP-003: Navigation Race Condition ✅
+#### GAP-003: Navigation Race Condition
 - Replaced flaky `setTimeout(100)` with `requestAnimationFrame` + 1300ms delay
 - Files: `CommitmentsView.tsx`
 
-#### GAP-004: Command Palette Recent Actions ✅
+#### GAP-004: Command Palette Recent Actions
 - Implemented localStorage persistence with auto-deduplication
 - "Recent" section appears at top when no query entered
 - Files: `CommandPalette.tsx`
 
-#### TASK-002: Habit Streaks & Gamification ✅
-- Already implemented (discovered during sprint)
-- No code changes needed, updated documentation
+### v1.5.9 Features (2026-01-31) - NOT YET ON STAGING
+
+#### BUG-023: Commitment Checkbox Requires Multiple Clicks
+- Replaced `onSnapshot` with polling-based `getDocs` (5s staleTime)
+- Files: `useTaskQueries.ts`
+
+#### UX-020: Task Completion Animation + Haptic Feedback
+- 800ms visible green checkmark animation
+- Haptic feedback via Navigator Vibration API
+- Files: `TaskItem.tsx`
+
+#### UX-019: Currency Overflow Protection
+- Large currency values display as abbreviations (₦15.2M)
+- Files: 5 finance components
 
 ---
 
 ## ⏳ PENDING CHANGES (Staging → Production)
 
-_Production and Staging are at parity (v1.5.9)_
+### v1.5.8 Features (2026-01-31) - ON STAGING, NOT ON PRODUCTION
 
-**Note**: v1.5.9 was fully deployed to production on 2026-01-30. Includes:
-- ✅ BUG-022: Modal keyboard input fix
-- ✅ BUG-023: Commitment checkbox fix (polling-based)
-- ✅ UX-019: Currency overflow protection (compact formatting)
-- ✅ UX-020: Task completion animation + haptic feedback
-- ✅ REG-003/004: Modal focus/input regressions
+#### REG-004: Modal Focus Stealing Race Condition
+- Modal inputs unresponsive after REG-003 fix - users could click but not type
+- Fix: Removed auto-focus logic from Modal.tsx
+- Files: `Modal.tsx`
+
+#### ActivityFeed Crash Fix
+- Fixed TypeError on `activity.details.amountCents`
+- Files: `ActivityFeed.tsx`
+
+#### Duplicate Category Icons
+- Assigned unique icons to each category (Food→Utensils, Groceries→ShoppingCart, etc.)
+- Files: `CategoryIcon.tsx`
+
+#### Transaction List Overflow UI
+- Fixed excessive whitespace on lists with 2-6 items
+- Files: `VirtualTransactionList.tsx`
+
+#### Edit/Delete Button Removal
+- Removed visible buttons from desktop (swipe gestures preserved on mobile)
+- Files: `TransactionItem.tsx`
+
+### v1.5.7 Features (2026-01-31) - ON STAGING, NOT ON PRODUCTION
+
+#### CRITICAL: REG-003 Modal Inputs Completely Unresponsive
+- `pointer-events-none` blocked ALL interactions to modals
+- Fix: Removed `pointer-events-none` from Modal.tsx wrapper
+- Files: `Modal.tsx`, `Modal.test.tsx`
+
+### v1.5.6 Features (2026-01-31) - ON STAGING, NOT ON PRODUCTION
+
+#### BUG-022: Modal Keyboard Input Not Working
+- Global keyboard handlers intercepting keystrokes
+- Fix: Added `e.stopPropagation()` to Modal keyboard handler
+- Files: `Modal.tsx`, `FinanceView.tsx`
+
+#### PullToRefresh Removal
+- Removed from Finance transaction list (was causing transactions to disappear)
+- Files: `FinanceView.tsx`
 
 ---
 
-## ⚠️ INCIDENT RESOLVED
+## ⚠️ INCIDENT LOG
 
 **Date**: 2026-01-29  
 **Issue**: Untested code was deployed to production without approval  
@@ -61,7 +104,7 @@ _Production and Staging are at parity (v1.5.9)_
 
 ---
 
-## ✅ DEPLOYED TO PRODUCTION (v1.5.9)
+## ✅ DEPLOYED TO PRODUCTION (v1.5.5)
 
 ### Bug Fixes
 | Bug ID | Description | Priority | Status |
@@ -117,72 +160,23 @@ _Production and Staging are at parity (v1.5.9)_
 
 ---
 
-## 🔧 LOCAL DEVELOPMENT
-
-**For Teeto Only (Tailscale)**:
-- URL: https://anchor.tail2fa2e.ts.net
-- Access: Private (Tailscale network)
-- Monitoring: https://beszel.tail2fa2e.ts.net
-
-**Local Dev Server**:
-```bash
-npm run dev
-# Starts at http://localhost:5173
-```
-
----
-
-## 📋 DEPLOYMENT PIPELINE
-
-### Development → Staging
-```bash
-# 1. Build and deploy to dev
-npm run deploy:dev
-
-# 2. Test on dev environment
-# https://anchor-os-dev-1c6ec.web.app
-
-# 3. Build and deploy to staging
-npm run deploy:staging
-```
-
-### Staging → Production
-```bash
-# 1. Test on staging
-# https://anchor-os-staging.web.app
-
-# 2. After approval, deploy to production
-npm run deploy:production
-
-# 3. Verify production
-# https://anchor-os.web.app
-```
-
----
-
 ## 📝 DEPLOYMENT HISTORY (Last 30 Days)
 
 | Date | Version | Env | Type | Notes |
 |------|---------|-----|------|-------|
-| 2026-02-01 | v1.6.0 | Dev | **MULTI-TEAM SPRINT** | GAP-002: Color tokens, GAP-003: Navigation timing, GAP-004: Command Palette recent actions, TASK-002: Streaks (already implemented) |
-| 2026-01-31 | v1.5.9 | Dev/Staging | **REASSURANCE RELEASE** | BUG-023: Commit checkbox, UX-019/20: Currency overflow + Haptic feedback |
-| 2026-01-31 | v1.5.8 | Dev/Staging | **UX FIXES** | REG-004: Modal focus stealing fix, ActivityFeed crash fix, Unique category icons, Transaction list overflow fix, Edit/delete button removal (swipe gestures preserved) |
-| 2026-01-31 | v1.5.7 | Dev/Staging | **CRITICAL FIX** | REG-003: Fixed modal inputs completely unresponsive (pointer-events-none blocking all interactions) |
-| 2026-01-31 | v1.5.6 | Dev/Staging | Bugfix | BUG-022: Modal keyboard fix, Removed PullToRefresh |
+| 2026-02-01 | v1.6.0 | Dev | **MULTI-TEAM SPRINT** | GAP-002: Color tokens, GAP-003: Navigation timing, GAP-004: Command Palette recent actions |
+| 2026-01-31 | v1.5.8 | Staging | **UX FIXES** | REG-004, ActivityFeed crash, Unique category icons, Transaction list overflow, Edit/delete button removal |
+| 2026-01-31 | v1.5.7 | Staging | **CRITICAL FIX** | REG-003: Fixed modal inputs completely unresponsive |
+| 2026-01-31 | v1.5.6 | Staging | Bugfix | BUG-022: Modal keyboard fix, Removed PullToRefresh |
+| 2026-01-30 | v1.5.5 | **Production** | Release | BUG-021: Service worker cache fix |
 | 2026-01-29 | v1.5.3-ui-fix | Dev/Staging | Feature | UX-017: Scrollable List, Fixed BUG-008/010/011/012/013/014 |
 | 2026-01-28 | v1.5.0 | **Production** | Release | Full code parity, all UX improvements |
 | 2026-01-28 | v1.5.0 | Staging | Feature | UX improvements, Mobile gestures, OLED toggle |
 | 2026-01-28 | v1.5.0 | Dev | Feature | UX improvements, Mobile gestures, OLED toggle |
-| 2026-01-28 | v1.5.0-dev | Local | Bugfix | BUG-007: Modal inputs fix, Dashboard enhancements |
-| 2026-01-27 | v1.5.0-dev | Dev | Feature | ARCH-001-003: 200-line rule, Error boundaries, Tests |
-| 2026-01-26 | v1.5.0-dev | Dev | Feature | Mobile Optimization, 5 bug fixes |
-| 2026-01-26 | v1.5.0-dev | Dev | Feature | PM Dashboard, Codebase Audit |
-| 2026-01-24 | v1.4.0 | Staging | Hotfix | Testing |
 | 2026-01-20 | v1.4.0 | Production | Release | Family Mode fixes |
 | 2026-01-15 | v1.3.0 | Production | Release | Fabric AI |
 
 ---
 
-**Maintained By**: Teeto
+**Maintained By**: Teeto  
 **Update**: After every deployment
-
