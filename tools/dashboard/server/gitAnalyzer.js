@@ -32,6 +32,102 @@ async function getRecentCommits(limit = 50) {
     }
 }
 
+// Paths that indicate dashboard-only changes
+const DASHBOARD_PATHS = [
+    'tools/dashboard/',
+    '.agent/',
+    'scripts/',
+    'docs/DASHBOARD'
+];
+
+// Paths that indicate Anchor OS product changes
+const ANCHOR_OS_PATHS = [
+    'src/',
+    'public/',
+    'e2e/',
+    'index.html',
+    'vite.config',
+    'tailwind.config',
+    'firebase.json',
+    'firestore'
+];
+
+/**
+ * Check if commit only touches dashboard files
+ */
+async function isDashboardOnlyCommit(commitHash) {
+    try {
+        const diff = await git.show([commitHash, '--name-only', '--format=']);
+        const files = diff.split('\n').filter(f => f.trim());
+
+        // If any file is in Anchor OS paths, it's not dashboard-only
+        for (const file of files) {
+            for (const anchorPath of ANCHOR_OS_PATHS) {
+                if (file.startsWith(anchorPath) || file.includes(anchorPath)) {
+                    return false;
+                }
+            }
+        }
+
+        // Check if at least one file is in dashboard paths
+        for (const file of files) {
+            for (const dashPath of DASHBOARD_PATHS) {
+                if (file.startsWith(dashPath) || file.includes(dashPath)) {
+                    return true;
+                }
+            }
+        }
+
+        // Doc-only commits (DEPLOYMENT_STATUS, etc.) are dashboard changes
+        if (files.every(f => f.startsWith('docs/') || f.endsWith('.md'))) {
+            return true;
+        }
+
+        return false;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * Get commits filtered by category (anchorOS or dashboard)
+ * @param {string} category - 'anchorOS', 'dashboard', or 'all'
+ * @param {number} limit - Max commits to return
+ */
+async function getRecentCommitsFiltered(category = 'all', limit = 50) {
+    try {
+        // Fetch more commits to account for filtering
+        const log = await git.log({ maxCount: limit * 2 });
+        const commits = [];
+
+        for (const commit of log.all) {
+            if (commits.length >= limit) break;
+
+            const isDashboard = await isDashboardOnlyCommit(commit.hash);
+
+            // Filter based on category
+            if (category === 'dashboard' && !isDashboard) continue;
+            if (category === 'anchorOS' && isDashboard) continue;
+
+            commits.push({
+                hash: commit.hash.substring(0, 7),
+                fullHash: commit.hash,
+                message: commit.message,
+                date: commit.date,
+                author: commit.author_name,
+                feature: extractFeature(commit.message),
+                type: extractCommitType(commit.message),
+                category: isDashboard ? 'dashboard' : 'anchorOS'
+            });
+        }
+
+        return commits;
+    } catch (error) {
+        console.error('Git log filtered error:', error);
+        return [];
+    }
+}
+
 /**
  * Extract feature name from commit message
  */
@@ -521,6 +617,7 @@ function generateRecommendedTests(areas) {
 
 module.exports = {
     getRecentCommits,
+    getRecentCommitsFiltered,
     getCommitsBetweenVersions,
     getTags,
     getActualDeployments,
