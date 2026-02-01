@@ -1,0 +1,960 @@
+{
+    "version": "1.0.0",
+    "lastUpdated": "2026-02-01",
+    "teams": [
+        "Product",
+        "Engineering",
+        "Architecture",
+        "Security",
+        "Database",
+        "DevOps",
+        "QA",
+        "Auth",
+        "Mobile",
+        "Design",
+        "Innovation",
+        "Data",
+        "Marketing",
+        "Branding"
+    ],
+    "priorities": [
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+    ],
+    "statuses": [
+        "planned",
+        "in-progress",
+        "completed",
+        "deferred"
+    ],
+    "initiatives": [
+        {
+            "id": "UX-022",
+            "team": "Design",
+            "priority": "P0",
+            "title": "Parse multi-team sprint commits into individual items",
+            "description": "Commits like feat(v1.6.0): Multi-team sprint - GAP-002, GAP-003 should split into individual trackable items in Kanban, Git Timeline, and Env Parity",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-022",
+                "parse",
+                "multi-team",
+                "sprint",
+                "commits",
+                "individual"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "UX-021",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Clickable completed widget in Backlog & Roadmap",
+            "description": "Click on Completed stats card to filter and see only completed items with details",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-021",
+                "clickable",
+                "completed",
+                "widget",
+                "backlog",
+                "roadmap"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "BUG-025",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "API documentation update",
+            "description": "Updating API docs for the new intake system.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-025",
+                "documentation",
+                "update",
+                "updating",
+                "intake",
+                "system."
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "FIN-004",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Dashboard filter persistence",
+            "description": "Remember selected filters between sessions",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-004",
+                "dashboard",
+                "filter",
+                "persistence",
+                "remember",
+                "selected"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "BUG-024",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Test intake system",
+            "description": "Testing the new intake system API endpoint",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-024",
+                "intake",
+                "system",
+                "testing"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "PLT-001",
+            "team": "Platform",
+            "priority": "P0",
+            "title": "Native Mobile Apps",
+            "description": "iOS/Android via Capacitor or React Native. PWA limitations blocking user engagement",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-001",
+                "native app",
+                "capacitor",
+                "react native",
+                "ios app",
+                "android app"
+            ],
+            "effort": "large",
+            "impact": "critical"
+        },
+        {
+            "id": "PLT-002",
+            "team": "Platform",
+            "priority": "P0",
+            "title": "Push Notification Infrastructure",
+            "description": "Firebase Cloud Messaging for task reminders, transaction alerts, family invites",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-002",
+                "push notification",
+                "FCM",
+                "cloud messaging"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "SEC-001",
+            "team": "Security",
+            "priority": "P0",
+            "title": "Rate Limiting Enhancement",
+            "description": "Current rateLimits collection exists but Cloud Functions enforcement is incomplete",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-001",
+                "rate limit",
+                "rate-limit"
+            ],
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "SEC-002",
+            "team": "Security",
+            "priority": "P0",
+            "title": "Audit Logging Service",
+            "description": "Financial apps require audit trails. Add immutable /audit collection for all money operations",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-002",
+                "audit log",
+                "audit trail"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "SRE-001",
+            "team": "DevOps",
+            "priority": "P0",
+            "title": "Production Monitoring",
+            "description": "Add performance monitoring (Web Vitals, error rates) beyond current pm2 dashboard",
+            "status": "planned",
+            "detectionPatterns": [
+                "SRE-001",
+                "monitoring",
+                "web vitals",
+                "observability"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "SRE-002",
+            "team": "DevOps",
+            "priority": "P0",
+            "title": "Automated Rollback",
+            "description": "Deploy failures should auto-rollback; current DEPLOY_PIPELINE.sh lacks this",
+            "status": "planned",
+            "detectionPatterns": [
+                "SRE-002",
+                "rollback",
+                "auto-rollback"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "PRD-001",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Budget Tracking",
+            "description": "As a user, I want to set monthly budgets per category and see my progress",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-001",
+                "budget",
+                "budget tracking",
+                "spending limit"
+            ],
+            "effort": "large",
+            "impact": "critical"
+        },
+        {
+            "id": "PRD-002",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Goals & Savings",
+            "description": "As a user, I want to create savings goals and track contributions",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-002",
+                "savings goal",
+                "savings target"
+            ],
+            "effort": "large",
+            "impact": "high"
+        },
+        {
+            "id": "PRD-003",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Bill Reminders",
+            "description": "As a user, I want automatic reminders before recurring bills are due",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-003",
+                "bill reminder",
+                "due date reminder"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "PRD-004",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Transaction Insights",
+            "description": "Spending trends, averages, and anomaly detection",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-004",
+                "transaction insight",
+                "spending trend",
+                "anomaly"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "PRD-005",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Export/Reports",
+            "description": "Export data to CSV/PDF for tax or personal review",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-005",
+                "export",
+                "csv export",
+                "pdf report"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "ENG-001",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "WebSocket Real-time",
+            "description": "Replace Firestore onSnapshot with dedicated WebSocket for live sync",
+            "status": "planned",
+            "detectionPatterns": [
+                "ENG-001",
+                "websocket",
+                "socket.io"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "ENG-002",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Service Worker V2",
+            "description": "Add background sync, offline transaction queueing",
+            "status": "planned",
+            "detectionPatterns": [
+                "ENG-002",
+                "service worker",
+                "background sync",
+                "offline queue"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "ENG-003",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Database Migrations",
+            "description": "Versioned Firestore schema migrations",
+            "status": "planned",
+            "detectionPatterns": [
+                "ENG-003",
+                "migration",
+                "schema migration"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "ENG-004",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Batch Operations",
+            "description": "Bulk delete, bulk categorize, bulk archive for power users",
+            "status": "planned",
+            "detectionPatterns": [
+                "ENG-004",
+                "batch",
+                "bulk delete",
+                "bulk operation"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-020",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Micro-Frontend Exploration",
+            "description": "Consider module federation for independent deployability",
+            "status": "planned",
+            "detectionPatterns": [
+                "ARCH-020",
+                "micro-frontend",
+                "module federation"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-021",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "GraphQL Layer",
+            "description": "Add Apollo Server for flexible querying, reduce over-fetching",
+            "status": "planned",
+            "detectionPatterns": [
+                "ARCH-021",
+                "graphql",
+                "apollo"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "DES-001",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Component Library Extraction",
+            "description": "Extract components/shared to standalone package",
+            "status": "planned",
+            "detectionPatterns": [
+                "DES-001",
+                "component library",
+                "design system package"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "DES-002",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Design Token Consolidation",
+            "description": "Sync tokens in tailwind.config.js with Figma",
+            "status": "planned",
+            "detectionPatterns": [
+                "DES-002",
+                "design token",
+                "figma sync"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "AUTH-001",
+            "team": "Auth",
+            "priority": "P2",
+            "title": "Social Sign-In",
+            "description": "Google, Apple sign-in via Firebase Auth",
+            "status": "planned",
+            "detectionPatterns": [
+                "AUTH-001",
+                "social sign",
+                "google sign",
+                "apple sign",
+                "oauth"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "AUTH-002",
+            "team": "Auth",
+            "priority": "P2",
+            "title": "Passkey Support",
+            "description": "WebAuthn for passwordless login",
+            "status": "planned",
+            "detectionPatterns": [
+                "AUTH-002",
+                "passkey",
+                "webauthn",
+                "passwordless"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "AUTH-003",
+            "team": "Auth",
+            "priority": "P2",
+            "title": "Session Management UI",
+            "description": "Where you're logged in view with remote logout",
+            "status": "planned",
+            "detectionPatterns": [
+                "AUTH-003",
+                "session management",
+                "active sessions"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "AUTH-004",
+            "team": "Auth",
+            "priority": "P2",
+            "title": "MFA Recovery Codes",
+            "description": "Backup codes for MFA recovery",
+            "status": "planned",
+            "detectionPatterns": [
+                "AUTH-004",
+                "recovery code",
+                "backup code",
+                "mfa recovery"
+            ],
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "QA-001",
+            "team": "QA",
+            "priority": "P2",
+            "title": "Mutation Testing",
+            "description": "Enable regular mutation testing with Stryker",
+            "status": "planned",
+            "detectionPatterns": [
+                "QA-001",
+                "mutation test",
+                "stryker"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "QA-002",
+            "team": "QA",
+            "priority": "P2",
+            "title": "Visual Regression Testing",
+            "description": "Add Percy or Chromatic for visual diff detection",
+            "status": "planned",
+            "detectionPatterns": [
+                "QA-002",
+                "visual regression",
+                "percy",
+                "chromatic"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "QA-003",
+            "team": "QA",
+            "priority": "P2",
+            "title": "Performance E2E Tests",
+            "description": "Add Lighthouse CI to E2E suite",
+            "status": "planned",
+            "detectionPatterns": [
+                "QA-003",
+                "lighthouse",
+                "performance test"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "PWA-001",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "iOS Home Screen Polish",
+            "description": "Better splash screens, icon masking for iOS Safari",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-001",
+                "ios splash",
+                "apple touch icon"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "PWA-002",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Android Deep Integration",
+            "description": "Web Share Target, shortcuts, file handlers",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-002",
+                "share target",
+                "web share",
+                "android shortcut"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "PWA-003",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Offline Transaction Queue",
+            "description": "Queue writes when offline, sync when back online",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-003",
+                "offline queue",
+                "offline transaction"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "PWA-005",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Biometric Auth",
+            "description": "Web Authentication API for fingerprint/face unlock",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-005",
+                "biometric",
+                "fingerprint",
+                "face unlock"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "DB-001",
+            "team": "Database",
+            "priority": "P2",
+            "title": "Firestore Index Optimization",
+            "description": "Review firestore.indexes.json for unused compound indexes",
+            "status": "planned",
+            "detectionPatterns": [
+                "DB-001",
+                "index optimization",
+                "firestore index"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "DB-003",
+            "team": "Database",
+            "priority": "P2",
+            "title": "Archival Strategy",
+            "description": "Move old transactions to cold storage (Firestore → BigQuery)",
+            "status": "planned",
+            "detectionPatterns": [
+                "DB-003",
+                "archival",
+                "cold storage",
+                "bigquery"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "RND-001",
+            "team": "Innovation",
+            "priority": "P3",
+            "title": "AI Categorization",
+            "description": "ML model to auto-categorize transactions from description",
+            "status": "planned",
+            "detectionPatterns": [
+                "RND-001",
+                "ai categoriz",
+                "ml categor",
+                "auto-categoriz"
+            ],
+            "effort": "large",
+            "impact": "high"
+        },
+        {
+            "id": "RND-002",
+            "team": "Innovation",
+            "priority": "P3",
+            "title": "Voice Commands",
+            "description": "Hey Anchor, how much did I spend on food this month?",
+            "status": "planned",
+            "detectionPatterns": [
+                "RND-002",
+                "voice command",
+                "voice input",
+                "speech recognition"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "RND-003",
+            "team": "Innovation",
+            "priority": "P3",
+            "title": "Receipt OCR",
+            "description": "Scan receipts to auto-create transactions",
+            "status": "planned",
+            "detectionPatterns": [
+                "RND-003",
+                "receipt",
+                "ocr",
+                "receipt scan"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "RND-004",
+            "team": "Innovation",
+            "priority": "P3",
+            "title": "Bank Integration",
+            "description": "Plaid/Yodlee for automatic transaction import",
+            "status": "planned",
+            "detectionPatterns": [
+                "RND-004",
+                "plaid",
+                "yodlee",
+                "bank integration",
+                "open banking"
+            ],
+            "effort": "large",
+            "impact": "critical"
+        },
+        {
+            "id": "DATA-001",
+            "team": "Data",
+            "priority": "P3",
+            "title": "Analytics Pipeline",
+            "description": "Firestore → BigQuery → Looker Studio for product analytics",
+            "status": "planned",
+            "detectionPatterns": [
+                "DATA-001",
+                "analytics pipeline",
+                "looker",
+                "bigquery analytics"
+            ],
+            "effort": "large",
+            "impact": "high"
+        },
+        {
+            "id": "BRAND-001",
+            "team": "Marketing",
+            "priority": "P3",
+            "title": "Marketing Website",
+            "description": "Conversion-optimized landing page",
+            "status": "planned",
+            "detectionPatterns": [
+                "BRAND-001",
+                "marketing website",
+                "landing page"
+            ],
+            "effort": "large",
+            "impact": "high"
+        },
+        {
+            "id": "BRAND-005",
+            "team": "Marketing",
+            "priority": "P3",
+            "title": "Referral Program",
+            "description": "Invite family, earn premium",
+            "status": "planned",
+            "detectionPatterns": [
+                "BRAND-005",
+                "referral",
+                "invite bonus"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "WEB-001",
+            "team": "Design",
+            "priority": "P3",
+            "title": "Dashboard 2.0",
+            "description": "Customizable widget layout, drag-and-drop",
+            "status": "planned",
+            "detectionPatterns": [
+                "WEB-001",
+                "customiz dashboard",
+                "drag.drop widget"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "WEB-003",
+            "team": "Design",
+            "priority": "P3",
+            "title": "Animation Library",
+            "description": "Framer Motion integration for richer animations",
+            "status": "planned",
+            "detectionPatterns": [
+                "WEB-003",
+                "framer motion",
+                "animation library"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "GAP-001",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Fabric Suggestion Pre-fill",
+            "description": "Record Transaction from completed commitment pre-fills form",
+            "status": "completed",
+            "detectionPatterns": [
+                "GAP-001",
+                "fabric prefill",
+                "suggestion prefill"
+            ],
+            "completedAt": "2026-01-29",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "GAP-002",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Design System Color Token Fragmentation",
+            "description": "Inconsistent use of indigo-* tokens instead of semantic primary-* tokens",
+            "status": "completed",
+            "detectionPatterns": [
+                "GAP-002",
+                "color token",
+                "primary token"
+            ],
+            "completedAt": "2026-02-01",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "GAP-003",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Navigation Race Condition",
+            "description": "Flaky navigation on slow devices due to hardcoded setTimeout(100) hack",
+            "status": "completed",
+            "detectionPatterns": [
+                "GAP-003",
+                "navigation race",
+                "requestAnimationFrame"
+            ],
+            "completedAt": "2026-02-01",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "GAP-004",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Command Palette Recent Actions",
+            "description": "Power users see recently used actions at top of Command Palette",
+            "status": "completed",
+            "detectionPatterns": [
+                "GAP-004",
+                "recent action",
+                "command palette recent"
+            ],
+            "completedAt": "2026-02-01",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "TASK-002",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Habit Streaks & Gamification",
+            "description": "Fire emoji streak badges on tasks with active streaks",
+            "status": "completed",
+            "detectionPatterns": [
+                "TASK-002",
+                "streak",
+                "habit streak",
+                "gamif"
+            ],
+            "completedAt": "2026-02-01",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "FIN-003",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Recurring Transactions",
+            "description": "Scheduled Cloud Function for recurring rules",
+            "status": "completed",
+            "detectionPatterns": [
+                "FIN-003",
+                "recurring",
+                "recurring transaction"
+            ],
+            "completedAt": "2026-01-29",
+            "effort": "large",
+            "impact": "critical"
+        },
+        {
+            "id": "UX-019",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Currency Overflow Protection",
+            "description": "Compact formatting for large currency values",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-019",
+                "currency overflow",
+                "compact format"
+            ],
+            "completedAt": "2026-01-31",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "UX-020",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Task Completion Animation + Haptic",
+            "description": "Visual animation and haptic feedback on task completion",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-020",
+                "haptic",
+                "completion animation"
+            ],
+            "completedAt": "2026-01-31",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "BUG-022",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Modal Keyboard Input Fix",
+            "description": "Fixed Transfer/Pay Bill modals not accepting keyboard input",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-022",
+                "modal keyboard",
+                "modal input"
+            ],
+            "completedAt": "2026-01-31",
+            "effort": "small",
+            "impact": "critical"
+        },
+        {
+            "id": "BUG-023",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Commitment Checkbox Multiple Clicks",
+            "description": "Fixed checkboxes requiring 2-3 clicks due to Firestore listener issues",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-023",
+                "checkbox",
+                "multiple click",
+                "onSnapshot"
+            ],
+            "completedAt": "2026-01-31",
+            "effort": "medium",
+            "impact": "critical"
+        },
+        {
+            "id": "ARCH-007",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Optimistic Updates",
+            "description": "Created useOptimisticMutation hook with automatic rollback",
+            "status": "completed",
+            "detectionPatterns": [
+                "ARCH-007",
+                "optimistic update",
+                "optimistic mutation"
+            ],
+            "completedAt": "2026-01-29",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "ARCH-016",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Telemetry Tracing",
+            "description": "Created TelemetryService with trace(), logEvent(), createTracer()",
+            "status": "completed",
+            "detectionPatterns": [
+                "ARCH-016",
+                "telemetry",
+                "tracing"
+            ],
+            "completedAt": "2026-01-29",
+            "effort": "medium",
+            "impact": "medium"
+        }
+    ]
+}

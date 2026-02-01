@@ -6,15 +6,32 @@
  * 
  * Data Sources:
  * - Git commits for bugs, features, regressions, enhancements
- * - Deploy markers for environment status
- * - Commit patterns for ID tracking
+ * - Git tags/markers for deployment status
+ * - roadmap.json for initiative titles/descriptions
  */
 
 const simpleGit = require('simple-git');
 const path = require('path');
 const fs = require('fs');
 
-const git = simpleGit(path.join(__dirname, '../../../'));
+const git = simpleGit(path.join(__dirname, '../../..'));
+
+// Load roadmap for title lookup
+function loadRoadmap() {
+    try {
+        const roadmapPath = path.join(__dirname, 'roadmap.json');
+        return JSON.parse(fs.readFileSync(roadmapPath, 'utf8'));
+    } catch {
+        return { initiatives: [] };
+    }
+}
+
+// Get initiative title from roadmap by ID
+function getInitiativeTitle(id) {
+    const roadmap = loadRoadmap();
+    const initiative = roadmap.initiatives.find(i => i.id.toUpperCase() === id.toUpperCase());
+    return initiative ? initiative.title : null;
+}
 
 // Patterns for extracting IDs from commit messages
 const ID_PATTERNS = {
@@ -24,7 +41,22 @@ const ID_PATTERNS = {
     ux: /UX-(\d+)/gi,
     task: /TASK-(\d+)/gi,
     gap: /GAP-(\d+)/gi,
-    arch: /ARCH-(\d+)/gi
+    arch: /ARCH-(\d+)/gi,
+    fin: /FIN-(\d+)/gi,
+    sec: /SEC-(\d+)/gi,
+    prd: /PRD-(\d+)/gi,
+    sre: /SRE-(\d+)/gi,
+    plt: /PLT-(\d+)/gi,
+    des: /DES-(\d+)/gi,
+    eng: /ENG-(\d+)/gi,
+    auth: /AUTH-(\d+)/gi,
+    pwa: /PWA-(\d+)/gi,
+    db: /DB-(\d+)/gi,
+    qa: /QA-(\d+)/gi,
+    rnd: /RND-(\d+)/gi,
+    data: /DATA-(\d+)/gi,
+    brand: /BRAND-(\d+)/gi,
+    web: /WEB-(\d+)/gi
 };
 
 // Commit type detection
@@ -98,10 +130,15 @@ async function getAllTrackedItems(limit = 200) {
                     const inStaging = isInEnvironment(commit, deployStatus.staging);
                     const inProd = isInEnvironment(commit, deployStatus.production);
 
+                    // Get title from roadmap if available, otherwise use commit message
+                    const roadmapTitle = getInitiativeTitle(idInfo.id);
+                    const commitTitle = commit.message.split('\n')[0].substring(0, 100);
+
                     items.set(idInfo.id, {
                         id: idInfo.id,
                         type: idInfo.type,
-                        title: commit.message.split('\n')[0].substring(0, 100),
+                        title: roadmapTitle || commitTitle,
+                        commitMessage: commitTitle,
                         hash: shortHash,
                         date: commit.date,
                         author: commit.author_name,

@@ -1,6 +1,38 @@
 {
-  "lastSync": "2026-02-01T07:26:40.872Z",
+  "lastSync": "2026-02-01T09:00:00.013Z",
   "syncHistory": [
+    {
+      "timestamp": "2026-02-01T09:00:00.013Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-02-01T09:00:00.012Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
+    {
+      "timestamp": "2026-02-01T08:00:00.010Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-02-01T08:00:00.009Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
     {
       "timestamp": "2026-02-01T07:26:40.872Z",
       "type": "archive",
@@ -368,44 +400,12 @@
       "details": {
         "message": "Detected undefined new completions"
       }
-    },
-    {
-      "timestamp": "2026-02-01T05:27:31.623Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-02-01T05:27:31.622Z",
-      "type": "priority",
-      "details": {
-        "totalBugs": 0,
-        "needsReview": 0,
-        "message": "Analyzed 0 bugs, 0 need priority review"
-      }
-    },
-    {
-      "timestamp": "2026-02-01T05:27:31.622Z",
-      "type": "velocity",
-      "details": {
-        "message": "Detected undefined new completions"
-      }
-    },
-    {
-      "timestamp": "2026-02-01T05:27:17.447Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
     }
   ],
   "stats": {
-    "totalSyncs": 1105,
-    "lastVelocityUpdate": "2026-02-01T07:26:40.872Z",
+    "totalSyncs": 1109,
+    "lastVelocityUpdate": "2026-02-01T09:00:00.012Z",
     "lastPriorityUpdate": "2026-02-01T07:00:00.010Z",
-    "lastArchiveRun": "2026-02-01T07:26:40.872Z"
+    "lastArchiveRun": "2026-02-01T09:00:00.013Z"
   }
 }

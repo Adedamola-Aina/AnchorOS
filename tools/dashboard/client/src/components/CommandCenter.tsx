@@ -5,6 +5,7 @@ import {
     Package, RefreshCw,
     Bug, ArrowRight, Shield, TrendingUp, ChevronDown, ChevronUp
 } from 'lucide-react';
+import { IntakeForm } from './IntakeForm';
 
 interface Alert {
     type: string;
@@ -160,6 +161,9 @@ export function CommandCenter({ onNavigate }: CommandCenterProps) {
                 </p>
             </div>
 
+            {/* Quick Intake Form */}
+            <IntakeForm onSubmit={fetchData} />
+
             {/* Proactive Alerts */}
             {data.alerts.count > 0 && (
                 <div className="space-y-3">
@@ -205,7 +209,7 @@ export function CommandCenter({ onNavigate }: CommandCenterProps) {
                                                     )}
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Show details inline */}
                                             {alert.details && alert.details.length > 0 ? (
                                                 <div className="mt-2 space-y-1">
@@ -273,7 +277,7 @@ export function CommandCenter({ onNavigate }: CommandCenterProps) {
                                             ) : (
                                                 <p className="text-sm text-slate-300 mt-1">{alert.description}</p>
                                             )}
-                                            
+
                                             <div className="flex items-center gap-4 mt-2 text-xs">
                                                 <span className="text-slate-500">Source: {alert.source}</span>
                                                 <span className="text-emerald-400 flex items-center gap-1">
