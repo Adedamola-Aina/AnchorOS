@@ -17,6 +17,7 @@ import { auth, db, APP_ID } from '../config/firebase';
 import type { UserProfile } from '../types';
 import { useMfaOperations, getWelcomeEmailHtml } from './auth';
 import { createTracer } from '../services/telemetry';
+import { getEffectiveTheme } from '../utils/systemTheme';
 
 const authTracer = createTracer('Auth');
 
@@ -44,8 +45,9 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
-    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('anchor_theme') as 'light' | 'dark' | null : null;
-    const [profile, setProfile] = useState<UserProfile>({ name: 'User', theme: savedTheme || 'light', familyMode: false, onboardingComplete: false });
+    // PWA-006: Use system theme detection for initial value
+    const initialTheme = typeof window !== 'undefined' ? getEffectiveTheme() : 'light';
+    const [profile, setProfile] = useState<UserProfile>({ name: 'User', theme: initialTheme, familyMode: false, onboardingComplete: false });
     const [loading, setLoading] = useState(true);
     const [profileLoaded, setProfileLoaded] = useState(false);
     const [accountNotifications, setAccountNotifications] = useState<string[]>([]);
