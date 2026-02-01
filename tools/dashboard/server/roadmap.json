@@ -31,6 +31,25 @@
     ],
     "initiatives": [
         {
+            "id": "PWA-006",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "PWA system theme detection",
+            "description": "Auto-detect dark/light mode preference from iOS and Android system settings using prefers-color-scheme media query",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-006",
+                "system",
+                "theme",
+                "detection",
+                "auto-detect",
+                "dark/light"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
             "id": "UX-022",
             "team": "Design",
             "priority": "P0",
