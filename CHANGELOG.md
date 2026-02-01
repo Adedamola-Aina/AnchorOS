@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.5.11] - 2026-02-01
+
+### ⚡ Performance Hotfix
+- **Heating/CPU Drain** (BUG-027): Fixed critical infinite loop in AuthContext that caused phones to get hot.
+
 ## [v1.5.10] - 2026-02-01
 
 ### 📱 Native Experience Hotfix
