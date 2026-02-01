@@ -26,36 +26,17 @@ Update `docs/DEPLOYMENT_STATUS.md`:
 
 ---
 
-## 2. Update KNOWN_ISSUES.md
+## 2. Verify Data Integrity
 
-For bugs/gaps that were fixed:
-- [ ] Add "(FIXED YYYY-MM-DD)" to title
-- [ ] Change status to "✅ FIXED"
-- [ ] Remove Assigned/Target fields
+// turbo
+```bash
+# Check if your recent commit was picked up
+curl -s http://localhost:3001/api/git/timeline | grep "$(git rev-parse --short HEAD)"
+```
 
----
-
-## 3. Update FEATURE_SUGGESTIONS.md
-
-For features that were completed:
-- [ ] Add "✅ IMPLEMENTED" to title
-- [ ] Update Team Voting Template table
-
----
-
-## 4. Update ROADMAP.md
-
-For completed items:
-- [ ] Change `[ ]` to `[x]`
-- [ ] Add strike-through to table rows
-
----
-
-## 5. Update PROJECT_STATUS.md
-
-- [ ] Update "Last Updated" timestamp
-- [ ] Move completed items to "Recently Completed" section
-- [ ] Clear "In Progress" if work completed
+**If commit is missing:**
+- Wait 30 seconds (dashboard poll interval)
+- Run `pm2 restart anchor-dashboard` if stuck
 
 ---
 

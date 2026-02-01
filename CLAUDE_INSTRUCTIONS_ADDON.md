@@ -6,11 +6,13 @@
 
 **You MUST read these documents:**
 
-**Priority 1 - Constitution & Status:**
+**Priority 1 - Status & Roadmap (Source of Truth):**
 1. `CLAUDE.md` - Development constitution (highest authority)
-2. `docs/PROJECT_STATUS.md` - Current state, sprint focus, priorities
-3. `docs/ROADMAP.md` - Why we're building this, dependencies
-4. `docs/KNOWN_ISSUES.md` - Active bugs (don't reintroduce!)
+2. **Internal Dashboard**: http://localhost:3001
+   - Project Status: `curl http://localhost:3001/api/command-center`
+   - Roadmap: `curl http://localhost:3001/api/roadmap`
+   - Bugs: `curl http://localhost:3001/api/bugs`
+3. **Git History**: Project truth is derived from commit messages (e.g., `feat: PWA-006`).
 
 **Priority 2 - Technical Standards:**
 5. `docs/TESTING_STRATEGY.md` - TDD protocol, test patterns, 80% coverage goal
@@ -30,14 +32,13 @@
 
 ### AFTER COMPLETING WORK
 
-**You MUST update these documents:**
+**You MUST perform these actions:**
+- [ ] **Git Commit**: Use the correct ID (e.g., `feat: PWA-006 ...`) to update the dashboard automatically.
+- [ ] `CHANGELOG.md` - Document the change.
+- [ ] `docs/DEPLOYMENT_STATUS.md` - Record deployment (if applicable).
 
-- [ ] `docs/PROJECT_STATUS.md` - Mark task complete, update metrics
-- [ ] `CHANGELOG.md` - Document the change
-- [ ] `docs/KNOWN_ISSUES.md` - Move bug to "Recently Fixed" (if applicable)
-- [ ] `docs/DEPLOYMENT_STATUS.md` - Record deployment (if applicable)
-
-**DO NOT say "done" until all relevant docs are updated.**
+**DO NOT** manually update `PROJECT_STATUS.md`, `ROADMAP.md`, or `KNOWN_ISSUES.md` (they are deprecated).
+**DO NOT** say "done" until Git and Deployment checks are complete.
 
 ---
 
@@ -172,11 +173,12 @@ If duplicate found:
 ---
 
 **STEP 6: DASHBOARD AUTO-UPDATES**
-All files feed into http://localhost:3001:
-- KNOWN_ISSUES.md → Overview (Bug count)
-- FEATURE_SUGGESTIONS.md → Feature Backlog tab
-- ROADMAP.md → Overview
-- PROJECT_STATUS.md → Overview
+The Dashboard (http://localhost:3001) reads directly from **Git Commit History**:
+- `fix(scope): BUG-XXX ...` → Updates Bug Status
+- `feat(scope): REQ-XXX ...` → Updates Feature Status
+- `deploy(env): ...` → Updates Deployment Status
+
+**You do NOT need to update markdown files.** Just commit correctly.
 
 ---
 
