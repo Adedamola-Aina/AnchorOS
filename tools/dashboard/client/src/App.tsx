@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { RefreshCw, Clock, GitBranch, FileText, CheckSquare, Lightbulb, Shield, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Clock, GitBranch, CheckSquare, Lightbulb, Shield, AlertTriangle } from 'lucide-react';
 import { EnvironmentParity } from './components/EnvironmentParity';
-import { DocumentHealth } from './components/DocumentHealth';
 import { EnterpriseKanban } from './components/EnterpriseKanban';
 import { GitTimeline } from './components/GitTimeline';
-import { FeatureBacklog } from './components/FeatureBacklog';
+import { UnifiedBacklog } from './components/UnifiedBacklog';
 import { CommandCenter } from './components/CommandCenter';
 
-type TabType = 'command' | 'kanban' | 'parity' | 'timeline' | 'docs' | 'features';
+type TabType = 'command' | 'kanban' | 'parity' | 'timeline' | 'backlog';
 
 interface Summary {
     projectStatus: unknown;
@@ -58,8 +57,7 @@ function App() {
         { id: 'kanban', label: 'Kanban Board', icon: <CheckSquare className="w-4 h-4" /> },
         { id: 'parity', label: 'Environment Parity', icon: <GitBranch className="w-4 h-4" /> },
         { id: 'timeline', label: 'Git Timeline', icon: <Clock className="w-4 h-4" /> },
-        { id: 'docs', label: 'Documentation', icon: <FileText className="w-4 h-4" /> },
-        { id: 'features', label: 'Feature Backlog', icon: <Lightbulb className="w-4 h-4" /> },
+        { id: 'backlog', label: 'Backlog & Roadmap', icon: <Lightbulb className="w-4 h-4" /> },
     ];
 
     return (
@@ -152,8 +150,7 @@ function App() {
                         {activeTab === 'kanban' && <EnterpriseKanban />}
                         {activeTab === 'parity' && <EnvironmentParity />}
                         {activeTab === 'timeline' && <GitTimeline />}
-                        {activeTab === 'docs' && <DocumentHealth />}
-                        {activeTab === 'features' && <FeatureBacklog />}
+                        {activeTab === 'backlog' && <UnifiedBacklog />}
                     </>
                 )}
             </main>

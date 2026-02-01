@@ -323,6 +323,256 @@ app.get('/api/git/backlog', async (req, res) => {
 });
 
 /**
+ * GET /api/git/roadmap
+ * Returns Strategic Roadmap with auto-detection of completed items from git
+ */
+app.get('/api/git/roadmap', async (req, res) => {
+    try {
+        const fs = require('fs');
+        const roadmapPath = path.join(__dirname, 'roadmap.json');
+        const roadmapData = JSON.parse(fs.readFileSync(roadmapPath, 'utf8'));
+
+        // Get all git commits for pattern matching
+        const commits = await getRecentCommits(500);
+        const commitMessages = commits.map(c => c.message.toLowerCase());
+
+        // Auto-detect status based on git history
+        const enrichedInitiatives = roadmapData.initiatives.map(item => {
+            // If already marked completed, keep it
+            if (item.status === 'completed') {
+                return { ...item, detectedFromGit: false };
+            }
+
+            // Check if any detection pattern matches git commits
+            const patterns = item.detectionPatterns || [];
+            const matchedCommits = [];
+
+            for (const pattern of patterns) {
+                const lowerPattern = pattern.toLowerCase();
+                for (let i = 0; i < commits.length; i++) {
+                    if (commitMessages[i].includes(lowerPattern)) {
+                        matchedCommits.push({
+                            hash: commits[i].hash,
+                            message: commits[i].message,
+                            date: commits[i].date
+                        });
+                        break; // One match per pattern is enough
+                    }
+                }
+            }
+
+            // If we found matches, mark as in-progress or completed
+            if (matchedCommits.length > 0) {
+                return {
+                    ...item,
+                    status: 'completed',
+                    detectedFromGit: true,
+                    matchedCommits: matchedCommits.slice(0, 3) // Top 3 matches
+                };
+            }
+
+            return { ...item, detectedFromGit: false };
+        });
+
+        // Calculate summary stats
+        const completed = enrichedInitiatives.filter(i => i.status === 'completed');
+        const inProgress = enrichedInitiatives.filter(i => i.status === 'in-progress');
+        const planned = enrichedInitiatives.filter(i => i.status === 'planned');
+
+        // Group by priority
+        const byPriority = {
+            P0: enrichedInitiatives.filter(i => i.priority === 'P0'),
+            P1: enrichedInitiatives.filter(i => i.priority === 'P1'),
+            P2: enrichedInitiatives.filter(i => i.priority === 'P2'),
+            P3: enrichedInitiatives.filter(i => i.priority === 'P3')
+        };
+
+        // Group by team
+        const teams = [...new Set(enrichedInitiatives.map(i => i.team))];
+        const byTeam = {};
+        teams.forEach(team => {
+            byTeam[team] = enrichedInitiatives.filter(i => i.team === team);
+        });
+
+        res.json({
+            source: 'roadmap.json + git-automated',
+            lastUpdated: roadmapData.lastUpdated,
+            version: roadmapData.version,
+            summary: {
+                total: enrichedInitiatives.length,
+                completed: completed.length,
+                inProgress: inProgress.length,
+                planned: planned.length,
+                autoDetected: enrichedInitiatives.filter(i => i.detectedFromGit).length
+            },
+            byPriority,
+            byTeam,
+            teams: teams.sort(),
+            initiatives: enrichedInitiatives
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/intake
+ * Submit a new bug/feature/enhancement request
+ * Auto-generates ticket ID and adds to roadmap.json
+ */
+app.post('/api/intake', async (req, res) => {
+    try {
+        const fs = require('fs');
+        const { type, title, description, priority, team } = req.body;
+
+        // Validate required fields
+        if (!type || !title || !description) {
+            return res.status(400).json({
+                error: 'Missing required fields: type, title, description'
+            });
+        }
+
+        // Read current roadmap
+        const roadmapPath = path.join(__dirname, 'roadmap.json');
+        const roadmapData = JSON.parse(fs.readFileSync(roadmapPath, 'utf8'));
+
+        // Determine prefix based on type
+        const prefixMap = {
+            'bug': 'BUG',
+            'feature': 'FIN',
+            'enhancement': 'UX',
+            'architecture': 'ARCH',
+            'security': 'SEC',
+            'devops': 'SRE',
+            'product': 'PRD',
+            'design': 'DES',
+            'mobile': 'PWA',
+            'auth': 'AUTH',
+            'database': 'DB',
+            'qa': 'QA',
+            'other': 'MISC'
+        };
+
+        const prefix = prefixMap[type.toLowerCase()] || 'MISC';
+
+        // Find next available ID for this prefix
+        const existingIds = roadmapData.initiatives
+            .filter(i => i.id.startsWith(prefix + '-'))
+            .map(i => parseInt(i.id.split('-')[1]) || 0);
+
+        const nextNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+        const newId = `${prefix}-${String(nextNum).padStart(3, '0')}`;
+
+        // Determine team based on type if not provided
+        const teamMap = {
+            'bug': 'Engineering',
+            'feature': 'Product',
+            'enhancement': 'Design',
+            'architecture': 'Architecture',
+            'security': 'Security',
+            'devops': 'DevOps',
+            'product': 'Product',
+            'design': 'Design',
+            'mobile': 'Mobile',
+            'auth': 'Auth',
+            'database': 'Database',
+            'qa': 'QA',
+            'other': 'Engineering'
+        };
+
+        const assignedTeam = team || teamMap[type.toLowerCase()] || 'Engineering';
+        const assignedPriority = priority || 'P1';
+
+        // Generate detection patterns from title and description
+        const words = (title + ' ' + description).toLowerCase()
+            .split(/\s+/)
+            .filter(w => w.length > 4)
+            .slice(0, 5);
+
+        const detectionPatterns = [
+            newId,
+            ...words.filter((w, i, a) => a.indexOf(w) === i) // unique words
+        ];
+
+        // Create new initiative
+        const newInitiative = {
+            id: newId,
+            team: assignedTeam,
+            priority: assignedPriority,
+            title: title,
+            description: description,
+            status: 'planned',
+            detectionPatterns: detectionPatterns,
+            effort: 'medium',
+            impact: 'medium',
+            createdAt: new Date().toISOString().split('T')[0]
+        };
+
+        // Add to roadmap
+        roadmapData.initiatives.unshift(newInitiative);
+        roadmapData.lastUpdated = new Date().toISOString().split('T')[0];
+
+        // Write back to file
+        fs.writeFileSync(roadmapPath, JSON.stringify(roadmapData, null, 4));
+
+        res.json({
+            success: true,
+            message: `Created ${newId}`,
+            ticket: newInitiative
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/intake/next-id
+ * Preview what the next ID would be for a given type
+ */
+app.get('/api/intake/next-id', (req, res) => {
+    try {
+        const fs = require('fs');
+        const { type } = req.query;
+
+        if (!type) {
+            return res.status(400).json({ error: 'Missing type parameter' });
+        }
+
+        const prefixMap = {
+            'bug': 'BUG',
+            'feature': 'FIN',
+            'enhancement': 'UX',
+            'architecture': 'ARCH',
+            'security': 'SEC',
+            'devops': 'SRE',
+            'product': 'PRD',
+            'design': 'DES',
+            'mobile': 'PWA',
+            'auth': 'AUTH',
+            'database': 'DB',
+            'qa': 'QA',
+            'other': 'MISC'
+        };
+
+        const prefix = prefixMap[type.toLowerCase()] || 'MISC';
+
+        const roadmapPath = path.join(__dirname, 'roadmap.json');
+        const roadmapData = JSON.parse(fs.readFileSync(roadmapPath, 'utf8'));
+
+        const existingIds = roadmapData.initiatives
+            .filter(i => i.id.startsWith(prefix + '-'))
+            .map(i => parseInt(i.id.split('-')[1]) || 0);
+
+        const nextNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+        const nextId = `${prefix}-${String(nextNum).padStart(3, '0')}`;
+
+        res.json({ type, prefix, nextId });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * GET /api/git/all-items
  * Returns all tracked items from git
  */
