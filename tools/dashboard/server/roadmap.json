@@ -36,7 +36,7 @@
             "priority": "P0",
             "title": "Parse multi-team sprint commits into individual items",
             "description": "Commits like feat(v1.6.0): Multi-team sprint - GAP-002, GAP-003 should split into individual trackable items in Kanban, Git Timeline, and Env Parity",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "UX-022",
                 "parse",
@@ -47,7 +47,8 @@
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-01"
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-02-01"
         },
         {
             "id": "UX-021",
@@ -55,7 +56,7 @@
             "priority": "P1",
             "title": "Clickable completed widget in Backlog & Roadmap",
             "description": "Click on Completed stats card to filter and see only completed items with details",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "UX-021",
                 "clickable",
@@ -66,7 +67,8 @@
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-01"
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-02-01"
         },
         {
             "id": "BUG-025",
