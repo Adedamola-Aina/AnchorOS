@@ -18,80 +18,33 @@
 
 ## ⏳ PENDING CHANGES (Dev → Staging)
 
-### v1.6.0 Multi-Team Sprint (2026-02-01) - NOT YET ON STAGING
+### v1.6.0 Multi-Team Sprint (2026-02-01)
+- [ ] **GAP-002**: Design System Color Token Fragmentation - Migrated indigo to primary tokens
+- [ ] **GAP-003**: Navigation Race Condition - requestAnimationFrame + 1300ms delay
+- [ ] **GAP-004**: Command Palette Recent Actions - localStorage persistence
 
-#### GAP-002: Design System Color Token Fragmentation
-- Migrated `indigo-*` to `primary-*` tokens across 4 components
-- Files: `CategoryIcon.tsx`, `RecurringTransactionsList.tsx`, `RecurringOptions.tsx`, `NotificationSettings.tsx`
-
-#### GAP-003: Navigation Race Condition
-- Replaced flaky `setTimeout(100)` with `requestAnimationFrame` + 1300ms delay
-- Files: `CommitmentsView.tsx`
-
-#### GAP-004: Command Palette Recent Actions
-- Implemented localStorage persistence with auto-deduplication
-- "Recent" section appears at top when no query entered
-- Files: `CommandPalette.tsx`
-
-### v1.5.9 Features (2026-01-31) - NOT YET ON STAGING
-
-#### BUG-023: Commitment Checkbox Requires Multiple Clicks
-- Replaced `onSnapshot` with polling-based `getDocs` (5s staleTime)
-- Files: `useTaskQueries.ts`
-
-#### UX-020: Task Completion Animation + Haptic Feedback
-- 800ms visible green checkmark animation
-- Haptic feedback via Navigator Vibration API
-- Files: `TaskItem.tsx`
-
-#### UX-019: Currency Overflow Protection
-- Large currency values display as abbreviations (₦15.2M)
-- Files: 5 finance components
+### v1.5.9 Features (2026-01-31)
+- [ ] **BUG-023**: Commitment Checkbox Requires Multiple Clicks - Polling-based fix
+- [ ] **UX-020**: Task Completion Animation + Haptic Feedback
+- [ ] **UX-019**: Currency Overflow Protection - Compact formatting
 
 ---
 
 ## ⏳ PENDING CHANGES (Staging → Production)
 
-### v1.5.8 Features (2026-01-31) - ON STAGING, NOT ON PRODUCTION
+### v1.5.8 Features (2026-01-31)
+- [ ] **REG-004**: Modal Focus Stealing Race Condition
+- [ ] **ActivityFeed**: Crash Fix on amountCents
+- [ ] **CategoryIcon**: Duplicate Category Icons Fix
+- [ ] **TransactionList**: Overflow UI Fix
+- [ ] **Edit/Delete**: Button Removal (swipe gestures preserved)
 
-#### REG-004: Modal Focus Stealing Race Condition
-- Modal inputs unresponsive after REG-003 fix - users could click but not type
-- Fix: Removed auto-focus logic from Modal.tsx
-- Files: `Modal.tsx`
+### v1.5.7 Features (2026-01-31)
+- [ ] **REG-003**: CRITICAL - Modal Inputs Completely Unresponsive
 
-#### ActivityFeed Crash Fix
-- Fixed TypeError on `activity.details.amountCents`
-- Files: `ActivityFeed.tsx`
-
-#### Duplicate Category Icons
-- Assigned unique icons to each category (Food→Utensils, Groceries→ShoppingCart, etc.)
-- Files: `CategoryIcon.tsx`
-
-#### Transaction List Overflow UI
-- Fixed excessive whitespace on lists with 2-6 items
-- Files: `VirtualTransactionList.tsx`
-
-#### Edit/Delete Button Removal
-- Removed visible buttons from desktop (swipe gestures preserved on mobile)
-- Files: `TransactionItem.tsx`
-
-### v1.5.7 Features (2026-01-31) - ON STAGING, NOT ON PRODUCTION
-
-#### CRITICAL: REG-003 Modal Inputs Completely Unresponsive
-- `pointer-events-none` blocked ALL interactions to modals
-- Fix: Removed `pointer-events-none` from Modal.tsx wrapper
-- Files: `Modal.tsx`, `Modal.test.tsx`
-
-### v1.5.6 Features (2026-01-31) - ON STAGING, NOT ON PRODUCTION
-
-#### BUG-022: Modal Keyboard Input Not Working
-- Global keyboard handlers intercepting keystrokes
-- Fix: Added `e.stopPropagation()` to Modal keyboard handler
-- Files: `Modal.tsx`, `FinanceView.tsx`
-
-#### PullToRefresh Removal
-- Removed from Finance transaction list (was causing transactions to disappear)
-- Files: `FinanceView.tsx`
+### v1.5.6 Features (2026-01-31)
+- [ ] **BUG-022**: Modal Keyboard Input Not Working
+- [ ] **PullToRefresh**: Removal from Finance transaction list
 
 ---
 
