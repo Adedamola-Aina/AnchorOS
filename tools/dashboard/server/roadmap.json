@@ -31,12 +31,49 @@
     ],
     "initiatives": [
         {
+            "id": "PRD-006",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Budget Tracking",
+            "description": "Implement budget management feature to track spending against limits per category.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-006",
+                "budget",
+                "tracking",
+                "implement",
+                "management"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "PWA-007",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "PWA System Theme Detection",
+            "description": "Implement auto-detection of iOS/Android system theme (dark/light) to respect user device settings.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-007",
+                "system",
+                "theme",
+                "detection",
+                "implement",
+                "auto-detection"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
             "id": "PWA-006",
             "team": "Mobile",
             "priority": "P1",
             "title": "PWA system theme detection",
             "description": "Auto-detect dark/light mode preference from iOS and Android system settings using prefers-color-scheme media query",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "PWA-006",
                 "system",
@@ -47,7 +84,27 @@
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-01"
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-02-01"
+        },
+        {
+            "id": "UX-023",
+            "team": "Design",
+            "priority": "P2",
+            "title": "Account Transaction History UI Harmonization",
+            "description": "Adaptive height for account transaction lists to eliminate excessive whitespace on short lists",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-023",
+                "adaptive height",
+                "UI harmonization",
+                "transaction history",
+                "excessive whitespace"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-02-01"
         },
         {
             "id": "UX-022",

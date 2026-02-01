@@ -14,6 +14,7 @@ interface VirtualTransactionListProps {
     loading?: boolean;
     searchQuery?: string;
     onClearSearch?: () => void;
+    className?: string;
 }
 
 export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
@@ -24,6 +25,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     loading,
     searchQuery,
     onClearSearch,
+    className = "h-[calc(100vh-320px)] min-h-[400px]",
 }) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const { isMobile } = useResponsive();
@@ -62,7 +64,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     return (
         <div
             ref={parentRef}
-            className={`bg-transparent overflow-y-auto overscroll-contain h-[calc(100vh-320px)] min-h-[400px] ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
+            className={`bg-transparent overflow-y-auto overscroll-contain ${className} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
         >
             <div
                 style={{
