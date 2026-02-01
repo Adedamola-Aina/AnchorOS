@@ -23,7 +23,7 @@ export const RecurringOptions: React.FC<RecurringOptionsProps> = ({
                     onClick={() => onChange(!isRecurring)}
                     className={`
                         w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors
-                        ${isRecurring ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'}
+                        ${isRecurring ? 'bg-primary-600' : 'bg-slate-300 dark:bg-slate-600'}
                     `}
                 >
                     <div className={`

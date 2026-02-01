@@ -1,6 +1,6 @@
 # PROJECT STATUS
 
-**Last Updated**: 2026-01-31 06:28 UTC
+**Last Updated**: 2026-02-01 05:30 UTC
 **Updated By**: Agent
 **Sprint**: Week of Jan 26 - Feb 1, 2026
 
@@ -17,6 +17,25 @@ _No active work items_
 _No blockers at this time_
 
 ### ✅ Recently Completed (Last 7 Days)
+
+#### Multi-Team Sprint (2026-02-01)
+- [x] **GAP-002: Design System Color Token Fragmentation** ✅
+  - Migrated `indigo-*` to `primary-*` tokens across 4 components
+  - Files: `CategoryIcon.tsx`, `RecurringTransactionsList.tsx`, `RecurringOptions.tsx`, `NotificationSettings.tsx`
+  
+- [x] **GAP-003: Navigation Race Condition** ✅
+  - Replaced flaky `setTimeout(100)` with `requestAnimationFrame` + 1300ms delay
+  - Files: `CommitmentsView.tsx`
+  
+- [x] **GAP-004: Command Palette Recent Actions** ✅
+  - Implemented localStorage persistence with auto-deduplication
+  - Added "Recent" section at top when no query entered
+  - Files: `CommandPalette.tsx`
+  
+- [x] **TASK-002: Habit Streaks & Gamification** ✅
+  - Discovered already implemented with 🔥 streak badges
+  - Full toggle logic, reset on missed days, unit tests
+  - Files: `TaskItem.tsx`, `useCommitmentService.ts`
 
 #### v1.5.9 Release (2026-01-31)
 - [x] **BUG-023: Commitment Checkbox Fix** ✅ - Fixed checkbox requiring multiple clicks

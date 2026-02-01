@@ -684,8 +684,8 @@ describe('CommitmentsView', () => {
       const circleIcons = screen.getAllByTestId('circle-icon');
       await user.click(circleIcons[0].closest('button')!);
 
-      // Small delay for the component's setTimeout(100)
-      await new Promise(r => setTimeout(r, 200));
+      // Wait for the component's timeout (1300ms animation + rAF)
+      await new Promise(r => setTimeout(r, 1500));
 
       await waitFor(() => {
         expect(notifications.confirm).toHaveBeenCalled();

@@ -17,32 +17,34 @@ _No critical issues at this time_
 
 
 
-### [GAP-002] Design System Color Token Fragmentation
+### [GAP-002] Design System Color Token Fragmentation (FIXED 2026-02-01)
 - **Reported**: 2026-01-26 (Codebase Audit)
 - **Impact**: Inconsistent "Premium" feel, mixed use of `indigo`, `blue`, `violet`
 - **Root Cause**: Hardcoded color values instead of semantic tokens
-- **Fix**: Refactor to `anchor-finance` / `primary` tokens from `tailwind.config.js`
-- **Assigned**: Unassigned
-- **Target**: 2026-02-05
-- **Status**: Backlog
+- **Fix**: Migrated `indigo-*` to `primary-*` tokens across:
+  - `CategoryIcon.tsx` (shopping category)
+  - `RecurringTransactionsList.tsx` (recurring badge/buttons)
+  - `RecurringOptions.tsx` (toggle switch)
+  - `NotificationSettings.tsx` (focus rings)
+- **Note**: Remaining `indigo` usages are intentional gradients for visual variety
+- **Status**: ✅ FIXED
 
-### [GAP-003] Navigation Race Condition
+### [GAP-003] Navigation Race Condition (FIXED 2026-02-01)
 - **Reported**: 2026-01-26 (Codebase Audit)
 - **Impact**: Flaky navigation on slow devices
 - **Root Cause**: `setTimeout(..., 100)` hack in `CommitmentsView.tsx`
-- **Fix**: Use proper `useEffect` or state callback
-- **Assigned**: Unassigned
-- **Target**: 2026-02-05
-- **Status**: Backlog
+- **Fix**: Replaced with `requestAnimationFrame` + 1300ms delay for animation completion
+- **Status**: ✅ FIXED
 
-### [GAP-004] Command Palette Recent Actions Stub
+### [GAP-004] Command Palette Recent Actions Stub (FIXED 2026-02-01)
 - **Reported**: 2026-01-26 (Codebase Audit)
 - **Impact**: Power users have static experience
-- **Root Cause**: Logic to track recent actions is commented out
-- **Fix**: Implement persistence for recent actions
-- **Assigned**: Unassigned
-- **Target**: 2026-02-10
-- **Status**: Backlog
+- **Root Cause**: Logic to track recent actions was commented out
+- **Fix**: Implemented full localStorage persistence with:
+  - `getRecentActions()` and `trackAction()` helpers
+  - Max 5 recent items, auto-deduplication
+  - "Recent" section appears at top when no query
+- **Status**: ✅ FIXED
 
 ---
 

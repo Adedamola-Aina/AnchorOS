@@ -5,6 +5,33 @@ All notable changes to Anchor OS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-02-01
+
+### Fixed
+
+#### GAP-002: Design System Color Token Fragmentation
+- **Issue**: Inconsistent use of `indigo-*` tokens instead of semantic `primary-*` tokens
+- **Fix**: Migrated all `indigo-*` usages to `primary-*` tokens
+- **Files**: `CategoryIcon.tsx`, `RecurringTransactionsList.tsx`, `RecurringOptions.tsx`, `NotificationSettings.tsx`
+
+#### GAP-003: Navigation Race Condition
+- **Issue**: Flaky navigation on slow devices due to hardcoded `setTimeout(100)` hack
+- **Fix**: Replaced with `requestAnimationFrame` + 1300ms delay for animation completion
+- **Files**: `CommitmentsView.tsx`
+
+### Added
+
+#### GAP-004: Command Palette Recent Actions
+- **Feature**: Power users now see recently used actions at top of Command Palette
+- **Implementation**: localStorage persistence with 5-item max, auto-deduplication
+- **UX**: "Recent" section appears when no query is entered
+- **Files**: `CommandPalette.tsx`
+
+#### TASK-002: Habit Streaks & Gamification (Discovered Already Implemented)
+- **Feature**: 🔥 Fire emoji streak badges on tasks with active streaks
+- **Logic**: Streak increments on toggle, resets on missed days
+- **Files**: `TaskItem.tsx`, `useCommitmentService.ts`
+
 ## [1.5.9] - 2026-01-31
 
 ### Fixed
