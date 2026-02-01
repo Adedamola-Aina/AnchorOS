@@ -789,9 +789,9 @@
 |----|---------|---------------------|-------|
 | AUTH-001 | Social Sign-In | | |
 | AUTH-002 | Passkey Support | | |
-| UX-001 | Color Token System | | |
+| ~~UX-001~~ | ~~Color Token System~~ | ✅ GAP-002 | **COMPLETE** (Feb 2026) |
 | FIN-001 | Budget Tracking | | |
-| TASK-002 | Streaks & Gamification | | |
+| ~~TASK-002~~ | ~~Streaks & Gamification~~ | ✅ | **COMPLETE** (Feb 2026) |
 | FAM-001 | Family Activity Feed | | |
 
 ---
