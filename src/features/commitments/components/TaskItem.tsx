@@ -15,17 +15,7 @@ interface TaskItemProps {
     onConfirmFinancial?: (title: string) => void;
 }
 
-/**
- * Trigger haptic feedback on mobile devices (PWA).
- * Uses the Navigator Vibration API for a subtle, satisfying "success" vibration.
- */
-const triggerHapticFeedback = () => {
-    if ('vibrate' in navigator) {
-        // Short, subtle vibration pattern: two quick pulses
-        // [vibrate 30ms, pause 50ms, vibrate 30ms] feels like a "tick tick" confirmation
-        navigator.vibrate([30, 50, 30]);
-    }
-};
+import { useHaptic } from '../../../hooks/useHaptic';
 
 export const TaskItem: React.FC<TaskItemProps> = ({
     task,
@@ -37,6 +27,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onConfirmFinancial,
 }) => {
     const [isAnimating, setIsAnimating] = useState(false);
+    const { trigger } = useHaptic();
 
     const handleToggle = async () => {
         // Only animate when completing (not uncompleting)
@@ -44,7 +35,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             setIsAnimating(true);
 
             // Trigger haptic feedback immediately on click
-            triggerHapticFeedback();
+            trigger('success');
 
             // Wait 800ms to show the checkmark animation (reassuring duration)
             await new Promise(resolve => setTimeout(resolve, 800));
@@ -76,10 +67,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                         onClick={handleToggle}
                         disabled={isAnimating}
                         className={`relative p-2 rounded-full shrink-0 ${isAnimating
-                                ? 'bg-emerald-500 text-white scale-150 ring-4 ring-emerald-300 dark:ring-emerald-700 shadow-lg shadow-emerald-500/50'
-                                : task.completed
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-500'
+                            ? 'bg-emerald-500 text-white scale-150 ring-4 ring-emerald-300 dark:ring-emerald-700 shadow-lg shadow-emerald-500/50'
+                            : task.completed
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-500'
                             }`}
                         style={{
                             transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
@@ -100,10 +91,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                             <h4 className={`font-bold text-sm tracking-tight transition-all duration-300 ${isAnimating
-                                    ? 'text-emerald-600 dark:text-emerald-400'
-                                    : task.completed
-                                        ? 'line-through text-slate-400 dark:text-slate-500'
-                                        : 'text-slate-800 dark:text-white'
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : task.completed
+                                    ? 'line-through text-slate-400 dark:text-slate-500'
+                                    : 'text-slate-800 dark:text-white'
                                 }`}>
                                 {task.title}
                             </h4>

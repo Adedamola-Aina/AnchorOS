@@ -1,7 +1,7 @@
 import React from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Monitor } from 'lucide-react';
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeToggleProps {
     theme: Theme;
@@ -12,6 +12,7 @@ interface ThemeToggleProps {
 export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, variant = 'full' }) => {
     const themes: { value: Theme; icon: typeof Sun; label: string }[] = [
         { value: 'light', icon: Sun, label: 'Light' },
+        { value: 'system', icon: Monitor, label: 'Auto' },
         { value: 'dark', icon: Moon, label: 'Dark' },
     ];
 
@@ -26,20 +27,20 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
                         type="button"
                         onClick={() => onSetTheme(value)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-[10px] font-black uppercase tracking-widest ${isActive
-                                ? value === 'light'
-                                    ? 'bg-white text-slate-900 shadow-md'
-                                    : 'bg-slate-700 dark:bg-slate-700 text-white shadow-md'
-                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                            ? value === 'light'
+                                ? 'bg-white text-slate-900 shadow-md'
+                                : 'bg-slate-700 dark:bg-slate-700 text-white shadow-md'
+                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                             }`}
                         aria-label={`${label} theme`}
                         aria-pressed={isActive}
                     >
                         <Icon
                             className={`w-3.5 h-3.5 ${isActive
-                                    ? value === 'light'
-                                        ? 'text-amber-500'
-                                        : 'text-primary-400'
-                                    : ''
+                                ? value === 'light'
+                                    ? 'text-amber-500'
+                                    : 'text-primary-400'
+                                : ''
                                 }`}
                             strokeWidth={2}
                         />

@@ -13,6 +13,7 @@ const OnboardingView = React.lazy(() => import('./features/onboarding/Onboarding
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import AuthGate from './components/auth/AuthGate';
 import MainLayout from './layouts/MainLayout';
+import { getSystemTheme, subscribeToSystemTheme } from './utils/systemTheme';
 import pkg from '../package.json';
 const APP_VERSION = (pkg as unknown as { version: string }).version;
 
@@ -41,18 +42,34 @@ const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
   useLocation();
 
-  // Sync theme to root element
+  // Sync theme to root element with System support (PWA-006)
   React.useEffect(() => {
-    const theme = profile?.theme || 'light';
+    // 1. Determine base preference
+    const userPref = profile?.theme; // 'light' | 'dark' | 'system' | undefined
 
-    // Remove dark class first
-    document.documentElement.classList.remove('dark');
+    // 2. Helper to apply theme
+    const applyTheme = (targetTheme: 'light' | 'dark') => {
+      document.documentElement.classList.remove('dark');
+      if (targetTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    };
 
-    // Apply dark class if dark theme
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+    // 3. Handle 'system' or undefined preference
+    if (!userPref || userPref === 'system') {
+      // Initial apply
+      applyTheme(getSystemTheme());
+
+      // Subscribe to OS changes
+      const unsubscribe = subscribeToSystemTheme((newSystemTheme) => {
+        applyTheme(newSystemTheme);
+      });
+      return unsubscribe;
     }
-    // light theme = no classes
+
+    // 4. Handle explicit 'light'/'dark' preference
+    applyTheme(userPref);
+
   }, [profile?.theme]);
 
   // Wait for auth AND profile to fully load before making onboarding decision

@@ -74,7 +74,7 @@ export interface AnchorTransaction {
 export interface UserProfile {
   name: string;
   familyMode: boolean;
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
   mfaEnabled?: boolean;
   onboardingComplete?: boolean;
   notificationPreferences?: {

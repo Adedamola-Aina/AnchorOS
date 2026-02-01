@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sunrise, Sun, Moon, Calendar } from 'lucide-react';
 import type { AnchorTask } from '../../types';
-export { ThemeToggle } from './ThemeToggle';
+export { ThemeToggle, type Theme } from './ThemeToggle';
 export { CategoryIcon } from './CategoryIcon';
 export { FabricSuggestionToast, FabricSuggestionContainer } from './FabricSuggestionToast';
 export { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
