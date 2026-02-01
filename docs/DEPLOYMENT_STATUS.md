@@ -24,6 +24,7 @@
 - [ ] **GAP-004**: Command Palette Recent Actions - localStorage persistence
 
 ### v1.5.9 Features (2026-01-31)
+- [ ] **BUG-024**: Exchange Rate Calculation 100x Inflation - Fixed dollars vs cents unit error
 - [ ] **BUG-023**: Commitment Checkbox Requires Multiple Clicks - Polling-based fix
 - [ ] **UX-020**: Task Completion Animation + Haptic Feedback
 - [ ] **UX-019**: Currency Overflow Protection - Compact formatting

@@ -40,6 +40,11 @@
 | ARCH-015 | Architecture Decision Records | 2026-01-29 | Created `docs/adr/` with template and first ADR |
 | ARCH-016 | OpenTelemetry Tracing | 2026-01-29 | Created `TelemetryService` abstraction in `src/services/telemetry/` |
 | BRAND-002 | App Icon Polish | 2026-01-29 | Generated premium anchor icon for PWA |
+| GAP-002 | Design System Color Token Fragmentation | 2026-02-01 | Migrated indigo-* to primary-* tokens in CategoryIcon, RecurringTransactionsList, RecurringOptions, NotificationSettings |
+| GAP-003 | Navigation Race Condition | 2026-02-01 | Replaced setTimeout(100) with requestAnimationFrame + 1300ms delay in CommitmentsView |
+| GAP-004 | Command Palette Recent Actions | 2026-02-01 | Implemented localStorage persistence with 5-item max, auto-deduplication |
+| TASK-002 | Habit Streaks & Gamification | 2026-02-01 | Already implemented - fire emoji badges on TaskItem, streak logic in useCommitmentService |
+| BUG-024 | Exchange Rate Calculation Fix | 2026-01-31 | Fixed 100x inflation - changed cents × rate to dollars × rate × 100 |
 
 ---
 

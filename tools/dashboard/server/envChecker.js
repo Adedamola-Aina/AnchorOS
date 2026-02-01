@@ -102,6 +102,18 @@ async function checkEnvParity() {
         console.error('Error parsing DEPLOYMENT_STATUS.md:', error.message);
     }
 
+    // Helper to detect item type from name
+    const detectType = (name) => {
+        // Handle both "BUG-023" and "**BUG-023**" formats
+        if (name.includes('BUG-')) return 'bug';
+        if (name.includes('REG-')) return 'regression';
+        if (name.includes('GAP-')) return 'gap';
+        if (name.includes('UX-')) return 'enhancement';
+        if (name.includes('TASK-')) return 'task';
+        if (name.includes('ARCH-')) return 'architecture';
+        return 'feature';
+    };
+
     // Build features list from pending changes
     const features = [];
 
@@ -109,7 +121,7 @@ async function checkEnvParity() {
     for (const item of devToStagingItems) {
         features.push({
             name: item.name,
-            type: item.name.startsWith('BUG-') || item.name.startsWith('REG-') ? 'bugfix' : 'feature',
+            type: detectType(item.name),
             commitCount: 1,
             latestCommit: null,
             dev: { deployed: true, hash: null },
@@ -122,7 +134,7 @@ async function checkEnvParity() {
     for (const item of stagingToProductionItems) {
         features.push({
             name: item.name,
-            type: item.name.startsWith('BUG-') || item.name.startsWith('REG-') ? 'bugfix' : 'feature',
+            type: detectType(item.name),
             commitCount: 1,
             latestCommit: null,
             dev: { deployed: true, hash: null },
