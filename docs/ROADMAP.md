@@ -74,7 +74,7 @@ Full backlog tracked in: [docs/FEATURE_SUGGESTIONS.md](file:///root/anchor-os/do
 |----|---------|--------|--------|
 | AUTH-001 | Google/Apple Sign-In | 30-50% signup conversion ↑ | Medium |
 | FIN-001 | Budget Tracking | Core financial planning | High |
-| TASK-002 | Habit Streaks & Gamification | Engagement ↑ | Medium |
+| ~~TASK-002~~ | ~~Habit Streaks & Gamification~~ | ✅ **COMPLETE** | N/A |
 | FAM-001 | Family Activity Feed | Connection ↑ | Medium |
 | AUTH-002 | Passkey / Biometric Auth | Modern security | High |
 
@@ -85,7 +85,7 @@ Full backlog tracked in: [docs/FEATURE_SUGGESTIONS.md](file:///root/anchor-os/do
 ### Candidates (Under Consideration)
 - [ ] **Social Sign-In** (AUTH-001) - Google/Apple OAuth
 - [ ] **Budget Tracking** (FIN-001) - Set & track monthly budgets
-- [ ] **Habit Streaks** (TASK-002) - Gamification for engagement
+- [x] **Habit Streaks** (TASK-002) - ✅ Complete (Feb 2026)
 - [ ] CSV/PDF Export
 - [ ] Bill Reminders
 

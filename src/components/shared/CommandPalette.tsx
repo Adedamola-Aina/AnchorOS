@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Search, ArrowRight, LayoutDashboard, CheckCircle2, CreditCard, Settings, Wallet, MinusCircle, PlusCircle, Plus } from 'lucide-react';
 import { useApp } from '../../context/AnchorContext';
 import { useFinance } from '../../context/FinanceContext';
@@ -12,21 +12,55 @@ interface CommandResult {
     action: () => void;
 }
 
-// TODO: Future enhancement - track and display recent actions
-// const getRecentActions = (): { id: string; title: string; type: string }[] => {
-//     try { return JSON.parse(localStorage.getItem('anchor_recent_actions') || '[]'); }
-//     catch { return []; }
-// };
+interface RecentAction {
+    id: string;
+    title: string;
+    type: string;
+    timestamp: number;
+}
+
+const STORAGE_KEY = 'anchor_recent_actions';
+const MAX_RECENT = 5;
+
+const getRecentActions = (): RecentAction[] => {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) return [];
+        return JSON.parse(stored) as RecentAction[];
+    } catch {
+        return [];
+    }
+};
+
+const trackAction = (action: Omit<RecentAction, 'timestamp'>) => {
+    try {
+        const recent = getRecentActions();
+        const newAction: RecentAction = { ...action, timestamp: Date.now() };
+        // Remove duplicate if exists, add new at front, limit to MAX_RECENT
+        const updated = [newAction, ...recent.filter(a => a.id !== action.id)].slice(0, MAX_RECENT);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+        // Silently fail if localStorage unavailable
+    }
+};
 
 
 export const CommandPalette = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [recentActions, setRecentActions] = useState<RecentAction[]>([]);
     const { navigateTo } = useApp();
     const { accounts } = useFinance();
     const { tasks } = useTasks();
     const inputRef = useRef<HTMLInputElement>(null);
+
+    // Load recent actions when palette opens
+    useEffect(() => {
+        if (isOpen) {
+            setRecentActions(getRecentActions());
+        }
+    }, [isOpen]);
 
     // Toggle Logic
     useEffect(() => {
@@ -41,6 +75,14 @@ export const CommandPalette = () => {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    // Execute action and track it
+    const executeAction = useCallback((result: CommandResult) => {
+        trackAction({ id: result.id, title: result.title, type: result.type });
+        result.action();
+        setIsOpen(false);
+        setQuery('');
     }, []);
 
     // Build results with actions and recent
@@ -76,12 +118,29 @@ export const CommandPalette = () => {
             })),
         ];
 
+        // If no query, prepend recent actions at the top
+        if (!query.trim() && recentActions.length > 0) {
+            const recentResults: CommandResult[] = recentActions
+                .map(recent => {
+                    const found = baseResults.find(r => r.id === recent.id);
+                    if (found) {
+                        return { ...found, type: 'Recent' };
+                    }
+                    return null;
+                })
+                .filter((r): r is CommandResult => r !== null);
+
+            // Show recent at top, then rest (excluding duplicates)
+            const recentIds = new Set(recentResults.map(r => r.id));
+            return [...recentResults, ...baseResults.filter(r => !recentIds.has(r.id))];
+        }
+
         // Filter by query
         return baseResults.filter(item =>
             item.title.toLowerCase().includes(query.toLowerCase()) ||
             item.type.toLowerCase().includes(query.toLowerCase())
         );
-    }, [accounts, tasks, query, navigateTo]);
+    }, [accounts, tasks, query, navigateTo, recentActions]);
 
     // Keyboard Nav - reset index when query changes
     const prevQueryRef = useRef(query);
@@ -105,9 +164,7 @@ export const CommandPalette = () => {
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (results[selectedIndex]) {
-                results[selectedIndex].action();
-                setIsOpen(false);
-                setQuery('');
+                executeAction(results[selectedIndex]);
             }
         }
     };
@@ -153,7 +210,7 @@ export const CommandPalette = () => {
                             return (
                                 <button
                                     key={item.id}
-                                    onClick={() => { item.action(); setIsOpen(false); setQuery(''); }}
+                                    onClick={() => executeAction(item)}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                                 >
                                     <Icon className={`w-4 h-4 ${isSelected ? 'text-primary-500' : 'text-slate-400'}`} />

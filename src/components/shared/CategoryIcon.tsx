@@ -41,7 +41,7 @@ const CATEGORY_MAP: Record<string, { icon: LucideIcon; color: string }> = {
     entertainment: { icon: Film, color: 'text-purple-500 bg-purple-500/10' },
     travel: { icon: Plane, color: 'text-cyan-500 bg-cyan-500/10' },
     education: { icon: GraduationCap, color: 'text-slate-500 bg-slate-500/10' },
-    shopping: { icon: ShoppingBag, color: 'text-indigo-500 bg-indigo-500/10' },
+    shopping: { icon: ShoppingBag, color: 'text-primary-500 bg-primary-500/10' },
     transfer: { icon: ArrowLeftRight, color: 'text-slate-500 bg-slate-500/10' },
     conversion: { icon: RefreshCw, color: 'text-slate-500 bg-slate-500/10' },
     general: { icon: Tag, color: 'text-slate-400 bg-slate-400/10' },

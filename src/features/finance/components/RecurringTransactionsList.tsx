@@ -70,7 +70,7 @@ export const RecurringTransactionsList: React.FC = () => {
                         <div className="flex items-center gap-4">
                             <div className={`
                                 w-10 h-10 rounded-full flex items-center justify-center shrink-0
-                                ${rule.status === 'paused' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-500' : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'}
+                                ${rule.status === 'paused' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-500' : 'bg-primary-100 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'}
                             `}>
                                 <CalendarClock className="w-5 h-5" />
                             </div>
@@ -104,7 +104,7 @@ export const RecurringTransactionsList: React.FC = () => {
                             <div className="flex items-center gap-1 mt-1">
                                 <button
                                     onClick={() => handleToggleStatus(rule)}
-                                    className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                    className="p-1.5 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400"
                                     title={rule.status === 'active' ? "Pause Rule" : "Resume Rule"}
                                 >
                                     {rule.status === 'active' ? <PauseCircle className="w-4 h-4" /> : <PlayCircle className="w-4 h-4" />}

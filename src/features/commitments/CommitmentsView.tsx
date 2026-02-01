@@ -47,7 +47,18 @@ const CommitmentsView = () => {
   };
 
   const handleConfirmFinancial = async (title: string) => {
-    setTimeout(async () => { if (await confirm({ title: 'Financial Transaction?', message: `You've marked '${title}' as done. Would you like to record a financial transaction for this now?`, confirmText: 'Yes, Record', cancelText: 'Not now' })) navigateTo('finance'); }, 100);
+    // GAP-003 Fix: Use requestAnimationFrame instead of setTimeout for stable DOM sync
+    // UX-AUDIT: 1300ms total delay = 800ms animation + 500ms pause before dialog
+    await new Promise(resolve => setTimeout(resolve, 1300));
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (await confirm({
+      title: 'Financial Transaction?',
+      message: `You've marked '${title}' as done. Would you like to record a financial transaction for this now?`,
+      confirmText: 'Yes, Record',
+      cancelText: 'Not now'
+    })) {
+      navigateTo('finance');
+    }
   };
 
   const handleDeleteTask = async (taskId: string) => {

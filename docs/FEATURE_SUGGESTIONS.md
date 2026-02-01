@@ -498,13 +498,15 @@
 - **Impact**: Easier onboarding, inspiration
 - **Effort**: Medium (2 days)
 
-#### [TASK-002] Task Streaks & Gamification
-- **Suggestion**: 
-  - Show current streak for recurring tasks
-  - Streak achievements/badges
-  - "Don't break the chain" visualization
+#### [TASK-002] Task Streaks & Gamification ✅ IMPLEMENTED
+- **Status**: Complete (discovered already implemented 2026-02-01)
+- **Implementation**:
+  - ✅ `currentStreak`/`longestStreak` fields in AnchorTask type
+  - ✅ Streak increment/decrement logic in `useCommitmentService.ts`
+  - ✅ 🔥 Streak badge display in `TaskItem.tsx`
+  - ✅ Automatic streak reset on missed days
+  - ✅ Unit tests in `useCommitmentService.test.tsx`
 - **Impact**: Habit formation, engagement
-- **Effort**: Medium (3 days)
 
 ### MEDIUM Priority
 
