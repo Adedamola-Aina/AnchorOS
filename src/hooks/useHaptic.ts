@@ -43,7 +43,7 @@ const PATTERNS: Record<HapticPattern, number | number[]> = {
 
 export function useHaptic(options: HapticOptions = {}): HapticResult {
     const { enabled = true } = options;
-    
+
     const isSupported = useMemo(() => {
         return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
     }, []);
@@ -51,7 +51,7 @@ export function useHaptic(options: HapticOptions = {}): HapticResult {
     const trigger = useCallback(
         (pattern: HapticPattern) => {
             if (!enabled || !isSupported) return;
-            
+
             try {
                 navigator.vibrate(PATTERNS[pattern]);
             } catch {
@@ -62,9 +62,9 @@ export function useHaptic(options: HapticOptions = {}): HapticResult {
         [enabled, isSupported]
     );
 
-    return {
+    return useMemo(() => ({
         trigger,
         isEnabled: enabled,
         isSupported,
-    };
+    }), [trigger, enabled, isSupported]);
 }

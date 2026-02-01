@@ -7,6 +7,7 @@
  * @module hooks/useFinanceOperations
  */
 
+import { useCallback, useMemo } from 'react';
 import type { User } from 'firebase/auth';
 import { db, APP_ID } from '../config/firebase';
 import { doc, collection, writeBatch, increment } from 'firebase/firestore';
@@ -29,7 +30,7 @@ export const useFinanceOperations = (
     transactions: AnchorTransaction[]
 ) => {
     // Account operations
-    const addAccount = async (acc: CreateAccountPayload) => {
+    const addAccount = useCallback(async (acc: CreateAccountPayload) => {
         if (!user) return;
         return financeTracer.trace('addAccount', async () => {
             try {
@@ -38,9 +39,9 @@ export const useFinanceOperations = (
                 throw handleError(err);
             }
         }, { attributes: { currency: acc.currency } });
-    };
+    }, [user]);
 
-    const deleteAccount = async (id: string) => {
+    const deleteAccount = useCallback(async (id: string) => {
         if (!user) return;
         const account = accounts.find(a => a.id === id);
         if (!account) return;
@@ -52,9 +53,9 @@ export const useFinanceOperations = (
         } catch (err) {
             throw handleError(err);
         }
-    };
+    }, [user, userName, accounts]);
 
-    const renameAccount = async (id: string, newName: string) => {
+    const renameAccount = useCallback(async (id: string, newName: string) => {
         if (!user) return;
         const account = accounts.find(a => a.id === id);
         if (!account) return;
@@ -66,10 +67,10 @@ export const useFinanceOperations = (
         } catch (err) {
             throw handleError(err);
         }
-    };
+    }, [user, userName, accounts]);
 
     // Transaction operations
-    const addTransaction = async (tx: CreateTransactionPayload) => {
+    const addTransaction = useCallback(async (tx: CreateTransactionPayload) => {
         if (!user) return;
         return financeTracer.trace('addTransaction', async () => {
             try {
@@ -82,9 +83,9 @@ export const useFinanceOperations = (
                 throw handleError(err);
             }
         }, { attributes: { type: tx.type, category: tx.category } });
-    };
+    }, [user, userName, accounts]);
 
-    const deleteTransaction = async (id: string, accountId: string) => {
+    const deleteTransaction = useCallback(async (id: string, accountId: string) => {
         if (!user) return;
         const account = accounts.find(a => a.id === accountId);
         if (!account) return;
@@ -98,9 +99,9 @@ export const useFinanceOperations = (
         } catch (err) {
             throw handleError(err);
         }
-    };
+    }, [user, userName, accounts, transactions]);
 
-    const updateTransaction = async (id: string, accountId: string, updates: UpdateTransactionPayload) => {
+    const updateTransaction = useCallback(async (id: string, accountId: string, updates: UpdateTransactionPayload) => {
         if (!user) return;
         const originalTx = transactions.find(t => t.id === id);
         const account = accounts.find(a => a.id === accountId);
@@ -112,9 +113,9 @@ export const useFinanceOperations = (
         } catch (err) {
             throw handleError(err);
         }
-    };
+    }, [user, userName, accounts, transactions]);
 
-    const restoreTransaction = async (id: string, accountId: string, amountCents: number, type: TransactionType) => {
+    const restoreTransaction = useCallback(async (id: string, accountId: string, amountCents: number, type: TransactionType) => {
         if (!user) return;
         try {
             const account = accounts.find(a => a.id === accountId);
@@ -129,9 +130,9 @@ export const useFinanceOperations = (
         } catch (err) {
             throw handleError(err);
         }
-    };
+    }, [user, accounts]);
 
-    const convertCurrency = async (fromAccountId: string, toAccountId: string, amountCents: number, rate: number) => {
+    const convertCurrency = useCallback(async (fromAccountId: string, toAccountId: string, amountCents: number, rate: number) => {
         if (!user) return;
         try {
             const fromAcc = accounts.find(a => a.id === fromAccountId);
@@ -165,7 +166,13 @@ export const useFinanceOperations = (
         } catch (err) {
             throw handleError(err);
         }
-    };
+    }, [user, accounts]);
 
-    return { addAccount, deleteAccount, renameAccount, addTransaction, deleteTransaction, updateTransaction, restoreTransaction, convertCurrency };
+    return useMemo(() => ({
+        addAccount, deleteAccount, renameAccount,
+        addTransaction, deleteTransaction, updateTransaction, restoreTransaction, convertCurrency
+    }), [
+        addAccount, deleteAccount, renameAccount,
+        addTransaction, deleteTransaction, updateTransaction, restoreTransaction, convertCurrency
+    ]);
 };

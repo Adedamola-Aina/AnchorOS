@@ -470,6 +470,13 @@ const ExpensiveComponent = React.memo(({ data }) => {
 
 // RULE 4: Virtualize long lists
 import { useVirtualizer } from '@tanstack/react-virtual';
+
+// RULE 5: Stable Hook Returns (MANDATORY)
+// Custom hooks MUST memoize object/array return values to prevent infinite loops in consumers
+export const useMyHook = () => {
+  const handler = useCallback(() => {}, []);
+  return useMemo(() => ({ handler }), [handler]);
+};
 ```
 
 ### 6.4 Firestore Performance Rules
