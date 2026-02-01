@@ -225,6 +225,7 @@ async function getDeployStatus() {
                 if (!status[env]) {
                     const match = msg.match(pattern);
                     if (match) {
+                        console.log(`✓ Found ${env} marker: ${msg} -> v${match[1]}`);
                         status[env] = {
                             version: `v${match[1]}`,
                             hash: commit.hash.substring(0, 7),

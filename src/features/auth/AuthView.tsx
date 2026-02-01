@@ -8,12 +8,10 @@
  */
 
 import React, { useState } from 'react';
-import { AnchorLogo, ThemeToggle } from '../../components/shared';
+import { AnchorLogo, ThemeToggle, type Theme } from '../../components/shared';
 import { AuthLeftPanel } from './AuthLeftPanel';
 import { AuthFormFields } from './AuthFormFields';
 import { AuthSubmitButton } from './AuthSubmitButton';
-
-export type Theme = 'light' | 'dark';
 
 interface AuthViewProps {
     authMode: 'login' | 'signup' | 'mfa' | 'reset';

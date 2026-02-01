@@ -115,8 +115,12 @@ async function findDeployCommits() {
 
         // Use fallbacks if standardized markers not found
         if (!deployments.production) {
-            deployments.production = versionCommits['1.5.5'] || {
-                version: 'v1.5.5', hash: 'unknown', source: 'fallback'
+            // STRICT MODE: Do not incorrectly attribute random commits as production markers.
+            // If no deploy(production): marker exists, assume not deployed or unknown.
+            deployments.production = {
+                version: 'unknown',
+                hash: null,
+                source: 'fallback-unknown'
             };
         }
         if (!deployments.staging) {
@@ -243,15 +247,6 @@ async function checkEnvParity() {
             const msg = commit.message.toLowerCase();
             const fullMsg = commit.message;
 
-            // Skip dashboard/tooling commits FIRST - don't let them affect markers
-            if (msg.includes('dashboard') || msg.includes('deployment_status') ||
-                msg.includes('docs:') || msg.includes('chore:') ||
-                msg.includes('project_status') || msg.includes('known_issues') ||
-                msg.includes('post-implementation') || msg.includes('.agent/') ||
-                msg.includes('deployment') || msg.includes('deploy')) {
-                continue;
-            }
-
             // NOW check if this PRODUCT commit mentions a version (as a marker)
             // Only product commits should set version markers
             const versionMatch = fullMsg.match(/v?(\d+\.\d+\.\d+)/);
@@ -261,6 +256,15 @@ async function checkEnvParity() {
                 if (commitVersion === stagingVersion) foundStagingMarker = true;
                 // If we see prod version, mark it
                 if (commitVersion === prodVersion) foundProdMarker = true;
+            }
+
+            // Skip dashboard/tooling commits FIRST - don't let them affect markers
+            if (msg.includes('dashboard') || msg.includes('deployment_status') ||
+                msg.includes('docs:') || msg.includes('chore:') ||
+                msg.includes('project_status') || msg.includes('known_issues') ||
+                msg.includes('post-implementation') || msg.includes('.agent/') ||
+                msg.includes('deployment') || msg.includes('deploy')) {
+                continue;
             }
 
             // Detect type
