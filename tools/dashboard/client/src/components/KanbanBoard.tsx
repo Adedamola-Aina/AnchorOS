@@ -31,11 +31,14 @@ export function KanbanBoard() {
         async function fetchBoard() {
             try {
                 // Use the new git-based API
+                console.log('KanbanBoard: Fetching /api/git/kanban...');
                 const res = await axios.get('/api/git/kanban');
+                console.log('KanbanBoard: Response:', res.data);
                 setBoard(res.data);
             } catch (error) {
-                console.error('Failed to fetch board:', error);
+                console.error('KanbanBoard: Failed to fetch:', error);
             } finally {
+                console.log('KanbanBoard: Setting loading to false');
                 setLoading(false);
             }
         }
@@ -137,10 +140,10 @@ export function KanbanBoard() {
                                         >
                                             <div className="flex items-start gap-2">
                                                 <span className={`px-1.5 py-0.5 text-xs rounded ${item.type === 'bug' ? 'bg-red-500/20 text-red-400' :
-                                                        item.type === 'feature' ? 'bg-blue-500/20 text-blue-400' :
-                                                            item.type === 'enhancement' ? 'bg-purple-500/20 text-purple-400' :
-                                                                item.type === 'gap' ? 'bg-amber-500/20 text-amber-400' :
-                                                                    'bg-slate-500/20 text-slate-400'
+                                                    item.type === 'feature' ? 'bg-blue-500/20 text-blue-400' :
+                                                        item.type === 'enhancement' ? 'bg-purple-500/20 text-purple-400' :
+                                                            item.type === 'gap' ? 'bg-amber-500/20 text-amber-400' :
+                                                                'bg-slate-500/20 text-slate-400'
                                                     }`}>
                                                     {item.type}
                                                 </span>
