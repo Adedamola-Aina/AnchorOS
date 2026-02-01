@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import type { User } from 'firebase/auth';
 import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
@@ -84,7 +84,7 @@ export const useCommitmentService = (user: User | null) => {
     });
   }, [rawTasks]);
 
-  const addTask = async (task: Omit<AnchorTask, 'id' | 'createdAt'>) => {
+  const addTask = useCallback(async (task: Omit<AnchorTask, 'id' | 'createdAt'>) => {
     if (!user) return;
     await addDoc(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments'), {
       ...task,
@@ -93,7 +93,7 @@ export const useCommitmentService = (user: User | null) => {
       longestStreak: 0
     });
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
-  };
+  }, [user, queryClient]);
 
   /**
    * Toggle task completion with optimistic updates and atomic streak calculation.
@@ -109,7 +109,7 @@ export const useCommitmentService = (user: User | null) => {
    * - State reversion (onSnapshot ensures sync with Firestore truth)
    * - Janky animations (smooth transitions with optimistic updates)
    */
-  const toggleTask = async (id: string, currentStatus: boolean) => {
+  const toggleTask = useCallback(async (id: string, currentStatus: boolean) => {
     if (!user) return;
 
     const taskRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id);
@@ -183,19 +183,21 @@ export const useCommitmentService = (user: User | null) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
       throw error;
     }
-  };
+  }, [user, queryClient]);
 
-  const deleteTask = async (id: string) => {
+  const deleteTask = useCallback(async (id: string) => {
     if (!user) return;
     await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id));
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
-  };
+  }, [user, queryClient]);
 
-  const updateTask = async (id: string, updates: Partial<Omit<AnchorTask, 'id' | 'createdAt' | 'type'>>) => {
+  const updateTask = useCallback(async (id: string, updates: Partial<Omit<AnchorTask, 'id' | 'createdAt' | 'type'>>) => {
     if (!user) return;
     await updateDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id), updates);
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
-  };
+  }, [user, queryClient]);
 
-  return { tasks, addTask, toggleTask, deleteTask, updateTask, loadingTasks: isLoading };
+  return useMemo(() => ({
+    tasks, addTask, toggleTask, deleteTask, updateTask, loadingTasks: isLoading
+  }), [tasks, addTask, toggleTask, deleteTask, updateTask, isLoading]);
 };

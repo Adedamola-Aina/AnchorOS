@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.5.12] - 2026-02-01
+
+### 🛡️ Systemic Performance Hardening
+- **Radical Performance Audit**: Memoized ALL critical hooks (`useFinanceOperations`, `useCommitmentService`) to prevent any future re-render loops.
+- **Architectural Mandate**: Updated `CLAUDE.md` to strictly enforce "Stable Hook Returns" for all future development.
+
 ## [v1.5.11] - 2026-02-01
 
 ### ⚡ Performance Hotfix
