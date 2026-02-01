@@ -2,7 +2,7 @@
  * commandCenter.js
  * 
  * Unified Command Center - Single Source of Truth
- * Aggregates all dashboard data into one coherent view like Google's internal tools.
+ * NOW USES GIT-BASED DATA - No more markdown dependencies
  * 
  * Features:
  * - Real-time project health summary
@@ -13,8 +13,7 @@
  * - Documentation status
  */
 
-const { getEnhancedKanbanBoard } = require('./docReader/kanban');
-const { readDoc, getAllDocs } = require('./docReader/index');
+const gitData = require('./gitDataProvider');
 const { getEnvironmentStatus, checkEnvParity } = require('./envChecker');
 const { getDependencyHealth } = require('./dependencyChecker');
 const { getHealthReport } = require('./fileHealthMonitor');
@@ -23,6 +22,7 @@ const { getVelocityStats } = require('./velocityTracker');
 
 /**
  * Get proactive alerts - things that need attention NOW
+ * NOW USES GIT-BASED DATA
  */
 async function getProactiveAlerts() {
     const alerts = [];
@@ -30,54 +30,23 @@ async function getProactiveAlerts() {
     const today = now.toISOString().split('T')[0];
 
     try {
-        // 1. Check for critical bugs
-        const bugs = await readDoc('KNOWN_ISSUES.md');
-        if (bugs.parsed?.critical && bugs.parsed.critical.length > 0) {
+        // 1. Check for dev-only bugs (pending deploy) using git data
+        const bugs = await gitData.getBugs();
+        const devOnlyBugs = bugs.filter(b => b.status === 'dev');
+
+        if (devOnlyBugs.length > 0) {
             alerts.push({
-                type: 'critical_bug',
-                severity: 'critical',
-                title: `${bugs.parsed.critical.length} Critical Bug(s) Open`,
-                description: bugs.parsed.critical.map(b => b.title || b.id).join(', '),
-                action: 'Review and prioritize fix',
-                source: 'KNOWN_ISSUES.md',
+                type: 'pending_bugs',
+                severity: 'warning',
+                title: `${devOnlyBugs.length} Bug Fix(es) Pending Deploy`,
+                description: devOnlyBugs.slice(0, 3).map(b => b.id).join(', '),
+                action: 'Deploy to staging/production',
+                source: 'Git History',
                 date: today
             });
         }
 
-        // 2. Check for stale bugs (open > 3 days)
-        const staleDays = 3;
-        if (bugs.parsed) {
-            const allActiveBugs = [
-                ...(bugs.parsed.critical || []),
-                ...(bugs.parsed.high || []),
-                ...(bugs.parsed.low || [])
-            ];
-            
-            const staleBugs = allActiveBugs.filter(bug => {
-                if (!bug.content) return false;
-                const reportedMatch = bug.content.match(/Reported[:\s]+(\d{4}-\d{2}-\d{2})/i);
-                if (reportedMatch) {
-                    const reportedDate = new Date(reportedMatch[1]);
-                    const daysSince = Math.floor((now - reportedDate) / (1000 * 60 * 60 * 24));
-                    return daysSince > staleDays;
-                }
-                return false;
-            });
-
-            if (staleBugs.length > 0) {
-                alerts.push({
-                    type: 'stale_bugs',
-                    severity: 'warning',
-                    title: `${staleBugs.length} Bug(s) Open > ${staleDays} Days`,
-                    description: staleBugs.map(b => b.id || b.title).join(', '),
-                    action: 'Review and update status or escalate',
-                    source: 'KNOWN_ISSUES.md',
-                    date: today
-                });
-            }
-        }
-
-        // 3. Check environment parity drift
+        // 2. Check environment parity drift
         const parity = await checkEnvParity();
         if (parity.summary) {
             if (parity.summary.stagingPending > 10) {
@@ -93,7 +62,7 @@ async function getProactiveAlerts() {
             }
         }
 
-        // 4. Check for files approaching 200-line limit
+        // 3. Check for files approaching 200-line limit
         const health = await getHealthReport();
         const approachingFiles = health.fileHealth?.files?.filter(f => f.status === 'warning' || f.status === 'caution') || [];
         if (approachingFiles.length > 0) {
@@ -109,7 +78,7 @@ async function getProactiveAlerts() {
             });
         }
 
-        // 5. Check for critical dependency vulnerabilities
+        // 4. Check for critical dependency vulnerabilities
         const deps = await getDependencyHealth();
         if (deps.security?.vulnerabilities?.critical > 0) {
             alerts.push({
@@ -123,7 +92,7 @@ async function getProactiveAlerts() {
             });
         }
 
-        // 6. Check for outdated major dependencies
+        // 5. Check for outdated major dependencies
         const outdatedDeps = deps.outdated?.dependencies || [];
         if (outdatedDeps.length > 0) {
             alerts.push({
@@ -138,137 +107,100 @@ async function getProactiveAlerts() {
             });
         }
 
-        // 7. Check for stale documentation
-        const docs = await getAllDocs();
-        const staleDocs = docs.filter(doc => {
-            if (!doc.lastModified) return false;
-            const docDate = new Date(doc.lastModified);
-            const daysSince = Math.floor((now - docDate) / (1000 * 60 * 60 * 24));
-            return daysSince > 7 && ['ROADMAP.md', 'PROJECT_STATUS.md', 'KNOWN_ISSUES.md'].includes(doc.filename);
-        });
+        // Sort by severity
+        const severityOrder = { critical: 0, warning: 1, info: 2 };
+        alerts.sort((a, b) => (severityOrder[a.severity] ?? 99) - (severityOrder[b.severity] ?? 99));
 
-        if (staleDocs.length > 0) {
-            alerts.push({
-                type: 'stale_docs',
-                severity: 'info',
-                title: `${staleDocs.length} Key Doc(s) Not Updated in 7+ Days`,
-                description: staleDocs.map(d => d.filename).join(', '),
-                action: 'Review and update documentation',
-                source: 'Documentation',
-                date: today
-            });
-        }
-
+        return alerts;
     } catch (error) {
-        console.error('Error generating alerts:', error.message);
+        console.error('Error getting proactive alerts:', error.message);
+        return alerts;
     }
-
-    // Sort by severity: critical > warning > info
-    const severityOrder = { critical: 0, warning: 1, info: 2 };
-    return alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
 }
 
 /**
- * Get deployment history with dates from DEPLOYMENT_STATUS.md
+ * Get deployment history using git commit data
+ * NOW USES GIT-BASED DATA
  */
 async function getDeploymentHistory() {
     try {
-        const status = await readDoc('DEPLOYMENT_STATUS.md');
-        const content = status.content || '';
+        // Use git-based deploy timeline instead of deleted DEPLOYMENT_STATUS.md
+        const timeline = await getDeploymentTimeline();
 
-        // Parse deployment history section if exists
-        const historyMatch = content.match(/## 📜 DEPLOYMENT HISTORY([\s\S]*?)(?=\n---|\n## |$)/);
-        const history = [];
-
-        if (historyMatch) {
-            // Parse table rows: | 2026-01-28 | v1.5.0-dev | Staging | Features... |
-            const rows = historyMatch[1].match(/\| (\d{4}-\d{2}-\d{2}[^|]*) \| ([^|]+) \| ([^|]+) \| ([^|]+) \|/g) || [];
-            for (const row of rows) {
-                const parts = row.split('|').map(p => p.trim()).filter(Boolean);
-                if (parts.length >= 4) {
-                    history.push({
-                        date: parts[0],
-                        version: parts[1],
-                        environment: parts[2],
-                        changes: parts[3]
-                    });
-                }
-            }
-        }
-
-        // Also extract last update date
-        const lastUpdateMatch = content.match(/\*\*Last Updated\*\*:\s*(\d{4}-\d{2}-\d{2}[^*\n]*)/);
+        // Map to history format
+        const history = timeline.slice(0, 20).map(item => ({
+            date: item.date ? new Date(item.date).toISOString().split('T')[0] : 'Unknown',
+            version: item.version || item.message?.match(/v?(\d+\.\d+\.\d+)/)?.[0] || 'Unknown',
+            environment: item.environment || 'dev',
+            changes: item.message?.substring(0, 100) || ''
+        }));
 
         return {
-            lastUpdated: lastUpdateMatch ? lastUpdateMatch[1].trim() : null,
-            history: history.slice(0, 20)
+            lastUpdated: new Date().toISOString(),
+            history
         };
     } catch (error) {
+        console.error('Error getting deployment history:', error.message);
         return { lastUpdated: null, history: [] };
     }
 }
 
 /**
  * Get work summary - what's done, in progress, planned
+ * NOW USES GIT-BASED DATA
  */
 async function getWorkSummary() {
     try {
-        const kanban = await getEnhancedKanbanBoard();
-        
-        // Calculate stats
+        // Use git-based data instead of deleted markdown files
+        const kanbanData = await gitData.getKanbanData();
+
+        // Map git data to work summary format
         const doneThisWeek = [];
         const inProgress = [];
         const upcoming = [];
         const now = new Date();
         const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
 
-        // Process done items
-        for (const id of kanban.columns.done || []) {
-            const item = kanban.items[id];
-            if (item) {
-                const itemDate = item.createdDate ? new Date(item.createdDate) : null;
-                if (itemDate && itemDate >= weekAgo) {
-                    doneThisWeek.push({
-                        id: item.id,
-                        title: item.title,
-                        type: item.type,
-                        date: item.createdDate
-                    });
-                }
-            }
-        }
-
-        // Process in-progress items
-        for (const id of [...(kanban.columns.inProgress || []), ...(kanban.columns.todo || [])]) {
-            const item = kanban.items[id];
-            if (item && item.status !== 'done' && item.status !== 'Fixed' && item.status !== 'Completed') {
-                inProgress.push({
+        // Process deployed items (done)
+        for (const item of kanbanData.done || []) {
+            const itemDate = item.date ? new Date(item.date) : null;
+            if (itemDate && itemDate >= weekAgo) {
+                doneThisWeek.push({
                     id: item.id,
                     title: item.title,
                     type: item.type,
-                    priority: item.priority,
-                    status: item.status
+                    date: item.date
                 });
             }
         }
 
-        // Process backlog items
-        for (const id of kanban.columns.backlog || []) {
-            const item = kanban.items[id];
-            if (item) {
-                upcoming.push({
-                    id: item.id,
-                    title: item.title,
-                    type: item.type
-                });
-            }
+        // Process in-progress items (dev only)
+        for (const item of kanbanData.inProgress || []) {
+            inProgress.push({
+                id: item.id,
+                title: item.title,
+                type: item.type,
+                priority: 'medium',
+                status: 'dev'
+            });
+        }
+
+        // Process staging items
+        for (const item of kanbanData.staging || []) {
+            inProgress.push({
+                id: item.id,
+                title: item.title,
+                type: item.type,
+                priority: 'high',
+                status: 'staging'
+            });
         }
 
         return {
             doneThisWeek: doneThisWeek.slice(0, 10),
             inProgress: inProgress.slice(0, 10),
             upcoming: upcoming.slice(0, 5),
-            stats: kanban.stats
+            stats: kanbanData.summary
         };
     } catch (error) {
         console.error('Error getting work summary:', error.message);

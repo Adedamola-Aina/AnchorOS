@@ -30,6 +30,20 @@ interface KanbanItem {
     description: string;
     createdDate: string | null;
     dueDate: string | null;
+    date?: string;
+}
+
+// Git-based response format
+interface GitKanbanResponse {
+    inProgress: KanbanItem[];
+    staging: KanbanItem[];
+    done: KanbanItem[];
+    summary: {
+        total: number;
+        devOnly: number;
+        stagingOnly: number;
+        deployed: number;
+    };
 }
 
 interface KanbanData {
@@ -75,8 +89,81 @@ export function EnterpriseKanban() {
     useEffect(() => {
         async function fetchKanban() {
             try {
-                const res = await axios.get('/api/kanban-enhanced');
-                setData(res.data);
+                // Use git-based API instead of deleted doc-based API
+                const res = await axios.get<GitKanbanResponse>('/api/git/kanban');
+                const gitData = res.data;
+
+                // Transform git response to KanbanData format
+                const items: Record<string, KanbanItem> = {};
+                const inProgressIds: string[] = [];
+                const doneIds: string[] = [];
+
+                // Process inProgress (dev only) items
+                for (const item of gitData.inProgress || []) {
+                    items[item.id] = {
+                        ...item,
+                        priority: item.priority || 'P2',
+                        assignee: item.assignee || 'Agent',
+                        label: item.type || '',
+                        description: item.title,
+                        createdDate: item.date || null,
+                        dueDate: null
+                    };
+                    inProgressIds.push(item.id);
+                }
+
+                // Process staging items (also in progress)
+                for (const item of gitData.staging || []) {
+                    items[item.id] = {
+                        ...item,
+                        priority: item.priority || 'P1',
+                        assignee: item.assignee || 'Agent',
+                        label: item.type || '',
+                        description: item.title,
+                        createdDate: item.date || null,
+                        dueDate: null
+                    };
+                    inProgressIds.push(item.id);
+                }
+
+                // Process done items
+                for (const item of gitData.done || []) {
+                    items[item.id] = {
+                        ...item,
+                        priority: item.priority || 'P2',
+                        assignee: item.assignee || 'Agent',
+                        label: item.type || '',
+                        description: item.title,
+                        createdDate: item.date || null,
+                        dueDate: null
+                    };
+                    doneIds.push(item.id);
+                }
+
+                // Count bugs and features
+                const allItems = Object.values(items);
+                const bugCount = allItems.filter(i => i.type === 'bug').length;
+                const featureCount = allItems.filter(i => i.type === 'feature').length;
+
+                setData({
+                    columns: {
+                        backlog: [],
+                        todo: [],
+                        inProgress: inProgressIds,
+                        done: doneIds
+                    },
+                    items,
+                    stats: {
+                        totalItems: gitData.summary.total,
+                        totalBugs: bugCount,
+                        criticalBugs: 0,
+                        totalFeatures: featureCount,
+                        completedThisWeek: gitData.summary.deployed,
+                        inProgressCount: gitData.summary.devOnly + gitData.summary.stagingOnly,
+                        wipLimit: 10,
+                        wipExceeded: (gitData.summary.devOnly + gitData.summary.stagingOnly) > 10
+                    }
+                });
             } catch (error) {
                 console.error('Failed to fetch Kanban:', error);
             } finally {
