@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { RefreshCw, GitCommit, GitBranch, Clock } from 'lucide-react';
+import { RefreshCw, GitCommit, GitBranch, Clock, Filter } from 'lucide-react';
 
 interface TimelineDay {
     date: string;
@@ -12,16 +12,21 @@ interface TimelineDay {
         date: string;
         author: string;
         type: string;
+        category?: string;
     }[];
 }
+
+type FilterType = 'all' | 'anchorOS' | 'dashboard';
 
 export function GitTimeline() {
     const [timeline, setTimeline] = useState<TimelineDay[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
+    const [filter, setFilter] = useState<FilterType>('anchorOS'); // Default to Anchor OS
 
     useEffect(() => {
         async function fetchTimeline() {
+            setLoading(true);
             try {
                 const res = await axios.get('/api/git/timeline?days=14');
                 setTimeline(res.data);
@@ -33,6 +38,33 @@ export function GitTimeline() {
         }
         fetchTimeline();
     }, []);
+
+    // Filter commits based on selected filter
+    const filterCommit = (commit: { message: string; hash: string }) => {
+        if (filter === 'all') return true;
+
+        // Dashboard-related keywords
+        const dashboardKeywords = [
+            'dashboard', 'DEPLOYMENT_STATUS', 'PROJECT_STATUS',
+            'KNOWN_ISSUES', 'FEATURE_SUGGESTIONS', 'tools/',
+            '.agent/', 'docs:', 'chore:', 'post-implementation'
+        ];
+
+        const isDashboard = dashboardKeywords.some(kw =>
+            commit.message.toLowerCase().includes(kw.toLowerCase())
+        );
+
+        if (filter === 'dashboard') return isDashboard;
+        if (filter === 'anchorOS') return !isDashboard;
+        return true;
+    };
+
+    // Filter timeline data
+    const filteredTimeline = timeline.map(day => ({
+        ...day,
+        commits: day.commits.filter(filterCommit),
+        commitCount: day.commits.filter(filterCommit).length
+    })).filter(day => day.commitCount > 0);
 
     if (loading) {
         return (
@@ -63,8 +95,39 @@ export function GitTimeline() {
         }
     };
 
+    const filterLabels: Record<FilterType, string> = {
+        all: 'All Commits',
+        anchorOS: '⚓ Anchor OS',
+        dashboard: '📊 Dashboard'
+    };
+
     return (
         <div className="space-y-6">
+            {/* Filter + Stats */}
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-400">Filter:</span>
+                    <div className="flex gap-1">
+                        {(['anchorOS', 'dashboard', 'all'] as FilterType[]).map(f => (
+                            <button
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                className={`px-3 py-1 text-sm rounded-md transition-colors ${filter === f
+                                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50'
+                                        : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 border border-transparent'
+                                    }`}
+                            >
+                                {filterLabels[f]}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <span className="text-sm text-slate-500">
+                    {filteredTimeline.reduce((sum, day) => sum + day.commitCount, 0)} commits shown
+                </span>
+            </div>
+
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="card">
@@ -72,7 +135,7 @@ export function GitTimeline() {
                         <Clock className="w-5 h-5 text-slate-400" />
                         <span className="text-sm font-medium text-slate-300">Active Days</span>
                     </div>
-                    <p className="text-3xl font-bold text-white">{timeline.length}</p>
+                    <p className="text-3xl font-bold text-white">{filteredTimeline.length}</p>
                 </div>
                 <div className="card">
                     <div className="flex items-center gap-2 mb-2">
@@ -80,7 +143,7 @@ export function GitTimeline() {
                         <span className="text-sm font-medium text-slate-300">Total Commits</span>
                     </div>
                     <p className="text-3xl font-bold text-emerald-400">
-                        {timeline.reduce((sum, day) => sum + day.commitCount, 0)}
+                        {filteredTimeline.reduce((sum, day) => sum + day.commitCount, 0)}
                     </p>
                 </div>
                 <div className="card">
@@ -89,72 +152,84 @@ export function GitTimeline() {
                         <span className="text-sm font-medium text-slate-300">Features Shipped</span>
                     </div>
                     <p className="text-3xl font-bold text-purple-400">
-                        {new Set(timeline.flatMap(d => d.features)).size}
+                        {new Set(filteredTimeline.flatMap(d => d.features)).size}
                     </p>
                 </div>
             </div>
 
             {/* Timeline */}
             <div className="card">
-                <h3 className="card-header">Commit Timeline (Last 14 Days)</h3>
+                <h3 className="card-header">
+                    {filter === 'anchorOS' && '⚓ Anchor OS '}
+                    {filter === 'dashboard' && '📊 Dashboard '}
+                    Commit Timeline (Last 14 Days)
+                </h3>
                 <div className="relative">
                     {/* Vertical line */}
                     <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-700" />
 
                     <div className="space-y-6">
-                        {timeline.map((day) => (
-                            <div key={day.date} className="relative pl-10">
-                                {/* Dot */}
-                                <div className="absolute left-2.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-slate-800" />
+                        {filteredTimeline.length === 0 ? (
+                            <div className="pl-10 text-slate-500">
+                                No {filter === 'all' ? '' : filter === 'anchorOS' ? 'Anchor OS' : 'Dashboard'} commits in the last 14 days.
+                            </div>
+                        ) : (
+                            filteredTimeline.map((day) => (
+                                <div key={day.date} className="relative pl-10">
+                                    {/* Dot */}
+                                    <div className={`absolute left-2.5 w-3 h-3 rounded-full ring-4 ring-slate-800 ${filter === 'dashboard' ? 'bg-blue-500' : 'bg-emerald-500'
+                                        }`} />
 
-                                {/* Content */}
-                                <div
-                                    className="cursor-pointer hover:bg-slate-700/20 rounded-lg p-3 -ml-2 transition-colors"
-                                    onClick={() => setExpandedDay(expandedDay === day.date ? null : day.date)}
-                                >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="font-bold text-white">{formatDate(day.date)}</span>
-                                        <span className="text-sm text-slate-400">
-                                            {day.commitCount} commit{day.commitCount !== 1 ? 's' : ''}
-                                        </span>
-                                    </div>
+                                    {/* Content */}
+                                    <div
+                                        className="cursor-pointer hover:bg-slate-700/20 rounded-lg p-3 -ml-2 transition-colors"
+                                        onClick={() => setExpandedDay(expandedDay === day.date ? null : day.date)}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="font-bold text-white">{formatDate(day.date)}</span>
+                                            <span className="text-sm text-slate-400">
+                                                {day.commitCount} commit{day.commitCount !== 1 ? 's' : ''}
+                                            </span>
+                                        </div>
 
-                                    {/* Features summary */}
-                                    <div className="flex flex-wrap gap-1 mb-2">
-                                        {day.features.slice(0, 3).map((feature, i) => (
-                                            <span key={i} className="badge badge-purple text-xs">
-                                                {feature.substring(0, 30)}{feature.length > 30 ? '...' : ''}
-                                            </span>
-                                        ))}
-                                        {day.features.length > 3 && (
-                                            <span className="badge badge-yellow text-xs">
-                                                +{day.features.length - 3} more
-                                            </span>
+                                        {/* Features summary */}
+                                        <div className="flex flex-wrap gap-1 mb-2">
+                                            {day.features.slice(0, 3).map((feature, i) => (
+                                                <span key={i} className="badge badge-purple text-xs">
+                                                    {feature.substring(0, 30)}{feature.length > 30 ? '...' : ''}
+                                                </span>
+                                            ))}
+                                            {day.features.length > 3 && (
+                                                <span className="badge badge-yellow text-xs">
+                                                    +{day.features.length - 3} more
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Expanded commits */}
+                                        {expandedDay === day.date && (
+                                            <div className="mt-3 space-y-2 border-t border-slate-700 pt-3">
+                                                {day.commits.map((commit, i) => (
+                                                    <div key={i} className="flex items-start gap-3 text-sm">
+                                                        <span className="font-mono text-emerald-400 flex-shrink-0">{commit.hash}</span>
+                                                        <span className={`badge ${getTypeColor(commit.type)} flex-shrink-0`}>
+                                                            {commit.type}
+                                                        </span>
+                                                        <span className="text-slate-300 truncate" title={commit.message}>
+                                                            {commit.message.split('\n')[0]}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
-
-                                    {/* Expanded commits */}
-                                    {expandedDay === day.date && (
-                                        <div className="mt-3 space-y-2 border-t border-slate-700 pt-3">
-                                            {day.commits.map((commit, i) => (
-                                                <div key={i} className="flex items-start gap-3 text-sm">
-                                                    <span className="font-mono text-emerald-400 flex-shrink-0">{commit.hash}</span>
-                                                    <span className={`badge ${getTypeColor(commit.type)} flex-shrink-0`}>
-                                                        {commit.type}
-                                                    </span>
-                                                    <span className="text-slate-300 truncate" title={commit.message}>
-                                                        {commit.message.split('\n')[0]}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+
