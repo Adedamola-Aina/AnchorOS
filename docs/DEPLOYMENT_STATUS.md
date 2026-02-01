@@ -1,6 +1,6 @@
 # DEPLOYMENT STATUS
 
-**Last Updated**: 2026-01-31 04:20 UTC
+**Last Updated**: 2026-02-01 05:35 UTC
 
 ---
 
@@ -10,7 +10,7 @@
 |-------------|---------|---------------|-----|--------|
 | **Production** | v1.5.4 | anchor-os | https://anchor-os.web.app | ✅ Stable |
 | **Staging** | v1.5.8 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Deployed |
-| **Dev** | v1.5.8 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Deployed |
+| **Dev** | v1.6.0 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Deployed |
 
 **Code Flow**: Dev → Staging → Production (with approval)
 
@@ -18,7 +18,24 @@
 
 ## ⏳ PENDING CHANGES (Dev → Staging)
 
-_Environments in sync - no pending changes_
+### v1.6.0 Multi-Team Sprint (Ready for Staging)
+
+#### GAP-002: Design System Color Token Fragmentation ✅
+- Migrated `indigo-*` to `primary-*` tokens across 4 components
+- Files: `CategoryIcon.tsx`, `RecurringTransactionsList.tsx`, `RecurringOptions.tsx`, `NotificationSettings.tsx`
+
+#### GAP-003: Navigation Race Condition ✅
+- Replaced flaky `setTimeout(100)` with `requestAnimationFrame` + 1300ms delay
+- Files: `CommitmentsView.tsx`
+
+#### GAP-004: Command Palette Recent Actions ✅
+- Implemented localStorage persistence with auto-deduplication
+- "Recent" section appears at top when no query entered
+- Files: `CommandPalette.tsx`
+
+#### TASK-002: Habit Streaks & Gamification ✅
+- Already implemented (discovered during sprint)
+- No code changes needed, updated documentation
 
 ---
 
@@ -153,6 +170,8 @@ npm run deploy:production
 
 | Date | Version | Env | Type | Notes |
 |------|---------|-----|------|-------|
+| 2026-02-01 | v1.6.0 | Dev | **MULTI-TEAM SPRINT** | GAP-002: Color tokens, GAP-003: Navigation timing, GAP-004: Command Palette recent actions, TASK-002: Streaks (already implemented) |
+| 2026-01-31 | v1.5.9 | Dev/Staging | **REASSURANCE RELEASE** | BUG-023: Commit checkbox, UX-019/20: Currency overflow + Haptic feedback |
 | 2026-01-31 | v1.5.8 | Dev/Staging | **UX FIXES** | REG-004: Modal focus stealing fix, ActivityFeed crash fix, Unique category icons, Transaction list overflow fix, Edit/delete button removal (swipe gestures preserved) |
 | 2026-01-31 | v1.5.7 | Dev/Staging | **CRITICAL FIX** | REG-003: Fixed modal inputs completely unresponsive (pointer-events-none blocking all interactions) |
 | 2026-01-31 | v1.5.6 | Dev/Staging | Bugfix | BUG-022: Modal keyboard fix, Removed PullToRefresh |
