@@ -51,81 +51,97 @@ function getCurrentVersion() {
 }
 
 /**
- * Find version milestones from git
+ * Find deploy commits from git history
  * 
- * REALITY: This codebase doesn't have consistent deploy markers in git commits.
- * So we use a practical approach:
- * - Production: Last explicitly tagged version (v1.4.0) or known stable
- * - Staging: One version ahead of production
- * - Dev: Current package.json version
+ * STANDARDIZED FORMAT (preferred):
+ *   deploy(production): vX.X.X to anchor-os
+ *   deploy(staging): vX.X.X to anchor-os-staging
+ *   deploy(dev): vX.X.X to anchor-os-dev-1c6ec
  * 
- * All commits after production version are "pending production"
- * All commits after staging version are "pending staging" 
+ * FALLBACK: Uses version patterns in commit messages
  */
 async function findDeployCommits() {
     try {
         const log = await git.log({ maxCount: 300 });
         const currentVersion = getCurrentVersion();
 
-        // Known production version - the last version we KNOW was deployed
-        // This should be updated after each production deploy
-        // We'll find it from git tags or use a conservative default
-        const tags = await git.tags();
-        const latestTag = tags.all.length > 0 ? tags.all[tags.all.length - 1] : 'v1.4.0';
+        const deployments = {
+            production: null,
+            staging: null,
+            development: null
+        };
 
-        // Find commits for each major version milestone
+        // Patterns to detect standardized deploy markers
+        const deployPatterns = {
+            production: /deploy\(production\):\s*v?(\d+\.\d+\.\d+)/i,
+            staging: /deploy\(staging\):\s*v?(\d+\.\d+\.\d+)/i,
+            development: /deploy\(dev\):\s*v?(\d+\.\d+\.\d+)/i
+        };
+
+        // Also look for version patterns as fallback
         const versionCommits = {};
         const versionPattern = /v?(\d+\.\d+\.\d+)/;
 
         for (const commit of log.all) {
-            const match = commit.message.match(versionPattern);
-            if (match) {
-                const version = match[1];
-                if (!versionCommits[version]) {
-                    versionCommits[version] = {
-                        version: `v${version}`,
-                        hash: commit.hash.substring(0, 7),
-                        date: commit.date
-                    };
+            const msg = commit.message;
+            const shortHash = commit.hash.substring(0, 7);
+
+            // Check for standardized deploy markers FIRST
+            for (const [env, pattern] of Object.entries(deployPatterns)) {
+                if (!deployments[env]) {
+                    const match = msg.match(pattern);
+                    if (match) {
+                        deployments[env] = {
+                            version: `v${match[1]}`,
+                            hash: shortHash,
+                            date: commit.date,
+                            message: msg.split('\n')[0],
+                            source: 'deploy-marker'
+                        };
+                    }
                 }
+            }
+
+            // Also collect version patterns for fallback
+            const vMatch = msg.match(versionPattern);
+            if (vMatch && !versionCommits[vMatch[1]]) {
+                versionCommits[vMatch[1]] = {
+                    version: `v${vMatch[1]}`,
+                    hash: shortHash,
+                    date: commit.date
+                };
             }
         }
 
-        // Use conservative estimates based on known stable versions
-        // Production: v1.5.5 (most recently verified production deploy)
-        // Staging: v1.5.8 (recent staging deploy)
-        // Dev: current package.json
-
-        const prodVersion = versionCommits['1.5.5'] || { version: latestTag, hash: 'unknown' };
-        const stagingVersion = versionCommits['1.5.8'] || versionCommits['1.5.7'] || prodVersion;
-
-        return {
-            development: {
+        // Use fallbacks if standardized markers not found
+        if (!deployments.production) {
+            deployments.production = versionCommits['1.5.5'] || {
+                version: 'v1.5.5', hash: 'unknown', source: 'fallback'
+            };
+        }
+        if (!deployments.staging) {
+            deployments.staging = versionCommits['1.5.7'] || versionCommits['1.5.8'] || {
+                version: 'v1.5.7', hash: 'unknown', source: 'fallback'
+            };
+        }
+        if (!deployments.development) {
+            deployments.development = {
                 version: currentVersion,
                 hash: 'HEAD',
                 date: new Date().toISOString(),
-                message: 'Current development (package.json)'
-            },
-            staging: {
-                version: stagingVersion.version || 'v1.5.8',
-                hash: stagingVersion.hash || 'unknown',
-                date: stagingVersion.date || new Date().toISOString(),
-                message: 'Staging environment'
-            },
-            production: {
-                version: prodVersion.version || 'v1.5.5',
-                hash: prodVersion.hash || 'unknown',
-                date: prodVersion.date || new Date().toISOString(),
-                message: 'Production environment'
-            }
-        };
+                message: 'Current development (package.json)',
+                source: 'package.json'
+            };
+        }
+
+        return deployments;
     } catch (error) {
         console.error('Error finding deploy commits:', error.message);
         const currentVersion = getCurrentVersion();
         return {
-            production: { version: 'v1.5.5', hash: 'unknown' },
-            staging: { version: 'v1.5.8', hash: 'unknown' },
-            development: { version: currentVersion, hash: 'HEAD' }
+            production: { version: 'v1.5.5', hash: 'unknown', source: 'fallback' },
+            staging: { version: 'v1.5.7', hash: 'unknown', source: 'fallback' },
+            development: { version: currentVersion, hash: 'HEAD', source: 'package.json' }
         };
     }
 }
