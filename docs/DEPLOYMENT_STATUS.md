@@ -6,11 +6,11 @@
 
 ## 📊 CURRENT STATE
 
-| Environment | Version | Firebase Site | URL | Health |
-|-------------|---------|---------------|-----|--------|
-| **Production** | v1.5.4 | anchor-os | https://anchor-os.web.app | ✅ Stable |
-| **Staging** | v1.5.8 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Deployed |
-| **Dev** | v1.6.0 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Deployed |
+| Environment | Version | Firebase Site | URL | Health | Last Deployed |
+|-------------|---------|---------------|-----|--------|---------------|
+| **Production** | v1.5.9 | anchor-os | https://anchor-os.web.app | ✅ Stable | 2026-01-30 08:19 |
+| **Staging** | v1.5.9 | anchor-os-staging | https://anchor-os-staging.web.app | ✅ Deployed | 2026-01-31 06:24 |
+| **Dev** | v1.6.0 | anchor-os-dev-1c6ec | https://anchor-os-dev-1c6ec.web.app | ✅ Deployed | 2026-02-01 05:32 |
 
 **Code Flow**: Dev → Staging → Production (with approval)
 
@@ -41,20 +41,14 @@
 
 ## ⏳ PENDING CHANGES (Staging → Production)
 
-### v1.5.6 Features Awaiting Production Deployment
+_Production and Staging are at parity (v1.5.9)_
 
-#### Critical Bug Fixes
-- [ ] **BUG-022**: Modal keyboard input fix - Transfer/Pay Bill modals now accept keyboard input (global handlers were intercepting keystrokes)
-- [ ] **Service Worker Cache**: Bumped to v1.5.6 to ensure immediate deployment of modal fix across all environments
-
-#### UX Improvements  
-- [ ] **PullToRefresh Removal**: Removed from Finance transaction list - was causing transactions to disappear during refresh
-- [ ] **Real-time Updates**: App now relies solely on Firestore real-time listeners and optimistic updates (no manual refresh needed)
-
-#### Technical Details
-- [ ] Modal: Added `e.stopPropagation()` to keyboard handler and content div to prevent event bubbling
-- [ ] FinanceView: Removed PullToRefresh wrapper, handleRefresh function, isRefreshing state
-- [ ] useFinanceData: Removed refetch function from hook exports
+**Note**: v1.5.9 was fully deployed to production on 2026-01-30. Includes:
+- ✅ BUG-022: Modal keyboard input fix
+- ✅ BUG-023: Commitment checkbox fix (polling-based)
+- ✅ UX-019: Currency overflow protection (compact formatting)
+- ✅ UX-020: Task completion animation + haptic feedback
+- ✅ REG-003/004: Modal focus/input regressions
 
 ---
 
@@ -67,7 +61,7 @@
 
 ---
 
-## ✅ DEPLOYED TO PRODUCTION (v1.5.4)
+## ✅ DEPLOYED TO PRODUCTION (v1.5.9)
 
 ### Bug Fixes
 | Bug ID | Description | Priority | Status |
