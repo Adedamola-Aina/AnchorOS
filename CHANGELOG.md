@@ -27,6 +27,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **UX**: "Recent" section appears when no query is entered
 - **Files**: `CommandPalette.tsx`
 
+#### UX-021: Clickable Stats Filters in Backlog & Roadmap
+- **Feature**: Stats cards (Completed, Planned) now act as toggle filters
+- **UX**: Checkmark indicator shows active filter, click again to clear
+- **Files**: `UnifiedBacklog.tsx`
+
+#### UX-022: Multi-ID Commit Parsing with Roadmap Titles
+- **Feature**: Commits referencing multiple IDs now show individual initiative titles
+- **Implementation**: `gitDataProvider.js` looks up titles from `roadmap.json`
+- **Expanded**: ID patterns now support 20+ prefixes (FIN, SEC, PRD, SRE, etc.)
+- **Files**: `gitDataProvider.js`
+
+#### Dashboard Intake System
+- **Feature**: File bugs/features directly to roadmap via API or conversational AI
+- **API**: `POST /api/intake` with auto-generated ticket IDs (BUG-XXX, FIN-XXX)
+- **UI**: IntakeForm component in Command Center as manual backup
+- **Files**: `IntakeForm.tsx`, `server/index.js`
+
 #### TASK-002: Habit Streaks & Gamification (Discovered Already Implemented)
 - **Feature**: 🔥 Fire emoji streak badges on tasks with active streaks
 - **Logic**: Streak increments on toggle, resets on missed days
