@@ -146,6 +146,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BUG-022 (Modal Keyboard Input)**: Fixed Transfer/Pay Bill modals not accepting keyboard input. Modal inputs were being intercepted by global keyboard handlers (CommandPalette Escape handler, FinanceView search shortcut). Added `e.stopPropagation()` to Modal's keyboard event handler and content div to prevent event bubbling.
 - **Service Worker Cache**: Bumped SW cache version from v1.5.5 to v1.5.6 to ensure immediate deployment of modal fix across all environments.
 
+### Added
+
+#### UX-023: Account Transaction History UI Harmonization
+- **Feature**: Unified Account Details transaction list with main Finance View
+- **Implementation**: Adaptive height scaling (min 200px to calc(100vh-250px)) instead of fixed full height
+- **UX**: "End of list" indicator visible immediately for short lists; eliminates excessive whitespace
+- **Files**: `VirtualTransactionList.tsx`, `AccountDetailsView.tsx`
+
 ### Removed
 
 #### Pull-to-Refresh on Finance Transaction List
