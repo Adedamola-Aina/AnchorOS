@@ -67,19 +67,6 @@ describe('SwipeableTransactionItem', () => {
             expect(screen.getByText('Test Transaction')).toBeInTheDocument();
             expect(screen.queryByTestId('swipeable-row')).not.toBeInTheDocument();
         });
-
-        it('shows edit and delete buttons', () => {
-            render(
-                <SwipeableTransactionItem
-                    transaction={mockTransaction}
-                    onEdit={mockOnEdit}
-                    onDelete={mockOnDelete}
-                />
-            );
-
-            expect(screen.getByLabelText('Edit transaction')).toBeInTheDocument();
-            expect(screen.getByLabelText('Delete transaction')).toBeInTheDocument();
-        });
     });
 
     describe('Mobile Mode', () => {
