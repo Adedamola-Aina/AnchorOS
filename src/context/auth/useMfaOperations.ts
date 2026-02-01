@@ -3,7 +3,7 @@
  * Extracted from AuthContext.tsx per CLAUDE.md §3.2
  */
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import { multiFactor, type User, type MultiFactorResolver, type TotpSecret } from 'firebase/auth';
 
 interface PendingMfaSecret extends TotpSecret {
@@ -110,12 +110,12 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
         pendingMfaSecretRef.current = null;
     }, []);
 
-    return {
+    return useMemo(() => ({
         verifyMfa,
         generateMfaSecret,
         enrollMfa,
         unenrollMfa,
         reauthenticate,
         clearPendingSecret
-    };
+    }), [verifyMfa, generateMfaSecret, enrollMfa, unenrollMfa, reauthenticate, clearPendingSecret]);
 }
