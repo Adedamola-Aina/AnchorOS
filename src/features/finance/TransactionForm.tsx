@@ -92,7 +92,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             if (isDifferentCurrency) {
                 const rate = parseFloat(formState.exchangeRate);
                 if (isNaN(rate) || rate <= 0) throw new Error('Invalid exchange rate');
-                destinationAmountCents = Math.round(amountCents * rate);
+                destinationAmountCents = Math.round(parseFloat(amount) * rate * 100);
             }
 
             const isoDate = new Date(transactionDate + 'T12:00:00').toISOString();

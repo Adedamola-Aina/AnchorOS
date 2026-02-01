@@ -54,6 +54,13 @@ _No regressions detected_
 
 ## ✅ RECENTLY FIXED
 
+### [BUG-024] Exchange Rate Calculation 100x Inflation (FIXED 2026-01-31)
+- **Root Cause**: Exchange rate was being multiplied by cents instead of dollars
+- **Impact**: Cross-currency transfers showed 100x inflated amounts (e.g., $1,000 at rate 1460 → ₦146,000,000 instead of ₦1,460,000)
+- **Fix**: Changed calculation from `cents × rate` to `dollars × rate × 100`
+- **Files**: `TransferDetails.tsx` (preview), `TransactionForm.tsx` (actual transfer)
+- **Deployed**: Dev (2026-01-31)
+
 ### [BUG-023] Commitment Checkbox Requires Multiple Clicks (FIXED 2026-01-31)
 - **Root Cause**: Firestore `onSnapshot` listener failing with 400 errors on Listen stream. Optimistic updates worked but reverted when real-time sync failed.
 - **Impact**: Checkboxes required 2-3 clicks, state reverted after ~10 seconds

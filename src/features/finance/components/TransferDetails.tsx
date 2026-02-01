@@ -8,7 +8,6 @@
 import React from 'react';
 import { ArrowRightLeft } from 'lucide-react';
 import { formatCurrency } from '../../../utils/format';
-import { toCents } from '../../../utils/moneyUtils';
 import type { AnchorAccount } from '../../../types';
 
 interface TransferDetailsProps {
@@ -93,7 +92,7 @@ export const TransferDetails: React.FC<TransferDetailsProps> = ({
                         <span className="text-xs font-mono text-slate-500">{destAccount?.currency}</span>
                     </div>
                     <p className="text-[10px] text-blue-600/70 dark:text-blue-400/70 mt-1 text-right">
-                        Receives: {formatCurrency(toCents(amount) * parseFloat(exchangeRate || '0'), destAccount?.currency || '')}
+                        Receives: {formatCurrency(parseFloat(amount || '0') * parseFloat(exchangeRate || '0'), destAccount?.currency || '')}
                     </p>
                 </div>
             )}
