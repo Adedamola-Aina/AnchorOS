@@ -10,19 +10,17 @@
 **BEFORE writing ANY code, I MUST:**
 
 - [ ] Read `CLAUDE.md` - Development constitution (highest authority)
-- [ ] Read `docs/PROJECT_STATUS.md` - Current sprint, priorities, what's in progress
-- [ ] Read `docs/ROADMAP.md` - Why we're building this, dependencies
-- [ ] Read `docs/KNOWN_ISSUES.md` - Active bugs (don't reintroduce or duplicate!)
-- [ ] Check for duplicates in relevant docs
+- [ ] Check **Internal Dashboard** (http://localhost:3001) for current Roadmap/Parity status
+- [ ] Check `roadmap.json` (server/roadmap.json) for dependencies and status
+- [ ] Check for duplicates via Dashboard Search or `tools/dashboard/server/roadmap.json`
 - [ ] Understand dependencies and ripple effects
 
 **If fixing a bug:**
-- [ ] Check `docs/KNOWN_ISSUES.md` - Is this already logged?
+- [ ] Search Dashboard: Is this already logged as `BUG-XXX`?
 - [ ] Write failing test FIRST (TDD mandate)
 
 **If building a feature:**
-- [ ] Check `docs/FEATURE_SUGGESTIONS.md` - Is this already suggested?
-- [ ] Check `docs/ROADMAP.md` - Is this already planned?
+- [ ] Check Dashboard Roadmap: Is this already planned?
 - [ ] Understand why we're building this
 - [ ] Write failing test FIRST (TDD mandate)
 
@@ -32,15 +30,12 @@
 
 **AFTER completing ANY work, I MUST:**
 
-- [ ] Update `docs/PROJECT_STATUS.md` - Mark task complete, update timestamp
-- [ ] Update `CHANGELOG.md` - Document the change
-- [ ] Update `docs/KNOWN_ISSUES.md` - Move bug to "Recently Fixed" (if applicable)
-- [ ] Update `docs/DEPLOYMENT_STATUS.md` - Record deployment (if applicable)
-- [ ] Update `docs/ROADMAP.md` - Mark feature complete (if applicable)
-- [ ] Verify all tests pass
-- [ ] Commit with structured message
+- [ ] Run `npm test` to ensure ALL tests pass
+- [ ] **Commit with Semantic Message**: `feat(scope): UX-123 message` (triggers dashboard)
+- [ ] Verify Dashboard shows updated status (Environment Parity)
+- [ ] Verify `roadmap.json` status is correct (if applicable)
 
-**DO NOT say "done" until ALL relevant docs are updated.**
+**DO NOT update Markdown files manually (Project Status, Changelog). Git is the Source of Truth.**
 
 ---
 
@@ -67,11 +62,11 @@
 - Feature requests → `docs/FEATURE_SUGGESTIONS.md`
 - Planned work → `docs/ROADMAP.md`
 
-### Rule 5: Document Everything
-**Track ALL work:**
-- Fix a bug → Update `KNOWN_ISSUES.md`
-- Complete a feature → Update `ROADMAP.md` + `PROJECT_STATUS.md`
-- Deploy anywhere → Update `DEPLOYMENT_STATUS.md`
+### Rule 5: Track via Git & Roadmap
+**Git History is the Source of Truth:**
+- **Bug Fix**: Commit with `fix(scope): BUG-123 description`
+- **Feature**: Commit with `feat(scope): UX-123 description`
+- **Dashboard**: Verify the dashboard picks up your commit automatically.
 
 ### Rule 6: Security First
 **Every line of code must be secure:**
@@ -109,11 +104,11 @@ When user reports something, classify correctly:
 ### Starting Work
 ```
 "Let me check the context first..."
-[Reads CLAUDE.md, PROJECT_STATUS.md, ROADMAP.md, KNOWN_ISSUES.md]
+[Checks Dashboard, roadmap.json, CLAUDE.md]
 
 "Here's my understanding:
+- ID: [UX-XXX / BUG-XXX]
 - Priority: [P0/P1/P2]
-- Dependencies: [None / Requires X]
 - Reason: [Why we're building this]
 
 Proceeding with TDD approach."
@@ -125,10 +120,8 @@ Proceeding with TDD approach."
 
 Summary:
 - Tests: ✅ All passing
-- Docs Updated:
-  - docs/PROJECT_STATUS.md ✅
-  - CHANGELOG.md ✅
-  - docs/KNOWN_ISSUES.md ✅ (if applicable)
+- Commit: `feat(ui): UX-123 - Implemented adaptive height`
+- Verification: Dashboard updated, Parity checker confirms Dev status.
 
 Ready for next task."
 ```
