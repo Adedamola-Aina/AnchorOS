@@ -6,9 +6,12 @@ description: Generate a quick status report of current work and project state.
 
 ## Gather Information:
 
-1. Check `docs/PROJECT_STATUS.md` for current tasks
-2. Check `docs/KNOWN_ISSUES.md` for bug counts
-3. Check `docs/DEPLOYMENT_STATUS.md` for versions
+1. Check Project Status (Dashboard):
+   `curl -s http://localhost:3001/api/command-center | python3 -m json.tool`
+2. Check Bugs (Dashboard):
+   `curl -s http://localhost:3001/api/bugs | python3 -m json.tool`
+3. Check Environment Parity (Git Status):
+   `curl -s http://localhost:3001/api/parity-git | python3 -m json.tool`
 
 ---
 

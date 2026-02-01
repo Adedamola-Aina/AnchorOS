@@ -12,10 +12,11 @@ The philosophy is simple: **We build software that works like magic because we e
 
 - **Project Status (Source of Truth)**: [Internal Dashboard](http://localhost:3001) - *Git-driven automation*
 - **Architecture (System Design)**: [ARCHITECTURE.md](file:///root/anchor-os/ARCHITECTURE.md) - *Structural Reference*
-- **Changelog (History)**: [CHANGELOG.md](file:///root/anchor-os/CHANGELOG.md) - *Release Records*
+- **History & Changelog**: **Git History** (viewable on Dashboard) - *The single source of truth*
+- **Roadmap**: `roadmap.json` (managed via Dashboard) - *No manual markdown editing*
 - **UX Standards**: [adaptive_layout_patterns.md](file:///root/.gemini/antigravity/knowledge/anchor_os_ux_ui/artifacts/adaptive_layout_patterns.md)
 
-Always consult these documents before starting new work.
+Always consult the Dashboard and Architecture docs before starting new work.
 
 ---
 

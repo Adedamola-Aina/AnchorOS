@@ -24,8 +24,8 @@
 
 - [ ] All tests passing (`npm run test:run`)
 - [ ] No lint errors (`npm run lint`)
-- [ ] Documentation updated (PROJECT_STATUS.md, CHANGELOG.md, KNOWN_ISSUES.md)
-- [ ] Git committed with descriptive message
+- [ ] **Roadmap Updated**: `roadmap.json` reflects features being deployed
+- [ ] Git committed with descriptive message (e.g., `deploy(staging): v1.2.0`)
 - [ ] Version bumped in package.json (if applicable)
 
 ---
@@ -193,18 +193,23 @@ firebase deploy --only hosting:staging  # CORRECT TARGET
 
 ---
 
-## 📝 DEPLOYMENT DOCUMENTATION
+## 📝 DEPLOYMENT MARKERS
 
-After EVERY deployment, update:
+To ensure the Dashboard tracks deployments correctly, you MUST create an empty commit after deployment:
 
-1. **DEPLOYMENT_STATUS.md**:
-   - Update environment version
-   - Add deployment history entry
-2. **Git commit**:
-   ```bash
-   git add docs/DEPLOYMENT_STATUS.md
-   git commit -m "docs: Update DEPLOYMENT_STATUS for v1.x.x deployment to [env]"
-   ```
+**Format**: `deploy(env): version to project`
+
+```bash
+# Example for Staging
+git commit --allow-empty -m "deploy(staging): v1.5.0 to anchor-os-staging"
+git push origin master
+
+# Example for Production
+git commit --allow-empty -m "deploy(production): v1.5.0 to anchor-os"
+git push origin master
+```
+
+**Note**: Development deployments are tracked automatically by every commit.
 
 ---
 
@@ -223,7 +228,9 @@ firebase hosting:rollback
 # Open the URL and test
 
 # 4. Document the rollback
-# Update DEPLOYMENT_STATUS.md with rollback entry
+# Create a rollback marker
+git commit --allow-empty -m "rollback(production): reverted to v1.4.9"
+git push
 ```
 
 ---
