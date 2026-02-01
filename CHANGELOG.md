@@ -2,14 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.5.10] - 2026-02-01
+
+### 📱 Native Experience Hotfix
+- **System Theme Auto-Detect** (BUG-025): Fixed auto-switching on iOS/Android (App now listens to OS changes).
+- **Standardized Haptics** (BUG-026): Unified haptic feedback logic (Animation fallback on iOS).
+
 ## [v1.5.9] - 2026-02-01
 
 ### 🚀 Major Features
 - **Transaction History UI** (UX-023): Complete redesign with adaptive height and scrolling.
-- **System Theme Detection** (PWA-006): Auto-switches Light/Dark mode based on iOS/Android settings.
+- **System Theme Detection** (PWA-006): Initial implementation.
 - **Multi-Team Sprint** (GAP-002): Support for cross-functional sprint tracking.
 - **Recurring Transactions** (FIN-003): Full implementation of recurring logic.
-- **Native Experience** (BUG-025/026): Fixed iOS System Theme detection and standardized haptics.
 
 ### 🎨 UX Enhancements
 - **Compact Currency** (UX-019): Overflow protection for large numbers.
