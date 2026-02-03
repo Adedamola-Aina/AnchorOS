@@ -4,9 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [v1.5.14] - 2026-02-03
 
+### ✨ UX Enhancements
+- **Nav Micro-Animations** (UX-024): Delightful tap animations on bottom navigation icons.
+  - Home: Subtle pulse animation
+  - Tasks: Bounce with random celebration colors (emerald, blue, violet, amber, rose, teal)
+  - Finance: Credit card swipe motion
+  - Settings: Gentle gear rotation
+  - 200ms duration, haptic feedback, dark mode compatible
+
 ### 🔔 Push Notification Infrastructure
 - **Server-Side Push Delivery** (PLT-003): New Cloud Function sends native iOS/Android banners for commitment reminders.
-  - Runs every 5 minutes to check for due reminders
+  - Runs every 1 minute to check for due reminders (near-realtime precision)
   - Minimal notification copy following Design Philosophy (just the commitment title, no fluff)
   - Handles stale FCM token cleanup
 - **IndexedDB Resilience** (PLT-002): Added retry logic for transient PWA navigation errors during token retrieval.
