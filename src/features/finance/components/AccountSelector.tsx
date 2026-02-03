@@ -1,12 +1,11 @@
 /**
- * AccountSelector
- * 
- * Grid of account cards for selecting source account.
- * Extracted from TransactionForm for modularity.
+ * AccountSelector - Grid of account cards for selection
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import React from 'react';
 import type { AnchorAccount } from '../../../types';
+import { Text, VStack } from '../../../components/primitives';
 
 interface AccountSelectorProps {
     accounts: AnchorAccount[];
@@ -22,10 +21,10 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
     label
 }) => {
     return (
-        <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+        <VStack gap="xs">
+            <Text as="label" variant="muted" size="xs" weight="bold" className="uppercase">
                 {label}
-            </label>
+            </Text>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {accounts.map(acc => (
                     <button
@@ -33,19 +32,20 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
                         type="button"
                         onClick={() => onSelect(acc.id)}
                         className={`text-left p-3 rounded-lg border transition-all ${selectedId === acc.id
-                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-500'
-                                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                            ? 'border-finance-500 bg-finance-50 dark:bg-finance-900/20 ring-1 ring-finance-500'
+                            : 'border-[var(--border)] hover:border-[var(--border-subtle)]'
                             }`}
                     >
-                        <div className="font-bold text-sm text-slate-800 dark:text-white truncate">
+                        <Text variant="heading" size="sm" truncate as="div">
                             {acc.name}
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                        </Text>
+                        <Text variant="muted" size="xs" as="div">
                             {acc.currency} • {acc.type}
-                        </div>
+                        </Text>
                     </button>
                 ))}
             </div>
-        </div>
+        </VStack>
     );
 };
+
