@@ -1,11 +1,12 @@
 /**
  * SharedActivitySection - Activity feed for shared accounts
- * Extracted from AccountDetailsView per CLAUDE.md §3.2
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { Users } from 'lucide-react';
 import { ActivityFeed } from './ActivityFeed';
 import type { AccountActivity } from '../../../types/activity';
+import { Text, HStack, Badge } from '../../../components/primitives';
 
 interface SharedActivitySectionProps {
     activities: AccountActivity[];
@@ -19,13 +20,11 @@ export const SharedActivitySection = ({
     loading,
 }: SharedActivitySectionProps) => (
     <div className="glass-card p-6">
-        <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
+        <HStack gap="sm" align="center" className="mb-4">
             <Users className="w-4 h-4 text-primary-500" />
-            <span>Recent Activity</span>
-            <span className="text-[10px] font-black text-primary-500 bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Shared
-            </span>
-        </h3>
+            <Text variant="heading" weight="bold">Recent Activity</Text>
+            <Badge variant="primary" size="xs">Shared</Badge>
+        </HStack>
         <ActivityFeed
             activities={activities}
             currentUserId={currentUserId}
@@ -34,3 +33,4 @@ export const SharedActivitySection = ({
         />
     </div>
 );
+

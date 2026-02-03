@@ -1,11 +1,12 @@
 /**
  * AccountHeader Sub-components
- * Split from AccountHeader.tsx per CLAUDE.md §3.2 (200-line rule)
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import React from 'react';
 import { Check, X, ArrowUpRight } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
+import { HStack } from '../../../components/primitives';
 
 interface RenameInputProps {
     newName: string;
@@ -35,11 +36,11 @@ export const AccountRenameInput: React.FC<RenameInputProps> = ({
             autoFocus
             disabled={isRenaming}
         />
-        <div className="flex gap-3">
+        <HStack gap="sm">
             <button
                 onClick={onConfirmRename}
                 disabled={isRenaming || !newName.trim()}
-                className="flex-1 bg-emerald-500 hover:bg-emerald-400 p-3 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 font-semibold"
+                className="flex-1 bg-finance-500 hover:bg-finance-400 p-3 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 font-semibold"
             >
                 <Check className="w-5 h-5" />
                 <span className="sm:hidden">Save</span>
@@ -52,7 +53,7 @@ export const AccountRenameInput: React.FC<RenameInputProps> = ({
                 <X className="w-5 h-5" />
                 <span className="sm:hidden">Cancel</span>
             </button>
-        </div>
+        </HStack>
     </div>
 );
 
@@ -70,10 +71,10 @@ export const AccountActionButtons: React.FC<ActionButtonsProps> = ({
     onTransfer,
     onPayBill,
 }) => (
-    <div className="flex flex-wrap gap-3">
+    <HStack gap="sm" wrap>
         <button
             onClick={onTransfer}
-            className="flex-1 min-w-[140px] bg-white text-slate-900 hover:bg-white/90 px-6 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+            className="flex-1 min-w-[140px] bg-white text-foreground hover:bg-white/90 px-6 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
         >
             <ArrowUpRight className="w-5 h-5" />
             Transfer
@@ -87,5 +88,6 @@ export const AccountActionButtons: React.FC<ActionButtonsProps> = ({
             </span>
             Pay Bill
         </button>
-    </div>
+    </HStack>
 );
+
