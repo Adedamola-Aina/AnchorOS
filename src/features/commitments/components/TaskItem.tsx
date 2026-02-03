@@ -13,6 +13,10 @@ interface TaskItemProps {
     onStartEdit: (id: string) => void;
     onDelete: (id: string) => void;
     onConfirmFinancial?: (title: string) => void;
+    /** Hide action buttons (for mobile swipe-to-delete) */
+    hideActions?: boolean;
+    /** Callback when title is tapped (for mobile tap-to-edit) */
+    onTitleClick?: () => void;
 }
 
 import { useHaptic } from '../../../hooks/useHaptic';
@@ -25,6 +29,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onStartEdit,
     onDelete,
     onConfirmFinancial,
+    hideActions = false,
+    onTitleClick,
 }) => {
     const [isAnimating, setIsAnimating] = useState(false);
     const { trigger } = useHaptic();
@@ -89,55 +95,74 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                         )}
                     </button>
                     <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className={`font-bold text-sm tracking-tight transition-all duration-300 ${isAnimating
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : task.completed
-                                    ? 'line-through text-slate-400 dark:text-slate-500'
-                                    : 'text-slate-800 dark:text-white'
-                                }`}>
-                                {task.title}
-                            </h4>
-                            {!task.completed && !isAnimating && (
-                                <div className="flex gap-1.5 flex-wrap">
-                                    <Badge type={task.type}>{task.type}</Badge>
-                                    <TaskContextBadge task={task} />
-                                    {hasFamilyActive && task.category === 'family' && (
-                                        <Badge type="family">Family</Badge>
-                                    )}
-                                    {(task.currentStreak || 0) > 0 && (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                                            🔥 {task.currentStreak}
-                                        </span>
-                                    )}
-                                </div>
+                        {/* Title row with streak inline */}
+                        <div className="flex items-center gap-2">
+                            {onTitleClick ? (
+                                <button
+                                    onClick={onTitleClick}
+                                    disabled={isAnimating || task.completed}
+                                    className={`font-semibold text-sm tracking-tight transition-all duration-300 truncate text-left ${isAnimating
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : task.completed
+                                            ? 'line-through text-slate-400 dark:text-slate-500'
+                                            : 'text-slate-800 dark:text-white hover:text-task-600 dark:hover:text-task-400'
+                                        }`}
+                                >
+                                    {task.title}
+                                </button>
+                            ) : (
+                                <h4 className={`font-semibold text-sm tracking-tight transition-all duration-300 truncate ${isAnimating
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : task.completed
+                                        ? 'line-through text-slate-400 dark:text-slate-500'
+                                        : 'text-slate-800 dark:text-white'
+                                    }`}>
+                                    {task.title}
+                                </h4>
+                            )}
+                            {!task.completed && !isAnimating && (task.currentStreak || 0) > 0 && (
+                                <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                    🔥{task.currentStreak}
+                                </span>
                             )}
                             {isAnimating && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-                                    ✓ Complete!
+                                <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                    ✓ Done!
                                 </span>
                             )}
                         </div>
+                        {/* Badges row - compact, single line with overflow hidden */}
+                        {!task.completed && !isAnimating && (
+                            <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
+                                <Badge type={task.type}>{task.type}</Badge>
+                                <TaskContextBadge task={task} />
+                                {hasFamilyActive && task.category === 'family' && (
+                                    <Badge type="family">Family</Badge>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div className="flex items-center gap-0.5 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onStartEdit(task.id)}
-                        className="text-slate-400 hover:text-task-500 hover:bg-task-50 dark:hover:bg-task-900/20"
-                    >
-                        <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(task.id)}
-                        className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
-                </div>
+                {!hideActions && (
+                    <div className="flex items-center gap-0.5 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onStartEdit(task.id)}
+                            className="text-slate-400 hover:text-task-500 hover:bg-task-50 dark:hover:bg-task-900/20"
+                        >
+                            <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onDelete(task.id)}
+                            className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </Button>
+                    </div>
+                )}
             </div>
         </Card>
     );
