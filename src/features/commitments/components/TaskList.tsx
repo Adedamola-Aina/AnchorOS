@@ -1,8 +1,14 @@
+/**
+ * TaskList - Active and completed task sections
+ * DES-002: Migrated to semantic tokens and primitives
+ */
+
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { SwipeableTaskItem } from './SwipeableTaskItem';
 import type { AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
+import { Text, VStack } from '../../../components/primitives';
 
 interface TaskListProps {
     activeTasks: AnchorTask[];
@@ -28,13 +34,15 @@ export const TaskList: React.FC<TaskListProps> = ({
     const [showCompleted, setShowCompleted] = useState(false);
 
     return (
-        <div className="space-y-8">
+        <VStack gap="xl">
             {/* Active Tasks */}
-            <div className="space-y-4">
+            <VStack gap="md">
                 {activeTasks.length > 0 && (
-                    <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Active Tasks</h3>
+                    <Text variant="subtle" size="xs" weight="bold" className="uppercase tracking-[0.2em]">
+                        Active Tasks
+                    </Text>
                 )}
-                <div className="space-y-3 transition-all duration-300 ease-out">
+                <VStack gap="sm" className="transition-all duration-300 ease-out">
                     {activeTasks.map((task) => (
                         <div
                             key={task.id}
@@ -51,12 +59,12 @@ export const TaskList: React.FC<TaskListProps> = ({
                             />
                         </div>
                     ))}
-                </div>
-            </div>
+                </VStack>
+            </VStack>
 
             {/* Completed Section */}
             {completedTasks.length > 0 && (
-                <div className="mt-8 border-t border-slate-100 dark:border-slate-800 pt-8">
+                <div className="mt-8 border-t border-[var(--border-subtle)] pt-8">
                     <Button
                         variant="secondary"
                         size="sm"
@@ -68,7 +76,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                     </Button>
 
                     {showCompleted && (
-                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <VStack gap="sm" className="animate-in fade-in slide-in-from-top-2 duration-300">
                             {completedTasks.map((task) => (
                                 <SwipeableTaskItem
                                     key={task.id}
@@ -80,10 +88,11 @@ export const TaskList: React.FC<TaskListProps> = ({
                                     onDelete={onDelete}
                                 />
                             ))}
-                        </div>
+                        </VStack>
                     )}
                 </div>
             )}
-        </div>
+        </VStack>
     );
 };
+
