@@ -66,8 +66,13 @@ self.addEventListener('activate', (event) => {
 
 // Fetch: Stale-While-Revalidate strategy
 self.addEventListener('fetch', (event) => {
-    // Skip non-GET requests and Firestore/Firebase Auth calls
-    if (event.request.method !== 'GET' || event.request.url.includes('firestore.googleapis.com') || event.request.url.includes('identitytoolkit.googleapis.com')) {
+    // Skip non-GET requests, non-http requests (extensions), and Firestore/Firebase Auth calls
+    if (
+        event.request.method !== 'GET' ||
+        !event.request.url.startsWith('http') ||
+        event.request.url.includes('firestore.googleapis.com') ||
+        event.request.url.includes('identitytoolkit.googleapis.com')
+    ) {
         return;
     }
 

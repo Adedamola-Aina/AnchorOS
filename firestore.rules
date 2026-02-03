@@ -98,6 +98,11 @@ service cloud.firestore {
           allow write: if request.auth.uid == userId;
         }
 
+        // FCM Tokens for Push Notifications
+        match /fcmTokens/{token} {
+          allow read, write: if request.auth.uid == userId;
+        }
+
 
         // ====================================================================
         // Accounts: Owner or shared member can read

@@ -1,5 +1,6 @@
 {
     "id": "/",
+    "gcm_sender_id": "103953800507",
     "name": "Anchor OS",
     "short_name": "Anchor",
     "description": "Premium Shared Asset Management & Family Finance",

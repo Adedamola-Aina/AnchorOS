@@ -49,17 +49,15 @@ export const CommandPalette = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const [recentActions, setRecentActions] = useState<RecentAction[]>([]);
     const { navigateTo } = useApp();
     const { accounts } = useFinance();
     const { tasks } = useTasks();
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Load recent actions when palette opens
-    useEffect(() => {
-        if (isOpen) {
-            setRecentActions(getRecentActions());
-        }
+    const recentActions = useMemo(() => {
+        if (!isOpen) return [];
+        return getRecentActions();
     }, [isOpen]);
 
     // Toggle Logic

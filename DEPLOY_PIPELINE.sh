@@ -99,14 +99,17 @@ case $ENV in
     development)
         FIREBASE_PROJECT="anchor-os-dev-1c6ec"
         HOSTING_URL="anchor-os-dev-1c6ec.web.app"
+        HOSTING_TARGET="dev"
         ;;
     staging)
         FIREBASE_PROJECT="anchor-os-staging"
         HOSTING_URL="anchor-os-staging.web.app"
+        HOSTING_TARGET="staging"
         ;;
     production)
         FIREBASE_PROJECT="anchor-os"
         HOSTING_URL="anchor-os.web.app"
+        HOSTING_TARGET="production"
         ;;
 esac
 
@@ -123,10 +126,19 @@ fi
 
 # 6. Deployment
 echo -e "\n${YELLOW}🚀 Stage 6: Deploying to ${ENV^}...${NC}"
-if firebase deploy --only hosting,firestore:rules --project "$FIREBASE_PROJECT"; then
+if firebase deploy --only hosting:"$HOSTING_TARGET",firestore:rules --project "$FIREBASE_PROJECT"; then
     echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL!${NC}"
     echo -e "🌍 Live at: https://${HOSTING_URL}"
 else
     echo -e "${RED}❌ Deployment failed.${NC}"
     exit 1
+fi
+
+# 7. Dashboard Sync
+echo -e "\n${YELLOW}🔄 Stage 7: Syncing Internal Dashboard...${NC}"
+# Use a timeout to prevent hanging if dashboard is down
+if curl -m 5 -X POST http://localhost:3001/api/refresh -s > /dev/null; then
+    echo -e "${GREEN}✅ Internal Dashboard updated.${NC}"
+else
+    echo -e "${YELLOW}⚠️  Dashboard not responding (is it running at :3001?). Deployment successful otherwise.${NC}"
 fi

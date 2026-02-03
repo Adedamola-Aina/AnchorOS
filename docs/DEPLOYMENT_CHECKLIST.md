@@ -35,17 +35,9 @@
 ### Deploy to Development
 
 ```bash
-# 1. Build for development environment
-npm run build:dev
+# Deploy to Development
+./DEPLOY_PIPELINE.sh --env=development
 
-# 2. Verify build output
-ls -lh dist/
-
-# 3. Deploy to Firebase
-firebase deploy --only hosting:dev
-
-# 4. Verify deployment
-# Open: https://anchor-os-dev-1c6ec.web.app
 # ✅ Should see BLUE banner: "DEVELOPMENT ENVIRONMENT"
 ```
 
@@ -58,17 +50,9 @@ firebase deploy --only hosting:dev
 ### Deploy to Staging
 
 ```bash
-# 1. Build for staging environment
-npm run build:staging
+# Deploy to Staging
+./DEPLOY_PIPELINE.sh --env=staging
 
-# 2. Verify build output
-ls -lh dist/
-
-# 3. Deploy to Firebase
-firebase deploy --only hosting:staging
-
-# 4. Verify deployment
-# Open: https://anchor-os-staging.web.app
 # ✅ Should see YELLOW banner: "STAGING ENVIRONMENT"
 ```
 
@@ -81,22 +65,10 @@ firebase deploy --only hosting:staging
 ### Deploy to Production
 
 ```bash
-# 1. Ensure staging is tested and verified
-# Open: https://anchor-os-staging.web.app
-# Test all critical flows
+# Deploy to Production (fast)
+./DEPLOY_PIPELINE.sh --env=production --skip-e2e
 
-# 2. Build for production environment
-npm run build:production
-
-# 3. Verify build output
-ls -lh dist/
-
-# 4. Deploy to Firebase
-firebase deploy --only hosting:production
-
-# 5. Verify deployment
-# Open: https://anchor-os.web.app
-# ✅ Should see NO banner (production has no environment indicator)
+# ✅ Should see NO banner
 ```
 
 **Environment Variables Used**:

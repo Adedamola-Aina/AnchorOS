@@ -25,6 +25,7 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: true, // Required for Sentry
     rollupOptions: {
       input: path.resolve(__dirname, 'index.html'),
       output: {

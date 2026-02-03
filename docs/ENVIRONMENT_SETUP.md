@@ -437,41 +437,19 @@ npm run test:run
 echo $?  # Should output 0 if tests passed
 ```
 
-#### Step 6: Build for Target Environment
+#### Step 6-8: Build & Deploy (Automated)
+
+WE ONE COMMAND for Build, Test, and Deploy.
 
 ```bash
-# For development environment
-npm run build:dev
-
-# For staging environment
-npm run build:staging
-
-# For production environment
-npm run build:production
-```
-
-**Build Output**: `dist/` directory contains optimized static files
-
-#### Step 7: Deploy to Firebase Hosting
-
-```bash
-# Install Firebase CLI (first time only)
-npm install -g firebase-tools
-
-# Login to Firebase (first time only)
-firebase login --no-localhost
-
 # Deploy to development
-firebase deploy --only hosting:dev
-# → https://anchor-os-dev-1c6ec.web.app/
+./DEPLOY_PIPELINE.sh --env=development
 
 # Deploy to staging
-firebase deploy --only hosting:staging
-# → https://anchor-os-staging.web.app/
+./DEPLOY_PIPELINE.sh --env=staging
 
-# Deploy to production
-firebase deploy --only hosting:production
-# → https://anchor-os.web.app/
+# Deploy to production (fast)
+./DEPLOY_PIPELINE.sh --env=production --skip-e2e
 ```
 
 **Deployment Time**: ~30-60 seconds (CDN propagation)

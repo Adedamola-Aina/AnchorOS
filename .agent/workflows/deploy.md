@@ -1,68 +1,40 @@
 ---
-description: Deploy to an environment with proper git markers for dashboard tracking
+description: How to deploy Anchor OS to Dev, Staging, or Production
 ---
 
 # Deployment Workflow
 
-## Dev Environment (Automatic)
-Dev deployments are **automatic** - every commit is considered deployed to dev.
+**STOP**: Do NOT use `firebase deploy` manually. Do NOT use `scripts/deploy.sh`.
+**ALWAYS** use the pipeline script. It handles linting, testing, building (with correct environment variables), and targeting.
 
-**Dev URLs:**
-- Local: http://localhost:5173/
-- Dev Tailscale: https://anchor.tail2fa2e.ts.net/
-- Dev Firebase: https://anchor-os-dev-1c6ec.web.app/
+## Command
 
-**No marker commit needed** - the dashboard automatically tracks commits as "dev".
+Run from the project root:
 
----
-
-## Staging & Production (Explicit Markers Required)
-
-### Deploy Marker Format
-```
-deploy(ENV): vX.X.X to PROJECT
-```
-
-### Deploy to Staging
 ```bash
-# 1. Build
-npm run build
-
-# 2. Deploy
-firebase deploy --only hosting --project anchor-os-staging
-
-# 3. Create marker
-VERSION=$(node -p "require('./package.json').version")
-git commit --allow-empty -m "deploy(staging): v$VERSION to anchor-os-staging"
-git push origin master
+./DEPLOY_PIPELINE.sh --env=<environment>
 ```
 
-### Deploy to Production
+## Environments
+
+| Environment | Flag | URL | Checks | Banner |
+| :--- | :--- | :--- | :--- | :--- |
+| **Development** | `development` | `anchor-os-dev-1c6ec.web.app` | Lint, Unit Test | BLUE |
+| **Staging** | `staging` | `anchor-os-staging.web.app` | Lint, Unit Test, E2E | YELLOW |
+| **Production** | `production` | `anchor-os.web.app` | Lint, Unit Test, E2E | NONE |
+
+## Automatic Dashboard Sync
+
+After a successful deployment, the pipeline automatically calls `POST /api/refresh` on the Internal Dashboard (localhost:3001) to update the Environment Parity and Deployment Timeline. You do not need to do this manually.
+
+## Examples
+
+**Deploy to Staging:**
 ```bash
-# 1. Build
-npm run build
-
-# 2. Deploy
-firebase deploy --only hosting --project anchor-os
-
-# 3. Create marker
-VERSION=$(node -p "require('./package.json').version")
-git commit --allow-empty -m "deploy(production): v$VERSION to anchor-os"
-git push origin master
+./DEPLOY_PIPELINE.sh --env=staging
 ```
 
----
-
-## Quick Reference
-
-| Environment | Marker Required | Detection |
-|-------------|----------------|-----------|
-| Local/Dev | ❌ No | Every commit = deployed |
-| Staging | ✅ Yes | `deploy(staging): vX.X.X` |
-| Production | ✅ Yes | `deploy(production): vX.X.X` |
-
-## When User Says "Deploy to Staging/Production"
-1. Build the app
-2. Run firebase deploy to the target project
-3. Create the marker commit
-4. Push to master
+**Deploy to Production (fast):**
+```bash
+./DEPLOY_PIPELINE.sh --env=production --skip-e2e
+```

@@ -55,7 +55,14 @@ export function FamilySettingsV2({ onNavigateToFinance }: FamilySettingsV2Props)
     }, [user]);
 
     const handleConnectionConfirmed = (_redirectTo: string, message: string) => { setShowPostConnectionMessage(true); setPostConnectionMessage(message); };
-    const handleGoToFinance = () => { setShowPostConnectionMessage(false); onNavigateToFinance ? onNavigateToFinance() : window.location.href = '/finance'; };
+    const handleGoToFinance = () => {
+        setShowPostConnectionMessage(false);
+        if (onNavigateToFinance) {
+            onNavigateToFinance();
+        } else {
+            window.location.href = '/finance';
+        }
+    };
 
     const handleDisconnect = async () => {
         if (!connection || !user) return;
