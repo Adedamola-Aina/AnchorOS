@@ -1,7 +1,8 @@
 /**
  * Finance View Account Details Section
- * Extracted from FinanceView.tsx per CLAUDE.md §3.2
+ * DES-002: Uses semantic Modal and ConfirmationModal components
  */
+
 
 import React from 'react';
 import { Modal } from '../../../components/shared/Modal';
