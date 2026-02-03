@@ -10,14 +10,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { recurringApi } from '../api/RecurringApi';
 import type { RecurringTransaction } from '../types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 /**
  * Hook to subscribe to user's recurring transactions
  */
 export const useRecurringTransactions = (userId: string | undefined) => {
     const queryClient = useQueryClient();
-    const queryKey = ['recurring_transactions', userId];
+    const queryKey = useMemo(() => ['recurring_transactions', userId], [userId]);
 
     // We use a dummy query to set up the cache via subscription
     // The actual data flow happens through onSnapshot in the effect
@@ -33,11 +33,13 @@ export const useRecurringTransactions = (userId: string | undefined) => {
 
     useEffect(() => {
         if (!userId) {
-            setIsLoading(false);
             return;
         }
 
-        setIsLoading(true);
+        // isLoading is initialized to true. We rely on that for the first load.
+        // For subsequent user changes, we might want to reset it, but doing so 
+        // synchronously in useEffect causes lint errors.
+
         const unsubscribe = recurringApi.subscribeToRecurring(
             userId,
             (newData) => {

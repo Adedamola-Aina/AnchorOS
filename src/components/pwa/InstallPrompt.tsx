@@ -18,7 +18,10 @@ interface BeforeInstallPromptEvent extends Event {
 export const InstallPrompt = () => {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [showPrompt, setShowPrompt] = useState(false);
-    const [isIOS, setIsIOS] = useState(false);
+    const [isIOS] = useState(() => {
+        if (typeof navigator === 'undefined') return false;
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as unknown as { MSStream: unknown }).MSStream;
+    });
     const { isMobile } = useResponsive();
 
     useEffect(() => {
@@ -30,12 +33,8 @@ export const InstallPrompt = () => {
         const dismissed = sessionStorage.getItem('pwa-prompt-dismissed');
         if (dismissed) return;
 
-        // Detect iOS
-        const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as unknown as { MSStream: unknown }).MSStream;
-        setIsIOS(isIOSDevice);
-
         // On iOS, show after a delay
-        if (isIOSDevice && isMobile) {
+        if (isIOS && isMobile) {
             const timer = setTimeout(() => setShowPrompt(true), 3000);
             return () => clearTimeout(timer);
         }

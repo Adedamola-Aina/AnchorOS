@@ -59,6 +59,7 @@ const FinanceView = () => {
   }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const action = searchParams.get('action');
     if (action === 'new') {

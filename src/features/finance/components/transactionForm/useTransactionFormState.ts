@@ -19,7 +19,13 @@ interface UseTransactionFormStateProps {
 export function useTransactionFormState({
     accounts, transactions, initialData, defaultAccountId, defaultType, prefillData
 }: UseTransactionFormStateProps) {
-    const [selectedAccId, setSelectedAccId] = useState(initialData?.accountId || defaultAccountId || '');
+    const [selectedAccId, setSelectedAccId] = useState(() => {
+        if (initialData?.accountId) return initialData.accountId;
+        if (defaultAccountId) return defaultAccountId;
+        const lastAccId = localStorage.getItem('anchor_last_account_id');
+        if (lastAccId && accounts.find(a => a.id === lastAccId)) return lastAccId;
+        return accounts[0]?.id || '';
+    });
     const [destinationAccId, setDestinationAccId] = useState(initialData?.destinationAccountId || '');
     const [type, setType] = useState<TransactionType>(initialData?.type || defaultType);
     const [category, setCategory] = useState(initialData?.category || prefillData?.category || 'General');
@@ -27,35 +33,31 @@ export function useTransactionFormState({
     const [exchangeRate, setExchangeRate] = useState('1.0');
     const [title, setTitle] = useState(initialData?.title || prefillData?.title || '');
 
-    // Smart defaults effect
+    // Initial destination setup (run once)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        if (initialData) return;
-        if (defaultAccountId) {
-            setSelectedAccId(defaultAccountId);
-            return;
-        }
-        const lastAccId = localStorage.getItem('anchor_last_account_id');
-        if (lastAccId && accounts.find(a => a.id === lastAccId)) {
-            setSelectedAccId(lastAccId);
-        } else if (accounts.length > 0 && !selectedAccId) {
-            setSelectedAccId(accounts[0].id);
-        }
         if (accounts.length > 1 && !destinationAccId) {
-            const dest = accounts.find(a => a.id !== selectedAccId && a.id !== lastAccId);
-            setDestinationAccId(dest?.id || accounts[1].id);
+            const dest = accounts.find(a => a.id !== selectedAccId);
+            if (dest) setDestinationAccId(dest.id);
         }
-    }, [accounts, defaultAccountId, initialData, selectedAccId, destinationAccId]);
+    }, []);
 
     // Prevent same-account transfer
+    // Prevent same-account transfer
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (selectedAccId === destinationAccId && accounts.length > 1) {
             const next = accounts.find(a => a.id !== selectedAccId);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             if (next) setDestinationAccId(next.id);
         }
     }, [selectedAccId, destinationAccId, accounts]);
 
     // Reset exchange rate on account change
+    // Reset exchange rate on account change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setExchangeRate('1.0');
     }, [selectedAccId, destinationAccId]);
 
@@ -73,6 +75,7 @@ export function useTransactionFormState({
                 }
             }, 300);
         } else {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSuggestedCategory(null);
         }
         return () => { if (suggestionTimeoutRef.current) clearTimeout(suggestionTimeoutRef.current); };

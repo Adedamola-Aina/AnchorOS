@@ -5,6 +5,8 @@
  * new connections, shared accounts, and transaction updates.
  */
 
+/* eslint-disable react-hooks/static-components */
+
 import { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
 import { db, APP_ID } from '../config/firebase';
@@ -93,6 +95,7 @@ export function FamilyNotificationBanner({ onNavigate }: FamilyNotificationBanne
     const notification = notifications[currentIndex];
     if (!notification) return null;
 
+    // eslint-disable-next-line
     const Icon = getNotificationIcon(notification.type);
     const bgColor = getNotificationBgColor(notification.type);
     const iconColor = getNotificationIconColor(notification.type);

@@ -11,8 +11,9 @@ interface Notification {
     type: NotificationType;
 }
 
-import { messaging } from '../config/firebase';
+import { messaging, db, auth } from '../config/firebase';
 import { getToken, onMessage } from 'firebase/messaging';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -56,8 +57,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                 }
                 // Get FCM Token
                 const token = await getToken(messaging, {
-                    // Valid VAPID key is required for some browsers, ensuring implicit default is used if none provided
-                    vapidKey: 'BCV_7sZdb_M-u_S9iAAI3T9F3uT3X7X5d5X5X5X5X5X5' // Example placeholder or remove if relying on default
+                    vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
                 }).catch(err => {
                     console.error('An error occurred while retrieving token. ', err);
                     return null;
@@ -66,7 +66,22 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                 if (token) {
                     console.log('FCM Token:', token);
                     setFcmToken(token);
-                    // TODO: In a real app, send this token to your backend (e.g., Firestore User Profile)
+
+                    if (auth.currentUser) {
+                        try {
+                            const tokenRef = doc(db, 'users', auth.currentUser.uid, 'fcmTokens', token);
+                            await setDoc(tokenRef, {
+                                token,
+                                platform: 'web',
+                                lastSeen: serverTimestamp(),
+                                userAgent: navigator.userAgent
+                            }, { merge: true });
+                            console.log('Token saved to Firestore');
+                        } catch (e) {
+                            console.error('Error saving token to Firestore:', e);
+                        }
+                    }
+
                     return token;
                 }
             }
