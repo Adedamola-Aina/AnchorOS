@@ -1,10 +1,8 @@
 /**
  * AccountHeader - Premium header section with balance and action buttons
- * Redesigned for a more modern, polished look
- * 
- * Refactored per CLAUDE.md §3.2 (200-line rule).
- * Sub-components extracted to AccountHeaderParts.tsx
+ * DES-002: Already uses semantic gradients (finance-500, primary colors)
  */
+
 
 import { ArrowLeft, Trash2, Users, Pencil, Sparkles } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';

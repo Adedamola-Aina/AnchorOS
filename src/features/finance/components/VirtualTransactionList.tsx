@@ -1,3 +1,8 @@
+/**
+ * VirtualTransactionList - Virtualized scrolling for transaction lists
+ * DES-002: Migrated to semantic tokens and primitives
+ */
+
 import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search } from 'lucide-react';
@@ -5,6 +10,7 @@ import { TransactionItem } from './TransactionItem';
 import { SwipeableTransactionItem } from './SwipeableTransactionItem';
 import { useResponsive } from '../../../hooks/useResponsive';
 import type { AnchorTransaction } from '../../../types';
+import { Text, VStack, HStack, Indicator } from '../../../components/primitives';
 
 interface VirtualTransactionListProps {
     transactions: AnchorTransaction[];
@@ -33,7 +39,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     const parentVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 88, // Row height: ~80px card + 8px gap
+        estimateSize: () => 88,
         overscan: 5,
     });
 
@@ -41,14 +47,14 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
 
     if (transactions.length === 0) {
         return (
-            <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
-                <Search className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
-                <h4 className="font-bold text-slate-800 dark:text-white mb-1">
+            <VStack align="center" justify="center" gap="sm" className="py-12 px-4">
+                <Search className="w-10 h-10 text-subtle dark:text-subtle-dark" />
+                <Text variant="heading" weight="bold">
                     {searchQuery ? 'No transactions found' : 'No transactions yet'}
-                </h4>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                </Text>
+                <Text variant="muted" size="sm">
                     {searchQuery ? 'Try a different search term' : 'Add your first transaction to get started'}
-                </p>
+                </Text>
                 {searchQuery && onClearSearch && (
                     <button
                         onClick={onClearSearch}
@@ -57,7 +63,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                         Clear Search
                     </button>
                 )}
-            </div>
+            </VStack>
         );
     }
 
@@ -75,7 +81,6 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
             >
                 {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                     const tx = transactions[virtualRow.index];
-                    // Safety check: ensure transaction exists (array may have changed)
                     if (!tx) return null;
                     return (
                         <div
@@ -89,7 +94,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                 width: '100%',
                                 transform: `translateY(${virtualRow.start}px)`,
                             }}
-                            className="pb-2" // Gap between transaction cards only
+                            className="pb-2"
                         >
                             {isMobile ? (
                                 <SwipeableTransactionItem
@@ -113,14 +118,15 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                 })}
             </div>
             {!loading && transactions.length > 0 && (
-                <div className="py-6 text-center">
-                    <div className="inline-flex items-center justify-center p-2 rounded-full bg-slate-100 dark:bg-slate-800/50 text-xs font-medium text-slate-400 dark:text-slate-500">
-                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 mr-2"></span>
-                        End of list
-                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 ml-2"></span>
-                    </div>
-                </div>
+                <HStack justify="center" className="py-6">
+                    <HStack gap="sm" align="center" className="p-2 rounded-full bg-surface-3 dark:bg-surface-3-dark">
+                        <Indicator status="default" size="xs" />
+                        <Text variant="muted" size="xs">End of list</Text>
+                        <Indicator status="default" size="xs" />
+                    </HStack>
+                </HStack>
             )}
         </div>
     );
 };
+
