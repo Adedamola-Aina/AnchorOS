@@ -8,14 +8,8 @@
   "targets": {
     "anchor-os-staging": {
       "hosting": {
-        "dev": [
-          "anchor-os-dev-1c6ec"
-        ],
         "staging": [
           "anchor-os-staging"
-        ],
-        "production": [
-          "anchor-os"
         ]
       }
     },
