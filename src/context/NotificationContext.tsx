@@ -11,7 +11,7 @@ interface Notification {
     type: NotificationType;
 }
 
-import { messaging, db, auth } from '../config/firebase';
+import { messaging, db, auth, APP_ID } from '../config/firebase';
 import { getToken, onMessage } from 'firebase/messaging';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -40,56 +40,107 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         });
     }, []);
 
+    // Check initial permission state
+    React.useEffect(() => {
+        const checkPermission = async () => {
+            if (typeof Notification === 'undefined' || !messaging) return;
+
+            if (Notification.permission === 'granted') {
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    const token = await getToken(messaging, {
+                        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+                        serviceWorkerRegistration: registration
+                    });
+                    if (token) setFcmToken(token);
+                } catch (error) {
+                    console.error('Error restoring token:', error);
+                }
+            }
+        };
+        checkPermission();
+    }, []);
+
     const requestPushPermission = useCallback(async () => {
         try {
             if (typeof Notification === 'undefined') {
-                console.warn('Notifications not supported in this environment');
+                showToast('Notifications not supported on this device', 'error');
                 return null;
             }
 
+            // If already granted and we have a token (or even if we don't, but UI says granted), 
+            // treat this click as a "Turn Off" request to reset UI state.
+            if (pushPermissionStatus === 'granted') {
+                setPushPermissionStatus('default');
+                setFcmToken(null);
+                showToast('Notifications Disabled (UI reset)', 'info');
+                return null;
+            }
+
+            console.log('[Push] Requesting permission...');
             const permission = await Notification.requestPermission();
             setPushPermissionStatus(permission);
 
             if (permission === 'granted') {
+                showToast('Permission granted! Initializing...', 'success');
+
                 if (!messaging) {
-                    console.warn('Firebase Messaging not initialized');
+                    showToast('Messaging service not available', 'error');
                     return null;
                 }
-                // Get FCM Token
-                const token = await getToken(messaging, {
-                    vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
-                }).catch(err => {
-                    console.error('An error occurred while retrieving token. ', err);
-                    return null;
-                });
 
-                if (token) {
-                    console.log('FCM Token:', token);
-                    setFcmToken(token);
+                // Get FCM Token with retry for IDB timing issues
+                const getTokenWithRetry = async (retries = 3, delay = 500): Promise<string | null> => {
+                    try {
+                        const registration = await navigator.serviceWorker.ready;
+                        const token = await getToken(messaging!, {
+                            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+                            serviceWorkerRegistration: registration
+                        });
+                        return token;
+                    } catch (err: any) {
+                        // Retry on IDB connection closing error (PWA navigation timing issue)
+                        if (retries > 0 && (err.message?.includes('closing') || err.name === 'InvalidStateError')) {
+                            console.log(`[Push] IDB timing error, retrying in ${delay}ms... (${retries} left)`);
+                            await new Promise(r => setTimeout(r, delay));
+                            return getTokenWithRetry(retries - 1, delay * 2);
+                        }
+                        throw err;
+                    }
+                };
 
-                    if (auth.currentUser) {
-                        try {
-                            const tokenRef = doc(db, 'users', auth.currentUser.uid, 'fcmTokens', token);
+                try {
+                    const token = await getTokenWithRetry();
+
+                    if (token) {
+                        setFcmToken(token);
+                        showToast('Push Notifications Enabled!', 'success');
+
+                        if (auth.currentUser) {
+                            const tokenRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', token);
                             await setDoc(tokenRef, {
                                 token,
                                 platform: 'web',
                                 lastSeen: serverTimestamp(),
                                 userAgent: navigator.userAgent
                             }, { merge: true });
-                            console.log('Token saved to Firestore');
-                        } catch (e) {
-                            console.error('Error saving token to Firestore:', e);
                         }
+                        return token;
                     }
-
-                    return token;
+                } catch (err: any) {
+                    console.error('An error occurred while retrieving token. ', err);
+                    showToast(`Token Error: ${err.message || 'Unknown'}`, 'error');
+                    return null;
                 }
+            } else {
+                showToast('Notifications blocked. Enable in Settings.', 'error');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Unable to get permission to notify.', error);
+            showToast(`Error: ${error.message || 'Permission failed'}`, 'error');
         }
         return null;
-    }, []);
+    }, [pushPermissionStatus, showToast]);
 
     // Listen for foreground messages
     React.useEffect(() => {

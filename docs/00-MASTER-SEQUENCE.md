@@ -83,31 +83,29 @@ Follow TDD:
 
 ## 📋 PHASE 4: AFTER COMPLETION (MANDATORY)
 
-### YOU MUST UPDATE THESE FILES:
+### YOU MUST DO THIS:
 
-**Always update:**
-- `docs/PROJECT_STATUS.md` - Mark task complete, add to "Recently Completed"
-- `CHANGELOG.md` - Add entry under [Unreleased]
+**1. COMMIT TO GIT (The Source of Truth)**
+   - Use meaningful messages with tags:
+     - `feat: ...` for features
+     - `fix: BUG-XXX ...` for bugs
+     - `docs: ...` for documentation
+   - **This AUTOMATICALLY updates the Dashboard.**
 
-**If bug fix:**
-- `docs/KNOWN_ISSUES.md` - Move bug to "Recently Fixed" section
-
-**If feature complete:**
-- `docs/ROADMAP.md` - Mark with ✅
-- `docs/FEATURE_SUGGESTIONS.md` - Remove from backlog if it was there
+**2. SYNC DASHBOARD**
+   - Run: `curl -X POST http://localhost:3001/api/refresh`
+   - Verify update at `http://localhost:3001/api/command-center`
 
 ### REPORT to user:
 ```
-✅ Task Complete. 
+✅ Task Complete.
 
 **Files Changed:**
 - [list code files]
 
-**Docs Updated:**
-- [ ] PROJECT_STATUS.md - [describe update]
-- [ ] CHANGELOG.md - [entry added]
-- [ ] KNOWN_ISSUES.md - [if applicable]
-- [ ] ROADMAP.md - [if applicable]
+**Dashboard Updated:**
+- [x] Git Commit: [Message]
+- [x] Dashboard Synced
 
 **Tests:** [X passing]
 **Ready for:** [dev/staging/production]
@@ -118,21 +116,18 @@ Follow TDD:
 ## 🚨 CRITICAL REMINDERS
 
 ### Before EVERY task:
-- [ ] Did I read PROJECT_STATUS.md?
-- [ ] Did I check KNOWN_ISSUES.md for duplicates?
-- [ ] Did I check ROADMAP.md?
+- [ ] Did I check the Dashboard Context?
+- [ ] Did I check for duplicates in Git/Dashboard?
 - [ ] Did I report findings to user?
 
 ### After EVERY task:
-- [ ] Did I update PROJECT_STATUS.md?
-- [ ] Did I add CHANGELOG.md entry?
-- [ ] Did I update KNOWN_ISSUES.md (if bug)?
-- [ ] Did I update ROADMAP.md (if feature)?
+- [ ] Did I COMMIT to Git with correct tags?
+- [ ] Did I SYNC the Dashboard (`/api/refresh`)?
 - [ ] Did I tell user what I updated?
 
 ### NEVER:
-- ❌ Start coding without reading docs first
-- ❌ Finish without updating docs
+- ❌ Start coding without checking Dashboard first
+- ❌ Finish without committing + syncing
 - ❌ Deploy to production without approval
 - ❌ Create files over 200 lines
 - ❌ Skip writing tests
