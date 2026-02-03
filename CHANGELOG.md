@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.5.14] - 2026-02-03
+
+### 🔔 Push Notification Infrastructure
+- **Server-Side Push Delivery** (PLT-003): New Cloud Function sends native iOS/Android banners for commitment reminders.
+  - Runs every 5 minutes to check for due reminders
+  - Minimal notification copy following Design Philosophy (just the commitment title, no fluff)
+  - Handles stale FCM token cleanup
+- **IndexedDB Resilience** (PLT-002): Added retry logic for transient PWA navigation errors during token retrieval.
+- **FCM Token Path Fix**: Corrected Firestore path to match security rules (`artifacts/APP_ID/users/{uid}/fcmTokens`).
+
 ## [v1.5.12] - 2026-02-01
 
 ### 🛡️ Systemic Performance Hardening

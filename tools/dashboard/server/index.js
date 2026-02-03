@@ -46,7 +46,8 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
  */
 app.get('/api/status', async (req, res) => {
     try {
-        const data = await readDoc('PROJECT_STATUS.md');
+        // Redirect to Command Center - The new Single Source of Truth
+        const data = await getCommandCenterData();
         res.json(data);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -59,8 +60,13 @@ app.get('/api/status', async (req, res) => {
  */
 app.get('/api/bugs', async (req, res) => {
     try {
-        const data = await readDoc('KNOWN_ISSUES.md');
-        res.json(data);
+        // Source from Git (BUG-xxx)
+        const bugs = await gitData.getBugs();
+        res.json({
+            source: 'git-automated',
+            count: bugs.length,
+            bugs
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -72,8 +78,8 @@ app.get('/api/bugs', async (req, res) => {
  */
 app.get('/api/roadmap', async (req, res) => {
     try {
-        const data = await readDoc('ROADMAP.md');
-        res.json(data);
+        // Redirect to safe, parsed git-roadmap
+        res.redirect('/api/git/roadmap');
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -98,33 +104,11 @@ app.get('/api/docs', async (req, res) => {
  */
 app.get('/api/board', async (req, res) => {
     try {
-        // Use ROADMAP.md as single source of truth for kanban
-        const roadmap = await readDoc('ROADMAP.md');
-        const kanban = roadmap.parsed?.kanban || {
-            backlog: [],
-            todo: [],
-            inProgress: [],
-            done: []
-        };
-
-        res.json({
-            filename: 'ROADMAP.md',
-            source: 'Single Source of Truth',
-            lastModified: roadmap.lastModified,
-            parsed: kanban,
-            currentFocus: roadmap.parsed?.currentFocus,
-            focusStatus: roadmap.parsed?.focusStatus
-        });
+        // Use Git-derived Kanban
+        const data = await gitData.getKanbanData();
+        res.json(data);
     } catch (error) {
         res.status(500).json({ error: error.message });
-        // Serve index.html for all non-API, non-static routes (SPA fallback)
-        app.get('*', (req, res) => {
-            if (!req.path.startsWith('/api/')) {
-                res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-            } else {
-                res.status(404).send('Not found');
-            }
-        });
     }
 });
 
@@ -134,8 +118,12 @@ app.get('/api/board', async (req, res) => {
  */
 app.get('/api/features', async (req, res) => {
     try {
-        const features = await getFeatureSuggestions();
-        res.json(features);
+        const features = await gitData.getFeatures();
+        res.json({
+            source: 'git-automated',
+            count: features.length,
+            features
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

@@ -1139,4 +1139,8 @@ exports.fixSharedAccountScopes = functions.https.onCall(async (_data, context) =
 // Finance Automation
 // ============================================================================
 __exportStar(require("./recurring"), exports);
+// ============================================================================
+// Push Notification Reminders (PLT-003)
+// ============================================================================
+__exportStar(require("./reminders"), exports);
 //# sourceMappingURL=index.js.map
