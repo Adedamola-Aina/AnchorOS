@@ -11,6 +11,7 @@ import { doc, increment, writeBatch, getDoc, runTransaction, type Firestore } fr
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
+import { auditFinance } from './AuditService';
 import type { AnchorTransaction, AnchorAccount } from '../types';
 import { canAddTransaction, canDeleteTransaction, canEditTransaction } from '../features/finance/utils/permissions';
 import { processTransferTransaction, processStandardTransaction } from './TransferOperations';
@@ -59,6 +60,14 @@ export class TransactionService {
                 processStandardTransaction(this.firestore, batch, userId, payload, sourceAccount, transactionDate, createdAt, isBackdated);
             }
             await batch.commit();
+
+            // AUDIT: Log transaction creation
+            auditFinance.transactionCreated(
+                'batch', // Batch operation doesn't return single ID
+                payload.accountId,
+                payload.amountCents,
+                payload.type
+            );
         } catch (error) {
             if (error instanceof AnchorError) throw error;
             throw new AnchorError('Failed to add transaction', 'DATABASE', error);
@@ -95,6 +104,9 @@ export class TransactionService {
                 await this.deleteLinkedTransaction(batch, txToDelete, userId, timestamp);
             }
             await batch.commit();
+
+            // AUDIT: Log transaction deletion
+            auditFinance.transactionDeleted(transactionId, accountId);
         } catch (error) {
             if (error instanceof AnchorError) throw error;
             throw new AnchorError('Failed to delete transaction', 'DATABASE', error);
@@ -145,6 +157,10 @@ export class TransactionService {
                     await this.syncLinkedTransaction(transaction, currentData, updates);
                 }
             });
+
+            // AUDIT: Log transaction update
+            const changedFields = Object.keys(updates);
+            auditFinance.transactionUpdated(transactionId, accountId, changedFields);
         } catch (error) {
             if (error instanceof AnchorError) throw error;
             throw new AnchorError('Failed to update transaction', 'DATABASE', error);
