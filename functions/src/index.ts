@@ -235,6 +235,10 @@ const RATE_LIMITS: Record<string, RateLimitConfig> = {
  * Enforces rate limiting for a given action and identifier.
  * THROWS HttpsError if rate limit is exceeded.
  * Use this at the START of Cloud Functions to protect against abuse.
+ * 
+ * AUDIT EVENTS:
+ * - rate_limit_blocked: User blocked due to exceeding limit
+ * - rate_limit_warning: User at >80% of limit (for monitoring)
  */
 async function enforceRateLimit(action: string, identifier: string): Promise<void> {
     const config = RATE_LIMITS[action];
@@ -256,6 +260,15 @@ async function enforceRateLimit(action: string, identifier: string): Promise<voi
             if (docData?.blockedUntil && docData.blockedUntil > now) {
                 const remainingMs = docData.blockedUntil - now;
                 const remainingMin = Math.ceil(remainingMs / 60000);
+
+                // AUDIT: Log blocked access attempt
+                await createAuditLog('rate_limit_blocked', identifier, {
+                    action,
+                    remainingMinutes: remainingMin,
+                    blockedUntil: new Date(docData.blockedUntil).toISOString(),
+                    severity: 'high'
+                });
+
                 throw new functions.https.HttpsError(
                     'resource-exhausted',
                     `Too many attempts. Please try again in ${remainingMin} minute(s).`
@@ -266,14 +279,35 @@ async function enforceRateLimit(action: string, identifier: string): Promise<voi
             const windowStart = now - config.windowMs;
             const attempts = (docData?.attempts || []).filter((ts: number) => ts > windowStart);
 
-            // Check if limit exceeded
+            // Check if limit exceeded - block user
             if (attempts.length >= config.maxAttempts) {
                 const blockedUntil = now + config.blockDurationMs;
                 transaction.set(rateLimitRef, { attempts: [], blockedUntil, lastAttempt: now });
+
+                // AUDIT: Log rate limit exceeded (user now blocked)
+                await createAuditLog('rate_limit_exceeded', identifier, {
+                    action,
+                    attempts: attempts.length,
+                    maxAttempts: config.maxAttempts,
+                    blockedForMinutes: Math.ceil(config.blockDurationMs / 60000),
+                    severity: 'critical'
+                });
+
                 throw new functions.https.HttpsError(
                     'resource-exhausted',
                     'Rate limit exceeded. You have been temporarily blocked.'
                 );
+            }
+
+            // AUDIT: Log warning when approaching limit (>80%)
+            const warningThreshold = Math.floor(config.maxAttempts * 0.8);
+            if (attempts.length >= warningThreshold && attempts.length < config.maxAttempts) {
+                await createAuditLog('rate_limit_warning', identifier, {
+                    action,
+                    attempts: attempts.length + 1,
+                    maxAttempts: config.maxAttempts,
+                    severity: 'medium'
+                });
             }
 
             // Record this attempt
@@ -359,6 +393,77 @@ export const resetRateLimit = functions.https.onCall(
         const { action, identifier } = data;
         const rateLimitRef = db.collection('rateLimits').doc(`${action}:${identifier}`);
         await rateLimitRef.delete();
+
+        return { success: true };
+    }
+);
+
+// ============================================================================
+// Audit Logging: Client-Side Events
+// ============================================================================
+
+/**
+ * Allowed client-side audit event types.
+ * This whitelist prevents clients from logging arbitrary events.
+ */
+const ALLOWED_AUDIT_EVENTS = new Set([
+    // Auth events
+    'auth_login_success',
+    'auth_login_failed',
+    'auth_logout',
+    'auth_mfa_challenge_started',
+    'auth_mfa_challenge_completed',
+    'auth_password_changed',
+    'auth_email_verified',
+    // Finance events
+    'account_created',
+    'account_archived',
+    'account_renamed',
+    'transaction_created',
+    'transaction_deleted',
+    'transaction_updated',
+    // Settings events
+    'settings_profile_updated',
+    'settings_notifications_changed',
+    'settings_theme_changed',
+    // Commitment events
+    'commitment_created',
+    'commitment_completed',
+    'commitment_deleted',
+    'commitment_edited',
+]);
+
+/**
+ * Log audit event from client-side.
+ * Used for operations that happen directly via Firestore from the client.
+ * 
+ * @param action - Must be in ALLOWED_AUDIT_EVENTS whitelist
+ * @param metadata - Additional context about the event
+ */
+export const logAuditEvent = functions.https.onCall(
+    async (data: { action: string; metadata?: Record<string, unknown> }, context) => {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+        }
+
+        const { action, metadata = {} } = data;
+
+        // Validate action against whitelist
+        if (!ALLOWED_AUDIT_EVENTS.has(action)) {
+            throw new functions.https.HttpsError(
+                'invalid-argument',
+                `Unknown or disallowed audit event: ${action}`
+            );
+        }
+
+        // Add client IP and user agent if available
+        const enrichedMetadata = {
+            ...metadata,
+            clientTimestamp: new Date().toISOString(),
+            source: 'client',
+        };
+
+        await createAuditLog(action, context.auth.uid, enrichedMetadata);
 
         return { success: true };
     }

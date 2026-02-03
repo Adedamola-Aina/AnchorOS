@@ -13,6 +13,7 @@ import { collection, doc, addDoc, writeBatch, query, where, getDocs, type Firest
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
+import { auditFinance } from './AuditService';
 import type { AnchorAccount } from '../types';
 import { canManageAccount } from '../features/finance/utils/permissions';
 import type { CreateAccountPayload } from './financeTypes';
@@ -46,6 +47,10 @@ export class AccountService {
                 collection(this.firestore, 'artifacts', APP_ID, 'users', userId, 'accounts'),
                 { ...payload, ownerId: userId, isArchived: false, shares: {} }
             );
+
+            // AUDIT: Log account creation
+            auditFinance.accountCreated(docRef.id, payload.name, payload.type);
+
             return docRef.id;
         } catch (error) {
             throw new AnchorError('Failed to add account', 'DATABASE', error);
@@ -78,6 +83,9 @@ export class AccountService {
                 });
             }
             await batch.commit();
+
+            // AUDIT: Log account archival
+            auditFinance.accountArchived(account.id, account.name);
         } catch (error) {
             throw new AnchorError('Failed to delete account', 'DATABASE', error);
         }
@@ -141,6 +149,9 @@ export class AccountService {
                     }
                 }
             }
+
+            // AUDIT: Log account rename
+            auditFinance.accountRenamed(account.id, account.name, newName);
         } catch (error) {
             if (error instanceof AnchorError) throw error;
             throw new AnchorError('Failed to rename account', 'DATABASE', error);
