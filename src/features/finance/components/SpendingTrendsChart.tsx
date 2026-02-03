@@ -1,15 +1,12 @@
 /**
  * SpendingTrendsChart - 30-day spending trends visualization
- * 
- * CLAUDE.md Design Philosophy:
- * - Clarity over cleverness: Clear income vs expense comparison
- * - Quiet over loud: Minimal visual noise
- * - Useful over impressive: Actionable insights at a glance
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { formatCurrencyCompact } from '../../../utils/format';
 import type { Currency } from '../../../types';
+import { Text, HStack, VStack } from '../../../components/primitives';
 
 interface WeeklyData {
     weekStart: Date;
@@ -46,11 +43,11 @@ export const SpendingTrendsChart = ({
     return (
         <div className="glass-card p-5">
             {/* Header with Summary */}
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+            <HStack justify="between" align="center" className="mb-4">
+                <Text variant="subtle" size="xs" weight="bold" className="uppercase tracking-[0.2em] flex items-center gap-2">
                     <TrendingUp className="w-3.5 h-3.5" />
                     30 Day Summary
-                </h3>
+                </Text>
                 {selectedWeekStart && (
                     <button
                         onClick={() => onSelectWeek(null)}
@@ -59,44 +56,44 @@ export const SpendingTrendsChart = ({
                         Clear Filter
                     </button>
                 )}
-            </div>
+            </HStack>
 
             {/* Summary Stats */}
             <div className="grid grid-cols-3 gap-3 mb-5">
                 <div className="text-center p-3 rounded-xl bg-finance-50 dark:bg-finance-900/20">
-                    <div className="flex items-center justify-center gap-1 mb-1">
+                    <HStack justify="center" gap="xs" align="center" className="mb-1">
                         <ArrowUpRight className="w-3 h-3 text-finance-500" />
-                        <span className="text-[9px] font-bold text-finance-600 dark:text-finance-400 uppercase">In</span>
-                    </div>
-                    <p className="font-bold text-sm text-finance-600 dark:text-finance-400 tabular-nums">
+                        <Text variant="finance" size="xs" weight="bold" className="uppercase">In</Text>
+                    </HStack>
+                    <Text variant="finance" size="sm" weight="bold" mono>
                         {formatCurrencyCompact(totals.income, currency)}
-                    </p>
+                    </Text>
                 </div>
-                <div className="text-center p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                        <ArrowDownRight className="w-3 h-3 text-rose-500" />
-                        <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase">Out</span>
-                    </div>
-                    <p className="font-bold text-sm text-rose-600 dark:text-rose-400 tabular-nums">
+                <div className="text-center p-3 rounded-xl bg-danger-bg dark:bg-danger-bgDark">
+                    <HStack justify="center" gap="xs" align="center" className="mb-1">
+                        <ArrowDownRight className="w-3 h-3 text-danger" />
+                        <Text variant="danger" size="xs" weight="bold" className="uppercase">Out</Text>
+                    </HStack>
+                    <Text variant="danger" size="sm" weight="bold" mono>
                         {formatCurrencyCompact(totals.expense, currency)}
-                    </p>
+                    </Text>
                 </div>
-                <div className={`text-center p-3 rounded-xl ${net >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                        {net >= 0 ? <TrendingUp className="w-3 h-3 text-blue-500" /> : <TrendingDown className="w-3 h-3 text-amber-500" />}
-                        <span className={`text-[9px] font-bold uppercase ${net >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>Net</span>
-                    </div>
-                    <p className={`font-bold text-sm tabular-nums ${net >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                <div className={`text-center p-3 rounded-xl ${net >= 0 ? 'bg-info-bg dark:bg-info-bgDark' : 'bg-warning-bg dark:bg-warning-bgDark'}`}>
+                    <HStack justify="center" gap="xs" align="center" className="mb-1">
+                        {net >= 0 ? <TrendingUp className="w-3 h-3 text-info" /> : <TrendingDown className="w-3 h-3 text-warning" />}
+                        <Text variant={net >= 0 ? 'info' : 'warning'} size="xs" weight="bold" className="uppercase">Net</Text>
+                    </HStack>
+                    <Text variant={net >= 0 ? 'info' : 'warning'} size="sm" weight="bold" mono>
                         {net > 0 ? '+' : ''}{formatCurrencyCompact(net, currency)}
-                    </p>
+                    </Text>
                 </div>
             </div>
 
             {/* Weekly Chart with clear label */}
-            <div className="mt-1">
-                <p className="text-[9px] text-slate-400 dark:text-slate-500 mb-2 text-center">
+            <VStack gap="sm" className="mt-1">
+                <Text variant="subtle" size="xs" className="text-center">
                     Week by week breakdown
-                </p>
+                </Text>
                 <div className="h-20 flex items-end gap-1">
                     {weeklyData.map((d, i) => {
                         const isSelected = selectedWeekStart && d.weekStart.getTime() === selectedWeekStart.getTime();
@@ -126,30 +123,31 @@ export const SpendingTrendsChart = ({
                                     <div className="flex-1 h-full flex items-end">
                                         <div
                                             style={{ height: `${Math.max(expenseHeight, 4)}%` }}
-                                            className={`w-full rounded-t transition-colors ${isSelected ? 'bg-rose-400' : 'bg-rose-500/70 group-hover:bg-rose-500'}`}
+                                            className={`w-full rounded-t transition-colors ${isSelected ? 'bg-danger' : 'bg-danger/70 group-hover:bg-danger'}`}
                                         />
                                     </div>
                                 </div>
-                                <span className={`text-[9px] font-bold ${isSelected ? 'text-primary-500' : 'text-slate-400'}`}>
+                                <Text variant={isSelected ? 'primary' : 'subtle'} size="xs" weight="bold">
                                     W{weekNum}
-                                </span>
+                                </Text>
                             </button>
                         );
                     })}
                 </div>
-            </div>
+            </VStack>
 
             {/* Compact Legend */}
-            <div className="flex justify-center gap-4 mt-3 text-[9px] font-bold text-slate-400">
-                <div className="flex items-center gap-1">
+            <HStack justify="center" gap="md" className="mt-3">
+                <HStack gap="xs" align="center">
                     <div className="w-2 h-2 bg-finance-500 rounded-sm" />
-                    <span>Income</span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-rose-500 rounded-sm" />
-                    <span>Expenses</span>
-                </div>
-            </div>
+                    <Text variant="subtle" size="xs" weight="bold">Income</Text>
+                </HStack>
+                <HStack gap="xs" align="center">
+                    <div className="w-2 h-2 bg-danger rounded-sm" />
+                    <Text variant="subtle" size="xs" weight="bold">Expenses</Text>
+                </HStack>
+            </HStack>
         </div>
     );
 };
+

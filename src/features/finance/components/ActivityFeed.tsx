@@ -1,8 +1,6 @@
 /**
  * Activity Feed Component
- * 
- * Displays a timeline of activities on a shared account.
- * Shows who did what and when for full transparency in family mode.
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import React from 'react';
@@ -13,6 +11,7 @@ import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { Currency } from '../../../types';
 import { formatRelativeTime, getActivityIcon } from './activityHelpers';
+import { Text, VStack, Skeleton } from '../../../components/primitives';
 
 interface ActivityFeedProps {
     activities: AccountActivity[];
@@ -31,38 +30,36 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
     if (loading) {
         return (
-            <div className="space-y-3">
+            <VStack gap="sm">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex gap-3 animate-pulse">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700" />
-                        <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
-                            <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-1/2" />
-                        </div>
+                    <div key={i} className="flex gap-3">
+                        <Skeleton variant="circle" size={32} />
+                        <VStack gap="xs" className="flex-1">
+                            <Skeleton variant="text" width="75%" height={16} />
+                            <Skeleton variant="text" width="50%" height={12} />
+                        </VStack>
                     </div>
                 ))}
-            </div>
+            </VStack>
         );
     }
 
     if (displayActivities.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-full mb-3">
-                    <Activity className="w-6 h-6 text-slate-400" />
+            <VStack align="center" justify="center" gap="sm" className="py-8">
+                <div className="p-3 bg-surface-3 dark:bg-surface-3-dark rounded-full">
+                    <Activity className="w-6 h-6 text-muted" />
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                    No activity yet
-                </p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                <Text variant="muted" size="sm">No activity yet</Text>
+                <Text variant="subtle" size="xs">
                     Activity will appear here when transactions are added
-                </p>
-            </div>
+                </Text>
+            </VStack>
         );
     }
 
     return (
-        <div className="space-y-1">
+        <VStack gap="xs">
             {displayActivities.map((activity, index) => {
                 const isCurrentUser = activity.actorId === currentUserId;
                 const colorClasses = getActivityColor(activity.action);
@@ -73,7 +70,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                         key={activity.id}
                         className={`
               flex gap-3 p-3 rounded-xl transition-colors
-              ${index === 0 ? 'bg-slate-50 dark:bg-slate-800/50' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'}
+              ${index === 0 ? 'bg-surface-3 dark:bg-surface-3-dark' : 'hover:bg-surface-3 dark:hover:bg-surface-3-dark'}
             `}
                     >
                         {/* Icon */}
@@ -86,22 +83,24 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm text-slate-700 dark:text-slate-200">
-                                <span className={`font-semibold ${isCurrentUser ? 'text-primary-600 dark:text-primary-400' : ''}`}>
+                            <Text variant="body" size="sm">
+                                <Text as="span" variant={isCurrentUser ? 'primary' : 'body'} weight="semibold">
                                     {isCurrentUser ? 'You' : activity.actorName}
-                                </span>
+                                </Text>
                                 {' '}
-                                <span className="text-slate-600 dark:text-slate-300">
+                                <Text as="span" variant="muted">
                                     {formatActivityMessage({ ...activity, actorName: '' }).trim()}
-                                </span>
-                            </p>
+                                </Text>
+                            </Text>
 
                             {/* Amount display for transaction activities */}
                             {showAmount && (
-                                <p className={`text-xs font-semibold mt-0.5 ${activity.details.type === 'income'
-                                    ? 'text-finance-600 dark:text-finance-400'
-                                    : 'text-slate-600 dark:text-slate-400'
-                                    }`}>
+                                <Text
+                                    variant={activity.details.type === 'income' ? 'finance' : 'muted'}
+                                    size="xs"
+                                    weight="semibold"
+                                    className="mt-0.5"
+                                >
                                     {activity.details.type === 'income' ? '+' : '-'}
                                     {formatCurrencyCompact(
                                         fromCents(activity.details.amountCents!),
@@ -109,21 +108,21 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                                     )}
                                     {activity.details.previousAmountCents !== undefined &&
                                         activity.details.previousAmountCents !== activity.details.amountCents && (
-                                            <span className="text-slate-400 ml-1">
+                                            <Text as="span" variant="subtle" className="ml-1">
                                                 (was {formatCurrencyCompact(
                                                     fromCents(activity.details.previousAmountCents),
                                                     (activity.details.currency || 'USD') as Currency
                                                 )})
-                                            </span>
+                                            </Text>
                                         )}
-                                </p>
+                                </Text>
                             )}
 
                             {/* Timestamp */}
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                            <div className="text-[10px] text-subtle dark:text-subtle-dark mt-1 flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
                                 {formatRelativeTime(activity.timestamp)}
-                            </p>
+                            </div>
                         </div>
                     </div>
                 );
@@ -131,11 +130,12 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
             {activities.length > maxItems && (
                 <div className="pt-2 text-center">
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <Text variant="subtle" size="xs">
                         +{activities.length - maxItems} more activities
-                    </p>
+                    </Text>
                 </div>
             )}
-        </div>
+        </VStack>
     );
 };
+
