@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { TaskItem } from './TaskItem';
+import { SwipeableTaskItem } from './SwipeableTaskItem';
 import type { AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
 
@@ -40,7 +40,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                             key={task.id}
                             className="transition-all duration-200 ease-out"
                         >
-                            <TaskItem
+                            <SwipeableTaskItem
                                 task={task}
                                 hasFamilyActive={hasFamilyActive}
                                 isEditing={editingTaskId === task.id}
@@ -70,7 +70,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                     {showCompleted && (
                         <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                             {completedTasks.map((task) => (
-                                <TaskItem
+                                <SwipeableTaskItem
                                     key={task.id}
                                     task={task}
                                     hasFamilyActive={hasFamilyActive}

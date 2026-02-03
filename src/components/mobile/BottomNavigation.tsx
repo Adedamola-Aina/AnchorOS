@@ -9,11 +9,10 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { CreditCard, Settings } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useHaptic } from '../../hooks/useHaptic';
 import { navAnimationStyles, getRandomColor, CELEBRATION_COLORS } from './NavIconAnimations';
-import { AnimatedHomeIcon, AnimatedTasksIcon } from './AnimatedNavIcons';
+import { AnimatedHomeIcon, AnimatedTasksIcon, AnimatedFinanceIcon, AnimatedSettingsIcon } from './AnimatedNavIcons';
 
 interface BottomNavigationProps {
     accountNotifications: string[];
@@ -36,6 +35,9 @@ export const BottomNavigation = ({
     const [celebrationColor, setCelebrationColor] = useState(CELEBRATION_COLORS[0]);
     const { trigger } = useHaptic();
     const hasSettingsNotification = accountNotifications.length > 0;
+
+    // Detect dark mode for Settings icon accent color
+    const isDarkMode = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
 
     // Inject animation styles once
     useEffect(() => {
@@ -93,23 +95,30 @@ export const BottomNavigation = ({
         {
             to: '/finance',
             label: 'Finance',
-            renderIcon: (_isAnimating: boolean, className: string) => (
-                <CreditCard className={className} />
+            renderIcon: (isAnimating: boolean, className: string) => (
+                <AnimatedFinanceIcon
+                    className={className}
+                    isAnimating={isAnimating}
+                />
             )
         },
         {
             to: '/settings',
             label: 'Settings',
-            renderIcon: (_isAnimating: boolean, className: string) => (
-                <Settings className={className} />
+            renderIcon: (isAnimating: boolean, className: string) => (
+                <AnimatedSettingsIcon
+                    className={className}
+                    isAnimating={isAnimating}
+                    isDarkMode={isDarkMode}
+                />
             )
         },
-    ], [accountColors]);
+    ], [accountColors, isDarkMode]);
 
     return (
         <nav
             role="navigation"
-            className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 pb-safe z-40"
+            className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 pb-safe-nav z-40"
             aria-label="Mobile navigation"
         >
             <div className="grid grid-cols-4 h-16">

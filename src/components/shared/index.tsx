@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sunrise, Sun, Moon, Calendar } from 'lucide-react';
+import { Sunrise, Sun, Moon } from 'lucide-react';
 import type { AnchorTask } from '../../types';
 export { ThemeToggle, type Theme } from './ThemeToggle';
 export { CategoryIcon } from './CategoryIcon';
@@ -36,38 +36,45 @@ export const Badge = ({ children, type, variant = 'solid' }: { children: React.R
 };
 
 export const TaskContextBadge = ({ task }: { task: AnchorTask }) => {
-  const commonStyles = "flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md capitalize";
+  const commonStyles = "inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md capitalize shrink-0";
 
   const content = (() => {
     if (task.type === 'daily' && task.timeOfDay && task.timeOfDay !== 'any') {
       const icons = { morning: <Sunrise className="w-3 h-3" />, afternoon: <Sun className="w-3 h-3" />, evening: <Moon className="w-3 h-3" /> };
-      return <span className={`${commonStyles} text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800`}>{icons[task.timeOfDay]} {task.timeOfDay}</span>;
+      return <span className={`${commonStyles} text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800`}>{icons[task.timeOfDay]}</span>;
     }
     if (task.type === 'weekly' && task.daysOfWeek && task.daysOfWeek.length > 0) {
-      const dayShortnames = {
-        'Sunday': 'Sun', 'Monday': 'Mon', 'Tuesday': 'Tue', 'Wednesday': 'Wed', 'Thursday': 'Thu', 'Friday': 'Fri', 'Saturday': 'Sat'
+      const dayShortnames: Record<string, string> = {
+        'Sunday': 'Su', 'Monday': 'M', 'Tuesday': 'Tu', 'Wednesday': 'W', 'Thursday': 'Th', 'Friday': 'F', 'Saturday': 'Sa'
       };
-      const formattedDays = task.daysOfWeek.map(d => dayShortnames[d as keyof typeof dayShortnames] || d).join(', ');
-      return <span className={`${commonStyles} text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20`}><Calendar className="w-3 h-3" /> {formattedDays}</span>;
+      const days = task.daysOfWeek.map(d => dayShortnames[d] || d.charAt(0));
+      // Show max 3 days, then +N more
+      const maxShow = 3;
+      const display = days.length <= maxShow
+        ? days.join(' ')
+        : `${days.slice(0, maxShow).join(' ')} +${days.length - maxShow}`;
+      return <span className={`${commonStyles} text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20`}>{display}</span>;
     }
     if (task.type === 'monthly' && (task.daysOfMonth?.length || task.dayOfMonth)) {
-      const dates = task.daysOfMonth?.length ? task.daysOfMonth : (task.dayOfMonth ? [task.dayOfMonth] : []);
-      const formatted = [...dates].sort((a, b) => a - b).join(', ');
-      return <span className={`${commonStyles} text-task-600 dark:text-task-400 bg-task-50 dark:bg-task-900/20`}><Calendar className="w-3 h-3" /> {dates.length > 1 ? 'Days' : 'Day'} {formatted}</span>;
+      const allDates = task.daysOfMonth?.length ? [...task.daysOfMonth] : (task.dayOfMonth ? [task.dayOfMonth] : []);
+      // Filter out past days (current month only)
+      const today = new Date().getDate();
+      const upcomingDates = allDates.filter(d => d >= today).sort((a, b) => a - b);
+      // Show max 5 upcoming days
+      const maxShow = 5;
+      if (upcomingDates.length === 0) {
+        return null; // All days passed
+      }
+      const display = upcomingDates.length <= maxShow
+        ? upcomingDates.join(', ')
+        : `${upcomingDates.slice(0, maxShow).join(', ')} +${upcomingDates.length - maxShow}`;
+      return <span className={`${commonStyles} text-task-600 dark:text-task-400 bg-task-50 dark:bg-task-900/20`}>{display}</span>;
     }
     return null;
   })();
 
-  return (
-    <div className="flex items-center gap-2">
-      {task.domain && (
-        <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-          {task.domain}
-        </span>
-      )}
-      {content}
-    </div>
-  );
+  // Simplified: only show context badge, domain hidden for compact view
+  return content;
 };
 
 export const AnchorLogo = ({ className = "w-8 h-8", strokeWidth = 8 }: { className?: string, strokeWidth?: number }) => (
