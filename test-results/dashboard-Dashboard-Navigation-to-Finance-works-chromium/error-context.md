@@ -43,7 +43,7 @@
     - main [ref=e51]:
       - generic [ref=e53]:
         - generic [ref=e55]:
-          - heading "Good morning, test" [level=2] [ref=e56]
+          - heading "Good afternoon, test" [level=2] [ref=e56]
           - paragraph [ref=e57]: Life at a glance.
         - generic [ref=e58]:
           - generic [ref=e59]:
@@ -51,23 +51,23 @@
               - generic [ref=e62]:
                 - img [ref=e64]
                 - heading "Portfolio" [level=3] [ref=e67]
-              - paragraph [ref=e68]: Total across 44 accounts
+              - paragraph [ref=e68]: Total across 48 accounts
               - generic [ref=e69]:
                 - generic [ref=e70]:
                   - generic [ref=e73]: Test Account 1769442024834
                   - generic [ref=e74]:
                     - paragraph [ref=e75]: ₦5,000.00
-                    - paragraph [ref=e76]: 24.3%
+                    - paragraph [ref=e76]: 22.5%
                 - generic [ref=e77]:
-                  - generic [ref=e80]: TransAcc1-1769724357210
+                  - generic [ref=e80]: TransAcc1-1770132706387
                   - generic [ref=e81]:
                     - paragraph [ref=e82]: ₦1,000.00
-                    - paragraph [ref=e83]: 4.9%
+                    - paragraph [ref=e83]: 4.5%
                 - generic [ref=e84]:
-                  - generic [ref=e87]: TransAcc1-1769184047491
+                  - generic [ref=e87]: TransAcc1-1769724357210
                   - generic [ref=e88]:
                     - paragraph [ref=e89]: ₦1,000.00
-                    - paragraph [ref=e90]: 4.9%
+                    - paragraph [ref=e90]: 4.5%
             - generic [ref=e91]:
               - generic [ref=e92]:
                 - generic [ref=e93]:
@@ -76,40 +76,44 @@
                 - button [ref=e99] [cursor=pointer]:
                   - img [ref=e100]
               - generic [ref=e102]:
-                - 'generic "Test Account 1769442024834: 24.3%" [ref=e103]'
-                - 'generic "TransAcc1-1769724357210: 4.9%" [ref=e104]'
-                - 'generic "TransAcc1-1769184047491: 4.9%" [ref=e105]'
-                - 'generic "TransAcc1-1769184205163: 4.9%" [ref=e106]'
-                - 'generic "TransAcc1-1769439311106: 4.9%" [ref=e107]'
-                - 'generic "TransAcc1-1770117009345: 4.9%" [ref=e108]'
-                - 'generic "TransAcc1-1769184323804: 4.9%" [ref=e109]'
-                - 'generic "TransAcc1-1769760305711: 4.9%" [ref=e110]'
-                - 'generic "Main Bank: 4.9%" [ref=e111]'
-                - 'generic "TransAcc1-1769184426988: 4.9%" [ref=e112]'
-                - 'generic "TransAcc1-1769723728342: 4.9%" [ref=e113]'
-                - 'generic "TransAcc2-1769184426988: 2.4%" [ref=e114]'
-                - 'generic "TransAcc2-1769724357210: 2.4%" [ref=e115]'
-                - 'generic "TransAcc2-1770117009345: 2.4%" [ref=e116]'
-                - 'generic "TransAcc2-1769439311106: 2.4%" [ref=e117]'
-                - 'generic "TransAcc2-1769723728342: 2.4%" [ref=e118]'
-                - 'generic "TransAcc2-1769184205163: 2.4%" [ref=e119]'
-                - 'generic "TransAcc2-1769184047491: 2.4%" [ref=e120]'
-                - 'generic "TransAcc2-1769184323804: 2.4%" [ref=e121]'
-                - 'generic "TransAcc2-1769760305711: 2.4%" [ref=e122]'
-                - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e123]'
-                - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e124]'
+                - 'generic "Test Account 1769442024834: 22.5%" [ref=e103]'
+                - 'generic "TransAcc1-1770132706387: 4.5%" [ref=e104]'
+                - 'generic "TransAcc1-1769724357210: 4.5%" [ref=e105]'
+                - 'generic "TransAcc1-1769184047491: 4.5%" [ref=e106]'
+                - 'generic "TransAcc1-1769184205163: 4.5%" [ref=e107]'
+                - 'generic "TransAcc1-1769439311106: 4.5%" [ref=e108]'
+                - 'generic "TransAcc1-1770117009345: 4.5%" [ref=e109]'
+                - 'generic "TransAcc1-1769184323804: 4.5%" [ref=e110]'
+                - 'generic "TransAcc1-1769760305711: 4.5%" [ref=e111]'
+                - 'generic "Main Bank: 4.5%" [ref=e112]'
+                - 'generic "TransAcc1-1769184426988: 4.5%" [ref=e113]'
+                - 'generic "TransAcc1-1769723728342: 4.5%" [ref=e114]'
+                - 'generic "TransAcc2-1769184426988: 2.3%" [ref=e115]'
+                - 'generic "TransAcc2-1769724357210: 2.3%" [ref=e116]'
+                - 'generic "TransAcc2-1770117009345: 2.3%" [ref=e117]'
+                - 'generic "TransAcc2-1770132706387: 2.3%" [ref=e118]'
+                - 'generic "TransAcc2-1769439311106: 2.3%" [ref=e119]'
+                - 'generic "TransAcc2-1769723728342: 2.3%" [ref=e120]'
+                - 'generic "TransAcc2-1769184205163: 2.3%" [ref=e121]'
+                - 'generic "TransAcc2-1769184047491: 2.3%" [ref=e122]'
+                - 'generic "TransAcc2-1769184323804: 2.3%" [ref=e123]'
+                - 'generic "TransAcc2-1769760305711: 2.3%" [ref=e124]'
                 - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e125]'
                 - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e126]'
                 - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e127]'
                 - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e128]'
                 - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e129]'
-                - 'generic "💰 Special-1769723709724: 0.2%" [ref=e130]'
-                - 'generic "💰 Special-1769184031561: 0.2%" [ref=e131]'
-                - 'generic "💰 Special-1770116997640: 0.2%" [ref=e132]'
-                - 'generic "💰 Special-1769439295072: 0.2%" [ref=e133]'
-                - 'generic "💰 Special-1769184307738: 0.2%" [ref=e134]'
-                - 'generic "💰 Special-1769724345313: 0.2%" [ref=e135]'
-                - 'generic "💰 Special-1769184189347: 0.2%" [ref=e136]'
+                - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e130]'
+                - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e131]'
+                - 'generic "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: 0.5%" [ref=e132]'
+                - 'generic "💰 Special-1769723709724: 0.2%" [ref=e133]'
+                - 'generic "💰 Special-1769184031561: 0.2%" [ref=e134]'
+                - 'generic "💰 Special-1770132694865: 0.2%" [ref=e135]'
+                - 'generic "💰 Special-1770116997640: 0.2%" [ref=e136]'
+                - 'generic "💰 Special-1769439295072: 0.2%" [ref=e137]'
+                - 'generic "💰 Special-1769184307738: 0.2%" [ref=e138]'
+                - 'generic "💰 Special-1769724345313: 0.2%" [ref=e139]'
+                - 'generic "💰 Special-1769184189347: 0.2%" [ref=e140]'
                 - 'generic "Delete Test 1769195852711: 0.0%"'
                 - 'generic "Delete Test 1769187876011: 0.0%"'
                 - 'generic "Delete Test 1769195666617: 0.0%"'
@@ -120,75 +124,75 @@
                 - 'generic "Delete Test 1769196017102: 0.0%"'
                 - 'generic "Delete Test 1769196186196: 0.0%"'
                 - 'generic "Delete Test 1769193758763: 0.0%"'
-              - generic [ref=e137]:
-                - generic [ref=e138]:
-                  - paragraph [ref=e142]: Test Account 1769442024834
-                  - generic [ref=e143]:
-                    - paragraph [ref=e144]: ₦5,000.00
-                    - paragraph [ref=e145]: 24.3%
-                - generic [ref=e146]:
-                  - paragraph [ref=e150]: TransAcc1-1769724357210
-                  - generic [ref=e151]:
-                    - paragraph [ref=e152]: ₦1,000.00
-                    - paragraph [ref=e153]: 4.9%
-                - generic [ref=e154]:
-                  - paragraph [ref=e158]: TransAcc1-1769184047491
-                  - generic [ref=e159]:
-                    - paragraph [ref=e160]: ₦1,000.00
-                    - paragraph [ref=e161]: 4.9%
-                - generic [ref=e162]:
-                  - paragraph [ref=e166]: TransAcc1-1769184205163
-                  - generic [ref=e167]:
-                    - paragraph [ref=e168]: ₦1,000.00
-                    - paragraph [ref=e169]: 4.9%
-                - button "View 40 More" [ref=e170] [cursor=pointer]
-          - generic [ref=e171]:
-            - generic [ref=e172] [cursor=pointer]:
-              - generic [ref=e174]:
-                - img [ref=e176]
-                - generic [ref=e179]:
-                  - heading "Momentum" [level=3] [ref=e180]
-                  - paragraph [ref=e181]: Pullback vs Last Week
-              - generic [ref=e182]:
+              - generic [ref=e141]:
+                - generic [ref=e142]:
+                  - paragraph [ref=e146]: Test Account 1769442024834
+                  - generic [ref=e147]:
+                    - paragraph [ref=e148]: ₦5,000.00
+                    - paragraph [ref=e149]: 22.5%
+                - generic [ref=e150]:
+                  - paragraph [ref=e154]: TransAcc1-1770132706387
+                  - generic [ref=e155]:
+                    - paragraph [ref=e156]: ₦1,000.00
+                    - paragraph [ref=e157]: 4.5%
+                - generic [ref=e158]:
+                  - paragraph [ref=e162]: TransAcc1-1769724357210
+                  - generic [ref=e163]:
+                    - paragraph [ref=e164]: ₦1,000.00
+                    - paragraph [ref=e165]: 4.5%
+                - generic [ref=e166]:
+                  - paragraph [ref=e170]: TransAcc1-1769184047491
+                  - generic [ref=e171]:
+                    - paragraph [ref=e172]: ₦1,000.00
+                    - paragraph [ref=e173]: 4.5%
+                - button "View 44 More" [ref=e174] [cursor=pointer]
+          - generic [ref=e175]:
+            - generic [ref=e176] [cursor=pointer]:
+              - generic [ref=e178]:
+                - img [ref=e180]
                 - generic [ref=e183]:
-                  - paragraph [ref=e184]: Income
-                  - paragraph [ref=e185]: ₦0.00
-                - generic [ref=e186]:
-                  - paragraph [ref=e187]: Expenses
-                  - paragraph [ref=e188]: ₦0.00
-            - generic [ref=e189] [cursor=pointer]:
-              - generic [ref=e190]:
-                - heading "Recent Activity" [level=3] [ref=e191]:
-                  - img [ref=e192]
+                  - heading "Momentum" [level=3] [ref=e184]
+                  - paragraph [ref=e185]: Pullback vs Last Week
+              - generic [ref=e186]:
+                - generic [ref=e187]:
+                  - paragraph [ref=e188]: Income
+                  - paragraph [ref=e189]: ₦0.00
+                - generic [ref=e190]:
+                  - paragraph [ref=e191]: Expenses
+                  - paragraph [ref=e192]: ₦0.00
+            - generic [ref=e193] [cursor=pointer]:
+              - generic [ref=e194]:
+                - heading "Recent Activity" [level=3] [ref=e195]:
+                  - img [ref=e196]
                   - text: Recent Activity
-                - img [ref=e195]
-              - paragraph [ref=e198]: No recent activity.
-          - generic [ref=e199]:
-            - generic [ref=e200] [cursor=pointer]:
-              - generic [ref=e201]:
-                - img [ref=e203]
-                - generic [ref=e206]:
-                  - heading "Productivity" [level=3] [ref=e207]
-                  - paragraph [ref=e208]: Follow-through
-              - generic [ref=e209]:
-                - heading "0%" [level=2] [ref=e210]
-                - paragraph [ref=e211]: Completion
-              - generic [ref=e212]:
-                - generic [ref=e214]:
-                  - generic [ref=e215]: Personal
-                  - generic [ref=e216]: 0%
-                - generic [ref=e219]:
-                  - generic [ref=e220]: Family
-                  - generic [ref=e221]: 0%
-            - generic [ref=e223] [cursor=pointer]:
-              - generic [ref=e224]:
-                - img [ref=e226]
-                - generic [ref=e230]:
-                  - heading "Today's Focus" [level=3] [ref=e231]
-                  - paragraph [ref=e232]: 1 Tasks Remaining
-              - generic [ref=e236]: Morning Run
-  - generic [ref=e237]:
-    - img [ref=e239]
-    - button "Open Tanstack query devtools" [ref=e287] [cursor=pointer]:
-      - img [ref=e288]
+                - img [ref=e199]
+              - paragraph [ref=e202]: No recent activity.
+          - generic [ref=e203]:
+            - generic [ref=e204] [cursor=pointer]:
+              - generic [ref=e205]:
+                - img [ref=e207]
+                - generic [ref=e210]:
+                  - heading "Productivity" [level=3] [ref=e211]
+                  - paragraph [ref=e212]: Follow-through
+              - generic [ref=e213]:
+                - heading "0%" [level=2] [ref=e214]
+                - paragraph [ref=e215]: Completion
+              - generic [ref=e216]:
+                - generic [ref=e218]:
+                  - generic [ref=e219]: Personal
+                  - generic [ref=e220]: 0%
+                - generic [ref=e223]:
+                  - generic [ref=e224]: Family
+                  - generic [ref=e225]: 0%
+            - generic [ref=e227] [cursor=pointer]:
+              - generic [ref=e228]:
+                - img [ref=e230]
+                - generic [ref=e234]:
+                  - heading "Today's Focus" [level=3] [ref=e235]
+                  - paragraph [ref=e236]: 1 Tasks Remaining
+              - generic [ref=e240]: Morning Run
+  - generic [ref=e241]:
+    - img [ref=e243]
+    - button "Open Tanstack query devtools" [ref=e291] [cursor=pointer]:
+      - img [ref=e292]
 ```
