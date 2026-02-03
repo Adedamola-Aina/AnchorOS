@@ -6,6 +6,7 @@ import type { AnchorTask } from '../types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTasksQuery, TASK_KEYS } from './queries/useTaskQueries';
 import { auditCommitments } from '../services/AuditService';
+import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
 
 export const useCommitmentService = (user: User | null) => {
   const queryClient = useQueryClient();
@@ -87,6 +88,13 @@ export const useCommitmentService = (user: User | null) => {
 
   const addTask = useCallback(async (task: Omit<AnchorTask, 'id' | 'createdAt'>) => {
     if (!user) return;
+
+    // Rate limit: 20 commitments per hour
+    const rateCheck = checkRateLimit(`commitmentCreate:${user.uid}`, RATE_LIMIT_CONFIGS.commitmentCreate);
+    if (rateCheck.isLimited) {
+      throw new Error(`Too many commitments created. Please try again in ${formatRetryTime(rateCheck.retryAfterMs || 0)}.`);
+    }
+
     const docRef = await addDoc(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments'), {
       ...task,
       createdAt: serverTimestamp(),

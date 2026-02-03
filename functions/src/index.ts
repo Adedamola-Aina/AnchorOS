@@ -225,6 +225,42 @@ const RATE_LIMITS: Record<string, RateLimitConfig> = {
         windowMs: 60 * 60 * 1000, // 1 hour
         blockDurationMs: 15 * 60 * 1000, // 15 min block
     },
+    // Revoke invitation - destructive, limit to 5/hour
+    revokeInvitation: {
+        maxAttempts: 5,
+        windowMs: 60 * 60 * 1000, // 1 hour
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    },
+    // Create invitation - prevent invite spam
+    createInvitation: {
+        maxAttempts: 5,
+        windowMs: 60 * 60 * 1000, // 1 hour
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    },
+    // Get notifications - read-only but prevent hammering
+    getNotifications: {
+        maxAttempts: 60,
+        windowMs: 60 * 1000, // 1 minute
+        blockDurationMs: 5 * 60 * 1000, // 5 min block
+    },
+    // Dismiss notification - prevent spam
+    dismissNotification: {
+        maxAttempts: 30,
+        windowMs: 60 * 1000, // 1 minute
+        blockDurationMs: 5 * 60 * 1000, // 5 min block
+    },
+    // Commitment creation - 20/day is reasonable
+    commitmentCreate: {
+        maxAttempts: 20,
+        windowMs: 24 * 60 * 60 * 1000, // 24 hours
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    },
+    // Password reset - prevent email bombing
+    passwordReset: {
+        maxAttempts: 3,
+        windowMs: 60 * 60 * 1000, // 1 hour
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    },
 };
 
 // ============================================================================
@@ -655,6 +691,9 @@ export const revokeInvitation = functions.https.onCall(
         const { inviteId } = data;
         const ownerUid = context.auth.uid;
 
+        // Rate limit: 5 revocations per hour
+        await enforceRateLimit('revokeInvitation', ownerUid);
+
         const inviteRef = db.collection('artifacts').doc(APP_ID).collection('family_invitations').doc(inviteId);
         const inviteDoc = await inviteRef.get();
 
@@ -1080,6 +1119,10 @@ export const getNotifications = functions.https.onCall(
         }
 
         const userId = context.auth.uid;
+
+        // Rate limit: 60 requests per minute
+        await enforceRateLimit('getNotifications', userId);
+
         const limit = data?.limit || 50;
         const includeRead = data?.includeRead ?? false;
 
@@ -1117,6 +1160,9 @@ export const dismissNotification = functions.https.onCall(
 
         const { notificationId } = data;
         const userId = context.auth.uid;
+
+        // Rate limit: 30 dismisses per minute
+        await enforceRateLimit('dismissNotification', userId);
 
         const notifRef = db.collection('artifacts').doc(APP_ID)
             .collection('users').doc(userId)
