@@ -1,13 +1,12 @@
 /**
- * OverdraftWarning
- * 
- * Warning banner displayed when a transaction would cause overdraft.
- * Extracted from TransactionForm for modularity.
+ * OverdraftWarning - Warning banner for overdraft risk
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import React from 'react';
 import { ArrowRightLeft } from 'lucide-react';
 import { fromCents } from '../../../utils/moneyUtils';
+import { Text, HStack, VStack } from '../../../components/primitives';
 
 interface OverdraftWarningProps {
     projectedBalance: number;
@@ -19,19 +18,24 @@ export const OverdraftWarning: React.FC<OverdraftWarningProps> = ({
     amountCents
 }) => {
     return (
-        <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-900/30 rounded-lg flex items-start gap-2 animate-in slide-in-from-top-2">
-            <div className="p-1 bg-rose-100 dark:bg-rose-800 rounded-full mt-0.5">
-                <ArrowRightLeft className="w-3 h-3 text-rose-600 dark:text-rose-300" />
-            </div>
-            <div>
-                <p className="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase">Warning: Overdraft Risk</p>
-                <p className="text-xs text-rose-600 dark:text-rose-400 mt-0.5">
-                    This transaction will take your account balance to{' '}
-                    <span className="font-mono font-bold">
-                        {amountCents > 0 ? '-' : ''}{fromCents(Math.abs(projectedBalance)).toLocaleString()}
-                    </span>.
-                </p>
-            </div>
+        <div className="mb-4 p-3 bg-danger-bg dark:bg-danger-bgDark border border-danger/20 rounded-lg animate-in slide-in-from-top-2">
+            <HStack gap="sm" align="start">
+                <div className="p-1 bg-danger/20 dark:bg-danger-dark/20 rounded-full mt-0.5">
+                    <ArrowRightLeft className="w-3 h-3 text-danger dark:text-danger-dark" />
+                </div>
+                <VStack gap="none">
+                    <Text variant="danger" size="xs" weight="bold" className="uppercase">
+                        Warning: Overdraft Risk
+                    </Text>
+                    <Text variant="danger" size="xs" className="mt-0.5">
+                        This transaction will take your account balance to{' '}
+                        <Text as="span" mono weight="bold">
+                            {amountCents > 0 ? '-' : ''}{fromCents(Math.abs(projectedBalance)).toLocaleString()}
+                        </Text>.
+                    </Text>
+                </VStack>
+            </HStack>
         </div>
     );
 };
+
