@@ -55,7 +55,7 @@ const APP_ID = 'anchor-os';
  * Queries commitments with reminders in the current time window and sends push notifications.
  */
 exports.processReminders = functions.pubsub
-    .schedule('every 5 minutes')
+    .schedule('every 1 minutes')
     .timeZone('Africa/Lagos') // WAT - adjust as needed
     .onRun(async () => {
     var _a;
