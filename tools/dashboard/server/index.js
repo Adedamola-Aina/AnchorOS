@@ -311,6 +311,21 @@ app.get('/api/git/backlog', async (req, res) => {
 });
 
 /**
+ * GET /api/git/changelog
+ * Returns auto-generated changelog from git commits
+ * Replaces manual CHANGELOG.md with git-automated data
+ */
+app.get('/api/git/changelog', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 100;
+        const data = await gitData.getChangelog(limit);
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * GET /api/git/roadmap
  * Returns Strategic Roadmap with auto-detection of completed items from git
  */
