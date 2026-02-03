@@ -1,7 +1,7 @@
 /**
  * Custom error class for Anchor OS application
  */
-export type ErrorCategory = 'VALIDATION' | 'PERMISSION' | 'NETWORK' | 'AUTH' | 'DATABASE' | 'UNKNOWN';
+export type ErrorCategory = 'VALIDATION' | 'PERMISSION' | 'NETWORK' | 'AUTH' | 'DATABASE' | 'RATE_LIMIT' | 'UNKNOWN';
 
 export class AnchorError extends Error {
     public category: ErrorCategory;

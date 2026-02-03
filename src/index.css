@@ -54,7 +54,7 @@
   }
 
   body {
-    @apply antialiased text-slate-900 bg-slate-50 dark:text-slate-100 transition-colors duration-300 font-sans;
+    @apply antialiased text-slate-900 bg-slate-50 dark:text-slate-100 transition-colors duration-300 font-sans font-medium;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     height: 100%;
     overflow: hidden;
@@ -223,9 +223,9 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Bottom navigation safe area with extra 12px spacing from home indicator */
+/* Bottom navigation safe area with extra 14px spacing from home indicator */
 .pb-safe-nav {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
 }
 
 .safe-area-top {

@@ -12,6 +12,7 @@
 import { collection, doc, addDoc, writeBatch, query, where, getDocs, type Firestore } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
+import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
 import type { AnchorAccount } from '../types';
 import { canManageAccount } from '../features/finance/utils/permissions';
 import type { CreateAccountPayload } from './financeTypes';
@@ -31,6 +32,15 @@ export class AccountService {
 
     /** Add a new account */
     async addAccount(userId: string, payload: CreateAccountPayload): Promise<string> {
+        // Rate limit: 10 accounts per 24 hours
+        const rateCheck = checkRateLimit(`accountCreate:${userId}`, RATE_LIMIT_CONFIGS.accountCreate);
+        if (rateCheck.isLimited) {
+            throw new AnchorError(
+                `Too many accounts created. Please try again in ${formatRetryTime(rateCheck.retryAfterMs || 0)}.`,
+                'RATE_LIMIT'
+            );
+        }
+
         try {
             const docRef = await addDoc(
                 collection(this.firestore, 'artifacts', APP_ID, 'users', userId, 'accounts'),

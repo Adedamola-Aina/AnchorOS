@@ -40,8 +40,14 @@ export const TaskContextBadge = ({ task }: { task: AnchorTask }) => {
 
   const content = (() => {
     if (task.type === 'daily' && task.timeOfDay && task.timeOfDay !== 'any') {
-      const icons = { morning: <Sunrise className="w-3 h-3" />, afternoon: <Sun className="w-3 h-3" />, evening: <Moon className="w-3 h-3" /> };
-      return <span className={`${commonStyles} text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800`}>{icons[task.timeOfDay]}</span>;
+      const icons = { morning: <Sunrise className="w-3 h-3 shrink-0" />, afternoon: <Sun className="w-3 h-3 shrink-0" />, evening: <Moon className="w-3 h-3 shrink-0" /> };
+      // Dynamic: show text by default, text truncates/hides when space is tight
+      return (
+        <span className={`${commonStyles} text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 max-w-[80px] overflow-hidden`}>
+          {icons[task.timeOfDay]}
+          <span className="truncate">{task.timeOfDay}</span>
+        </span>
+      );
     }
     if (task.type === 'weekly' && task.daysOfWeek && task.daysOfWeek.length > 0) {
       const dayShortnames: Record<string, string> = {
