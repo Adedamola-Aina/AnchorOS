@@ -1,9 +1,8 @@
 /**
  * TransactionItem - Individual transaction row in the transaction list
  * 
- * Follows the Calm Computing design philosophy:
- * - Clarity over cleverness: obvious purpose for each element
- * - Quiet over loud: minimal decoration, semantic colors only
+ * DES-002: Migrated to semantic tokens and primitives
+ * Follows the Calm Computing design philosophy
  */
 
 import React from 'react';
@@ -12,6 +11,7 @@ import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { AnchorTransaction } from '../../../types';
 import { Card } from '@anchor-os/ui';
+import { Badge, Text, HStack, VStack } from '../../../components/primitives';
 
 interface TransactionItemProps {
     transaction: AnchorTransaction;
@@ -25,10 +25,9 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
     transaction,
     currentUserId,
 }) => {
-    // Guard against undefined transaction
     if (!transaction) return null;
 
-    // Use the isBackdated flag if available (new transactions), otherwise calculate for legacy
+    // Backdated calculation
     const isBackdated = transaction.isBackdated ?? (() => {
         if (!transaction.transactionDate) return false;
         const entryDate = new Date(transaction.date).getTime();
@@ -37,22 +36,20 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
         return (entryDate - txDate) > ONE_DAY_MS;
     })();
 
-    // Display date - use transactionDate if available, otherwise use entry date
     const displayDate = transaction.transactionDate || transaction.date;
 
-    // Determine amount color based on transaction type
-    const amountColor = transaction.type === 'income'
-        ? 'text-finance-600 dark:text-finance-400'
+    // Semantic amount styling
+    const amountVariant = transaction.type === 'income'
+        ? 'finance'
         : transaction.type === 'transfer'
-            ? 'text-primary-600 dark:text-primary-400'
-            : 'text-slate-900 dark:text-white';
+            ? 'primary'
+            : 'body';
 
     const amountPrefix = transaction.type === 'expense' ? '-' : transaction.type === 'income' ? '+' : '';
 
     return (
-        <Card className="group p-3 sm:p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
-            {/* Mobile: Horizontal layout with amount on right */}
-            <div className="flex items-center gap-3">
+        <Card className="group p-3 sm:p-4 transition-all hover:border-[var(--border)]">
+            <HStack gap="sm" align="center">
                 {/* Icon */}
                 <CategoryIcon
                     category={transaction.category}
@@ -60,48 +57,55 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                 />
 
                 {/* Title + Meta */}
-                <div className="min-w-0 flex-1 flex flex-col justify-center">
-                    <div className="flex items-center justify-between gap-2">
-                        <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate leading-tight">
+                <VStack gap="xs" className="min-w-0 flex-1">
+                    <HStack justify="between" align="center" gap="sm">
+                        <Text as="h4" variant="heading" size="sm" truncate className="leading-tight">
                             {transaction.title}
-                        </h4>
-                        {/* Amount - centered with title line */}
-                        <p className={`font-bold text-sm tabular-nums shrink-0 truncate ${amountColor}`}>
+                        </Text>
+                        <Text
+                            variant={amountVariant}
+                            weight="bold"
+                            size="sm"
+                            mono
+                            truncate
+                            className="shrink-0"
+                        >
                             {amountPrefix}
                             {formatCurrencyCompact(fromCents(transaction.amountCents || 0), transaction.currency || 'USD')}
-                        </p>
-                    </div>
+                        </Text>
+                    </HStack>
 
-                    {/* Metadata row - badges/pills */}
-                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5 min-w-0">
-                        <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">
+                    {/* Metadata row */}
+                    <HStack gap="xs" align="center" wrap className="min-w-0">
+                        <Text variant="muted" size="xs" className="shrink-0">
                             {new Date(displayDate).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric'
                             })}
-                        </span>
+                        </Text>
 
-                        {/* Category Pill */}
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 truncate max-w-[120px]">
+                        {/* Category Badge */}
+                        <Badge variant="default" size="xs" className="truncate max-w-[120px]">
                             {transaction.category}
-                        </span>
+                        </Badge>
 
-                        {/* Family Member Pill */}
+                        {/* Family Member Badge */}
                         {transaction.createdBy && currentUserId && transaction.createdBy !== currentUserId && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 truncate max-w-[100px]">
+                            <Badge variant="info" size="xs" className="truncate max-w-[100px]">
                                 {transaction.createdByName || 'Family'}
-                            </span>
+                            </Badge>
                         )}
 
-                        {/* Backdated Pill */}
+                        {/* Backdated Badge */}
                         {isBackdated && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 border border-amber-100 dark:border-amber-800/50">
+                            <Badge variant="warning" size="xs">
                                 Backdated
-                            </span>
+                            </Badge>
                         )}
-                    </div>
-                </div>
-            </div>
+                    </HStack>
+                </VStack>
+            </HStack>
         </Card>
     );
 };
+

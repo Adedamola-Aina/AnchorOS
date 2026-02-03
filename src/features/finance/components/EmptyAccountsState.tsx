@@ -1,10 +1,11 @@
 /**
  * EmptyAccountsState - Empty state for when no accounts exist
- * Extracted from FinanceView per CLAUDE.md 200-line rule
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { Landmark, Plus } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
+import { Text, VStack } from '../../../components/primitives';
 
 interface EmptyAccountsStateProps {
     onCreateAccount: () => void;
@@ -12,19 +13,26 @@ interface EmptyAccountsStateProps {
 
 export const EmptyAccountsState = ({ onCreateAccount }: EmptyAccountsStateProps) => {
     return (
-        <div className="col-span-full flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl animate-in fade-in zoom-in-95 duration-500">
-            <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full flex items-center justify-center">
-                    <Landmark className="w-10 h-10 text-emerald-500/60 dark:text-emerald-400/60" />
+        <VStack
+            align="center"
+            justify="center"
+            gap="md"
+            className="col-span-full py-16 px-4 border-2 border-dashed border-[var(--border)] rounded-3xl animate-in fade-in zoom-in-95 duration-500"
+        >
+            <div className="relative mb-2">
+                <div className="w-20 h-20 bg-gradient-to-br from-finance-100 to-finance-200 dark:from-finance-900/30 dark:to-finance-800/30 rounded-full flex items-center justify-center">
+                    <Landmark className="w-10 h-10 text-finance-500/60 dark:text-finance-400/60" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                    <Plus className="w-3.5 h-3.5 text-blue-500" />
+                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center">
+                    <Plus className="w-3.5 h-3.5 text-primary-500" />
                 </div>
             </div>
-            <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-2">No accounts yet</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-6 text-sm">
+            <Text as="h3" variant="heading" size="lg">
+                No accounts yet
+            </Text>
+            <Text variant="muted" size="sm" className="text-center max-w-sm">
                 Create your first account to start tracking your finances.
-            </p>
+            </Text>
             <Button
                 variant="secondary"
                 onClick={onCreateAccount}
@@ -33,6 +41,7 @@ export const EmptyAccountsState = ({ onCreateAccount }: EmptyAccountsStateProps)
                 <Landmark className="w-4 h-4" />
                 <span>Create your first account</span>
             </Button>
-        </div>
+        </VStack>
     );
 };
+
