@@ -133,24 +133,107 @@ async function getActiveConnection(userUid) {
     return null;
 }
 const RATE_LIMITS = {
+    // Authentication (Firebase handles primary, this is for tracking)
     auth: {
         maxAttempts: 5,
-        windowMs: 15 * 60 * 1000,
-        blockDurationMs: 60 * 60 * 1000,
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
     },
+    // Family invitations - 10 per day is generous
     invite: {
-        maxAttempts: 3,
+        maxAttempts: 10,
         windowMs: 24 * 60 * 60 * 1000, // 24 hours
         blockDurationMs: 24 * 60 * 60 * 1000,
     },
+    // Account sharing - 20 toggles per hour
     shareAccount: {
+        maxAttempts: 20,
+        windowMs: 60 * 60 * 1000, // 1 hour
+        blockDurationMs: 30 * 60 * 1000, // 30 min block
+    },
+    // Token validation - prevent brute force on invite tokens
+    tokenValidation: {
         maxAttempts: 10,
         windowMs: 60 * 60 * 1000, // 1 hour
-        blockDurationMs: 60 * 60 * 1000,
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    },
+    // Verification code attempts - 5 tries per 15 min
+    codeVerification: {
+        maxAttempts: 5,
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    },
+    // Disconnect family - destructive action, limit to 3/hour
+    disconnectFamily: {
+        maxAttempts: 3,
+        windowMs: 60 * 60 * 1000, // 1 hour
+        blockDurationMs: 24 * 60 * 60 * 1000, // 24 hour block
+    },
+    // Email sending - prevent email bombing
+    emailSend: {
+        maxAttempts: 5,
+        windowMs: 60 * 60 * 1000, // 1 hour
+        blockDurationMs: 60 * 60 * 1000, // 1 hour block
+    },
+    // Transaction creation via shared account - 100/hour is generous
+    transactionCreate: {
+        maxAttempts: 100,
+        windowMs: 60 * 60 * 1000, // 1 hour
+        blockDurationMs: 15 * 60 * 1000, // 15 min block
     },
 };
 // ============================================================================
-// Rate Limiting Functions
+// Rate Limiting Helper - Enforces rate limits and throws on exceeded
+// ============================================================================
+/**
+ * Enforces rate limiting for a given action and identifier.
+ * THROWS HttpsError if rate limit is exceeded.
+ * Use this at the START of Cloud Functions to protect against abuse.
+ */
+async function enforceRateLimit(action, identifier) {
+    const config = RATE_LIMITS[action];
+    if (!config) {
+        // Fail open for unknown actions to not break functionality
+        console.warn(`[RateLimit] Unknown action: ${action}. Skipping enforcement.`);
+        return;
+    }
+    const rateLimitRef = db.collection('rateLimits').doc(`${action}:${identifier}`);
+    const now = Date.now();
+    try {
+        await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(rateLimitRef);
+            const docData = doc.data();
+            // Check if currently blocked
+            if ((docData === null || docData === void 0 ? void 0 : docData.blockedUntil) && docData.blockedUntil > now) {
+                const remainingMs = docData.blockedUntil - now;
+                const remainingMin = Math.ceil(remainingMs / 60000);
+                throw new functions.https.HttpsError('resource-exhausted', `Too many attempts. Please try again in ${remainingMin} minute(s).`);
+            }
+            // Count attempts in window
+            const windowStart = now - config.windowMs;
+            const attempts = ((docData === null || docData === void 0 ? void 0 : docData.attempts) || []).filter((ts) => ts > windowStart);
+            // Check if limit exceeded
+            if (attempts.length >= config.maxAttempts) {
+                const blockedUntil = now + config.blockDurationMs;
+                transaction.set(rateLimitRef, { attempts: [], blockedUntil, lastAttempt: now });
+                throw new functions.https.HttpsError('resource-exhausted', 'Rate limit exceeded. You have been temporarily blocked.');
+            }
+            // Record this attempt
+            attempts.push(now);
+            transaction.set(rateLimitRef, { attempts, blockedUntil: null, lastAttempt: now });
+        });
+    }
+    catch (error) {
+        // Re-throw HttpsErrors (rate limit)
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        // Log but don't fail on internal errors (fail open)
+        console.error('[RateLimit] Enforcement failed:', error);
+    }
+}
+// ============================================================================
+// Rate Limiting Functions (Public API)
 // ============================================================================
 exports.checkRateLimit = functions.https.onCall(async (data) => {
     const { action, identifier } = data;
@@ -394,6 +477,8 @@ exports.validateInvitationToken = functions.https.onCall(async (data) => {
     if (!token) {
         throw new functions.https.HttpsError('invalid-argument', 'Token is required');
     }
+    // Rate limit: prevent brute force on invite tokens (10/hour per token)
+    await enforceRateLimit('tokenValidation', token);
     const inviteRef = db.collection('artifacts').doc(APP_ID).collection('family_invitations').doc(token);
     const inviteDoc = await inviteRef.get();
     if (!inviteDoc.exists) {
@@ -433,6 +518,8 @@ exports.acceptInvitation = functions.https.onCall(async (data, context) => {
     }
     const { inviteId, verificationCode } = data;
     const inviteeUid = context.auth.uid;
+    // Rate limit: prevent brute force on verification codes (5/15min per invite)
+    await enforceRateLimit('codeVerification', inviteId);
     const inviteRef = db.collection('artifacts').doc(APP_ID).collection('family_invitations').doc(inviteId);
     const inviteDoc = await inviteRef.get();
     if (!inviteDoc.exists) {
@@ -491,6 +578,8 @@ exports.confirmConnection = functions.https.onCall(async (data, context) => {
     }
     const { inviteId, confirmed } = data;
     const ownerUid = context.auth.uid;
+    // Rate limit: prevent spam confirmations (10/day per user)
+    await enforceRateLimit('invite', ownerUid);
     const inviteRef = db.collection('artifacts').doc(APP_ID).collection('family_invitations').doc(inviteId);
     const inviteDoc = await inviteRef.get();
     if (!inviteDoc.exists) {
@@ -563,6 +652,8 @@ exports.shareAccount = functions.https.onCall(async (data, context) => {
     }
     const { accountId, share } = data;
     const ownerUid = context.auth.uid;
+    // Rate limit: prevent share/unshare spam (20/hour per user)
+    await enforceRateLimit('shareAccount', ownerUid);
     // Get active connection
     const connection = await getActiveConnection(ownerUid);
     if (!connection) {
@@ -687,6 +778,8 @@ exports.disconnectFamily = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
     }
     const callerUid = context.auth.uid;
+    // Rate limit: destructive action - limit to 3/hour per user
+    await enforceRateLimit('disconnectFamily', callerUid);
     const connection = await getActiveConnection(callerUid);
     if (!connection) {
         throw new functions.https.HttpsError('failed-precondition', 'No active family connection');
@@ -855,6 +948,8 @@ exports.sendTemplatedEmail = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
     }
+    // Rate limit: prevent email bombing (5/hour per user)
+    await enforceRateLimit('emailSend', context.auth.uid);
     const { template, recipient, data: templateData } = data;
     const templates = {
         invitation: {
@@ -1022,6 +1117,8 @@ exports.addTransactionToSharedAccount = functions.https.onCall(async (data, cont
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
     }
+    // Rate limit: prevent transaction spam (100/hour per user)
+    await enforceRateLimit('transactionCreate', context.auth.uid);
     const callerUid = context.auth.uid;
     const { accountId, transaction } = data;
     if (!accountId || !transaction) {

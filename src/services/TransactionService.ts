@@ -10,6 +10,7 @@
 import { doc, increment, writeBatch, getDoc, runTransaction, type Firestore } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
+import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
 import type { AnchorTransaction, AnchorAccount } from '../types';
 import { canAddTransaction, canDeleteTransaction, canEditTransaction } from '../features/finance/utils/permissions';
 import { processTransferTransaction, processStandardTransaction } from './TransferOperations';
@@ -30,6 +31,15 @@ export class TransactionService {
 
     /** Add a new transaction (handles transfers and standard transactions) */
     async addTransaction(userId: string, payload: CreateTransactionPayload, accounts: AnchorAccount[]): Promise<void> {
+        // Rate limit: 100 transactions per hour
+        const rateCheck = checkRateLimit(`transactionCreate:${userId}`, RATE_LIMIT_CONFIGS.transactionCreate);
+        if (rateCheck.isLimited) {
+            throw new AnchorError(
+                `Too many transactions created. Please try again in ${formatRetryTime(rateCheck.retryAfterMs || 0)}.`,
+                'RATE_LIMIT'
+            );
+        }
+
         const sourceAccount = accounts.find(a => a.id === payload.accountId);
         if (!sourceAccount) throw new AnchorError('Source account not found', 'VALIDATION');
         if (!canAddTransaction(sourceAccount, userId)) {

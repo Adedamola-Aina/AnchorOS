@@ -102,6 +102,7 @@ export function formatRetryTime(ms: number): string {
 
 // Preset configurations for common operations
 export const RATE_LIMIT_CONFIGS = {
+    // Authentication (Firebase handles but we track client-side)
     signIn: {
         maxAttempts: 5,
         windowMs: 15 * 60 * 1000,  // 15 minutes
@@ -126,5 +127,29 @@ export const RATE_LIMIT_CONFIGS = {
         maxAttempts: 3,
         windowMs: 60 * 60 * 1000,  // 1 hour
         lockoutMs: 60 * 60 * 1000  // 1 hour lockout
-    }
+    },
+    // Commitments - 20 creates per hour
+    commitmentCreate: {
+        maxAttempts: 20,
+        windowMs: 60 * 60 * 1000,  // 1 hour
+        lockoutMs: 15 * 60 * 1000  // 15 minute lockout
+    },
+    // Transactions - 100 creates per hour (generous for bulk entry)
+    transactionCreate: {
+        maxAttempts: 100,
+        windowMs: 60 * 60 * 1000,  // 1 hour
+        lockoutMs: 15 * 60 * 1000  // 15 minute lockout
+    },
+    // Accounts - 10 creates per day (rarely need more)
+    accountCreate: {
+        maxAttempts: 10,
+        windowMs: 24 * 60 * 60 * 1000,  // 24 hours
+        lockoutMs: 60 * 60 * 1000       // 1 hour lockout
+    },
+    // Feedback - 3 per hour (spam protection)
+    feedbackSubmit: {
+        maxAttempts: 3,
+        windowMs: 60 * 60 * 1000,  // 1 hour
+        lockoutMs: 24 * 60 * 60 * 1000  // 24 hour lockout
+    },
 } as const;

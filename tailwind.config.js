@@ -105,28 +105,45 @@ module.exports = {
         // Semantic Typography Scale - UX-013
         // Built-in responsive sizing, line-height, and font-weight
         // Usage: text-h1 (mobile), lg:text-h1-lg (desktop)
+        // UPDATED: Bolder weights for native iOS/Android confidence (Feb 2026)
 
         // Display: Hero sections, marketing (48px desktop / 36px mobile)
-        'display': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '900' }],      // 36px mobile
-        'display-lg': ['3rem', { lineHeight: '1', fontWeight: '900' }],           // 48px desktop
+        'display': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '800' }],      // 36px mobile - BLACK
+        'display-lg': ['3rem', { lineHeight: '1', fontWeight: '800' }],           // 48px desktop - BLACK
 
         // H1: Page titles (36px desktop / 30px mobile)
-        'h1': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],         // 30px mobile
-        'h1-lg': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '700' }],        // 36px desktop
+        'h1': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],         // 30px mobile - BOLD
+        'h1-lg': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '700' }],        // 36px desktop - BOLD
 
         // H2: Section headers (30px desktop / 24px mobile)
-        'h2': ['1.5rem', { lineHeight: '2rem', fontWeight: '700' }],              // 24px mobile
-        'h2-lg': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],      // 30px desktop
+        'h2': ['1.5rem', { lineHeight: '2rem', fontWeight: '700' }],              // 24px mobile - BOLD
+        'h2-lg': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],      // 30px desktop - BOLD
 
         // H3: Subsections (24px desktop / 20px mobile)
-        'h3': ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],          // 20px mobile
-        'h3-lg': ['1.5rem', { lineHeight: '2rem', fontWeight: '600' }],           // 24px desktop
+        'h3': ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],          // 20px mobile - SEMIBOLD
+        'h3-lg': ['1.5rem', { lineHeight: '2rem', fontWeight: '600' }],           // 24px desktop - SEMIBOLD
 
         // Body: Main text (16px all breakpoints)
-        'body': ['1rem', { lineHeight: '1.5rem', fontWeight: '400' }],            // 16px
+        'body': ['1rem', { lineHeight: '1.5rem', fontWeight: '500' }],            // 16px - MEDIUM (was 400)
 
         // Small: Captions, labels (14px all breakpoints)
-        'small': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '500' }],      // 14px
+        'small': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '600' }],      // 14px - SEMIBOLD (was 500)
+      },
+
+      // Native System Font Stack - iOS uses SF Pro, Android uses Roboto
+      fontFamily: {
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'SF Pro Display',
+          'SF Pro Text',
+          'Segoe UI',
+          'Roboto',
+          'Oxygen',
+          'Ubuntu',
+          'system-ui',
+          'sans-serif',
+        ],
       },
     }
   },
