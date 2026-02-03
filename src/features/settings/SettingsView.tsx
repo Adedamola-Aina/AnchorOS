@@ -26,6 +26,7 @@ import { VerifyEmailBanner, EnableMfaBanner } from './components/SettingsBanners
 import { ReauthModal } from './components/ReauthModal';
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
+import { auditSettings } from '../../services/AuditService';
 
 const SettingsView = () => {
   const {
@@ -116,8 +117,8 @@ const SettingsView = () => {
           </div>
         )}
 
-        <ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => updateProfile({ name })} />
-        <AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => updateProfile({ theme })} />
+        <ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }} />
+        <AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }} />
         <SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={isEnrolling} show2FASetup={show2FASetup} mfaQrUrl={mfaQrUrl} mfaManualKey={mfaManualKey}
           mfaCode={mfaCode} mfaError={mfaError} onSetShow2FASetup={setShow2FASetup} onSetMfaCode={setMfaCode} onGenerateMfaSecret={handleGenerateMfaSecret}
           onEnrollMfa={handleEnrollMfa} onUnenrollMfa={unenrollMfa} />
