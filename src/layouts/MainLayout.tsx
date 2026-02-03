@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { LayoutDashboard, CheckCircle2, CreditCard, Settings, X, LogOut, Menu } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,7 @@ import { useResponsive } from '../hooks/useResponsive';
 import { useKeyboardAvoidance } from '../hooks/useKeyboardAvoidance';
 import { BottomNavigation } from '../components/mobile/BottomNavigation';
 import { InstallPrompt } from '../components/pwa/InstallPrompt';
+import { useFinanceService } from '../hooks/useFinanceService';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -53,6 +54,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     const { user, profile, logout, accountNotifications } = useAuth();
     const { isMobile } = useResponsive(); // ← Per M3.2
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Get account colors for Home icon animation (UX-024)
+    const { accounts } = useFinanceService(user);
+    const accountColors = useMemo(() => accounts.map(a => a.color).filter(Boolean), [accounts]);
 
     // BUG-002 Fix: Handle iOS keyboard covering inputs
     // Hook auto-scrolls focused inputs into view when keyboard appears
@@ -161,7 +166,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </div>
 
                 {/* Bottom Navigation - NEW, mobile only per M3.2 */}
-                {isMobile && <BottomNavigation accountNotifications={accountNotifications} />}
+                {isMobile && <BottomNavigation accountNotifications={accountNotifications} accountColors={accountColors} />}
 
                 {/* PWA Install Prompt */}
                 <InstallPrompt />

@@ -5,25 +5,20 @@
  * Per DESIGN_PHILOSOPHY.md: "Remain visually stable and emotionally calm"
  * 
  * Features subtle tap animations on each icon that bring delight without being intrusive.
+ * Home icon shows account colors, Tasks icon has celebration animation.
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { LayoutDashboard, CheckCircle2, CreditCard, Settings } from 'lucide-react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { CreditCard, Settings } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useHaptic } from '../../hooks/useHaptic';
 import { navAnimationStyles, getRandomColor, CELEBRATION_COLORS } from './NavIconAnimations';
+import { AnimatedHomeIcon, AnimatedTasksIcon } from './AnimatedNavIcons';
 
 interface BottomNavigationProps {
     accountNotifications: string[];
+    accountColors?: string[]; // Colors from user's accounts for Home animation
 }
-
-// Static nav items
-const NAV_ITEMS = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
-    { to: '/commitments', icon: CheckCircle2, label: 'Tasks' },
-    { to: '/finance', icon: CreditCard, label: 'Finance' },
-    { to: '/settings', icon: Settings, label: 'Settings' },
-] as const;
 
 // Animation config per route
 const ANIMATIONS = {
@@ -34,7 +29,8 @@ const ANIMATIONS = {
 } as const;
 
 export const BottomNavigation = ({
-    accountNotifications
+    accountNotifications,
+    accountColors = []
 }: BottomNavigationProps) => {
     const [animatingRoute, setAnimatingRoute] = useState<string | null>(null);
     const [celebrationColor, setCelebrationColor] = useState(CELEBRATION_COLORS[0]);
@@ -53,30 +49,62 @@ export const BottomNavigation = ({
     }, []);
 
     const handleTap = useCallback((route: string) => {
-        // Trigger haptic feedback
         trigger('light');
-
-        // Set random color for Tasks icon
         if (route === '/commitments') {
             setCelebrationColor(getRandomColor());
         }
-
-        // Start animation
         setAnimatingRoute(route);
-
-        // Clear animation after duration
         setTimeout(() => setAnimatingRoute(null), 200);
     }, [trigger]);
 
-    // Get dynamic color class for Tasks icon during animation
-    const getIconColorClass = (route: string, isActive: boolean) => {
+    // Get dynamic color class for icons during animation
+    const getIconColorClass = useCallback((route: string, isActive: boolean) => {
         if (animatingRoute === route && route === '/commitments') {
             return `${celebrationColor.light} ${celebrationColor.dark}`;
         }
         return isActive
             ? 'text-primary-600 dark:text-primary-400'
             : 'text-slate-400 dark:text-slate-500';
-    };
+    }, [animatingRoute, celebrationColor]);
+
+    // Navigation items with custom icon renderers
+    const navItems = useMemo(() => [
+        {
+            to: '/dashboard',
+            label: 'Home',
+            renderIcon: (isAnimating: boolean, className: string) => (
+                <AnimatedHomeIcon
+                    className={className}
+                    accountColors={accountColors}
+                    isAnimating={isAnimating}
+                />
+            )
+        },
+        {
+            to: '/commitments',
+            label: 'Tasks',
+            renderIcon: (isAnimating: boolean, className: string) => (
+                <AnimatedTasksIcon
+                    className={className}
+                    isAnimating={isAnimating}
+                />
+            )
+        },
+        {
+            to: '/finance',
+            label: 'Finance',
+            renderIcon: (_isAnimating: boolean, className: string) => (
+                <CreditCard className={className} />
+            )
+        },
+        {
+            to: '/settings',
+            label: 'Settings',
+            renderIcon: (_isAnimating: boolean, className: string) => (
+                <Settings className={className} />
+            )
+        },
+    ], [accountColors]);
 
     return (
         <nav
@@ -85,7 +113,7 @@ export const BottomNavigation = ({
             aria-label="Mobile navigation"
         >
             <div className="grid grid-cols-4 h-16">
-                {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+                {navItems.map(({ to, label, renderIcon }) => (
                     <NavLink
                         key={to}
                         to={to}
@@ -94,25 +122,25 @@ export const BottomNavigation = ({
                             `flex flex-col items-center justify-center gap-1 relative transition-colors min-h-[44px] ${getIconColorClass(to, isActive)}`
                         }
                     >
-                        {({ isActive }) => (
-                            <>
-                                <Icon
-                                    className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''
-                                        } ${animatingRoute === to
-                                            ? ANIMATIONS[to as keyof typeof ANIMATIONS] || ''
-                                            : ''
-                                        }`}
-                                />
-                                <span className="text-[10px] font-medium">{label}</span>
-                                {to === '/settings' && hasSettingsNotification && (
-                                    <span
-                                        className="absolute top-2 right-1/4 w-2 h-2 bg-red-500 rounded-full animate-pulse"
-                                        role="status"
-                                        aria-label="Notification indicator"
-                                    />
-                                )}
-                            </>
-                        )}
+                        {({ isActive }) => {
+                            const isAnimating = animatingRoute === to;
+                            const animClass = isAnimating ? ANIMATIONS[to as keyof typeof ANIMATIONS] || '' : '';
+                            const iconClass = `w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''} ${animClass}`;
+
+                            return (
+                                <>
+                                    {renderIcon(isAnimating, iconClass)}
+                                    <span className="text-[10px] font-medium">{label}</span>
+                                    {to === '/settings' && hasSettingsNotification && (
+                                        <span
+                                            className="absolute top-2 right-1/4 w-2 h-2 bg-red-500 rounded-full animate-pulse"
+                                            role="status"
+                                            aria-label="Notification indicator"
+                                        />
+                                    )}
+                                </>
+                            );
+                        }}
                     </NavLink>
                 ))}
             </div>
