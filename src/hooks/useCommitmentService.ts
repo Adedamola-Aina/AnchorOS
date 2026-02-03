@@ -5,6 +5,7 @@ import { db, APP_ID } from '../config/firebase';
 import type { AnchorTask } from '../types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTasksQuery, TASK_KEYS } from './queries/useTaskQueries';
+import { auditCommitments } from '../services/AuditService';
 
 export const useCommitmentService = (user: User | null) => {
   const queryClient = useQueryClient();
@@ -86,12 +87,14 @@ export const useCommitmentService = (user: User | null) => {
 
   const addTask = useCallback(async (task: Omit<AnchorTask, 'id' | 'createdAt'>) => {
     if (!user) return;
-    await addDoc(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments'), {
+    const docRef = await addDoc(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments'), {
       ...task,
       createdAt: serverTimestamp(),
       currentStreak: 0,
       longestStreak: 0
     });
+    // AUDIT: Log commitment creation
+    auditCommitments.created(docRef.id, task.title);
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
   }, [user, queryClient]);
 
@@ -183,10 +186,17 @@ export const useCommitmentService = (user: User | null) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
       throw error;
     }
+
+    // AUDIT: Log completion (only when completing, not uncompleting)
+    if (!currentStatus) {
+      auditCommitments.completed(id);
+    }
   }, [user, queryClient]);
 
   const deleteTask = useCallback(async (id: string) => {
     if (!user) return;
+    // AUDIT: Log commitment deletion
+    auditCommitments.deleted(id);
     await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id));
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
   }, [user, queryClient]);

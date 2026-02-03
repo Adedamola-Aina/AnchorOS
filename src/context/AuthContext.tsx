@@ -18,6 +18,7 @@ import type { UserProfile } from '../types';
 import { useMfaOperations, getWelcomeEmailHtml } from './auth';
 import { createTracer } from '../services/telemetry';
 import { getEffectiveTheme } from '../utils/systemTheme';
+import { auditAuth } from '../services/AuditService';
 
 const authTracer = createTracer('Auth');
 
@@ -103,6 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signIn = async (e: string, p: string) => {
         return authTracer.trace('signIn', async () => {
             await signInWithEmailAndPassword(auth, e, p);
+            // AUDIT: Log successful login
+            auditAuth.loginSuccess('password');
         });
     };
 
@@ -118,6 +121,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const logout = async () => {
         authTracer.logEvent('logout');
+        // AUDIT: Log logout
+        auditAuth.logout();
         sessionStorage.removeItem('anchor_session_active');
         await signOut(auth);
         navigate('/', { replace: true });
