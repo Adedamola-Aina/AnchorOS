@@ -87,7 +87,7 @@ Follow TDD:
 
 **Always update:**
 - `docs/PROJECT_STATUS.md` - Mark task complete, add to "Recently Completed"
-- `CHANGELOG.md` - Add entry under [Unreleased]
+- ~~CHANGELOG.md~~ **Deleted - git commits are the source of truth.** Use `/api/git/changelog` endpoint.
 
 **If bug fix:**
 - `docs/KNOWN_ISSUES.md` - Move bug to "Recently Fixed" section
@@ -105,7 +105,6 @@ Follow TDD:
 
 **Docs Updated:**
 - [ ] PROJECT_STATUS.md - [describe update]
-- [ ] CHANGELOG.md - [entry added]
 - [ ] KNOWN_ISSUES.md - [if applicable]
 - [ ] ROADMAP.md - [if applicable]
 
@@ -125,7 +124,6 @@ Follow TDD:
 
 ### After EVERY task:
 - [ ] Did I update PROJECT_STATUS.md?
-- [ ] Did I add CHANGELOG.md entry?
 - [ ] Did I update KNOWN_ISSUES.md (if bug)?
 - [ ] Did I update ROADMAP.md (if feature)?
 - [ ] Did I tell user what I updated?

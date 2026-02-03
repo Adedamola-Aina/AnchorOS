@@ -182,7 +182,6 @@ If you find yourself about to write code and realize you didn't:
 
 If you just finished and realize you didn't:
 1. Update docs → DO IT NOW before saying "done"
-2. Add changelog → DO IT NOW
-3. Report updates → TELL THE USER what you updated
+2. Report updates → TELL THE USER what you updated
 
 **The workflow is: READ → PLAN → CONFIRM → BUILD → UPDATE → REPORT**
