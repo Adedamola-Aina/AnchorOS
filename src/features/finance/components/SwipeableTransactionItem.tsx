@@ -36,12 +36,12 @@ export const SwipeableTransactionItem: React.FC<SwipeableTransactionItemProps> =
                 onSwipeRight={() => onEdit(transaction)}
                 leftAction={{
                     label: 'Edit',
-                    color: 'blue',
+                    color: 'primary',
                     icon: <Pencil className="w-4 h-4 mr-1" />,
                 }}
                 rightAction={{
                     label: 'Delete',
-                    color: 'red',
+                    color: 'danger',
                     icon: <Trash2 className="w-4 h-4 mr-1" />,
                 }}
             >

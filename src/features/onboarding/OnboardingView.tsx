@@ -1,10 +1,11 @@
 /**
  * OnboardingView - Multi-step onboarding experience
- * 
+ * WEB-003: Framer Motion step transitions
  * Refactored per CLAUDE.md 200-line rule.
  */
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
@@ -82,40 +83,66 @@ export const OnboardingView = () => {
     };
 
     return (
-        <div className="h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
+        <div className="h-screen w-full flex items-center justify-center bg-surface-2 dark:bg-surface-base-dark p-6">
             <div className="w-full max-w-lg">
                 {/* Progress Indicator */}
                 <div className="text-center mb-6">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <span className="text-xs font-bold text-muted uppercase tracking-widest">
                         Step {step} of 3
                     </span>
                     <div className="flex justify-center gap-2 mt-2">
                         {[1, 2, 3].map(s => (
-                            <div key={s} className={`h-1.5 w-12 rounded-full transition-all ${s <= step ? 'bg-blue-500' : 'bg-slate-200 dark:bg-slate-800'}`} />
+                            <div key={s} className={`h-1.5 w-12 rounded-full transition-all ${s <= step ? 'bg-primary-500' : 'bg-surface-3 dark:bg-surface-3-dark'}`} />
                         ))}
                     </div>
                 </div>
 
-                {step === 1 && (
-                    <OnboardingWelcome userName={profile.name || 'User'} onStart={handleStart} onSkip={handleSkip} />
-                )}
+                <AnimatePresence mode="wait">
+                    {step === 1 && (
+                        <motion.div
+                            key="step-1"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        >
+                            <OnboardingWelcome userName={profile.name || 'User'} onStart={handleStart} onSkip={handleSkip} />
+                        </motion.div>
+                    )}
 
-                {step === 2 && (
-                    <OnboardingAccountStep
-                        accName={accName} setAccName={setAccName}
-                        balance={balance} setBalance={setBalance}
-                        currency={currency} setCurrency={setCurrency}
-                        accountType={accountType} setAccountType={setAccountType}
-                        loading={loading} onSubmit={handleCreateAccount} onSkip={handleSkip}
-                    />
-                )}
+                    {step === 2 && (
+                        <motion.div
+                            key="step-2"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        >
+                            <OnboardingAccountStep
+                                accName={accName} setAccName={setAccName}
+                                balance={balance} setBalance={setBalance}
+                                currency={currency} setCurrency={setCurrency}
+                                accountType={accountType} setAccountType={setAccountType}
+                                loading={loading} onSubmit={handleCreateAccount} onSkip={handleSkip}
+                            />
+                        </motion.div>
+                    )}
 
-                {step === 3 && (
-                    <OnboardingHabitStep
-                        taskTitle={taskTitle} setTaskTitle={setTaskTitle}
-                        loading={loading} onSubmit={handleCreateTask} onSkip={handleSkip}
-                    />
-                )}
+                    {step === 3 && (
+                        <motion.div
+                            key="step-3"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        >
+                            <OnboardingHabitStep
+                                taskTitle={taskTitle} setTaskTitle={setTaskTitle}
+                                loading={loading} onSubmit={handleCreateTask} onSkip={handleSkip}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

@@ -102,7 +102,7 @@ describe('BottomNavigation', () => {
             renderWithRouter(<BottomNavigation accountNotifications={[]} />, { route: '/dashboard' });
 
             const financeLink = screen.getByRole('link', { name: /finance/i });
-            expect(financeLink.className).toContain('text-slate-400');
+            expect(financeLink.className).toContain('text-muted');
         });
     });
 });

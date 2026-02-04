@@ -77,19 +77,19 @@ export class FeatureErrorBoundary extends Component<Props, State> {
             // Default error UI - mobile-responsive
             return (
                 <div className="w-full p-6 md:p-8">
-                    <div className="max-w-md mx-auto bg-white dark:bg-slate-800 rounded-2xl border-2 border-rose-200 dark:border-rose-900/50 shadow-sm p-6">
+                    <div className="max-w-md mx-auto bg-surface-1 dark:bg-surface-2-dark rounded-2xl border-2 border-danger-200 dark:border-danger-900/50 shadow-sm p-6">
                         {/* Error Icon */}
                         <div className="flex justify-center mb-4">
-                            <div className="p-3 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full">
+                            <div className="p-3 bg-danger-100 dark:bg-danger-900/30 text-danger-600 dark:text-danger-400 rounded-full">
                                 <AlertCircle className="w-8 h-8" />
                             </div>
                         </div>
 
                         {/* Error Message */}
-                        <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white text-center mb-2">
+                        <h3 className="text-h3 lg:text-h3-lg text-foreground dark:text-foreground-dark text-center mb-2">
                             Unable to load {this.props.featureName}
                         </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 text-center mb-6">
+                        <p className="text-sm text-subtle dark:text-subtle-dark text-center mb-6">
                             Something went wrong. Try reloading this section or navigate to another page.
                         </p>
 
@@ -97,7 +97,7 @@ export class FeatureErrorBoundary extends Component<Props, State> {
                         <div className="flex flex-col md:flex-row gap-3 md:gap-4">
                             <button
                                 onClick={this.handleReset}
-                                className="flex items-center justify-center gap-2 px-4 py-3 md:py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-medium hover:scale-105 transition-transform w-full md:flex-1 min-h-[44px] md:min-h-0"
+                                className="flex items-center justify-center gap-2 px-4 py-3 md:py-2.5 bg-foreground dark:bg-foreground-dark text-surface-1 dark:text-surface-1-dark rounded-xl font-medium hover:scale-105 transition-transform w-full md:flex-1 min-h-[44px] md:min-h-0"
                                 aria-label={`Retry loading ${this.props.featureName}`}
                             >
                                 <RefreshCw className="w-5 h-5" />
@@ -105,7 +105,7 @@ export class FeatureErrorBoundary extends Component<Props, State> {
                             </button>
                             <button
                                 onClick={this.handleReport}
-                                className="flex items-center justify-center gap-2 px-4 py-3 md:py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full md:flex-1 min-h-[44px] md:min-h-0"
+                                className="flex items-center justify-center gap-2 px-4 py-3 md:py-2.5 border border-border-subtle text-subtle dark:text-subtle-dark rounded-xl font-medium hover:bg-surface-2 dark:hover:bg-surface-3-dark transition-colors w-full md:flex-1 min-h-[44px] md:min-h-0"
                                 aria-label="Report this issue"
                             >
                                 <MessageCircle className="w-5 h-5" />
@@ -116,10 +116,10 @@ export class FeatureErrorBoundary extends Component<Props, State> {
                         {/* Dev Mode: Show Error Details */}
                         {import.meta.env.DEV && this.state.error && (
                             <details className="mt-6">
-                                <summary className="text-xs text-slate-500 dark:text-slate-400 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
+                                <summary className="text-xs text-muted cursor-pointer hover:text-foreground dark:hover:text-foreground-dark">
                                     Show error details (dev only)
                                 </summary>
-                                <pre className="mt-2 p-3 bg-slate-100 dark:bg-slate-900 rounded-lg text-xs text-slate-600 dark:text-slate-400 overflow-auto">
+                                <pre className="mt-2 p-3 bg-surface-3 dark:bg-surface-1-dark rounded-lg text-xs text-subtle dark:text-subtle-dark overflow-auto">
                                     {this.state.error.toString()}
                                     {this.state.error.stack && `\n\n${this.state.error.stack}`}
                                 </pre>

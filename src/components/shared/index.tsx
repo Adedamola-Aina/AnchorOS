@@ -11,8 +11,8 @@ export { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
 export const SectionHeader = ({ title, subtitle, action }: { title: string, subtitle: string, action?: React.ReactNode }) => (
   <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-in fade-in slide-in-from-left-4 duration-700">
     <div>
-      <h2 className="text-h2 lg:text-h2-lg tracking-tight text-slate-900 dark:text-white">{title}</h2>
-      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{subtitle}</p>
+      <h2 className="text-h2 lg:text-h2-lg tracking-tight text-foreground dark:text-foreground-dark">{title}</h2>
+      <p className="text-muted text-sm mt-1">{subtitle}</p>
     </div>
     {action}
   </div>
@@ -24,7 +24,7 @@ export const Badge = ({ children, type, variant = 'solid' }: { children: React.R
     family: 'bg-anchor-family-light text-anchor-family dark:bg-anchor-family-dark/30 dark:text-anchor-family-light',
     checking: 'bg-anchor-success-light text-anchor-success dark:bg-anchor-success-dark/30 dark:text-anchor-success-light',
     savings: 'bg-anchor-finance-light text-anchor-finance dark:bg-anchor-finance-dark/30 dark:text-anchor-finance-light',
-    todo: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    todo: 'bg-surface-3 text-subtle dark:bg-surface-3-dark dark:text-subtle-dark',
   };
 
   const baseStyle = styles[type] || styles.todo;
@@ -43,7 +43,7 @@ export const TaskContextBadge = ({ task }: { task: AnchorTask }) => {
       const icons = { morning: <Sunrise className="w-3 h-3 shrink-0" />, afternoon: <Sun className="w-3 h-3 shrink-0" />, evening: <Moon className="w-3 h-3 shrink-0" /> };
       // Dynamic: show text by default, text truncates/hides when space is tight
       return (
-        <span className={`${commonStyles} text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 max-w-[80px] overflow-hidden`}>
+        <span className={`${commonStyles} text-muted bg-surface-3 dark:bg-surface-3-dark max-w-[80px] overflow-hidden`}>
           {icons[task.timeOfDay]}
           <span className="truncate">{task.timeOfDay}</span>
         </span>

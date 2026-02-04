@@ -3,17 +3,17 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
 const badgeVariants = cva(
-    'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2',
+    'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2',
     {
         variants: {
             variant: {
                 default:
-                    'border-transparent bg-slate-900 text-slate-50 hover:bg-slate-900/80 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/80',
+                    'border-transparent bg-foreground text-surface-1 hover:bg-foreground/80 dark:bg-foreground-dark dark:text-surface-1-dark dark:hover:bg-foreground-dark/80',
                 secondary:
-                    'border-transparent bg-slate-100 text-slate-900 hover:bg-slate-100/80 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-800/80',
+                    'border-transparent bg-surface-3 text-foreground hover:bg-surface-3/80 dark:bg-surface-3-dark dark:text-foreground-dark dark:hover:bg-surface-3-dark/80',
                 destructive:
-                    'border-transparent bg-rose-500 text-slate-50 hover:bg-rose-500/80 dark:bg-rose-900 dark:text-slate-50 dark:hover:bg-rose-900/80',
-                outline: 'text-slate-950 dark:text-slate-50',
+                    'border-transparent bg-danger-500 text-white hover:bg-danger-500/80 dark:bg-danger-900 dark:text-white dark:hover:bg-danger-900/80',
+                outline: 'text-foreground dark:text-foreground-dark',
                 success: 'border-transparent bg-emerald-500 text-white hover:bg-emerald-600',
                 warning: 'border-transparent bg-amber-500 text-white hover:bg-amber-600',
             },

@@ -21,6 +21,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OfflineIndicator } from './components/shared/OfflineIndicator';
 import { useVersionCheck } from './hooks/useVersionCheck';
+import { AnimatedRoutes, PageWrapper } from './components/shared/AnimatedRoutes';
 
 // Environment Banner - Shows in non-production environments
 const EnvironmentBanner = () => {
@@ -76,7 +77,7 @@ const AppContent = () => {
   // This prevents flash of onboarding screen for users who have already completed it
   if (loading || (user && !profileLoaded)) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-2 dark:bg-surface-base-dark flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -85,7 +86,7 @@ const AppContent = () => {
   // Only show onboarding if user is logged in AND profile loaded AND onboarding is not complete
   if (user && profileLoaded && profile && !profile.onboardingComplete) {
     return (
-      <React.Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+      <React.Suspense fallback={<div className="min-h-screen bg-surface-2 dark:bg-surface-base-dark flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
         <Routes>
           <Route path="/accept-invite" element={
             <ErrorBoundary componentName="Accept Invite">
@@ -102,7 +103,7 @@ const AppContent = () => {
     <Routes>
       <Route path="/accept-invite" element={
         <ErrorBoundary componentName="Accept Invite">
-          <div className={`${profile?.theme === 'dark' ? 'dark' : ''} bg-slate-50 dark:bg-slate-900 min-h-screen`}>
+          <div className={`${profile?.theme === 'dark' ? 'dark' : ''} bg-surface-2 dark:bg-surface-1-dark min-h-screen`}>
             <AcceptInviteView />
           </div>
         </ErrorBoundary>
@@ -113,17 +114,17 @@ const AppContent = () => {
           <MainLayout version={APP_VERSION}>
             <React.Suspense fallback={
               <div className="flex items-center justify-center p-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-muted"></div>
               </div>
             }>
-              <Routes>
-                <Route path="dashboard" element={<DashboardView />} />
-                <Route path="commitments" element={<CommitmentsView />} />
-                <Route path="finance" element={<FinanceView />} />
-                <Route path="settings" element={<SettingsView />} />
+              <AnimatedRoutes>
+                <Route path="dashboard" element={<PageWrapper><DashboardView /></PageWrapper>} />
+                <Route path="commitments" element={<PageWrapper><CommitmentsView /></PageWrapper>} />
+                <Route path="finance" element={<PageWrapper><FinanceView /></PageWrapper>} />
+                <Route path="settings" element={<PageWrapper><SettingsView /></PageWrapper>} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Routes>
+              </AnimatedRoutes>
             </React.Suspense>
           </MainLayout>
         </AuthGate>

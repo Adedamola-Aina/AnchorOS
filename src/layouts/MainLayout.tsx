@@ -32,7 +32,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon, accountNotific
             to={to}
             onClick={() => setMobileMenuOpen(false)}
             className={({ isActive }) =>
-                `w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'}`
+                `w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-surface-base-dark dark:bg-surface-3-dark text-white shadow-lg shadow-border-subtle dark:shadow-none' : 'text-muted hover:bg-surface-1 dark:hover:bg-surface-2-dark hover:text-foreground dark:hover:text-foreground-dark'}`
             }
         >
             {({ isActive }) => (
@@ -64,40 +64,40 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     useKeyboardAvoidance();
 
     return (
-        <div className={`adaptive-layout bg-[var(--surface-1)] font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'pt-6 min-h-[calc(100vh-24px)]' : 'min-h-screen'}`}>
+        <div className={`adaptive-layout bg-[var(--surface-1)] font-sans text-foreground dark:text-foreground-dark transition-colors duration-300 ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'pt-6 min-h-[calc(100vh-24px)]' : 'min-h-screen'}`}>
             <CommandPalette />
 
             {/* Desktop Sidebar - UNCHANGED per M3.2 */}
-            <aside className={`hidden md:flex flex-col bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 sticky ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'top-6 h-[calc(100vh-24px)]' : 'top-0 h-screen'}`}>
+            <aside className={`hidden md:flex flex-col bg-surface-2 dark:bg-surface-1-dark border-r border-border-subtle dark:border-border p-4 sticky ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'top-6 h-[calc(100vh-24px)]' : 'top-0 h-screen'}`}>
                 <div className="mb-8 px-4 py-2 shrink-0">
-                    <h1 className="text-h2 lg:text-h2-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                        <AnchorLogo className="w-8 h-8 text-slate-900 dark:text-white" />
+                    <h1 className="text-h2 lg:text-h2-lg tracking-tight text-foreground dark:text-foreground-dark flex items-center gap-2">
+                        <AnchorLogo className="w-8 h-8 text-foreground dark:text-foreground-dark" />
                         Anchor
                     </h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 tracking-widest uppercase">Anchor v{version}</p>
+                    <p className="text-xs text-muted font-medium mt-1 tracking-widest uppercase">Anchor v{version}</p>
                 </div>
 
                 <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
                     <NavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} accountNotifications={accountNotifications} setMobileMenuOpen={setMobileMenuOpen} />
                     <NavItem to="/commitments" label="Commitments" icon={CheckCircle2} accountNotifications={accountNotifications} setMobileMenuOpen={setMobileMenuOpen} />
                     <NavItem to="/finance" label="Finance" icon={CreditCard} accountNotifications={accountNotifications} setMobileMenuOpen={setMobileMenuOpen} />
-                    <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
+                    <div className="pt-4 mt-4 border-t border-border-subtle dark:border-border">
                         <NavItem to="/settings" label="System" icon={Settings} accountNotifications={accountNotifications} setMobileMenuOpen={setMobileMenuOpen} />
                     </div>
                 </nav>
 
-                <div className="p-4 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl mt-auto shrink-0">
+                <div className="p-4 bg-surface-3/50 dark:bg-surface-2-dark/50 rounded-xl mt-auto shrink-0">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-8 h-8 rounded-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-surface-3 dark:bg-surface-3-dark flex items-center justify-center text-xs font-bold text-subtle dark:text-subtle-dark shrink-0">
                                 {(profile?.name || user?.email || 'U').slice(0, 2).toUpperCase()}
                             </div>
                             <div className="overflow-hidden">
-                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{profile?.name || 'User'}</p>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-500 truncate font-mono">{user?.email}</p>
+                                <p className="text-xs font-bold text-subtle dark:text-subtle-dark truncate">{profile?.name || 'User'}</p>
+                                <p className="text-[10px] text-muted truncate font-mono">{user?.email}</p>
                             </div>
                         </div>
-                        <button onClick={() => logout()} className="text-slate-400 hover:text-rose-500 transition-colors p-1" title="Sign Out">
+                        <button onClick={() => logout()} className="text-muted hover:text-danger-500 transition-colors p-1" title="Sign Out">
                             <LogOut className="w-4 h-4" />
                         </button>
                     </div>
@@ -106,15 +106,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
 
             <main className="flex flex-col relative w-full">
                 {/* Mobile Header - SIMPLIFIED per M3.2 */}
-                <header className="md:hidden sticky top-0 flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-30">
+                <header className="md:hidden sticky top-0 flex items-center justify-between p-4 bg-surface-1/80 dark:bg-surface-1-dark/80 backdrop-blur-md border-b border-border-subtle dark:border-border z-30">
                     <div className="flex items-center gap-2">
-                        <AnchorLogo className="w-6 h-6 text-slate-900 dark:text-white" />
-                        <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white">Anchor</span>
+                        <AnchorLogo className="w-6 h-6 text-foreground dark:text-foreground-dark" />
+                        <span className="font-bold text-lg tracking-tight text-foreground dark:text-foreground-dark">Anchor</span>
                     </div>
                     {/* Optional: Keep hamburger for settings/profile */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="p-2 text-slate-500 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-2 text-muted rounded-lg hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-colors"
                         aria-label="Open menu"
                     >
                         {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -122,40 +122,40 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </header>
 
                 {/* Mobile Navigation Drawer (for user profile & logout) */}
-                <div className={`fixed inset-0 z-50 bg-slate-900/20 backdrop-blur-sm md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMobileMenuOpen(false)}>
-                    <div className={`absolute top-0 right-0 h-full w-72 bg-white dark:bg-slate-900 p-6 pt-20 shadow-2xl transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`} onClick={e => e.stopPropagation()}>
+                <div className={`fixed inset-0 z-50 bg-surface-base-dark/20 backdrop-blur-sm md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMobileMenuOpen(false)}>
+                    <div className={`absolute top-0 right-0 h-full w-72 bg-surface-1 dark:bg-surface-1-dark p-6 pt-20 shadow-2xl transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`} onClick={e => e.stopPropagation()}>
                         {/* User Profile Section */}
-                        <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                        <div className="mb-6 p-4 bg-surface-2 dark:bg-surface-2-dark/50 rounded-xl">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300">
+                                <div className="w-12 h-12 rounded-full bg-surface-3 dark:bg-surface-3-dark flex items-center justify-center text-lg font-bold text-subtle dark:text-subtle-dark">
                                     {(profile?.name || user?.email || 'U').slice(0, 2).toUpperCase()}
                                 </div>
                                 <div className="overflow-hidden">
-                                    <p className="font-bold text-slate-900 dark:text-white truncate">{profile?.name || 'User'}</p>
-                                    <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                                    <p className="font-bold text-foreground dark:text-foreground-dark truncate">{profile?.name || 'User'}</p>
+                                    <p className="text-xs text-muted truncate">{user?.email}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-2">Quick Actions</p>
+                        <p className="text-xs font-bold text-muted uppercase tracking-widest mb-3 px-2">Quick Actions</p>
                         <NavLink
                             to="/settings"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-subtle dark:text-subtle-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-colors"
                         >
                             <Settings className="w-5 h-5" />
                             <span className="font-medium">Settings</span>
                             {accountNotifications.length > 0 && (
-                                <span className="ml-auto w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                <span className="ml-auto w-2 h-2 bg-danger-500 rounded-full animate-pulse" />
                             )}
                         </NavLink>
 
-                        <button onClick={() => logout()} className="mt-4 flex items-center gap-3 text-rose-600 font-bold px-4 py-3 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors w-full">
+                        <button onClick={() => logout()} className="mt-4 flex items-center gap-3 text-danger-600 font-bold px-4 py-3 rounded-xl hover:bg-danger-50 dark:hover:bg-danger-500/10 transition-colors w-full">
                             <LogOut className="w-5 h-5" />
                             Sign Out
                         </button>
 
-                        <p className="text-[10px] text-slate-400 text-center mt-8">Anchor v{version}</p>
+                        <p className="text-[10px] text-muted text-center mt-8">Anchor v{version}</p>
                     </div>
                 </div>
 

@@ -1,5 +1,6 @@
 /**
  * InstallPrompt - PWA Install Banner
+ * DES-002: Migrated to semantic tokens
  * 
  * Shows a prompt to install the app on mobile devices.
  * Uses the beforeinstallprompt event on Android/Chrome.
@@ -9,6 +10,7 @@
 import { useState, useEffect } from 'react';
 import { X, Download, Share } from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
+import { Text, HStack, VStack } from '../primitives';
 
 interface BeforeInstallPromptEvent extends Event {
     prompt: () => Promise<void>;
@@ -71,44 +73,45 @@ export const InstallPrompt = () => {
 
     return (
         <div className="fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4">
-                <div className="flex items-start gap-3">
+            <VStack gap="sm" className="bg-surface-1 dark:bg-surface-2-dark rounded-2xl shadow-2xl border border-border-subtle p-4">
+                <HStack gap="sm" align="start">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
                         <Download className="w-6 h-6 text-white" />
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-slate-900 dark:text-white">
+                    <VStack gap="xs" className="flex-1 min-w-0">
+                        <Text weight="bold" className="text-foreground dark:text-foreground-dark">
                             Install Anchor
-                        </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                        </Text>
+                        <Text size="sm" variant="muted">
                             {isIOS
                                 ? <>Tap <Share className="w-4 h-4 inline mx-0.5" /> then "Add to Home Screen"</>
                                 : 'Add to your home screen for quick access'
                             }
-                        </p>
-                    </div>
+                        </Text>
+                    </VStack>
 
                     <button
                         onClick={handleDismiss}
-                        className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        className="p-1 text-muted hover:text-foreground dark:hover:text-foreground-dark"
                         aria-label="Dismiss"
                     >
                         <X className="w-5 h-5" />
                     </button>
-                </div>
+                </HStack>
 
                 {!isIOS && (
                     <button
                         onClick={handleInstall}
-                        className="mt-3 w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
+                        className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
                     >
                         Install App
                     </button>
                 )}
-            </div>
+            </VStack>
         </div>
     );
 };
 
 export default InstallPrompt;
+

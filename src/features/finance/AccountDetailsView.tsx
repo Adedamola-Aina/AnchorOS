@@ -65,7 +65,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
                 </div>
                 {isSharedAccount && <SharedActivitySection activities={activities} currentUserId={user?.uid} loading={loadingActivities} />}
                 {/* Standardized VirtualTransactionList used in FinanceView for consistency */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+                <div className="bg-surface-1 dark:bg-surface-1-dark rounded-xl border border-border-subtle dark:border-border flex flex-col overflow-hidden">
                     <TransactionFilterHeader searchQuery={searchQuery} filterType={filterType} hasWeekFilter={!!selectedWeekStart} onSearchChange={setSearchQuery} onFilterChange={setFilterType} />
                     <div className="pt-0">
                         <VirtualTransactionList transactions={filteredList} onEdit={onEdit || (() => { })} onDelete={setTransactionToDelete} loading={loadingActivities} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} className="min-h-[200px] max-h-[calc(100vh-250px)]" />

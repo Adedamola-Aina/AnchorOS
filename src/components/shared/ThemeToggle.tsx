@@ -1,3 +1,8 @@
+/**
+ * ThemeToggle - Light/Dark/System theme switcher
+ * DES-002: Migrated to semantic tokens
+ */
+
 import React from 'react';
 import { Sun, Moon, Monitor } from 'lucide-react';
 
@@ -17,7 +22,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
     ];
 
     return (
-        <div className={`flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner transition-all duration-300 ${variant === 'minimal' ? 'scale-90' : ''}`}>
+        <div className={`flex items-center gap-1 p-1 bg-surface-3 dark:bg-surface-3-dark rounded-xl border border-border-subtle shadow-inner transition-all duration-300 ${variant === 'minimal' ? 'scale-90' : ''}`}>
             {themes.map(({ value, icon: Icon, label }) => {
                 const isActive = theme === value;
 
@@ -28,9 +33,9 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
                         onClick={() => onSetTheme(value)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-[10px] font-black uppercase tracking-widest ${isActive
                             ? value === 'light'
-                                ? 'bg-white text-slate-900 shadow-md'
-                                : 'bg-slate-700 dark:bg-slate-700 text-white shadow-md'
-                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                ? 'bg-surface-1 text-foreground shadow-md'
+                                : 'bg-surface-2-dark text-foreground-dark shadow-md'
+                            : 'text-muted hover:text-foreground dark:hover:text-foreground-dark'
                             }`}
                         aria-label={`${label} theme`}
                         aria-pressed={isActive}
@@ -38,7 +43,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
                         <Icon
                             className={`w-3.5 h-3.5 ${isActive
                                 ? value === 'light'
-                                    ? 'text-amber-500'
+                                    ? 'text-warning-500'
                                     : 'text-primary-400'
                                 : ''
                                 }`}
@@ -51,3 +56,4 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
         </div>
     );
 };
+

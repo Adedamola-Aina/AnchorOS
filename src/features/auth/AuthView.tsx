@@ -1,6 +1,6 @@
 /**
  * AuthView - Main authentication page
- * 
+ * WEB-003: Framer Motion fade + slide up animations
  * Orchestrates the login, signup, MFA, and reset password flows.
  * 
  * Refactored per CLAUDE.md 200-line rule.
@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AnchorLogo, ThemeToggle, type Theme } from '../../components/shared';
 import { AuthLeftPanel } from './AuthLeftPanel';
 import { AuthFormFields } from './AuthFormFields';
@@ -81,20 +82,34 @@ const AuthView: React.FC<AuthViewProps> = ({
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors duration-500">
+        <div className="min-h-screen bg-surface-2 dark:bg-surface-base-dark flex transition-colors duration-500">
             <AuthLeftPanel />
 
             <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 z-10 relative">
-                <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
-                    {/* Header */}
-                    <div className="mb-10 flex flex-col items-center lg:items-start">
-                        <div className="flex items-center gap-3 mb-8">
-                            <AnchorLogo className="w-10 h-10 text-slate-900 dark:text-white" />
-                            <span className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white transition-colors">Anchor</span>
-                        </div>
-                        <h2 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white transition-colors font-light">{titles[authMode]}</h2>
-                        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm transition-colors">{subtitles[authMode]}</p>
-                    </div>
+                <motion.div
+                    className="w-full max-w-md"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: 'spring' as const, damping: 25, stiffness: 300, delay: 0.1 }}
+                >
+                    {/* Header with animated mode switch */}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={authMode}
+                            className="mb-10 flex flex-col items-center lg:items-start"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <div className="flex items-center gap-3 mb-8">
+                                <AnchorLogo className="w-10 h-10 text-foreground dark:text-foreground-dark" />
+                                <span className="text-2xl font-bold tracking-tight text-foreground dark:text-foreground-dark transition-colors">Anchor</span>
+                            </div>
+                            <h2 className="text-h2 lg:text-h2-lg text-foreground dark:text-foreground-dark transition-colors font-light">{titles[authMode]}</h2>
+                            <p className="text-muted mt-2 text-sm transition-colors">{subtitles[authMode]}</p>
+                        </motion.div>
+                    </AnimatePresence>
 
                     {/* Errors */}
                     {authError && (
@@ -122,23 +137,23 @@ const AuthView: React.FC<AuthViewProps> = ({
                     {/* Footer Links */}
                     <div className="mt-8 text-center flex flex-col items-center gap-8">
                         {authMode !== 'mfa' ? (
-                            <button onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')} className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors group">
-                                {authMode === 'login' ? <>Don't have an account? <span className="text-slate-900 dark:text-white group-hover:underline underline-offset-4">Sign up</span></> :
-                                    authMode === 'signup' ? <>Already have an account? <span className="text-slate-900 dark:text-white group-hover:underline underline-offset-4">Sign in</span></> :
-                                        <>Back to <span className="text-slate-900 dark:text-white group-hover:underline underline-offset-4">Sign In</span></>}
+                            <button onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')} className="text-sm font-medium text-muted hover:text-foreground transition-colors group">
+                                {authMode === 'login' ? <>Don't have an account? <span className="text-foreground dark:text-foreground-dark group-hover:underline underline-offset-4">Sign up</span></> :
+                                    authMode === 'signup' ? <>Already have an account? <span className="text-foreground dark:text-foreground-dark group-hover:underline underline-offset-4">Sign in</span></> :
+                                        <>Back to <span className="text-foreground dark:text-foreground-dark group-hover:underline underline-offset-4">Sign In</span></>}
                             </button>
                         ) : (
-                            <button onClick={() => window.location.reload()} className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors group">
-                                Back to <span className="text-slate-900 dark:text-white group-hover:underline underline-offset-4">Sign In</span>
+                            <button onClick={() => window.location.reload()} className="text-sm font-medium text-muted hover:text-foreground transition-colors group">
+                                Back to <span className="text-foreground dark:text-foreground-dark group-hover:underline underline-offset-4">Sign In</span>
                             </button>
                         )}
 
                         <div className="mt-auto pt-8 flex flex-col items-center animate-in fade-in duration-1000 delay-500">
                             <ThemeToggle variant="minimal" theme={theme} onSetTheme={(t) => onSetTheme?.(t)} />
-                            <p className="mt-6 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em] opacity-50">&copy; 2026 Anchor OS</p>
+                            <p className="mt-6 text-[10px] text-subtle dark:text-subtle-dark font-bold uppercase tracking-[0.2em] opacity-50">&copy; 2026 Anchor OS</p>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );

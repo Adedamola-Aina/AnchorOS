@@ -49,8 +49,8 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                     <TrendingUp className="w-5 h-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                    <p className="text-[10px] uppercase font-bold text-slate-400">Total Income</p>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white tabular-nums truncate">
+                    <p className="text-[10px] uppercase font-bold text-muted">Total Income</p>
+                    <p className="text-lg font-bold text-foreground dark:text-foreground-dark tabular-nums truncate">
                         {formatCurrencyCompact(fromCents(summary.income), currency)}
                     </p>
                 </div>
@@ -61,8 +61,8 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                     <TrendingDown className="w-5 h-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                    <p className="text-[10px] uppercase font-bold text-slate-400">Total Spent</p>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white tabular-nums truncate">
+                    <p className="text-[10px] uppercase font-bold text-muted">Total Spent</p>
+                    <p className="text-lg font-bold text-foreground dark:text-foreground-dark tabular-nums truncate">
                         {formatCurrencyCompact(fromCents(summary.expense), currency)}
                     </p>
                 </div>
@@ -76,10 +76,10 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                     {isOverspending ? <TrendingDown className="w-5 h-5" /> : <Target className="w-5 h-5" />}
                 </div>
                 <div className="min-w-0 flex-1">
-                    <p className="text-[10px] uppercase font-bold text-slate-400">
+                    <p className="text-[10px] uppercase font-bold text-muted">
                         {isOverspending ? 'Overspending' : 'Potential Savings'}
                     </p>
-                    <p className={`text-lg font-bold tabular-nums truncate ${isOverspending ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
+                    <p className={`text-lg font-bold tabular-nums truncate ${isOverspending ? 'text-danger-600 dark:text-danger-400' : 'text-foreground dark:text-foreground-dark'
                         }`}>
                         {formatCurrencyCompact(fromCents(Math.abs(summary.savings)), currency)}
                     </p>
@@ -92,8 +92,8 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                         <PieChart className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[10px] uppercase font-bold text-slate-400 truncate">Top: {summary.topCategory.name}</p>
-                        <p className="text-lg font-bold text-slate-900 dark:text-white tabular-nums truncate">
+                        <p className="text-[10px] uppercase font-bold text-muted truncate">Top: {summary.topCategory.name}</p>
+                        <p className="text-lg font-bold text-foreground dark:text-foreground-dark tabular-nums truncate">
                             {formatCurrencyCompact(fromCents(summary.topCategory.amount), currency)}
                         </p>
                     </div>

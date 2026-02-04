@@ -1,4 +1,9 @@
+/**
+ * TransactionForm - Form for adding/editing transactions
+ * WEB-003: Framer Motion button animations
+ */
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useFinance } from '../../context/FinanceContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useHaptic } from '../../hooks/useHaptic';
@@ -157,8 +162,8 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     if (formState.type === 'transfer' && accounts.length === 1) return <SingleAccountTransferMessage onClose={onClose} />;
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-1 rounded-xl">
-            <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4">{getTransactionLabel(formState.type).header}</h3>
+        <div className="bg-surface-1 dark:bg-surface-2-dark p-1 rounded-xl">
+            <h3 className="text-h3 lg:text-h3-lg text-foreground dark:text-foreground-dark mb-4">{getTransactionLabel(formState.type).header}</h3>
             {isOverdraft && <OverdraftWarning projectedBalance={projectedBalance} amountCents={toCents(amount)} />}
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -195,13 +200,27 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                 )}
 
                 <div className="flex justify-end gap-3 pt-2">
-                    <button type="button" onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-sm">Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="bg-slate-800 dark:bg-slate-600 hover:bg-slate-900 dark:hover:bg-slate-500 text-white px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    <motion.button
+                        type="button"
+                        onClick={onClose}
+                        className="text-muted hover:text-foreground dark:hover:text-foreground-dark text-sm"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        Cancel
+                    </motion.button>
+                    <motion.button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-foreground dark:bg-surface-3-dark hover:bg-foreground/90 dark:hover:bg-surface-2-dark text-white px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                        whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
+                    >
                         {isSubmitting ? 'Saving...' : initialData ? 'Update Transaction' :
                             (isRecurring ? 'Record & Schedule Recurring' :
                                 (formState.type === 'transfer' ? 'Record Transfer' : 'Record Transaction'))
                         }
-                    </button>
+                    </motion.button>
                 </div>
             </form>
         </div>

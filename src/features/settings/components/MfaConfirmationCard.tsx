@@ -1,10 +1,12 @@
 /**
  * MfaConfirmationCard - MFA verification step for family connection confirmation
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { Lock, AlertCircle, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
+import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface MfaConfirmationCardProps {
     inviteeEmail: string;
@@ -20,61 +22,63 @@ export function MfaConfirmationCard({
     inviteeEmail, mfaCode, setMfaCode, error,
     confirmingConnection, onMfaSubmit, onBack,
 }: MfaConfirmationCardProps) {
+    const inputClass = "w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border)] bg-surface-2 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-xl tracking-widest text-center";
+
     return (
-        <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
+        <Card className="border-primary-200 dark:border-primary-800 bg-primary-50/50 dark:bg-primary-900/10 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-indigo-500" />
             <CardHeader className="p-6 pb-4">
-                <CardTitle className="text-base font-bold text-blue-900 dark:text-blue-400 flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/10 rounded-lg">
-                        <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <CardTitle className="text-base font-bold text-primary-900 dark:text-primary-400 flex items-center gap-3">
+                    <div className="p-2 bg-primary-500/10 rounded-lg">
+                        <Lock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                     </div>
                     Two-Factor Authentication
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6 pt-0">
                 <form onSubmit={onMfaSubmit} className="space-y-4">
-                    <div className="p-4 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800">
-                        <p className="text-sm text-slate-600 dark:text-slate-300">Connecting with: <span className="font-semibold">{inviteeEmail}</span></p>
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">✓ Password verified • MFA required</p>
+                    <div className="p-4 rounded-xl bg-surface-2 dark:bg-surface-2-dark border border-primary-200 dark:border-primary-800">
+                        <Text variant="muted" size="sm">Connecting with: <span className="font-semibold text-foreground dark:text-foreground-dark">{inviteeEmail}</span></Text>
+                        <Text size="xs" className="text-primary-600 dark:text-primary-400 mt-1">✓ Password verified • MFA required</Text>
                     </div>
-                    <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Enter 2FA Code</label>
+                    <VStack gap="sm">
+                        <Text variant="subtle" size="xs" weight="bold" className="uppercase tracking-wider">Enter 2FA Code</Text>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
                             <input
                                 type="text"
                                 inputMode="numeric"
                                 value={mfaCode}
                                 onChange={(e) => {
-                                    // Only allow numeric input
                                     const value = e.target.value.replace(/[^0-9]/g, '');
                                     setMfaCode(value);
                                 }}
                                 placeholder="000000"
                                 maxLength={6}
-                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xl tracking-widest text-center"
+                                className={inputClass}
                                 autoFocus
                                 autoComplete="one-time-code"
                             />
                         </div>
-                        <p className="text-xs text-slate-500 mt-2 text-center">Enter the 6-digit code from your authenticator app</p>
-                    </div>
+                        <Text variant="muted" size="xs" className="text-center">Enter the 6-digit code from your authenticator app</Text>
+                    </VStack>
                     {error && (
-                        <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-sm">
+                        <HStack gap="sm" align="center" className="text-danger-600 dark:text-danger-400 text-sm">
                             <AlertCircle className="w-4 h-4" />
-                            {error}
-                        </div>
+                            <span>{error}</span>
+                        </HStack>
                     )}
-                    <div className="flex gap-3">
+                    <HStack gap="sm">
                         <Button type="button" variant="secondary" onClick={onBack} className="flex-1 gap-2">
                             <ArrowLeft className="w-4 h-4" />Back
                         </Button>
-                        <Button type="submit" disabled={confirmingConnection || mfaCode.length !== 6} className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2">
+                        <Button type="submit" disabled={confirmingConnection || mfaCode.length !== 6} className="flex-1 bg-primary-600 hover:bg-primary-700 gap-2">
                             {confirmingConnection ? <><Loader2 className="w-4 h-4 animate-spin" />Verifying...</> : <>Confirm<ArrowRight className="w-4 h-4" /></>}
                         </Button>
-                    </div>
+                    </HStack>
                 </form>
             </CardContent>
         </Card>
     );
 }
+

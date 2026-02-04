@@ -24,7 +24,7 @@ export const NetWorthCards = ({ netWorth }: NetWorthCardsProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {/* NGN Net Worth Card */}
             {hasNGN && (
-                <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-surface-3-dark to-surface-2-dark dark:from-slate-800 dark:to-slate-900">
+                <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-surface-3-dark to-surface-2-dark dark:from-surface-2-dark dark:to-surface-base-dark">
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
                         <Landmark className="w-16 h-16 text-muted" />
                     </div>

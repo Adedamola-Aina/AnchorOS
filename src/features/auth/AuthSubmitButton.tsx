@@ -32,11 +32,11 @@ export function AuthSubmitButton({ authMode, isAuthenticating }: AuthSubmitButto
         <button
             type="submit"
             disabled={isAuthenticating}
-            className="w-full py-4 px-6 bg-slate-800 dark:bg-white dark:text-slate-950 text-white font-bold rounded-2xl transition-all hover:bg-slate-900 dark:hover:bg-slate-100 disabled:opacity-50 shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-[0.98] flex items-center justify-center gap-3"
+            className="w-full py-4 px-6 bg-foreground dark:bg-foreground-dark dark:text-surface-1-dark text-white font-bold rounded-2xl transition-all hover:bg-foreground/90 dark:hover:bg-foreground-dark/90 disabled:opacity-50 shadow-xl shadow-foreground/10 dark:shadow-white/5 active:scale-[0.98] flex items-center justify-center gap-3"
         >
             {isAuthenticating ? (
                 <>
-                    <div className="w-5 h-5 border-2 border-white/20 dark:border-slate-900/20 border-t-white dark:border-t-slate-900 rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white/20 dark:border-foreground-dark/20 border-t-white dark:border-t-foreground-dark rounded-full animate-spin" />
                     <span className="uppercase tracking-widest text-[10px] font-black">Processing...</span>
                 </>
             ) : (

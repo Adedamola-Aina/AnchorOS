@@ -31,7 +31,7 @@ interface AccountHeaderProps {
 const getAccountStyle = (account: AnchorAccount) => {
     if (account.currency === 'USD') {
         return {
-            gradient: 'from-slate-900 via-slate-800 to-slate-900',
+            gradient: 'from-surface-base-dark via-surface-2-dark to-surface-base-dark',
             accent: 'bg-finance-500',
             accentText: 'text-finance-400',
             glow: 'shadow-emerald-500/20',

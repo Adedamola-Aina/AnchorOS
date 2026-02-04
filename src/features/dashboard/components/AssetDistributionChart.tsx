@@ -1,8 +1,10 @@
 /**
  * AssetDistributionChart - Pie chart showing account distribution
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface AssetData {
     name: string;
@@ -18,7 +20,7 @@ interface AssetDistributionChartProps {
 export function AssetDistributionChart({ accountData }: AssetDistributionChartProps) {
     return (
         <div className="glass-card p-6 min-w-0 flex flex-col min-h-[400px]">
-            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Asset Distribution</h4>
+            <Text size="xs" weight="bold" variant="muted" className="font-black uppercase tracking-[0.2em] mb-4">Asset Distribution</Text>
             <div className="flex-1 flex flex-col sm:flex-row gap-6 min-h-0">
                 <div className="h-48 md:h-full md:w-1/2">
                     <ResponsiveContainer width="100%" height="100%" debounce={1}>
@@ -43,22 +45,23 @@ export function AssetDistributionChart({ accountData }: AssetDistributionChartPr
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
-                <div className="md:w-1/2 overflow-y-auto pr-2 custom-scrollbar space-y-2">
+                <VStack gap="sm" className="md:w-1/2 overflow-y-auto pr-2 custom-scrollbar">
                     {accountData.map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-xs group">
-                            <div className="flex items-center gap-2 pr-2 min-w-0 flex-1">
+                        <HStack key={idx} justify="between" align="center" className="text-xs group">
+                            <HStack gap="sm" align="center" className="pr-2 min-w-0 flex-1">
                                 <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                                <span className="text-slate-600 dark:text-slate-400 font-medium truncate group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                                <Text variant="muted" weight="medium" className="truncate group-hover:text-foreground dark:group-hover:text-foreground-dark transition-colors">
                                     {item.name}
-                                </span>
-                            </div>
-                            <span className="font-financial font-bold text-slate-900 dark:text-slate-200 shrink-0">
+                                </Text>
+                            </HStack>
+                            <Text weight="bold" className="font-financial shrink-0">
                                 {Math.round((item.value / accountData.reduce((acc, curr) => acc + curr.value, 0)) * 100)}%
-                            </span>
-                        </div>
+                            </Text>
+                        </HStack>
                     ))}
-                </div>
+                </VStack>
             </div>
         </div>
     );
 }
+

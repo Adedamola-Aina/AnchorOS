@@ -1,11 +1,13 @@
 /**
  * VirtualTransactionList - Virtualized scrolling for transaction lists
  * DES-002: Migrated to semantic tokens and primitives
+ * WEB-003: Framer Motion staggered entry animations
  */
 
 import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { TransactionItem } from './TransactionItem';
 import { SwipeableTransactionItem } from './SwipeableTransactionItem';
 import { useResponsive } from '../../../hooks/useResponsive';
@@ -22,6 +24,20 @@ interface VirtualTransactionListProps {
     onClearSearch?: () => void;
     className?: string;
 }
+
+// Animation variants for list items
+const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (i: number) => ({
+        opacity: 1,
+        x: 0,
+        transition: {
+            delay: Math.min(i * 0.03, 0.3), // Stagger capped at 0.3s
+            duration: 0.2,
+            ease: 'easeOut' as const,
+        },
+    }),
+};
 
 export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     transactions,
@@ -56,12 +72,14 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                     {searchQuery ? 'Try a different search term' : 'Add your first transaction to get started'}
                 </Text>
                 {searchQuery && onClearSearch && (
-                    <button
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={onClearSearch}
                         className="mt-4 text-primary-500 text-sm font-bold hover:underline"
                     >
                         Clear Search
-                    </button>
+                    </motion.button>
                 )}
             </VStack>
         );
@@ -83,7 +101,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                     const tx = transactions[virtualRow.index];
                     if (!tx) return null;
                     return (
-                        <div
+                        <motion.div
                             key={tx.id}
                             data-index={virtualRow.index}
                             ref={rowVirtualizer.measureElement}
@@ -95,6 +113,10 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                 transform: `translateY(${virtualRow.start}px)`,
                             }}
                             className="pb-2"
+                            variants={itemVariants}
+                            initial="hidden"
+                            animate="visible"
+                            custom={virtualRow.index}
                         >
                             {isMobile ? (
                                 <SwipeableTransactionItem
@@ -113,7 +135,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                     onDelete={onDelete}
                                 />
                             )}
-                        </div>
+                        </motion.div>
                     );
                 })}
             </div>
