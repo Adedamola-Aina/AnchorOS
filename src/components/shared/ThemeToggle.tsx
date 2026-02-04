@@ -33,7 +33,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
                         onClick={() => onSetTheme(value)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-[10px] font-black uppercase tracking-widest ${isActive
                             ? value === 'light'
-                                ? 'bg-surface-1 text-foreground shadow-md'
+                                ? 'bg-white text-foreground shadow-md ring-1 ring-slate-200'
                                 : 'bg-surface-2-dark text-foreground-dark shadow-md'
                             : 'text-muted hover:text-foreground dark:hover:text-foreground-dark'
                             }`}
@@ -43,8 +43,8 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
                         <Icon
                             className={`w-3.5 h-3.5 ${isActive
                                 ? value === 'light'
-                                    ? 'text-warning-500'
-                                    : 'text-primary-400'
+                                    ? 'text-amber-500'
+                                    : 'text-blue-400'
                                 : ''
                                 }`}
                             strokeWidth={2}

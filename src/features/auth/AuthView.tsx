@@ -85,7 +85,7 @@ const AuthView: React.FC<AuthViewProps> = ({
         <div className="min-h-screen bg-surface-2 dark:bg-surface-base-dark flex transition-colors duration-500">
             <AuthLeftPanel />
 
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 z-10 relative">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 z-10 relative bg-white dark:bg-slate-900">
                 <motion.div
                     className="w-full max-w-md"
                     initial={{ opacity: 0, y: 20 }}
