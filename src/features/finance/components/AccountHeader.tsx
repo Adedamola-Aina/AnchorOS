@@ -31,7 +31,7 @@ interface AccountHeaderProps {
 const getAccountStyle = (account: AnchorAccount) => {
     if (account.currency === 'USD') {
         return {
-            gradient: 'from-surface-base-dark via-surface-2-dark to-surface-base-dark',
+            gradient: 'from-surface-1-dark via-surface-2-dark to-surface-1-dark',
             accent: 'bg-finance-500',
             accentText: 'text-finance-400',
             glow: 'shadow-emerald-500/20',
@@ -69,29 +69,29 @@ export const AccountHeader = ({
             <div className="relative z-10">
                 {/* Top Bar */}
                 <div className="flex items-center justify-between mb-8">
-                    <button onClick={onBack} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-3 rounded-2xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10">
+                    <button onClick={onBack} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-3 rounded-2xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/5">
                         <ArrowLeft className="w-5 h-5" />
                     </button>
 
                     <div className="flex items-center gap-2">
                         {isShared && (
-                            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/10">
+                            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/5">
                                 <Users className="w-3.5 h-3.5" />
                                 <span className="text-xs font-semibold">Shared</span>
                             </div>
                         )}
                         {isOwner && (
-                            <button onClick={onStartRename} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10" title="Rename account">
+                            <button onClick={onStartRename} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/5" title="Rename account">
                                 <Pencil className="w-4 h-4" />
                             </button>
                         )}
                         {onShare && familyMemberId && !account.ownerId && (
-                            <button onClick={onShare} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10" title="Manage Sharing">
+                            <button onClick={onShare} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/5" title="Manage Sharing">
                                 <Users className="w-4 h-4" />
                             </button>
                         )}
                         {onDelete && isOwner && (
-                            <button onClick={onDelete} className="bg-white/10 hover:bg-red-500/80 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10" title="Delete account">
+                            <button onClick={onDelete} className="bg-white/10 hover:bg-red-500/80 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/5" title="Delete account">
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         )}

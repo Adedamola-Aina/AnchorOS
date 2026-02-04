@@ -32,7 +32,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon, accountNotific
             to={to}
             onClick={() => setMobileMenuOpen(false)}
             className={({ isActive }) =>
-                `w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-surface-base-dark dark:bg-surface-3-dark text-white shadow-lg shadow-border-subtle dark:shadow-none' : 'text-muted hover:bg-surface-1 dark:hover:bg-surface-2-dark hover:text-foreground dark:hover:text-foreground-dark'}`
+                `w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-surface-1-dark dark:bg-surface-3-dark text-white shadow-lg shadow-border-subtle dark:shadow-none' : 'text-muted hover:bg-surface-1 dark:hover:bg-surface-2-dark hover:text-foreground dark:hover:text-foreground-dark'}`
             }
         >
             {({ isActive }) => (
@@ -122,7 +122,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </header>
 
                 {/* Mobile Navigation Drawer (for user profile & logout) */}
-                <div className={`fixed inset-0 z-50 bg-surface-base-dark/20 backdrop-blur-sm md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMobileMenuOpen(false)}>
+                <div className={`fixed inset-0 z-50 bg-surface-1-dark/20 backdrop-blur-sm md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMobileMenuOpen(false)}>
                     <div className={`absolute top-0 right-0 h-full w-72 bg-surface-1 dark:bg-surface-1-dark p-6 pt-20 shadow-2xl transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`} onClick={e => e.stopPropagation()}>
                         {/* User Profile Section */}
                         <div className="mb-6 p-4 bg-surface-2 dark:bg-surface-2-dark/50 rounded-xl">

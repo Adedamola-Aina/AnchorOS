@@ -106,7 +106,7 @@
   .dark {
     /* Glass morphism - Dark */
     --glass-bg: rgba(15, 23, 42, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-border: var(--border-subtle);
     --glass-blur: 20px;
 
     /* Surface hierarchy - Dark mode (Navy nautical theme) */
@@ -220,7 +220,7 @@
   }
 
   .glass-card {
-    @apply glass rounded-2xl shadow-sm hover:shadow-md dark:hover:border-white/10;
+    @apply glass rounded-2xl shadow-sm hover:shadow-md;
     background-color: var(--surface-2);
   }
 
@@ -243,7 +243,7 @@
 
   .premium-gradient {
     background: linear-gradient(to bottom right, #0f172a, #020617, #000);
-    /* Maps to: surface-1-dark → surface-base-dark → black */
+    /* Maps to: surface-1-dark → surface-1-dark → black */
   }
 
   .vibrant-gradient {

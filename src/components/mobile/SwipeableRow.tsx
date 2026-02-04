@@ -145,7 +145,7 @@ export function SwipeableRow({
       {/* Content wrapper - matches Card background to hide action buttons when not swiping */}
       <motion.div
         data-testid="swipeable-content"
-        className="relative bg-surface-1 dark:bg-surface-1-dark rounded-2xl"
+        className="relative bg-surface-1 dark:bg-surface-1-dark rounded-2xl touch-pan-y"
         animate={{ x: translateX }}
         transition={isDragging ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 30 }}
         onTouchStart={handleTouchStart}

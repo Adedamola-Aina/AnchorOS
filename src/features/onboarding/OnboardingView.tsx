@@ -83,7 +83,7 @@ export const OnboardingView = () => {
     };
 
     return (
-        <div className="h-screen w-full flex items-center justify-center bg-surface-2 dark:bg-surface-base-dark p-6">
+        <div className="h-screen w-full flex items-center justify-center bg-surface-2 dark:bg-surface-1-dark p-6">
             <div className="w-full max-w-lg">
                 {/* Progress Indicator */}
                 <div className="text-center mb-6">
