@@ -33,7 +33,7 @@ export const SupportSettings = ({ onOpenContact }: SupportSettingsProps) => {
                     </VStack>
                     <Button
                         onClick={onOpenContact}
-                        className="!bg-info-500 hover:!bg-info-600 text-white font-black text-[10px] uppercase tracking-[0.2em] px-6 h-10 shadow-info-500/20 whitespace-nowrap w-full md:w-auto"
+                        className="bg-cyan-500 hover:bg-cyan-600 text-white font-black text-[10px] uppercase tracking-[0.2em] px-6 h-10 shadow-cyan-500/20 whitespace-nowrap w-full md:w-auto"
                     >
                         Send Message
                     </Button>

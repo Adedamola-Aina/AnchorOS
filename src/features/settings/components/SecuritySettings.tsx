@@ -43,14 +43,17 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-                <HStack justify="between" align="start" className="flex-col sm:flex-row text-center sm:text-left gap-4">
-                    <VStack gap="xs">
-                        <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Two-Factor Authentication (2FA)</Text>
+                <HStack justify="between" align="center" className="flex-col sm:flex-row text-center sm:text-left gap-4">
+                    <VStack gap="xs" className="flex-1">
+                        <HStack gap="sm" align="center">
+                            <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Two-Factor Authentication (2FA)</Text>
+                            {!mfaEnabled && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400">RECOMMENDED</span>}
+                        </HStack>
                         <Text variant="muted" size="sm">Secure your account with a secondary TOTP verification.</Text>
                     </VStack>
                     {mfaEnabled ? (
-                        <Button variant="secondary" className="text-danger-500 hover:text-white hover:bg-danger-500 border-danger-200 dark:border-danger-900 gap-2 w-full sm:w-auto" onClick={handleDisableMfa}><Trash2 className="w-4 h-4" />Disable</Button>
-                    ) : (!show2FASetup && <Button isLoading={isEnrolling} onClick={onGenerateMfaSecret} className="gap-2 w-full sm:w-auto font-bold"><Shield className="w-4 h-4" />Setup 2FA</Button>)}
+                        <Button variant="secondary" className="text-danger-500 hover:text-white hover:bg-danger-500 border-danger-200 dark:border-danger-900 gap-2 w-full sm:w-auto shrink-0" onClick={handleDisableMfa}><Trash2 className="w-4 h-4" />Disable</Button>
+                    ) : (!show2FASetup && <Button isLoading={isEnrolling} onClick={onGenerateMfaSecret} className="gap-2 w-full sm:w-auto font-bold shrink-0"><Shield className="w-4 h-4" />Setup 2FA</Button>)}
                 </HStack>
 
                 {show2FASetup && (

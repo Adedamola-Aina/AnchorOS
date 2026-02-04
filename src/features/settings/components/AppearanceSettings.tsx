@@ -25,7 +25,7 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme, o
 
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-[var(--border-subtle)] bg-surface-3/30 dark:bg-surface-3-dark/20">
+            <CardHeader className="p-6 border-b border-border-subtle dark:border-border-dark bg-surface-3/30 dark:bg-surface-3-dark/20">
                 <CardTitle className="text-base font-bold text-foreground dark:text-foreground-dark flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${theme === 'light' ? 'bg-warning-500/10' : theme === 'dark' ? 'bg-primary-500/10' : 'bg-surface-3'}`}>
                         {getThemeIcon()}

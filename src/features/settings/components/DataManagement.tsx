@@ -56,7 +56,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({ userUid, profile
 
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-[var(--border-subtle)] bg-primary-50/30 dark:bg-primary-900/10">
+            <CardHeader className="p-6 border-b border-border-subtle dark:border-border-dark bg-primary-50/30 dark:bg-primary-900/10">
                 <CardTitle className="text-base font-bold text-primary-900 dark:text-primary-400 flex items-center gap-3">
                     <div className="p-2 bg-primary-500/10 rounded-lg">
                         <Database className="w-5 h-5 text-primary-600 dark:text-primary-400" />
@@ -80,7 +80,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({ userUid, profile
                 </HStack>
 
                 {import.meta.env.MODE !== 'production' && (
-                    <HStack justify="between" align="center" className="flex-col sm:flex-row gap-6 border-t border-[var(--border-subtle)] pt-6">
+                    <HStack justify="between" align="center" className="flex-col sm:flex-row gap-6 border-t border-border-subtle dark:border-border-dark pt-6">
                         <VStack gap="xs">
                             <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Wipe All Data (Dev Only)</Text>
                             <Text variant="muted" size="sm" className="max-w-sm">
@@ -90,7 +90,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({ userUid, profile
                         <Button
                             onClick={onWipeData}
                             variant="secondary"
-                            className="h-10 px-6 text-[10px] font-black uppercase tracking-widest whitespace-nowrap hover:bg-danger-500 hover:text-white hover:border-danger-500 transition-all"
+                            className="h-10 px-6 text-[10px] font-black uppercase tracking-widest whitespace-nowrap bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 border-danger-200 dark:border-danger-800 hover:bg-danger-500 hover:text-white hover:border-danger-500 transition-all"
                         >
                             Wipe Data
                         </Button>

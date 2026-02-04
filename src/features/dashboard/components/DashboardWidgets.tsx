@@ -20,14 +20,14 @@ export const PortfolioWidget: React.FC<PortfolioWidgetProps> = ({ assets, onNavi
             <Text weight="bold" className="text-muted dark:text-muted-dark">Portfolio</Text>
         </HStack>
         <Text size="xs" weight="bold" variant="muted" className="uppercase tracking-widest">Total across {accountCount} accounts</Text>
-        <VStack gap="sm" className="pt-4 border-t border-border-subtle">
+        <VStack gap="sm" className="pt-4 border-t border-border-subtle dark:border-border-dark">
             {assets.slice(0, 3).map(asset => (
                 <HStack key={asset.id} justify="between" align="center" className="text-xs">
                     <HStack gap="sm" align="center" className="min-w-0 flex-1"><div className="w-1.5 h-1.5 rounded-full bg-muted shrink-0" /><Text size="xs" weight="medium" variant="muted" className="truncate">{asset.name}</Text></HStack>
-                    <div className="text-right">
+                    <VStack gap="none" className="text-right shrink-0">
                         <Text size="xs" weight="bold" className="font-mono tabular-nums">{formatCurrencyCompact(asset.amount, asset.currency as Currency)}</Text>
-                        <Text size="xs" variant="muted" weight="bold" className="tabular-nums">{asset.percent.toFixed(1)}%</Text>
-                    </div>
+                        <Text size="xs" variant="muted" weight="medium" className="tabular-nums">{asset.percent.toFixed(1)}%</Text>
+                    </VStack>
                 </HStack>
             ))}
         </VStack>
@@ -120,7 +120,7 @@ export const TodaysFocusWidget: React.FC<TodaysFocusWidgetProps> = ({ priorities
             </HStack>
             <VStack gap="sm">
                 {priorities.map(task => (
-                    <HStack key={task.id} gap="sm" align="center" className="p-2 bg-surface-3 dark:bg-surface-3-dark rounded-lg border border-border-subtle min-w-0">
+                    <HStack key={task.id} gap="sm" align="center" className="p-2 bg-surface-3 dark:bg-surface-3-dark rounded-lg border border-border-subtle dark:border-border-dark min-w-0">
                         <div className="w-2 h-2 rounded-full bg-primary-500 shrink-0" /><Text size="sm" weight="medium" className="text-muted dark:text-muted-dark truncate min-w-0">{task.title}</Text>
                     </HStack>
                 ))}

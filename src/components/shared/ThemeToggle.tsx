@@ -22,7 +22,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
     ];
 
     return (
-        <div className={`flex items-center gap-1 p-1 bg-surface-3 dark:bg-surface-3-dark rounded-xl border border-border-subtle shadow-inner transition-all duration-300 ${variant === 'minimal' ? 'scale-90' : ''}`}>
+        <div className={`flex items-center gap-1 p-1 bg-surface-3 dark:bg-surface-3-dark rounded-xl border border-border-subtle dark:border-border-dark shadow-inner transition-all duration-300 ${variant === 'minimal' ? 'scale-90' : ''}`}>
             {themes.map(({ value, icon: Icon, label }) => {
                 const isActive = theme === value;
 
