@@ -47,7 +47,7 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
                             }
                         }}
                         variant="primary"
-                        className="bg-danger-500 hover:bg-danger-600 shadow-danger-500/20 h-11 px-8 text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
+                        className="!bg-danger-500 hover:!bg-danger-600 shadow-danger-500/20 h-11 px-8 text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
                     >
                         Delete Account
                     </Button>

@@ -41,7 +41,7 @@ export function ProductivityScoreCard({ commitmentStats, navigateTo }: Productiv
     }
 
     return (
-        <div className="premium-gradient text-white p-6 rounded-3xl shadow-2xl overflow-hidden relative border border-white/10 flex flex-col justify-between group">
+        <div className="premium-gradient text-white p-6 rounded-3xl shadow-2xl overflow-hidden relative flex flex-col justify-between group">
             <HStack justify="between" align="start" className="mb-4 relative z-10 transition-transform duration-700 group-hover:-translate-y-1">
                 <VStack gap="sm">
                     <Text size="xs" weight="bold" className="font-black text-white/40 uppercase tracking-[0.2em]">Productivity Score</Text>
