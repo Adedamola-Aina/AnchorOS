@@ -17,7 +17,7 @@ export const PortfolioWidget: React.FC<PortfolioWidgetProps> = ({ assets, onNavi
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
         <HStack gap="sm" className="mb-4">
             <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600 dark:text-primary-400"><Wallet className="w-5 h-5" /></div>
-            <Text weight="bold" className="text-subtle dark:text-subtle-dark">Portfolio</Text>
+            <Text weight="bold" className="text-muted dark:text-muted-dark">Portfolio</Text>
         </HStack>
         <Text size="xs" weight="bold" variant="muted" className="uppercase tracking-widest">Total across {accountCount} accounts</Text>
         <VStack gap="sm" className="pt-4 border-t border-border-subtle">
@@ -43,7 +43,7 @@ export const CashFlowWidget: React.FC<CashFlowWidgetProps> = ({ cashFlow, curren
                     {cashFlow.trend === 'better' ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
                 </div>
                 <VStack gap="none">
-                    <Text weight="bold" className="text-subtle dark:text-subtle-dark">Momentum</Text>
+                    <Text weight="bold" className="text-muted dark:text-muted-dark">Momentum</Text>
                     <Text size="xs" variant="muted" weight="bold" className="uppercase tracking-widest">{cashFlow.trend === 'better' ? 'Improvements' : 'Pullback'} vs Last Week</Text>
                 </VStack>
             </HStack>
@@ -90,7 +90,7 @@ export const ProductivityWidget: React.FC<ProductivityWidgetProps> = ({ producti
     <div onClick={onNavigate} className="glass-card p-5 cursor-pointer hover:shadow-xl transition-all group active:scale-[0.99]">
         <HStack gap="sm" align="center" className="mb-6">
             <div className="p-2 bg-warning-100 dark:bg-warning-900/30 rounded-lg text-warning-600 dark:text-warning-400"><CheckCircle2 className="w-5 h-5" /></div>
-            <VStack gap="none"><Text weight="bold" className="text-subtle dark:text-subtle-dark">Productivity</Text><Text size="xs" variant="muted" weight="bold" className="uppercase tracking-widest">Follow-through</Text></VStack>
+            <VStack gap="none"><Text weight="bold" className="text-muted dark:text-muted-dark">Productivity</Text><Text size="xs" variant="muted" weight="bold" className="uppercase tracking-widest">Follow-through</Text></VStack>
         </HStack>
         {hasCommitments ? (
             <>
@@ -116,12 +116,12 @@ export const TodaysFocusWidget: React.FC<TodaysFocusWidgetProps> = ({ priorities
         <div onClick={onNavigate} className="glass-card p-5 cursor-pointer hover:shadow-xl transition-all group active:scale-[0.99]">
             <HStack gap="sm" align="center" className="mb-4">
                 <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600 dark:text-primary-400"><Target className="w-5 h-5" /></div>
-                <VStack gap="none"><Text weight="bold" className="text-subtle dark:text-subtle-dark">Today's Focus</Text><Text size="xs" variant="muted" weight="bold" className="uppercase tracking-widest">{priorities.length} Tasks Remaining</Text></VStack>
+                <VStack gap="none"><Text weight="bold" className="text-muted dark:text-muted-dark">Today's Focus</Text><Text size="xs" variant="muted" weight="bold" className="uppercase tracking-widest">{priorities.length} Tasks Remaining</Text></VStack>
             </HStack>
             <VStack gap="sm">
                 {priorities.map(task => (
                     <HStack key={task.id} gap="sm" align="center" className="p-2 bg-surface-3 dark:bg-surface-3-dark rounded-lg border border-border-subtle min-w-0">
-                        <div className="w-2 h-2 rounded-full bg-primary-500 shrink-0" /><Text size="sm" weight="medium" className="text-subtle dark:text-subtle-dark truncate min-w-0">{task.title}</Text>
+                        <div className="w-2 h-2 rounded-full bg-primary-500 shrink-0" /><Text size="sm" weight="medium" className="text-muted dark:text-muted-dark truncate min-w-0">{task.title}</Text>
                     </HStack>
                 ))}
             </VStack>

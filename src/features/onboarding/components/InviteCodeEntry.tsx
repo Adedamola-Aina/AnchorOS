@@ -41,7 +41,7 @@ export function InviteCodeEntry({
                         setVerificationCode(val);
                     }}
                     placeholder="000000"
-                    className="w-full text-center text-3xl font-mono font-bold tracking-[0.5em] py-4 px-6 rounded-xl border-2 border-border-subtle dark:border-border bg-surface-1 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark placeholder:text-muted dark:placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full text-center text-3xl font-mono font-bold tracking-[0.5em] py-4 px-6 rounded-xl border-2 border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark placeholder:text-muted dark:placeholder:text-muted-dark focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     maxLength={6}
                     autoFocus
                 />

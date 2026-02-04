@@ -96,14 +96,14 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                         value={newAccName}
                         onChange={e => setNewAccName(e.target.value)}
                         placeholder="e.g. Zenith Spending, Sterling Salary"
-                        className="w-full p-3 rounded-lg border border-border-subtle dark:border-border bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
+                        className="w-full p-3 rounded-lg border border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
                         autoFocus
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-bold text-muted uppercase mb-1">Type</label>
-                        <select value={newAccType} onChange={(e) => setNewAccType(e.target.value as AnchorAccount['type'])} className="w-full p-3 rounded-lg border border-border-subtle dark:border-border bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark">
+                        <select value={newAccType} onChange={(e) => setNewAccType(e.target.value as AnchorAccount['type'])} className="w-full p-3 rounded-lg border border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark">
                             <option value="checking">Checking / Spending</option>
                             <option value="savings">Savings</option>
                             <option value="salary">Salary</option>
@@ -115,7 +115,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                         <select
                             value={newAccCurrency}
                             onChange={(e) => setNewAccCurrency(e.target.value as Currency)}
-                            className="w-full p-3 rounded-lg border border-border-subtle dark:border-border bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
+                            className="w-full p-3 rounded-lg border border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
                         >
                             <option value="NGN">NGN (₦)</option>
                             <option value="USD">USD ($)</option>
@@ -134,14 +134,14 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                             if (/^[0-9.,]*$/.test(e.target.value)) setNewAccBalance(e.target.value);
                         }}
                         placeholder="0.00"
-                        className="w-full p-3 rounded-lg border border-border-subtle dark:border-border bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
+                        className="w-full p-3 rounded-lg border border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
                     />
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
                     <motion.button 
                         type="button" 
                         onClick={onClose} 
-                        className="text-muted text-sm hover:text-subtle"
+                        className="text-muted text-sm hover:text-foreground dark:hover:text-foreground-dark"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >

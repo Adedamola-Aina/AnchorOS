@@ -79,7 +79,7 @@ export function InviteStatusDisplay({ status, error, ownerName }: InviteStatusDi
                         Waiting for <span className="font-semibold">{ownerName}</span> to confirm the connection.
                     </p>
                 </div>
-                <div className="p-4 bg-surface-2 dark:bg-surface-1-dark/50 rounded-xl text-sm text-subtle dark:text-subtle-dark">
+                <div className="p-4 bg-surface-2 dark:bg-surface-1-dark/50 rounded-xl text-sm text-muted dark:text-muted-dark">
                     <p>You'll receive a notification when they confirm. This usually happens quickly.</p>
                 </div>
                 <button

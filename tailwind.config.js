@@ -95,6 +95,14 @@ module.exports = {
           dark: '#94a3b8',    // slate-400
         },
 
+        // Subtle: Tertiary/disabled text
+        // Light: slate-400, Dark: slate-500
+        // Usage: Disabled states, tertiary labels, icons
+        subtle: {
+          DEFAULT: '#94a3b8', // slate-400
+          dark: '#64748b',    // slate-500
+        },
+
         // ============================================================
         // SEMANTIC BACKGROUND COLORS - Replace raw bg-slate-* usage
         // ============================================================
@@ -234,8 +242,10 @@ module.exports = {
       // BORDER COLORS - Extend for border-border-* utilities
       // ============================================================
       borderColor: {
-        border: '#e2e8f0',          // slate-200
-        'border-subtle': '#f1f5f9', // slate-100
+        border: '#e2e8f0',              // slate-200 - Light mode default
+        'border-subtle': '#f1f5f9',     // slate-100 - Light mode subtle
+        'border-dark': '#334155',       // slate-700 - Dark mode default
+        'border-subtle-dark': '#1e293b', // slate-800 - Dark mode subtle
       },
 
       // ============================================================

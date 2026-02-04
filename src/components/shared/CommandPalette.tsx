@@ -234,7 +234,7 @@ export const CommandPalette = () => {
                                         <motion.button
                                             key={item.id}
                                             onClick={() => executeAction(item)}
-                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-subtle dark:text-subtle-dark hover:bg-surface-3 dark:hover:bg-surface-3-dark'}`}
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-muted dark:text-muted-dark hover:bg-surface-3 dark:hover:bg-surface-3-dark'}`}
                                             whileHover={{ x: 4 }}
                                             whileTap={{ scale: 0.98 }}
                                         >

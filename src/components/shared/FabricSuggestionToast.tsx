@@ -135,7 +135,7 @@ export const FabricSuggestionToast: React.FC<FabricSuggestionToastProps> = ({ su
                     </motion.button>
                     <motion.button
                         onClick={handleDismiss}
-                        className="flex-1 py-2.5 bg-surface-3 dark:bg-surface-3-dark text-subtle dark:text-subtle-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark rounded-xl text-sm font-medium transition-colors"
+                        className="flex-1 py-2.5 bg-surface-3 dark:bg-surface-3-dark text-muted dark:text-muted-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark rounded-xl text-sm font-medium transition-colors"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.95 }}
                     >

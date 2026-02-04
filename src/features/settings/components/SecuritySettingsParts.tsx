@@ -31,7 +31,7 @@ export const MfaStep2ScanQR: React.FC<Step2Props> = ({ qrUrl, manualKey, onBack,
         </VStack>
         <div className="flex justify-center py-2">
             <div className="p-4 bg-white rounded-2xl shadow-lg border border-[var(--border-subtle)]">
-                {qrUrl ? <QRCodeSVG value={qrUrl} size={160} level="H" /> : <div className="w-40 h-40 flex items-center justify-center bg-surface-3 text-subtle"><QrCode className="w-8 h-8 animate-pulse" /></div>}
+                {qrUrl ? <QRCodeSVG value={qrUrl} size={160} level="H" /> : <div className="w-40 h-40 flex items-center justify-center bg-surface-3 text-muted"><QrCode className="w-8 h-8 animate-pulse" /></div>}
             </div>
         </div>
         <div className="text-xs"><Text variant="subtle" size="xs" weight="bold" className="uppercase tracking-widest mb-2">Can't scan?</Text><div className="bg-surface-3 dark:bg-surface-3-dark/50 p-3 rounded-lg font-mono text-muted inline-block max-w-xs break-all select-all">{manualKey}</div></div>
@@ -48,7 +48,7 @@ export const MfaStep3Verify: React.FC<Step3Props> = ({ mfaCode, mfaError, isEnro
             <Text variant="muted" size="sm" className="max-w-sm">Enter the 6-digit code from your app to confirm everything is working.</Text>
         </VStack>
         <VStack gap="md" className="max-w-xs w-full">
-            <input type="text" inputMode="numeric" maxLength={6} placeholder="000 000" value={mfaCode} onChange={(e) => onSetMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} className="w-full p-4 bg-white dark:bg-surface-1-dark border border-[var(--border)] rounded-2xl text-center text-3xl font-mono tracking-[0.5em] text-foreground dark:text-foreground-dark focus:ring-4 focus:ring-primary-500/20 outline-none transition-all placeholder:text-subtle" autoFocus />
+            <input type="text" inputMode="numeric" maxLength={6} placeholder="000 000" value={mfaCode} onChange={(e) => onSetMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} className="w-full p-4 bg-white dark:bg-surface-1-dark border border-[var(--border)] rounded-2xl text-center text-3xl font-mono tracking-[0.5em] text-foreground dark:text-foreground-dark focus:ring-4 focus:ring-primary-500/20 outline-none transition-all placeholder:text-muted" autoFocus />
             {mfaError && <Text variant="danger" size="xs" weight="bold" className="animate-in fade-in slide-in-from-top-1">{mfaError}</Text>}
             <Button onClick={onEnroll} isLoading={isEnrolling} disabled={mfaCode.length !== 6} className="w-full py-6 font-black uppercase tracking-widest">Verify & Enable</Button>
         </VStack>

@@ -100,7 +100,7 @@ Component Stack: ${errorInfo?.componentStack}
                             </button>
                             <button
                                 onClick={this.handleCopyError}
-                                className="px-4 py-2.5 bg-surface-3 dark:bg-surface-3-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark text-subtle dark:text-subtle-dark font-medium rounded-lg transition-colors"
+                                className="px-4 py-2.5 bg-surface-3 dark:bg-surface-3-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark text-muted dark:text-muted-dark font-medium rounded-lg transition-colors"
                                 title="Copy error details"
                             >
                                 <Copy className="w-4 h-4" />
@@ -119,7 +119,7 @@ Component Stack: ${errorInfo?.componentStack}
 
                             {showDetails && (
                                 <div className="p-4 bg-surface-2 dark:bg-surface-2-dark max-h-64 overflow-auto">
-                                    <pre className="text-xs font-mono text-subtle dark:text-subtle-dark whitespace-pre-wrap break-all">
+                                    <pre className="text-xs font-mono text-muted dark:text-muted-dark whitespace-pre-wrap break-all">
                                         {error?.stack}
                                         {'\n\n--- Component Stack ---\n'}
                                         {errorInfo?.componentStack}

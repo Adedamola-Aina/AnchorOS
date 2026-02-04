@@ -150,7 +150,7 @@ const AuthView: React.FC<AuthViewProps> = ({
 
                         <div className="mt-auto pt-8 flex flex-col items-center animate-in fade-in duration-1000 delay-500">
                             <ThemeToggle variant="minimal" theme={theme} onSetTheme={(t) => onSetTheme?.(t)} />
-                            <p className="mt-6 text-[10px] text-subtle dark:text-subtle-dark font-bold uppercase tracking-[0.2em] opacity-50">&copy; 2026 Anchor OS</p>
+                            <p className="mt-6 text-[10px] text-muted dark:text-muted-dark font-bold uppercase tracking-[0.2em] opacity-50">&copy; 2026 Anchor OS</p>
                         </div>
                     </div>
                 </motion.div>

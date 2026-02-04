@@ -30,7 +30,7 @@ export function InviteDetails({ user, ownerName, isVerifying, hasVerificationCod
 
             {!user ? (
                 <div>
-                    <div className="p-4 bg-surface-2 dark:bg-surface-1-dark/50 text-subtle dark:text-subtle-dark text-sm rounded-xl mb-4 text-center font-medium border border-border-subtle dark:border-border">
+                    <div className="p-4 bg-surface-2 dark:bg-surface-1-dark/50 text-muted dark:text-muted-dark text-sm rounded-xl mb-4 text-center font-medium border border-border-subtle dark:border-border-dark">
                         Please log in or create an account to accept.
                     </div>
                     <button
@@ -46,9 +46,9 @@ export function InviteDetails({ user, ownerName, isVerifying, hasVerificationCod
             ) : (
                 <div>
                     <div className="text-center mb-6">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-3 dark:bg-surface-3-dark/50 border border-border-subtle dark:border-border">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-3 dark:bg-surface-3-dark/50 border border-border-subtle dark:border-border-dark">
                             <div className="w-2 h-2 rounded-full bg-finance-500"></div>
-                            <span className="text-xs font-semibold text-subtle dark:text-subtle-dark">Logged in as {user.email}</span>
+                            <span className="text-xs font-semibold text-muted dark:text-muted-dark">Logged in as {user.email}</span>
                         </div>
                     </div>
                     <button

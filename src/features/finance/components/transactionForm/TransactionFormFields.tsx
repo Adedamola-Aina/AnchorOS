@@ -23,7 +23,7 @@ export const DescriptionField: React.FC<DescriptionFieldProps> = ({ value, onCha
             id="tx-title"
             type="text"
             placeholder="e.g. Groceries, Upwork Salary"
-            className={`w-full p-3 rounded-lg border bg-surface-2 dark:bg-surface-1-dark text-foreground dark:text-foreground-dark placeholder:text-muted transition-colors ${error ? 'border-danger-500 ring-1 ring-danger-500' : 'border-border-subtle dark:border-border'}`}
+            className={`w-full p-3 rounded-lg border bg-surface-2 dark:bg-surface-1-dark text-foreground dark:text-foreground-dark placeholder:text-muted transition-colors ${error ? 'border-danger-500 ring-1 ring-danger-500' : 'border-border-subtle dark:border-border-dark'}`}
             value={value}
             onChange={(e) => { onChange(e.target.value); if (error) onClearError(); }}
             autoFocus
@@ -50,7 +50,7 @@ export const AmountField: React.FC<AmountFieldProps> = ({ value, onChange, error
                 type="text"
                 inputMode="decimal"
                 placeholder="0.00"
-                className={`w-full p-3 rounded-lg border bg-surface-2 dark:bg-surface-1-dark text-foreground dark:text-foreground-dark font-bold placeholder:text-muted transition-all ${error ? 'border-danger-500 ring-1 ring-danger-500' : 'border-border-subtle dark:border-border'}`}
+                className={`w-full p-3 rounded-lg border bg-surface-2 dark:bg-surface-1-dark text-foreground dark:text-foreground-dark font-bold placeholder:text-muted transition-all ${error ? 'border-danger-500 ring-1 ring-danger-500' : 'border-border-subtle dark:border-border-dark'}`}
                 value={value}
                 onChange={(e) => { if (/^[0-9.,]*$/.test(e.target.value)) { onChange(e.target.value); if (error) onClearError(); } }}
                 onBlur={() => { if (value) onChange(fromCents(toCents(value)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })); }}
@@ -75,7 +75,7 @@ export const DateField: React.FC<DateFieldProps> = ({ value, onChange }) => (
                 type="date"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="flex-1 p-3 rounded-lg border border-border-subtle dark:border-border text-sm bg-surface-1 dark:bg-surface-1-dark text-foreground dark:text-foreground-dark [color-scheme:light] dark:[color-scheme:dark]"
+                className="flex-1 p-3 rounded-lg border border-border-subtle dark:border-border-dark text-sm bg-surface-1 dark:bg-surface-1-dark text-foreground dark:text-foreground-dark [color-scheme:light] dark:[color-scheme:dark]"
             />
         </div>
     </div>

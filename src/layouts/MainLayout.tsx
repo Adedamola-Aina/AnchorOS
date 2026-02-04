@@ -68,7 +68,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
             <CommandPalette />
 
             {/* Desktop Sidebar - UNCHANGED per M3.2 */}
-            <aside className={`hidden md:flex flex-col bg-surface-2 dark:bg-surface-1-dark border-r border-border-subtle dark:border-border p-4 sticky ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'top-6 h-[calc(100vh-24px)]' : 'top-0 h-screen'}`}>
+            <aside className={`hidden md:flex flex-col bg-surface-2 dark:bg-surface-1-dark border-r border-border-subtle dark:border-border-dark p-4 sticky ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'top-6 h-[calc(100vh-24px)]' : 'top-0 h-screen'}`}>
                 <div className="mb-8 px-4 py-2 shrink-0">
                     <h1 className="text-h2 lg:text-h2-lg tracking-tight text-foreground dark:text-foreground-dark flex items-center gap-2">
                         <AnchorLogo className="w-8 h-8 text-foreground dark:text-foreground-dark" />
@@ -81,7 +81,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                     <NavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} accountNotifications={accountNotifications} setMobileMenuOpen={setMobileMenuOpen} />
                     <NavItem to="/commitments" label="Commitments" icon={CheckCircle2} accountNotifications={accountNotifications} setMobileMenuOpen={setMobileMenuOpen} />
                     <NavItem to="/finance" label="Finance" icon={CreditCard} accountNotifications={accountNotifications} setMobileMenuOpen={setMobileMenuOpen} />
-                    <div className="pt-4 mt-4 border-t border-border-subtle dark:border-border">
+                    <div className="pt-4 mt-4 border-t border-border-subtle dark:border-border-dark">
                         <NavItem to="/settings" label="System" icon={Settings} accountNotifications={accountNotifications} setMobileMenuOpen={setMobileMenuOpen} />
                     </div>
                 </nav>
@@ -89,11 +89,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 <div className="p-4 bg-surface-3/50 dark:bg-surface-2-dark/50 rounded-xl mt-auto shrink-0">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-8 h-8 rounded-full bg-surface-3 dark:bg-surface-3-dark flex items-center justify-center text-xs font-bold text-subtle dark:text-subtle-dark shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-surface-3 dark:bg-surface-3-dark flex items-center justify-center text-xs font-bold text-muted dark:text-muted-dark shrink-0">
                                 {(profile?.name || user?.email || 'U').slice(0, 2).toUpperCase()}
                             </div>
                             <div className="overflow-hidden">
-                                <p className="text-xs font-bold text-subtle dark:text-subtle-dark truncate">{profile?.name || 'User'}</p>
+                                <p className="text-xs font-bold text-muted dark:text-muted-dark truncate">{profile?.name || 'User'}</p>
                                 <p className="text-[10px] text-muted truncate font-mono">{user?.email}</p>
                             </div>
                         </div>
@@ -106,7 +106,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
 
             <main className="flex flex-col relative w-full">
                 {/* Mobile Header - SIMPLIFIED per M3.2 */}
-                <header className="md:hidden sticky top-0 flex items-center justify-between p-4 bg-surface-1/80 dark:bg-surface-1-dark/80 backdrop-blur-md border-b border-border-subtle dark:border-border z-30">
+                <header className="md:hidden sticky top-0 flex items-center justify-between p-4 bg-surface-1/80 dark:bg-surface-1-dark/80 backdrop-blur-md border-b border-border-subtle dark:border-border-dark z-30">
                     <div className="flex items-center gap-2">
                         <AnchorLogo className="w-6 h-6 text-foreground dark:text-foreground-dark" />
                         <span className="font-bold text-lg tracking-tight text-foreground dark:text-foreground-dark">Anchor</span>
@@ -127,7 +127,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                         {/* User Profile Section */}
                         <div className="mb-6 p-4 bg-surface-2 dark:bg-surface-2-dark/50 rounded-xl">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full bg-surface-3 dark:bg-surface-3-dark flex items-center justify-center text-lg font-bold text-subtle dark:text-subtle-dark">
+                                <div className="w-12 h-12 rounded-full bg-surface-3 dark:bg-surface-3-dark flex items-center justify-center text-lg font-bold text-muted dark:text-muted-dark">
                                     {(profile?.name || user?.email || 'U').slice(0, 2).toUpperCase()}
                                 </div>
                                 <div className="overflow-hidden">
@@ -141,7 +141,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                         <NavLink
                             to="/settings"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-subtle dark:text-subtle-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-colors"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted dark:text-muted-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-colors"
                         >
                             <Settings className="w-5 h-5" />
                             <span className="font-medium">Settings</span>

@@ -24,7 +24,7 @@ export const Badge = ({ children, type, variant = 'solid' }: { children: React.R
     family: 'bg-anchor-family-light text-anchor-family dark:bg-anchor-family-dark/30 dark:text-anchor-family-light',
     checking: 'bg-anchor-success-light text-anchor-success dark:bg-anchor-success-dark/30 dark:text-anchor-success-light',
     savings: 'bg-anchor-finance-light text-anchor-finance dark:bg-anchor-finance-dark/30 dark:text-anchor-finance-light',
-    todo: 'bg-surface-3 text-subtle dark:bg-surface-3-dark dark:text-subtle-dark',
+    todo: 'bg-surface-3 text-muted dark:bg-surface-3-dark dark:text-muted-dark',
   };
 
   const baseStyle = styles[type] || styles.todo;

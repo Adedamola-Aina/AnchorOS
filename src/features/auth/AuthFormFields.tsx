@@ -41,7 +41,7 @@ export function AuthFormFields({
     if (authMode === 'mfa') {
         return (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <label className="text-[11px] font-black text-subtle dark:text-subtle-dark uppercase tracking-[0.2em] text-center block">
+                <label className="text-[11px] font-black text-muted dark:text-muted-dark uppercase tracking-[0.2em] text-center block">
                     Verification Code
                 </label>
                 {/* Hidden fields to confuse autofill */}
@@ -71,11 +71,11 @@ export function AuthFormFields({
                             const value = e.target.value.replace(/[^0-9]/g, '');
                             setMfaCode(value);
                         }}
-                        className="w-full pl-12 pr-4 py-4 bg-surface-2 dark:bg-surface-1-dark border-2 border-border-subtle dark:border-border rounded-3xl text-foreground dark:text-foreground-dark placeholder-muted focus:outline-none focus:ring-4 focus:ring-primary-500/5 focus:border-primary-400 dark:focus:border-primary-700 transition-all font-mono font-bold text-2xl tracking-[0.3em] text-center"
+                        className="w-full pl-12 pr-4 py-4 bg-surface-2 dark:bg-surface-1-dark border-2 border-border-subtle dark:border-border-dark rounded-3xl text-foreground dark:text-foreground-dark placeholder-muted focus:outline-none focus:ring-4 focus:ring-primary-500/5 focus:border-primary-400 dark:focus:border-primary-700 transition-all font-mono font-bold text-2xl tracking-[0.3em] text-center"
                     />
                 </div>
                 <div className="text-center space-y-2">
-                    <p className="text-[10px] font-bold text-subtle uppercase tracking-widest">Open Authenticator App</p>
+                    <p className="text-[10px] font-bold text-muted uppercase tracking-widest">Open Authenticator App</p>
                     <p className="text-xs text-muted max-w-xs mx-auto">Enter the 6-digit code from Google Authenticator or your preferred app.</p>
                 </div>
             </div>
@@ -86,9 +86,9 @@ export function AuthFormFields({
         <>
             {/* Email Field */}
             <div className="space-y-2">
-                <label className="text-[11px] font-bold text-subtle dark:text-subtle-dark uppercase tracking-widest ml-1">Email Address</label>
+                <label className="text-[11px] font-bold text-muted dark:text-muted-dark uppercase tracking-widest ml-1">Email Address</label>
                 <div className="relative group">
-                    <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${validationErrors.email ? 'text-danger-400' : 'text-muted group-focus-within:text-subtle dark:group-focus-within:text-subtle-dark'}`} />
+                    <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${validationErrors.email ? 'text-danger-400' : 'text-muted group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400'}`} />
                     <input
                         type="email"
                         name="anchor_email"
@@ -99,7 +99,7 @@ export function AuthFormFields({
                         }}
                         placeholder="you@example.com"
                         autoComplete="off"
-                        className={`w-full pl-12 pr-4 py-3.5 bg-surface-1 dark:bg-surface-1-dark border rounded-2xl text-foreground dark:text-foreground-dark placeholder-muted dark:placeholder:text-subtle-dark focus:outline-none focus:ring-4 transition-all font-medium ${validationErrors.email ? 'border-danger-400 focus:ring-danger-500/10 focus:border-danger-400' : 'border-border-subtle dark:border-border focus:ring-muted/5 focus:border-muted dark:focus:border-subtle'}`}
+                        className={`w-full pl-12 pr-4 py-3.5 bg-surface-1 dark:bg-surface-1-dark border rounded-2xl text-foreground dark:text-foreground-dark placeholder-muted dark:placeholder:text-muted-dark focus:outline-none focus:ring-4 transition-all font-medium ${validationErrors.email ? 'border-danger-400 focus:ring-danger-500/10 focus:border-danger-400' : 'border-border-subtle dark:border-border-dark focus:ring-muted/5 focus:border-primary-400 dark:focus:border-primary-600'}`}
                     />
                 </div>
                 {validationErrors.email && (
@@ -111,7 +111,7 @@ export function AuthFormFields({
             {authMode !== 'reset' && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-500">
                     <div className="flex justify-between items-center">
-                        <label className="text-[11px] font-bold text-subtle dark:text-subtle-dark uppercase tracking-widest ml-1">Password</label>
+                        <label className="text-[11px] font-bold text-muted dark:text-muted-dark uppercase tracking-widest ml-1">Password</label>
                         {authMode === 'login' && (
                             <button type="button" onClick={() => setAuthMode('reset')} className="text-[11px] font-bold text-primary-500 hover:text-primary-600 uppercase tracking-wider transition-colors">
                                 Forgot?
@@ -119,7 +119,7 @@ export function AuthFormFields({
                         )}
                     </div>
                     <div className="relative group">
-                        <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${validationErrors.password ? 'text-danger-400' : 'text-muted group-focus-within:text-subtle dark:group-focus-within:text-subtle-dark'}`} />
+                        <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${validationErrors.password ? 'text-danger-400' : 'text-muted group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400'}`} />
                         <input
                             type={showPassword ? 'text' : 'password'}
                             name="anchor_password"
@@ -130,12 +130,12 @@ export function AuthFormFields({
                             }}
                             placeholder="••••••••"
                             autoComplete="new-password"
-                            className={`w-full pl-12 pr-14 py-3.5 bg-surface-1 dark:bg-surface-1-dark border rounded-2xl text-foreground dark:text-foreground-dark placeholder-muted dark:placeholder:text-subtle-dark focus:outline-none focus:ring-4 transition-all font-medium ${validationErrors.password ? 'border-danger-400 focus:ring-danger-500/10 focus:border-danger-400' : 'border-border-subtle dark:border-border focus:ring-muted/5 focus:border-muted dark:focus:border-subtle'}`}
+                            className={`w-full pl-12 pr-14 py-3.5 bg-surface-1 dark:bg-surface-1-dark border rounded-2xl text-foreground dark:text-foreground-dark placeholder-muted dark:placeholder:text-muted-dark focus:outline-none focus:ring-4 transition-all font-medium ${validationErrors.password ? 'border-danger-400 focus:ring-danger-500/10 focus:border-danger-400' : 'border-border-subtle dark:border-border-dark focus:ring-muted/5 focus:border-primary-400 dark:focus:border-primary-600'}`}
                         />
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center text-muted hover:text-subtle dark:hover:text-subtle-dark transition-colors rounded-xl hover:bg-surface-3 dark:hover:bg-surface-3-dark"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center text-muted hover:text-foreground dark:hover:text-foreground-dark transition-colors rounded-xl hover:bg-surface-3 dark:hover:bg-surface-3-dark"
                             aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
