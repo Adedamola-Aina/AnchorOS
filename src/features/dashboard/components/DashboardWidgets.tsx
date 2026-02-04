@@ -49,8 +49,8 @@ export const CashFlowWidget: React.FC<CashFlowWidgetProps> = ({ cashFlow, curren
             </HStack>
         </HStack>
         <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-surface-3 dark:bg-surface-3-dark rounded-xl"><Text size="xs" variant="muted" weight="bold" className="font-black uppercase mb-1">Income</Text><Text weight="bold" className="font-mono text-finance-500">{formatCurrencyCompact(cashFlow.income, currency)}</Text></div>
-            <div className="p-3 bg-surface-3 dark:bg-surface-3-dark rounded-xl"><Text size="xs" variant="muted" weight="bold" className="font-black uppercase mb-1">Expenses</Text><Text weight="bold" className="font-mono text-danger-500">{formatCurrencyCompact(cashFlow.expense, currency)}</Text></div>
+            <div className="p-3 bg-surface-3 dark:bg-surface-3-dark rounded-xl overflow-hidden"><Text size="xs" variant="muted" weight="bold" className="font-black uppercase mb-1">Income</Text><Text weight="bold" className="font-mono text-finance-500 truncate block">{formatCurrencyCompact(cashFlow.income, currency)}</Text></div>
+            <div className="p-3 bg-surface-3 dark:bg-surface-3-dark rounded-xl overflow-hidden"><Text size="xs" variant="muted" weight="bold" className="font-black uppercase mb-1">Expenses</Text><Text weight="bold" className="font-mono text-danger-500 truncate block">{formatCurrencyCompact(cashFlow.expense, currency)}</Text></div>
         </div>
     </div>
 );
@@ -94,9 +94,9 @@ export const ProductivityWidget: React.FC<ProductivityWidgetProps> = ({ producti
         </HStack>
         {hasCommitments ? (
             <>
-                <HStack gap="sm" align="end" className="mb-2">
-                    <span className="text-5xl font-black text-foreground dark:text-foreground-dark tracking-tighter tabular-nums">{productivity.score}%</span>
-                    <Text size="xs" weight="bold" variant="muted" className="mb-2 pb-0.5 uppercase">Completion</Text>
+                <HStack gap="sm" align="end" className="mb-2 overflow-hidden">
+                    <span className="text-4xl sm:text-5xl font-black text-foreground dark:text-foreground-dark tracking-tighter tabular-nums">{productivity.score}%</span>
+                    <Text size="xs" weight="bold" variant="muted" className="mb-2 pb-0.5 uppercase shrink-0">Completion</Text>
                 </HStack>
                 <VStack gap="sm" className="mt-6">
                     <div><HStack justify="between" className="text-[10px] font-bold uppercase text-muted mb-1"><span>Personal</span><span>{productivity.domainBreakdown.personal}%</span></HStack><div className="h-1.5 w-full bg-surface-3 dark:bg-surface-3-dark rounded-full overflow-hidden"><div style={{ width: `${productivity.domainBreakdown.personal}%` }} className="h-full bg-primary-500 rounded-full" /></div></div>
