@@ -119,7 +119,7 @@ export const BottomNavigation = ({
     return (
         <nav
             role="navigation"
-            className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 dark:bg-surface-1-dark/95 backdrop-blur-xl border-t border-border-subtle pb-safe-nav z-40"
+            className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 dark:bg-surface-1-dark/95 backdrop-blur-xl border-t border-border-subtle dark:border-border-dark pb-safe-nav z-40"
             aria-label="Mobile navigation"
         >
             <div className="grid grid-cols-4 h-16">

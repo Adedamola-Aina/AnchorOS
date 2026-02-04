@@ -39,9 +39,18 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
             </CardHeader>
             <CardContent className="p-8 space-y-6">
                 {/* Push Notifications */}
-                <HStack justify="between" align="center" className="flex-col sm:flex-row gap-3">
+                <HStack justify="between" align="center" gap="md">
                     <VStack gap="xs" className="flex-1 min-w-0">
-                        <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Push Notifications</Text>
+                        <HStack gap="sm" align="center" justify="between">
+                            <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Push Notifications</Text>
+                            <button
+                                onClick={() => requestPushPermission()}
+                                className={toggleClass(pushPermissionStatus === 'granted')}
+                                disabled={pushPermissionStatus === 'denied'}
+                            >
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${pushPermissionStatus === 'granted' ? 'translate-x-6' : 'translate-x-1'}`} />
+                            </button>
+                        </HStack>
                         <HStack gap="sm" align="center" className="flex-wrap">
                             <Text variant="muted" size="sm">Real-time alerts for transactions and commitments.</Text>
                             {pushPermissionStatus === 'granted' && (
@@ -52,26 +61,21 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                             )}
                         </HStack>
                     </VStack>
-                    <button
-                        onClick={() => requestPushPermission()}
-                        className={toggleClass(pushPermissionStatus === 'granted')}
-                        disabled={pushPermissionStatus === 'denied'}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${pushPermissionStatus === 'granted' ? 'translate-x-6' : 'translate-x-1'}`} />
-                    </button>
                 </HStack>
 
-                <div className="h-px bg-[var(--border-subtle)]" />
+                <div className="h-px bg-border-subtle dark:bg-border-dark" />
 
                 {/* Email Notifications */}
-                <HStack justify="between" align="center" className="flex-col sm:flex-row gap-3">
+                <HStack justify="between" align="center" gap="md">
                     <VStack gap="xs" className="flex-1 min-w-0">
-                        <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Email Notifications</Text>
+                        <HStack gap="sm" align="center" justify="between">
+                            <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Email Notifications</Text>
+                            <button onClick={() => onUpdatePreferences({ enabled: !emailEnabled })} className={toggleClass(emailEnabled)}>
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${emailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            </button>
+                        </HStack>
                         <Text variant="muted" size="sm">Receive digests or instant alerts for family activity.</Text>
                     </VStack>
-                    <button onClick={() => onUpdatePreferences({ enabled: !emailEnabled })} className={toggleClass(emailEnabled)}>
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${emailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
-                    </button>
                 </HStack>
 
                 {emailEnabled && (

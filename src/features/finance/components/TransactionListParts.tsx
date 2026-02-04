@@ -10,7 +10,7 @@ import { Text, HStack, Badge } from '../../../components/primitives';
 interface FilterHeaderProps { searchQuery: string; filterType: 'all' | 'income' | 'expense'; hasWeekFilter: boolean; onSearchChange: (q: string) => void; onFilterChange: (f: 'all' | 'income' | 'expense') => void; }
 
 export const TransactionFilterHeader: React.FC<FilterHeaderProps> = ({ searchQuery, filterType, hasWeekFilter, onSearchChange, onFilterChange }) => (
-    <div className="p-4 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row gap-4 items-center justify-between">
+    <div className="p-4 border-b border-border-subtle dark:border-border-dark flex flex-col sm:flex-row gap-4 items-center justify-between">
         <HStack gap="sm" align="center">
             <Text variant="heading" size="lg" weight="bold">History</Text>
             {hasWeekFilter && <Badge variant="default" size="xs">Filtered by Week</Badge>}
