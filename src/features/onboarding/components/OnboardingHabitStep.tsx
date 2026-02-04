@@ -31,14 +31,14 @@ export function OnboardingHabitStep({ taskTitle, setTaskTitle, loading, onSubmit
                 <div>
                     <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">I commit to...</label>
                     <input type="text" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)}
-                        className="w-full p-4 bg-surface-1 dark:bg-surface-1-dark border border-border-subtle dark:border-border rounded-xl font-bold text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-finance-500 transition-all"
+                        className="w-full p-4 bg-surface-1 dark:bg-surface-1-dark border border-border-subtle dark:border-border-dark rounded-xl font-bold text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-finance-500 transition-all"
                         placeholder="e.g. Drink water, Read pages, Exercise" />
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
                     {SUGGESTIONS.map(s => (
                         <button key={s} onClick={() => setTaskTitle(s)}
-                            className="px-3 py-1.5 rounded-lg bg-surface-3 dark:bg-surface-3-dark text-xs font-medium text-subtle dark:text-subtle-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-colors">
+                            className="px-3 py-1.5 rounded-lg bg-surface-3 dark:bg-surface-3-dark text-xs font-medium text-muted dark:text-muted-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-colors">
                             {s}
                         </button>
                     ))}
@@ -50,7 +50,7 @@ export function OnboardingHabitStep({ taskTitle, setTaskTitle, loading, onSubmit
                 </button>
 
                 <div className="text-center">
-                    <button onClick={onSkip} className="text-sm text-muted hover:text-subtle transition-colors">Skip for now →</button>
+                    <button onClick={onSkip} className="text-sm text-muted hover:text-foreground dark:hover:text-foreground-dark transition-colors">Skip for now →</button>
                 </div>
             </div>
         </div>

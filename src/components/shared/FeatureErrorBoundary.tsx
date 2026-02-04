@@ -89,7 +89,7 @@ export class FeatureErrorBoundary extends Component<Props, State> {
                         <h3 className="text-h3 lg:text-h3-lg text-foreground dark:text-foreground-dark text-center mb-2">
                             Unable to load {this.props.featureName}
                         </h3>
-                        <p className="text-sm text-subtle dark:text-subtle-dark text-center mb-6">
+                        <p className="text-sm text-muted dark:text-muted-dark text-center mb-6">
                             Something went wrong. Try reloading this section or navigate to another page.
                         </p>
 
@@ -105,7 +105,7 @@ export class FeatureErrorBoundary extends Component<Props, State> {
                             </button>
                             <button
                                 onClick={this.handleReport}
-                                className="flex items-center justify-center gap-2 px-4 py-3 md:py-2.5 border border-border-subtle text-subtle dark:text-subtle-dark rounded-xl font-medium hover:bg-surface-2 dark:hover:bg-surface-3-dark transition-colors w-full md:flex-1 min-h-[44px] md:min-h-0"
+                                className="flex items-center justify-center gap-2 px-4 py-3 md:py-2.5 border border-border-subtle text-muted dark:text-muted-dark rounded-xl font-medium hover:bg-surface-2 dark:hover:bg-surface-3-dark transition-colors w-full md:flex-1 min-h-[44px] md:min-h-0"
                                 aria-label="Report this issue"
                             >
                                 <MessageCircle className="w-5 h-5" />
@@ -119,7 +119,7 @@ export class FeatureErrorBoundary extends Component<Props, State> {
                                 <summary className="text-xs text-muted cursor-pointer hover:text-foreground dark:hover:text-foreground-dark">
                                     Show error details (dev only)
                                 </summary>
-                                <pre className="mt-2 p-3 bg-surface-3 dark:bg-surface-1-dark rounded-lg text-xs text-subtle dark:text-subtle-dark overflow-auto">
+                                <pre className="mt-2 p-3 bg-surface-3 dark:bg-surface-1-dark rounded-lg text-xs text-muted dark:text-muted-dark overflow-auto">
                                     {this.state.error.toString()}
                                     {this.state.error.stack && `\n\n${this.state.error.stack}`}
                                 </pre>

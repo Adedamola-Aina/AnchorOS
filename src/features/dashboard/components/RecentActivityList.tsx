@@ -48,7 +48,7 @@ export function RecentActivityList({ recentActivity }: RecentActivityListProps) 
                                         }
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <Text size="sm" weight="bold" className="text-subtle dark:text-subtle-dark truncate">
+                                        <Text size="sm" weight="bold" className="text-muted dark:text-muted-dark truncate">
                                             {tx.title}
                                         </Text>
                                         <HStack gap="sm" align="center" className="mt-0.5 min-w-0">

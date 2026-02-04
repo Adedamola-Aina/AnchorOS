@@ -50,7 +50,7 @@ export function AnimatedCard({
     const Component = motion[as];
     const isInteractive = !!onClick;
 
-    const baseClasses = `bg-surface-2 dark:bg-surface-2-dark rounded-xl border border-border-subtle dark:border-border ${paddingClasses[padding]}`;
+    const baseClasses = `bg-surface-2 dark:bg-surface-2-dark rounded-xl border border-border-subtle dark:border-border-dark ${paddingClasses[padding]}`;
     const interactiveClasses = isInteractive ? 'cursor-pointer' : '';
 
     // Hover animation values

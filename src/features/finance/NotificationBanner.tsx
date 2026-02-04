@@ -86,11 +86,11 @@ export const NotificationBanner = ({ accountId }: NotificationBannerProps) => {
 
                         <div className="flex-1 min-w-0">
                             {isGroup ? (
-                                <p className="text-sm text-subtle dark:text-subtle-dark">
+                                <p className="text-sm text-muted dark:text-muted-dark">
                                     <span className="font-bold text-foreground dark:text-foreground-dark">{latest.actorName}</span> added {count} transactions today.
                                 </p>
                             ) : (
-                                <p className="text-sm text-subtle dark:text-subtle-dark truncate">
+                                <p className="text-sm text-muted dark:text-muted-dark truncate">
                                     <span className="font-bold text-foreground dark:text-foreground-dark">{latest.actorName}:</span> {latest.message}
                                 </p>
                             )}
@@ -101,7 +101,7 @@ export const NotificationBanner = ({ accountId }: NotificationBannerProps) => {
 
                         <button
                             onClick={() => group.forEach(n => markAsRead(n.id))}
-                            className="p-2 text-muted hover:text-subtle dark:hover:text-subtle-dark hover:bg-surface-3 dark:hover:bg-surface-3-dark rounded-lg transition-colors"
+                            className="p-2 text-muted hover:text-foreground dark:hover:text-foreground-dark hover:bg-surface-3 dark:hover:bg-surface-3-dark rounded-lg transition-colors"
                             title="Dismiss"
                         >
                             <X className="w-4 h-4" />

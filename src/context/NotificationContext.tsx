@@ -194,13 +194,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
             {confirmDialog && createPortal(
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-surface-1-dark/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="relative bg-surface-1 dark:bg-surface-1-dark rounded-2xl shadow-2xl w-full max-w-md p-6 border border-border-subtle dark:border-border animate-in zoom-in-95 duration-200">
+                    <div className="relative bg-surface-1 dark:bg-surface-1-dark rounded-2xl shadow-2xl w-full max-w-md p-6 border border-border-subtle dark:border-border-dark animate-in zoom-in-95 duration-200">
                         <h3 className="text-h3 lg:text-h3-lg text-foreground dark:text-foreground-dark mb-2">{confirmDialog.options.title}</h3>
                         <p className="text-muted mb-8 whitespace-pre-wrap">{confirmDialog.options.message}</p>
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => handleConfirm(false)}
-                                className="px-5 py-2.5 rounded-xl text-subtle dark:text-subtle-dark font-bold hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-all"
+                                className="px-5 py-2.5 rounded-xl text-muted dark:text-muted-dark font-bold hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-all"
                             >
                                 {confirmDialog.options.cancelText || 'Cancel'}
                             </button>

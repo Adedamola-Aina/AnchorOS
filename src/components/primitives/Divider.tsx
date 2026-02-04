@@ -21,7 +21,7 @@ interface DividerProps {
 const variantClasses: Record<string, string> = {
     default: 'border-[var(--border)]',
     subtle: 'border-[var(--border-subtle)]',
-    strong: 'border-border-subtle dark:border-border',
+    strong: 'border-border-subtle dark:border-border-dark',
 };
 
 const spacingClasses: Record<string, { horizontal: string; vertical: string }> = {

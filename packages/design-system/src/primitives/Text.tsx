@@ -50,7 +50,7 @@ const variantClasses: Record<TextVariant, string> = {
     label: 'text-foreground dark:text-foreground-dark font-medium',
     caption: 'text-muted dark:text-muted-dark text-sm',
     muted: 'text-muted dark:text-muted-dark',
-    subtle: 'text-subtle dark:text-subtle-dark',
+    subtle: 'text-muted dark:text-muted-dark',
     success: 'text-success dark:text-success-dark',
     danger: 'text-danger dark:text-danger-dark',
     warning: 'text-warning dark:text-warning-dark',

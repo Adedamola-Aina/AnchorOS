@@ -45,7 +45,7 @@ interface KeyboardShortcutsHelpProps {
 }
 
 const KeyBadge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <kbd className="px-2 py-1 bg-surface-3 dark:bg-surface-3-dark border border-border-subtle rounded-md text-xs font-mono font-bold text-subtle dark:text-subtle-dark shadow-sm">
+    <kbd className="px-2 py-1 bg-surface-3 dark:bg-surface-3-dark border border-border-subtle rounded-md text-xs font-mono font-bold text-muted dark:text-muted-dark shadow-sm">
         {children}
     </kbd>
 );
@@ -92,7 +92,7 @@ export const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ is
                                         align="center"
                                         className="py-2 px-3 rounded-lg hover:bg-surface-3/50 dark:hover:bg-surface-3-dark/50 transition-colors"
                                     >
-                                        <Text size="sm" className="text-subtle dark:text-subtle-dark">
+                                        <Text size="sm" className="text-muted dark:text-muted-dark">
                                             {shortcut.description}
                                         </Text>
                                         <HStack gap="xs" align="center">

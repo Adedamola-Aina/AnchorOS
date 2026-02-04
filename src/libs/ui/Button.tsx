@@ -8,8 +8,8 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-md shadow-primary-100 dark:shadow-none focus-visible:ring-primary-500',
-                secondary: 'border-2 border-border-subtle dark:border-border bg-surface-1 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark hover:bg-surface-2 dark:hover:bg-surface-3-dark focus-visible:ring-muted',
-                ghost: 'hover:bg-surface-3 dark:hover:bg-surface-3-dark text-subtle dark:text-subtle-dark hover:text-foreground dark:hover:text-foreground-dark focus-visible:ring-muted',
+                secondary: 'border-2 border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark hover:bg-surface-2 dark:hover:bg-surface-3-dark focus-visible:ring-muted',
+                ghost: 'hover:bg-surface-3 dark:hover:bg-surface-3-dark text-muted dark:text-muted-dark hover:text-foreground dark:hover:text-foreground-dark focus-visible:ring-muted',
             },
             size: {
                 sm: 'h-11 md:h-9 px-3 rounded-lg',  // 44px on mobile, 36px on desktop

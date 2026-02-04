@@ -27,13 +27,13 @@ export const SingleAccountTransferMessage: React.FC<SingleAccountTransferMessage
             <p className="text-sm text-muted">
                 Transfers move money between your accounts. You currently have only one account.
                 <br />
-                <span className="font-medium text-subtle dark:text-subtle-dark">Create a second account first to make transfers.</span>
+                <span className="font-medium text-muted dark:text-muted-dark">Create a second account first to make transfers.</span>
             </p>
         </div>
         <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-subtle dark:text-subtle-dark hover:text-foreground dark:hover:text-foreground-dark transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted dark:text-muted-dark hover:text-foreground dark:hover:text-foreground-dark transition-colors"
         >
             Got it
         </button>

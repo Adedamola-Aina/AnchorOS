@@ -47,13 +47,13 @@ export function OnboardingAccountStep({
                 <div>
                     <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Account Name</label>
                     <input type="text" value={accName} onChange={(e) => setAccName(e.target.value)}
-                        className="w-full p-4 bg-surface-1 dark:bg-surface-1-dark border border-border-subtle dark:border-border rounded-xl font-bold text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                        className="w-full p-4 bg-surface-1 dark:bg-surface-1-dark border border-border-subtle dark:border-border-dark rounded-xl font-bold text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                         placeholder="e.g. Chase Checking" />
                 </div>
 
                 <div>
                     <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Account Type</label>
-                    <div className="flex bg-surface-3 dark:bg-surface-1-dark rounded-xl p-1 border border-border-subtle dark:border-border">
+                    <div className="flex bg-surface-3 dark:bg-surface-1-dark rounded-xl p-1 border border-border-subtle dark:border-border-dark">
                         {accountTypes.map(t => (
                             <button key={t.value} type="button" onClick={() => setAccountType(t.value)}
                                 className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${accountType === t.value ? 'bg-surface-1 dark:bg-surface-2-dark shadow-sm text-foreground dark:text-foreground-dark' : 'text-muted'}`}>
@@ -66,7 +66,7 @@ export function OnboardingAccountStep({
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Currency</label>
-                        <div className="flex bg-surface-3 dark:bg-surface-1-dark rounded-xl p-1 border border-border-subtle dark:border-border">
+                        <div className="flex bg-surface-3 dark:bg-surface-1-dark rounded-xl p-1 border border-border-subtle dark:border-border-dark">
                             <button onClick={() => setCurrency('USD')} className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${currency === 'USD' ? 'bg-surface-1 dark:bg-surface-2-dark shadow-sm text-foreground dark:text-foreground-dark' : 'text-muted'}`}>USD</button>
                             <button onClick={() => setCurrency('NGN')} className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${currency === 'NGN' ? 'bg-surface-1 dark:bg-surface-2-dark shadow-sm text-foreground dark:text-foreground-dark' : 'text-muted'}`}>NGN</button>
                         </div>
@@ -74,7 +74,7 @@ export function OnboardingAccountStep({
                     <div>
                         <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Current Balance</label>
                         <input type="number" value={balance} onChange={(e) => setBalance(e.target.value)}
-                            className="w-full p-4 bg-surface-1 dark:bg-surface-1-dark border border-border-subtle dark:border-border rounded-xl font-bold text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                            className="w-full p-4 bg-surface-1 dark:bg-surface-1-dark border border-border-subtle dark:border-border-dark rounded-xl font-bold text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                             placeholder="0.00" />
                     </div>
                 </div>
@@ -85,7 +85,7 @@ export function OnboardingAccountStep({
                 </button>
 
                 <div className="text-center">
-                    <button onClick={onSkip} className="text-sm text-muted hover:text-subtle transition-colors">Skip for now →</button>
+                    <button onClick={onSkip} className="text-sm text-muted hover:text-foreground dark:hover:text-foreground-dark transition-colors">Skip for now →</button>
                 </div>
             </div>
         </div>

@@ -124,7 +124,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                             )}
 
                             {/* Timestamp */}
-                            <div className="text-[10px] text-subtle dark:text-subtle-dark mt-1 flex items-center gap-1">
+                            <div className="text-[10px] text-muted dark:text-muted-dark mt-1 flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
                                 {formatRelativeTime(activity.timestamp)}
                             </div>

@@ -70,7 +70,7 @@ export const AssetAllocationWidget = ({ assets }: AssetAllocationWidgetProps) =>
                         <HStack gap="sm" align="center">
                             <div className={`w-3 h-3 rounded-full ${getColor(i)} ring-2 ring-white dark:ring-[var(--surface-1-dark)] shadow-sm`} />
                             <VStack gap="none">
-                                <Text size="sm" weight="bold" className="text-subtle dark:text-subtle-dark">{asset.name}</Text>
+                                <Text size="sm" weight="bold" className="text-muted dark:text-muted-dark">{asset.name}</Text>
                                 {expanded && <Text size="xs" variant="muted" className="font-mono mt-0.5">{asset.type}</Text>}
                             </VStack>
                         </HStack>

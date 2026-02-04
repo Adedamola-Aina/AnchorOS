@@ -86,7 +86,7 @@ export const FamilyInviteCard: React.FC<InviteCardProps> = ({ onShowInviteForm }
                     <Text weight="semibold" className="group-hover:text-warning-900 dark:group-hover:text-warning-400 transition-colors">Invite Family Member</Text>
                     <Text variant="muted" size="sm">Share selected accounts with a spouse or partner</Text>
                 </VStack>
-                <ArrowRight className="w-5 h-5 text-subtle group-hover:text-warning-500 transition-colors" />
+                <ArrowRight className="w-5 h-5 text-muted group-hover:text-warning-500 transition-colors" />
             </button>
         </CardContent>
     </Card>

@@ -64,7 +64,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     if (transactions.length === 0) {
         return (
             <VStack align="center" justify="center" gap="sm" className="py-12 px-4">
-                <Search className="w-10 h-10 text-subtle dark:text-subtle-dark" />
+                <Search className="w-10 h-10 text-muted dark:text-muted-dark" />
                 <Text variant="heading" weight="bold">
                     {searchQuery ? 'No transactions found' : 'No transactions yet'}
                 </Text>

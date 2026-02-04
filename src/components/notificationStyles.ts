@@ -32,7 +32,7 @@ export const getNotificationBgColor = (type: NotificationType): string => {
         case 'invitation_accepted':
             return 'bg-family-50 dark:bg-family-900/20 border-family-200 dark:border-family-800';
         default:
-            return 'bg-surface-2 dark:bg-surface-2-dark border-border-subtle dark:border-border';
+            return 'bg-surface-2 dark:bg-surface-2-dark border-border-subtle dark:border-border-dark';
     }
 };
 
@@ -45,6 +45,6 @@ export const getNotificationIconColor = (type: NotificationType): string => {
         case 'invitation_accepted':
             return 'text-family-600 dark:text-family-400 bg-family-100 dark:bg-family-900/30';
         default:
-            return 'text-subtle dark:text-subtle-dark bg-surface-2 dark:bg-surface-2-dark';
+            return 'text-muted dark:text-muted-dark bg-surface-2 dark:bg-surface-2-dark';
     }
 };

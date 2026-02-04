@@ -57,8 +57,8 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
                     <div className="mt-8 bg-surface-3 dark:bg-surface-3-dark/40 rounded-3xl border border-[var(--border)] animate-in zoom-in-95 duration-500 overflow-hidden">
                         <HStack justify="between" align="center" className="p-6 border-b border-[var(--border)] bg-surface-2/50 dark:bg-surface-2-dark/50 backdrop-blur-sm">
                             <HStack gap="sm" align="center" className="text-xs font-bold uppercase tracking-widest text-muted">
-                                <span className={step >= 1 ? "text-primary-600 dark:text-primary-400" : ""}>Step 1</span><span className="text-subtle">→</span>
-                                <span className={step >= 2 ? "text-primary-600 dark:text-primary-400" : ""}>Step 2</span><span className="text-subtle">→</span>
+                                <span className={step >= 1 ? "text-primary-600 dark:text-primary-400" : ""}>Step 1</span><span className="text-muted">→</span>
+                                <span className={step >= 2 ? "text-primary-600 dark:text-primary-400" : ""}>Step 2</span><span className="text-muted">→</span>
                                 <span className={step >= 3 ? "text-primary-600 dark:text-primary-400" : ""}>Step 3</span>
                             </HStack>
                             <Button variant="ghost" size="icon" onClick={() => onSetShow2FASetup(false)} className="text-muted hover:text-foreground"><Check className="w-5 h-5 rotate-45" /></Button>
