@@ -218,7 +218,24 @@ module.exports = {
             DEFAULT: '#8b5cf6',
             dark: '#2e1065',
           }
-        }
+        },
+
+        // ============================================================
+        // SEMANTIC BORDER COLORS - For border-* utilities
+        // ============================================================
+        border: {
+          DEFAULT: '#e2e8f0',   // slate-200 - Standard borders
+          subtle: '#f1f5f9',    // slate-100 - Subtle dividers
+          dark: '#334155',      // slate-700 - Dark mode borders
+        },
+      },
+
+      // ============================================================
+      // BORDER COLORS - Extend for border-border-* utilities
+      // ============================================================
+      borderColor: {
+        border: '#e2e8f0',          // slate-200
+        'border-subtle': '#f1f5f9', // slate-100
       },
 
       // ============================================================
