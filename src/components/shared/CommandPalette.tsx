@@ -1,8 +1,16 @@
+/**
+ * CommandPalette - Quick actions and navigation (Cmd+K)
+ * DES-002: Migrated to semantic tokens
+ * WEB-003: Framer Motion slide-down animation
+ */
+
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Search, ArrowRight, LayoutDashboard, CheckCircle2, CreditCard, Settings, Wallet, MinusCircle, PlusCircle, Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../context/AnchorContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
+import { Text, VStack } from '../primitives';
 
 interface CommandResult {
     id: string;
@@ -167,64 +175,86 @@ export const CommandPalette = () => {
         }
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] px-4">
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
-                onClick={() => setIsOpen(false)}
-            />
-
-            {/* Search Modal */}
-            <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                    <Search className="w-5 h-5 text-slate-400" />
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder="Search queries, pages, or actions..."
-                        className="flex-1 bg-transparent border-none outline-none text-slate-900 dark:text-white placeholder-slate-400 h-8"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={handleListKeyDown}
-                        autoFocus
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] px-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                >
+                    {/* Backdrop */}
+                    <motion.div
+                        className="absolute inset-0 bg-surface-1/40 dark:bg-surface-1-dark/40 backdrop-blur-sm"
+                        onClick={() => setIsOpen(false)}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                     />
-                    <div className="hidden sm:flex items-center gap-1">
-                        <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 rounded px-1.5 py-0.5">ESC</span>
-                    </div>
-                </div>
 
-                {/* Results */}
-                <div className="max-h-[60vh] overflow-y-auto p-2 space-y-1">
-                    {results.length === 0 ? (
-                        <div className="p-8 text-center text-slate-500 text-sm">No results found.</div>
-                    ) : (
-                        results.map((item, index) => {
-                            const Icon = item.icon;
-                            const isSelected = index === selectedIndex;
+                    {/* Search Modal */}
+                    <motion.div
+                        className="relative w-full max-w-xl bg-surface-1 dark:bg-surface-1-dark rounded-xl shadow-2xl border border-border-subtle overflow-hidden"
+                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                        transition={{ type: 'spring' as const, damping: 25, stiffness: 300 }}
+                    >
+                        <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle">
+                            <Search className="w-5 h-5 text-muted" />
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                placeholder="Search queries, pages, or actions..."
+                                className="flex-1 bg-transparent border-none outline-none text-foreground dark:text-foreground-dark placeholder-muted h-8"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={handleListKeyDown}
+                                autoFocus
+                            />
+                            <div className="hidden sm:flex items-center gap-1">
+                                <span className="text-[10px] font-bold bg-surface-3 dark:bg-surface-3-dark text-muted rounded px-1.5 py-0.5">ESC</span>
+                            </div>
+                        </div>
 
-                            return (
-                                <button
-                                    key={item.id}
-                                    onClick={() => executeAction(item)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
-                                >
-                                    <Icon className={`w-4 h-4 ${isSelected ? 'text-primary-500' : 'text-slate-400'}`} />
-                                    <span className="flex-1 text-left line-clamp-1 font-medium">{item.title}</span>
-                                    {isSelected && <ArrowRight className="w-3.5 h-3.5 opacity-50" />}
-                                </button>
-                            );
-                        })
-                    )}
-                </div>
+                        {/* Results */}
+                        <VStack gap="xs" className="max-h-[60vh] overflow-y-auto p-2">
+                            {results.length === 0 ? (
+                                <div className="p-8 text-center">
+                                    <Text variant="muted" size="sm">No results found.</Text>
+                                </div>
+                            ) : (
+                                results.map((item, index) => {
+                                    const Icon = item.icon;
+                                    const isSelected = index === selectedIndex;
 
-                <div className="px-4 py-2 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 flex justify-between items-center text-[10px] text-slate-400">
-                    <span>Select <kbd className="font-sans">↑↓</kbd></span>
-                    <span>Open <kbd className="font-sans">↵</kbd></span>
-                </div>
-            </div>
-        </div>
+                                    return (
+                                        <motion.button
+                                            key={item.id}
+                                            onClick={() => executeAction(item)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-subtle dark:text-subtle-dark hover:bg-surface-3 dark:hover:bg-surface-3-dark'}`}
+                                            whileHover={{ x: 4 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <Icon className={`w-4 h-4 ${isSelected ? 'text-primary-500' : 'text-muted'}`} />
+                                            <span className="flex-1 text-left line-clamp-1 font-medium">{item.title}</span>
+                                            {isSelected && <ArrowRight className="w-3.5 h-3.5 opacity-50" />}
+                                        </motion.button>
+                                    );
+                                })
+                            )}
+                        </VStack>
+
+                        <div className="px-4 py-2 bg-surface-2 dark:bg-surface-2-dark border-t border-border-subtle flex justify-between items-center text-[10px] text-muted">
+                            <span>Select <kbd className="font-sans">↑↓</kbd></span>
+                            <span>Open <kbd className="font-sans">↵</kbd></span>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
+

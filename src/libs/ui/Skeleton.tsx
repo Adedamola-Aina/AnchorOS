@@ -21,7 +21,7 @@ interface SkeletonProps {
  */
 export const Skeleton: React.FC<SkeletonProps> = ({ className = '' }) => (
     <div
-        className={`animate-pulse bg-slate-200 dark:bg-slate-700 rounded ${className}`}
+        className={`animate-pulse bg-surface-3 dark:bg-surface-3-dark rounded ${className}`}
         aria-hidden="true"
     />
 );
@@ -30,7 +30,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className = '' }) => (
  * Transaction list item skeleton
  */
 export const TransactionSkeleton: React.FC = () => (
-    <div className="flex items-center gap-4 p-4 border-b border-slate-100 dark:border-slate-800">
+    <div className="flex items-center gap-4 p-4 border-b border-border-subtle">
         {/* Icon placeholder */}
         <Skeleton className="w-10 h-10 rounded-xl flex-shrink-0" />
 
@@ -49,7 +49,7 @@ export const TransactionSkeleton: React.FC = () => (
  * Account card skeleton
  */
 export const AccountSkeleton: React.FC = () => (
-    <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+    <div className="p-4 rounded-2xl border border-border-subtle bg-surface-1 dark:bg-surface-2-dark">
         <div className="flex items-center gap-3 mb-3">
             <Skeleton className="w-10 h-10 rounded-xl" />
             <div className="flex-1">
@@ -65,7 +65,7 @@ export const AccountSkeleton: React.FC = () => (
  * Commitment/Task item skeleton
  */
 export const CommitmentSkeleton: React.FC = () => (
-    <div className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div className="flex items-center gap-3 p-3 rounded-xl border border-border-subtle">
         <Skeleton className="w-5 h-5 rounded-full flex-shrink-0" />
         <div className="flex-1">
             <Skeleton className="w-3/4 h-4 mb-1" />
@@ -79,7 +79,7 @@ export const CommitmentSkeleton: React.FC = () => (
  * Dashboard widget skeleton
  */
 export const DashboardWidgetSkeleton: React.FC = () => (
-    <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+    <div className="p-6 rounded-2xl border border-border-subtle bg-surface-1 dark:bg-surface-2-dark">
         <Skeleton className="w-24 h-4 mb-4" />
         <Skeleton className="w-32 h-8 mb-2" />
         <Skeleton className="w-full h-3" />

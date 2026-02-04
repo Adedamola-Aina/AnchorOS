@@ -122,13 +122,13 @@ const FinanceView = () => {
 
         {accounts.length > 0 && (
           <div className="glass-card overflow-hidden">
-            <div className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/20 flex flex-col sm:flex-row items-center gap-4">
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-xl p-1 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
+            <div className="p-4 border-b border-border-subtle/50 dark:border-border/50 bg-surface-2/30 dark:bg-surface-2-dark/20 flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex items-center gap-2 bg-surface-1 dark:bg-surface-1-dark rounded-xl p-1 shadow-sm border border-border-subtle/50 dark:border-border/50">
                 <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8" aria-label="Previous month"><ChevronLeft className="w-4 h-4" /></Button>
-                <div className="px-2 flex items-center gap-2 min-w-[160px] justify-center text-sm font-bold text-slate-700 dark:text-slate-200"><Calendar className="w-4 h-4 text-slate-400" /><span>{currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span></div>
+                <div className="px-2 flex items-center gap-2 min-w-[160px] justify-center text-sm font-bold text-subtle dark:text-subtle-dark"><Calendar className="w-4 h-4 text-muted" /><span>{currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span></div>
                 <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8" aria-label="Next month"><ChevronRight className="w-4 h-4" /></Button>
               </div>
-              <div className="relative flex-1 w-full"><Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" strokeWidth={2.5} /><input ref={searchInputRef} type="text" placeholder={`Search in ${currentMonth.toLocaleDateString('en-US', { month: 'long' })}...`} className="w-full bg-white dark:bg-slate-900 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/50 dark:border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-medium" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
+              <div className="relative flex-1 w-full"><Search className="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2" strokeWidth={2.5} /><input ref={searchInputRef} type="text" placeholder={`Search in ${currentMonth.toLocaleDateString('en-US', { month: 'long' })}...`} className="w-full bg-surface-1 dark:bg-surface-1-dark pl-10 pr-4 py-2.5 rounded-xl border border-border-subtle/50 dark:border-border/50 focus:outline-none focus:ring-2 focus:ring-finance-500/20 text-sm font-medium" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
             </div>
             {isSearching && <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/30"><p className="text-xs font-medium text-blue-600 dark:text-blue-400">Found {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''} matching "{debouncedSearch}"</p></div>}
             <VirtualTransactionList transactions={filteredTransactions} currentUserId={user?.uid} onEdit={handleEdit} onDelete={setTransactionToDelete} loading={loadingFinance} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} />

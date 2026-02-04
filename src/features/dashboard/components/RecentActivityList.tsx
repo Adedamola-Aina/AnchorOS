@@ -1,13 +1,13 @@
 /**
  * RecentActivityList - Shows recent transactions
- * 
- * Follows CLAUDE.md design system with consistent styling
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import type { AnchorTransaction } from '../../../types';
 import { fromCents } from '../../../utils/moneyUtils';
 import { formatCurrencyCompact } from '../../../utils/format';
+import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface RecentActivityListProps {
     recentActivity: AnchorTransaction[];
@@ -16,8 +16,8 @@ interface RecentActivityListProps {
 export function RecentActivityList({ recentActivity }: RecentActivityListProps) {
     return (
         <div className="glass-card p-6 overflow-hidden">
-            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Recent Activity</h4>
-            <div className="space-y-2">
+            <Text size="xs" weight="bold" variant="muted" className="font-black uppercase tracking-[0.2em] mb-4">Recent Activity</Text>
+            <VStack gap="sm">
                 {recentActivity.length > 0 ? (
                     recentActivity.map((tx, idx) => {
                         // Use transactionDate (actual date) if available, else entry date
@@ -27,16 +27,18 @@ export function RecentActivityList({ recentActivity }: RecentActivityListProps) 
                             : '';
 
                         return (
-                            <div
+                            <HStack
                                 key={tx.id || idx}
-                                className="flex items-center justify-between text-sm group p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                                justify="between"
+                                align="center"
+                                className="text-sm group p-3 rounded-xl hover:bg-surface-3 dark:hover:bg-surface-3-dark transition-colors"
                             >
-                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <HStack gap="sm" align="center" className="min-w-0 flex-1">
                                     <div className={`p-2 rounded-xl shrink-0 ${tx.type === 'income'
-                                        ? 'bg-emerald-500/10 text-emerald-500'
+                                        ? 'bg-finance-500/10 text-finance-500'
                                         : tx.type === 'expense'
-                                            ? 'bg-rose-500/10 text-rose-500'
-                                            : 'bg-blue-500/10 text-blue-500'
+                                            ? 'bg-danger-500/10 text-danger-500'
+                                            : 'bg-primary-500/10 text-primary-500'
                                         }`}>
                                         {tx.type === 'income'
                                             ? <TrendingUp className="w-4 h-4" />
@@ -46,35 +48,36 @@ export function RecentActivityList({ recentActivity }: RecentActivityListProps) 
                                         }
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-bold text-sm text-slate-700 dark:text-slate-300 truncate">
+                                        <Text size="sm" weight="bold" className="text-subtle dark:text-subtle-dark truncate">
                                             {tx.title}
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-0.5 min-w-0">
-                                            <span className="text-[10px] text-slate-400 shrink-0">
+                                        </Text>
+                                        <HStack gap="sm" align="center" className="mt-0.5 min-w-0">
+                                            <Text size="xs" variant="muted" className="shrink-0">
                                                 {dateStr}
-                                            </span>
-                                            <span className="text-[10px] text-slate-400 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded truncate">
+                                            </Text>
+                                            <span className="text-[10px] text-muted px-1.5 py-0.5 bg-surface-3 dark:bg-surface-3-dark rounded truncate">
                                                 {tx.category}
                                             </span>
-                                        </div>
+                                        </HStack>
                                     </div>
-                                </div>
+                                </HStack>
                                 <span className={`font-mono font-bold text-sm tabular-nums shrink-0 ${tx.type === 'income'
-                                    ? 'text-emerald-500'
+                                    ? 'text-finance-500'
                                     : tx.type === 'expense'
-                                        ? 'text-rose-500'
-                                        : 'text-blue-500'
+                                        ? 'text-danger-500'
+                                        : 'text-primary-500'
                                     }`}>
                                     {tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : ''}
                                     {formatCurrencyCompact(fromCents(tx.amountCents || 0), tx.currency || 'NGN')}
                                 </span>
-                            </div>
+                            </HStack>
                         );
                     })
                 ) : (
-                    <p className="text-sm text-slate-400 italic text-center py-4">No recent transactions</p>
+                    <Text size="sm" variant="muted" className="italic text-center py-4">No recent transactions</Text>
                 )}
-            </div>
+            </VStack>
         </div>
     );
 }
+

@@ -1,9 +1,11 @@
 /**
  * Activity Feed Component
  * DES-002: Migrated to semantic tokens and primitives
+ * WEB-003: Framer Motion stagger animations for feed items
  */
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Activity, Clock } from 'lucide-react';
 import type { AccountActivity } from '../../../types/activity';
 import { formatActivityMessage, getActivityColor } from '../../../types/activity';
@@ -66,12 +68,15 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                 const showAmount = activity.details?.amountCents !== undefined && activity.action !== 'transaction_deleted';
 
                 return (
-                    <div
+                    <motion.div
                         key={activity.id}
                         className={`
               flex gap-3 p-3 rounded-xl transition-colors
               ${index === 0 ? 'bg-surface-3 dark:bg-surface-3-dark' : 'hover:bg-surface-3 dark:hover:bg-surface-3-dark'}
             `}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.3 }}
                     >
                         {/* Icon */}
                         <div className={`
@@ -124,7 +129,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                                 {formatRelativeTime(activity.timestamp)}
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 );
             })}
 

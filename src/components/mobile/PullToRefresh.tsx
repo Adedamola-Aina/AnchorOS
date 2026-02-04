@@ -1,13 +1,15 @@
 /**
  * PullToRefresh - Mobile pull-to-refresh gesture component
+ * WEB-003: Framer Motion rubber-band physics
  * 
  * Implements native pull-to-refresh behavior for mobile devices.
- * Uses touch events for gesture detection.
+ * Uses Framer Motion for smooth spring animations.
  * 
  * @module components/mobile/PullToRefresh
  */
 
 import React, { useState, useRef, useCallback, type ReactNode, type RefObject } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 export interface PullToRefreshProps {
@@ -46,7 +48,7 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPulling, setIsPulling] = useState(false);
-  
+
   const startY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -65,14 +67,14 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (disabled || isRefreshing) return;
     if (!isAtTop()) return;
-    
+
     // Ignore touch events from interactive elements (inputs, buttons, etc.)
     const target = e.target as HTMLElement;
     const interactiveElements = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'];
     if (interactiveElements.includes(target.tagName) || target.closest('input, textarea, select, button, a, [role="button"]')) {
       return;
     }
-    
+
     startY.current = e.touches[0].clientY;
     setIsPulling(true);
   }, [disabled, isRefreshing, isAtTop]);
@@ -86,7 +88,7 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
 
     const currentY = e.touches[0].clientY;
     const distance = Math.max(0, currentY - startY.current);
-    
+
     // Apply resistance - pulling gets harder as you pull more
     const resistedDistance = Math.min(distance * 0.5, threshold * 2);
     setPullDistance(resistedDistance);
@@ -94,9 +96,9 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
 
   const handleTouchEnd = useCallback(async () => {
     if (!isPulling) return;
-    
+
     setIsPulling(false);
-    
+
     if (pullDistance >= threshold && !isRefreshing && !disabled) {
       setIsRefreshing(true);
       try {
@@ -124,44 +126,50 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
       onTouchEnd={handleTouchEnd}
     >
       {/* Pull indicator */}
-      {showIndicator && (
-        <div
-          role="status"
-          aria-label={isRefreshing ? 'Refreshing content' : 'Pull to refresh'}
-          aria-busy={isRefreshing}
-          aria-valuenow={progress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          className="absolute left-0 right-0 flex justify-center transition-all duration-200 z-10"
-          style={{
-            top: Math.min(pullDistance - 40, 20),
-            opacity: Math.min(1, pullDistance / (threshold * 0.5)),
-          }}
-        >
-          <div className={`
-            flex items-center justify-center w-10 h-10 rounded-full 
-            bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700
-            ${isRefreshing ? 'animate-pulse' : ''}
-          `}>
-            <Loader2 
-              className={`w-5 h-5 text-primary-500 ${isRefreshing ? 'animate-spin' : ''}`}
-              style={{
-                transform: isRefreshing ? 'none' : `rotate(${progress * 3.6}deg)`,
-              }}
-            />
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showIndicator && (
+          <motion.div
+            role="status"
+            aria-label={isRefreshing ? 'Refreshing content' : 'Pull to refresh'}
+            aria-busy={isRefreshing}
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="absolute left-0 right-0 flex justify-center z-10"
+            initial={{ opacity: 0, y: -40 }}
+            animate={{
+              opacity: Math.min(1, pullDistance / (threshold * 0.5)),
+              y: Math.min(pullDistance - 40, 20),
+            }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          >
+            <motion.div
+              className={`
+                flex items-center justify-center w-10 h-10 rounded-full 
+                bg-surface-1 dark:bg-surface-2-dark shadow-lg border border-border-subtle
+              `}
+              animate={isRefreshing ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+              transition={isRefreshing ? { duration: 0.8, repeat: Infinity } : undefined}
+            >
+              <motion.div
+                animate={{ rotate: isRefreshing ? 360 : progress * 3.6 }}
+                transition={isRefreshing ? { duration: 1, repeat: Infinity, ease: 'linear' } : { duration: 0 }}
+              >
+                <Loader2 className="w-5 h-5 text-primary-500" />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Content with pull offset */}
-      <div
-        style={{
-          transform: `translateY(${pullDistance}px)`,
-          transition: isPulling ? 'none' : 'transform 0.2s ease-out',
-        }}
+      {/* Content with pull offset - rubber-band spring physics */}
+      <motion.div
+        animate={{ y: pullDistance }}
+        transition={isPulling ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 30 }}
       >
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 };

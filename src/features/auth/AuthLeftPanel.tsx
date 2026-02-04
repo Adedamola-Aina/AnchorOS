@@ -8,7 +8,7 @@ import { AnchorLogo } from '../../components/shared';
 
 export function AuthLeftPanel() {
     return (
-        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 dark:from-slate-900 dark:via-slate-950 dark:to-black">
+        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-surface-2-dark via-surface-1-dark to-surface-base-dark dark:from-surface-1-dark dark:via-surface-base-dark dark:to-black">
             <div className="absolute inset-0 z-0">
                 <svg className="absolute bottom-0 left-0 w-full opacity-20 dark:opacity-10" viewBox="0 0 1440 320" preserveAspectRatio="none" style={{ height: '50%' }}>
                     <path fill="#22d3ee" d="M0,256L48,261.3C96,267,192,277,288,272C384,267,480,245,576,229.3C672,213,768,203,864,213.3C960,224,1056,256,1152,261.3C1248,267,1344,245,1392,234.7L1440,224L1440,320L0,320Z" />

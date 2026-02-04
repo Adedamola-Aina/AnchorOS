@@ -39,7 +39,7 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
                 onSwipeLeft={() => onDelete(task.id)}
                 rightAction={{
                     label: 'Delete',
-                    color: 'red',
+                    color: 'danger',
                     icon: <Trash2 className="w-4 h-4 mr-1" />,
                 }}
                 disabled={isEditing}

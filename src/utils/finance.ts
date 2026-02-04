@@ -40,7 +40,7 @@ export function groupSmallValues(
         significant.push({
             name: 'Other',
             value: otherValue,
-            color: '#94a3b8' // slate-400
+            color: 'var(--foreground-subtle)' // Uses semantic muted color
         });
     }
 

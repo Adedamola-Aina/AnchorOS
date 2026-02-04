@@ -8,8 +8,8 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-md shadow-primary-100 dark:shadow-none focus-visible:ring-primary-500',
-                secondary: 'border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 focus-visible:ring-slate-400',
-                ghost: 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 focus-visible:ring-slate-400',
+                secondary: 'border-2 border-border-subtle dark:border-border bg-surface-1 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark hover:bg-surface-2 dark:hover:bg-surface-3-dark focus-visible:ring-muted',
+                ghost: 'hover:bg-surface-3 dark:hover:bg-surface-3-dark text-subtle dark:text-subtle-dark hover:text-foreground dark:hover:text-foreground-dark focus-visible:ring-muted',
             },
             size: {
                 sm: 'h-11 md:h-9 px-3 rounded-lg',  // 44px on mobile, 36px on desktop
@@ -41,7 +41,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 {...props}
             >
                 {isLoading ? (
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-muted border-t-transparent" />
                 ) : null}
                 {children}
             </button>

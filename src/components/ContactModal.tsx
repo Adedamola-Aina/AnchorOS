@@ -1,11 +1,14 @@
 /**
  * ContactModal - User feedback form with dual-delivery strategy
+ * DES-002: Migrated to semantic tokens
+ * WEB-003: Framer Motion slide-up animation
  * Refactored per CLAUDE.md §3.2 (200-line rule).
  * Form components extracted to ContactModalParts.tsx
  */
 
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { db, APP_ID } from '../config/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -60,22 +63,54 @@ const ContactModal: React.FC<ContactModalProps> = ({ onClose, currentPage = 'unk
 
     if (isSubmitted) return createPortal(<ContactSuccessMessage />, document.body);
 
-    const modalContent = (
-        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 overflow-y-auto" onClick={onClose}>
-            <div className="w-full sm:max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-500 sm:my-8" onClick={e => e.stopPropagation()}>
-                <ContactHeader onClose={onClose} />
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                    <SubjectSelect value={subject} onChange={setSubject} />
-                    <MessageInput value={message} onChange={setMessage} />
-                    <IdentityFields name={name} email={email} onNameChange={setName} onEmailChange={setEmail} />
-                    {error && <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-xs text-center">{error}</div>}
-                    <SubmitButton isSubmitting={isSubmitting} disabled={isSubmitting || !message.trim()} />
-                </form>
-            </div>
-        </div>
-    );
+    return createPortal(
+        <AnimatePresence>
+            <motion.div
+                className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+            >
+                {/* Backdrop */}
+                <motion.div
+                    className="absolute inset-0 bg-black/50 dark:bg-black/60 backdrop-blur-sm"
+                    onClick={onClose}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                />
 
-    return createPortal(modalContent, document.body);
+                {/* Modal Content */}
+                <motion.div
+                    className="relative w-full sm:max-w-lg bg-surface-1 dark:bg-surface-1-dark rounded-t-3xl sm:rounded-3xl shadow-2xl sm:my-8"
+                    onClick={e => e.stopPropagation()}
+                    initial={{ opacity: 0, y: 100 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 50 }}
+                    transition={{ type: 'spring' as const, damping: 25, stiffness: 300 }}
+                >
+                    <ContactHeader onClose={onClose} />
+                    <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                        <SubjectSelect value={subject} onChange={setSubject} />
+                        <MessageInput value={message} onChange={setMessage} />
+                        <IdentityFields name={name} email={email} onNameChange={setName} onEmailChange={setEmail} />
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="p-3 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-xl text-danger-600 dark:text-danger-400 text-xs text-center"
+                            >
+                                {error}
+                            </motion.div>
+                        )}
+                        <SubmitButton isSubmitting={isSubmitting} disabled={isSubmitting || !message.trim()} />
+                    </form>
+                </motion.div>
+            </motion.div>
+        </AnimatePresence>,
+        document.body
+    );
 };
 
 export default ContactModal;
+

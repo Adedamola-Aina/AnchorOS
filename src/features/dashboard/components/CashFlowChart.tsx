@@ -1,11 +1,13 @@
 /**
  * CashFlowChart - Bar chart showing income vs expense trends
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { AnchorTransaction } from '../../../types';
 import { fromCents } from '../../../utils/moneyUtils';
+import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface CashFlowChartProps {
     financialTrend: { date: string; income: number; expense: number }[];
@@ -37,44 +39,44 @@ export function CashFlowChart({ financialTrend, cashFlowTotals, transactions, fu
 
     return (
         <div className={`glass-card p-6 min-w-0 flex flex-col ${fullWidth ? 'lg:col-span-2' : ''}`}>
-            <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
-                <div>
-                    <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Cash Flow (7 Days)</h4>
-                    <div className="flex gap-4 mt-2">
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase">In</p>
-                            <p className="font-financial font-bold text-emerald-500">₦{cashFlowTotals.income.toLocaleString()}</p>
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase">Out</p>
-                            <p className="font-financial font-bold text-rose-500">₦{cashFlowTotals.expense.toLocaleString()}</p>
-                        </div>
-                    </div>
+            <HStack justify="between" align="start" className="mb-6 gap-4 flex-col sm:flex-row">
+                <VStack gap="sm">
+                    <Text size="xs" weight="bold" variant="muted" className="font-black uppercase tracking-[0.2em]">Cash Flow (7 Days)</Text>
+                    <HStack gap="md" className="mt-2">
+                        <VStack gap="none">
+                            <Text size="xs" weight="bold" variant="muted" className="uppercase">In</Text>
+                            <Text weight="bold" className="font-financial text-finance-500">₦{cashFlowTotals.income.toLocaleString()}</Text>
+                        </VStack>
+                        <VStack gap="none">
+                            <Text size="xs" weight="bold" variant="muted" className="uppercase">Out</Text>
+                            <Text weight="bold" className="font-financial text-danger-500">₦{cashFlowTotals.expense.toLocaleString()}</Text>
+                        </VStack>
+                    </HStack>
                     {transactions.length > 0 && (
-                        <div className="flex items-center gap-2 mt-2 animate-in fade-in slide-in-from-left-2 duration-700 delay-100">
-                            <div className={`flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide gap-1 ${currentNet >= 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
+                        <HStack gap="sm" align="center" className="mt-2 animate-in fade-in slide-in-from-left-2 duration-700 delay-100">
+                            <div className={`flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide gap-1 ${currentNet >= 0 ? 'bg-finance-500/10 text-finance-600 dark:text-finance-400' : 'bg-danger-500/10 text-danger-600 dark:text-danger-400'}`}>
                                 {currentNet >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                 <span>Net: ₦{currentNet.toLocaleString()}</span>
                             </div>
                             {prevNet !== 0 && (
-                                <span className={`text-[10px] font-bold ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                <Text size="xs" weight="bold" className={isPositive ? 'text-finance-500' : 'text-danger-500'}>
                                     {isPositive ? '+' : ''}{percentChange}%
-                                </span>
+                                </Text>
                             )}
-                        </div>
+                        </HStack>
                     )}
-                </div>
-                <div className="flex items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                        <span className="text-slate-500 dark:text-slate-400 font-medium">Income</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-rose-400" />
-                        <span className="text-slate-500 dark:text-slate-400 font-medium">Expense</span>
-                    </div>
-                </div>
-            </div>
+                </VStack>
+                <HStack gap="md" align="center" className="text-xs">
+                    <HStack gap="xs" align="center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-finance-500" />
+                        <Text variant="muted" weight="medium">Income</Text>
+                    </HStack>
+                    <HStack gap="xs" align="center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-danger-400" />
+                        <Text variant="muted" weight="medium">Expense</Text>
+                    </HStack>
+                </HStack>
+            </HStack>
             <div className="flex-1 min-h-[200px] w-full">
                 <ResponsiveContainer width="100%" height="100%" debounce={1}>
                     <BarChart data={financialTrend}>
@@ -94,3 +96,4 @@ export function CashFlowChart({ financialTrend, cashFlowTotals, transactions, fu
         </div>
     );
 }
+

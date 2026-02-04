@@ -1,5 +1,6 @@
 /**
  * BottomNavigation - Mobile bottom tab navigation with micro-animations
+ * DES-002: Migrated to semantic tokens
  * 
  * Per MOBILE_OPTIMIZATION_DIRECTIVE.md Article M3.1
  * Per DESIGN_PHILOSOPHY.md: "Remain visually stable and emotionally calm"
@@ -66,7 +67,7 @@ export const BottomNavigation = ({
         }
         return isActive
             ? 'text-primary-600 dark:text-primary-400'
-            : 'text-slate-400 dark:text-slate-500';
+            : 'text-muted';
     }, [animatingRoute, celebrationColor]);
 
     // Navigation items with custom icon renderers
@@ -118,7 +119,7 @@ export const BottomNavigation = ({
     return (
         <nav
             role="navigation"
-            className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 pb-safe-nav z-40"
+            className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 dark:bg-surface-1-dark/95 backdrop-blur-xl border-t border-border-subtle pb-safe-nav z-40"
             aria-label="Mobile navigation"
         >
             <div className="grid grid-cols-4 h-16">

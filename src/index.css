@@ -16,53 +16,86 @@
     --glass-blur: 12px;
 
     /* Surface hierarchy - Light mode */
-    --surface-1: #f8fafc; /* slate-50: Page background */
-    --surface-2: #ffffff; /* white: Cards, containers */
-    --surface-3: #f1f5f9; /* slate-100: Inputs, modals */
-    --surface-hover: #e2e8f0; /* slate-200: Hover states */
+    --surface-1: #f8fafc;
+    /* slate-50: Page background */
+    --surface-2: #ffffff;
+    /* white: Cards, containers */
+    --surface-3: #f1f5f9;
+    /* slate-100: Inputs, modals */
+    --surface-hover: #e2e8f0;
+    /* slate-200: Hover states */
 
     /* Text hierarchy - Light mode */
-    --foreground: #0f172a; /* slate-900: Primary text */
-    --foreground-muted: #64748b; /* slate-500: Secondary text */
-    --foreground-subtle: #94a3b8; /* slate-400: Tertiary/disabled */
+    --foreground: #0f172a;
+    /* slate-900: Primary text */
+    --foreground-muted: #64748b;
+    /* slate-500: Secondary text */
+    --foreground-subtle: #94a3b8;
+    /* slate-400: Tertiary/disabled */
 
     /* Border colors - Light mode */
-    --border: #e2e8f0; /* slate-200: Default borders */
-    --border-subtle: #f1f5f9; /* slate-100: Subtle dividers */
+    --border: #e2e8f0;
+    /* slate-200: Default borders */
+    --border-subtle: #f1f5f9;
+    /* slate-100: Subtle dividers */
 
     /* Status colors - Light mode */
-    --status-success: #10b981; /* emerald-500 */
-    --status-success-bg: #ecfdf5; /* emerald-50 */
-    --status-danger: #f43f5e; /* rose-500 */
-    --status-danger-bg: #fff1f2; /* rose-50 */
-    --status-warning: #f59e0b; /* amber-500 */
-    --status-warning-bg: #fffbeb; /* amber-50 */
-    --status-info: #3b82f6; /* blue-500 */
-    --status-info-bg: #eff6ff; /* blue-50 */
+    --status-success: #10b981;
+    /* emerald-500 */
+    --status-success-bg: #ecfdf5;
+    /* emerald-50 */
+    --status-danger: #f43f5e;
+    /* rose-500 */
+    --status-danger-bg: #fff1f2;
+    /* rose-50 */
+    --status-warning: #f59e0b;
+    /* amber-500 */
+    --status-warning-bg: #fffbeb;
+    /* amber-50 */
+    --status-info: #3b82f6;
+    /* blue-500 */
+    --status-info-bg: #eff6ff;
+    /* blue-50 */
 
     /* Feature colors */
-    --color-primary: #3b82f6; /* blue-500 */
-    --color-finance: #22c55e; /* green-500 */
-    --color-task: #a855f7; /* purple-500 */
-    --color-family: #f97316; /* orange-500 */
+    --color-primary: #3b82f6;
+    /* blue-500 */
+    --color-finance: #22c55e;
+    /* green-500 */
+    --color-task: #a855f7;
+    /* purple-500 */
+    --color-family: #f97316;
+    /* orange-500 */
 
     /* Focus ring */
-    --focus-ring: #22d3ee; /* cyan-400 */
+    --focus-ring: #22d3ee;
+    /* cyan-400 */
 
     /* Spacing tokens */
-    --space-xs: 0.25rem;  /* 4px */
-    --space-sm: 0.5rem;   /* 8px */
-    --space-md: 1rem;     /* 16px */
-    --space-lg: 1.5rem;   /* 24px */
-    --space-xl: 2rem;     /* 32px */
-    --space-2xl: 3rem;    /* 48px */
+    --space-xs: 0.25rem;
+    /* 4px */
+    --space-sm: 0.5rem;
+    /* 8px */
+    --space-md: 1rem;
+    /* 16px */
+    --space-lg: 1.5rem;
+    /* 24px */
+    --space-xl: 2rem;
+    /* 32px */
+    --space-2xl: 3rem;
+    /* 48px */
 
     /* Radius tokens */
-    --radius-sm: 0.375rem; /* 6px */
-    --radius-md: 0.5rem;   /* 8px */
-    --radius-lg: 0.75rem;  /* 12px */
-    --radius-xl: 1rem;     /* 16px */
-    --radius-2xl: 1.5rem;  /* 24px */
+    --radius-sm: 0.375rem;
+    /* 6px */
+    --radius-md: 0.5rem;
+    /* 8px */
+    --radius-lg: 0.75rem;
+    /* 12px */
+    --radius-xl: 1rem;
+    /* 16px */
+    --radius-2xl: 1.5rem;
+    /* 24px */
 
     /* Shadow tokens */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -77,38 +110,60 @@
     --glass-blur: 20px;
 
     /* Surface hierarchy - Dark mode (Navy nautical theme) */
-    --surface-1: #0a0f1a; /* Deep navy background */
-    --surface-2: #0f172a; /* slate-900: Cards */
-    --surface-3: #1e293b; /* slate-800: Inputs, modals */
-    --surface-hover: #334155; /* slate-700: Hover states */
+    --surface-1: #0a0f1a;
+    /* Deep navy background */
+    --surface-2: #0f172a;
+    /* slate-900: Cards */
+    --surface-3: #1e293b;
+    /* slate-800: Inputs, modals */
+    --surface-hover: #334155;
+    /* slate-700: Hover states */
 
     /* Text hierarchy - Dark mode */
-    --foreground: #f1f5f9; /* slate-100: Primary text */
-    --foreground-muted: #94a3b8; /* slate-400: Secondary text */
-    --foreground-subtle: #64748b; /* slate-500: Tertiary/disabled */
+    --foreground: #f1f5f9;
+    /* slate-100: Primary text */
+    --foreground-muted: #94a3b8;
+    /* slate-400: Secondary text */
+    --foreground-subtle: #64748b;
+    /* slate-500: Tertiary/disabled */
 
     /* Border colors - Dark mode */
-    --border: #334155; /* slate-700 */
-    --border-subtle: #1e293b; /* slate-800 */
+    --border: #334155;
+    /* slate-700 */
+    --border-subtle: #1e293b;
+    /* slate-800 */
 
     /* Status colors - Dark mode (brighter for visibility) */
-    --status-success: #34d399; /* emerald-400 */
-    --status-success-bg: #064e3b; /* emerald-900 */
-    --status-danger: #fb7185; /* rose-400 */
-    --status-danger-bg: #4c0519; /* rose-900 */
-    --status-warning: #fbbf24; /* amber-400 */
-    --status-warning-bg: #78350f; /* amber-900 */
-    --status-info: #60a5fa; /* blue-400 */
-    --status-info-bg: #1e3a8a; /* blue-900 */
+    --status-success: #34d399;
+    /* emerald-400 */
+    --status-success-bg: #064e3b;
+    /* emerald-900 */
+    --status-danger: #fb7185;
+    /* rose-400 */
+    --status-danger-bg: #4c0519;
+    /* rose-900 */
+    --status-warning: #fbbf24;
+    /* amber-400 */
+    --status-warning-bg: #78350f;
+    /* amber-900 */
+    --status-info: #60a5fa;
+    /* blue-400 */
+    --status-info-bg: #1e3a8a;
+    /* blue-900 */
 
     /* Feature colors - Brighter for dark mode */
-    --color-primary: #60a5fa; /* blue-400 */
-    --color-finance: #4ade80; /* green-400 */
-    --color-task: #c084fc; /* purple-400 */
-    --color-family: #fb923c; /* orange-400 */
+    --color-primary: #60a5fa;
+    /* blue-400 */
+    --color-finance: #4ade80;
+    /* green-400 */
+    --color-task: #c084fc;
+    /* purple-400 */
+    --color-family: #fb923c;
+    /* orange-400 */
 
     /* Focus ring - Cyan glow */
-    --focus-ring: #22d3ee; /* cyan-400 */
+    --focus-ring: #22d3ee;
+    /* cyan-400 */
   }
 
   html {
@@ -165,8 +220,12 @@
   }
 
   .glass-card {
-    @apply glass rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300/50 dark:hover:border-white/10;
+    @apply glass rounded-2xl shadow-sm hover:shadow-md dark:hover:border-white/10;
     background-color: var(--surface-2);
+  }
+
+  .glass-card:hover {
+    border-color: rgba(var(--border-subtle-rgb, 241, 245, 249), 0.5);
   }
 
   .dark .glass-card {
@@ -174,11 +233,17 @@
   }
 
   .glass-interactive {
-    @apply glass hover:bg-white/80 dark:hover:bg-slate-800/80 active:scale-[0.98];
+    @apply glass hover:bg-white/80 active:scale-[0.98];
+  }
+
+  .dark .glass-interactive:hover {
+    background-color: rgba(30, 41, 59, 0.8);
+    /* surface-2-dark at 80% */
   }
 
   .premium-gradient {
-    @apply bg-gradient-to-br from-slate-900 via-slate-950 to-black;
+    background: linear-gradient(to bottom right, #0f172a, #020617, #000);
+    /* Maps to: surface-1-dark → surface-base-dark → black */
   }
 
   .vibrant-gradient {
@@ -228,11 +293,11 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 dark:bg-slate-800 rounded-full;
+  @apply bg-surface-3 dark:bg-surface-2-dark rounded-full;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-300 dark:bg-slate-700;
+  @apply bg-surface-hover dark:bg-surface-3-dark;
 }
 
 /* Global scrollbar styling - subtle, thin, rounded */
@@ -246,24 +311,24 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.3);
-  /* slate-400 at 30% */
+  background-color: var(--scrollbar-color, rgba(148, 163, 184, 0.3));
+  /* Uses CSS variable with fallback */
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(148, 163, 184, 0.5);
-  /* slate-400 at 50% */
+  background-color: var(--scrollbar-hover-color, rgba(148, 163, 184, 0.5));
+  /* Uses CSS variable with fallback */
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background-color: rgba(71, 85, 105, 0.4);
-  /* slate-600 at 40% */
+  background-color: var(--scrollbar-color-dark, rgba(71, 85, 105, 0.4));
+  /* Uses CSS variable with fallback */
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(71, 85, 105, 0.6);
-  /* slate-600 at 60% */
+  background-color: var(--scrollbar-hover-color-dark, rgba(71, 85, 105, 0.6));
+  /* Uses CSS variable with fallback */
 }
 
 /* Firefox scrollbar styling */

@@ -1,21 +1,22 @@
 /**
  * SwipeableRow Component
+ * DES-002: Migrated to semantic tokens
+ * WEB-003: Framer Motion spring physics for swipe gestures
  * 
  * A touch-enabled row component that reveals actions when swiped.
  * - Swipe left to reveal right action (e.g., delete)
  * - Swipe right to reveal left action (e.g., edit)
  * 
- * Uses native touch events for optimal mobile performance.
- * No external library dependencies (per AD-2 in mob_opt_phase2_plan.md).
+ * Uses Framer Motion for spring physics and smooth animations.
  * 
  * @module components/mobile/SwipeableRow
  */
 
 import { useState, useRef, useCallback, type ReactNode } from 'react';
-
+import { motion } from 'framer-motion';
 export interface SwipeAction {
   label: string;
-  color: 'blue' | 'red' | 'green' | 'gray';
+  color: 'primary' | 'danger' | 'finance' | 'muted';
   icon?: ReactNode;
 }
 
@@ -34,10 +35,10 @@ const ACTION_WIDTH = 80;
 const DEFAULT_THRESHOLD = 60;
 
 const colorClasses: Record<string, string> = {
-  blue: 'bg-blue-500 text-white',
-  red: 'bg-red-500 text-white',
-  green: 'bg-green-500 text-white',
-  gray: 'bg-gray-500 text-white',
+  primary: 'bg-primary-500 text-white',
+  danger: 'bg-danger-500 text-white',
+  finance: 'bg-finance-500 text-white',
+  muted: 'bg-surface-3 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark',
 };
 
 export function SwipeableRow({
@@ -52,21 +53,21 @@ export function SwipeableRow({
 }: SwipeableRowProps) {
   const [translateX, setTranslateX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const startXRef = useRef(0);
   const currentXRef = useRef(0);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (disabled) return;
-      
+
       // Ignore touch events from interactive elements (inputs, buttons, etc.)
       const target = e.target as HTMLElement;
       const interactiveElements = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'];
       if (interactiveElements.includes(target.tagName) || target.closest('input, textarea, select, button, a, [role="button"]')) {
         return;
       }
-      
+
       startXRef.current = e.touches[0].clientX;
       currentXRef.current = 0;
       setIsDragging(true);
@@ -77,14 +78,14 @@ export function SwipeableRow({
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
       if (disabled || !isDragging) return;
-      
+
       const deltaX = e.touches[0].clientX - startXRef.current;
       currentXRef.current = deltaX;
-      
+
       // Limit swipe distance
       const maxSwipe = ACTION_WIDTH;
       const clampedX = Math.max(-maxSwipe, Math.min(maxSwipe, deltaX));
-      
+
       setTranslateX(clampedX);
     },
     [disabled, isDragging]
@@ -92,11 +93,11 @@ export function SwipeableRow({
 
   const handleTouchEnd = useCallback(() => {
     if (disabled) return;
-    
+
     setIsDragging(false);
-    
+
     const deltaX = currentXRef.current;
-    
+
     // Check if swipe exceeded threshold
     if (Math.abs(deltaX) >= threshold) {
       if (deltaX < 0 && onSwipeLeft) {
@@ -105,7 +106,7 @@ export function SwipeableRow({
         onSwipeRight();
       }
     }
-    
+
     // Reset position with animation
     setTranslateX(0);
   }, [disabled, threshold, onSwipeLeft, onSwipeRight]);
@@ -142,16 +143,17 @@ export function SwipeableRow({
       )}
 
       {/* Content wrapper - matches Card background to hide action buttons when not swiping */}
-      <div
+      <motion.div
         data-testid="swipeable-content"
-        className={`relative bg-white dark:bg-slate-900 rounded-2xl transition-transform ${isDragging ? 'duration-0' : 'duration-200'}`}
-        style={{ transform: `translateX(${translateX}px)` }}
+        className="relative bg-surface-1 dark:bg-surface-1-dark rounded-2xl"
+        animate={{ x: translateX }}
+        transition={isDragging ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 30 }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 }

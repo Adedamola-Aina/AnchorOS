@@ -1,5 +1,11 @@
+/**
+ * OfflineIndicator - Shows online/offline network status
+ * DES-002: Migrated to semantic tokens
+ */
+
 import { useState, useEffect } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
+import { Text, HStack } from '../primitives';
 
 export const OfflineIndicator = () => {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -30,23 +36,26 @@ export const OfflineIndicator = () => {
     if (!show && isOnline) return null;
 
     return (
-        <div
-            className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl flex items-center gap-3 font-bold text-sm shadow-2xl transition-all duration-500 animate-in slide-in-from-bottom-4 ${isOnline
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-900 dark:bg-slate-800 text-white'
+        <HStack
+            gap="sm"
+            align="center"
+            className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl font-bold text-sm shadow-2xl transition-all duration-500 animate-in slide-in-from-bottom-4 ${isOnline
+                ? 'bg-finance-500 text-white'
+                : 'bg-surface-1 dark:bg-surface-2-dark text-white'
                 }`}
         >
             {isOnline ? (
                 <>
                     <Wifi className="w-4 h-4" />
-                    <span>Back Online</span>
+                    <Text weight="bold" className="text-white">Back Online</Text>
                 </>
             ) : (
                 <>
                     <WifiOff className="w-4 h-4 animate-pulse" />
-                    <span>Offline Mode</span>
+                    <Text weight="bold" className="text-white">Offline Mode</Text>
                 </>
             )}
-        </div>
+        </HStack>
     );
 };
+

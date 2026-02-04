@@ -1,7 +1,6 @@
 /**
  * DashboardCharts - Main dashboard visualization component
- * 
- * Refactored per CLAUDE.md 200-line rule.
+ * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { useMemo } from 'react';
@@ -12,6 +11,7 @@ import { AssetDistributionChart } from './components/AssetDistributionChart';
 import { CashFlowChart } from './components/CashFlowChart';
 import { ProductivityScoreCard } from './components/ProductivityScoreCard';
 import { RecentActivityList } from './components/RecentActivityList';
+import { Text } from '../../components/primitives';
 
 interface DashboardChartsProps {
     accounts: AnchorAccount[];
@@ -80,7 +80,7 @@ const DashboardCharts = ({ accounts, transactions, tasks, navigateTo }: Dashboar
     if (accounts.length === 0 && transactions.length === 0) {
         return (
             <div className="glass-card p-12 text-center animate-in fade-in zoom-in-95 duration-700">
-                <p className="text-slate-400 font-medium italic">No financial data available to visualize.</p>
+                <Text variant="muted" weight="medium" className="italic">No financial data available to visualize.</Text>
             </div>
         );
     }
@@ -98,3 +98,4 @@ const DashboardCharts = ({ accounts, transactions, tasks, navigateTo }: Dashboar
 };
 
 export default DashboardCharts;
+

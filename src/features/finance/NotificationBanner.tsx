@@ -78,7 +78,7 @@ export const NotificationBanner = ({ accountId }: NotificationBannerProps) => {
                 return (
                     <div
                         key={latest.id} // Use latest ID as key for group
-                        className="pointer-events-auto bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-primary-100 dark:border-primary-500/30 p-3 rounded-2xl shadow-lg shadow-primary-500/10 flex items-center gap-3 max-w-2xl mx-auto w-full group transition-all hover:scale-[1.01]"
+                        className="pointer-events-auto bg-surface-1/90 dark:bg-surface-2-dark/90 backdrop-blur-md border border-primary-100 dark:border-primary-500/30 p-3 rounded-2xl shadow-lg shadow-primary-500/10 flex items-center gap-3 max-w-2xl mx-auto w-full group transition-all hover:scale-[1.01]"
                     >
                         <div className={`p-2 rounded-xl shrink-0 ${isGroup ? 'bg-primary-500 text-white' : 'bg-primary-50 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400'}`}>
                             {isGroup ? <span className="font-bold text-xs">{count}x</span> : <Bell className="w-4 h-4" />}
@@ -86,22 +86,22 @@ export const NotificationBanner = ({ accountId }: NotificationBannerProps) => {
 
                         <div className="flex-1 min-w-0">
                             {isGroup ? (
-                                <p className="text-sm text-slate-700 dark:text-slate-200">
-                                    <span className="font-bold text-slate-900 dark:text-white">{latest.actorName}</span> added {count} transactions today.
+                                <p className="text-sm text-subtle dark:text-subtle-dark">
+                                    <span className="font-bold text-foreground dark:text-foreground-dark">{latest.actorName}</span> added {count} transactions today.
                                 </p>
                             ) : (
-                                <p className="text-sm text-slate-700 dark:text-slate-200 truncate">
-                                    <span className="font-bold text-slate-900 dark:text-white">{latest.actorName}:</span> {latest.message}
+                                <p className="text-sm text-subtle dark:text-subtle-dark truncate">
+                                    <span className="font-bold text-foreground dark:text-foreground-dark">{latest.actorName}:</span> {latest.message}
                                 </p>
                             )}
-                            <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
+                            <p className="text-[10px] text-muted mt-0.5 font-medium">
                                 {formatDistanceToNow(new Date(latest.date), { addSuffix: true })}
                             </p>
                         </div>
 
                         <button
                             onClick={() => group.forEach(n => markAsRead(n.id))}
-                            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                            className="p-2 text-muted hover:text-subtle dark:hover:text-subtle-dark hover:bg-surface-3 dark:hover:bg-surface-3-dark rounded-lg transition-colors"
                             title="Dismiss"
                         >
                             <X className="w-4 h-4" />
