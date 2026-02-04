@@ -47,15 +47,22 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     loading,
     searchQuery,
     onClearSearch,
-    className = "h-[calc(100vh-320px)] min-h-[400px]",
+    className = "",
 }) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const { isMobile } = useResponsive();
 
+    // Calculate estimated height for content-fit sizing
+    const ITEM_HEIGHT = 88; // Estimated height per item
+    const END_OF_LIST_HEIGHT = 56; // Height of end-of-list indicator
+    const MAX_HEIGHT = typeof window !== 'undefined' ? window.innerHeight - 320 : 600;
+    const contentHeight = transactions.length * ITEM_HEIGHT + END_OF_LIST_HEIGHT;
+    const containerHeight = Math.min(contentHeight, MAX_HEIGHT);
+
     const parentVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 88,
+        estimateSize: () => ITEM_HEIGHT,
         overscan: 5,
     });
 
@@ -88,7 +95,8 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     return (
         <div
             ref={parentRef}
-            className={`bg-transparent overflow-y-auto overscroll-contain ${className} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
+            style={{ height: transactions.length > 0 ? `${containerHeight}px` : 'auto' }}
+            className={`bg-transparent overflow-y-auto overscroll-none ${className} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
         >
             <div
                 style={{
