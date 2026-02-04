@@ -48,7 +48,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
     const amountPrefix = transaction.type === 'expense' ? '-' : transaction.type === 'income' ? '+' : '';
 
     return (
-        <Card className="group p-3 sm:p-4 transition-all hover:border-[var(--border)]">
+        <Card className="group p-3 sm:p-4 transition-all hover:border-border dark:hover:border-border-dark">
             <HStack gap="sm" align="center">
                 {/* Icon */}
                 <CategoryIcon
