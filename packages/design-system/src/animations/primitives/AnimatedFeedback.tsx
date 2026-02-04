@@ -123,6 +123,7 @@ export function AnimatedShake({
 
     useEffect(() => {
         if (trigger && !prefersReducedMotion) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsShaking(true);
             const timer = setTimeout(() => setIsShaking(false), duration);
             return () => clearTimeout(timer);

@@ -45,7 +45,8 @@ export function AnimatedToggle({
 }: AnimatedToggleProps) {
     const prefersReducedMotion = useReducedMotion();
     const sizes = sizeMap[size];
-    const toggleId = id || `toggle-${Math.random().toString(36).slice(2)}`;
+    // eslint-disable-next-line react-hooks/purity
+    const toggleId = React.useMemo(() => id || `toggle-${Math.random().toString(36).slice(2)}`, [id]);
 
     const handleToggle = () => {
         if (!disabled) {
@@ -117,7 +118,8 @@ export function AnimatedIconToggle({
 }: AnimatedIconToggleProps) {
     const prefersReducedMotion = useReducedMotion();
     const sizes = sizeMap[size];
-    const toggleId = id || `icon-toggle-${Math.random().toString(36).slice(2)}`;
+    // eslint-disable-next-line react-hooks/purity
+    const toggleId = React.useMemo(() => id || `icon-toggle-${Math.random().toString(36).slice(2)}`, [id]);
 
     const handleToggle = () => {
         if (!disabled) {

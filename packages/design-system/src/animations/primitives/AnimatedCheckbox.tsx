@@ -45,7 +45,8 @@ export function AnimatedCheckbox({
 }: AnimatedCheckboxProps) {
     const prefersReducedMotion = useReducedMotion();
     const sizes = sizeMap[size];
-    const checkboxId = id || `checkbox-${Math.random().toString(36).slice(2)}`;
+    // eslint-disable-next-line react-hooks/purity
+    const checkboxId = React.useMemo(() => id || `checkbox-${Math.random().toString(36).slice(2)}`, [id]);
 
     return (
         <label
@@ -113,7 +114,8 @@ export function AnimatedCheckboxPath({
     id,
 }: AnimatedCheckboxPathProps) {
     const prefersReducedMotion = useReducedMotion();
-    const checkboxId = id || `checkbox-path-${Math.random().toString(36).slice(2)}`;
+    // eslint-disable-next-line react-hooks/purity
+    const checkboxId = React.useMemo(() => id || `checkbox-path-${Math.random().toString(36).slice(2)}`, [id]);
 
     // SVG path for checkmark (draw animation)
     const checkPath = "M3 12l5 5L18 6";
