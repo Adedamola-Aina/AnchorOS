@@ -162,29 +162,30 @@ function getHistoricalData(weeks = 12) {
     };
 }
 
-// Auto-detect completions from ROADMAP.md (for backfill)
-function autoDetectCompletions(roadmapData) {
+// Auto-detect completions from git-tracked deployed items (replaces ROADMAP.md parsing)
+async function autoDetectCompletions() {
+    const gitData = require('./gitDataProvider');
     const data = readVelocityData();
     const existingIds = new Set(data.completions.map(c => c.itemId));
 
     let newCompletions = 0;
 
-    // Process completed items
-    if (roadmapData.completed && Array.isArray(roadmapData.completed)) {
-        roadmapData.completed.forEach(item => {
-            if (!item || !item.text) return;
+    try {
+        const items = await gitData.getAllTrackedItems(200);
+        const deployedItems = items.filter(i => i.status === 'deployed');
 
-            // Extract ID
-            const idMatch = item.text.match(/\[([A-Z]+-\d+)\]|\*\*([A-Z]+-\d+)\*\*/);
-            const itemId = idMatch ? (idMatch[1] || idMatch[2]) : null;
-
-            if (itemId && !existingIds.has(itemId)) {
-                // Use current date as completion date (could be enhanced to parse from git)
-                const completedDate = new Date().toISOString().split('T')[0];
-                recordCompletion(itemId, completedDate);
+        for (const item of deployedItems) {
+            if (!existingIds.has(item.id)) {
+                // Use the commit date as completion date
+                const completedDate = item.date
+                    ? new Date(item.date).toISOString().split('T')[0]
+                    : new Date().toISOString().split('T')[0];
+                recordCompletion(item.id, completedDate);
                 newCompletions++;
             }
-        });
+        }
+    } catch (error) {
+        console.error('Error auto-detecting completions from git:', error.message);
     }
 
     return newCompletions;

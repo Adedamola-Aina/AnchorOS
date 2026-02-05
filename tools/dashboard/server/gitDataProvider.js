@@ -17,6 +17,16 @@ const deploymentTracker = require('./deploymentTracker');
 
 const git = simpleGit(path.join(__dirname, '../../..'));
 
+// Cache for getAllTrackedItems - avoids repeated git log + ancestry checks
+let itemsCache = null;
+let itemsCacheTime = 0;
+const ITEMS_CACHE_TTL = 120_000; // 2 minutes
+
+function clearItemsCache() {
+    itemsCache = null;
+    itemsCacheTime = 0;
+}
+
 // Load roadmap for title lookup
 function loadRoadmap() {
     try {
@@ -112,6 +122,12 @@ function isDashboardCommit(message) {
  * using git ancestry checks
  */
 async function getAllTrackedItems(limit = 200) {
+    // Return cached data if fresh
+    const now = Date.now();
+    if (itemsCache && (now - itemsCacheTime) < ITEMS_CACHE_TTL && limit <= 200) {
+        return itemsCache;
+    }
+
     try {
         const log = await git.log({ maxCount: limit });
         const items = new Map(); // Use Map for deduplication
@@ -192,7 +208,13 @@ async function getAllTrackedItems(limit = 200) {
             }
         }
 
-        return Array.from(items.values());
+        const result = Array.from(items.values());
+        // Cache the result
+        if (limit <= 200) {
+            itemsCache = result;
+            itemsCacheTime = Date.now();
+        }
+        return result;
     } catch (error) {
         console.error('Error getting tracked items:', error.message);
         return [];
@@ -317,7 +339,7 @@ async function getChangelog(limit = 100) {
     // Group by date (YYYY-MM-DD)
     const grouped = {};
     items.forEach(item => {
-        const date = item.date.split('T')[0];
+        const date = item.date ? item.date.split('T')[0] : 'unknown';
         if (!grouped[date]) {
             grouped[date] = {
                 date,
@@ -329,18 +351,19 @@ async function getChangelog(limit = 100) {
             };
         }
 
-        // Categorize by ID prefix
-        const ids = item.ids || [];
-        const message = item.title || item.message;
-        const entry = { id: ids[0] || null, message, hash: item.hash };
+        // item.id is a string like "BUG-001", item.type is the category
+        const itemId = item.id || null;
+        const message = item.title || item.commitMessage || '';
+        const entry = { id: itemId, message, hash: item.hash };
 
-        if (ids.some(id => id.startsWith('SEC-'))) {
+        // Categorize by item type or ID prefix
+        if (itemId && itemId.startsWith('SEC-')) {
             grouped[date].security.push(entry);
-        } else if (ids.some(id => id.startsWith('BUG-') || id.startsWith('REG-'))) {
+        } else if (item.type === 'bug' || item.type === 'regression') {
             grouped[date].fixes.push(entry);
-        } else if (ids.some(id => id.match(/^(FEAT|UX|PLT|WEB|PWA)-/))) {
+        } else if (['feature', 'enhancement', 'ux', 'gap'].includes(item.type)) {
             grouped[date].features.push(entry);
-        } else if (ids.some(id => id.match(/^(ARCH|ENG|DES)-/))) {
+        } else if (['architecture', 'task'].includes(item.type)) {
             grouped[date].improvements.push(entry);
         } else if (message) {
             grouped[date].other.push(entry);
@@ -371,5 +394,6 @@ module.exports = {
     getChangelog,
     extractIds,
     detectType,
-    isDashboardCommit
+    isDashboardCommit,
+    clearCache: clearItemsCache
 };

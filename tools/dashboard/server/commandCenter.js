@@ -196,6 +196,31 @@ async function getWorkSummary() {
             });
         }
 
+        // Populate upcoming from roadmap.json planned items
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const roadmapPath = path.join(__dirname, 'roadmap.json');
+            const roadmapData = JSON.parse(fs.readFileSync(roadmapPath, 'utf8'));
+            const planned = roadmapData.initiatives
+                .filter(i => i.status === 'planned')
+                .sort((a, b) => {
+                    // P0 first, then P1, etc.
+                    const pOrder = { P0: 0, P1: 1, P2: 2, P3: 3 };
+                    return (pOrder[a.priority] ?? 4) - (pOrder[b.priority] ?? 4);
+                });
+            for (const item of planned.slice(0, 10)) {
+                upcoming.push({
+                    id: item.id,
+                    title: item.title,
+                    type: item.team || 'planned',
+                    priority: item.priority || 'P2'
+                });
+            }
+        } catch (e) {
+            // roadmap.json not available - upcoming stays empty
+        }
+
         return {
             doneThisWeek: doneThisWeek.slice(0, 10),
             inProgress: inProgress.slice(0, 10),
@@ -296,12 +321,14 @@ async function getCommandCenterData() {
 
         // Quick links
         links: {
-            kanban: '/api/kanban-enhanced',
-            bugs: '/api/bugs',
-            roadmap: '/api/roadmap',
-            features: '/api/features',
+            kanban: '/api/git/kanban',
+            bugs: '/api/git/bugs',
+            roadmap: '/api/git/roadmap',
+            features: '/api/git/features',
             parity: '/api/parity',
-            git: '/api/git/timeline'
+            backlog: '/api/git/backlog',
+            changelog: '/api/git/changelog',
+            timeline: '/api/git/timeline'
         }
     };
 }

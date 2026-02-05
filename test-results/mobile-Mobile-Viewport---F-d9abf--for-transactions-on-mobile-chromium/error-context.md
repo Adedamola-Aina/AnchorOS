@@ -1,0 +1,47 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]: DEVELOPMENT ENVIRONMENT
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img [ref=e9]
+        - generic [ref=e12]: Anchor
+      - heading "Welcome back" [level=2] [ref=e13]
+      - paragraph [ref=e14]: Sign into your world
+    - generic [ref=e15]: Limit exceeded. Please check your usage or try again later.
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - text: Email Address
+        - generic [ref=e18]:
+          - img
+          - textbox "you@example.com" [ref=e19]: test@anchor-os.com
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]: Password
+          - button "Forgot?" [ref=e23] [cursor=pointer]
+        - generic [ref=e24]:
+          - img
+          - textbox "••••••••" [ref=e25]: TestPass123!
+          - button "Show password" [ref=e26] [cursor=pointer]:
+            - img [ref=e27]
+      - button "Sign In" [ref=e30] [cursor=pointer]:
+        - img [ref=e31]
+        - generic [ref=e34]: Sign In
+    - generic [ref=e35]:
+      - button "Don't have an account? Sign up" [ref=e36] [cursor=pointer]
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - button "Light theme" [pressed] [ref=e39] [cursor=pointer]:
+            - img [ref=e40]
+          - button "Auto theme" [ref=e46] [cursor=pointer]:
+            - img [ref=e47]
+          - button "Dark theme" [ref=e49] [cursor=pointer]:
+            - img [ref=e50]
+        - paragraph [ref=e52]: © 2026 Anchor OS
+  - generic [ref=e53]:
+    - img [ref=e55]
+    - button "Open Tanstack query devtools" [ref=e103] [cursor=pointer]:
+      - img [ref=e104]
+```

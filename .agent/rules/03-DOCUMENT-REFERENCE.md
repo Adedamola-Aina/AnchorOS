@@ -4,14 +4,17 @@
 
 ---
 
-## 📁 Key Documents (Read on EVERY task)
+## 📁 Key Data Sources (Check on EVERY task)
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **Project Status** | Current sprint, tasks, blockers | `docs/PROJECT_STATUS.md` |
-| **Known Issues** | Active bugs, fixed bugs | `docs/KNOWN_ISSUES.md` |
-| **Roadmap** | Feature plan, priorities | `docs/ROADMAP.md` |
-| **Changelog** | Release history | `CHANGELOG.md` |
+| Source | Purpose | How to Access |
+|--------|---------|---------------|
+| **Command Center** | Unified project view, alerts, velocity | `curl http://localhost:3001/api/command-center` |
+| **Bugs** | All tracked bugs from git history | `curl http://localhost:3001/api/git/bugs` |
+| **Roadmap** | Feature plan, priorities (auto-detected) | `curl http://localhost:3001/api/git/roadmap` |
+| **Changelog** | Auto-generated release history | `curl http://localhost:3001/api/git/changelog` |
+| **Environment Parity** | What's deployed where | `curl http://localhost:3001/api/parity` |
+
+> **Note**: `PROJECT_STATUS.md`, `KNOWN_ISSUES.md`, `ROADMAP.md`, `CHANGELOG.md`, and `DEPLOYMENT_STATUS.md` have been **deleted**. All tracking is now git-automated via the dashboard.
 
 ---
 
@@ -45,5 +48,5 @@
 | Document | Location |
 |----------|----------|
 | Environment Setup | `docs/ENVIRONMENT_SETUP.md` |
-| Deployment Status | `docs/DEPLOYMENT_STATUS.md` |
+| Deployment Parity | Dashboard `/api/parity` (git-based) |
 | Error Handling | `docs/ERROR_HANDLING.md` |

@@ -72,11 +72,11 @@ REFACTOR → Clean up, keep tests green
 
 ## ❌ FORBIDDEN ACTIONS
 
-1. ❌ Start work without reading docs
-2. ❌ Finish work without updating docs
+1. ❌ Start work without checking dashboard (`/api/command-center`)
+2. ❌ Finish work without committing with correct prefix
 3. ❌ Write code without tests
 4. ❌ Deploy to production without staging validation
-5. ❌ Reintroduce bugs from KNOWN_ISSUES.md
+5. ❌ Reintroduce known bugs (check `/api/git/bugs`)
 6. ❌ Use `any` type in TypeScript
 7. ❌ Commit with failing tests
 8. ❌ Skip error handling
@@ -85,12 +85,12 @@ REFACTOR → Clean up, keep tests green
 
 ## ✅ AFTER COMPLETING WORK
 
-**ALWAYS update these files:**
+**Commit with correct prefix** — dashboard auto-updates:
+- `fix: BUG-XXX description` → Bug tracked automatically
+- `feat: FEAT-XXX description` → Feature tracked automatically
+- `deploy(env): vX.X.X @ HASH` → Deployment recorded
 
-1. `docs/PROJECT_STATUS.md` - Mark task complete
-2. `CHANGELOG.md` - Add entry under [Unreleased]
-3. `docs/KNOWN_ISSUES.md` - If bug was fixed
-4. `docs/ROADMAP.md` - If feature was completed
+> **Note**: `PROJECT_STATUS.md`, `KNOWN_ISSUES.md`, `ROADMAP.md`, and `CHANGELOG.md` have been deleted. Git commits with correct prefixes are the single source of truth.
 
 **Run before committing:**
 ```bash
