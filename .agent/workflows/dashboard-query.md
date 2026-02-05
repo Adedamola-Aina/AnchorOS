@@ -4,6 +4,8 @@ description: Query the Internal PM Dashboard for current project state. Use for 
 
 # Dashboard Query Workflow
 
+**Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (browser) | http://localhost:3001 (API)
+
 ## Full Project State Query
 
 Execute these API calls to get complete project state:

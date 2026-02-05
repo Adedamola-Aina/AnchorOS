@@ -4,6 +4,8 @@ description: Force a full context check. Use when you want to verify current pro
 
 # Full Context Check
 
+**Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (browser) | http://localhost:3001 (API)
+
 ## Execute These Steps:
 
 ### 1. Check Project Focus (Dashboard)

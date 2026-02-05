@@ -1,6 +1,6 @@
 # ANCHOR OS VERSIONING POLICY
 
-**Last Updated**: 2026-01-26  
+**Last Updated**: 2026-02-05  
 **Maintained By**: Teeto
 
 ---
@@ -67,9 +67,13 @@ Is it a BUG FIX or HOTFIX?
 
 | Environment | Version | Status |
 |-------------|---------|--------|
-| **Production** | v1.4.0 | Stable |
-| **Staging** | v1.4.0 | Testing |
-| **Development** | v1.5.0-dev | Active |
+| **Production** | v1.5.12 | Stable |
+| **Staging** | v1.5.12 | Reverted (pre-DES-002/WEB-003) |
+| **Development** | v1.5.12 | Reverted (pre-DES-002/WEB-003) |
+
+**Last Updated**: 2026-02-05
+
+**Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (live environment parity)
 
 ---
 
@@ -86,25 +90,27 @@ Features do not have independent version numbers. They ship together as part of 
 
 ## 📝 Version Changelog
 
-All version changes are documented in [CHANGELOG.md](file:///root/anchor-os/CHANGELOG.md).
+~~CHANGELOG.md~~ **Deleted** - Git commits are the source of truth.
+
+View changelog via:
+- **Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ → Git Timeline tab
+- **API**: `curl http://localhost:3001/api/git/changelog`
 
 Each version entry includes:
-- **Added**: New features
-- **Changed**: Enhancements to existing features  
-- **Fixed**: Bug fixes
-- **Removed**: Deprecated features
-- **Security**: Security-related changes
+- **Added**: New features (`feat:` commits)
+- **Changed**: Enhancements (`refactor:`, `perf:` commits)
+- **Fixed**: Bug fixes (`fix:` commits)
+- **Security**: Security-related changes (`SEC-` commits)
 
 ---
 
 ## 🔄 Release Process
 
-1. **Development**: Work on `development` branch (v1.x.x-dev)
-2. **Staging**: Deploy to staging for testing
+1. **Development**: Work on `master` branch
+2. **Staging**: Deploy via `./DEPLOY_PIPELINE.sh --env=staging`
 3. **Version Bump**: Update `package.json` version
-4. **Changelog**: Add release notes to CHANGELOG.md
-5. **Production**: Deploy to production
-6. **Tag**: Git tag with version (e.g., `v1.5.0`)
+4. **Deploy Marker**: Commit with `deploy(env): vX.X.X` format
+5. **Production**: Deploy via `./DEPLOY_PIPELINE.sh --env=production`
 
 ---
 

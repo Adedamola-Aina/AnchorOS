@@ -7,7 +7,7 @@ description: Deep integration with Anchor OS Internal PM Dashboard. Load when wo
 
 ## Overview
 
-The **Internal PM Dashboard** at `http://localhost:3001` is the **SINGLE SOURCE OF TRUTH** for:
+The **Internal PM Dashboard** is the **SINGLE SOURCE OF TRUTH** for:
 - Bug tracking and prioritization
 - Feature requests and backlog
 - Kanban board state
@@ -16,13 +16,17 @@ The **Internal PM Dashboard** at `http://localhost:3001` is the **SINGLE SOURCE 
 - Velocity metrics
 - Documentation health
 
+**Dashboard URLs:**
+- **Browser**: https://anchor.tail2fa2e.ts.net:3443/
+- **Local API**: http://localhost:3001
+
 **ALWAYS check the dashboard before making decisions about bugs, features, or project state.**
 
 ---
 
 ## Dashboard API Reference
 
-Base URL: `http://localhost:3001`
+Base URL: `http://localhost:3001` (local) or `https://anchor.tail2fa2e.ts.net:3443` (remote)
 
 ### Core Data Endpoints
 
