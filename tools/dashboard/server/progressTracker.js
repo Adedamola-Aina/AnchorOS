@@ -1,88 +1,74 @@
 /**
  * progressTracker.js
  * 
- * Tracks task progress by parsing [x]/[/]/[ ] markers in markdown files.
- * Also tracks sprint velocity and completion trends.
+ * Tracks project progress using roadmap.json + git-based data.
+ * Replaced old ROADMAP.md parsing with automated git-based tracking.
  */
 
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
+const gitData = require('./gitDataProvider');
 
-const DOCS_PATH = path.join(__dirname, '../../../docs');
+const ROADMAP_PATH = path.join(__dirname, 'roadmap.json');
 
 /**
- * Parse task markers from markdown content
+ * Load roadmap.json data
  */
-function parseTaskMarkers(content) {
-    const tasks = {
-        done: [],
-        inProgress: [],
-        todo: [],
-        total: 0
-    };
-
-    const lines = content.split('\n');
-    let currentSection = '';
-
-    lines.forEach((line, idx) => {
-        // Track section headers
-        const headerMatch = line.match(/^#{1,3}\s+(.+)/);
-        if (headerMatch) {
-            currentSection = headerMatch[1].trim();
-        }
-
-        // Match task markers: - [x], - [/], - [ ]
-        const taskMatch = line.match(/^(\s*)-\s*\[([ x\/])\]\s+(.+)/);
-        if (taskMatch) {
-            const indent = taskMatch[1].length;
-            const marker = taskMatch[2];
-            const text = taskMatch[3].trim();
-
-            const task = {
-                text,
-                section: currentSection,
-                line: idx + 1,
-                indent
-            };
-
-            if (marker === 'x') {
-                tasks.done.push(task);
-            } else if (marker === '/') {
-                tasks.inProgress.push(task);
-            } else {
-                tasks.todo.push(task);
-            }
-            tasks.total++;
-        }
-    });
-
-    return tasks;
+function loadRoadmap() {
+    try {
+        return JSON.parse(fs.readFileSync(ROADMAP_PATH, 'utf8'));
+    } catch {
+        return { initiatives: [], lastUpdated: null };
+    }
 }
 
 /**
- * Get progress from ROADMAP.md
+ * Get progress from roadmap.json + git data
  */
 async function getRoadmapProgress() {
     try {
-        const content = await fs.readFile(path.join(DOCS_PATH, 'ROADMAP.md'), 'utf-8');
-        const tasks = parseTaskMarkers(content);
+        const roadmap = loadRoadmap();
+        const items = await gitData.getAllTrackedItems(200);
 
-        const completedCount = tasks.done.length;
-        const inProgressCount = tasks.inProgress.length;
-        const todoCount = tasks.todo.length;
+        // Build a set of deployed IDs from git
+        const deployedIds = new Set(
+            items.filter(i => i.status === 'deployed').map(i => i.id.toUpperCase())
+        );
+        const stagingIds = new Set(
+            items.filter(i => i.status === 'staging').map(i => i.id.toUpperCase())
+        );
+
+        // Enrich roadmap initiatives with git status
+        const enriched = roadmap.initiatives.map(init => {
+            const id = init.id.toUpperCase();
+            let status = init.status;
+            if (deployedIds.has(id)) status = 'completed';
+            else if (stagingIds.has(id)) status = 'in-progress';
+            return { ...init, status, gitDetected: status !== init.status };
+        });
+
+        const completed = enriched.filter(i => i.status === 'completed');
+        const inProgress = enriched.filter(i => i.status === 'in-progress');
+        const planned = enriched.filter(i => i.status === 'planned');
 
         return {
-            tasks,
             progress: {
-                completed: completedCount,
-                inProgress: inProgressCount,
-                todo: todoCount,
-                total: tasks.total,
-                percentComplete: tasks.total > 0
-                    ? Math.round((completedCount / tasks.total) * 100)
+                completed: completed.length,
+                inProgress: inProgress.length,
+                todo: planned.length,
+                total: enriched.length,
+                percentComplete: enriched.length > 0
+                    ? Math.round((completed.length / enriched.length) * 100)
                     : 0
             },
-            bySection: groupBySection(tasks)
+            byPriority: {
+                P0: enriched.filter(i => i.priority === 'P0'),
+                P1: enriched.filter(i => i.priority === 'P1'),
+                P2: enriched.filter(i => i.priority === 'P2'),
+                P3: enriched.filter(i => i.priority === 'P3')
+            },
+            byTeam: groupByTeam(enriched),
+            source: 'roadmap.json + git-automated'
         };
     } catch (error) {
         return { error: error.message };
@@ -90,61 +76,61 @@ async function getRoadmapProgress() {
 }
 
 /**
- * Group tasks by section
+ * Group initiatives by team
  */
-function groupBySection(tasks) {
-    const sections = {};
-
-    const addToSection = (task, status) => {
-        if (!sections[task.section]) {
-            sections[task.section] = { done: 0, inProgress: 0, todo: 0 };
-        }
-        sections[task.section][status]++;
-    };
-
-    tasks.done.forEach(t => addToSection(t, 'done'));
-    tasks.inProgress.forEach(t => addToSection(t, 'inProgress'));
-    tasks.todo.forEach(t => addToSection(t, 'todo'));
-
-    return sections;
+function groupByTeam(initiatives) {
+    const teams = {};
+    for (const init of initiatives) {
+        const team = init.team || 'Unknown';
+        if (!teams[team]) teams[team] = { completed: 0, inProgress: 0, planned: 0 };
+        if (init.status === 'completed') teams[team].completed++;
+        else if (init.status === 'in-progress') teams[team].inProgress++;
+        else teams[team].planned++;
+    }
+    return teams;
 }
 
 /**
- * Detect stale tasks (in-progress for more than 7 days)
+ * Detect stale items (in-progress for extended periods)
  */
 async function detectStaleTasks() {
     try {
-        const roadmapPath = path.join(DOCS_PATH, 'ROADMAP.md');
-        const { mtime } = await fs.stat(roadmapPath);
-        const content = await fs.readFile(roadmapPath, 'utf-8');
-        const tasks = parseTaskMarkers(content);
-
-        // Check if file hasn't been updated in 7+ days
-        const daysSinceUpdate = Math.floor((Date.now() - new Date(mtime)) / (1000 * 60 * 60 * 24));
-
+        const items = await gitData.getAllTrackedItems(200);
         const alerts = [];
 
-        if (tasks.inProgress.length > 0 && daysSinceUpdate > 7) {
+        // Check items in staging for more than 7 days
+        const now = new Date();
+        const stagingItems = items.filter(i => i.status === 'staging');
+        const oldStagingItems = stagingItems.filter(i => {
+            const itemDate = new Date(i.date);
+            const daysSince = Math.floor((now - itemDate) / (1000 * 60 * 60 * 24));
+            return daysSince > 7;
+        });
+
+        if (oldStagingItems.length > 0) {
             alerts.push({
-                type: 'stale_tasks',
-                message: `${tasks.inProgress.length} tasks in-progress but ROADMAP not updated in ${daysSinceUpdate} days`,
-                severity: 'warning'
+                type: 'stale_staging',
+                message: `${oldStagingItems.length} items in staging for 7+ days`,
+                severity: 'warning',
+                items: oldStagingItems.slice(0, 5).map(i => i.id)
             });
         }
 
-        if (tasks.inProgress.length > 5) {
+        // Check for too many in-progress items
+        const devItems = items.filter(i => i.status === 'dev');
+        if (devItems.length > 5) {
             alerts.push({
                 type: 'too_many_wip',
-                message: `${tasks.inProgress.length} tasks in-progress simultaneously (limit: 5)`,
+                message: `${devItems.length} items in dev only (limit: 5)`,
                 severity: 'warning'
             });
         }
 
         return {
             alerts,
-            inProgressCount: tasks.inProgress.length,
-            daysSinceUpdate,
-            lastUpdated: mtime
+            stagingCount: stagingItems.length,
+            devOnlyCount: devItems.length,
+            lastChecked: now.toISOString()
         };
     } catch (error) {
         return { error: error.message };
@@ -163,6 +149,7 @@ async function getProgressReport() {
     return {
         roadmap,
         stale,
+        source: 'git-automated',
         lastChecked: new Date().toISOString()
     };
 }
@@ -170,6 +157,5 @@ async function getProgressReport() {
 module.exports = {
     getRoadmapProgress,
     detectStaleTasks,
-    getProgressReport,
-    parseTaskMarkers
+    getProgressReport
 };

@@ -839,12 +839,11 @@ app.post('/api/velocity/predict', (req, res) => {
 
 /**
  * POST /api/velocity/auto-detect
- * Auto-detect completions from ROADMAP.md
+ * Auto-detect completions from git-tracked deployed items
  */
 app.post('/api/velocity/auto-detect', async (req, res) => {
     try {
-        const roadmapData = await readDoc('ROADMAP.md');
-        const newCompletions = autoDetectCompletions(roadmapData);
+        const newCompletions = await autoDetectCompletions();
         res.json({ success: true, newCompletions });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -913,18 +912,26 @@ app.get('/api/archive/preview', (req, res) => {
 
 /**
  * GET /api/bugs/priority-suggestions
- * Returns priority suggestions for all bugs
+ * Returns priority suggestions for all bugs (git-automated)
  */
 app.get('/api/bugs/priority-suggestions', async (req, res) => {
     try {
-        const knownIssuesData = await readDoc('KNOWN_ISSUES.md');
-        const suggestions = analyzeBugsFromKnownIssues(knownIssuesData);
-        const stats = getPrioritySuggestionStats(suggestions);
+        const bugs = await gitData.getBugs();
+        // Map git bugs to priority suggestion format
+        const suggestions = bugs.map(bug => ({
+            id: bug.id,
+            title: bug.title,
+            currentStatus: bug.status,
+            suggestedPriority: bug.status === 'dev' ? 'P0' : bug.status === 'staging' ? 'P1' : 'P2',
+            reason: bug.status === 'deployed' ? 'Already deployed' : `Pending deploy (${bug.status})`
+        }));
+        const stats = {
+            total: suggestions.length,
+            deployed: bugs.filter(b => b.status === 'deployed').length,
+            pending: bugs.filter(b => b.status !== 'deployed').length
+        };
 
-        res.json({
-            suggestions,
-            stats
-        });
+        res.json({ source: 'git-automated', suggestions, stats });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -958,42 +965,23 @@ app.get('/api/docs/sync/status', (req, res) => {
 
 /**
  * GET /api/summary
- * Returns combined dashboard summary
+ * Returns combined dashboard summary (git-automated)
  */
 app.get('/api/summary', async (req, res) => {
     try {
-        const [roadmap, bugs, board, parity, repoStats] = await Promise.all([
-            readDoc('ROADMAP.md'),
-            readDoc('KNOWN_ISSUES.md'),
-            getProjectBoard(),
+        const [kanban, bugs, features, parity, repoStats] = await Promise.all([
+            gitData.getKanbanData(),
+            gitData.getBugs(),
+            gitData.getFeatures(),
             checkEnvParity(),
             getRepoStats()
         ]);
 
-        // Build projectStatus from ROADMAP.md instead of non-existent PROJECT_STATUS.md
-        const roadmapData = roadmap.parsed || {};
-        const projectStatus = {
-            currentFocus: roadmapData.currentFocus || '',
-            successCriteria: roadmapData.successCriteria || [],
-            inProgress: roadmapData.inProgress || [],
-            completed: roadmapData.completed || [],
-            criticalBugs: (bugs.parsed?.critical || []).map(bug => ({
-                id: bug.id,
-                description: bug.title
-            }))
-        };
-
-        // Calculate success criteria progress
-        const totalCriteria = projectStatus.successCriteria.length;
-        const completedCriteria = projectStatus.successCriteria.filter(c => c.status === 'done').length;
-        const criteriaProgress = totalCriteria > 0 ? Math.round((completedCriteria / totalCriteria) * 100) : 0;
-
         res.json({
-            projectStatus,
-            roadmap: roadmapData,
-            criteriaProgress,
-            bugs: bugs.parsed,
-            kanban: board.parsed,
+            source: 'git-automated',
+            kanban: kanban.summary,
+            bugs: { count: bugs.length, bugs: bugs.slice(0, 10) },
+            features: { count: features.length, features: features.slice(0, 10) },
             parity: parity.summary,
             git: repoStats,
             lastRefresh: new Date().toISOString()
@@ -1005,15 +993,24 @@ app.get('/api/summary', async (req, res) => {
 
 /**
  * POST /api/refresh
- * Trigger manual data refresh (cache invalidation if implemented)
+ * Trigger manual data refresh - clears all caches
  */
 app.post('/api/refresh', (req, res) => {
-    // In a full implementation, this would clear caches
-    res.json({
-        success: true,
-        message: 'Data refreshed',
-        timestamp: new Date().toISOString()
-    });
+    try {
+        const deploymentTracker = require('./deploymentTracker');
+        // Clear deployment tracker ancestry cache
+        deploymentTracker.clearCache();
+        // Clear git data provider items cache
+        gitData.clearCache();
+        res.json({
+            success: true,
+            message: 'All caches cleared',
+            clearedCaches: ['deploymentTracker', 'gitDataProvider'],
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 /**
@@ -1037,19 +1034,15 @@ cron.schedule('0 2 * * *', () => {
 });
 
 /**
- * Schedule hourly documentation sync
+ * Schedule hourly velocity auto-detection from git
  */
 cron.schedule('0 * * * *', async () => {
-    console.log('[CRON] Running hourly documentation sync...');
+    console.log('[CRON] Running hourly velocity auto-detect...');
     try {
-        const results = await runFullSync();
-        console.log('[CRON] Doc sync complete:', {
-            velocity: results.velocity.newCompletions || 0,
-            priority: results.priority.totalBugs || 0,
-            archive: results.archive.archivedCount || 0
-        });
+        const newCompletions = await autoDetectCompletions();
+        console.log(`[CRON] Auto-detect complete: ${newCompletions} new completions recorded`);
     } catch (error) {
-        console.error('[CRON] Doc sync failed:', error.message);
+        console.error('[CRON] Auto-detect failed:', error.message);
     }
 });
 
@@ -1061,14 +1054,14 @@ const server = app.listen(PORT, () => {
 ║                                                                ║
 ║  📊 Dashboard: http://localhost:${PORT}                        ║
 ║  🔄 Auto-refresh: Enabled                                      ║
-║  📁 Watching: ROADMAP.md, KNOWN_ISSUES.md, FEATURE_SUGGESTIONS ║
+║  📁 Data Source: Git History + roadmap.json (auto-detected)    ║
 ║                                                                ║
 ║  ⚡ Features:                                                   ║
-║     • Velocity Tracking (auto-detect completions)             ║
+║     • Git-Based Tracking (zero manual maintenance)            ║
+║     • Deployment Ancestry (git merge-base)                    ║
+║     • Velocity Auto-Detect (from git deploys)                 ║
 ║     • Auto-Archive (daily at 2 AM)                            ║
-║     • Bug Prioritization (ML-based)                           ║
-║     • Doc Sync (hourly at :00)                                ║
-║     • Real-time File Watching (instant updates)               ║
+║     • Environment Parity (3-env tracking)                     ║
 ╚════════════════════════════════════════════════════════════════╝
     `);
 
@@ -1116,22 +1109,6 @@ process.on('SIGINT', () => {
     stopFileWatchers();
     server.close(() => {
         console.log('[SHUTDOWN] Server closed');
-        process.exit(0);
-    });
-});
-
-// Graceful shutdown
-process.on('SIGINT', () => {
-    console.log('\n🛑 Shutting down dashboard...');
-    server.close(() => {
-        console.log('✅ Dashboard stopped gracefully');
-        process.exit(0);
-    });
-});
-
-process.on('SIGTERM', () => {
-    console.log('\n🛑 Received SIGTERM, shutting down...');
-    server.close(() => {
         process.exit(0);
     });
 });

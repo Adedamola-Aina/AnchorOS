@@ -26,7 +26,7 @@ Generated: [current date/time]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📌 CURRENT SPRINT
-[Sprint name/focus from PROJECT_STATUS.md]
+[From /api/command-center work section]
 
 📝 TASKS
 - In Progress: [count]
@@ -34,19 +34,31 @@ Generated: [current date/time]
 - Blocked: [count]
 
 🐛 BUGS
-- P0 (Critical): [count] 
+- P0 (Critical): [count] [list if any]
 - P1 (High): [count]
 - P2 (Medium): [count]
 
-🚀 DEPLOYMENT
-- Production: v[X.X.X] ([date])
-- Staging: v[X.X.X] ([date])
+✨ FEATURE BACKLOG
+- High Priority: [count]
+- Medium Priority: [count]
+- Low Priority: [count]
 
-⚠️ BLOCKERS
-[List any blockers or "None"]
+🚀 ENVIRONMENT PARITY
+| Feature      | Dev | Staging | Prod |
+|--------------|-----|---------|------|
+| [feature 1]  | ✅  | ✅      | ❌   |
+| [feature 2]  | ✅  | ❌      | ❌   |
+
+⚠️ ALERTS
+[List any critical or warning alerts]
+
+📈 VELOCITY
+- This Week: [X] items completed
+- Average: [Y] items/week
+- Trend: [Up/Down/Stable]
 
 📋 NEXT UP
-[Top priority from ROADMAP.md]
+[Top priority from /api/command-center upcoming items]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

@@ -34,13 +34,426 @@
       "cycleTime": 1,
       "recordedAt": "2026-01-28T07:35:00.000Z",
       "description": "Mobile Optimization Phase 2 complete - 67 new tests"
+    },
+    {
+      "itemId": "e95b849",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.362Z"
+    },
+    {
+      "itemId": "BUG-027",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.362Z"
+    },
+    {
+      "itemId": "BUG-025",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.363Z"
+    },
+    {
+      "itemId": "BUG-026",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "UX-023",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "PWA-006",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "cdfc1f8",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "88223df",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "TASK-002",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "GAP-002",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "GAP-003",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "GAP-004",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "BUG-024",
+      "completedDate": "2026-02-01",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "UX-019",
+      "completedDate": "2026-01-31",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "BUG-023",
+      "completedDate": "2026-01-31",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.364Z"
+    },
+    {
+      "itemId": "UX-020",
+      "completedDate": "2026-01-31",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "REGRESSION-003",
+      "completedDate": "2026-01-31",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "f866a46",
+      "completedDate": "2026-01-31",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "BUG-021",
+      "completedDate": "2026-01-30",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "f0df243",
+      "completedDate": "2026-01-30",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "BUG-020",
+      "completedDate": "2026-01-30",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "BUG-019",
+      "completedDate": "2026-01-30",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "BUG-018",
+      "completedDate": "2026-01-30",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "131cdb1",
+      "completedDate": "2026-01-29",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "899ee63",
+      "completedDate": "2026-01-29",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.365Z"
+    },
+    {
+      "itemId": "BUG-017",
+      "completedDate": "2026-01-29",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "BUG-016",
+      "completedDate": "2026-01-29",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "BUG-015",
+      "completedDate": "2026-01-29",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "FIN-003",
+      "completedDate": "2026-01-29",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "0ef2bbe",
+      "completedDate": "2026-01-29",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "a232e4d",
+      "completedDate": "2026-01-29",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "1744b61",
+      "completedDate": "2026-01-28",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "6cfcb8e",
+      "completedDate": "2026-01-28",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "66d5ca1",
+      "completedDate": "2026-01-28",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "4fd59c7",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.366Z"
+    },
+    {
+      "itemId": "UX-002",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.368Z"
+    },
+    {
+      "itemId": "UX-014",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.368Z"
+    },
+    {
+      "itemId": "UX-013",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "UX-011",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "UX-001",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "ARCH-002",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "ARCH-003",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "ARCH-001",
+      "completedDate": "2026-01-27",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "GAP-001",
+      "completedDate": "2026-01-26",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "c15411e",
+      "completedDate": "2026-01-26",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "b2c74e1",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.369Z"
+    },
+    {
+      "itemId": "cb128c6",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.370Z"
+    },
+    {
+      "itemId": "91078c3",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.370Z"
+    },
+    {
+      "itemId": "b0963e4",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.370Z"
+    },
+    {
+      "itemId": "7fe6955",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.370Z"
+    },
+    {
+      "itemId": "15a20eb",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.370Z"
+    },
+    {
+      "itemId": "a6ccfda",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.370Z"
+    },
+    {
+      "itemId": "5659747",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.370Z"
+    },
+    {
+      "itemId": "9ad326a",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.370Z"
+    },
+    {
+      "itemId": "f2760cb",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "dfdc87b",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "cd39038",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "f521904",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "1b54a5d",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "cf8bd90",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "0f058ba",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "6bab5a4",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "51c9276",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "30f9dda",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.371Z"
+    },
+    {
+      "itemId": "d0110f2",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.372Z"
+    },
+    {
+      "itemId": "5b4e469",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.372Z"
+    },
+    {
+      "itemId": "dfd7983",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.372Z"
+    },
+    {
+      "itemId": "12a29cd",
+      "completedDate": "2026-01-24",
+      "cycleTime": null,
+      "recordedAt": "2026-02-05T19:22:49.372Z"
     }
   ],
   "weeklyStats": [
     {
+      "week": "2026-W04",
+      "completed": 23,
+      "velocity": 23
+    },
+    {
       "week": "2026-W05",
-      "completed": 5,
-      "velocity": 5.0
+      "completed": 50,
+      "velocity": 50
     }
   ]
 }

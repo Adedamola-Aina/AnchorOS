@@ -1,0 +1,61 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]: DEVELOPMENT ENVIRONMENT
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - img [ref=e7]
+        - img [ref=e9]
+      - img [ref=e13]
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - img [ref=e18]
+          - generic [ref=e21]: Anchor
+        - heading "Stay grounded. Track what matters." [level=2] [ref=e22]:
+          - text: Stay grounded.
+          - text: Track what matters.
+        - paragraph [ref=e23]: Your personal operating system for habits, finances, and intentional living.
+      - paragraph [ref=e25]: Built for Intentionality
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - img [ref=e30]
+          - generic [ref=e33]: Anchor
+        - heading "Welcome back" [level=2] [ref=e34]
+        - paragraph [ref=e35]: Sign into your world
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - text: Email Address
+          - generic [ref=e38]:
+            - img
+            - textbox "you@example.com" [ref=e39]
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]: Password
+            - button "Forgot?" [ref=e43] [cursor=pointer]
+          - generic [ref=e44]:
+            - img
+            - textbox "••••••••" [ref=e45]
+            - button "Show password" [ref=e46] [cursor=pointer]:
+              - img [ref=e47]
+        - button "Sign In" [ref=e50] [cursor=pointer]:
+          - img [ref=e51]
+          - generic [ref=e54]: Sign In
+      - generic [ref=e55]:
+        - button "Don't have an account? Sign up" [ref=e56] [cursor=pointer]
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - button "Light theme" [pressed] [ref=e59] [cursor=pointer]:
+              - img [ref=e60]
+            - button "Auto theme" [ref=e66] [cursor=pointer]:
+              - img [ref=e67]
+            - button "Dark theme" [ref=e69] [cursor=pointer]:
+              - img [ref=e70]
+          - paragraph [ref=e72]: © 2026 Anchor OS
+  - generic [ref=e73]:
+    - img [ref=e75]
+    - button "Open Tanstack query devtools" [ref=e123] [cursor=pointer]:
+      - img [ref=e124]
+```

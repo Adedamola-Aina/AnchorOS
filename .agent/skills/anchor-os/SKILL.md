@@ -52,11 +52,16 @@ description: Deep context about Anchor OS project. Load when working on architec
 - `firestore.indexes.json` - Database indexes
 
 ### Documentation
-- `docs/PROJECT_STATUS.md` - Current state
-- `docs/ROADMAP.md` - Feature planning
-- `docs/KNOWN_ISSUES.md` - Bug tracking
 - `docs/ARCHITECTURE_OVERVIEW.md` - System design
 - `docs/FIRESTORE_SCHEMA.md` - Database schema
+- `docs/TESTING_STRATEGY.md` - Testing approach
+- `docs/SECURITY.md` - Security model
+
+### Tracking (Git-Automated)
+- **Dashboard**: `curl http://localhost:3001/api/command-center`
+- **Bugs**: `curl http://localhost:3001/api/git/bugs` (from git history)
+- **Roadmap**: `curl http://localhost:3001/api/git/roadmap` (from `roadmap.json` + git)
+- **Parity**: `curl http://localhost:3001/api/parity` (git ancestry-based)
 
 ### Core Code
 - `src/services/` - Business logic services

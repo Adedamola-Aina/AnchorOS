@@ -18,27 +18,27 @@ Returns: Sprint focus, alerts, health metrics, velocity
 
 ### 2. Bug Status
 ```bash
-curl http://localhost:3001/api/bugs
+curl http://localhost:3001/api/git/bugs
 ```
-Returns: All bugs by priority (P0, P1, P2)
+Returns: All bugs from git history (BUG-XXX, REG-XXX)
 
 ### 3. Feature Backlog
 ```bash
-curl http://localhost:3001/api/features
+curl http://localhost:3001/api/git/features
 ```
-Returns: Feature requests and suggestions
+Returns: All features from git history
 
 ### 4. Kanban Board
 ```bash
-curl http://localhost:3001/api/kanban-enhanced
+curl http://localhost:3001/api/git/kanban
 ```
-Returns: Combined bugs + features board
+Returns: Kanban board from git (todo/in-progress/staging/done)
 
 ### 5. Environment Parity
 ```bash
 curl http://localhost:3001/api/parity
 ```
-Returns: What's deployed in Dev/Staging/Production
+Returns: What's deployed in Dev/Staging/Production (git ancestry)
 
 ### 6. Alerts
 ```bash

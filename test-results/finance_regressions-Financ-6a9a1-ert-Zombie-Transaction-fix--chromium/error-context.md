@@ -1,0 +1,478 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]: DEVELOPMENT ENVIRONMENT
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic [ref=e6]:
+        - heading "Anchor" [level=1] [ref=e7]:
+          - img [ref=e8]
+          - text: Anchor
+        - paragraph [ref=e11]: Anchor v1.5.12
+      - navigation [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - generic [ref=e14]:
+            - img [ref=e15]
+            - generic [ref=e20]: Dashboard
+        - link "Commitments" [ref=e21] [cursor=pointer]:
+          - /url: /commitments
+          - generic [ref=e22]:
+            - img [ref=e23]
+            - generic [ref=e26]: Commitments
+        - link "Finance" [ref=e27] [cursor=pointer]:
+          - /url: /finance
+          - generic [ref=e28]:
+            - img [ref=e29]
+            - generic [ref=e31]: Finance
+        - link "System *" [ref=e33] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e34]:
+            - img [ref=e35]
+            - generic [ref=e38]: System
+          - generic [ref=e39]: "*"
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic [ref=e43]: TE
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: test
+            - paragraph [ref=e46]: test@anchor-os.com
+        - button "Sign Out" [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+    - main [ref=e51]:
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - heading "Finance" [level=2] [ref=e57]
+            - paragraph [ref=e58]: Multi-account asset management and cashflow tracking.
+          - button "Add Account" [ref=e59] [cursor=pointer]:
+            - img [ref=e60]
+            - generic [ref=e62]: Add Account
+        - generic [ref=e64]:
+          - img [ref=e66]
+          - text: Net Worth (NGN)
+          - heading "₦23.9K" [level=2] [ref=e68]
+        - generic [ref=e69]:
+          - generic [ref=e70] [cursor=pointer]:
+            - img [ref=e73]
+            - generic [ref=e76]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e78]
+              - paragraph [ref=e79]: ₦100.00
+              - generic [ref=e80]:
+                - generic [ref=e81]: checking
+                - generic [ref=e82]: NGN
+          - generic [ref=e83] [cursor=pointer]:
+            - img [ref=e86]
+            - generic [ref=e89]:
+              - heading "TransAcc1-1770132706387" [level=3] [ref=e91]
+              - paragraph [ref=e92]: ₦1,000.00
+              - generic [ref=e93]:
+                - generic [ref=e94]: checking
+                - generic [ref=e95]: NGN
+          - generic [ref=e96] [cursor=pointer]:
+            - img [ref=e99]
+            - generic [ref=e102]:
+              - heading "TransAcc2-1769184426988" [level=3] [ref=e104]
+              - paragraph [ref=e105]: ₦500.00
+              - generic [ref=e106]:
+                - generic [ref=e107]: checking
+                - generic [ref=e108]: NGN
+          - generic [ref=e109] [cursor=pointer]:
+            - img [ref=e112]
+            - generic [ref=e115]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e117]
+              - paragraph [ref=e118]: ₦100.00
+              - generic [ref=e119]:
+                - generic [ref=e120]: checking
+                - generic [ref=e121]: NGN
+          - generic [ref=e122] [cursor=pointer]:
+            - img [ref=e125]
+            - generic [ref=e128]:
+              - heading "💰 Special-1770244451502" [level=3] [ref=e130]
+              - paragraph [ref=e131]: ₦50.00
+              - generic [ref=e132]:
+                - generic [ref=e133]: checking
+                - generic [ref=e134]: NGN
+          - generic [ref=e135] [cursor=pointer]:
+            - img [ref=e138]
+            - generic [ref=e141]:
+              - heading "💰 Special-1769723709724" [level=3] [ref=e143]
+              - paragraph [ref=e144]: ₦50.00
+              - generic [ref=e145]:
+                - generic [ref=e146]: checking
+                - generic [ref=e147]: NGN
+          - generic [ref=e148] [cursor=pointer]:
+            - img [ref=e151]
+            - generic [ref=e154]:
+              - heading "💰 Special-1769184031561" [level=3] [ref=e156]
+              - paragraph [ref=e157]: ₦50.00
+              - generic [ref=e158]:
+                - generic [ref=e159]: checking
+                - generic [ref=e160]: NGN
+          - generic [ref=e161] [cursor=pointer]:
+            - img [ref=e164]
+            - generic [ref=e167]:
+              - heading "Delete Test 1769195852711" [level=3] [ref=e169]
+              - paragraph [ref=e170]: ₦0.00
+              - generic [ref=e171]:
+                - generic [ref=e172]: checking
+                - generic [ref=e173]: NGN
+          - generic [ref=e174] [cursor=pointer]:
+            - img [ref=e177]
+            - generic [ref=e180]:
+              - heading "TransAcc1-1769724357210" [level=3] [ref=e182]
+              - paragraph [ref=e183]: ₦1,000.00
+              - generic [ref=e184]:
+                - generic [ref=e185]: checking
+                - generic [ref=e186]: NGN
+          - generic [ref=e187] [cursor=pointer]:
+            - img [ref=e190]
+            - generic [ref=e193]:
+              - heading "TransAcc2-1769724357210" [level=3] [ref=e195]
+              - paragraph [ref=e196]: ₦500.00
+              - generic [ref=e197]:
+                - generic [ref=e198]: checking
+                - generic [ref=e199]: NGN
+          - generic [ref=e200] [cursor=pointer]:
+            - img [ref=e203]
+            - generic [ref=e206]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e208]
+              - paragraph [ref=e209]: ₦100.00
+              - generic [ref=e210]:
+                - generic [ref=e211]: checking
+                - generic [ref=e212]: NGN
+          - generic [ref=e213] [cursor=pointer]:
+            - img [ref=e216]
+            - generic [ref=e219]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e221]
+              - paragraph [ref=e222]: ₦100.00
+              - generic [ref=e223]:
+                - generic [ref=e224]: checking
+                - generic [ref=e225]: NGN
+          - generic [ref=e226] [cursor=pointer]:
+            - img [ref=e229]
+            - generic [ref=e232]:
+              - heading "TransAcc2-1770244463215" [level=3] [ref=e234]
+              - paragraph [ref=e235]: ₦500.00
+              - generic [ref=e236]:
+                - generic [ref=e237]: checking
+                - generic [ref=e238]: NGN
+          - generic [ref=e239] [cursor=pointer]:
+            - img [ref=e242]
+            - generic [ref=e245]:
+              - heading "💰 Special-1770132694865" [level=3] [ref=e247]
+              - paragraph [ref=e248]: ₦50.00
+              - generic [ref=e249]:
+                - generic [ref=e250]: checking
+                - generic [ref=e251]: NGN
+          - generic [ref=e252] [cursor=pointer]:
+            - img [ref=e255]
+            - generic [ref=e258]:
+              - heading "Delete Test 1770246823998" [level=3] [ref=e260]
+              - paragraph [ref=e261]: ₦0.00
+              - generic [ref=e262]:
+                - generic [ref=e263]: checking
+                - generic [ref=e264]: NGN
+          - generic [ref=e265] [cursor=pointer]:
+            - img [ref=e268]
+            - generic [ref=e271]:
+              - heading "TransAcc1-1770244498084" [level=3] [ref=e273]
+              - paragraph [ref=e274]: ₦1,000.00
+              - generic [ref=e275]:
+                - generic [ref=e276]: checking
+                - generic [ref=e277]: NGN
+          - generic [ref=e278] [cursor=pointer]:
+            - img [ref=e281]
+            - generic [ref=e284]:
+              - heading "Delete Test 1769187876011" [level=3] [ref=e286]
+              - paragraph [ref=e287]: ₦0.00
+              - generic [ref=e288]:
+                - generic [ref=e289]: checking
+                - generic [ref=e290]: NGN
+          - generic [ref=e291] [cursor=pointer]:
+            - img [ref=e294]
+            - generic [ref=e297]:
+              - heading "💰 Special-1770116997640" [level=3] [ref=e299]
+              - paragraph [ref=e300]: ₦50.00
+              - generic [ref=e301]:
+                - generic [ref=e302]: checking
+                - generic [ref=e303]: NGN
+          - generic [ref=e304] [cursor=pointer]:
+            - img [ref=e307]
+            - generic [ref=e310]:
+              - heading "💰 Special-1769439295072" [level=3] [ref=e312]
+              - paragraph [ref=e313]: ₦50.00
+              - generic [ref=e314]:
+                - generic [ref=e315]: checking
+                - generic [ref=e316]: NGN
+          - generic [ref=e317] [cursor=pointer]:
+            - img [ref=e320]
+            - generic [ref=e323]:
+              - heading "TransAcc1-1769184047491" [level=3] [ref=e325]
+              - paragraph [ref=e326]: ₦1,000.00
+              - generic [ref=e327]:
+                - generic [ref=e328]: checking
+                - generic [ref=e329]: NGN
+          - generic [ref=e330] [cursor=pointer]:
+            - img [ref=e333]
+            - generic [ref=e336]:
+              - heading "Delete Test 1769195666617" [level=3] [ref=e338]
+              - paragraph [ref=e339]: ₦0.00
+              - generic [ref=e340]:
+                - generic [ref=e341]: checking
+                - generic [ref=e342]: NGN
+          - generic [ref=e343] [cursor=pointer]:
+            - img [ref=e346]
+            - generic [ref=e349]:
+              - heading "💰 Special-1769184307738" [level=3] [ref=e351]
+              - paragraph [ref=e352]: ₦50.00
+              - generic [ref=e353]:
+                - generic [ref=e354]: checking
+                - generic [ref=e355]: NGN
+          - generic [ref=e356] [cursor=pointer]:
+            - img [ref=e359]
+            - generic [ref=e362]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e364]
+              - paragraph [ref=e365]: ₦100.00
+              - generic [ref=e366]:
+                - generic [ref=e367]: checking
+                - generic [ref=e368]: NGN
+          - generic [ref=e369] [cursor=pointer]:
+            - img [ref=e372]
+            - generic [ref=e375]:
+              - heading "Delete Test 1769193844456" [level=3] [ref=e377]
+              - paragraph [ref=e378]: ₦0.00
+              - generic [ref=e379]:
+                - generic [ref=e380]: checking
+                - generic [ref=e381]: NGN
+          - generic [ref=e382] [cursor=pointer]:
+            - img [ref=e385]
+            - generic [ref=e388]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e390]
+              - paragraph [ref=e391]: ₦100.00
+              - generic [ref=e392]:
+                - generic [ref=e393]: checking
+                - generic [ref=e394]: NGN
+          - generic [ref=e395] [cursor=pointer]:
+            - img [ref=e398]
+            - generic [ref=e401]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e403]
+              - paragraph [ref=e404]: ₦100.00
+              - generic [ref=e405]:
+                - generic [ref=e406]: checking
+                - generic [ref=e407]: NGN
+          - generic [ref=e408] [cursor=pointer]:
+            - img [ref=e411]
+            - generic [ref=e414]:
+              - heading "Delete Test 1769194607065" [level=3] [ref=e416]
+              - paragraph [ref=e417]: ₦0.00
+              - generic [ref=e418]:
+                - generic [ref=e419]: checking
+                - generic [ref=e420]: NGN
+          - generic [ref=e421] [cursor=pointer]:
+            - img [ref=e424]
+            - generic [ref=e427]:
+              - heading "TransAcc1-1769184205163" [level=3] [ref=e429]
+              - paragraph [ref=e430]: ₦1,000.00
+              - generic [ref=e431]:
+                - generic [ref=e432]: checking
+                - generic [ref=e433]: NGN
+          - generic [ref=e434] [cursor=pointer]:
+            - img [ref=e437]
+            - generic [ref=e440]:
+              - heading "TransAcc1-1770244463215" [level=3] [ref=e442]
+              - paragraph [ref=e443]: ₦1,000.00
+              - generic [ref=e444]:
+                - generic [ref=e445]: checking
+                - generic [ref=e446]: NGN
+          - generic [ref=e447] [cursor=pointer]:
+            - img [ref=e450]
+            - generic [ref=e453]:
+              - heading "TransAcc2-1770117009345" [level=3] [ref=e455]
+              - paragraph [ref=e456]: ₦500.00
+              - generic [ref=e457]:
+                - generic [ref=e458]: checking
+                - generic [ref=e459]: NGN
+          - generic [ref=e460] [cursor=pointer]:
+            - img [ref=e463]
+            - generic [ref=e466]:
+              - heading "💰 Special-1769724345313" [level=3] [ref=e468]
+              - paragraph [ref=e469]: ₦50.00
+              - generic [ref=e470]:
+                - generic [ref=e471]: checking
+                - generic [ref=e472]: NGN
+          - generic [ref=e473] [cursor=pointer]:
+            - img [ref=e476]
+            - generic [ref=e479]:
+              - heading "💰 Special-1770244485330" [level=3] [ref=e481]
+              - paragraph [ref=e482]: ₦50.00
+              - generic [ref=e483]:
+                - generic [ref=e484]: checking
+                - generic [ref=e485]: NGN
+          - generic [ref=e486] [cursor=pointer]:
+            - img [ref=e489]
+            - generic [ref=e492]:
+              - heading "Delete Test 1769441954190" [level=3] [ref=e494]
+              - paragraph [ref=e495]: ₦0.00
+              - generic [ref=e496]:
+                - generic [ref=e497]: checking
+                - generic [ref=e498]: NGN
+          - generic [ref=e499] [cursor=pointer]:
+            - img [ref=e502]
+            - generic [ref=e505]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e507]
+              - paragraph [ref=e508]: ₦100.00
+              - generic [ref=e509]:
+                - generic [ref=e510]: checking
+                - generic [ref=e511]: NGN
+          - generic [ref=e512] [cursor=pointer]:
+            - img [ref=e515]
+            - generic [ref=e518]:
+              - heading "TransAcc2-1770132706387" [level=3] [ref=e520]
+              - paragraph [ref=e521]: ₦500.00
+              - generic [ref=e522]:
+                - generic [ref=e523]: checking
+                - generic [ref=e524]: NGN
+          - generic [ref=e525] [cursor=pointer]:
+            - img [ref=e528]
+            - generic [ref=e531]:
+              - heading "TransAcc1-1769439311106" [level=3] [ref=e533]
+              - paragraph [ref=e534]: ₦1,000.00
+              - generic [ref=e535]:
+                - generic [ref=e536]: checking
+                - generic [ref=e537]: NGN
+          - generic [ref=e538] [cursor=pointer]:
+            - img [ref=e541]
+            - generic [ref=e544]:
+              - heading "Delete Test 1769187990213" [level=3] [ref=e546]
+              - paragraph [ref=e547]: ₦0.00
+              - generic [ref=e548]:
+                - generic [ref=e549]: checking
+                - generic [ref=e550]: NGN
+          - generic [ref=e551] [cursor=pointer]:
+            - img [ref=e554]
+            - generic [ref=e557]:
+              - heading "TransAcc2-1769439311106" [level=3] [ref=e559]
+              - paragraph [ref=e560]: ₦500.00
+              - generic [ref=e561]:
+                - generic [ref=e562]: checking
+                - generic [ref=e563]: NGN
+          - generic [ref=e564] [cursor=pointer]:
+            - img [ref=e567]
+            - generic [ref=e570]:
+              - heading "Delete Test 1769196017102" [level=3] [ref=e572]
+              - paragraph [ref=e573]: ₦0.00
+              - generic [ref=e574]:
+                - generic [ref=e575]: checking
+                - generic [ref=e576]: NGN
+          - generic [ref=e577] [cursor=pointer]:
+            - img [ref=e580]
+            - generic [ref=e583]:
+              - heading "Delete Test 1770246790082" [level=3] [ref=e585]
+              - paragraph [ref=e586]: ₦0.00
+              - generic [ref=e587]:
+                - generic [ref=e588]: checking
+                - generic [ref=e589]: NGN
+          - generic [ref=e590] [cursor=pointer]:
+            - img [ref=e593]
+            - generic [ref=e596]:
+              - heading "Delete Test 1769196186196" [level=3] [ref=e598]
+              - paragraph [ref=e599]: ₦0.00
+              - generic [ref=e600]:
+                - generic [ref=e601]: checking
+                - generic [ref=e602]: NGN
+          - generic [ref=e603] [cursor=pointer]:
+            - img [ref=e606]
+            - generic [ref=e609]:
+              - heading "Test Account 1770246866375" [level=3] [ref=e611]
+              - paragraph [ref=e612]: ₦5,000.00
+              - generic [ref=e613]:
+                - generic [ref=e614]: checking
+                - generic [ref=e615]: NGN
+          - generic [ref=e616] [cursor=pointer]:
+            - img [ref=e619]
+            - generic [ref=e622]:
+              - heading "TransAcc2-1769723728342" [level=3] [ref=e624]
+              - paragraph [ref=e625]: ₦500.00
+              - generic [ref=e626]:
+                - generic [ref=e627]: checking
+                - generic [ref=e628]: NGN
+          - generic [ref=e629] [cursor=pointer]:
+            - img [ref=e632]
+            - generic [ref=e635]:
+              - heading "TransAcc2-1770244498084" [level=3] [ref=e637]
+              - paragraph [ref=e638]: ₦500.00
+              - generic [ref=e639]:
+                - generic [ref=e640]: checking
+                - generic [ref=e641]: NGN
+          - generic [ref=e642] [cursor=pointer]:
+            - img [ref=e645]
+            - generic [ref=e648]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e650]
+              - paragraph [ref=e651]: ₦100.00
+              - generic [ref=e652]:
+                - generic [ref=e653]: checking
+                - generic [ref=e654]: NGN
+          - generic [ref=e655] [cursor=pointer]:
+            - img [ref=e658]
+            - generic [ref=e661]:
+              - heading "TransAcc2-1769184205163" [level=3] [ref=e663]
+              - paragraph [ref=e664]: ₦500.00
+              - generic [ref=e665]:
+                - generic [ref=e666]: checking
+                - generic [ref=e667]: NGN
+          - generic [ref=e668] [cursor=pointer]:
+            - img [ref=e671]
+            - generic [ref=e674]:
+              - heading "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" [level=3] [ref=e676]
+              - paragraph [ref=e677]: ₦100.00
+              - generic [ref=e678]:
+                - generic [ref=e679]: checking
+                - generic [ref=e680]: NGN
+          - generic [ref=e681] [cursor=pointer]:
+            - img [ref=e684]
+            - generic [ref=e687]:
+              - heading "TransAcc2-1769184047491" [level=3] [ref=e689]
+              - paragraph [ref=e690]: ₦500.00
+              - generic [ref=e691]:
+                - generic [ref=e692]: checking
+                - generic [ref=e693]: NGN
+          - generic [ref=e694] [cursor=pointer]:
+            - img [ref=e697]
+            - generic [ref=e700]:
+              - heading "Test Account 1769442024834" [level=3] [ref=e702]
+              - paragraph [ref=e703]: ₦5,000.00
+              - generic [ref=e704]:
+                - generic [ref=e705]: checking
+                - generic [ref=e706]: NGN
+          - generic [ref=e707] [cursor=pointer]:
+            - img [ref=e710]
+            - generic [ref=e713]:
+              - heading "TransAcc2-1769184323804" [level=3] [ref=e715]
+              - paragraph [ref=e716]: ₦500.00
+              - generic [ref=e717]:
+                - generic [ref=e718]: checking
+                - generic [ref=e719]: NGN
+        - generic [ref=e720]:
+          - generic [ref=e721]:
+            - generic [ref=e722]:
+              - button "Previous month" [ref=e723] [cursor=pointer]:
+                - img [ref=e724]
+              - generic [ref=e726]:
+                - img [ref=e727]
+                - generic [ref=e729]: February 2026
+              - button "Next month" [ref=e730] [cursor=pointer]:
+                - img [ref=e731]
+            - generic [ref=e733]:
+              - img [ref=e734]
+              - textbox "Search in February..." [ref=e737]
+          - generic [ref=e738]:
+            - img [ref=e739]
+            - generic [ref=e742]: No transactions yet
+            - generic [ref=e743]: Add your first transaction to get started
+  - generic [ref=e744]:
+    - img [ref=e746]
+    - button "Open Tanstack query devtools" [ref=e794] [cursor=pointer]:
+      - img [ref=e795]
+```

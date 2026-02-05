@@ -20,27 +20,30 @@ Before doing ANYTHING, you MUST:
 
 ## 📋 PHASE 1: BEFORE STARTING (MANDATORY)
 
-### For ANY task, read these files FIRST:
-```
-docs/PROJECT_STATUS.md    → Current sprint, what's in progress
-docs/KNOWN_ISSUES.md      → Existing bugs (check for duplicates!)
-docs/ROADMAP.md           → Planned features, priorities
+### For ANY task, check the dashboard FIRST:
+```bash
+# Command Center - unified project view
+curl -s http://localhost:3001/api/command-center
+# Bugs from git history
+curl -s http://localhost:3001/api/git/bugs
+# Roadmap with auto-detected progress
+curl -s http://localhost:3001/api/git/roadmap
 ```
 
 ### For BUG REPORTS, also check:
-- Is this bug already listed in `docs/KNOWN_ISSUES.md`?
-- Search for similar descriptions (BUG-008 through BUG-014 are active)
+- Check `/api/git/bugs` for existing tracked bugs
+- Search git: `curl http://localhost:3001/api/git/search/{keyword}`
 - If duplicate, tell user: "This is already tracked as [BUG-XXX]"
 
 ### For FEATURE REQUESTS, also check:
-- Is this in `docs/FEATURE_SUGGESTIONS.md`?
-- Is this in `docs/ROADMAP.md`?
+- Check `roadmap.json` (`/api/git/roadmap`) for planned items
+- Check `/api/git/features` for tracked features
 - If duplicate, tell user: "This is already planned/tracked"
 
 ### REPORT to user:
 ```
 📋 Context Check:
-- Current Sprint: [from PROJECT_STATUS.md]
+- Current State: [from /api/command-center]
 - Related Issues: [any duplicates found]
 - Dependencies: [if any]
 - Ready to proceed: Yes/No
@@ -83,18 +86,16 @@ Follow TDD:
 
 ## 📋 PHASE 4: AFTER COMPLETION (MANDATORY)
 
-### YOU MUST UPDATE THESE FILES:
+### YOU MUST DO THESE:
 
-**Always update:**
-- `docs/PROJECT_STATUS.md` - Mark task complete, add to "Recently Completed"
-- ~~CHANGELOG.md~~ **Deleted - git commits are the source of truth.** Use `/api/git/changelog` endpoint.
+**Git commit with correct prefix** — dashboard auto-updates:
+- `fix: BUG-XXX description` → Bug tracked automatically
+- `feat: FEAT-XXX description` → Feature tracked automatically
+- `deploy(env): vX.X.X @ HASH` → Deployment recorded
 
-**If bug fix:**
-- `docs/KNOWN_ISSUES.md` - Move bug to "Recently Fixed" section
+> **Note**: `PROJECT_STATUS.md`, `KNOWN_ISSUES.md`, `ROADMAP.md`, `CHANGELOG.md`, `FEATURE_SUGGESTIONS.md`, and `DEPLOYMENT_STATUS.md` have been **deleted**. Git commits with correct prefixes are the single source of truth. The dashboard auto-detects everything from git history.
 
-**If feature complete:**
-- `docs/ROADMAP.md` - Mark with ✅
-- `docs/FEATURE_SUGGESTIONS.md` - Remove from backlog if it was there
+**If new planned work**: Add to `tools/dashboard/server/roadmap.json`
 
 ### REPORT to user:
 ```
@@ -103,10 +104,7 @@ Follow TDD:
 **Files Changed:**
 - [list code files]
 
-**Docs Updated:**
-- [ ] PROJECT_STATUS.md - [describe update]
-- [ ] KNOWN_ISSUES.md - [if applicable]
-- [ ] ROADMAP.md - [if applicable]
+**Git Commit**: `fix: BUG-XXX ...` (dashboard auto-updated)
 
 **Tests:** [X passing]
 **Ready for:** [dev/staging/production]
@@ -117,20 +115,18 @@ Follow TDD:
 ## 🚨 CRITICAL REMINDERS
 
 ### Before EVERY task:
-- [ ] Did I read PROJECT_STATUS.md?
-- [ ] Did I check KNOWN_ISSUES.md for duplicates?
-- [ ] Did I check ROADMAP.md?
+- [ ] Did I check `/api/command-center`?
+- [ ] Did I check `/api/git/bugs` for duplicates?
+- [ ] Did I check `/api/git/roadmap`?
 - [ ] Did I report findings to user?
 
 ### After EVERY task:
-- [ ] Did I update PROJECT_STATUS.md?
-- [ ] Did I update KNOWN_ISSUES.md (if bug)?
-- [ ] Did I update ROADMAP.md (if feature)?
-- [ ] Did I tell user what I updated?
+- [ ] Did I commit with the correct prefix (fix:/feat:/etc)?
+- [ ] Did I tell user what I committed?
 
 ### NEVER:
-- ❌ Start coding without reading docs first
-- ❌ Finish without updating docs
+- ❌ Start coding without checking dashboard first
+- ❌ Finish without committing with correct prefix
 - ❌ Deploy to production without approval
 - ❌ Create files over 200 lines
 - ❌ Skip writing tests
@@ -139,21 +135,9 @@ Follow TDD:
 
 ## 📊 CURRENT PROJECT STATE
 
-**Read `docs/PROJECT_STATUS.md` for latest, but key points:**
+**Check dashboard for latest**: `curl http://localhost:3001/api/command-center`
 
-- **Current Focus**: Marketing Website (P0)
-- **Active Bugs in Testing**: BUG-008 through BUG-014
-- **Production**: v1.5.0 (stable)
-- **Dev/Staging**: v1.5.2-dev (testing)
-
-**Active Bug IDs** (check before logging new):
-- BUG-008: Transaction History UI Inconsistency
-- BUG-009: Dark Mode White Edge
-- BUG-010: Transaction List Spacing
-- BUG-011: Empty List Scroll
-- BUG-012: Task Box Too Large
-- BUG-013: Redundant Icons
-- BUG-014: Transaction List Layout
+All project state is derived from git history automatically.
 
 ---
 
@@ -162,10 +146,11 @@ Follow TDD:
 **Dashboard URL**: https://anchor.tail2fa2e.ts.net:3443/
 
 The Internal PM Dashboard shows:
-- Current bugs and their status
-- Feature backlog
-- Environment parity (dev/staging/prod versions)
-- Git history and deploy markers
+- Current bugs and their status (from git history)
+- Feature backlog (from git + roadmap.json)
+- Environment parity (dev/staging/prod via git ancestry)
+- Git timeline and deploy markers
+- Velocity metrics and cycle time
 
 **Query via terminal** (local server runs on port 3001):
 ```bash

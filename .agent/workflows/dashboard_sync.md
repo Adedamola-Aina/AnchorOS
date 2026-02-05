@@ -19,9 +19,9 @@ curl -X POST http://localhost:3001/api/refresh
 ## How It Works
 
 1.  Connects to the Dashboard API running on port 3001.
-2.  Triggers a git fetch/pull to ensure parity.
-3.  Re-scans all markdown files in `docs/`.
-4.  Re-analyzes git history for the timeline.
+2.  Clears all internal caches (deployment tracker, git data provider).
+3.  Forces fresh git history analysis on next request.
+4.  Re-reads `roadmap.json` for initiative data.
 
 ## Verification
 

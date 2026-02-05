@@ -10,8 +10,8 @@
 1. `CLAUDE.md` - Development constitution (highest authority)
 2. **Internal Dashboard**: https://anchor.tail2fa2e.ts.net:3443/
    - Project Status: `curl http://localhost:3001/api/command-center`
-   - Roadmap: `curl http://localhost:3001/api/roadmap`
-   - Bugs: `curl http://localhost:3001/api/bugs`
+   - Roadmap: `curl http://localhost:3001/api/git/roadmap`
+   - Bugs: `curl http://localhost:3001/api/git/bugs`
    - Browser: https://anchor.tail2fa2e.ts.net:3443/
 3. **Git History**: Project truth is derived from commit messages (e.g., `feat: PWA-006`).
 
@@ -22,7 +22,7 @@
 8. `docs/ERROR_HANDLING.md` - ErrorBoundary patterns, error strategies
 
 **Priority 3 - Environment & Deployment:**
-9. `docs/DEPLOYMENT_STATUS.md` - What's deployed where (dev/staging/prod)
+9. Dashboard `/api/parity` - What's deployed where (git ancestry-based)
 10. `docs/ENVIRONMENT_SETUP.md` - Firebase hosting, env vars, build commands
 11. `docs/VERSIONING.md` - Semantic versioning policy
 12. `docs/ARCHITECTURE_OVERVIEW.md` - System architecture, Firebase CDN model
@@ -35,40 +35,40 @@
 
 **You MUST perform these actions:**
 - [ ] **Git Commit**: Use the correct ID (e.g., `feat: PWA-006 ...`) to update the dashboard automatically.
-- [ ] `CHANGELOG.md` - Document the change.
-- [ ] `docs/DEPLOYMENT_STATUS.md` - Record deployment (if applicable).
+- [ ] If new planned work, add to `tools/dashboard/server/roadmap.json`
+- [ ] Use deploy markers for deployments: `deploy(env): vX.X.X @ COMMIT_HASH`
 
-**DO NOT** manually update `PROJECT_STATUS.md`, `ROADMAP.md`, or `KNOWN_ISSUES.md` (they are deprecated).
-**DO NOT** say "done" until Git and Deployment checks are complete.
+**DO NOT** manually update deleted markdown files (`PROJECT_STATUS.md`, `ROADMAP.md`, `KNOWN_ISSUES.md`, `CHANGELOG.md`, `DEPLOYMENT_STATUS.md`, `FEATURE_SUGGESTIONS.md`).
+**DO NOT** say "done" until Git commit with correct prefix is complete.
 
 ---
 
 ## 🚨 CRITICAL RULES
 
-### Rule 1: NEVER START WITHOUT READING
+### Rule 1: NEVER START WITHOUT CHECKING DASHBOARD
 ❌ BAD: Start coding immediately
-✅ GOOD: "Let me check the context first..." [reads docs]
+✅ GOOD: "Let me check the dashboard first..." [queries /api/command-center]
 
-### Rule 2: NEVER FINISH WITHOUT UPDATING
-❌ BAD: "Bug fixed!" [docs not updated]
-✅ GOOD: "Bug fixed! Updating docs..." [updates docs]
+### Rule 2: NEVER FINISH WITHOUT CORRECT COMMIT
+❌ BAD: "Bug fixed!" [no commit or wrong prefix]
+✅ GOOD: "Bug fixed! Committing as `fix: BUG-XXX ...`"
 
 ### Rule 3: ALWAYS CHECK DEPENDENCIES
-Before starting a feature, check docs/ROADMAP.md for:
+Before starting a feature, check `/api/git/roadmap` for:
 - What does this depend on?
 - What does this unblock?
 - Why is this prioritized?
 
-### Rule 4: TRACK EVERYTHING
+### Rule 4: TRACK EVERYTHING VIA GIT
 If you:
-- Fix a bug → Update KNOWN_ISSUES.md
-- Complete a feature → Update ROADMAP.md + PROJECT_STATUS.md
-- Deploy anywhere → Update DEPLOYMENT_STATUS.md
-- Respond to feedback → Update USER_FEEDBACK.md
+- Fix a bug → Commit with `fix: BUG-XXX description`
+- Complete a feature → Commit with `feat: FEAT-XXX description`
+- Deploy anywhere → Use deploy marker: `deploy(env): vX.X.X @ HASH`
+- New planned work → Add to `roadmap.json`
 
 ### Rule 5: ASSUME NOTHING
 ❌ Don't assume: "I remember we fixed this"
-✅ Always verify: Read KNOWN_ISSUES.md
+✅ Always verify: Check `/api/git/bugs`
 
 ### Rule 6: UNIFIED VERSIONING
 All features are part of the whole app, not standalone modules.
@@ -97,87 +97,73 @@ When ANYTHING is reported (bug, feature request, suggestion, feedback):
 ---
 
 **STEP 0: CHECK FOR DUPLICATES FIRST**
-Before creating a new entry, search these files:
-- `docs/KNOWN_ISSUES.md` - Is this bug already logged?
-- `docs/FEATURE_SUGGESTIONS.md` - Is this feature already suggested?
-- `docs/ROADMAP.md` - Is this already planned/in progress?
-- `docs/USER_FEEDBACK.md` - Has this been reported before?
+Before creating a new entry, check the dashboard:
+- `curl http://localhost:3001/api/git/bugs` - Is this bug already tracked?
+- `curl http://localhost:3001/api/git/features` - Is this feature already tracked?
+- `curl http://localhost:3001/api/git/roadmap` - Is this already planned?
 
 If duplicate found:
 - Link to existing entry
-- Update existing entry with new context if needed
 - Do NOT create duplicate
 
 ---
 
 **STEP 1: CLASSIFY THE REPORT**
 
-| Type | ID Prefix | File |
-|------|-----------|------|
-| Bug | BUG-XXX | `docs/KNOWN_ISSUES.md` |
-| Regression | REG-XXX | `docs/KNOWN_ISSUES.md` |
-| Technical Gap | GAP-XXX | `docs/KNOWN_ISSUES.md` |
-| Feature Request | REQ-XXX | `docs/FEATURE_SUGGESTIONS.md` |
-| Enhancement | (Use existing ID) | `docs/FEATURE_SUGGESTIONS.md` |
+| Type | ID Prefix | Tracking |
+|------|-----------|----------|
+| Bug | BUG-XXX | Git commit: `fix: BUG-XXX ...` |
+| Regression | REG-XXX | Git commit: `fix: REG-XXX ...` |
+| Technical Gap | GAP-XXX | Git commit: `feat: GAP-XXX ...` |
+| Feature Request | FEAT-XXX | Git commit: `feat: FEAT-XXX ...` |
+| Enhancement | UX-XXX | Git commit: `feat: UX-XXX ...` |
 | User Feedback | N/A | `docs/USER_FEEDBACK.md` |
 
 ---
 
 **STEP 2: ASSIGN ID**
-- Check last ID in the target file
-- Increment: BUG-001 → BUG-002, REQ-001 → REQ-002, etc.
+- Check existing IDs: `curl http://localhost:3001/api/intake/next-id?type=bug`
+- Or use roadmap.json to find highest existing ID for prefix
+- Increment: BUG-001 → BUG-002, FEAT-001 → FEAT-002, etc.
 
 ---
 
-**STEP 3: ADD TO APPROPRIATE FILE**
+**STEP 3: ADD TO ROADMAP & COMMIT**
 
-**For Bugs (KNOWN_ISSUES.md):**
-```markdown
-### [BUG-XXX] Short description
-- **Reported**: YYYY-MM-DD
-- **Reporter**: [Teeto / User / Agent]
-- **Impact**: What's broken
-- **Root Cause**: Why it's happening (if known)
-- **Fix**: Proposed solution
-- **Assigned**: [Teeto / Unassigned]
-- **Target**: YYYY-MM-DD
-- **Status**: [Not Started / Investigating / In Progress / Fixed]
-- **Workaround**: Temporary fix (if any)
+For new planned work, add to `tools/dashboard/server/roadmap.json`:
+```json
+{
+    "id": "BUG-XXX",
+    "team": "Engineering",
+    "priority": "P1",
+    "title": "Short description",
+    "status": "planned",
+    "detectionPatterns": ["BUG-XXX", "keyword"],
+    "effort": "medium",
+    "impact": "high"
+}
 ```
 
-**For Feature Requests (FEATURE_SUGGESTIONS.md):**
-```markdown
-#### [REQ-XXX] Feature Name
-- **Requested**: YYYY-MM-DD
-- **Requester**: [Teeto / User]
-- **Category**: [Finance / Auth / UI / etc.]
-- **Priority**: [High / Medium / Low]
-- **Suggestion**: What they want
-- **Impact**: Why it matters
-- **Effort**: [Low / Medium / High]
-- **Status**: [Backlog / Under Review / Planned / In Progress]
+Then commit the fix with correct prefix:
+```
+fix: BUG-XXX Short description
+feat: FEAT-XXX Short description
 ```
 
 ---
 
 **STEP 4: SET PRIORITY**
-- 🔴 P0 (Critical) - App unusable, data loss, security, user-blocking
-- 🟡 P1 (High) - Major feature broken, significant UX issue
-- 🟢 P2 (Low) - Minor issues, polish, nice-to-have
+- P0 (Critical) - App unusable, data loss, security, user-blocking
+- P1 (High) - Major feature broken, significant UX issue
+- P2 (Low) - Minor issues, polish, nice-to-have
 
 ---
 
-**STEP 5: ASSIGN OWNER**
-- Teeto (Owner/Lead) - Default for most items
-- Agent (AI Assistant) - Research, documentation, implementation
-
----
-
-**STEP 6: DASHBOARD AUTO-UPDATES**
+**STEP 5: DASHBOARD AUTO-UPDATES**
 The Dashboard (https://anchor.tail2fa2e.ts.net:3443/) reads directly from **Git Commit History**:
 - `fix(scope): BUG-XXX ...` → Updates Bug Status
-- `feat(scope): REQ-XXX ...` → Updates Feature Status
-- `deploy(env): ...` → Updates Deployment Status
+- `feat(scope): FEAT-XXX ...` → Updates Feature Status
+- `deploy(env): vX.X.X @ HASH` → Updates Deployment Status
 
 **You do NOT need to update markdown files.** Just commit correctly.
 
@@ -186,19 +172,19 @@ The Dashboard (https://anchor.tail2fa2e.ts.net:3443/) reads directly from **Git 
 **QUICK REFERENCE: Report Type Decision Tree**
 ```
 Is something BROKEN?
-  └─ YES → Bug/Regression → KNOWN_ISSUES.md
+  └─ YES → Bug/Regression → commit as fix: BUG-XXX / REG-XXX
   └─ NO ↓
 
 Is it a NEW CAPABILITY request?
-  └─ YES → Feature Request → FEATURE_SUGGESTIONS.md
+  └─ YES → Feature Request → add to roadmap.json, commit as feat: FEAT-XXX
   └─ NO ↓
 
 Is it an IMPROVEMENT to existing feature?
-  └─ YES → Enhancement → FEATURE_SUGGESTIONS.md (update existing)
+  └─ YES → Enhancement → commit as feat: UX-XXX
   └─ NO ↓
 
 Is it FEEDBACK or OPINION?
-  └─ YES → User Feedback → USER_FEEDBACK.md
+  └─ YES → User Feedback → docs/USER_FEEDBACK.md
 ```
 
 ---
@@ -209,7 +195,7 @@ Is it FEEDBACK or OPINION?
 ```
 "I'm starting work on [TASK]. Let me check the context first..."
 
-[Reads PROJECT_STATUS.md, ROADMAP.md, KNOWN_ISSUES.md]
+[Checks /api/command-center, /api/git/bugs, /api/git/roadmap]
 
 "Here's my understanding:
 - Priority: [P0/P1/P2]
@@ -226,11 +212,8 @@ Proceeding with TDD approach. ETA: [X hours/days]"
 
 Summary:
 - Tests: ✅ All passing
+- Git Commit: fix: BUG-XXX ... (dashboard auto-updated)
 - Deploy: ✅ [Environment] @ [timestamp]
-- Docs Updated:
-  - docs/PROJECT_STATUS.md (marked complete)
-  - CHANGELOG.md (added entry)
-  - docs/KNOWN_ISSUES.md (moved bug to fixed)
 
 Ready for next task."
 ```
@@ -245,7 +228,7 @@ Options:
 A) [Option 1]
 B) [Option 2]
 
-Updated PROJECT_STATUS.md with blocker. Awaiting decision."
+Awaiting decision."
 ```
 
 ---
@@ -253,17 +236,14 @@ Updated PROJECT_STATUS.md with blocker. Awaiting decision."
 ## 📋 DAILY CHECKLIST
 
 ### Morning (Before Any Code)
-- [ ] Read PROJECT_STATUS.md (current state)
-- [ ] Check ROADMAP.md (understand why)
-- [ ] Review KNOWN_ISSUES.md (don't reintroduce bugs)
-- [ ] Check DEPLOYMENT_STATUS.md (know what's where)
-- [ ] Scan USER_FEEDBACK.md (understand pain points)
+- [ ] Check `/api/command-center` (current project state)
+- [ ] Check `/api/git/roadmap` (understand priorities)
+- [ ] Check `/api/git/bugs` (don't reintroduce bugs)
+- [ ] Check `/api/parity` (know what's deployed where)
 
 ### Evening (Before Ending Session)
-- [ ] Update PROJECT_STATUS.md (mark progress)
-- [ ] Update CHANGELOG.md (document changes)
-- [ ] Update KNOWN_ISSUES.md (if bugs fixed)
-- [ ] Update DEPLOYMENT_STATUS.md (if deployed)
+- [ ] Commit all work with correct prefixes (dashboard auto-updates)
+- [ ] Verify `/api/parity` reflects new deployments
 
 ---
 
@@ -274,11 +254,11 @@ You're successful when:
 - ✅ Never build features that conflict with priorities
 - ✅ Always know what's deployed where
 - ✅ Always understand dependencies before starting
-- ✅ Always update docs after completing work
-- ✅ Never say "I don't remember" (check docs instead)
+- ✅ Always commit with correct prefixes (dashboard auto-updates)
+- ✅ Never say "I don't remember" (check dashboard instead)
 
 ---
 
-**Last Updated**: 2026-01-26
+**Last Updated**: 2026-02-05
 **Maintained By**: Teeto
 **Purpose**: Ensure Claude AI never forgets context
