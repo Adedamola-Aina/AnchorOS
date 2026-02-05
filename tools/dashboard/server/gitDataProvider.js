@@ -6,13 +6,14 @@
  * 
  * Data Sources:
  * - Git commits for bugs, features, regressions, enhancements
- * - Git tags/markers for deployment status
+ * - deploymentTracker for accurate deployment status (git ancestry based)
  * - roadmap.json for initiative titles/descriptions
  */
 
 const simpleGit = require('simple-git');
 const path = require('path');
 const fs = require('fs');
+const deploymentTracker = require('./deploymentTracker');
 
 const git = simpleGit(path.join(__dirname, '../../..'));
 
@@ -107,16 +108,20 @@ function isDashboardCommit(message) {
 
 /**
  * Get all tracked items from git history
- * Returns bugs, features, regressions, etc. with deployment status
+ * Returns bugs, features, regressions, etc. with ACCURATE deployment status
+ * using git ancestry checks
  */
 async function getAllTrackedItems(limit = 200) {
     try {
         const log = await git.log({ maxCount: limit });
         const items = new Map(); // Use Map for deduplication
 
-        // Get current deploy status
-        const deployStatus = await getDeployStatus();
+        // Get deployments for git ancestry checks
+        const deployments = await deploymentTracker.parseDeployMarkers();
 
+        // First pass: collect all commits
+        const commitsToCheck = [];
+        
         for (const commit of log.all) {
             if (isDashboardCommit(commit.message)) continue;
 
@@ -124,13 +129,7 @@ async function getAllTrackedItems(limit = 200) {
             const shortHash = commit.hash.substring(0, 7);
 
             for (const idInfo of ids) {
-                const existing = items.get(idInfo.id);
-                if (!existing) {
-                    // Determine environment status
-                    const inStaging = isInEnvironment(commit, deployStatus.staging);
-                    const inProd = isInEnvironment(commit, deployStatus.production);
-
-                    // Get title from roadmap if available, otherwise use commit message
+                if (!items.has(idInfo.id)) {
                     const roadmapTitle = getInitiativeTitle(idInfo.id);
                     const commitTitle = commit.message.split('\n')[0].substring(0, 100);
 
@@ -140,15 +139,13 @@ async function getAllTrackedItems(limit = 200) {
                         title: roadmapTitle || commitTitle,
                         commitMessage: commitTitle,
                         hash: shortHash,
+                        fullHash: commit.hash,
                         date: commit.date,
                         author: commit.author_name,
-                        status: inProd ? 'deployed' : inStaging ? 'staging' : 'dev',
-                        environments: {
-                            dev: true,
-                            staging: inStaging,
-                            production: inProd
-                        }
+                        status: 'dev', // Will be updated after ancestry check
+                        environments: { dev: true, staging: false, production: false }
                     });
+                    commitsToCheck.push(commit.hash);
                 }
             }
 
@@ -156,24 +153,42 @@ async function getAllTrackedItems(limit = 200) {
             if (ids.length === 0) {
                 const type = detectType(commit.message);
                 if (type !== 'docs' && type !== 'chore' && type !== 'other') {
-                    const inStaging = isInEnvironment(commit, deployStatus.staging);
-                    const inProd = isInEnvironment(commit, deployStatus.production);
-
-                    items.set(shortHash, {
-                        id: shortHash,
-                        type: type,
-                        title: commit.message.split('\n')[0].substring(0, 100),
-                        hash: shortHash,
-                        date: commit.date,
-                        author: commit.author_name,
-                        status: inProd ? 'deployed' : inStaging ? 'staging' : 'dev',
-                        environments: {
-                            dev: true,
-                            staging: inStaging,
-                            production: inProd
-                        }
-                    });
+                    if (!items.has(shortHash)) {
+                        items.set(shortHash, {
+                            id: shortHash,
+                            type: type,
+                            title: commit.message.split('\n')[0].substring(0, 100),
+                            hash: shortHash,
+                            fullHash: commit.hash,
+                            date: commit.date,
+                            author: commit.author_name,
+                            status: 'dev',
+                            environments: { dev: true, staging: false, production: false }
+                        });
+                        commitsToCheck.push(commit.hash);
+                    }
                 }
+            }
+        }
+
+        // Batch check deployment status using git ancestry
+        const deploymentStatus = await deploymentTracker.batchCheckDeploymentStatus(
+            commitsToCheck,
+            deployments
+        );
+
+        // Update items with accurate deployment status
+        for (const item of items.values()) {
+            const status = deploymentStatus.get(item.fullHash);
+            if (status) {
+                item.environments = {
+                    dev: status.development,
+                    staging: status.staging,
+                    production: status.production
+                };
+                item.status = status.production ? 'deployed' : 
+                              status.staging ? 'staging' : 
+                              status.development ? 'dev' : 'pending';
             }
         }
 
@@ -184,103 +199,12 @@ async function getAllTrackedItems(limit = 200) {
     }
 }
 
-// Check if a commit is in a specific environment
-function isInEnvironment(commit, envMarker) {
-    if (!envMarker || !envMarker.date) return false;
-    // Commit is in environment if it's older than the deploy marker
-    return new Date(commit.date) <= new Date(envMarker.date);
-}
-
 /**
  * Get deployment status from git markers
- * Uses SAME logic as envChecker.js for consistency
+ * Delegates to deploymentTracker for consistency
  */
 async function getDeployStatus() {
-    try {
-        const log = await git.log({ maxCount: 300 });
-
-        const status = {
-            production: null,
-            staging: null,
-            development: { version: 'HEAD', date: new Date().toISOString() }
-        };
-
-        // First, look for standardized deploy markers
-        const deployPatterns = {
-            production: /deploy\(production\):\s*v?(\d+\.\d+\.\d+)/i,
-            staging: /deploy\(staging\):\s*v?(\d+\.\d+\.\d+)/i
-        };
-
-        // Also look for version patterns as fallback (v1.5.5, v1.5.7, etc.)
-        const prodVersion = '1.5.5';
-        const stagingVersion = '1.5.7';
-        let foundProdCommit = null;
-        let foundStagingCommit = null;
-
-        for (const commit of log.all) {
-            const msg = commit.message;
-
-            // Check for standardized markers first
-            for (const [env, pattern] of Object.entries(deployPatterns)) {
-                if (!status[env]) {
-                    const match = msg.match(pattern);
-                    if (match) {
-                        console.log(`✓ Found ${env} marker: ${msg} -> v${match[1]}`);
-                        status[env] = {
-                            version: `v${match[1]}`,
-                            hash: commit.hash.substring(0, 7),
-                            date: commit.date,
-                            message: msg.split('\n')[0]
-                        };
-                    }
-                }
-            }
-
-            // Also look for version patterns as fallbacks
-            if (!foundProdCommit && msg.includes(prodVersion)) {
-                foundProdCommit = commit;
-            }
-            if (!foundStagingCommit && msg.includes(stagingVersion)) {
-                foundStagingCommit = commit;
-            }
-
-            if (status.production && status.staging) break;
-        }
-
-        // Use fallbacks if standardized markers not found
-        if (!status.production && foundProdCommit) {
-            status.production = {
-                version: `v${prodVersion}`,
-                hash: foundProdCommit.hash.substring(0, 7),
-                date: foundProdCommit.date,
-                message: 'Version milestone (fallback)'
-            };
-        } else if (!status.production) {
-            // Hardcoded fallback - use a date in the past
-            status.production = { version: 'v1.5.5', date: '2026-01-15T00:00:00Z', hash: 'unknown' };
-        }
-
-        if (!status.staging && foundStagingCommit) {
-            status.staging = {
-                version: `v${stagingVersion}`,
-                hash: foundStagingCommit.hash.substring(0, 7),
-                date: foundStagingCommit.date,
-                message: 'Version milestone (fallback)'
-            };
-        } else if (!status.staging) {
-            // Hardcoded fallback
-            status.staging = { version: 'v1.5.7', date: '2026-01-20T00:00:00Z', hash: 'unknown' };
-        }
-
-        return status;
-    } catch (error) {
-        console.error('Error getting deploy status:', error.message);
-        return {
-            production: { version: 'unknown', date: '1970-01-01T00:00:00Z' },
-            staging: { version: 'unknown', date: '1970-01-01T00:00:00Z' },
-            development: { version: 'HEAD', date: new Date().toISOString() }
-        };
-    }
+    return deploymentTracker.getDeploymentSummary();
 }
 
 /**

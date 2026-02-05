@@ -3,16 +3,20 @@
  * 
  * AUTOMATED ENVIRONMENT PARITY - NO MANUAL DOCS REQUIRED
  * 
+ * Uses GIT ANCESTRY for accurate deployment status.
+ * A commit is "deployed" to an environment if it's an ancestor of that
+ * environment's deployed hash.
+ * 
  * Sources:
  * - package.json for current version
- * - Git tags for version history
- * - Git commits for pending changes
- * - Firebase deploy logs for actual deployed versions
+ * - Git history for deploy markers (deploy(env): version @ hash)
+ * - Git ancestry for accurate containment checks
  */
 
 const path = require('path');
 const fs = require('fs');
 const simpleGit = require('simple-git');
+const deploymentTracker = require('./deploymentTracker');
 
 const REPO_PATH = path.join(__dirname, '../../..');
 const git = simpleGit(REPO_PATH);
@@ -52,136 +56,27 @@ function getCurrentVersion() {
 
 /**
  * Find deploy commits from git history
- * 
- * STANDARDIZED FORMAT (preferred):
- *   deploy(production): vX.X.X
- *   deploy(staging): vX.X.X
- *   deploy(development): vX.X.X  (or deploy(dev):)
- * 
- * Also supports version suffixes like -revert, -hotfix, etc.
- * 
- * FALLBACK: Uses version patterns in commit messages
+ * Delegates to deploymentTracker for accurate parsing
  */
 async function findDeployCommits() {
-    try {
-        const log = await git.log({ maxCount: 300 });
-        const currentVersion = getCurrentVersion();
-
-        const deployments = {
-            production: null,
-            staging: null,
-            development: null
-        };
-
-        // Patterns to detect standardized deploy markers
-        // Supports: v1.5.12, v1.5.11-revert, v1.5.12-hotfix, etc.
-        const deployPatterns = {
-            production: /deploy\(production\):\s*v?(\d+\.\d+\.\d+(?:-\w+)?)/i,
-            staging: /deploy\(staging\):\s*v?(\d+\.\d+\.\d+(?:-\w+)?)/i,
-            development: /deploy\(dev(?:elopment)?\):\s*v?(\d+\.\d+\.\d+(?:-\w+)?)/i
-        };
-
-        // Also look for version patterns as fallback
-        const versionCommits = {};
-        const versionPattern = /v?(\d+\.\d+\.\d+)/;
-
-        for (const commit of log.all) {
-            const msg = commit.message;
-            const shortHash = commit.hash.substring(0, 7);
-
-            // Check for standardized deploy markers FIRST
-            for (const [env, pattern] of Object.entries(deployPatterns)) {
-                if (!deployments[env]) {
-                    const match = msg.match(pattern);
-                    if (match) {
-                        // Check for actual deployed commit hash in message
-                        // Format: "@ 82e3d43" or "Actual deployed commit: 82e3d43"
-                        const actualHashMatch = msg.match(/@\s*([a-f0-9]{7})|Actual deployed commit:\s*([a-f0-9]{7})/i);
-                        const deployedHash = actualHashMatch ? (actualHashMatch[1] || actualHashMatch[2]) : shortHash;
-                        
-                        deployments[env] = {
-                            version: `v${match[1]}`,
-                            hash: shortHash,              // The marker commit
-                            deployedHash: deployedHash,   // The actual deployed code
-                            date: commit.date,
-                            message: msg.split('\n')[0],
-                            source: 'deploy-marker'
-                        };
-                    }
-                }
-            }
-
-            // Also collect version patterns for fallback
-            const vMatch = msg.match(versionPattern);
-            if (vMatch && !versionCommits[vMatch[1]]) {
-                versionCommits[vMatch[1]] = {
-                    version: `v${vMatch[1]}`,
-                    hash: shortHash,
-                    date: commit.date
-                };
-            }
-        }
-
-        // Use fallbacks if standardized markers not found
-        if (!deployments.production) {
-            // STRICT MODE: Do not incorrectly attribute random commits as production markers.
-            // If no deploy(production): marker exists, assume not deployed or unknown.
-            deployments.production = {
-                version: 'unknown',
-                hash: null,
-                source: 'fallback-unknown'
-            };
-        }
-        if (!deployments.staging) {
-            deployments.staging = versionCommits['1.5.7'] || versionCommits['1.5.8'] || {
-                version: 'v1.5.7', hash: 'unknown', source: 'fallback'
-            };
-        }
-        if (!deployments.development) {
-            deployments.development = {
-                version: currentVersion,
-                hash: 'HEAD',
-                date: new Date().toISOString(),
-                message: 'Current development (package.json)',
-                source: 'package.json'
-            };
-        }
-
-        return deployments;
-    } catch (error) {
-        console.error('Error finding deploy commits:', error.message);
-        const currentVersion = getCurrentVersion();
-        return {
-            production: { version: 'v1.5.5', hash: 'unknown', source: 'fallback' },
-            staging: { version: 'v1.5.7', hash: 'unknown', source: 'fallback' },
-            development: { version: currentVersion, hash: 'HEAD', source: 'package.json' }
-        };
-    }
+    return deploymentTracker.parseDeployMarkers();
 }
 
 /**
- * Get environment versions - PURE GIT, NO DOCS
- * Returns version AND commit hash to prevent ambiguity
- * when same version is deployed from different codebases
+ * Get environment versions with hashes for disambiguation
  */
 async function getEnvironmentVersions() {
-    const deployments = await findDeployCommits();
+    const deployments = await deploymentTracker.parseDeployMarkers();
     return {
         production: deployments.production?.version || 'unknown',
         staging: deployments.staging?.version || 'unknown',
         development: deployments.development?.version || getCurrentVersion(),
-        // Include hashes for disambiguation
         hashes: {
-            production: deployments.production?.deployedHash || deployments.production?.hash || 'unknown',
-            staging: deployments.staging?.deployedHash || deployments.staging?.hash || 'unknown',
-            development: deployments.development?.deployedHash || deployments.development?.hash || 'HEAD'
+            production: deployments.production?.deployedHash || 'unknown',
+            staging: deployments.staging?.deployedHash || 'unknown',
+            development: deployments.development?.deployedHash || 'HEAD'
         },
-        // Include full deployment info for debugging
-        details: {
-            production: deployments.production || null,
-            staging: deployments.staging || null,
-            development: deployments.development || null
-        }
+        details: deployments
     };
 }
 
@@ -197,7 +92,13 @@ function extractId(message) {
         /\b(TASK-\d+)\b/i,
         /\b(ARCH-\d+)\b/i,
         /\b(FIN-\d+)\b/i,
-        /\b(FEAT-\d+)\b/i
+        /\b(FEAT-\d+)\b/i,
+        /\b(SEC-\d+)\b/i,
+        /\b(PLT-\d+)\b/i,
+        /\b(DES-\d+)\b/i,
+        /\b(WEB-\d+)\b/i,
+        /\b(ENG-\d+)\b/i,
+        /\b(PWA-\d+)\b/i
     ];
 
     for (const pattern of patterns) {
@@ -218,6 +119,10 @@ function detectType(message) {
     if (msg.includes('UX-')) return 'enhancement';
     if (msg.includes('TASK-')) return 'task';
     if (msg.includes('ARCH-')) return 'architecture';
+    if (msg.includes('SEC-')) return 'security';
+    if (msg.includes('DES-')) return 'design';
+    if (msg.includes('WEB-')) return 'feature';
+    if (msg.includes('PLT-')) return 'platform';
 
     const msgLower = message.toLowerCase();
     if (msgLower.startsWith('feat')) return 'feature';
@@ -230,108 +135,116 @@ function detectType(message) {
 }
 
 /**
- * Check environment parity - PURE GIT BASED
- * Uses version milestone detection and commit ordering
+ * Check if a commit message indicates a dashboard-only change
+ */
+function isDashboardCommit(message) {
+    const msg = message.toLowerCase();
+    return msg.includes('dashboard') ||
+        msg.includes('deployment_status') ||
+        msg.includes('project_status') ||
+        msg.includes('known_issues') ||
+        msg.includes('post-implementation') ||
+        msg.includes('.agent/') ||
+        msg.includes('tools/dashboard') ||
+        (msg.startsWith('docs:') && !msg.includes('versioning')) ||
+        (msg.startsWith('chore:') && !msg.includes('deploy'));
+}
+
+/**
+ * Check environment parity using GIT ANCESTRY
  * 
- * Logic: 
- * - Find commits with version patterns (v1.5.5, v1.5.7, etc.)
- * - Use those as markers for what's deployed to each environment
- * - Commits newer than the staging marker = "dev only"
- * - Commits between prod and staging = "staging only"
+ * This is the CORRECT approach:
+ * - A commit is "in" an environment if it's an ancestor of the deployed hash
+ * - Uses `git merge-base --is-ancestor` for accuracy
+ * - Handles reverts correctly (new marker -> old code)
  */
 async function checkEnvParity() {
     try {
-        const deployments = await findDeployCommits();
+        const deployments = await deploymentTracker.parseDeployMarkers();
         const versions = await getEnvironmentVersions();
-        const log = await git.log({ maxCount: 150 });
+        const log = await git.log({ maxCount: 100 });
 
-        const features = [];
+        // Collect product commits (exclude dashboard/docs)
+        const productCommits = [];
         const seenIds = new Set();
 
-        // Get versions for comparison
-        const prodVersion = versions.production.replace('v', '');
-        const stagingVersion = versions.staging.replace('v', '');
-
-        // Helper to compare versions
-        const compareVersions = (v1, v2) => {
-            const [a1, a2, a3] = v1.split('.').map(Number);
-            const [b1, b2, b3] = v2.split('.').map(Number);
-            if (a1 !== b1) return a1 - b1;
-            if (a2 !== b2) return a2 - b2;
-            return a3 - b3;
-        };
-
-        // Track which milestone we've passed based on commit position
-        let foundStagingMarker = false;
-        let foundProdMarker = false;
-
         for (const commit of log.all) {
-            const shortHash = commit.hash.substring(0, 7);
             const msg = commit.message.toLowerCase();
             const fullMsg = commit.message;
-
-            // NOW check if this PRODUCT commit mentions a version (as a marker)
-            // Only product commits should set version markers
-            const versionMatch = fullMsg.match(/v?(\d+\.\d+\.\d+)/);
-            if (versionMatch) {
-                const commitVersion = versionMatch[1];
-                // If we see staging version, mark it
-                if (commitVersion === stagingVersion) foundStagingMarker = true;
-                // If we see prod version, mark it
-                if (commitVersion === prodVersion) foundProdMarker = true;
-            }
-
-            // Skip dashboard/tooling commits FIRST - don't let them affect markers
-            if (msg.includes('dashboard') || msg.includes('deployment_status') ||
-                msg.includes('docs:') || msg.includes('chore:') ||
-                msg.includes('project_status') || msg.includes('known_issues') ||
-                msg.includes('post-implementation') || msg.includes('.agent/') ||
-                msg.includes('deployment') || msg.includes('deploy')) {
-                continue;
-            }
+            
+            // Skip deploy markers themselves
+            if (msg.includes('deploy(')) continue;
+            
+            // Skip dashboard-only commits
+            if (isDashboardCommit(fullMsg)) continue;
 
             // Detect type
             const type = detectType(fullMsg);
             if (type === 'docs' || type === 'chore' || type === 'other') continue;
 
             // Extract ID
-            const id = extractId(fullMsg) || shortHash;
+            const id = extractId(fullMsg) || commit.hash.substring(0, 7);
             if (seenIds.has(id)) continue;
             seenIds.add(id);
 
-            // Determine deployment status based on which markers we've passed
-            // If we HAVEN'T seen the staging marker yet, this commit is DEV ONLY
-            // If we've seen staging but not prod, it's STAGING ONLY
-            // If we've seen prod, it's FULLY DEPLOYED
-            const inDev = true;
-            const inStaging = foundStagingMarker;
-            const inProd = foundProdMarker;
-
-            features.push({
-                name: `**${id}**: ${fullMsg.split('\n')[0].substring(0, 80)}`,
-                type: type,
-                commitCount: 1,
-                latestCommit: shortHash,
-                date: commit.date,
-                dev: { deployed: inDev, hash: shortHash },
-                staging: { deployed: inStaging, hash: inStaging ? shortHash : null },
-                production: { deployed: inProd, hash: inProd ? shortHash : null }
+            productCommits.push({
+                id,
+                hash: commit.hash.substring(0, 7),
+                fullHash: commit.hash,
+                message: fullMsg.split('\n')[0].substring(0, 80),
+                type,
+                date: commit.date
             });
 
-            if (features.length >= 50) break;
+            if (productCommits.length >= 50) break;
         }
 
+        // Batch check deployment status using git ancestry
+        const commitHashes = productCommits.map(c => c.fullHash);
+        const deploymentStatus = await deploymentTracker.batchCheckDeploymentStatus(
+            commitHashes, 
+            deployments
+        );
+
+        // Build feature list with accurate deployment status
+        const features = productCommits.map(commit => {
+            const status = deploymentStatus.get(commit.fullHash) || {
+                production: false,
+                staging: false,
+                development: false
+            };
+
+            return {
+                name: `**${commit.id}**: ${commit.message}`,
+                type: commit.type,
+                commitCount: 1,
+                latestCommit: commit.hash,
+                date: commit.date,
+                dev: { deployed: status.development, hash: status.development ? commit.hash : null },
+                staging: { deployed: status.staging, hash: status.staging ? commit.hash : null },
+                production: { deployed: status.production, hash: status.production ? commit.hash : null }
+            };
+        });
+
         // Count stats
-        const devOnly = features.filter(f => f.dev.deployed && !f.staging.deployed).length;
-        const stagingOnly = features.filter(f => f.staging.deployed && !f.production.deployed).length;
+        const notDeployed = features.filter(f => 
+            !f.dev.deployed && !f.staging.deployed && !f.production.deployed
+        ).length;
+        const devOnly = features.filter(f => 
+            f.dev.deployed && !f.staging.deployed && !f.production.deployed
+        ).length;
+        const stagingOnly = features.filter(f => 
+            f.staging.deployed && !f.production.deployed
+        ).length;
         const fullyDeployed = features.filter(f => f.production.deployed).length;
 
         return {
-            source: 'git-automated',
+            source: 'git-ancestry',
             versions,
             features,
             summary: {
                 total: features.length,
+                notDeployed,
                 devOnly,
                 stagingPending: stagingOnly,
                 fullyDeployed
@@ -340,7 +253,7 @@ async function checkEnvParity() {
     } catch (error) {
         console.error('Error checking parity:', error.message);
         return {
-            source: 'git-automated',
+            source: 'git-ancestry',
             error: error.message,
             versions: await getEnvironmentVersions(),
             features: [],
@@ -396,7 +309,7 @@ async function getEnvironmentStatus() {
     ]);
 
     return {
-        source: 'git-automated',
+        source: 'git-ancestry',
         versions,
         parity: parity.features,
         paritySummary: parity.summary,
