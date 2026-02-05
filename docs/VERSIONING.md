@@ -65,15 +65,47 @@ Is it a BUG FIX or HOTFIX?
 
 ## 🎯 Current Version Status
 
-| Environment | Version | Status |
-|-------------|---------|--------|
-| **Production** | v1.5.12 | Stable |
-| **Staging** | v1.5.12 | Reverted (pre-DES-002/WEB-003) |
-| **Development** | v1.5.12 | Reverted (pre-DES-002/WEB-003) |
+| Environment | Version | Deployed Commit | Status |
+|-------------|---------|-----------------|--------|
+| **Production** | v1.5.12 | e222534 | Stable |
+| **Staging** | v1.5.11-revert | 82e3d43 | Reverted (pre-DES-002/WEB-003) |
+| **Development** | v1.5.11-revert | 82e3d43 | Reverted (pre-DES-002/WEB-003) |
 
 **Last Updated**: 2026-02-05
 
 **Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (live environment parity)
+
+---
+
+## 🏷️ Deploy Marker Format
+
+Deploy markers are git commits that tell the dashboard what's deployed where.
+
+**Standard Format:**
+```
+deploy(environment): vX.X.X
+```
+
+**With Deployed Commit Hash (recommended for reverts/manual deploys):**
+```
+deploy(environment): vX.X.X @ COMMIT_HASH
+```
+
+**Examples:**
+```bash
+# Normal deploy
+git commit --allow-empty -m "deploy(production): v1.5.12"
+
+# Revert or deploy from different commit
+git commit --allow-empty -m "deploy(staging): v1.5.11-revert @ 82e3d43"
+```
+
+**Version Suffixes (supported):**
+- `-revert` - Rolled back to previous code
+- `-hotfix` - Emergency fix
+- `-dev` - Development build
+
+The dashboard extracts the `@ HASH` to show the ACTUAL deployed code, not just the marker commit.
 
 ---
 
@@ -115,6 +147,6 @@ Each version entry includes:
 ---
 
 **Related Docs**:
-- [CHANGELOG.md](file:///root/anchor-os/CHANGELOG.md) - Version history
-- [DEPLOYMENT_STATUS.md](file:///root/anchor-os/docs/DEPLOYMENT_STATUS.md) - Environment versions
-- [ROADMAP.md](file:///root/anchor-os/docs/ROADMAP.md) - Planned versions
+- **Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ - Live version status
+- [DEPLOYMENT_CHECKLIST.md](docs/DEPLOYMENT_CHECKLIST.md) - Deploy procedures
+- [ROADMAP.md](docs/ROADMAP.md) - Planned versions
