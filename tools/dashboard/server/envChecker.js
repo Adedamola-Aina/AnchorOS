@@ -54,9 +54,11 @@ function getCurrentVersion() {
  * Find deploy commits from git history
  * 
  * STANDARDIZED FORMAT (preferred):
- *   deploy(production): vX.X.X to anchor-os
- *   deploy(staging): vX.X.X to anchor-os-staging
- *   deploy(dev): vX.X.X to anchor-os-dev-1c6ec
+ *   deploy(production): vX.X.X
+ *   deploy(staging): vX.X.X
+ *   deploy(development): vX.X.X  (or deploy(dev):)
+ * 
+ * Also supports version suffixes like -revert, -hotfix, etc.
  * 
  * FALLBACK: Uses version patterns in commit messages
  */
@@ -72,10 +74,11 @@ async function findDeployCommits() {
         };
 
         // Patterns to detect standardized deploy markers
+        // Supports: v1.5.12, v1.5.11-revert, v1.5.12-hotfix, etc.
         const deployPatterns = {
-            production: /deploy\(production\):\s*v?(\d+\.\d+\.\d+)/i,
-            staging: /deploy\(staging\):\s*v?(\d+\.\d+\.\d+)/i,
-            development: /deploy\(dev\):\s*v?(\d+\.\d+\.\d+)/i
+            production: /deploy\(production\):\s*v?(\d+\.\d+\.\d+(?:-\w+)?)/i,
+            staging: /deploy\(staging\):\s*v?(\d+\.\d+\.\d+(?:-\w+)?)/i,
+            development: /deploy\(dev(?:elopment)?\):\s*v?(\d+\.\d+\.\d+(?:-\w+)?)/i
         };
 
         // Also look for version patterns as fallback
@@ -91,9 +94,15 @@ async function findDeployCommits() {
                 if (!deployments[env]) {
                     const match = msg.match(pattern);
                     if (match) {
+                        // Check for actual deployed commit hash in message
+                        // Format: "@ 82e3d43" or "Actual deployed commit: 82e3d43"
+                        const actualHashMatch = msg.match(/@\s*([a-f0-9]{7})|Actual deployed commit:\s*([a-f0-9]{7})/i);
+                        const deployedHash = actualHashMatch ? (actualHashMatch[1] || actualHashMatch[2]) : shortHash;
+                        
                         deployments[env] = {
                             version: `v${match[1]}`,
-                            hash: shortHash,
+                            hash: shortHash,              // The marker commit
+                            deployedHash: deployedHash,   // The actual deployed code
                             date: commit.date,
                             message: msg.split('\n')[0],
                             source: 'deploy-marker'
@@ -152,13 +161,27 @@ async function findDeployCommits() {
 
 /**
  * Get environment versions - PURE GIT, NO DOCS
+ * Returns version AND commit hash to prevent ambiguity
+ * when same version is deployed from different codebases
  */
 async function getEnvironmentVersions() {
     const deployments = await findDeployCommits();
     return {
         production: deployments.production?.version || 'unknown',
         staging: deployments.staging?.version || 'unknown',
-        development: deployments.development?.version || getCurrentVersion()
+        development: deployments.development?.version || getCurrentVersion(),
+        // Include hashes for disambiguation
+        hashes: {
+            production: deployments.production?.deployedHash || deployments.production?.hash || 'unknown',
+            staging: deployments.staging?.deployedHash || deployments.staging?.hash || 'unknown',
+            development: deployments.development?.deployedHash || deployments.development?.hash || 'HEAD'
+        },
+        // Include full deployment info for debugging
+        details: {
+            production: deployments.production || null,
+            staging: deployments.staging || null,
+            development: deployments.development || null
+        }
     };
 }
 
