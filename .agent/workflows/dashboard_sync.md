@@ -4,6 +4,8 @@ description: How to manually trigger a sync of the Internal PM Dashboard
 
 # Dashboard Manual Sync
 
+**Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (browser) | http://localhost:3001 (API)
+
 The dashboard automatically updates after every deployment via `DEPLOY_PIPELINE.sh`. However, if you need to force an update (e.g., after a manual documentation change or if the pipeline failed to sync), follow this workflow.
 
 ## Command

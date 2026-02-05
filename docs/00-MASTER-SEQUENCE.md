@@ -22,6 +22,9 @@ Before doing ANYTHING, you MUST:
 ## 📋 PHASE 1: BEFORE STARTING (MANDATORY)
 
 ### For ANY task, CHECK DASHBOARD FIRST:
+
+**Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (browser) | http://localhost:3001 (API)
+
 Query the internal dashboard for real-time status (Git-based Source of Truth):
 ```bash
 curl http://localhost:3001/api/command-center  # Unified View

@@ -5,7 +5,9 @@ description: Standards for Git commit messages to ensure Dashboard visibility
 
 # Anchor OS Git Tracking Skill
 
-This skill defines the **MANDATORY** git commit standards. The Internal Dashboard (`http://localhost:3001`) relies 100% on parsing these commit messages to track progress, parity, and deployments.
+This skill defines the **MANDATORY** git commit standards. The Internal Dashboard (https://anchor.tail2fa2e.ts.net:3443/) relies 100% on parsing these commit messages to track progress, parity, and deployments.
+
+Local API: `http://localhost:3001`
 
 ## 🎯 The Golden Rule
 

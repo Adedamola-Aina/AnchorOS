@@ -8,10 +8,11 @@
 
 **Priority 1 - Status & Roadmap (Source of Truth):**
 1. `CLAUDE.md` - Development constitution (highest authority)
-2. **Internal Dashboard**: http://localhost:3001
+2. **Internal Dashboard**: https://anchor.tail2fa2e.ts.net:3443/
    - Project Status: `curl http://localhost:3001/api/command-center`
    - Roadmap: `curl http://localhost:3001/api/roadmap`
    - Bugs: `curl http://localhost:3001/api/bugs`
+   - Browser: https://anchor.tail2fa2e.ts.net:3443/
 3. **Git History**: Project truth is derived from commit messages (e.g., `feat: PWA-006`).
 
 **Priority 2 - Technical Standards:**
@@ -173,7 +174,7 @@ If duplicate found:
 ---
 
 **STEP 6: DASHBOARD AUTO-UPDATES**
-The Dashboard (http://localhost:3001) reads directly from **Git Commit History**:
+The Dashboard (https://anchor.tail2fa2e.ts.net:3443/) reads directly from **Git Commit History**:
 - `fix(scope): BUG-XXX ...` → Updates Bug Status
 - `feat(scope): REQ-XXX ...` → Updates Feature Status
 - `deploy(env): ...` → Updates Deployment Status

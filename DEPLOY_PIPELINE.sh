@@ -156,9 +156,13 @@ fi
 
 # 7. Dashboard Sync
 echo -e "\n${YELLOW}🔄 Stage 7: Syncing Internal Dashboard...${NC}"
+# Dashboard URLs:
+#   - Local API: http://localhost:3001
+#   - Browser: https://anchor.tail2fa2e.ts.net:3443/
 # Use a timeout to prevent hanging if dashboard is down
 if curl -m 5 -X POST http://localhost:3001/api/refresh -s > /dev/null; then
     echo -e "${GREEN}✅ Internal Dashboard updated.${NC}"
+    echo -e "   🌐 View at: https://anchor.tail2fa2e.ts.net:3443/"
 else
     echo -e "${YELLOW}⚠️  Dashboard not responding (is it running at :3001?). Deployment successful otherwise.${NC}"
 fi

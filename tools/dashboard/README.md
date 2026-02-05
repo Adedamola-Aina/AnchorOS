@@ -64,7 +64,9 @@ pm2 restart anchor-dashboard  # Restart
 pm2 logs anchor-dashboard     # View logs
 ```
 
-Access: http://localhost:3001
+**Access URLs:**
+- Local: http://localhost:3001
+- Remote (Tailscale): https://anchor.tail2fa2e.ts.net:3443/
 
 ## 📁 Structure
 

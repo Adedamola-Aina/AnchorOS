@@ -4,6 +4,8 @@ description: Generate a quick status report of current work and project state.
 
 # Quick Status Report
 
+**Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (browser) | http://localhost:3001 (API)
+
 ## Gather Information:
 
 1. Check Project Status (Dashboard):

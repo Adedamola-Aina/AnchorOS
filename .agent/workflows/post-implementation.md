@@ -4,6 +4,8 @@ description: Post-implementation checklist - update all PM dashboard data source
 
 # Post-Implementation Dashboard Update
 
+**Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (browser) | http://localhost:3001 (API)
+
 **⚠️ MANDATORY**: Run this after EVERY implementation or deployment to keep dashboard in sync.
 
 ---

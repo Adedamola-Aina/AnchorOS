@@ -84,7 +84,8 @@ description: Current project state, active bugs, deployment status. Load when st
   - 15 UX improvements implemented
 
 - **Internal PM Dashboard** (2026-01-26)
-  - http://localhost:3001
+  - Browser: https://anchor.tail2fa2e.ts.net:3443/
+  - Local API: http://localhost:3001
   - 6 tabs: Overview, Parity, Docs, Kanban, Git, Backlog
 
 ---

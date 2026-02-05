@@ -165,20 +165,22 @@ Follow TDD:
 
 ## 🔧 INTERNAL DASHBOARD
 
-The Internal PM Dashboard at `http://localhost:3001` shows:
+**Dashboard URL**: https://anchor.tail2fa2e.ts.net:3443/
+
+The Internal PM Dashboard shows:
 - Current bugs and their status
 - Feature backlog
-- Environment parity
-- Git history
+- Environment parity (dev/staging/prod versions)
+- Git history and deploy markers
 
-**If you can execute commands**, query it:
+**Query via terminal** (local server on port 3001):
 ```bash
 curl http://localhost:3001/api/command-center
 curl http://localhost:3001/api/bugs
 curl http://localhost:3001/api/parity
 ```
 
-**If you cannot execute commands**, ask user to check dashboard or read the docs directly.
+**Browser access**: https://anchor.tail2fa2e.ts.net:3443/
 
 ---
 
