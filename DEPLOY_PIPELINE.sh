@@ -1,6 +1,26 @@
 #!/bin/bash
 set -e # Exit immediately if a command exits with a non-zero status.
 
+# ============================================================================
+# ANCHOR OS DEPLOYMENT PIPELINE
+# ============================================================================
+#
+# USAGE:
+#   ./DEPLOY_PIPELINE.sh --env=development    # Deploy to dev
+#   ./DEPLOY_PIPELINE.sh --env=staging        # Deploy to staging
+#   ./DEPLOY_PIPELINE.sh --env=production     # Deploy to production
+#
+# FIREBASE HOSTING TARGETS (defined in firebase.json & .firebaserc):
+#   - dev        → anchor-os-dev-1c6ec.web.app
+#   - staging    → anchor-os-staging.web.app
+#   - production → anchor-os.web.app
+#
+# ⚠️  IMPORTANT: Always use target names (dev/staging/production), NOT project IDs.
+#     ❌ WRONG:  firebase deploy --only hosting:anchor-os-dev-1c6ec
+#     ✅ RIGHT:  firebase deploy --only hosting:dev --project anchor-os-dev-1c6ec
+#
+# ============================================================================
+
 # Ensure we are running from the project root
 cd "$(dirname "$0")"
 
