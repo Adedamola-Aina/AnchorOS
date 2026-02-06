@@ -3,6 +3,7 @@
  * 
  * Refactored per CLAUDE.md §3.2 (200-line rule).
  * UI states extracted to FamilySettingsStates.tsx
+ * PERF-002: Accepts connection prop from parent to avoid duplicate Firestore listeners.
  */
 
 import { useState, useEffect } from 'react';
@@ -18,40 +19,29 @@ import { db, APP_ID } from '../../../config/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 interface FamilyConnection { id: string; ownerUid: string; memberUid: string; ownerDisplayName: string; memberDisplayName: string; status: 'active' | 'disconnected'; connectedAt: string; }
-interface FamilySettingsV2Props { onNavigateToFinance?: () => void; }
+interface FamilySettingsV2Props { onNavigateToFinance?: () => void; connection?: FamilyConnection | null; connectionLoading?: boolean; }
 
-export function FamilySettingsV2({ onNavigateToFinance }: FamilySettingsV2Props) {
+export function FamilySettingsV2({ onNavigateToFinance, connection: externalConnection, connectionLoading }: FamilySettingsV2Props) {
     const { user } = useAuth();
     const { showToast, confirm: confirmDialog } = useNotifications();
 
-    const [loading, setLoading] = useState(true);
-    const [connection, setConnection] = useState<FamilyConnection | null>(null);
+    // Use external connection state when provided (avoids duplicate Firestore listeners)
+    const connection = externalConnection ?? null;
+    const loading = connectionLoading ?? false;
+
     const [hasPendingInvite, setHasPendingInvite] = useState(false);
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [disconnecting, setDisconnecting] = useState(false);
     const [showPostConnectionMessage, setShowPostConnectionMessage] = useState(false);
     const [postConnectionMessage, setPostConnectionMessage] = useState('');
 
+    // Only listen for pending invites (unique to this component)
     useEffect(() => {
         if (!user) return;
-        const connectionsRef = collection(db, 'artifacts', APP_ID, 'family_connections');
-        const ownerQuery = query(connectionsRef, where('ownerUid', '==', user.uid), where('status', '==', 'active'));
-        const memberQuery = query(connectionsRef, where('memberUid', '==', user.uid), where('status', '==', 'active'));
-
-        const unsubOwner = onSnapshot(ownerQuery, (snapshot) => {
-            if (!snapshot.empty) { const doc = snapshot.docs[0]; setConnection({ id: doc.id, ...doc.data() } as FamilyConnection); }
-            setLoading(false);
-        });
-        const unsubMember = onSnapshot(memberQuery, (snapshot) => {
-            if (!snapshot.empty) { const doc = snapshot.docs[0]; setConnection({ id: doc.id, ...doc.data() } as FamilyConnection); }
-            setLoading(false);
-        });
-
         const invitesRef = collection(db, 'artifacts', APP_ID, 'family_invitations');
         const pendingQuery = query(invitesRef, where('ownerUid', '==', user.uid), where('status', 'in', ['pending', 'awaiting_confirmation']));
         const unsubPending = onSnapshot(pendingQuery, (snapshot) => { setHasPendingInvite(!snapshot.empty); });
-
-        return () => { unsubOwner(); unsubMember(); unsubPending(); };
+        return () => { unsubPending(); };
     }, [user]);
 
     const handleConnectionConfirmed = (_redirectTo: string, message: string) => { setShowPostConnectionMessage(true); setPostConnectionMessage(message); };
@@ -80,7 +70,7 @@ export function FamilySettingsV2({ onNavigateToFinance }: FamilySettingsV2Props)
             const disconnectFamily = httpsCallable<{ type: 'remove_member' | 'leave' }, { success: boolean }>(functions, 'disconnectFamily');
             await disconnectFamily({ type: isOwner ? 'remove_member' : 'leave' });
             showToast('Family connection removed', 'success');
-            setConnection(null);
+            // Connection state is managed by parent via useFamilySharing — Firestore listener updates automatically
         } catch (err) { console.error('Disconnect error:', err); showToast('Failed to disconnect', 'error'); }
         finally { setDisconnecting(false); }
     };

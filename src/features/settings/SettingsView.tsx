@@ -36,7 +36,7 @@ const SettingsView = () => {
     accountNotifications, sendVerificationEmail, generateMfaSecret, enrollMfa, unenrollMfa, reauthenticate
   } = useAuth();
   const { navigateTo } = useApp();
-  const { connection: familyConnection, disconnectFamily } = useFamilySharing(user?.uid);
+  const { connection: familyConnection, loading: familyLoading, disconnectFamily } = useFamilySharing(user?.uid);
   const { showToast, pushPermissionStatus, requestPushPermission } = useNotifications();
 
   const [isResending, setIsResending] = useState(false);
@@ -116,7 +116,7 @@ const SettingsView = () => {
           frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
           onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || {}), ...prefs } })}
           pushPermissionStatus={pushPermissionStatus} requestPushPermission={() => requestPushPermission()} /></div>
-        <div id="settings-family"><FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} /></div>
+        <div id="settings-family"><FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} connection={familyConnection} connectionLoading={familyLoading} /></div>
         <div id="settings-support"><SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} /></div>
         {import.meta.env.VITE_APP_ENV !== 'production' && <DeveloperTools userUid={user?.uid || ''} />}
         <div id="settings-data"><DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={onWipeData} /></div>
