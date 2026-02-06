@@ -10,6 +10,7 @@ import { useNotifications } from '../../../context/NotificationContext';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { MfaStep1GetApp, MfaStep2ScanQR, MfaStep3Verify } from './SecuritySettingsParts';
+import { PasswordChange } from './PasswordChange';
 
 interface SecuritySettingsProps {
     mfaEnabled?: boolean; isEnrolling: boolean; show2FASetup: boolean; mfaQrUrl: string; mfaManualKey: string; mfaCode: string; mfaError: string;
@@ -71,6 +72,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
                         </div>
                     </div>
                 )}
+                <PasswordChange />
             </CardContent>
         </Card>
     );
