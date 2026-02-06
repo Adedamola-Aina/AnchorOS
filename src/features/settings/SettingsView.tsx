@@ -91,8 +91,48 @@ const SettingsView = () => {
   };
 
   const handleDeleteAccount = async () => {
-    try { if (familyConnection) await disconnectFamily('leave'); showToast('Account scheduled for deletion. Signing out...', 'info'); setTimeout(() => logout(), 2000); }
-    catch (e) { showToast('Error: ' + (e as Error).message, 'error'); }
+    // BUG-038 Fix: Actually delete user data and Firebase Auth account
+    try {
+      // Step 1: Disconnect from family if connected
+      if (familyConnection) await disconnectFamily('leave');
+
+      // Step 2: Delete all Firestore data (same as handleDevWipe)
+      const { getDocs, collection, writeBatch, doc } = await import('firebase/firestore');
+      const { db, APP_ID } = await import('../../config/firebase');
+      const uid = user?.uid;
+      if (!uid) throw new Error('No user ID');
+
+      const batch = writeBatch(db);
+      for (const colName of ['accounts', 'finance', 'commitments', 'notifications']) {
+        const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'users', uid, colName));
+        snap.docs.forEach(d => { batch.delete(doc(db, 'artifacts', APP_ID, 'users', uid, colName, d.id)); });
+      }
+      // Also delete user profile document
+      batch.delete(doc(db, 'artifacts', APP_ID, 'users', uid));
+      await batch.commit();
+
+      // Step 3: Delete Firebase Auth account
+      const { deleteUser } = await import('firebase/auth');
+      const currentUser = user;
+      if (currentUser) {
+        try {
+          await deleteUser(currentUser);
+          showToast('Account deleted successfully.', 'success');
+        } catch (authErr: any) {
+          // If requires recent login, just log out and let user know
+          if (authErr.code === 'auth/requires-recent-login') {
+            showToast('Account data deleted. Sign in again to complete deletion.', 'info');
+          } else {
+            throw authErr;
+          }
+        }
+      }
+
+      // Logout and redirect (may already be logged out from deleteUser)
+      setTimeout(() => logout(), 500);
+    } catch (e) {
+      showToast('Error: ' + (e as Error).message, 'error');
+    }
   };
 
   const handleReauthenticate = async () => {
