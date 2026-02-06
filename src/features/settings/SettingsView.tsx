@@ -25,6 +25,7 @@ import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
 import { VerifyEmailBanner, EnableMfaBanner } from './components/SettingsBanners';
 import { ReauthModal } from './components/ReauthModal';
+import { RecoveryCodesDisplay } from './components/RecoveryCodesDisplay';
 import { SectionNav } from './components/SectionNav';
 import { handleWipeData, handleDeleteAccount } from './components/SettingsDataActions';
 import { Button } from '@anchor-os/ui';
@@ -53,6 +54,7 @@ const SettingsView = () => {
     enrollMfa,
     showToast,
     onRequiresReauth: () => setShowReauthModal(true),
+    userId: user?.uid,
   });
 
   const handleResendVerification = async () => {
@@ -94,6 +96,7 @@ const SettingsView = () => {
         <div id="settings-security"><SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={mfa.isEnrolling} show2FASetup={mfa.show2FASetup} mfaQrUrl={mfa.mfaQrUrl} mfaManualKey={mfa.mfaManualKey}
           mfaCode={mfa.mfaCode} mfaError={mfa.mfaError} onSetShow2FASetup={mfa.setShow2FASetup} onSetMfaCode={mfa.setMfaCode} onGenerateMfaSecret={mfa.handleGenerateSecret}
           onEnrollMfa={mfa.handleEnroll} onUnenrollMfa={unenrollMfa} /></div>
+        {mfa.recoveryCodes && <RecoveryCodesDisplay codes={mfa.recoveryCodes} onDone={mfa.clearRecoveryCodes} />}
         <div id="settings-notifications"><NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
           frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
           onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || {}), ...prefs } })}

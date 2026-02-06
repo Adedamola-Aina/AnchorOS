@@ -6,12 +6,16 @@
  */
 
 import { useState, useRef, useCallback } from 'react';
+import { generateRecoveryCodes } from '../../../services/mfaRecoveryService';
+import { doc, setDoc } from 'firebase/firestore';
+import { db, APP_ID } from '../../../config/firebase';
 
 interface UseMfaEnrollmentUIOptions {
     generateMfaSecret: () => Promise<{ qrCodeUrl: string; manualKey: string }>;
     enrollMfa: (code: string) => Promise<void>;
     showToast: (message: string, type: 'success' | 'error') => void;
     onRequiresReauth: () => void;
+    userId?: string;
 }
 
 export function useMfaEnrollmentUI({
@@ -19,6 +23,7 @@ export function useMfaEnrollmentUI({
     enrollMfa,
     showToast,
     onRequiresReauth,
+    userId,
 }: UseMfaEnrollmentUIOptions) {
     const [show2FASetup, setShow2FASetup] = useState(false);
     const [mfaQrUrl, setMfaQrUrl] = useState('');
@@ -26,6 +31,7 @@ export function useMfaEnrollmentUI({
     const [mfaCode, setMfaCode] = useState('');
     const [mfaError, setMfaError] = useState('');
     const [isEnrolling, setIsEnrolling] = useState(false);
+    const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
     const mfaCompletedRef = useRef(false);
 
     const handleGenerateSecret = useCallback(async () => {
@@ -63,6 +69,20 @@ export function useMfaEnrollmentUI({
         setMfaError('');
         try {
             await enrollMfa(code);
+            // FEAT-002: Generate recovery codes after successful MFA enrollment
+            try {
+                const { plainCodes, hashedCodes } = await generateRecoveryCodes();
+                if (userId) {
+                    await setDoc(doc(db, 'artifacts', APP_ID, 'users', userId, 'security', 'mfaRecovery'), {
+                        hashedCodes,
+                        generatedAt: new Date().toISOString(),
+                        codesRemaining: hashedCodes.length,
+                    });
+                }
+                setRecoveryCodes(plainCodes);
+            } catch (rcErr) {
+                console.warn('[MFA] Recovery codes generation failed:', rcErr);
+            }
             setShow2FASetup(false);
             setMfaCode('');
             showToast('2FA enabled successfully!', 'success');
@@ -78,7 +98,11 @@ export function useMfaEnrollmentUI({
         } finally {
             setIsEnrolling(false);
         }
-    }, [enrollMfa, showToast, onRequiresReauth]);
+    }, [enrollMfa, showToast, onRequiresReauth, userId]);
+
+    const clearRecoveryCodes = useCallback(() => {
+        setRecoveryCodes(null);
+    }, []);
 
     return {
         show2FASetup,
@@ -89,6 +113,8 @@ export function useMfaEnrollmentUI({
         setMfaCode,
         mfaError,
         isEnrolling,
+        recoveryCodes,
+        clearRecoveryCodes,
         handleGenerateSecret,
         handleEnroll,
     };
