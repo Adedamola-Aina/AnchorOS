@@ -85,16 +85,6 @@ const DashboardCharts = ({ accounts, transactions, tasks, navigateTo }: Dashboar
         expense: financialTrend.reduce((acc, curr) => acc + curr.expense, 0)
     }), [financialTrend]);
 
-    if (accounts.length === 0 && transactions.length === 0) {
-        return (
-            <div className="glass-card p-12 text-center animate-in fade-in zoom-in-95 duration-700">
-                <p className="text-slate-400 font-medium italic">No financial data available to visualize.</p>
-            </div>
-        );
-    }
-
-    const showAssetDist = accounts.length > 1;
-
     // Determine primary currency based on most accounts or default to NGN
     const primaryCurrency = useMemo(() => {
         const currencyCount: Record<string, number> = {};
@@ -104,6 +94,16 @@ const DashboardCharts = ({ accounts, transactions, tasks, navigateTo }: Dashboar
         const sorted = Object.entries(currencyCount).sort((a, b) => b[1] - a[1]);
         return (sorted[0]?.[0] as 'NGN' | 'USD') || 'NGN';
     }, [accounts]);
+
+    if (accounts.length === 0 && transactions.length === 0) {
+        return (
+            <div className="glass-card p-12 text-center animate-in fade-in zoom-in-95 duration-700">
+                <p className="text-slate-400 font-medium italic">No financial data available to visualize.</p>
+            </div>
+        );
+    }
+
+    const showAssetDist = accounts.length > 1;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
