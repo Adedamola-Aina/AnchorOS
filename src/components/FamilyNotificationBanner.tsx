@@ -118,9 +118,9 @@ export function FamilyNotificationBanner({ onNavigate, accountId }: FamilyNotifi
                     <div className="flex items-center gap-2 mt-3">
                         <button
                             onClick={() => handleAction(notification)}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
+                            className="inline-flex items-center gap-1 min-h-11 px-2 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
                         >
-                            View <ArrowRight className="w-3 h-3" />
+                            View <ArrowRight className="w-4 h-4" />
                         </button>
                         {notifications.length > 1 && (
                             <span className="text-xs text-slate-400">
@@ -135,14 +135,14 @@ export function FamilyNotificationBanner({ onNavigate, accountId }: FamilyNotifi
                             <button
                                 onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
                                 disabled={currentIndex === 0}
-                                className="p-1.5 text-slate-400 hover:text-slate-600 disabled:opacity-30"
+                                className="min-w-11 min-h-11 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/50 dark:hover:bg-slate-700/50 disabled:opacity-30 rounded-lg transition-colors"
                             >
                                 ←
                             </button>
                             <button
                                 onClick={() => setCurrentIndex(Math.min(notifications.length - 1, currentIndex + 1))}
                                 disabled={currentIndex === notifications.length - 1}
-                                className="p-1.5 text-slate-400 hover:text-slate-600 disabled:opacity-30"
+                                className="min-w-11 min-h-11 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/50 dark:hover:bg-slate-700/50 disabled:opacity-30 rounded-lg transition-colors"
                             >
                                 →
                             </button>
@@ -150,10 +150,10 @@ export function FamilyNotificationBanner({ onNavigate, accountId }: FamilyNotifi
                     )}
                     <button
                         onClick={() => handleDismiss(notification.id)}
-                        className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-white/50 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
+                        className="min-w-11 min-h-11 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/50 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
                         title="Dismiss"
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
             </div>
