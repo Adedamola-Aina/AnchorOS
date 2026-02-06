@@ -6,11 +6,12 @@
  * Reauth modal extracted to ReauthModal.tsx
  */
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useApp } from '../../context/AnchorContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
+import { useMfaEnrollmentUI } from './hooks/useMfaEnrollmentUI';
 import ContactModal from '../../components/ContactModal';
 
 import { ProfileSettings } from './components/ProfileSettings';
@@ -40,44 +41,25 @@ const SettingsView = () => {
   const { showToast, pushPermissionStatus, requestPushPermission } = useNotifications();
 
   const [isResending, setIsResending] = useState(false);
-  const [show2FASetup, setShow2FASetup] = useState(false);
-  const [mfaQrUrl, setMfaQrUrl] = useState('');
-  const [mfaManualKey, setMfaManualKey] = useState('');
-  const [mfaCode, setMfaCode] = useState('');
-  const [mfaError, setMfaError] = useState('');
-  const [isEnrolling, setIsEnrolling] = useState(false);
-  const mfaCompletedRef = useRef(false); // MFA-001: Track completion to avoid stale closure
   const [showContactModal, setShowContactModal] = useState(false);
   const [initialSubject, setInitialSubject] = useState<'question' | 'feedback' | undefined>(undefined);
   const [showReauthModal, setShowReauthModal] = useState(false);
   const [reauthPassword, setReauthPassword] = useState('');
   const [isReauthenticating, setIsReauthenticating] = useState(false);
 
+  // ARCH-001: MFA enrollment UI state encapsulated in dedicated hook
+  const mfa = useMfaEnrollmentUI({
+    generateMfaSecret,
+    enrollMfa,
+    showToast,
+    onRequiresReauth: () => setShowReauthModal(true),
+  });
+
   const handleResendVerification = async () => {
     setIsResending(true);
     await sendVerificationEmail();
     showToast('Verification email sent!', 'success');
     setIsResending(false);
-  };
-
-  const handleGenerateMfaSecret = async () => {
-    mfaCompletedRef.current = false; // MFA-001: Reset ref at start
-    setIsEnrolling(true); setShow2FASetup(true); setMfaQrUrl(''); setMfaManualKey(''); setMfaError('');
-    const timeout = setTimeout(() => { if (!mfaCompletedRef.current) { setMfaError('Initialization taking too long.'); setIsEnrolling(false); } }, 10000);
-    try { const result = await generateMfaSecret(); clearTimeout(timeout); mfaCompletedRef.current = true; setMfaQrUrl(result.qrCodeUrl); setMfaManualKey(result.manualKey); }
-    catch (err) { clearTimeout(timeout); mfaCompletedRef.current = true; setMfaError((err as Error).message); }
-    finally { setIsEnrolling(false); }
-  };
-
-  const handleEnrollMfa = async (code: string) => {
-    setIsEnrolling(true); setMfaError('');
-    try { await enrollMfa(code); setShow2FASetup(false); setMfaCode(''); showToast('2FA enabled successfully!', 'success'); }
-    catch (err) {
-      const msg = (err as Error).message;
-      if (msg.includes('requires-recent-login') || (err as any).code === 'auth/requires-recent-login') { setShowReauthModal(true); }
-      else { setMfaError(msg.includes('invalid-verification-code') ? 'Invalid code. Check device Date & Time settings.' : msg); }
-    }
-    finally { setIsEnrolling(false); }
   };
 
   const onWipeData = () => handleWipeData(user!.uid, showToast);
@@ -103,15 +85,15 @@ const SettingsView = () => {
         {accountNotifications.length > 0 && (
           <div className="grid gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
             {accountNotifications.includes('verify_email') && <VerifyEmailBanner isResending={isResending} onResend={handleResendVerification} />}
-            {accountNotifications.includes('enable_2fa') && <EnableMfaBanner onEnable={handleGenerateMfaSecret} />}
+            {accountNotifications.includes('enable_2fa') && <EnableMfaBanner onEnable={mfa.handleGenerateSecret} />}
           </div>
         )}
 
         <div id="settings-profile"><ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }} /></div>
         <div id="settings-appearance"><AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }} /></div>
-        <div id="settings-security"><SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={isEnrolling} show2FASetup={show2FASetup} mfaQrUrl={mfaQrUrl} mfaManualKey={mfaManualKey}
-          mfaCode={mfaCode} mfaError={mfaError} onSetShow2FASetup={setShow2FASetup} onSetMfaCode={setMfaCode} onGenerateMfaSecret={handleGenerateMfaSecret}
-          onEnrollMfa={handleEnrollMfa} onUnenrollMfa={unenrollMfa} /></div>
+        <div id="settings-security"><SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={mfa.isEnrolling} show2FASetup={mfa.show2FASetup} mfaQrUrl={mfa.mfaQrUrl} mfaManualKey={mfa.mfaManualKey}
+          mfaCode={mfa.mfaCode} mfaError={mfa.mfaError} onSetShow2FASetup={mfa.setShow2FASetup} onSetMfaCode={mfa.setMfaCode} onGenerateMfaSecret={mfa.handleGenerateSecret}
+          onEnrollMfa={mfa.handleEnroll} onUnenrollMfa={unenrollMfa} /></div>
         <div id="settings-notifications"><NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
           frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
           onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || {}), ...prefs } })}
