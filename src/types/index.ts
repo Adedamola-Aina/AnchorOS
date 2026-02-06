@@ -82,6 +82,21 @@ export interface UserProfile {
     frequency: 'instant' | 'daily' | 'weekly';
     enabled: boolean;
     lastDigestAt?: string; // To track frequency
+    categories?: {
+      finance: boolean;
+      commitments: boolean;
+      family: boolean;
+    };
+    quietHours?: {
+      enabled: boolean;
+      startTime: string;
+      endTime: string;
+    };
+  };
+  accessibility?: {
+    fontSize: 'default' | 'large' | 'xl';
+    highContrast: boolean;
+    reducedMotion: boolean;
   };
 }
 
