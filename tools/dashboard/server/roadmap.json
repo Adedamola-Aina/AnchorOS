@@ -1590,6 +1590,166 @@
             "completedAt": "2026-01-29",
             "effort": "medium",
             "impact": "medium"
+        },
+        {
+            "id": "PERF-001",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Add 500ms debounce to profile name input",
+            "description": "Bug fix: Added 500ms debounce to profile name input to prevent excessive Firestore writes",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "PERF-001"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "PERF-002",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Remove duplicate Firestore listeners in FamilySettingsV2",
+            "description": "Bug fix: Removed duplicate Firestore listeners in FamilySettingsV2 that caused redundant reads and potential memory leaks",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "PERF-002"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "PERF-003",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Add list virtualization to TaskList component",
+            "description": "Feature: Added list virtualization to TaskList component for improved rendering performance with large task lists",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "PERF-003"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "PERF-004",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Make dark mode detection reactive in BottomNavigation",
+            "description": "Bug fix: Made dark mode detection reactive in BottomNavigation so theme changes apply without page reload",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "PERF-004"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-001",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Encapsulate MFA enrollment UI state in dedicated hook",
+            "description": "Feature: Encapsulated MFA enrollment UI state in a dedicated hook to reduce component complexity and improve testability",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-001"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "ARCH-002",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Consolidate FamilyConnection interface to single source",
+            "description": "Feature: Consolidated FamilyConnection interface to a single source of truth, eliminating duplicated type definitions",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-002"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-003",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Extract FCM token retry logic to dedicated service",
+            "description": "Feature: Extracted FCM token retry logic to a dedicated service for better separation of concerns and reusability",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-003"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-004",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Remove mfaOps from useEffect dependency array",
+            "description": "Bug fix: Removed mfaOps from useEffect dependency array to prevent infinite re-render loop in MFA enrollment flow",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-004"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "ARCH-005",
+            "team": "Architecture",
+            "priority": "P3",
+            "title": "Remove dead returnAfterAuth sessionStorage code",
+            "description": "Bug fix: Removed dead returnAfterAuth sessionStorage code that was no longer referenced anywhere in the codebase",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-005"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "low"
+        },
+        {
+            "id": "ARCH-006",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Use system theme preference for auth view default",
+            "description": "Bug fix: Replaced hardcoded light theme default with system theme preference detection using getEffectiveTheme() to eliminate dark-mode flash",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-006"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
         }
     ]
 }
