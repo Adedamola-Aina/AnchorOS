@@ -123,7 +123,7 @@ const SettingsView = () => {
         <div id="settings-danger"><DangerZone onDeleteAccount={onDeleteAccount} /></div>
 
         <div className="mt-8 flex justify-center gap-6 pb-8">
-          <Button variant="ghost" size="sm" onClick={() => logout()} className="text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
+          <Button variant="ghost" size="sm" onClick={() => logout()} className="min-h-11 text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
         </div>
 
         {showContactModal && <ContactModal onClose={() => setShowContactModal(false)} currentPage="settings" initialSubject={initialSubject} />}
