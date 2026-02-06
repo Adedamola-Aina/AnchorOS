@@ -76,28 +76,16 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
 
     // Optional: Navigate to Finance and ensure account exists
     if (!skipNavigation) {
-        // We need to handle both Desktop (sidebar visible) and Mobile (drawer hidden)
+        // We need to handle both Desktop (sidebar visible) and Mobile (bottom nav)
         const aside = page.locator('aside');
         let financeBtn = aside.getByRole('button', { name: 'Finance' });
 
-        // Logic: If on mobile, the desktop sidebar is hidden. We must open the mobile menu.
-        // We check if the sidebar is visible. If not, we assume mobile state.
+        // If on mobile, the desktop sidebar is hidden. Use the bottom nav instead.
         const isDesktopSidebarVisible = await aside.isVisible().catch(() => false);
 
         if (!isDesktopSidebarVisible) {
-            // Mobile: Find and click the menu toggle (in the header)
-            // MainLayout.tsx uses LayoutDashboard icon for the closed menu state
-            const header = page.locator('header');
-            // The button inside header
-            const menuToggle = header.locator('button');
-
-            if (await menuToggle.isVisible()) {
-                await menuToggle.click();
-                await page.waitForTimeout(500); // Allow drawer animation
-                // Now look for Finance button in the mobile navigation drawer
-                // The drawer is likely a div with fixed positioning
-                financeBtn = page.getByRole('button', { name: 'Finance' }).first();
-            }
+            // Mobile: Use bottom navigation bar
+            financeBtn = page.locator('nav[aria-label="Main navigation"] a, nav[aria-label="Main navigation"] button').filter({ hasText: 'Finance' }).first();
         }
 
         if (await financeBtn.isVisible()) {
