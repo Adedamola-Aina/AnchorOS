@@ -6,7 +6,7 @@
  * Reauth modal extracted to ReauthModal.tsx
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useApp } from '../../context/AnchorContext';
@@ -25,6 +25,7 @@ import { DangerZone } from './components/DangerZone';
 import { VerifyEmailBanner, EnableMfaBanner } from './components/SettingsBanners';
 import { ReauthModal } from './components/ReauthModal';
 import { SectionNav } from './components/SectionNav';
+import { handleWipeData, handleDeleteAccount } from './components/SettingsDataActions';
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { auditSettings } from '../../services/AuditService';
@@ -45,6 +46,7 @@ const SettingsView = () => {
   const [mfaCode, setMfaCode] = useState('');
   const [mfaError, setMfaError] = useState('');
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const mfaCompletedRef = useRef(false); // MFA-001: Track completion to avoid stale closure
   const [showContactModal, setShowContactModal] = useState(false);
   const [initialSubject, setInitialSubject] = useState<'question' | 'feedback' | undefined>(undefined);
   const [showReauthModal, setShowReauthModal] = useState(false);
@@ -59,10 +61,11 @@ const SettingsView = () => {
   };
 
   const handleGenerateMfaSecret = async () => {
+    mfaCompletedRef.current = false; // MFA-001: Reset ref at start
     setIsEnrolling(true); setShow2FASetup(true); setMfaQrUrl(''); setMfaManualKey(''); setMfaError('');
-    const timeout = setTimeout(() => { if (isEnrolling && !mfaQrUrl) { setMfaError('Initialization taking too long.'); setIsEnrolling(false); } }, 10000);
-    try { const result = await generateMfaSecret(); clearTimeout(timeout); setMfaQrUrl(result.qrCodeUrl); setMfaManualKey(result.manualKey); }
-    catch (err) { clearTimeout(timeout); setMfaError((err as Error).message); }
+    const timeout = setTimeout(() => { if (!mfaCompletedRef.current) { setMfaError('Initialization taking too long.'); setIsEnrolling(false); } }, 10000);
+    try { const result = await generateMfaSecret(); clearTimeout(timeout); mfaCompletedRef.current = true; setMfaQrUrl(result.qrCodeUrl); setMfaManualKey(result.manualKey); }
+    catch (err) { clearTimeout(timeout); mfaCompletedRef.current = true; setMfaError((err as Error).message); }
     finally { setIsEnrolling(false); }
   };
 
@@ -77,64 +80,8 @@ const SettingsView = () => {
     finally { setIsEnrolling(false); }
   };
 
-  const handleWipeData = async () => {
-    try {
-      const { getDocs, collection, writeBatch, doc } = await import('firebase/firestore');
-      const { db, APP_ID } = await import('../../config/firebase');
-      const batch = writeBatch(db); let opCount = 0;
-      for (const colName of ['accounts', 'finance', 'commitments', 'notifications']) {
-        const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'users', user!.uid, colName));
-        snap.docs.forEach(d => { batch.delete(doc(db, 'artifacts', APP_ID, 'users', user!.uid, colName, d.id)); opCount++; });
-      }
-      if (opCount > 0) { await batch.commit(); showToast(`Wiped ${opCount} records.`, 'success'); setTimeout(() => window.location.reload(), 1000); }
-      else { showToast('Nothing to wipe.', 'info'); }
-    } catch (e) { showToast('Wipe failed: ' + (e as Error).message, 'error'); }
-  };
-
-  const handleDeleteAccount = async () => {
-    // BUG-038 Fix: Actually delete user data and Firebase Auth account
-    try {
-      // Step 1: Disconnect from family if connected
-      if (familyConnection) await disconnectFamily('leave');
-
-      // Step 2: Delete all Firestore data (same as handleDevWipe)
-      const { getDocs, collection, writeBatch, doc } = await import('firebase/firestore');
-      const { db, APP_ID } = await import('../../config/firebase');
-      const uid = user?.uid;
-      if (!uid) throw new Error('No user ID');
-
-      const batch = writeBatch(db);
-      for (const colName of ['accounts', 'finance', 'commitments', 'notifications']) {
-        const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'users', uid, colName));
-        snap.docs.forEach(d => { batch.delete(doc(db, 'artifacts', APP_ID, 'users', uid, colName, d.id)); });
-      }
-      // Also delete user profile document
-      batch.delete(doc(db, 'artifacts', APP_ID, 'users', uid));
-      await batch.commit();
-
-      // Step 3: Delete Firebase Auth account
-      const { deleteUser } = await import('firebase/auth');
-      const currentUser = user;
-      if (currentUser) {
-        try {
-          await deleteUser(currentUser);
-          showToast('Account deleted successfully.', 'success');
-        } catch (authErr: any) {
-          // If requires recent login, just log out and let user know
-          if (authErr.code === 'auth/requires-recent-login') {
-            showToast('Account data deleted. Sign in again to complete deletion.', 'info');
-          } else {
-            throw authErr;
-          }
-        }
-      }
-
-      // Logout and redirect (may already be logged out from deleteUser)
-      setTimeout(() => logout(), 500);
-    } catch (e) {
-      showToast('Error: ' + (e as Error).message, 'error');
-    }
-  };
+  const onWipeData = () => handleWipeData(user!.uid, showToast);
+  const onDeleteAccount = () => handleDeleteAccount(user, familyConnection, disconnectFamily, logout, showToast);
 
   const handleReauthenticate = async () => {
     setIsReauthenticating(true);
@@ -172,8 +119,8 @@ const SettingsView = () => {
         <div id="settings-family"><FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} /></div>
         <div id="settings-support"><SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} /></div>
         {import.meta.env.VITE_APP_ENV !== 'production' && <DeveloperTools userUid={user?.uid || ''} />}
-        <div id="settings-data"><DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={handleWipeData} /></div>
-        <div id="settings-danger"><DangerZone onDeleteAccount={handleDeleteAccount} /></div>
+        <div id="settings-data"><DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={onWipeData} /></div>
+        <div id="settings-danger"><DangerZone onDeleteAccount={onDeleteAccount} /></div>
 
         <div className="mt-8 flex justify-center gap-6 pb-8">
           <Button variant="ghost" size="sm" onClick={() => logout()} className="text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>

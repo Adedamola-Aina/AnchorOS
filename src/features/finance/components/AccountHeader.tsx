@@ -12,6 +12,15 @@ import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import { AccountRenameInput, AccountActionButtons } from './AccountHeaderParts';
 
+interface MonthlyBalance {
+    openingBalance?: number;
+    closingBalance?: number;
+    monthIncome: number;
+    monthExpense: number;
+    netChange: number;
+    isCurrentMonth: boolean;
+}
+
 interface AccountHeaderProps {
     account: AnchorAccount;
     isOwner: boolean;
@@ -28,6 +37,7 @@ interface AccountHeaderProps {
     onCancelRename: () => void;
     onConfirmRename: () => void;
     onNameChange: (name: string) => void;
+    monthlyBalance?: MonthlyBalance;
 }
 
 const getAccountStyle = (account: AnchorAccount) => {
@@ -52,6 +62,7 @@ export const AccountHeader = ({
     isEditingName, newName, isRenaming,
     onBack, onDelete, onShare, onTransfer, onPayBill,
     onStartRename, onCancelRename, onConfirmRename, onNameChange,
+    monthlyBalance,
 }: AccountHeaderProps) => {
     const style = getAccountStyle(account);
     const isShared = account.sharedWith && Object.keys(account.sharedWith).length > 0;
@@ -124,6 +135,32 @@ export const AccountHeader = ({
                     <h2 className="text-5xl sm:text-6xl font-black tabular-nums tracking-tight">
                         {formatCurrencyCompact(fromCents(account.balanceCents), account.currency)}
                     </h2>
+                    {/* F-006: Monthly opening/closing balance */}
+                    {monthlyBalance?.isCurrentMonth && monthlyBalance.openingBalance != null && (
+                        <div className="flex items-center gap-4 mt-3 text-xs font-medium opacity-70">
+                            <div>
+                                <span className="opacity-60 uppercase tracking-wider text-[10px]">Opening </span>
+                                <span className="tabular-nums">{formatCurrencyCompact(fromCents(monthlyBalance.openingBalance), account.currency)}</span>
+                            </div>
+                            <span className="opacity-30">→</span>
+                            <div>
+                                <span className={`tabular-nums font-bold ${monthlyBalance.netChange >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                                    {monthlyBalance.netChange >= 0 ? '+' : ''}{formatCurrencyCompact(fromCents(monthlyBalance.netChange), account.currency)}
+                                </span>
+                                <span className="opacity-60 ml-1 uppercase tracking-wider text-[10px]">this month</span>
+                            </div>
+                        </div>
+                    )}
+                    {monthlyBalance && !monthlyBalance.isCurrentMonth && (
+                        <div className="flex items-center gap-4 mt-3 text-xs font-medium opacity-70">
+                            <div>
+                                <span className="opacity-60 uppercase tracking-wider text-[10px]">Month Net </span>
+                                <span className={`tabular-nums font-bold ${monthlyBalance.netChange >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                                    {monthlyBalance.netChange >= 0 ? '+' : ''}{formatCurrencyCompact(fromCents(monthlyBalance.netChange), account.currency)}
+                                </span>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Action Buttons */}

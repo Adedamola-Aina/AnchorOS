@@ -185,6 +185,48 @@
             "createdAt": "2026-02-06"
         },
         {
+            "id": "BUG-059",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Pay Bill transaction identical to regular expense - no category distinction",
+            "description": "Pay Bill creates a transaction with no distinguishing category. Should pre-fill category as Bills & Utilities to differentiate from regular expenses.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-059"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-058",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "O(n²) percentage calculation in AssetDistributionChart legend",
+            "description": "Each legend item recalculates total via accountData.reduce() inside map. Pre-compute percentages in useMemo for O(n) performance.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-058"
+            ],
+            "effort": "small",
+            "impact": "small",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-057",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Negative account balances crash AssetDistributionChart percentages",
+            "description": "Negative account balances pass to pie chart producing negative percentages and rendering errors. Chart should filter to positive balances only and show warning.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-057"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
             "id": "BUG-056",
             "team": "Engineering",
             "priority": "P1",
@@ -218,7 +260,7 @@
             "priority": "P1",
             "title": "writeBatch wipe data can exceed Firestore 500-op limit",
             "description": "handleWipeData uses single writeBatch for all collections. Users with 500+ total documents get Firestore error. No chunking logic.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-054"
             ],
@@ -232,7 +274,7 @@
             "priority": "P1",
             "title": "MFA timeout stale closure - error never fires",
             "description": "handleGenerateMfaSecret timeout captures pre-setState isEnrolling value (false). Condition isEnrolling && !mfaQrUrl always false. 10-second timeout error never displays.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-053"
             ],
@@ -246,7 +288,7 @@
             "priority": "P1",
             "title": "Hardcoded naira in charts - AssetDistributionChart and CashFlowChart",
             "description": "Both chart components hardcode naira symbol instead of using account currency. Wrong symbol shown for USD accounts in all visualizations.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-052"
             ],
@@ -260,7 +302,7 @@
             "priority": "P1",
             "title": "RecurringTransactionsList hardcodes NGN currency symbol",
             "description": "RecurringTransactionsList always displays naira symbol regardless of transaction currency. USD recurring transactions show wrong symbol.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-051"
             ],
@@ -274,7 +316,7 @@
             "priority": "P1",
             "title": "calculateNetWorth.total ignores USD entirely",
             "description": "Net worth calculation only sums NGN balances. USD account balances are silently excluded from total net worth.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-050"
             ],
@@ -288,7 +330,7 @@
             "priority": "P1",
             "title": "30 Day Summary is actually 28 days and uses today not selected month",
             "description": "The 30 Day Summary card always calculates from today minus 28 days, ignoring which month the user has selected. Shows current data even when viewing past months.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-049"
             ],
@@ -302,7 +344,7 @@
             "priority": "P1",
             "title": "MonthlyInsight uses first account currency for multi-currency totals",
             "description": "Multi-currency users see meaningless sums. NGN + USD added together using NGN symbol. Should either convert via exchange rate or show per-currency totals.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-048"
             ],
@@ -316,7 +358,7 @@
             "priority": "P1",
             "title": "No monthly opening/closing balance - always shows today",
             "description": "Finance view always displays current balance regardless of which month is selected. Users cannot see what their balance was at end of previous months.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-047"
             ],
