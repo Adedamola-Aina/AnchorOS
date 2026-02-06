@@ -1,11 +1,11 @@
 /**
  * InviteSuccessStep - Step 3 of family invitation flow
- * DES-002: Migrated to semantic tokens and primitives
+ * 
+ * Displays the verification code after successful invitation.
  */
 
 import { Copy, Check } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
-import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface InviteSuccessStepProps {
     inviteeEmail: string;
@@ -16,50 +16,51 @@ interface InviteSuccessStepProps {
 }
 
 export function InviteSuccessStep({
-    inviteeEmail, verificationCode, copied, onCopyCode, onDone,
+    inviteeEmail,
+    verificationCode,
+    copied,
+    onCopyCode,
+    onDone,
 }: InviteSuccessStepProps) {
     return (
-        <VStack gap="lg">
-            <VStack gap="md" align="center" className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-finance-100 dark:bg-finance-900/30">
-                    <Check className="w-8 h-8 text-finance-600 dark:text-finance-400" />
+        <div className="space-y-6">
+            <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-4">
+                    <Check className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <VStack gap="xs" align="center">
-                    <Text as="h3" variant="heading" size="lg">Invitation Sent!</Text>
-                    <Text variant="muted" size="sm">
-                        An email has been sent to <span className="font-semibold text-foreground dark:text-foreground-dark">{inviteeEmail}</span>
-                    </Text>
-                </VStack>
-            </VStack>
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Invitation Sent!</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    An email has been sent to <span className="font-semibold">{inviteeEmail}</span>
+                </p>
+            </div>
 
-            <VStack gap="sm" className="p-6 rounded-2xl bg-surface-3 dark:bg-surface-3-dark border border-[var(--border)]">
-                <Text variant="subtle" size="xs" weight="bold" className="uppercase tracking-wider text-center">
+            <div className="p-6 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 text-center">
                     Verification Code
-                </Text>
-                <HStack gap="sm" justify="center" align="center">
-                    <code className="text-4xl font-mono font-bold tracking-[0.5em] text-foreground dark:text-foreground-dark">
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                    <code className="text-4xl font-mono font-bold tracking-[0.5em] text-slate-900 dark:text-white">
                         {verificationCode}
                     </code>
                     <button
                         onClick={onCopyCode}
-                        className="p-2 rounded-lg hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-colors"
+                        className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                     >
                         {copied ? (
-                            <Check className="w-5 h-5 text-finance-600" />
+                            <Check className="w-5 h-5 text-emerald-600" />
                         ) : (
-                            <Copy className="w-5 h-5 text-muted" />
+                            <Copy className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                         )}
                     </button>
-                </HStack>
-                <Text variant="muted" size="xs" className="text-center">
+                </div>
+                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
                     For convenience, this code has also been included in the invitation email.
-                </Text>
-            </VStack>
+                </p>
+            </div>
 
             <Button onClick={onDone} className="w-full">
                 Done
             </Button>
-        </VStack>
+        </div>
     );
 }
-

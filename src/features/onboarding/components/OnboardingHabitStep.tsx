@@ -22,35 +22,35 @@ export function OnboardingHabitStep({ taskTitle, setTaskTitle, loading, onSubmit
                     <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div>
-                    <h2 className="text-h2 lg:text-h2-lg text-foreground dark:text-foreground-dark">One Small Habit</h2>
-                    <p className="text-muted text-sm">Consistency starts with one daily action.</p>
+                    <h2 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white">One Small Habit</h2>
+                    <p className="text-slate-500 text-sm">Consistency starts with one daily action.</p>
                 </div>
             </div>
 
             <div className="space-y-4">
                 <div>
-                    <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">I commit to...</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">I commit to...</label>
                     <input type="text" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)}
-                        className="w-full p-4 bg-surface-1 dark:bg-surface-1-dark border border-border-subtle dark:border-border-dark rounded-xl font-bold text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-finance-500 transition-all"
+                        className="w-full p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                         placeholder="e.g. Drink water, Read pages, Exercise" />
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
                     {SUGGESTIONS.map(s => (
                         <button key={s} onClick={() => setTaskTitle(s)}
-                            className="px-3 py-1.5 rounded-lg bg-surface-3 dark:bg-surface-3-dark text-xs font-medium text-muted dark:text-muted-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-colors">
+                            className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                             {s}
                         </button>
                     ))}
                 </div>
 
                 <button onClick={onSubmit} disabled={!taskTitle || loading}
-                    className="w-full mt-8 bg-finance-600 hover:bg-finance-500 disabled:opacity-50 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+                    className="w-full mt-8 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
                     {loading ? 'Committing...' : 'Finish Setup'} <Sparkles className="w-4 h-4" />
                 </button>
 
                 <div className="text-center">
-                    <button onClick={onSkip} className="text-sm text-muted hover:text-foreground dark:hover:text-foreground-dark transition-colors">Skip for now →</button>
+                    <button onClick={onSkip} className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Skip for now →</button>
                 </div>
             </div>
         </div>

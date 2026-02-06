@@ -1,11 +1,5 @@
-/**
- * RecurringOptions - Toggle and settings for recurring transactions
- * DES-002: Migrated to semantic tokens and primitives
- */
-
 import React from 'react';
 import type { RecurringFrequency } from '../../../types';
-import { Text, HStack, VStack } from '../../../components/primitives';
 
 interface RecurringOptionsProps {
     isRecurring: boolean;
@@ -20,16 +14,16 @@ export const RecurringOptions: React.FC<RecurringOptionsProps> = ({
     isRecurring, onChange, frequency, onFrequencyChange, interval, onIntervalChange
 }) => {
     return (
-        <div className="bg-surface-3 dark:bg-surface-3-dark p-3 rounded-lg border border-[var(--border)]">
-            <HStack justify="between" align="center" className="mb-2">
-                <Text variant="body" size="sm" weight="medium">
+        <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+            <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                     Make Recurring?
-                </Text>
+                </label>
                 <div
                     onClick={() => onChange(!isRecurring)}
                     className={`
                         w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors
-                        ${isRecurring ? 'bg-primary-600' : 'bg-surface-hover dark:bg-surface-hover-dark'}
+                        ${isRecurring ? 'bg-primary-600' : 'bg-slate-300 dark:bg-slate-600'}
                     `}
                 >
                     <div className={`
@@ -37,47 +31,46 @@ export const RecurringOptions: React.FC<RecurringOptionsProps> = ({
                         ${isRecurring ? 'translate-x-5' : 'translate-x-0'}
                     `} />
                 </div>
-            </HStack>
+            </div>
 
             {isRecurring && (
                 <div className="grid grid-cols-2 gap-3 mt-3 animate-in slide-in-from-top-2 fade-in duration-200">
-                    <VStack gap="xs">
-                        <Text variant="muted" size="xs" weight="medium">
+                    <div>
+                        <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
                             Frequency
-                        </Text>
+                        </label>
                         <select
                             value={frequency}
                             onChange={(e) => onFrequencyChange(e.target.value as RecurringFrequency)}
-                            className="w-full text-sm rounded-lg border-[var(--border)] bg-surface-2 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark"
+                            className="w-full text-sm rounded-lg border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                         >
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
                         </select>
-                    </VStack>
-                    <VStack gap="xs">
-                        <Text variant="muted" size="xs" weight="medium">
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
                             Every...
-                        </Text>
-                        <HStack gap="sm" align="center">
+                        </label>
+                        <div className="flex items-center gap-2">
                             <input
                                 type="number"
                                 min="1"
                                 max="12"
                                 value={interval}
                                 onChange={(e) => onIntervalChange(parseInt(e.target.value) || 1)}
-                                className="w-full text-sm rounded-lg border-[var(--border)] bg-surface-2 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark"
+                                className="w-full text-sm rounded-lg border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                             />
-                            <Text variant="muted" size="xs">
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
                                 {frequency === 'weekly' && 'week(s)'}
                                 {frequency === 'monthly' && 'month(s)'}
                                 {frequency === 'yearly' && 'year(s)'}
-                            </Text>
-                        </HStack>
-                    </VStack>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
     );
 };
-

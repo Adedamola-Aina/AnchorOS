@@ -94,9 +94,9 @@ export function FamilySettingsV2({ onNavigateToFinance }: FamilySettingsV2Props)
     if (showInviteForm) {
         return (
             <Card className="overflow-hidden">
-                <CardHeader className="p-6 border-b border-border-subtle bg-warning-50/30 dark:bg-warning-900/10">
-                    <CardTitle className="text-base font-bold text-warning-900 dark:text-warning-500 flex items-center gap-3">
-                        <div className="p-2 bg-warning-500/10 rounded-lg"><Users className="w-5 h-5 text-warning-600 dark:text-warning-500" /></div>
+                <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-amber-50/30 dark:bg-amber-900/10">
+                    <CardTitle className="text-base font-bold text-amber-900 dark:text-amber-500 flex items-center gap-3">
+                        <div className="p-2 bg-amber-500/10 rounded-lg"><Users className="w-5 h-5 text-amber-600 dark:text-amber-500" /></div>
                         Invite Family Member
                     </CardTitle>
                 </CardHeader>

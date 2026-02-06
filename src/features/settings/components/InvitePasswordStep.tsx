@@ -1,11 +1,11 @@
 /**
  * InvitePasswordStep - Step 2 of family invitation flow
- * DES-002: Migrated to semantic tokens and primitives
+ * 
+ * Confirms user's password before sending invitation.
  */
 
 import { Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
-import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface InvitePasswordStepProps {
     inviteeEmail: string;
@@ -18,47 +18,51 @@ interface InvitePasswordStepProps {
 }
 
 export function InvitePasswordStep({
-    inviteeEmail, password, setPassword, error, loading, onSubmit, onBack,
+    inviteeEmail,
+    password,
+    setPassword,
+    error,
+    loading,
+    onSubmit,
+    onBack,
 }: InvitePasswordStepProps) {
-    const inputClass = "w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border)] bg-surface-2 dark:bg-surface-2-dark text-foreground dark:text-foreground-dark placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-warning-500";
-
     return (
         <form onSubmit={onSubmit} className="space-y-4">
-            <div className="p-4 rounded-xl bg-surface-3 dark:bg-surface-3-dark mb-4">
-                <Text variant="muted" size="sm">
-                    Inviting: <span className="font-semibold text-foreground dark:text-foreground-dark">{inviteeEmail}</span>
-                </Text>
+            <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800 mb-4">
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                    Inviting: <span className="font-semibold">{inviteeEmail}</span>
+                </p>
             </div>
 
-            <VStack gap="sm">
-                <Text variant="subtle" size="xs" weight="bold" className="uppercase tracking-wider">
+            <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                     Confirm Your Password
-                </Text>
+                </label>
                 <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
-                        className={inputClass}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                         autoFocus
                         autoComplete="current-password"
                     />
                 </div>
-                <Text variant="muted" size="xs">
+                <p className="text-xs text-slate-500 mt-2">
                     This confirms your intent to invite a family member.
-                </Text>
-            </VStack>
+                </p>
+            </div>
 
             {error && (
-                <HStack gap="sm" align="center" className="text-danger-600 dark:text-danger-400 text-sm">
+                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-sm">
                     <AlertCircle className="w-4 h-4" />
-                    <span>{error}</span>
-                </HStack>
+                    {error}
+                </div>
             )}
 
-            <HStack gap="sm">
+            <div className="flex gap-3">
                 <Button type="button" variant="secondary" onClick={onBack} className="flex-1">
                     Back
                 </Button>
@@ -75,8 +79,7 @@ export function InvitePasswordStep({
                         </>
                     )}
                 </Button>
-            </HStack>
+            </div>
         </form>
     );
 }
-

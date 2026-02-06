@@ -1,4 +1,4 @@
-const CACHE_NAME = 'anchor-os-v1.5.15';
+const CACHE_NAME = 'anchor-os-v1.5.14';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',

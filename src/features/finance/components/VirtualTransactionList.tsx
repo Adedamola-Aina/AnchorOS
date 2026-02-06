@@ -1,18 +1,10 @@
-/**
- * VirtualTransactionList - Virtualized scrolling for transaction lists
- * DES-002: Migrated to semantic tokens and primitives
- * WEB-003: Framer Motion staggered entry animations
- */
-
 import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { TransactionItem } from './TransactionItem';
 import { SwipeableTransactionItem } from './SwipeableTransactionItem';
 import { useResponsive } from '../../../hooks/useResponsive';
 import type { AnchorTransaction } from '../../../types';
-import { Text, VStack, HStack, Indicator } from '../../../components/primitives';
 
 interface VirtualTransactionListProps {
     transactions: AnchorTransaction[];
@@ -25,20 +17,6 @@ interface VirtualTransactionListProps {
     className?: string;
 }
 
-// Animation variants for list items
-const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: (i: number) => ({
-        opacity: 1,
-        x: 0,
-        transition: {
-            delay: Math.min(i * 0.03, 0.3), // Stagger capped at 0.3s
-            duration: 0.2,
-            ease: 'easeOut' as const,
-        },
-    }),
-};
-
 export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     transactions,
     currentUserId,
@@ -47,22 +25,15 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     loading,
     searchQuery,
     onClearSearch,
-    className = "",
+    className = "h-[calc(100vh-320px)] min-h-[400px]",
 }) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const { isMobile } = useResponsive();
 
-    // Calculate estimated height for content-fit sizing
-    const ITEM_HEIGHT = 88; // Estimated height per item
-    const END_OF_LIST_HEIGHT = 56; // Height of end-of-list indicator
-    const MAX_HEIGHT = typeof window !== 'undefined' ? window.innerHeight - 320 : 600;
-    const contentHeight = transactions.length * ITEM_HEIGHT + END_OF_LIST_HEIGHT;
-    const containerHeight = Math.min(contentHeight, MAX_HEIGHT);
-
     const parentVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => ITEM_HEIGHT,
+        estimateSize: () => 88, // Row height: ~80px card + 8px gap
         overscan: 5,
     });
 
@@ -70,33 +41,30 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
 
     if (transactions.length === 0) {
         return (
-            <VStack align="center" justify="center" gap="sm" className="py-12 px-4">
-                <Search className="w-10 h-10 text-muted dark:text-muted-dark" />
-                <Text variant="heading" weight="bold">
+            <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
+                <Search className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
+                <h4 className="font-bold text-slate-800 dark:text-white mb-1">
                     {searchQuery ? 'No transactions found' : 'No transactions yet'}
-                </Text>
-                <Text variant="muted" size="sm">
+                </h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                     {searchQuery ? 'Try a different search term' : 'Add your first transaction to get started'}
-                </Text>
+                </p>
                 {searchQuery && onClearSearch && (
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                    <button
                         onClick={onClearSearch}
                         className="mt-4 text-primary-500 text-sm font-bold hover:underline"
                     >
                         Clear Search
-                    </motion.button>
+                    </button>
                 )}
-            </VStack>
+            </div>
         );
     }
 
     return (
         <div
             ref={parentRef}
-            style={{ height: transactions.length > 0 ? `${containerHeight}px` : 'auto' }}
-            className={`bg-transparent overflow-y-auto overscroll-none ${className} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
+            className={`bg-transparent overflow-y-auto overscroll-contain ${className} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
         >
             <div
                 style={{
@@ -107,9 +75,10 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
             >
                 {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                     const tx = transactions[virtualRow.index];
+                    // Safety check: ensure transaction exists (array may have changed)
                     if (!tx) return null;
                     return (
-                        <motion.div
+                        <div
                             key={tx.id}
                             data-index={virtualRow.index}
                             ref={rowVirtualizer.measureElement}
@@ -120,11 +89,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                 width: '100%',
                                 transform: `translateY(${virtualRow.start}px)`,
                             }}
-                            className="pb-2"
-                            variants={itemVariants}
-                            initial="hidden"
-                            animate="visible"
-                            custom={virtualRow.index}
+                            className="pb-2" // Gap between transaction cards only
                         >
                             {isMobile ? (
                                 <SwipeableTransactionItem
@@ -143,20 +108,19 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                     onDelete={onDelete}
                                 />
                             )}
-                        </motion.div>
+                        </div>
                     );
                 })}
             </div>
             {!loading && transactions.length > 0 && (
-                <HStack justify="center" className="py-6">
-                    <HStack gap="sm" align="center" className="p-2 rounded-full bg-surface-3 dark:bg-surface-3-dark">
-                        <Indicator status="default" size="xs" />
-                        <Text variant="muted" size="xs">End of list</Text>
-                        <Indicator status="default" size="xs" />
-                    </HStack>
-                </HStack>
+                <div className="py-6 text-center">
+                    <div className="inline-flex items-center justify-center p-2 rounded-full bg-slate-100 dark:bg-slate-800/50 text-xs font-medium text-slate-400 dark:text-slate-500">
+                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 mr-2"></span>
+                        End of list
+                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 ml-2"></span>
+                    </div>
+                </div>
             )}
         </div>
     );
 };
-

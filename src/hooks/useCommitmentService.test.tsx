@@ -70,6 +70,7 @@ const firestoreMocks = vi.hoisted(() => {
 // 2. Apply Mocks
 vi.mock('../config/firebase', () => ({
   db: {},
+  functions: {},
   APP_ID: 'anchor-os-test',
 }));
 

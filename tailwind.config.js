@@ -8,310 +8,129 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // ============================================================
-        // SEMANTIC COLOR SYSTEM - DES-002
-        // All raw color classes (text-slate-*, bg-slate-*) should be
-        // replaced with these semantic tokens for consistency.
-        // ============================================================
+        // Semantic Color System - UX-001
+        // Following calm design principles from DESIGN_PHILOSOPHY.md
 
         // Primary: Anchor Blue (professional, trustworthy)
         // Usage: Primary CTAs, active navigation, main UI highlights
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#eff6ff',   // Very light blue
+          100: '#dbeafe',  // Light blue
+          200: '#bfdbfe',  // Lighter blue
+          300: '#93c5fd',  // Light-medium blue
+          400: '#60a5fa',  // Medium blue
+          500: '#3b82f6',  // Base primary blue
+          600: '#2563eb',  // Primary blue (main)
+          700: '#1d4ed8',  // Darker blue
+          800: '#1e40af',  // Dark blue
+          900: '#1e3a8a',  // Very dark blue
         },
 
         // Finance: Money Green (wealth, growth, positive financial indicators)
         // Usage: Income, account surplus, positive trends, financial success
         finance: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+          50: '#f0fdf4',   // Very light green
+          100: '#dcfce7',  // Light green
+          200: '#bbf7d0',  // Lighter green
+          300: '#86efac',  // Light-medium green
+          400: '#4ade80',  // Medium green
+          500: '#22c55e',  // Base finance green
+          600: '#16a34a',  // Finance green (main)
+          700: '#15803d',  // Darker green
+          800: '#166534',  // Dark green
+          900: '#14532d',  // Very dark green
         },
 
         // Task: Action Purple (productivity, focus, completion)
         // Usage: Commitments module, task completion, streaks
         task: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',
-          600: '#9333ea',
-          700: '#7e22ce',
-          800: '#6b21a8',
-          900: '#581c87',
+          50: '#faf5ff',   // Very light purple
+          100: '#f3e8ff',  // Light purple
+          200: '#e9d5ff',  // Lighter purple
+          300: '#d8b4fe',  // Light-medium purple
+          400: '#c084fc',  // Medium purple
+          500: '#a855f7',  // Base task purple
+          600: '#9333ea',  // Task purple (main)
+          700: '#7e22ce',  // Darker purple
+          800: '#6b21a8',  // Dark purple
+          900: '#581c87',  // Very dark purple
         },
 
         // Family: Warm Coral (connection, warmth, collaboration)
         // Usage: Family mode, shared accounts, collaborative features
         family: {
-          50: '#fff7ed',
-          100: '#ffedd5',
-          200: '#fed7aa',
-          300: '#fdba74',
-          400: '#fb923c',
-          500: '#f97316',
-          600: '#ea580c',
-          700: '#c2410c',
-          800: '#9a3412',
-          900: '#7c2d12',
+          50: '#fff7ed',   // Very light coral
+          100: '#ffedd5',  // Light coral
+          200: '#fed7aa',  // Lighter coral
+          300: '#fdba74',  // Light-medium coral
+          400: '#fb923c',  // Medium coral
+          500: '#f97316',  // Base family coral
+          600: '#ea580c',  // Family coral (main)
+          700: '#c2410c',  // Darker coral
+          800: '#9a3412',  // Dark coral
+          900: '#7c2d12',  // Very dark coral
         },
 
-        // ============================================================
-        // SEMANTIC TEXT COLORS - Replace raw text-slate-* usage
-        // ============================================================
-
-        // Foreground: Primary text color
-        // Light: slate-900, Dark: slate-100
-        // Usage: Headings, important text, labels
-        foreground: {
-          DEFAULT: '#0f172a', // slate-900
-          dark: '#f1f5f9',    // slate-100
-        },
-
-        // Muted: Secondary/subdued text
-        // Light: slate-500, Dark: slate-400
-        // Usage: Descriptions, helper text, timestamps
-        muted: {
-          DEFAULT: '#64748b', // slate-500
-          foreground: '#64748b', // slate-500
-          dark: '#94a3b8',    // slate-400
-        },
-
-        // Subtle: Tertiary/disabled text
-        // Light: slate-400, Dark: slate-500
-        // Usage: Disabled states, tertiary labels, icons
-        subtle: {
-          DEFAULT: '#94a3b8', // slate-400
-          dark: '#64748b',    // slate-500
-        },
-
-        // ============================================================
-        // SEMANTIC BACKGROUND COLORS - Replace raw bg-slate-* usage
-        // ============================================================
-
-        // Surface levels for depth hierarchy
-        surface: {
-          // Level 1: Page background
-          // Light: slate-50, Dark: #0a0f1a (deep navy)
-          1: {
-            DEFAULT: '#f8fafc', // slate-50
-            dark: '#0a0f1a',
-          },
-          // Level 2: Cards, containers
-          // Light: white, Dark: slate-900
-          2: {
-            DEFAULT: '#ffffff',
-            dark: '#0f172a', // slate-900
-          },
-          // Level 3: Inputs, modals, elevated
-          // Light: slate-100, Dark: slate-800
-          3: {
-            DEFAULT: '#f1f5f9', // slate-100
-            dark: '#1e293b', // slate-800
-          },
-          // Level 4: Hover states
-          // Light: slate-200, Dark: slate-700
-          hover: {
-            DEFAULT: '#e2e8f0', // slate-200
-            dark: '#334155', // slate-700
-          },
-        },
-
-        // ============================================================
-        // STATUS COLORS - Semantic status indicators (with full scale)
-        // ============================================================
-
-        // Success: Emerald palette
-        success: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
-          DEFAULT: '#10b981',
-        },
-
-        // Danger: Rose palette
-        danger: {
-          50: '#fff1f2',
-          100: '#ffe4e6',
-          200: '#fecdd3',
-          300: '#fda4af',
-          400: '#fb7185',
-          500: '#f43f5e',
-          600: '#e11d48',
-          700: '#be123c',
-          800: '#9f1239',
-          900: '#881337',
-          DEFAULT: '#f43f5e',
-        },
-
-        // Warning: Amber palette
-        warning: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
-          DEFAULT: '#f59e0b',
-        },
-
-        // Info: Blue palette (matches primary)
-        info: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          DEFAULT: '#3b82f6',
-        },
-
-        // Legacy anchor colors (deprecated - use semantic tokens above)
+        // System colors (keep existing for non-semantic usage)
         anchor: {
           personal: {
-            light: '#f0fdfa',
-            DEFAULT: '#14b8a6',
-            dark: '#134e4a',
+            light: '#f0fdfa', // teal-50
+            DEFAULT: '#14b8a6', // teal-500
+            dark: '#134e4a', // teal-900
           },
           family: {
-            light: '#fffbeb',
-            DEFAULT: '#f59e0b',
-            dark: '#78350f',
+            light: '#fffbeb', // amber-50
+            DEFAULT: '#f59e0b', // amber-500
+            dark: '#78350f', // amber-900
           },
           success: {
-            light: '#ecfdf5',
-            DEFAULT: '#10b981',
-            dark: '#064e3b',
+            light: '#ecfdf5', // emerald-50
+            DEFAULT: '#10b981', // emerald-500
+            dark: '#064e3b', // emerald-900
           },
           error: {
-            light: '#fef2f2',
-            DEFAULT: '#f43f5e',
-            dark: '#4c0519',
+            light: '#fef2f2', // rose-50
+            DEFAULT: '#f43f5e', // rose-500
+            dark: '#4c0519', // rose-900
           },
           finance: {
-            light: '#f5f3ff',
-            DEFAULT: '#8b5cf6',
-            dark: '#2e1065',
+            light: '#f5f3ff', // violet-50
+            DEFAULT: '#8b5cf6', // violet-500
+            dark: '#2e1065', // violet-900
           }
-        },
-
-        // ============================================================
-        // SEMANTIC BORDER COLORS - For border-* utilities
-        // ============================================================
-        border: {
-          DEFAULT: '#e2e8f0',   // slate-200 - Standard borders
-          subtle: '#f1f5f9',    // slate-100 - Subtle dividers
-          dark: '#334155',      // slate-700 - Dark mode borders
-        },
-      },
-
-      // ============================================================
-      // BORDER COLORS - Extend for border-border-* utilities
-      // ============================================================
-      borderColor: {
-        border: '#e2e8f0',              // slate-200 - Light mode default
-        'border-subtle': '#f1f5f9',     // slate-100 - Light mode subtle
-        'border-dark': '#334155',       // slate-700 - Dark mode default
-        'border-subtle-dark': '#1e293b', // slate-800 - Dark mode subtle
-      },
-
-      // ============================================================
-      // SEMANTIC SPACING - Standardized spacing scale
-      // ============================================================
-      spacing: {
-        // Micro spacing (internal component spacing)
-        'xs': '0.25rem',  // 4px - Icon gaps, tight padding
-        'sm': '0.5rem',   // 8px - Default gap between related items
-        // Standard spacing (section/component spacing)
-        'md': '1rem',     // 16px - Card padding, form field gaps
-        'lg': '1.5rem',   // 24px - Section gaps
-        // Large spacing (page-level spacing)
-        'xl': '2rem',     // 32px - Major section gaps
-        '2xl': '3rem',    // 48px - Page section dividers
-        '3xl': '4rem',    // 64px - Hero spacing
-      },
-
-      // ============================================================
-      // SEMANTIC BORDER RADIUS - Standardized radius scale
-      // ============================================================
-      borderRadius: {
-        // Tight: Pills, badges, small buttons
-        'sm': '0.375rem', // 6px
-        // Standard: Cards, inputs, medium buttons
-        'md': '0.5rem',   // 8px
-        // Soft: Large cards, modals
-        'lg': '0.75rem',  // 12px
-        // Rounded: Feature cards, image containers
-        'xl': '1rem',     // 16px
-        // Extra rounded: Decorative elements
-        '2xl': '1.5rem',  // 24px
-      },
-
-      // ============================================================
-      // SEMANTIC SHADOWS - Depth hierarchy
-      // ============================================================
-      boxShadow: {
-        // Subtle: Hover states, borders
-        'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        // Standard: Cards, dropdowns
-        'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        // Elevated: Modals, popovers
-        'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        // Prominent: Focus states, important callouts
-        'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-        // Glow effects (dark mode)
-        'glow-primary': '0 0 20px -5px rgb(59 130 246 / 0.5)',
-        'glow-finance': '0 0 20px -5px rgb(34 197 94 / 0.5)',
-        'glow-danger': '0 0 20px -5px rgb(244 63 94 / 0.5)',
+        }
       },
 
       fontSize: {
         // Semantic Typography Scale - UX-013
-        'display': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '800' }],
-        'display-lg': ['3rem', { lineHeight: '1', fontWeight: '800' }],
-        'h1': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],
-        'h1-lg': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '700' }],
-        'h2': ['1.5rem', { lineHeight: '2rem', fontWeight: '700' }],
-        'h2-lg': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],
-        'h3': ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        'h3-lg': ['1.5rem', { lineHeight: '2rem', fontWeight: '600' }],
-        'body': ['1rem', { lineHeight: '1.5rem', fontWeight: '500' }],
-        'small': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '600' }],
+        // Built-in responsive sizing, line-height, and font-weight
+        // Usage: text-h1 (mobile), lg:text-h1-lg (desktop)
+        // UPDATED: Bolder weights for native iOS/Android confidence (Feb 2026)
+
+        // Display: Hero sections, marketing (48px desktop / 36px mobile)
+        'display': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '800' }],      // 36px mobile - BLACK
+        'display-lg': ['3rem', { lineHeight: '1', fontWeight: '800' }],           // 48px desktop - BLACK
+
+        // H1: Page titles (36px desktop / 30px mobile)
+        'h1': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],         // 30px mobile - BOLD
+        'h1-lg': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '700' }],        // 36px desktop - BOLD
+
+        // H2: Section headers (30px desktop / 24px mobile)
+        'h2': ['1.5rem', { lineHeight: '2rem', fontWeight: '700' }],              // 24px mobile - BOLD
+        'h2-lg': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],      // 30px desktop - BOLD
+
+        // H3: Subsections (24px desktop / 20px mobile)
+        'h3': ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],          // 20px mobile - SEMIBOLD
+        'h3-lg': ['1.5rem', { lineHeight: '2rem', fontWeight: '600' }],           // 24px desktop - SEMIBOLD
+
+        // Body: Main text (16px all breakpoints)
+        'body': ['1rem', { lineHeight: '1.5rem', fontWeight: '500' }],            // 16px - MEDIUM (was 400)
+
+        // Small: Captions, labels (14px all breakpoints)
+        'small': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '600' }],      // 14px - SEMIBOLD (was 500)
       },
 
+      // Native System Font Stack - iOS uses SF Pro, Android uses Roboto
       fontFamily: {
         sans: [
           '-apple-system',
@@ -332,4 +151,3 @@ module.exports = {
     require("tailwindcss-animate"),
   ],
 }
-

@@ -1,12 +1,6 @@
-/**
- * ProfileSettings - User profile display and editing
- * DES-002: Migrated to semantic tokens and primitives
- */
-
 import React from 'react';
 import { User } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
-import { Text, VStack } from '../../../components/primitives';
 
 interface ProfileSettingsProps {
     name: string;
@@ -15,36 +9,33 @@ interface ProfileSettingsProps {
 }
 
 export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onUpdateName }) => {
-    const inputClass = "w-full p-3 border border-[var(--border)] rounded-xl bg-surface-3 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark focus:ring-2 focus:ring-primary-500/20 outline-none transition-all";
-
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-[var(--border-subtle)]">
-                <CardTitle className="text-base font-bold text-foreground dark:text-foreground-dark flex items-center gap-3">
-                    <div className="p-2 bg-primary-500/10 rounded-lg">
-                        <User className="w-5 h-5 text-primary-500" />
+            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
+                <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <div className="p-2 bg-blue-500/10 rounded-lg">
+                        <User className="w-5 h-5 text-blue-500" />
                     </div>
                     User Profile
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <VStack gap="xs">
-                        <Text variant="subtle" size="xs" weight="bold" className="uppercase">Display Name</Text>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Display Name</label>
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => onUpdateName(e.target.value)}
-                            className={inputClass}
+                            className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                         />
-                    </VStack>
-                    <VStack gap="xs" justify="end">
-                        <Text variant="subtle" size="xs" weight="bold" className="uppercase">User Identifier</Text>
-                        <Text variant="muted" size="xs" className="font-mono select-all">{uid}</Text>
-                    </VStack>
+                    </div>
+                    <div className="flex flex-col justify-end">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">User Identifier</label>
+                        <div className="text-xs text-slate-400 font-mono mt-1 select-all">{uid}</div>
+                    </div>
                 </div>
             </CardContent>
         </Card>
     );
 };
-

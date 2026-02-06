@@ -1,15 +1,9 @@
-/**
- * EditTaskForm - Form for editing existing tasks
- * DES-002: Migrated to semantic tokens and primitives
- */
-
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import type { AnchorTask, TimeOfDay } from '../../../types';
 import { Button } from '@anchor-os/ui';
 import { Card } from '@anchor-os/ui';
 import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
-import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface EditTaskFormProps {
     task: AnchorTask;
@@ -38,79 +32,105 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
         if (isSaving) return;
         setIsSaving(true);
         try {
-            const updates: any = { title: editTitle, domain: editDomain, category: editScope };
-            if (task.type === 'daily') updates.timeOfDay = editTime;
-            else if (task.type === 'weekly') updates.daysOfWeek = editDays;
-            else if (task.type === 'monthly') updates.daysOfMonth = editDaysOfMonth;
+            const updates: any = {
+                title: editTitle,
+                domain: editDomain,
+                category: editScope,
+            };
+
+            if (task.type === 'daily') {
+                updates.timeOfDay = editTime;
+            } else if (task.type === 'weekly') {
+                updates.daysOfWeek = editDays;
+            } else if (task.type === 'monthly') {
+                updates.daysOfMonth = editDaysOfMonth;
+            }
+
             await onSave(task.id, updates);
         } finally {
             setIsSaving(false);
         }
     };
 
-    const inputClass = "w-full px-4 py-3 rounded-xl bg-surface-3 dark:bg-surface-3-dark border border-[var(--border)] text-foreground dark:text-foreground-dark placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all";
-    const selectClass = "w-full px-3 py-2.5 rounded-xl bg-surface-3 dark:bg-surface-3-dark border border-[var(--border)] text-foreground dark:text-foreground-dark text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none";
-
     return (
         <Card className="space-y-4 p-5 border-task-500/20 shadow-xl animate-in slide-in-from-top-2 duration-200">
-            <HStack justify="between" align="center">
-                <Text variant="subtle" size="xs" weight="bold" className="uppercase tracking-[0.2em]">
-                    Editing {task.type} Commitment
-                </Text>
-                <Button variant="ghost" size="icon" onClick={onCancel} className="text-muted h-8 w-8">
+            <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Editing {task.type} Commitment</span>
+                <Button variant="ghost" size="icon" onClick={onCancel} className="text-slate-400 h-8 w-8">
                     <X className="w-4 h-4" />
                 </Button>
-            </HStack>
+            </div>
 
-            <VStack gap="md">
-                <VStack gap="xs">
-                    <Text variant="subtle" size="xs" weight="bold" className="uppercase">Title</Text>
+            <div className="space-y-4">
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-400">Title</label>
                     <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
                         placeholder="Commitment title"
-                        className={inputClass}
+                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all"
                         autoFocus
                     />
-                </VStack>
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <VStack gap="xs">
-                        <Text variant="subtle" size="xs" weight="bold" className="uppercase">Domain</Text>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Domain</label>
                         <select
                             value={editDomain}
                             onChange={(e) => setEditDomain(e.target.value)}
-                            className={selectClass}
+                            className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none"
                         >
                             {domains.map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
-                    </VStack>
+                    </div>
                     {hasFamilyActive && (
-                        <VStack gap="xs">
-                            <Text variant="subtle" size="xs" weight="bold" className="uppercase">Scope</Text>
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] uppercase font-bold text-slate-400">Scope</label>
                             <select
                                 value={editScope}
                                 onChange={(e) => setEditScope(e.target.value as 'personal' | 'family')}
-                                className={selectClass}
+                                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none"
                             >
                                 <option value="personal">Personal</option>
                                 <option value="family">Family</option>
                             </select>
-                        </VStack>
+                        </div>
                     )}
                 </div>
 
-                {task.type === 'daily' && <DailyFields editTime={editTime} setEditTime={setEditTime} />}
-                {task.type === 'weekly' && <WeeklyFields editDays={editDays} setEditDays={setEditDays} />}
-                {task.type === 'monthly' && <MonthlyFields editDaysOfMonth={editDaysOfMonth} setEditDaysOfMonth={setEditDaysOfMonth} />}
-            </VStack>
+                {/* Type-specific fields */}
+                {task.type === 'daily' && (
+                    <DailyFields editTime={editTime} setEditTime={setEditTime} />
+                )}
 
-            <HStack justify="end" gap="sm" className="pt-4 border-t border-[var(--border-subtle)]">
-                <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
-                <Button onClick={handleSave} isLoading={isSaving} size="sm" className="px-6">Save Changes</Button>
-            </HStack>
+                {task.type === 'weekly' && (
+                    <WeeklyFields editDays={editDays} setEditDays={setEditDays} />
+                )}
+
+                {task.type === 'monthly' && (
+                    <MonthlyFields editDaysOfMonth={editDaysOfMonth} setEditDaysOfMonth={setEditDaysOfMonth} />
+                )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onCancel}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    onClick={handleSave}
+                    isLoading={isSaving}
+                    size="sm"
+                    className="px-6"
+                >
+                    Save Changes
+                </Button>
+            </div>
         </Card>
     );
 };
-

@@ -127,8 +127,8 @@ export const getActivityColor = (action: ActivityAction): string => {
         case 'account_shared':
             return 'text-primary-500 bg-primary-50 dark:bg-indigo-900/20';
         case 'account_unshared':
-            return 'text-muted bg-surface-2 dark:bg-surface-1-dark/20';
+            return 'text-slate-500 bg-slate-50 dark:bg-slate-900/20';
         default:
-            return 'text-muted bg-surface-2 dark:bg-surface-1-dark/20';
+            return 'text-slate-500 bg-slate-50 dark:bg-slate-900/20';
     }
 };

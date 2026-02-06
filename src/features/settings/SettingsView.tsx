@@ -106,8 +106,8 @@ const SettingsView = () => {
     <FeatureErrorBoundary featureName="Settings">
       <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-500 pb-20">
         <div className="flex flex-col gap-2 mb-2">
-          <h1 className="text-h1 lg:text-h1-lg text-foreground dark:text-foreground-dark tracking-tight">System Settings</h1>
-          <p className="text-muted">Manage your preferences and environment.</p>
+          <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white tracking-tight">System Settings</h1>
+          <p className="text-slate-500 dark:text-slate-400">Manage your preferences and environment.</p>
         </div>
 
         {accountNotifications.length > 0 && (

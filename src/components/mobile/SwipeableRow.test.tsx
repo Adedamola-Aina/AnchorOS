@@ -44,8 +44,8 @@ describe('SwipeableRow', () => {
 
     it('applies custom className to container', () => {
       render(
-        <SwipeableRow
-          onSwipeLeft={mockOnSwipeLeft}
+        <SwipeableRow 
+          onSwipeLeft={mockOnSwipeLeft} 
           onSwipeRight={mockOnSwipeRight}
           className="custom-class"
         >
@@ -60,10 +60,10 @@ describe('SwipeableRow', () => {
   describe('Action Indicators', () => {
     it('renders left action indicator when leftAction is provided', () => {
       render(
-        <SwipeableRow
-          onSwipeLeft={mockOnSwipeLeft}
+        <SwipeableRow 
+          onSwipeLeft={mockOnSwipeLeft} 
           onSwipeRight={mockOnSwipeRight}
-          leftAction={{ label: 'Edit', color: 'primary' }}
+          leftAction={{ label: 'Edit', color: 'blue' }}
         >
           <div>Row Content</div>
         </SwipeableRow>
@@ -75,10 +75,10 @@ describe('SwipeableRow', () => {
 
     it('renders right action indicator when rightAction is provided', () => {
       render(
-        <SwipeableRow
-          onSwipeLeft={mockOnSwipeLeft}
+        <SwipeableRow 
+          onSwipeLeft={mockOnSwipeLeft} 
           onSwipeRight={mockOnSwipeRight}
-          rightAction={{ label: 'Delete', color: 'danger' }}
+          rightAction={{ label: 'Delete', color: 'red' }}
         >
           <div>Row Content</div>
         </SwipeableRow>
@@ -104,8 +104,8 @@ describe('SwipeableRow', () => {
     it('accepts threshold prop', () => {
       expect(() => {
         render(
-          <SwipeableRow
-            onSwipeLeft={mockOnSwipeLeft}
+          <SwipeableRow 
+            onSwipeLeft={mockOnSwipeLeft} 
             onSwipeRight={mockOnSwipeRight}
             threshold={100}
           >
@@ -118,8 +118,8 @@ describe('SwipeableRow', () => {
     it('accepts disabled prop', () => {
       expect(() => {
         render(
-          <SwipeableRow
-            onSwipeLeft={mockOnSwipeLeft}
+          <SwipeableRow 
+            onSwipeLeft={mockOnSwipeLeft} 
             onSwipeRight={mockOnSwipeRight}
             disabled
           >
@@ -145,11 +145,11 @@ describe('SwipeableRow', () => {
 
     it('action indicators have aria-hidden when not visible', () => {
       render(
-        <SwipeableRow
-          onSwipeLeft={mockOnSwipeLeft}
+        <SwipeableRow 
+          onSwipeLeft={mockOnSwipeLeft} 
           onSwipeRight={mockOnSwipeRight}
-          leftAction={{ label: 'Edit', color: 'primary' }}
-          rightAction={{ label: 'Delete', color: 'danger' }}
+          leftAction={{ label: 'Edit', color: 'blue' }}
+          rightAction={{ label: 'Delete', color: 'red' }}
         >
           <div>Row Content</div>
         </SwipeableRow>
@@ -158,7 +158,7 @@ describe('SwipeableRow', () => {
       // Actions should be aria-hidden when not swiped
       const leftAction = screen.getByTestId('left-action');
       const rightAction = screen.getByTestId('right-action');
-
+      
       expect(leftAction).toHaveAttribute('aria-hidden', 'true');
       expect(rightAction).toHaveAttribute('aria-hidden', 'true');
     });

@@ -1,7 +1,5 @@
 /**
  * FabricSuggestionToast
- * DES-002: Migrated to semantic tokens
- * WEB-003: Framer Motion button animations
  * 
  * Fabric v1.5: Smart suggestion toast that appears when completing financial commitments.
  * Auto-dismisses after 8 seconds with smooth exit animation.
@@ -11,7 +9,6 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { Sparkles, X } from 'lucide-react';
 import type { FabricSuggestion } from '../../hooks/useFabricSuggestions';
 
@@ -66,9 +63,9 @@ export const FabricSuggestionToast: React.FC<FabricSuggestionToastProps> = ({ su
             aria-live="polite"
             className={`
         fixed bottom-6 right-6 z-50 max-w-sm w-full
-        bg-surface-1 dark:bg-surface-2-dark 
+        bg-white dark:bg-slate-800 
         rounded-2xl shadow-2xl 
-        border border-border-subtle 
+        border border-slate-200 dark:border-slate-700 
         overflow-hidden
         transform transition-all duration-300 ease-out
         ${isExiting
@@ -78,7 +75,7 @@ export const FabricSuggestionToast: React.FC<FabricSuggestionToastProps> = ({ su
       `}
         >
             {/* Progress bar for auto-dismiss */}
-            <div className="h-1 bg-surface-3 dark:bg-surface-3-dark overflow-hidden">
+            <div className="h-1 bg-slate-100 dark:bg-slate-700 overflow-hidden">
                 <div
                     className="h-full bg-gradient-to-r from-indigo-500 to-purple-500"
                     style={{
@@ -96,10 +93,10 @@ export const FabricSuggestionToast: React.FC<FabricSuggestionToastProps> = ({ su
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                        <p className="font-bold text-foreground dark:text-foreground-dark text-sm">
+                        <p className="font-bold text-slate-900 dark:text-white text-sm">
                             {suggestion.title}
                         </p>
-                        <p className="text-xs text-muted mt-1 line-clamp-2">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
                             {suggestion.message}
                         </p>
 
@@ -112,35 +109,29 @@ export const FabricSuggestionToast: React.FC<FabricSuggestionToastProps> = ({ su
                     </div>
 
                     {/* Close button */}
-                    <motion.button
+                    <button
                         onClick={handleDismiss}
-                        className="p-1.5 text-muted hover:text-foreground dark:hover:text-foreground-dark hover:bg-surface-3 dark:hover:bg-surface-3-dark rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                         aria-label="Dismiss suggestion"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
                     >
                         <X className="w-4 h-4" />
-                    </motion.button>
+                    </button>
                 </div>
 
                 {/* Action buttons */}
                 <div className="flex gap-2 mt-4">
-                    <motion.button
+                    <button
                         onClick={handleAction}
                         className="flex-1 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-500/20"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.95 }}
                     >
                         Yes, Record
-                    </motion.button>
-                    <motion.button
+                    </button>
+                    <button
                         onClick={handleDismiss}
-                        className="flex-1 py-2.5 bg-surface-3 dark:bg-surface-3-dark text-muted dark:text-muted-dark hover:bg-surface-2 dark:hover:bg-surface-2-dark rounded-xl text-sm font-medium transition-colors"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.95 }}
+                        className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-sm font-medium transition-colors"
                     >
                         Not now
-                    </motion.button>
+                    </button>
                 </div>
             </div>
 
@@ -172,4 +163,3 @@ export const FabricSuggestionContainer: React.FC<FabricSuggestionContainerProps>
 
     return <FabricSuggestionToast suggestion={latestSuggestion} />;
 };
-

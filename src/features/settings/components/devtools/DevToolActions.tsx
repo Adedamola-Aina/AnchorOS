@@ -1,13 +1,12 @@
 /**
  * Developer Tools Action Components
- * DES-002: Migrated to semantic tokens and primitives
+ * Split from DeveloperTools.tsx per CLAUDE.md §3.2 (200-line rule)
  */
 
 import React, { useState } from 'react';
 import { Button } from '@anchor-os/ui';
 import { useNotifications } from '../../../../context/NotificationContext';
 import { seedData } from '../../../../utils/seeder';
-import { Text, VStack, HStack } from '../../../../components/primitives';
 
 interface ActionProps {
     userUid: string;
@@ -41,19 +40,19 @@ export const SeedDataAction: React.FC<ActionProps> = ({ userUid }) => {
     };
 
     return (
-        <HStack justify="between" align="center">
-            <VStack gap="xs">
-                <Text weight="bold" size="xs" className="uppercase tracking-wider">Seed Test Data</Text>
-                <Text variant="muted" size="sm">Populate account with random data (Accounts, Tx, Commitments).</Text>
-            </VStack>
+        <div className="flex items-center justify-between">
+            <div>
+                <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Seed Test Data</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Populate account with random data (Accounts, Tx, Commitments).</p>
+            </div>
             <Button
                 onClick={handleSeedData}
                 isLoading={seeding}
-                className="bg-task-600 hover:bg-task-700 h-10 px-6 text-xs font-black uppercase tracking-widest"
+                className="bg-purple-600 hover:bg-purple-700 h-10 px-6 text-xs font-black uppercase tracking-widest"
             >
                 Seed Data
             </Button>
-        </HStack>
+        </div>
     );
 };
 
@@ -122,19 +121,19 @@ export const SimulateFamilyAction: React.FC<ActionProps> = ({ userUid }) => {
     };
 
     return (
-        <HStack justify="between" align="center" className="mt-6 pt-6 border-t border-border-subtle">
-            <VStack gap="xs">
-                <Text weight="bold" size="xs" className="uppercase tracking-wider">Simulate Family Data</Text>
-                <Text variant="muted" size="sm">Mock a spouse, shared accounts, and activity for testing.</Text>
-            </VStack>
+        <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Simulate Family Data</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Mock a spouse, shared accounts, and activity for testing.</p>
+            </div>
             <Button
                 onClick={handleSimulate}
-                className="bg-task-700 hover:bg-task-800 h-10 px-6 text-xs font-black uppercase tracking-widest gap-2"
+                className="bg-purple-700 hover:bg-purple-800 h-10 px-6 text-xs font-black uppercase tracking-widest gap-2"
             >
                 <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                 Simulate
             </Button>
-        </HStack>
+        </div>
     );
 };
 
@@ -158,18 +157,17 @@ export const FixSharedAccountsAction: React.FC = () => {
     };
 
     return (
-        <HStack justify="between" align="center" className="mt-6 pt-6 border-t border-border-subtle">
-            <VStack gap="xs">
-                <Text weight="bold" size="xs" className="uppercase tracking-wider">Fix Shared Accounts</Text>
-                <Text variant="muted" size="sm">Update all shared accounts to have correct scope (family).</Text>
-            </VStack>
+        <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Fix Shared Accounts</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Update all shared accounts to have correct scope (family).</p>
+            </div>
             <Button
                 onClick={handleFix}
-                className="bg-finance-600 hover:bg-finance-700 h-10 px-6 text-xs font-black uppercase tracking-widest"
+                className="bg-green-600 hover:bg-green-700 h-10 px-6 text-xs font-black uppercase tracking-widest"
             >
                 Fix Now
             </Button>
-        </HStack>
+        </div>
     );
 };
-

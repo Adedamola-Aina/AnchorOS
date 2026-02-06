@@ -1,12 +1,6 @@
-/**
- * WeeklyView - 7-day task calendar grid
- * DES-002: Migrated to semantic tokens and primitives
- */
-
 import React from 'react';
 import type { AnchorTask } from '../../../types';
 import { Circle, CheckCircle2 } from 'lucide-react';
-import { Text, VStack } from '../../../components/primitives';
 
 interface WeeklyViewProps {
     tasks: AnchorTask[];
@@ -14,6 +8,7 @@ interface WeeklyViewProps {
 }
 
 export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
+    // Generate next 7 days
     const days = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() + i);
@@ -29,6 +24,7 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
                     const dayNum = date.getDate();
                     const isToday = idx === 0;
 
+                    // Filter tasks for this day
                     const dayTasks = tasks.filter(t => {
                         if (t.type === 'daily') return true;
                         if (t.type === 'weekly') return t.daysOfWeek?.includes(fullDayName);
@@ -37,52 +33,45 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
                     });
 
                     return (
-                        <VStack key={idx} gap="sm" className={`rounded-xl border transition-colors p-2 ${isToday ? 'bg-task-50/50 border-task-100 dark:bg-task-900/10 dark:border-task-900/30' : 'border-transparent'}`}>
+                        <div key={idx} className={`flex flex-col gap-2 rounded-xl border transition-colors ${isToday ? 'bg-task-50/50 border-task-100 dark:bg-task-900/10 dark:border-task-900/30 p-2' : 'border-transparent p-2'}`}>
                             <div className="text-center mb-1">
-                                <Text variant={isToday ? 'task' : 'subtle'} size="xs" weight="bold" className="uppercase tracking-wider">
-                                    {dayName}
-                                </Text>
-                                <Text variant={isToday ? 'task' : 'muted'} size="xl" weight="bold">
-                                    {dayNum}
-                                </Text>
+                                <div className={`text-[10px] font-bold uppercase tracking-wider ${isToday ? 'text-task-600 dark:text-task-400' : 'text-slate-400'}`}>{dayName}</div>
+                                <div className={`text-xl font-bold ${isToday ? 'text-task-700 dark:text-task-300' : 'text-slate-700 dark:text-slate-300'}`}>{dayNum}</div>
                             </div>
 
-                            <VStack gap="sm" className="flex-1">
+                            <div className="space-y-2 flex-1">
                                 {dayTasks.map(task => (
                                     <div
                                         key={task.id}
-                                        className={`p-2 rounded-lg border shadow-sm flex flex-col items-center text-center gap-1 transition-all ${isToday ? 'bg-surface-2 dark:bg-surface-2-dark border-[var(--border-subtle)]' : 'bg-surface-3 dark:bg-surface-3-dark border-transparent opacity-70'
+                                        className={`p-2 rounded-lg border shadow-sm flex flex-col items-center text-center gap-1 transition-all ${isToday ? 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700' : 'bg-slate-50 dark:bg-slate-800/50 border-transparent opacity-70'
                                             }`}
                                     >
-                                        <div className="w-full" title={task.title}>
-                                            <Text variant="body" size="xs" weight="medium" truncate>
-                                                {task.title}
-                                            </Text>
+                                        <div className="text-xs font-medium truncate w-full" title={task.title}>
+                                            {task.title}
                                         </div>
 
                                         {isToday ? (
                                             <button
                                                 onClick={() => onToggle(task.id, task.completed)}
-                                                className={`mt-1 p-1 rounded-full transition-colors ${task.completed ? 'text-finance-500 bg-finance-50 dark:bg-finance-900/20' : 'text-muted hover:text-finance-500'}`}
+                                                className={`mt-1 p-1 rounded-full transition-colors ${task.completed ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'text-slate-300 hover:text-emerald-500'}`}
                                             >
                                                 {task.completed ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
                                             </button>
                                         ) : (
-                                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-subtle dark:bg-subtle-dark" />
+                                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
                                         )}
                                     </div>
                                 ))}
                                 {dayTasks.length === 0 && (
                                     <div className="h-full flex items-center justify-center">
-                                        <div className="w-1 h-1 rounded-full bg-surface-3 dark:bg-surface-3-dark" />
+                                        <div className="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-700" />
                                     </div>
                                 )}
-                            </VStack>
-                        </VStack>
+                            </div>
+                        </div>
                     );
                 })}
             </div>
         </div>
     );
 };
-

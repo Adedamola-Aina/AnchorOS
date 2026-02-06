@@ -1,6 +1,7 @@
 /**
  * TaskForm - Multi-step commitment creation form
- * DES-002: Migrated to semantic tokens and primitives
+ * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Wizard steps and field components extracted to TaskFormParts.tsx
  */
 
 import React, { useState } from 'react';
@@ -8,7 +9,6 @@ import type { TaskType, TimeOfDay, AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
 import { Card } from '@anchor-os/ui';
 import { FrequencyStep, DetailsHeader, DailyTimeField, WeeklyDaysField, MonthlyDatesField } from './TaskFormParts';
-import { Text, VStack } from '../../../components/primitives';
 
 interface TaskFormProps { onClose: () => void; onAdd: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>; hasFamilyActive: boolean; }
 
@@ -41,8 +41,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
 
     const handleSelectType = (type: TaskType) => { setNewTaskType(type); setCreationStep('details'); };
 
-    const inputClass = "w-full p-3 rounded-xl border border-[var(--border)] bg-surface-3 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-muted";
-
     return (
         <Card className="p-6 mb-8 shadow-2xl animate-in zoom-in-95 duration-200">
             {creationStep === 'frequency' ? (
@@ -51,37 +49,37 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <DetailsHeader taskType={newTaskType} onBack={() => setCreationStep('frequency')} onClose={onClose} />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <VStack gap="md">
-                            <VStack gap="xs">
-                                <Text variant="subtle" size="xs" weight="bold" className="uppercase">Name</Text>
-                                <input autoFocus type="text" placeholder="e.g. Morning Prayer, Gym, Rent Payment" className={inputClass} value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} />
-                            </VStack>
-                            <VStack gap="xs">
-                                <Text variant="subtle" size="xs" weight="bold" className="uppercase">Domain</Text>
-                                <select value={newTaskDomain} onChange={(e) => setNewTaskDomain(e.target.value)} className={`${inputClass} appearance-none`}>
+                        <div className="space-y-4">
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] uppercase font-bold text-slate-400">Name</label>
+                                <input autoFocus type="text" placeholder="e.g. Morning Prayer, Gym, Rent Payment" className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] uppercase font-bold text-slate-400">Domain</label>
+                                <select value={newTaskDomain} onChange={(e) => setNewTaskDomain(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all appearance-none">
                                     {domains.map(d => <option key={d} value={d}>{d}</option>)}
                                 </select>
-                            </VStack>
+                            </div>
                             {hasFamilyActive && (
-                                <VStack gap="xs">
-                                    <Text variant="subtle" size="xs" weight="bold" className="uppercase">Context</Text>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[10px] uppercase font-bold text-slate-400">Context</label>
                                     <div className="flex gap-2">
                                         {['personal', 'family'].map((s) => (<Button key={s} type="button" onClick={() => setNewTaskScope(s as 'personal' | 'family')} variant={newTaskScope === s ? 'primary' : 'secondary'} className="flex-1 capitalize">{s}</Button>))}
                                     </div>
-                                </VStack>
+                                </div>
                             )}
-                        </VStack>
-                        <VStack gap="md">
+                        </div>
+                        <div className="space-y-4">
                             {newTaskType === 'daily' && <DailyTimeField value={newTaskTime} onChange={setNewTaskTime} />}
                             {newTaskType === 'weekly' && <WeeklyDaysField value={newTaskDays} onChange={setNewTaskDays} />}
                             {newTaskType === 'monthly' && <MonthlyDatesField value={newTaskDates} onChange={setNewTaskDates} />}
-                            <VStack gap="xs" className="pt-2">
-                                <Text variant="subtle" size="xs" weight="bold" className="uppercase">Reminder (Optional)</Text>
-                                <input type="time" className={inputClass} value={newTaskReminder} onChange={(e) => setNewTaskReminder(e.target.value)} />
-                            </VStack>
-                        </VStack>
+                            <div className="flex flex-col gap-1.5 pt-2">
+                                <label className="text-[10px] uppercase font-bold text-slate-400">Reminder (Optional)</label>
+                                <input type="time" className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 transition-all" value={newTaskReminder} onChange={(e) => setNewTaskReminder(e.target.value)} />
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                         <Button type="button" variant="ghost" onClick={() => setCreationStep('frequency')}>Back</Button>
                         <Button type="submit" isLoading={isSaving} className="px-8">Save Commitment</Button>
                     </div>
@@ -90,4 +88,3 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
         </Card>
     );
 };
-

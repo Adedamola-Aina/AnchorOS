@@ -1,8 +1,3 @@
-/**
- * DiagnosticPanel - Debug tool for family sharing
- * DES-002: Migrated to semantic tokens
- */
-
 import { useState } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useAuth } from '../context/AuthContext';
@@ -54,7 +49,7 @@ export function DiagnosticPanel() {
             <button
                 onClick={runDiagnostic}
                 disabled={loading}
-                className="bg-task-600 hover:bg-task-700 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm"
             >
                 {loading ? 'Running...' : '🔍 Run Diagnostic'}
             </button>
@@ -62,15 +57,15 @@ export function DiagnosticPanel() {
             <button
                 onClick={fixSharedAccounts}
                 disabled={fixing}
-                className="bg-finance-600 hover:bg-finance-700 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm"
             >
                 {fixing ? 'Fixing...' : '🔧 Fix Shared Accounts'}
             </button>
 
             {report && (
-                <div className="mt-4 max-w-2xl bg-surface-1 dark:bg-surface-2-dark p-4 rounded-lg shadow-lg max-h-96 overflow-auto">
-                    <h3 className="font-bold mb-2 text-foreground dark:text-foreground-dark">Diagnostic Report:</h3>
-                    <pre className="text-xs overflow-auto text-muted">
+                <div className="mt-4 max-w-2xl bg-white dark:bg-slate-800 p-4 rounded-lg shadow-lg max-h-96 overflow-auto">
+                    <h3 className="font-bold mb-2">Diagnostic Report:</h3>
+                    <pre className="text-xs overflow-auto">
                         {JSON.stringify(report, null, 2)}
                     </pre>
                     <button
@@ -78,7 +73,7 @@ export function DiagnosticPanel() {
                             navigator.clipboard.writeText(JSON.stringify(report, null, 2));
                             alert('Copied to clipboard!');
                         }}
-                        className="mt-2 text-sm bg-finance-600 text-white px-3 py-1 rounded"
+                        className="mt-2 text-sm bg-green-600 text-white px-3 py-1 rounded"
                     >
                         Copy Report
                     </button>
@@ -87,4 +82,3 @@ export function DiagnosticPanel() {
         </div>
     );
 }
-
