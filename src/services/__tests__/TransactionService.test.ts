@@ -346,24 +346,25 @@ describe('TransactionService', () => {
                 linkId: 'link-123',
             };
 
-            const mockBatch = {
+            // BUG-035: Now uses runTransaction for atomic linked deletion
+            const mockTransaction = {
+                get: vi.fn().mockResolvedValue({
+                    exists: () => true,
+                    data: () => createMockTransaction('tx-paired', 'income', 10000),
+                }),
                 update: vi.fn(),
-                commit: vi.fn().mockResolvedValue(undefined),
             };
-            vi.mocked(firestore.writeBatch).mockReturnValue(mockBatch as any);
-
-            // Mock getDoc to return linked transaction
-            vi.mocked(firestore.getDoc).mockResolvedValueOnce({
-                exists: () => true,
-                data: () => createMockTransaction('tx-paired', 'income', 10000),
-            } as any);
+            vi.mocked(firestore.runTransaction).mockImplementation(async (_db, fn) => {
+                return fn(mockTransaction as any);
+            });
 
             // Act
             await service.deleteTransaction(userId, 'tx-transfer', 'acc-source', [account], [linkedTx]);
 
-            // Assert
-            expect(firestore.getDoc).toHaveBeenCalled();
-            expect(mockBatch.commit).toHaveBeenCalled();
+            // Assert - runTransaction used for atomicity
+            expect(firestore.runTransaction).toHaveBeenCalled();
+            expect(mockTransaction.get).toHaveBeenCalled();
+            expect(mockTransaction.update).toHaveBeenCalled();
         });
 
         it('handles missing linked transaction gracefully', async () => {
@@ -385,20 +386,20 @@ describe('TransactionService', () => {
                 linkedUserId: userId,
             };
 
-            const mockBatch = {
+            // BUG-035: Now uses runTransaction for atomic linked deletion
+            const mockTransaction = {
+                get: vi.fn().mockResolvedValue({
+                    exists: () => false,
+                }),
                 update: vi.fn(),
-                commit: vi.fn().mockResolvedValue(undefined),
             };
-            vi.mocked(firestore.writeBatch).mockReturnValue(mockBatch as any);
-
-            // Mock getDoc to return non-existent
-            vi.mocked(firestore.getDoc).mockResolvedValueOnce({
-                exists: () => false,
-            } as any);
+            vi.mocked(firestore.runTransaction).mockImplementation(async (_db, fn) => {
+                return fn(mockTransaction as any);
+            });
 
             // Act & Assert - should not throw
             await expect(service.deleteTransaction(userId, 'tx-orphaned', 'acc-1', [account], [orphanedTx])).resolves.toBeUndefined();
-            expect(mockBatch.commit).toHaveBeenCalled();
+            expect(firestore.runTransaction).toHaveBeenCalled();
         });
 
         it('throws VALIDATION error if account not found', async () => {
@@ -475,6 +476,65 @@ describe('TransactionService', () => {
             // Act & Assert
             await expect(service.deleteTransaction('user-1', 'tx-1', 'acc-1', [account], [tx])).rejects.toThrow(AnchorError);
             await expect(service.deleteTransaction('user-1', 'tx-1', 'acc-1', [account], [tx])).rejects.toThrow('Failed to delete transaction');
+        });
+
+        it('uses runTransaction for linked transfer deletion to prevent race conditions (BUG-035)', async () => {
+            // Arrange
+            const userId = 'user-atomic';
+            const account: AnchorAccount = {
+                id: 'acc-source',
+                name: 'Source',
+                balanceCents: 100000,
+                type: 'checking',
+                currency: 'USD',
+                color: '#0000FF',
+                scope: 'personal',
+                ownerId: userId,
+            };
+            const linkedTx: AnchorTransaction = {
+                id: 'tx-transfer',
+                title: 'Transfer Out',
+                amountCents: 10000,
+                type: 'expense',
+                category: 'transfer',
+                date: '2026-01-27T00:00:00Z',
+                accountId: 'acc-source',
+                accountName: 'Source',
+                currency: 'USD',
+                createdAt: '2026-01-27T00:00:00Z',
+                createdBy: userId,
+                isSoftDeleted: false,
+                accountOwnerId: userId,
+                scope: 'personal',
+                linkedTransactionId: 'tx-paired',
+                linkedUserId: userId,
+                linkId: 'link-123',
+            };
+
+            // Mock runTransaction - should be called for atomic deletion
+            const mockTransaction = {
+                get: vi.fn().mockResolvedValue({
+                    exists: () => true,
+                    data: () => ({
+                        id: 'tx-paired',
+                        type: 'income',
+                        amountCents: 10000,
+                        accountId: 'acc-dest',
+                    }),
+                }),
+                update: vi.fn(),
+            };
+            vi.mocked(firestore.runTransaction).mockImplementation(async (_db, fn) => {
+                return fn(mockTransaction as any);
+            });
+
+            // Act
+            await service.deleteTransaction(userId, 'tx-transfer', 'acc-source', [account], [linkedTx]);
+
+            // Assert - runTransaction MUST be used for atomic linked deletion
+            expect(firestore.runTransaction).toHaveBeenCalled();
+            // Should NOT use getDoc outside transaction
+            expect(firestore.getDoc).not.toHaveBeenCalled();
         });
     });
 
