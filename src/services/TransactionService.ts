@@ -159,11 +159,24 @@ export class TransactionService {
                 if (!txDoc.exists()) throw new AnchorError('Transaction does not exist', 'VALIDATION');
                 const currentData = txDoc.data() as AnchorTransaction;
 
-                if (updates.amountCents !== undefined && updates.amountCents !== currentData.amountCents) {
-                    const diff = updates.amountCents - currentData.amountCents;
-                    const correction = currentData.type === 'income' ? diff : -diff;
-                    const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
-                    transaction.update(accRef, { balanceCents: increment(correction) });
+                // BUG-036 Fix: Handle type change, amount change, or both
+                const oldType = currentData.type;
+                const newType = updates.type ?? oldType;
+                const oldAmount = currentData.amountCents;
+                const newAmount = updates.amountCents ?? oldAmount;
+                
+                // Only correct balance if type or amount actually changed
+                if (newType !== oldType || newAmount !== oldAmount) {
+                    // Reverse old contribution: income added, expense subtracted
+                    const oldContribution = oldType === 'income' ? oldAmount : -oldAmount;
+                    // Apply new contribution
+                    const newContribution = newType === 'income' ? newAmount : -newAmount;
+                    // Net correction = new - old
+                    const correction = newContribution - oldContribution;
+                    if (correction !== 0) {
+                        const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
+                        transaction.update(accRef, { balanceCents: increment(correction) });
+                    }
                 }
                 transaction.update(txRef, { ...updates, lastEditedBy: userId, updatedAt: new Date().toISOString() });
 
