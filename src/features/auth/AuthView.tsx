@@ -13,6 +13,7 @@ import { AuthLeftPanel } from './AuthLeftPanel';
 import { AuthFormFields } from './AuthFormFields';
 import { AuthSubmitButton } from './AuthSubmitButton';
 import { useKeyboardAvoidance } from '../../hooks/useKeyboardAvoidance';
+import { getEffectiveTheme } from '../../utils/systemTheme';
 
 interface AuthViewProps {
     authMode: 'login' | 'signup' | 'mfa' | 'reset';
@@ -37,7 +38,7 @@ const subtitles = {
 
 const AuthView: React.FC<AuthViewProps> = ({
     authMode, setAuthMode, email, setEmail, password, setPassword,
-    mfaCode, setMfaCode, authError, isAuthenticating, onSubmit, theme = 'light', onSetTheme
+    mfaCode, setMfaCode, authError, isAuthenticating, onSubmit, theme = getEffectiveTheme(), onSetTheme
 }) => {
     // KB-001: Ensure keyboard doesn't cover inputs on mobile
     useKeyboardAvoidance();
