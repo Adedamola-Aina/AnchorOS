@@ -175,13 +175,24 @@ export class TransactionService {
         const linkedDoc = await transaction.get(linkedTxRef);
         if (linkedDoc.exists()) {
             const linkedData = linkedDoc.data() as AnchorTransaction;
-            if (updates.amountCents !== undefined && updates.amountCents !== linkedData.amountCents) {
-                const diff = updates.amountCents - linkedData.amountCents;
+            
+            // BUG-034: For cross-currency transfers, use destinationAmountCents instead of amountCents
+            const linkedAmountUpdate = updates.destinationAmountCents ?? updates.amountCents;
+            
+            if (linkedAmountUpdate !== undefined && linkedAmountUpdate !== linkedData.amountCents) {
+                const diff = linkedAmountUpdate - linkedData.amountCents;
                 const correction = linkedData.type === 'income' ? diff : -diff;
                 const linkedAccRef = doc(this.firestore, 'artifacts', APP_ID, 'users', currentData.linkedUserId!, 'accounts', linkedData.accountId);
                 transaction.update(linkedAccRef, { balanceCents: increment(correction) });
             }
-            transaction.update(linkedTxRef, { ...updates });
+            
+            // Update linked transaction with correct amount (not source amount for cross-currency)
+            const linkedUpdates = { ...updates };
+            if (updates.destinationAmountCents !== undefined) {
+                linkedUpdates.amountCents = updates.destinationAmountCents;
+                delete linkedUpdates.destinationAmountCents;
+            }
+            transaction.update(linkedTxRef, linkedUpdates);
         }
     }
 }

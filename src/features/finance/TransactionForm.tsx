@@ -120,6 +120,8 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             if (initialData) {
                 await updateTransaction(initialData.id, initialData.accountId, {
                     title: formState.title, amountCents, type: formState.type, category: finalCategory, date: transactionDate,
+                    // BUG-034: Include cross-currency amounts for transfer edits
+                    ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) })
                 });
                 haptic.trigger('success');
                 showToast('Transaction updated', 'success');
