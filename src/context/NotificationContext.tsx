@@ -230,13 +230,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => handleConfirm(false)}
-                                className="px-5 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                                className="min-h-11 px-5 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                             >
                                 {confirmDialog.options.cancelText || 'Cancel'}
                             </button>
                             <button
                                 onClick={() => handleConfirm(true)}
-                                className={`px-5 py-2.5 rounded-xl text-white font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${confirmDialog.options.type === 'danger' ? 'bg-rose-600 shadow-rose-600/20' : 'bg-slate-900 dark:bg-slate-700 shadow-slate-900/20'
+                                className={`min-h-11 px-5 py-2.5 rounded-xl text-white font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${confirmDialog.options.type === 'danger' ? 'bg-rose-600 shadow-rose-600/20' : 'bg-slate-900 dark:bg-slate-700 shadow-slate-900/20'
                                     }`}
                             >
                                 {confirmDialog.options.confirmText || 'Confirm'}
