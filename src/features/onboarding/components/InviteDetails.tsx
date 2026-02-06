@@ -35,7 +35,7 @@ export function InviteDetails({ user, ownerName, isVerifying, hasVerificationCod
                     </div>
                     <button
                         onClick={() => {
-                            sessionStorage.setItem('returnAfterAuth', window.location.href);
+                            // ARCH-005: Removed dead sessionStorage.setItem('returnAfterAuth') — never consumed
                             window.location.href = '/';
                         }}
                         className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2"
