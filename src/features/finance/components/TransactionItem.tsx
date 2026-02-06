@@ -23,6 +23,7 @@ interface TransactionItemProps {
 
 export const TransactionItem: React.FC<TransactionItemProps> = ({
     transaction,
+    accountName,
     currentUserId,
 }) => {
     // Guard against undefined transaction
@@ -85,6 +86,13 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 truncate max-w-[120px]">
                             {transaction.category}
                         </span>
+
+                        {/* Account / Bank Pill */}
+                        {accountName && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/50 truncate max-w-[120px]">
+                                {accountName}
+                            </span>
+                        )}
 
                         {/* Family Member Pill */}
                         {transaction.createdBy && currentUserId && transaction.createdBy !== currentUserId && (
