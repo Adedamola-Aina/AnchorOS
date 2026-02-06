@@ -55,9 +55,9 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
                                         {isToday ? (
                                             <button
                                                 onClick={() => onToggle(task.id, task.completed)}
-                                                className={`mt-1 p-1 rounded-full transition-colors ${task.completed ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'text-slate-300 hover:text-emerald-500'}`}
+                                                className={`mt-1 min-w-11 min-h-11 flex items-center justify-center rounded-full transition-colors ${task.completed ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'text-slate-300 hover:text-emerald-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                             >
-                                                {task.completed ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                                                {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                                             </button>
                                         ) : (
                                             <div className="mt-1 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
