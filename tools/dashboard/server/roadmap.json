@@ -1980,6 +1980,38 @@
             "completedAt": "2026-02-06",
             "effort": "medium",
             "impact": "high"
+        },
+        {
+            "id": "BUG-075",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Remove redundant hamburger menu on mobile",
+            "description": "Bottom navigation already has Settings tab. Removed mobile header, drawer overlay, and mobileMenuOpen state from MainLayout.",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.31",
+            "detectionPatterns": [
+                "BUG-075"
+            ],
+            "completedAt": "2026-02-07",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "BUG-076",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Extract shared ToggleSwitch, align toggles on mobile",
+            "description": "Created reusable ToggleSwitch component with 44px touch target. Replaced 7 inline copies across 4 settings files. Standardized rows to always-inline layout.",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.31",
+            "detectionPatterns": [
+                "BUG-076"
+            ],
+            "completedAt": "2026-02-07",
+            "effort": "medium",
+            "impact": "high"
         }
     ]
 }
