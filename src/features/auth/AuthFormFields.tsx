@@ -98,7 +98,7 @@ export function AuthFormFields({
                             if (validationErrors.email) setValidationErrors({ ...validationErrors, email: undefined });
                         }}
                         placeholder="you@example.com"
-                        autoComplete="off"
+                        autoComplete="email"
                         className={`w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-4 transition-all font-medium ${validationErrors.email ? 'border-red-400 focus:ring-red-500/10 focus:border-red-400' : 'border-slate-200 dark:border-slate-800 focus:ring-slate-500/5 focus:border-slate-400 dark:focus:border-slate-700'}`}
                     />
                 </div>

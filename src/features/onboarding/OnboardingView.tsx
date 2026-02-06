@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { useKeyboardAvoidance } from '../../hooks/useKeyboardAvoidance';
 import { toCents } from '../../utils/moneyUtils';
 import { OnboardingWelcome } from './components/OnboardingWelcome';
 import { OnboardingAccountStep } from './components/OnboardingAccountStep';
@@ -17,6 +18,9 @@ import { OnboardingHabitStep } from './components/OnboardingHabitStep';
 type AccountType = 'checking' | 'savings' | 'salary' | 'investment';
 
 export const OnboardingView = () => {
+    // KB-001: Ensure keyboard doesn't cover inputs on mobile
+    useKeyboardAvoidance();
+    
     const { profile, updateProfile } = useAuth();
     const { addAccount } = useFinance();
     const { addTask } = useTasks();

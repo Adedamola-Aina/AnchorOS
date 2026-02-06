@@ -12,6 +12,7 @@ import { AnchorLogo, ThemeToggle, type Theme } from '../../components/shared';
 import { AuthLeftPanel } from './AuthLeftPanel';
 import { AuthFormFields } from './AuthFormFields';
 import { AuthSubmitButton } from './AuthSubmitButton';
+import { useKeyboardAvoidance } from '../../hooks/useKeyboardAvoidance';
 
 interface AuthViewProps {
     authMode: 'login' | 'signup' | 'mfa' | 'reset';
@@ -38,6 +39,9 @@ const AuthView: React.FC<AuthViewProps> = ({
     authMode, setAuthMode, email, setEmail, password, setPassword,
     mfaCode, setMfaCode, authError, isAuthenticating, onSubmit, theme = 'light', onSetTheme
 }) => {
+    // KB-001: Ensure keyboard doesn't cover inputs on mobile
+    useKeyboardAvoidance();
+    
     const [showPassword, setShowPassword] = useState(false);
     const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
     const [rateLimitError, setRateLimitError] = useState<string | null>(null);
@@ -109,7 +113,7 @@ const AuthView: React.FC<AuthViewProps> = ({
                     )}
 
                     {/* Form */}
-                    <form onSubmit={handleFormSubmit} className="space-y-5" autoComplete="off" noValidate>
+                    <form onSubmit={handleFormSubmit} className="space-y-5" noValidate>
                         <AuthFormFields
                             authMode={authMode} setAuthMode={setAuthMode} email={email} setEmail={setEmail}
                             password={password} setPassword={setPassword} mfaCode={mfaCode} setMfaCode={setMfaCode}

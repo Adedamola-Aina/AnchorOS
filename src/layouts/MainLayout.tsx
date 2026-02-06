@@ -114,7 +114,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                     {/* Optional: Keep hamburger for settings/profile */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="p-2 text-slate-500 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="w-11 h-11 flex items-center justify-center text-slate-500 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         aria-label="Open menu"
                     >
                         {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

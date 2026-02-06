@@ -24,6 +24,7 @@ import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
 import { VerifyEmailBanner, EnableMfaBanner } from './components/SettingsBanners';
 import { ReauthModal } from './components/ReauthModal';
+import { SectionNav } from './components/SectionNav';
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { auditSettings } from '../../services/AuditService';
@@ -150,6 +151,8 @@ const SettingsView = () => {
           <p className="text-slate-500 dark:text-slate-400">Manage your preferences and environment.</p>
         </div>
 
+        <SectionNav />
+
         {accountNotifications.length > 0 && (
           <div className="grid gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
             {accountNotifications.includes('verify_email') && <VerifyEmailBanner isResending={isResending} onResend={handleResendVerification} />}
@@ -157,20 +160,20 @@ const SettingsView = () => {
           </div>
         )}
 
-        <ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }} />
-        <AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }} />
-        <SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={isEnrolling} show2FASetup={show2FASetup} mfaQrUrl={mfaQrUrl} mfaManualKey={mfaManualKey}
+        <div id="settings-profile"><ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }} /></div>
+        <div id="settings-appearance"><AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }} /></div>
+        <div id="settings-security"><SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={isEnrolling} show2FASetup={show2FASetup} mfaQrUrl={mfaQrUrl} mfaManualKey={mfaManualKey}
           mfaCode={mfaCode} mfaError={mfaError} onSetShow2FASetup={setShow2FASetup} onSetMfaCode={setMfaCode} onGenerateMfaSecret={handleGenerateMfaSecret}
-          onEnrollMfa={handleEnrollMfa} onUnenrollMfa={unenrollMfa} />
-        <NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
+          onEnrollMfa={handleEnrollMfa} onUnenrollMfa={unenrollMfa} /></div>
+        <div id="settings-notifications"><NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
           frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
           onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || {}), ...prefs } })}
-          pushPermissionStatus={pushPermissionStatus} requestPushPermission={() => requestPushPermission()} />
-        <FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} />
-        <SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} />
+          pushPermissionStatus={pushPermissionStatus} requestPushPermission={() => requestPushPermission()} /></div>
+        <div id="settings-family"><FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} /></div>
+        <div id="settings-support"><SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} /></div>
         {import.meta.env.VITE_APP_ENV !== 'production' && <DeveloperTools userUid={user?.uid || ''} />}
-        <DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={handleWipeData} />
-        <DangerZone onDeleteAccount={handleDeleteAccount} />
+        <div id="settings-data"><DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={handleWipeData} /></div>
+        <div id="settings-danger"><DangerZone onDeleteAccount={handleDeleteAccount} /></div>
 
         <div className="mt-8 flex justify-center gap-6 pb-8">
           <Button variant="ghost" size="sm" onClick={() => logout()} className="text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>

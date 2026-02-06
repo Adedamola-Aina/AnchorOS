@@ -87,6 +87,11 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
     const currentY = e.touches[0].clientY;
     const distance = Math.max(0, currentY - startY.current);
     
+    // PULL-001: Prevent Chrome's native pull-to-refresh when we're handling it
+    if (distance > 10) {
+      e.preventDefault();
+    }
+    
     // Apply resistance - pulling gets harder as you pull more
     const resistedDistance = Math.min(distance * 0.5, threshold * 2);
     setPullDistance(resistedDistance);
