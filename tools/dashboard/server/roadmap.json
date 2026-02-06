@@ -199,6 +199,76 @@
             "createdAt": "2026-02-06"
         },
         {
+            "id": "BUG-060",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Chrome native pull-to-refresh conflicts with app scroll",
+            "description": "Chrome pull-to-refresh reloads the page instead of using in-app refresh. Fixed with e.preventDefault() on touchmove.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-060"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-061",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "AssetDistributionChart not responsive for mobile height",
+            "description": "Chart container has fixed height that clips on mobile viewports. Made responsive.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-061"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-062",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Keyboard covers input on AuthView and OnboardingView",
+            "description": "Mobile keyboard covers form inputs. Fixed with useKeyboardAvoidance hook.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-062"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-063",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "EditTaskForm not visible when opened below fold",
+            "description": "EditTaskForm opens below viewport on long lists. Fixed with scrollIntoView on mount.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-063"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-064",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "No quick section navigation in Settings on mobile",
+            "description": "Long Settings page requires excessive scrolling. Added SectionNav for quick mobile navigation.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-064"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
             "id": "BUG-059",
             "team": "Engineering",
             "priority": "P2",
@@ -386,7 +456,7 @@
             "priority": "P1",
             "title": "15+ touch targets below 44px platform minimum",
             "description": "WeeklyView toggle 24px, MonthlyDates 32px, TaskItem checkbox 32px, AssetAllocation expand 16px, notification toggles 24px, toast dismiss 24px, nav hamburger 36px. All below Apple 44px and Google 48px minimums.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-046"
             ],
@@ -400,7 +470,7 @@
             "priority": "P1",
             "title": "Loading overlay blocks all scrolling with pointer-events-none",
             "description": "Dashboard loading overlay applies pointer-events-none to body, blocking all scroll and touch. Screen appears frozen during data loads.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-045"
             ],
@@ -414,7 +484,7 @@
             "priority": "P1",
             "title": "Toast notifications min-w-300px overflows on small phones",
             "description": "Toasts have min-w-[300px] + right-6 positioning. On 375px phones, toasts are cut off on left edge.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-044"
             ],
@@ -428,7 +498,7 @@
             "priority": "P1",
             "title": "autoComplete=off blocks mobile autofill on email and password",
             "description": "Auth forms use autoComplete=off which blocks iOS/Android password autofill. 97% mobile users must hand-type credentials.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-043"
             ],
@@ -442,7 +512,7 @@
             "priority": "P1",
             "title": "min-h-screen used instead of dvh throughout auth and onboarding",
             "description": "6+ files use min-h-screen which does not account for mobile browser chrome. Content hidden behind URL bar. Should use min-h-dvh.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-042"
             ],
@@ -456,7 +526,7 @@
             "priority": "P1",
             "title": "1300ms hard delay before financial confirmation dialog",
             "description": "Finance flow has setTimeout 1300ms before showing confirmation. Users think app is frozen while waiting for dialog.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-041"
             ],
@@ -470,7 +540,7 @@
             "priority": "P0",
             "title": "WeeklyView forces min-w-800px - unusable on mobile",
             "description": "WeeklyView component has min-w-[800px] hardcoded. 375px phones show horizontal scroll bar, content unreadable. 97% users are mobile.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-040"
             ],
@@ -1115,7 +1185,7 @@
             "team": "Database",
             "priority": "P2",
             "title": "Archival Strategy",
-            "description": "Move old transactions to cold storage (Firestore \u2192 BigQuery)",
+            "description": "Move old transactions to cold storage (Firestore → BigQuery)",
             "status": "planned",
             "detectionPatterns": [
                 "DB-003"
@@ -1180,7 +1250,7 @@
             "team": "Data",
             "priority": "P3",
             "title": "Analytics Pipeline",
-            "description": "Firestore \u2192 BigQuery \u2192 Looker Studio for product analytics",
+            "description": "Firestore → BigQuery → Looker Studio for product analytics",
             "status": "planned",
             "detectionPatterns": [
                 "DATA-001"
