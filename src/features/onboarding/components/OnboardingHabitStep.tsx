@@ -10,11 +10,12 @@ interface OnboardingHabitStepProps {
     loading: boolean;
     onSubmit: () => void;
     onSkip: () => void;
+    onBack: () => void;
 }
 
 const SUGGESTIONS = ['Drink 2L Water', 'Read 15 Mins', 'Walk 5000 Steps', 'Review Finances'];
 
-export function OnboardingHabitStep({ taskTitle, setTaskTitle, loading, onSubmit, onSkip }: OnboardingHabitStepProps) {
+export function OnboardingHabitStep({ taskTitle, setTaskTitle, loading, onSubmit, onSkip, onBack }: OnboardingHabitStepProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="flex items-center gap-4 mb-8">
@@ -49,7 +50,8 @@ export function OnboardingHabitStep({ taskTitle, setTaskTitle, loading, onSubmit
                     {loading ? 'Committing...' : 'Finish Setup'} <Sparkles className="w-4 h-4" />
                 </button>
 
-                <div className="text-center">
+                <div className="text-center flex justify-center gap-4">
+                    <button onClick={onBack} className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">← Back</button>
                     <button onClick={onSkip} className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Skip for now →</button>
                 </div>
             </div>
