@@ -22,8 +22,13 @@ export function CashFlowChart({ financialTrend, cashFlowTotals, transactions, fu
 
     let currentNet = 0;
     let prevNet = 0;
+    // BUG-037 Fix: Helper to detect transfers
+    const isTransfer = (tx: AnchorTransaction): boolean => {
+        return Boolean(tx.linkId) || tx.category?.toLowerCase() === 'transfer';
+    };
     transactions.forEach(tx => {
-        if (tx.type === 'transfer') return;
+        // BUG-037 Fix: Skip transfers from cash flow totals
+        if (isTransfer(tx)) return;
         const d = new Date(tx.date);
         const amount = fromCents(tx.amountCents || 0);
         const val = tx.type === 'income' ? amount : -amount;

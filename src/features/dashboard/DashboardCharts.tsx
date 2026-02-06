@@ -39,8 +39,14 @@ const DashboardCharts = ({ accounts, transactions, tasks, navigateTo }: Dashboar
             return { date: d.toLocaleDateString('en-US', { weekday: 'short' }), income: 0, expense: 0 };
         });
 
+        // BUG-037 Fix: Helper to detect transfers
+        const isTransfer = (tx: AnchorTransaction): boolean => {
+            return Boolean(tx.linkId) || tx.category?.toLowerCase() === 'transfer';
+        };
+
         transactions.forEach(tx => {
-            if (tx.type === 'transfer') return;
+            // BUG-037 Fix: Skip transfers from financial trends
+            if (isTransfer(tx)) return;
             const txDate = new Date(tx.date);
             const diffDays = Math.floor((new Date().getTime() - txDate.getTime()) / (1000 * 3600 * 24));
             if (diffDays < 7) {

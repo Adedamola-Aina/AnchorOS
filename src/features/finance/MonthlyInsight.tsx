@@ -15,8 +15,16 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
         let expense = 0;
         const categories: Record<string, number> = {};
 
+        // BUG-037 Fix: Helper to detect transfers (have linkId or category is Transfer)
+        const isTransfer = (tx: AnchorTransaction): boolean => {
+            return Boolean(tx.linkId) || tx.category?.toLowerCase() === 'transfer';
+        };
+
         transactions.forEach(tx => {
             if (!tx || tx.isSoftDeleted) return;
+            // BUG-037 Fix: Skip transfers from income/expense totals
+            if (isTransfer(tx)) return;
+            
             const amount = tx.amountCents || 0;
             if (tx.type === 'income') {
                 income += amount;

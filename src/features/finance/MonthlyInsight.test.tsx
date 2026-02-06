@@ -87,4 +87,52 @@ describe('MonthlyInsight', () => {
         const { container } = render(<MonthlyInsight transactions={[]} currency="USD" />);
         expect(container.firstChild).toBeNull();
     });
+
+    // BUG-037: Transfers should NOT be counted in income/expense totals
+    it('excludes transfers from income and expense totals (BUG-037)', () => {
+        const transferOut: AnchorTransaction = {
+            id: '3',
+            type: 'expense',
+            amountCents: 25000, // $250 transfer out
+            date: new Date().toISOString(),
+            title: 'Transfer to Savings',
+            category: 'Transfer',
+            accountId: 'acc1',
+            currency: 'USD',
+            scope: 'personal',
+            isSoftDeleted: false,
+            linkId: 'link-123',
+            linkedTransactionId: 'tx-dest',
+            linkedUserId: 'user-1',
+        };
+
+        const transferIn: AnchorTransaction = {
+            id: '4',
+            type: 'income',
+            amountCents: 25000, // $250 transfer in
+            date: new Date().toISOString(),
+            title: 'Transfer from Checking',
+            category: 'Transfer',
+            accountId: 'acc2',
+            currency: 'USD',
+            scope: 'personal',
+            isSoftDeleted: false,
+            linkId: 'link-123',
+            linkedTransactionId: 'tx-source',
+            linkedUserId: 'user-1',
+        };
+
+        // Include real income/expense + transfers
+        render(<MonthlyInsight transactions={[mockIncome, mockExpense, transferOut, transferIn]} currency="USD" />);
+
+        // Income should be $1000 (not $1250 which would include transfer)
+        expect(screen.getByText(/\$1,000.00/)).toBeInTheDocument();
+        // Expense should be $500 (not $750 which would include transfer)
+        const expenseAmounts = screen.getAllByText(/\$500.00/);
+        expect(expenseAmounts.length).toBeGreaterThanOrEqual(1);
+
+        // Should NOT show $1250 or $750
+        expect(screen.queryByText(/\$1,250.00/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/\$750.00/)).not.toBeInTheDocument();
+    });
 });
