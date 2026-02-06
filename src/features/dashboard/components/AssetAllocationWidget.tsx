@@ -39,9 +39,9 @@ export const AssetAllocationWidget = ({ assets }: AssetAllocationWidgetProps) =>
                 </div>
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
-                    {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                 </button>
             </div>
 
