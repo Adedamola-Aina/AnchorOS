@@ -197,21 +197,12 @@ test.describe('System - Responsive Design', () => {
         await expect(sidebar).toBeVisible();
     });
 
-    test('Mobile drawer opens on hamburger click', async ({ page }) => {
+    test('Mobile view (375px) shows bottom navigation', async ({ page }) => {
         await page.setViewportSize({ width: 375, height: 667 });
         await loginOrSignup(page, TEST_USER, true);
 
-        const hamburger = page.locator('button:has(svg.lucide-menu)');
-
-        if (await hamburger.isVisible()) {
-            await hamburger.click();
-            await page.waitForTimeout(500);
-
-            // Drawer should open
-            const drawer = page.locator('[class*="drawer"], aside:visible');
-            const hasDrawer = await drawer.isVisible().catch(() => false);
-            expect(hasDrawer).toBe(true);
-        }
+        const bottomNav = page.locator('nav[aria-label="Main navigation"]');
+        await expect(bottomNav).toBeVisible();
     });
 });
 
