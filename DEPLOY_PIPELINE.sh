@@ -93,6 +93,15 @@ else
     exit 1
 fi
 
+# 3b. Verify build environment marker
+echo -e "\n${YELLOW}🔍 Stage 3b: Verify Build Environment${NC}"
+if ./scripts/verify-build-env.sh "$ENV"; then
+    echo -e "${GREEN}✅ Build environment verified.${NC}"
+else
+    echo -e "${RED}❌ Build environment mismatch. Deployment blocked.${NC}"
+    exit 1
+fi
+
 # 4. E2E Testing (only for staging and production, unless skipped)
 if [[ "$SKIP_E2E" == false ]] && [[ "$ENV" != "development" ]]; then
     echo -e "\n${YELLOW}🎭 Stage 4: End-to-End Testing${NC}"
