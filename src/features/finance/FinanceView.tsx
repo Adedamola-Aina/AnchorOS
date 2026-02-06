@@ -4,7 +4,7 @@
  * Account details section extracted to AccountDetailsContainer.tsx
  */
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Landmark, Search, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -48,6 +48,7 @@ const FinanceView = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [prefillData, setPrefillData] = useState<{ amount?: number; category?: string; title?: string } | undefined>(undefined);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const transactionSectionRef = useRef<HTMLDivElement>(null);
 
   const activeAccounts = useMemo(() => accounts.filter(a => !a.isArchived), [accounts]);
   const selectedAccount = useMemo(() => selectedAccountId ? accounts.find(a => a.id === selectedAccountId) || null : null, [selectedAccountId, accounts]);
@@ -93,6 +94,15 @@ const FinanceView = () => {
   const handleCloseForm = () => { setMode('view'); setEditingTransaction(undefined); setPrefillData(undefined); };
   const handleEdit = (tx: AnchorTransaction) => { setEditingTransaction(tx); setMode('editTx'); };
 
+  /** Scroll back to transaction section after month navigation */
+  const scrollToTransactions = useCallback(() => {
+    requestAnimationFrame(() => {
+      transactionSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
+  const handlePrevMonth = () => { prevMonth(); scrollToTransactions(); };
+  const handleNextMonth = () => { nextMonth(); scrollToTransactions(); };
+
 
 
   // Haptic feedback on delete confirmation
@@ -137,12 +147,12 @@ const FinanceView = () => {
 
 
         {accounts.length > 0 && (
-          <div className="glass-card overflow-hidden">
+          <div ref={transactionSectionRef} className="glass-card overflow-hidden scroll-mt-4">
             <div className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/20 flex flex-col sm:flex-row items-center gap-4">
               <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-xl p-1 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
-                <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8" aria-label="Previous month"><ChevronLeft className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8" aria-label="Previous month"><ChevronLeft className="w-4 h-4" /></Button>
                 <div className="px-2 flex items-center gap-2 min-w-[160px] justify-center text-sm font-bold text-slate-700 dark:text-slate-200"><Calendar className="w-4 h-4 text-slate-400" /><span>{currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span></div>
-                <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8" aria-label="Next month"><ChevronRight className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8" aria-label="Next month"><ChevronRight className="w-4 h-4" /></Button>
               </div>
               <div className="relative flex-1 w-full"><Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" strokeWidth={2.5} /><input ref={searchInputRef} type="text" placeholder={`Search in ${currentMonth.toLocaleDateString('en-US', { month: 'long' })}...`} className="w-full bg-white dark:bg-slate-900 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/50 dark:border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-medium" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
             </div>
