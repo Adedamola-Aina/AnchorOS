@@ -31,3 +31,13 @@ Agent implemented optimistic UI updates without rollback on failure. Users saw s
 
 ## 10. UPDATING DELETED DOCS
 Agent tried to update `PROJECT_STATUS.md`, `KNOWN_ISSUES.md`, `ROADMAP.md` — files that were intentionally deleted. **Git commits with correct prefixes are the single source of truth. The dashboard auto-detects everything from git history.**
+
+## 11. DIRECT FIREBASE DEPLOY (2026-02-06 Incident)
+Agent ran `firebase deploy --only hosting:staging` directly instead of using `npm run deploy:staging`. This deployed a dev build (missing `VITE_APP_ENV=staging`) to staging, causing the environment banner to disappear.
+
+**NEVER run `firebase deploy` directly. ALWAYS use:**
+- `npm run deploy:dev` → Development
+- `npm run deploy:staging` → Staging  
+- `npm run deploy:production` → Production
+
+These commands build with the correct `--mode` flag and verify the build environment before deploying.

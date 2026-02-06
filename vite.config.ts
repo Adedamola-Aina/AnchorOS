@@ -4,13 +4,35 @@ import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { fileURLToPath } from 'url'
 import path from 'path'
+import fs from 'fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+/**
+ * Vite plugin to write a build environment marker file.
+ * This allows deploy scripts to verify the build matches the target environment.
+ * Prevents deploying a dev build to staging or production.
+ */
+function buildEnvMarker(mode: string) {
+  return {
+    name: 'build-env-marker',
+    closeBundle() {
+      // Map Vite mode to environment name
+      const env = mode === 'staging' ? 'staging' 
+                : mode === 'production' ? 'production'
+                : 'development';
+      const markerPath = path.resolve(__dirname, 'dist/.build-env');
+      fs.writeFileSync(markerPath, env, 'utf-8');
+      console.log(`\n✓ Build environment marker written: ${env}`);
+    },
+  };
+}
+
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
+    buildEnvMarker(mode),
     process.env.ANALYZE === 'true' && visualizer({
       open: true,
       filename: 'dist/stats.html',
@@ -60,4 +82,4 @@ export default defineConfig({
       '.tail2fa2e.ts.net',
     ],
   },
-})
+}))
