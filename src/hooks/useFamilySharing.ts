@@ -9,16 +9,7 @@ import { db, APP_ID } from '../config/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useNotifications } from '../context/NotificationContext';
-
-interface FamilyConnection {
-    id: string;
-    ownerUid: string;
-    memberUid: string;
-    ownerDisplayName: string;
-    memberDisplayName: string;
-    status: 'active' | 'disconnected';
-    connectedAt: string;
-}
+import type { FamilyConnection } from '../types';
 
 interface UseFamilySharingResult {
     connection: FamilyConnection | null;

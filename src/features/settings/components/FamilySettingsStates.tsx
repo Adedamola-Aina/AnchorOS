@@ -7,11 +7,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { Users, Check, Loader2, UserMinus, ArrowRight } from 'lucide-react';
-
-interface FamilyConnection {
-    id: string; ownerUid: string; memberUid: string; ownerDisplayName: string;
-    memberDisplayName: string; status: 'active' | 'disconnected'; connectedAt: string;
-}
+import type { FamilyConnection } from '../../../types';
 
 export const FamilyLoadingState: React.FC = () => (
     <Card>
