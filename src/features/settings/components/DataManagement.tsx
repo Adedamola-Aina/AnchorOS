@@ -1,6 +1,7 @@
 import React from 'react';
 import { Database } from 'lucide-react';
 import { useNotifications } from '../../../context/NotificationContext';
+import { downloadCsv } from '../../../utils/csvExport';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 
@@ -17,25 +18,25 @@ export const DataManagement: React.FC<DataManagementProps> = ({
 }) => {
     const { showToast } = useNotifications();
 
+    const fetchAllData = async () => {
+        const { getDocs, collection } = await import('firebase/firestore');
+        const { db, APP_ID } = await import('../../../config/firebase');
+        const [accSnap, txSnap, tasksSnap] = await Promise.all([
+            getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'accounts')),
+            getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'finance')),
+            getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'commitments'))
+        ]);
+        return {
+            accounts: accSnap.docs.map(d => d.data()),
+            transactions: txSnap.docs.map(d => d.data()),
+            commitments: tasksSnap.docs.map(d => d.data()),
+        };
+    };
+
     const handleExportJson = async () => {
         try {
-            const { getDocs, collection } = await import('firebase/firestore');
-            const { db, APP_ID } = await import('../../../config/firebase');
-
-            // Fetch all data
-            const [accSnap, txSnap, tasksSnap] = await Promise.all([
-                getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'accounts')),
-                getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'finance')),
-                getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'commitments'))
-            ]);
-
-            const data = {
-                profile,
-                accounts: accSnap.docs.map(d => d.data()),
-                transactions: txSnap.docs.map(d => d.data()),
-                commitments: tasksSnap.docs.map(d => d.data()),
-                exportedAt: new Date().toISOString()
-            };
+            const raw = await fetchAllData();
+            const data = { profile, ...raw, exportedAt: new Date().toISOString() };
 
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -50,6 +51,16 @@ export const DataManagement: React.FC<DataManagementProps> = ({
             showToast('Data export started.', 'success');
         } catch (e) {
             showToast('Export failed: ' + (e as Error).message, 'error');
+        }
+    };
+
+    const handleExportCsv = async () => {
+        try {
+            const raw = await fetchAllData();
+            downloadCsv(raw);
+            showToast('CSV export started.', 'success');
+        } catch (e) {
+            showToast('CSV export failed: ' + (e as Error).message, 'error');
         }
     };
 
@@ -69,6 +80,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Export Personal Data</p>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">Download a JSON copy of all your accounts, transactions, and commitments.</p>
                     </div>
+                    <div className="flex gap-2">
                     <Button
                         onClick={handleExportJson}
                         variant="primary"
@@ -76,6 +88,14 @@ export const DataManagement: React.FC<DataManagementProps> = ({
                     >
                         Export JSON
                     </Button>
+                    <Button
+                        onClick={handleExportCsv}
+                        variant="secondary"
+                        className="h-10 px-6 text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
+                    >
+                        Export CSV
+                    </Button>
+                    </div>
                 </div>
 
                 {import.meta.env.MODE !== 'production' && (
