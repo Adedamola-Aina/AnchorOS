@@ -57,10 +57,9 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
             if (Notification.permission === 'granted') {
                 try {
-                    const registration = await navigator.serviceWorker.ready;
-                    const token = await getToken(messaging, {
+                    const token = await getFcmTokenWithRetry({
+                        messaging: messaging!,
                         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-                        serviceWorkerRegistration: registration
                     });
                     if (token) setFcmToken(token);
                 } catch (error) {
