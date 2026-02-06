@@ -16,8 +16,10 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
     });
 
     return (
-        <div className="overflow-x-auto pb-4">
-            <div className="grid grid-cols-7 gap-2 min-w-[800px]">
+        <div className="overflow-x-auto pb-4 -mx-2 px-2 snap-x snap-mandatory">
+            {/* BUG-040 Fix: Remove min-w-800px, make grid responsive */}
+            {/* Mobile: 2 cols (visible w/scroll) | sm: 3 cols | md: 4 cols | lg: 7 cols */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 min-w-0">
                 {days.map((date, idx) => {
                     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
                     const fullDayName = date.toLocaleDateString('en-US', { weekday: 'long' });
