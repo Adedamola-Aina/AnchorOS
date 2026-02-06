@@ -3,6 +3,7 @@ import { Bell, AlertCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { NotificationCategoryToggles, type CategoryPreferences } from './NotificationCategoryToggles';
+import { QuietHoursSettings, type QuietHoursPreferences } from './QuietHoursSettings';
 
 interface NotificationSettingsProps {
     emailEnabled: boolean;
@@ -12,6 +13,7 @@ interface NotificationSettingsProps {
     emailVerified: boolean;
     onUpdatePreferences: (prefs: any) => void;
     categories?: CategoryPreferences;
+    quietHours?: QuietHoursPreferences;
     pushPermissionStatus: NotificationPermission;
     requestPushPermission: () => void;
 }
@@ -24,6 +26,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     emailVerified,
     onUpdatePreferences,
     categories,
+    quietHours,
     pushPermissionStatus,
     requestPushPermission,
 }) => {
@@ -127,6 +130,13 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                 <NotificationCategoryToggles
                   categories={categories || { finance: true, commitments: true, family: true }}
                   onToggle={(cat, enabled) => onUpdatePreferences({ categories: { ...(categories || { finance: true, commitments: true, family: true }), [cat]: enabled } })}
+                />
+
+                <div className="h-px bg-slate-100 dark:bg-slate-800" />
+
+                <QuietHoursSettings
+                  preferences={quietHours || { enabled: false, startTime: '22:00', endTime: '07:00' }}
+                  onUpdate={(prefs) => onUpdatePreferences({ quietHours: { ...(quietHours || { enabled: false, startTime: '22:00', endTime: '07:00' }), ...prefs } })}
                 />
             </CardContent>
         </Card>
