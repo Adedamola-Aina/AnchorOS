@@ -3,7 +3,7 @@
  * Extracted from SecuritySettings.tsx per CLAUDE.md §3.2
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Smartphone, QrCode, Key, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
@@ -39,7 +39,18 @@ export const MfaStep2ScanQR: React.FC<Step2Props> = ({ qrUrl, manualKey, onBack,
 );
 
 interface Step3Props { mfaCode: string; mfaError: string; isEnrolling: boolean; onSetMfaCode: (c: string) => void; onEnroll: () => void; onBack: () => void; }
-export const MfaStep3Verify: React.FC<Step3Props> = ({ mfaCode, mfaError, isEnrolling, onSetMfaCode, onEnroll, onBack }) => (
+export const MfaStep3Verify: React.FC<Step3Props> = ({ mfaCode, mfaError, isEnrolling, onSetMfaCode, onEnroll, onBack }) => {
+    const submittedRef = useRef(false);
+
+    useEffect(() => {
+        if (mfaCode.length === 6 && !isEnrolling && !submittedRef.current) {
+            submittedRef.current = true;
+            onEnroll();
+        }
+        if (mfaCode.length < 6) submittedRef.current = false;
+    }, [mfaCode, isEnrolling, onEnroll]);
+
+    return (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-right-4 duration-300">
         <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400"><Key className="w-8 h-8" /></div>
         <div>
@@ -53,4 +64,5 @@ export const MfaStep3Verify: React.FC<Step3Props> = ({ mfaCode, mfaError, isEnro
         </div>
         <div className="flex justify-center pt-4"><Button variant="ghost" onClick={onBack} className="text-slate-400 hover:text-slate-600 gap-2"><ArrowLeft className="w-4 h-4" /> Back to QR</Button></div>
     </div>
-);
+    );
+};

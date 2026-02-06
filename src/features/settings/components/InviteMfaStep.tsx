@@ -4,6 +4,7 @@
  * Handles MFA verification when required during invitation.
  */
 
+import { useEffect, useRef } from 'react';
 import { KeyRound, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
 
@@ -24,6 +25,16 @@ export function InviteMfaStep({
     onSubmit,
     onBack,
 }: InviteMfaStepProps) {
+    const submittedRef = useRef(false);
+
+    useEffect(() => {
+        if (mfaCode.length === 6 && !loading && !submittedRef.current) {
+            submittedRef.current = true;
+            onSubmit({ preventDefault: () => {} } as React.FormEvent);
+        }
+        if (mfaCode.length < 6) submittedRef.current = false;
+    }, [mfaCode, loading, onSubmit]);
+
     return (
         <form onSubmit={onSubmit} className="space-y-4">
             <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 mb-4">

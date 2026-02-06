@@ -4,6 +4,7 @@
  * Handles the 6-digit code input with validation.
  */
 
+import { useEffect, useRef } from 'react';
 import { AlertCircle } from 'lucide-react';
 
 interface InviteCodeEntryProps {
@@ -23,6 +24,16 @@ export function InviteCodeEntry({
     onSubmit,
     onBack,
 }: InviteCodeEntryProps) {
+    const submittedRef = useRef(false);
+
+    useEffect(() => {
+        if (verificationCode.length === 6 && !submittedRef.current) {
+            submittedRef.current = true;
+            onSubmit({ preventDefault: () => {} } as React.FormEvent);
+        }
+        if (verificationCode.length < 6) submittedRef.current = false;
+    }, [verificationCode, onSubmit]);
+
     return (
         <form onSubmit={onSubmit} className="space-y-6">
             <div className="text-center">

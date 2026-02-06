@@ -2,6 +2,7 @@
  * MfaConfirmationCard - MFA verification step for family connection confirmation
  */
 
+import { useEffect, useRef } from 'react';
 import { Lock, AlertCircle, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
@@ -20,6 +21,16 @@ export function MfaConfirmationCard({
     inviteeEmail, mfaCode, setMfaCode, error,
     confirmingConnection, onMfaSubmit, onBack,
 }: MfaConfirmationCardProps) {
+    const submittedRef = useRef(false);
+
+    useEffect(() => {
+        if (mfaCode.length === 6 && !confirmingConnection && !submittedRef.current) {
+            submittedRef.current = true;
+            onMfaSubmit({ preventDefault: () => {} } as React.FormEvent);
+        }
+        if (mfaCode.length < 6) submittedRef.current = false;
+    }, [mfaCode, confirmingConnection, onMfaSubmit]);
+
     return (
         <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
