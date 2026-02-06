@@ -50,7 +50,7 @@ export function OnboardingHabitStep({ taskTitle, setTaskTitle, loading, onSubmit
                 </button>
 
                 <div className="text-center">
-                    <button onClick={onSkip} className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Skip for now →</button>
+                    <button onClick={onSkip} className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Skip for now →</button>
                 </div>
             </div>
         </div>
