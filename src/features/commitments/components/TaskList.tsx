@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { SwipeableTaskItem } from './SwipeableTaskItem';
 import type { AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
+
+const VIRTUALIZE_THRESHOLD = 20;
+const ESTIMATED_TASK_HEIGHT = 72; // ~64px card + 8px gap
 
 interface TaskListProps {
     activeTasks: AnchorTask[];
@@ -26,6 +30,16 @@ export const TaskList: React.FC<TaskListProps> = ({
     onConfirmFinancial,
 }) => {
     const [showCompleted, setShowCompleted] = useState(false);
+    const parentRef = useRef<HTMLDivElement>(null);
+    const useVirtual = activeTasks.length > VIRTUALIZE_THRESHOLD;
+
+    const virtualizer = useVirtualizer({
+        count: useVirtual ? activeTasks.length : 0,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => ESTIMATED_TASK_HEIGHT,
+        overscan: 5,
+        enabled: useVirtual,
+    });
 
     return (
         <div className="space-y-8">
@@ -34,24 +48,33 @@ export const TaskList: React.FC<TaskListProps> = ({
                 {activeTasks.length > 0 && (
                     <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Active Tasks</h3>
                 )}
-                <div className="space-y-3 transition-all duration-300 ease-out">
-                    {activeTasks.map((task) => (
-                        <div
-                            key={task.id}
-                            className="transition-all duration-200 ease-out"
-                        >
-                            <SwipeableTaskItem
-                                task={task}
-                                hasFamilyActive={hasFamilyActive}
-                                isEditing={editingTaskId === task.id}
-                                onToggle={onToggle}
-                                onStartEdit={onStartEdit}
-                                onDelete={onDelete}
-                                onConfirmFinancial={onConfirmFinancial}
-                            />
+                {useVirtual ? (
+                    <div ref={parentRef} className="max-h-[60vh] overflow-y-auto overscroll-contain">
+                        <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+                            {virtualizer.getVirtualItems().map((virtualRow) => {
+                                const task = activeTasks[virtualRow.index];
+                                if (!task) return null;
+                                return (
+                                    <div key={task.id} data-index={virtualRow.index} ref={virtualizer.measureElement}
+                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)` }}
+                                        className="pb-3">
+                                        <SwipeableTaskItem task={task} hasFamilyActive={hasFamilyActive} isEditing={editingTaskId === task.id}
+                                            onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onConfirmFinancial={onConfirmFinancial} />
+                                    </div>
+                                );
+                            })}
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ) : (
+                    <div className="space-y-3 transition-all duration-300 ease-out">
+                        {activeTasks.map((task) => (
+                            <div key={task.id} className="transition-all duration-200 ease-out">
+                                <SwipeableTaskItem task={task} hasFamilyActive={hasFamilyActive} isEditing={editingTaskId === task.id}
+                                    onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onConfirmFinancial={onConfirmFinancial} />
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Completed Section */}
