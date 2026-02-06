@@ -73,11 +73,12 @@ export function suggestCategory(
 /**
  * Calculate net worth from accounts
  * Separates by currency
+ * F-017: Fixed to properly handle multi-currency totals
  */
 export function calculateNetWorth(accounts: AnchorAccount[]): {
     NGN: number;
     USD: number;
-    total: { amount: number; currency: 'NGN' };
+    total: { amount: number; currency: 'NGN' | 'USD' };
 } {
     const NGN_Cents = accounts
         .filter(acc => acc.currency === 'NGN')
@@ -91,10 +92,15 @@ export function calculateNetWorth(accounts: AnchorAccount[]): {
     const NGN = fromCents(NGN_Cents);
     const USD = fromCents(USD_Cents);
 
+    // F-017: Total uses the dominant currency (higher absolute value)
+    // This provides a reasonable primary display when user has mixed currencies
+    const primaryCurrency = Math.abs(NGN) >= Math.abs(USD) ? 'NGN' : 'USD';
+    const primaryAmount = primaryCurrency === 'NGN' ? NGN : USD;
+
     return {
         NGN,
         USD,
-        total: { amount: NGN, currency: 'NGN' }
+        total: { amount: primaryAmount, currency: primaryCurrency }
     };
 }
 

@@ -27,7 +27,9 @@ const DashboardCharts = ({ accounts, transactions, tasks, navigateTo }: Dashboar
         const rawData = accounts.map((acc, index) => ({
             name: acc.name,
             value: fromCents(acc.balanceCents),
-            color: COLORS[index % COLORS.length]
+            color: COLORS[index % COLORS.length],
+            currency: acc.currency,
+            percent: 0 // Will be recalculated in chart
         })).filter(item => item.value > 0);
         return groupSmallValues(deduplicateLabels(rawData), 0.05);
     }, [accounts]);
@@ -93,10 +95,20 @@ const DashboardCharts = ({ accounts, transactions, tasks, navigateTo }: Dashboar
 
     const showAssetDist = accounts.length > 1;
 
+    // Determine primary currency based on most accounts or default to NGN
+    const primaryCurrency = useMemo(() => {
+        const currencyCount: Record<string, number> = {};
+        accounts.forEach(acc => {
+            currencyCount[acc.currency] = (currencyCount[acc.currency] || 0) + 1;
+        });
+        const sorted = Object.entries(currencyCount).sort((a, b) => b[1] - a[1]);
+        return (sorted[0]?.[0] as 'NGN' | 'USD') || 'NGN';
+    }, [accounts]);
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {showAssetDist && <AssetDistributionChart accountData={accountData} />}
-            <CashFlowChart financialTrend={financialTrend} cashFlowTotals={cashFlowTotals} transactions={transactions} fullWidth={!showAssetDist} />
+            <CashFlowChart financialTrend={financialTrend} cashFlowTotals={cashFlowTotals} transactions={transactions} fullWidth={!showAssetDist} currency={primaryCurrency} />
             <ProductivityScoreCard commitmentStats={commitmentStats} navigateTo={navigateTo} />
             <RecentActivityList recentActivity={recentActivity} />
         </div>

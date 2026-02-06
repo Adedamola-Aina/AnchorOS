@@ -19,7 +19,7 @@ import { TransactionFilterHeader } from './components/TransactionListParts';
 interface AccountDetailsViewProps { account: AnchorAccount; onBack: () => void; onDelete?: () => void; onShare?: () => void; onTransfer?: () => void; onPayBill?: () => void; onEdit?: (tx: AnchorTransaction) => void; familyMemberId?: string | null; }
 
 export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTransfer, onPayBill, onEdit, familyMemberId }: AccountDetailsViewProps) => {
-    const { transactions, deleteTransaction, renameAccount } = useFinance();
+    const { transactions, deleteTransaction, renameAccount, currentMonth } = useFinance();
     const { user } = useAuth();
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -35,8 +35,30 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
     const { activities, loading: loadingActivities } = useAccountActivity({ accountId: account.id, accountOwnerId: account.ownerId || user?.uid || '', enabled: isSharedAccount });
 
     const accountTransactions = useMemo(() => (transactions || []).filter(t => t?.accountId === account.id), [transactions, account.id]);
-    const weeklyData = useMemo(() => getWeeklySpending(accountTransactions), [accountTransactions]);
+    const weeklyData = useMemo(() => getWeeklySpending(accountTransactions, currentMonth), [accountTransactions, currentMonth]);
     const maxWeeklyAmount = useMemo(() => Math.max(...weeklyData.flatMap(d => [d.income, d.expense]), 1), [weeklyData]);
+    
+    // F-006: Calculate monthly opening/closing balance
+    const monthlyBalance = useMemo(() => {
+        const now = new Date();
+        const isCurrentMonth = currentMonth.getMonth() === now.getMonth() && currentMonth.getFullYear() === now.getFullYear();
+        let monthIncome = 0;
+        let monthExpense = 0;
+        accountTransactions.forEach(t => {
+            if (!t || t.isSoftDeleted) return;
+            const amount = t.amountCents || 0;
+            if (t.type === 'income') monthIncome += amount;
+            else if (t.type === 'expense') monthExpense += amount;
+            else if (t.type === 'transfer') {
+                if (t.accountId === account.id) monthExpense += amount;
+                else monthIncome += amount;
+            }
+        });
+        const netChange = monthIncome - monthExpense;
+        const closingBalance = isCurrentMonth ? account.balanceCents : undefined;
+        const openingBalance = isCurrentMonth ? account.balanceCents - netChange : undefined;
+        return { openingBalance, closingBalance, monthIncome, monthExpense, netChange, isCurrentMonth };
+    }, [accountTransactions, account.balanceCents, account.id, currentMonth]);
 
     const filteredList = useMemo(() => {
         return accountTransactions.filter(t => {
@@ -59,7 +81,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
         <>
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-6">
                 <NotificationBanner accountId={account.id} />
-                <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} />
+                <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} />
                 <div className="grid grid-cols-1 gap-5">
                     {accountTransactions.length > 0 && <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />}
                 </div>

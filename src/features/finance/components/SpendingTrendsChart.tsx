@@ -49,7 +49,7 @@ export const SpendingTrendsChart = ({
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                     <TrendingUp className="w-3.5 h-3.5" />
-                    30 Day Summary
+                    Monthly Summary
                 </h3>
                 {selectedWeekStart && (
                     <button

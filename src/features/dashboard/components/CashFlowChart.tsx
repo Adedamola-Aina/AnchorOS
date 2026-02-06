@@ -1,20 +1,23 @@
 /**
  * CashFlowChart - Bar chart showing income vs expense trends
+ * CHART-002: Fixed hardcoded currency symbol
  */
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import type { AnchorTransaction } from '../../../types';
+import type { AnchorTransaction, Currency } from '../../../types';
 import { fromCents } from '../../../utils/moneyUtils';
+import { formatCurrency } from '../../../utils/format';
 
 interface CashFlowChartProps {
     financialTrend: { date: string; income: number; expense: number }[];
     cashFlowTotals: { income: number; expense: number };
     transactions: AnchorTransaction[];
     fullWidth?: boolean;
+    currency?: Currency;
 }
 
-export function CashFlowChart({ financialTrend, cashFlowTotals, transactions, fullWidth }: CashFlowChartProps) {
+export function CashFlowChart({ financialTrend, cashFlowTotals, transactions, fullWidth, currency = 'NGN' }: CashFlowChartProps) {
     // Calculate momentum
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -48,18 +51,18 @@ export function CashFlowChart({ financialTrend, cashFlowTotals, transactions, fu
                     <div className="flex gap-4 mt-2">
                         <div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase">In</p>
-                            <p className="font-financial font-bold text-emerald-500">₦{cashFlowTotals.income.toLocaleString()}</p>
+                            <p className="font-financial font-bold text-emerald-500">{formatCurrency(cashFlowTotals.income, currency)}</p>
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase">Out</p>
-                            <p className="font-financial font-bold text-rose-500">₦{cashFlowTotals.expense.toLocaleString()}</p>
+                            <p className="font-financial font-bold text-rose-500">{formatCurrency(cashFlowTotals.expense, currency)}</p>
                         </div>
                     </div>
                     {transactions.length > 0 && (
                         <div className="flex items-center gap-2 mt-2 animate-in fade-in slide-in-from-left-2 duration-700 delay-100">
                             <div className={`flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide gap-1 ${currentNet >= 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
                                 {currentNet >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                <span>Net: ₦{currentNet.toLocaleString()}</span>
+                                <span>Net: {formatCurrency(currentNet, currency)}</span>
                             </div>
                             {prevNet !== 0 && (
                                 <span className={`text-[10px] font-bold ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
@@ -89,7 +92,7 @@ export function CashFlowChart({ financialTrend, cashFlowTotals, transactions, fu
                         <Tooltip
                             cursor={{ fill: 'transparent' }}
                             contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
-                            formatter={(value) => [`₦${Number(value).toLocaleString()}`, '']}
+                            formatter={(value) => [formatCurrency(Number(value), currency), '']}
                         />
                         <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
                         <Bar dataKey="expense" fill="#f87171" radius={[4, 4, 0, 0]} barSize={20} />

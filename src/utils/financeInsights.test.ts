@@ -39,7 +39,9 @@ describe('financeInsights', () => {
 
         it('handles empty transactions', () => {
             const data = getWeeklySpending([]);
-            expect(data.length).toBe(4);
+            // F-015: Now returns full month's weeks (4-6 depending on month)
+            expect(data.length).toBeGreaterThanOrEqual(4);
+            expect(data.length).toBeLessThanOrEqual(6);
             expect(data[0].income).toBe(0);
         });
     });

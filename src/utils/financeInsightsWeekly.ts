@@ -20,14 +20,24 @@ const getStartOfWeek = (d: Date) => {
 
 const formatDateLabel = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-export const getWeeklySpending = (transactions: AnchorTransaction[]): WeeklySpendingData[] => {
+/**
+ * F-015: Updated to accept optional month reference date.
+ * When viewing past months, uses that month's date range instead of today.
+ * Now shows full month weeks, not just 4 weeks from today.
+ */
+export const getWeeklySpending = (transactions: AnchorTransaction[], referenceDate?: Date): WeeklySpendingData[] => {
     const weeks: WeeklySpendingData[] = [];
+    const ref = referenceDate || new Date();
+    
+    // Use start and end of the reference month
+    const monthStart = new Date(ref.getFullYear(), ref.getMonth(), 1);
+    const monthEnd = new Date(ref.getFullYear(), ref.getMonth() + 1, 0, 23, 59, 59, 999);
+    
+    // Generate weeks that cover the month
+    let weekStart = getStartOfWeek(monthStart);
     const today = new Date();
-    const currentWeekStart = getStartOfWeek(today);
-
-    for (let i = 3; i >= 0; i--) {
-        const weekStart = new Date(currentWeekStart);
-        weekStart.setDate(weekStart.getDate() - (i * 7));
+    
+    while (weekStart <= monthEnd) {
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 6);
         weekEnd.setHours(23, 59, 59, 999);
@@ -40,8 +50,16 @@ export const getWeeklySpending = (transactions: AnchorTransaction[]): WeeklySpen
 
         const income = weekTxs.filter(t => t && t.type === 'income').reduce((sum, t) => sum + fromCents(t.amountCents || 0), 0);
         const expense = weekTxs.filter(t => t && t.type === 'expense').reduce((sum, t) => sum + fromCents(t.amountCents || 0), 0);
-        weeks.push({ label: i === 0 ? 'This Week' : formatDateLabel(weekStart), income, expense, net: income - expense, weekStart });
+        
+        const isCurrentWeek = today >= weekStart && today <= weekEnd;
+        const label = isCurrentWeek && !referenceDate ? 'This Week' : formatDateLabel(weekStart);
+        
+        weeks.push({ label, income, expense, net: income - expense, weekStart: new Date(weekStart) });
+        
+        weekStart = new Date(weekStart);
+        weekStart.setDate(weekStart.getDate() + 7);
     }
+    
     return weeks;
 };
 

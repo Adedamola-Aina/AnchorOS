@@ -10,12 +10,15 @@ import { format } from 'date-fns';
 import { CalendarClock, PauseCircle, PlayCircle, Trash2 } from 'lucide-react';
 import { useRecurringTransactions, useUpdateRecurringTransaction, useDeleteRecurringTransaction } from '../../../hooks/useRecurringQueries';
 import { useAuth } from '../../../context/AuthContext';
+import { useFinance } from '../../../context/FinanceContext';
 import { useHaptic } from '../../../hooks/useHaptic';
 import { fromCents } from '../../../utils/moneyUtils';
+import { formatCurrency } from '../../../utils/format';
 import type { RecurringTransaction } from '../../../types';
 
 export const RecurringTransactionsList: React.FC = () => {
     const { user } = useAuth();
+    const { accounts } = useFinance();
     const haptic = useHaptic();
     const { data: rules, isLoading, isEmpty } = useRecurringTransactions(user?.uid);
     const { mutateAsync: updateRule } = useUpdateRecurringTransaction();
@@ -98,7 +101,7 @@ export const RecurringTransactionsList: React.FC = () => {
                                 ${rule.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-white'}
                             `}>
                                 {rule.type === 'income' ? '+' : ''}
-                                {fromCents(rule.amountCents).toLocaleString('en-US', { style: 'currency', currency: 'NGN' })}
+                                {formatCurrency(fromCents(rule.amountCents), accounts.find(a => a.id === rule.accountId)?.currency || 'NGN')}
                             </span>
 
                             <div className="flex items-center gap-1 mt-1">

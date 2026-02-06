@@ -51,6 +51,13 @@ const FinanceView = () => {
 
   const activeAccounts = useMemo(() => accounts.filter(a => !a.isArchived), [accounts]);
   const selectedAccount = useMemo(() => selectedAccountId ? accounts.find(a => a.id === selectedAccountId) || null : null, [selectedAccountId, accounts]);
+  // F-008: Calculate primary currency based on account count (not just first account)
+  const primaryCurrency = useMemo(() => {
+    const currencyCount: Record<string, number> = {};
+    activeAccounts.forEach(acc => { currencyCount[acc.currency] = (currencyCount[acc.currency] || 0) + 1; });
+    const sorted = Object.entries(currencyCount).sort((a, b) => b[1] - a[1]);
+    return (sorted[0]?.[0] as 'NGN' | 'USD') || 'NGN';
+  }, [activeAccounts]);
   const showModal = accounts.length >= 3;
 
   useEffect(() => {
@@ -94,7 +101,7 @@ const FinanceView = () => {
         <AccountDetailsContainer account={selectedAccount} mode={mode} editingTransaction={editingTransaction} initialTransactionType={initialTransactionType}
           accountToDelete={accountToDelete} accountToUnshare={accountToUnshare} familyMemberUid={familyMemberUid || undefined} familyMemberName={familyMemberName || undefined}
           onBack={() => setSelectedAccountId(null)} onShare={() => { if (!familyMemberUid) return; const isShared = selectedAccount.sharedWith?.[familyMemberUid]; if (isShared) setAccountToUnshare(selectedAccount); else toggleShareAccount(selectedAccount.id, true); }}
-          onTransfer={() => { setInitialTransactionType('transfer'); setMode('addTx'); }} onPayBill={() => { setInitialTransactionType('expense'); setMode('addTx'); }}
+          onTransfer={() => { setInitialTransactionType('transfer'); setMode('addTx'); }} onPayBill={() => { setInitialTransactionType('expense'); setPrefillData({ category: 'Bills & Utilities' }); setMode('addTx'); }}
           onEdit={handleEdit} onDelete={() => setAccountToDelete(selectedAccount)} onCloseForm={handleCloseForm}
           onDeleteAccount={() => { if (accountToDelete) { deleteAccount(accountToDelete.id); setAccountToDelete(null); setSelectedAccountId(null); } }}
           setAccountToDelete={setAccountToDelete}
@@ -109,7 +116,7 @@ const FinanceView = () => {
       <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 relative ${isMobile ? 'space-y-5' : 'space-y-8'}`}>
         <SectionHeader title="Finance" subtitle="Multi-account asset management and cashflow tracking." action={<Button variant="secondary" size="sm" onClick={() => setMode(mode === 'addAcc' ? 'view' : 'addAcc')} className="gap-2"><Landmark className="w-4 h-4" /> <span>Add Account</span></Button>} />
 
-        {!isSearching && (<><FamilyNotificationBanner /><NetWorthCards netWorth={netWorth} /><MonthlyInsight transactions={transactions} currency={activeAccounts[0]?.currency || 'NGN'} />
+        {!isSearching && (<><FamilyNotificationBanner /><NetWorthCards netWorth={netWorth} /><MonthlyInsight transactions={transactions} currency={primaryCurrency} />
           <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-6'}`}>
             {activeAccounts.map((acc) => (<AccountCard key={acc.id} account={acc} userId={user?.uid || ''} isOwnerOfConnection={isFamilyOwner} familyMemberUid={familyMemberUid || undefined} onEdit={(acc) => setSelectedAccountId(acc.id)} onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)} />))}
             {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
