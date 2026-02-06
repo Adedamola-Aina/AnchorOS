@@ -76,7 +76,7 @@ const AppContent = () => {
   // This prevents flash of onboarding screen for users who have already completed it
   if (loading || (user && !profileLoaded)) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -85,7 +85,7 @@ const AppContent = () => {
   // Only show onboarding if user is logged in AND profile loaded AND onboarding is not complete
   if (user && profileLoaded && profile && !profile.onboardingComplete) {
     return (
-      <React.Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+      <React.Suspense fallback={<div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
         <Routes>
           <Route path="/accept-invite" element={
             <ErrorBoundary componentName="Accept Invite">
@@ -102,7 +102,7 @@ const AppContent = () => {
     <Routes>
       <Route path="/accept-invite" element={
         <ErrorBoundary componentName="Accept Invite">
-          <div className={`${profile?.theme === 'dark' ? 'dark' : ''} bg-slate-50 dark:bg-slate-900 min-h-screen`}>
+          <div className={`${profile?.theme === 'dark' ? 'dark' : ''} bg-slate-50 dark:bg-slate-900 min-h-dvh`}>
             <AcceptInviteView />
           </div>
         </ErrorBoundary>

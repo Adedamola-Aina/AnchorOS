@@ -15,7 +15,7 @@ interface InviteStatusDisplayProps {
 export function InviteStatusDisplay({ status, error, ownerName }: InviteStatusDisplayProps) {
     if (status === 'validating') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+            <div className="min-h-dvh flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 text-slate-900 dark:text-white animate-spin" />
                     <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Checking invitation...</p>
@@ -26,7 +26,7 @@ export function InviteStatusDisplay({ status, error, ownerName }: InviteStatusDi
 
     if (status === 'invalid') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+            <div className="min-h-dvh flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
                 <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl max-w-md w-full text-center space-y-4">
                     <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto">
                         <AlertCircle className="w-8 h-8 text-rose-500" />
@@ -46,7 +46,7 @@ export function InviteStatusDisplay({ status, error, ownerName }: InviteStatusDi
 
     if (status === 'locked') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+            <div className="min-h-dvh flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
                 <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl max-w-md w-full text-center space-y-4">
                     <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto">
                         <Lock className="w-8 h-8 text-rose-500" />
@@ -68,7 +68,7 @@ export function InviteStatusDisplay({ status, error, ownerName }: InviteStatusDi
 
     // awaiting_confirmation
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+        <div className="min-h-dvh flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
             <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl max-w-md w-full text-center space-y-6">
                 <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle className="w-10 h-10 text-emerald-500" />

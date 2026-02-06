@@ -81,7 +81,7 @@ const AuthView: React.FC<AuthViewProps> = ({
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors duration-500">
+        <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex transition-colors duration-500">
             <AuthLeftPanel />
 
             <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 z-10 relative">
