@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bell, AlertCircle } from 'lucide-react';
+import { ToggleSwitch } from '../../../components/shared';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { NotificationCategoryToggles, type CategoryPreferences } from './NotificationCategoryToggles';
@@ -42,7 +43,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
             </CardHeader>
             <CardContent className="p-8 space-y-6">
                 {/* Push Notifications Section */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Push Notifications</p>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -57,36 +58,26 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                             )}
                         </div>
                     </div>
-                    <button
-                        onClick={() => {
-                            if (pushPermissionStatus !== 'granted') {
-                                requestPushPermission();
-                            } else {
-                                // In a real app, this would delete the token from the backend
-                                // For now we just allow re-requesting/syncing
-                                requestPushPermission();
-                            }
-                        }}
-                        className={`relative inline-flex min-h-11 h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${pushPermissionStatus === 'granted' ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                    <ToggleSwitch
+                        enabled={pushPermissionStatus === 'granted'}
+                        onToggle={() => requestPushPermission()}
                         disabled={pushPermissionStatus === 'denied'}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${pushPermissionStatus === 'granted' ? 'translate-x-6' : 'translate-x-1'}`} />
-                    </button>
+                        label="Toggle push notifications"
+                    />
                 </div>
 
                 <div className="h-px bg-slate-100 dark:bg-slate-800" />
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Email Notifications</p>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Receive digests or instant alerts for family activity.</p>
                     </div>
-                    <button
-                        onClick={() => onUpdatePreferences({ enabled: !emailEnabled })}
-                        className={`relative inline-flex min-h-11 h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${emailEnabled ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${emailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
-                    </button>
+                    <ToggleSwitch
+                        enabled={emailEnabled}
+                        onToggle={() => onUpdatePreferences({ enabled: !emailEnabled })}
+                        label="Toggle email notifications"
+                    />
                 </div>
 
                 {emailEnabled && (

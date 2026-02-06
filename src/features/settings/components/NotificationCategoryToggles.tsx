@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Wallet, CheckSquare, Users } from 'lucide-react';
+import { ToggleSwitch } from '../../../components/shared';
 
 export interface CategoryPreferences {
   finance: boolean;
@@ -37,13 +38,11 @@ export const NotificationCategoryToggles: React.FC<Props> = ({ categories, onTog
             <p className="text-xs text-slate-400 dark:text-slate-500">{desc}</p>
           </div>
         </div>
-        <button
-          onClick={() => onToggle(key, !categories[key])}
-          className={`relative inline-flex min-h-11 h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${categories[key] ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-          aria-label={`Toggle ${label} notifications`}
-        >
-          <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${categories[key] ? 'translate-x-6' : 'translate-x-1'}`} />
-        </button>
+        <ToggleSwitch
+          enabled={categories[key]}
+          onToggle={() => onToggle(key, !categories[key])}
+          label={`Toggle ${label} notifications`}
+        />
       </div>
     ))}
   </div>
