@@ -20,7 +20,8 @@ const APP_VERSION = (pkg as unknown as { version: string }).version;
 import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OfflineIndicator } from './components/shared/OfflineIndicator';
-import { useVersionCheck } from './hooks/useVersionCheck';\nimport { useAccessibility } from './hooks/useAccessibility';
+import { useVersionCheck } from './hooks/useVersionCheck';
+import { useAccessibility } from './hooks/useAccessibility';
 
 // Environment Banner - Shows in non-production environments
 const EnvironmentBanner = () => {
