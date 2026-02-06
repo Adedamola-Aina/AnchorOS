@@ -12,12 +12,19 @@ interface Notification {
 }
 
 import { messaging, db, auth, APP_ID } from '../config/firebase';
-import { getToken, onMessage } from 'firebase/messaging';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { getToken, onMessage, deleteToken } from 'firebase/messaging';
+import { doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+
+// BUG-039: Key to track user's push notification preference
+const PUSH_DISABLED_KEY = 'anchor_push_disabled';
 
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [fcmToken, setFcmToken] = useState<string | null>(null);
+    // BUG-039: Track if user has explicitly disabled push notifications
+    const [pushDisabled, setPushDisabled] = useState<boolean>(() => {
+        return localStorage.getItem(PUSH_DISABLED_KEY) === 'true';
+    });
     const [pushPermissionStatus, setPushPermissionStatus] = useState<NotificationPermission>(
         typeof Notification !== 'undefined' ? Notification.permission : 'default'
     );
@@ -40,10 +47,12 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         });
     }, []);
 
-    // Check initial permission state
+    // Check initial permission state - BUG-039: Only restore if not explicitly disabled
     React.useEffect(() => {
         const checkPermission = async () => {
             if (typeof Notification === 'undefined' || !messaging) return;
+            // BUG-039: Respect user's explicit disable preference
+            if (pushDisabled) return;
 
             if (Notification.permission === 'granted') {
                 try {
@@ -59,7 +68,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             }
         };
         checkPermission();
-    }, []);
+    }, [pushDisabled]);
 
     const requestPushPermission = useCallback(async () => {
         try {
@@ -68,13 +77,34 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                 return null;
             }
 
-            // If already granted and we have a token (or even if we don't, but UI says granted), 
-            // treat this click as a "Turn Off" request to reset UI state.
-            if (pushPermissionStatus === 'granted') {
+            // BUG-039 Fix: If already granted, properly disable push notifications
+            if (pushPermissionStatus === 'granted' || pushDisabled) {
+                // Actually disable push by deleting token
+                if (messaging && fcmToken) {
+                    try {
+                        // Delete token from Firebase Messaging
+                        await deleteToken(messaging);
+                        // Delete token from Firestore
+                        if (auth.currentUser) {
+                            await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', fcmToken));
+                        }
+                    } catch (err) {
+                        console.error('Error deleting FCM token:', err);
+                    }
+                }
+                // Set disabled state and persist to localStorage
+                setPushDisabled(true);
+                localStorage.setItem(PUSH_DISABLED_KEY, 'true');
                 setPushPermissionStatus('default');
                 setFcmToken(null);
-                showToast('Notifications Disabled (UI reset)', 'info');
+                showToast('Push Notifications Disabled', 'info');
                 return null;
+            }
+
+            // Re-enable if was disabled
+            if (pushDisabled) {
+                setPushDisabled(false);
+                localStorage.removeItem(PUSH_DISABLED_KEY);
             }
 
             console.log('[Push] Requesting permission...');
@@ -140,7 +170,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             showToast(`Error: ${error.message || 'Permission failed'}`, 'error');
         }
         return null;
-    }, [pushPermissionStatus, showToast]);
+    }, [pushPermissionStatus, pushDisabled, fcmToken, showToast]);
 
     // Listen for foreground messages
     React.useEffect(() => {
