@@ -17,14 +17,14 @@ interface ChartDataItem {
  * Groups small values (< threshold %) into an "Other" category
  * Prevents chart legend clutter
  */
-export function groupSmallValues(
-    data: ChartDataItem[],
+export function groupSmallValues<T extends ChartDataItem>(
+    data: T[],
     threshold: number = 0.05
-): ChartDataItem[] {
+): T[] {
     const total = data.reduce((sum, item) => sum + item.value, 0);
     if (total === 0) return data;
 
-    const significant: ChartDataItem[] = [];
+    const significant: T[] = [];
     let otherValue = 0;
 
     data.forEach(item => {
@@ -41,7 +41,7 @@ export function groupSmallValues(
             name: 'Other',
             value: otherValue,
             color: '#94a3b8' // slate-400
-        });
+        } as T);
     }
 
     return significant;
@@ -157,7 +157,7 @@ export function calculateCashFlow(
 /**
  * Deduplicate account names for chart labels
  */
-export function deduplicateLabels(data: ChartDataItem[]): ChartDataItem[] {
+export function deduplicateLabels<T extends ChartDataItem>(data: T[]): T[] {
     const nameCount: Record<string, number> = {};
 
     return data.map(item => {

@@ -45,7 +45,7 @@ export async function handleWipeData(userId: string, showToast: ShowToast): Prom
 export async function handleDeleteAccount(
     user: User | null,
     familyConnection: unknown,
-    disconnectFamily: (action: string) => Promise<void>,
+    disconnectFamily: (action: 'remove_member' | 'leave') => Promise<void>,
     logout: () => void,
     showToast: ShowToast,
 ): Promise<void> {
