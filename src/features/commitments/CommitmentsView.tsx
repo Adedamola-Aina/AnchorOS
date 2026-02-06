@@ -1,8 +1,8 @@
 /**
  * CommitmentsView - Task management page orchestrator
- * DES-002: Uses semantic components via extracted parts
+ * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * UI components extracted to CommitmentsViewParts.tsx
  */
-
 
 import { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';

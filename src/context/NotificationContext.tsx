@@ -173,7 +173,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                             key={n.id}
                             className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border animate-in slide-in-from-right-8 duration-300 min-w-[300px] max-w-md ${n.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400' :
                                 n.type === 'error' ? 'bg-rose-50 dark:bg-rose-800/20 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-400' :
-                                    'bg-surface-1-dark text-white border-border'
+                                    'bg-slate-800 text-white border-slate-700'
                                 }`}
                         >
                             {n.type === 'success' && <CheckCircle2 className="w-5 h-5 shrink-0" />}
@@ -193,20 +193,20 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             )}
 
             {confirmDialog && createPortal(
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-surface-1-dark/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="relative bg-surface-1 dark:bg-surface-1-dark rounded-2xl shadow-2xl w-full max-w-md p-6 border border-border-subtle dark:border-border-dark animate-in zoom-in-95 duration-200">
-                        <h3 className="text-h3 lg:text-h3-lg text-foreground dark:text-foreground-dark mb-2">{confirmDialog.options.title}</h3>
-                        <p className="text-muted mb-8 whitespace-pre-wrap">{confirmDialog.options.message}</p>
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+                        <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-2">{confirmDialog.options.title}</h3>
+                        <p className="text-slate-500 dark:text-slate-400 mb-8 whitespace-pre-wrap">{confirmDialog.options.message}</p>
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => handleConfirm(false)}
-                                className="px-5 py-2.5 rounded-xl text-muted dark:text-muted-dark font-bold hover:bg-surface-2 dark:hover:bg-surface-2-dark transition-all"
+                                className="px-5 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                             >
                                 {confirmDialog.options.cancelText || 'Cancel'}
                             </button>
                             <button
                                 onClick={() => handleConfirm(true)}
-                                className={`px-5 py-2.5 rounded-xl text-white font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${confirmDialog.options.type === 'danger' ? 'bg-danger-600 shadow-danger-600/20' : 'bg-foreground dark:bg-surface-3-dark shadow-foreground/20'
+                                className={`px-5 py-2.5 rounded-xl text-white font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${confirmDialog.options.type === 'danger' ? 'bg-rose-600 shadow-rose-600/20' : 'bg-slate-900 dark:bg-slate-700 shadow-slate-900/20'
                                     }`}
                             >
                                 {confirmDialog.options.confirmText || 'Confirm'}

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CommandPalette } from './CommandPalette';
 import { AppContext } from '../../context/AnchorContext';
 import { FinanceContext } from '../../context/FinanceContext';
@@ -105,7 +105,7 @@ describe('CommandPalette', () => {
         expect(screen.queryByText('Chase Checking')).not.toBeInTheDocument();
     });
 
-    it('navigates on click and closes', () => {
+    it('navigates on click and closes', async () => {
         renderWithContexts(<CommandPalette />);
 
         fireEvent.keyDown(window, { key: 'k', metaKey: true });
@@ -114,6 +114,8 @@ describe('CommandPalette', () => {
         fireEvent.click(navItem);
 
         expect(mockNavigateTo).toHaveBeenCalledWith('dashboard');
-        expect(screen.queryByPlaceholderText(/Search queries/i)).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.queryByPlaceholderText(/Search queries/i)).not.toBeInTheDocument();
+        });
     });
 });

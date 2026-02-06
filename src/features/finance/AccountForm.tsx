@@ -1,9 +1,4 @@
-/**
- * AccountForm - Form for creating new accounts
- * WEB-003: Framer Motion button hover/tap animations
- */
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Landmark } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 import type { AnchorAccount, Currency } from '../../types';
@@ -53,7 +48,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                 type: newAccType,
                 currency: newAccCurrency,
                 balanceCents: toCents(newAccBalance),
-                color: 'bg-surface-3-dark',
+                color: 'bg-slate-500',
                 scope: 'personal' // Default to personal scope
             });
             showToast('Account created successfully', 'success');
@@ -72,8 +67,8 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="bg-surface-2 dark:bg-surface-2-dark p-1 rounded-xl">
-            <h3 className="text-h3 lg:text-h3-lg text-foreground dark:text-foreground-dark mb-4 flex items-center gap-2">
+        <div className="bg-slate-50 dark:bg-slate-800 p-1 rounded-xl">
+            <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                 <Landmark className="w-5 h-5" /> Setup New Account
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
@@ -83,10 +78,10 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                     </div>
                 )}
                 <div>
-                    <label className="block text-xs font-bold text-muted uppercase mb-1">
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                         Account Name
                         {newAccName.length > 255 && (
-                            <span className="text-danger-500 ml-2 normal-case font-normal">
+                            <span className="text-rose-500 ml-2 normal-case font-normal">
                                 Must be 255 characters or fewer
                             </span>
                         )}
@@ -96,14 +91,14 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                         value={newAccName}
                         onChange={e => setNewAccName(e.target.value)}
                         placeholder="e.g. Zenith Spending, Sterling Salary"
-                        className="w-full p-3 rounded-lg border border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
+                        className="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                         autoFocus
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-xs font-bold text-muted uppercase mb-1">Type</label>
-                        <select value={newAccType} onChange={(e) => setNewAccType(e.target.value as AnchorAccount['type'])} className="w-full p-3 rounded-lg border border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark">
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Type</label>
+                        <select value={newAccType} onChange={(e) => setNewAccType(e.target.value as AnchorAccount['type'])} className="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white">
                             <option value="checking">Checking / Spending</option>
                             <option value="savings">Savings</option>
                             <option value="salary">Salary</option>
@@ -111,11 +106,11 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-muted uppercase mb-1">Currency</label>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Currency</label>
                         <select
                             value={newAccCurrency}
                             onChange={(e) => setNewAccCurrency(e.target.value as Currency)}
-                            className="w-full p-3 rounded-lg border border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
+                            className="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                         >
                             <option value="NGN">NGN (₦)</option>
                             <option value="USD">USD ($)</option>
@@ -123,7 +118,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                     </div>
                 </div>
                 <div>
-                    <label className="block text-xs font-bold text-muted uppercase mb-1">
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                         Initial Balance
                     </label>
                     <input
@@ -134,28 +129,14 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                             if (/^[0-9.,]*$/.test(e.target.value)) setNewAccBalance(e.target.value);
                         }}
                         placeholder="0.00"
-                        className="w-full p-3 rounded-lg border border-border-subtle dark:border-border-dark bg-surface-1 dark:bg-surface-3-dark text-foreground dark:text-foreground-dark"
+                        className="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                     />
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
-                    <motion.button 
-                        type="button" 
-                        onClick={onClose} 
-                        className="text-muted text-sm hover:text-foreground dark:hover:text-foreground-dark"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        Cancel
-                    </motion.button>
-                    <motion.button 
-                        type="submit" 
-                        disabled={isSubmitting || !newAccName} 
-                        className="bg-foreground dark:bg-surface-3-dark text-white px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                        whileHover={{ scale: isSubmitting || !newAccName ? 1 : 1.02 }}
-                        whileTap={{ scale: isSubmitting || !newAccName ? 1 : 0.95 }}
-                    >
+                    <button type="button" onClick={onClose} className="text-slate-500 dark:text-slate-400 text-sm hover:text-slate-700 dark:hover:text-slate-200">Cancel</button>
+                    <button type="submit" disabled={isSubmitting || !newAccName} className="bg-slate-800 dark:bg-slate-600 text-white px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50">
                         {isSubmitting ? 'Creating...' : 'Create Account'}
-                    </motion.button>
+                    </button>
                 </div>
             </form>
         </div>

@@ -1,10 +1,8 @@
 /**
  * ProductivityScoreCard - Shows commitment completion stats
- * DES-002: Migrated to semantic tokens and primitives
  */
 
 import { Activity } from 'lucide-react';
-import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface CommitmentStats {
     total: number;
@@ -26,10 +24,10 @@ export function ProductivityScoreCard({ commitmentStats, navigateTo }: Productiv
                 <div className="w-12 h-12 bg-primary-50 dark:bg-primary-900/20 rounded-full flex items-center justify-center mb-3">
                     <Activity className="w-6 h-6 text-primary-500" />
                 </div>
-                <Text as="h3" variant="heading" size="lg" className="mb-1">Boost Productivity</Text>
-                <Text variant="muted" size="xs" className="mb-4 max-w-[200px]">
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-1">Boost Productivity</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-[200px]">
                     Set daily or weekly commitments to track your consistency across life domains.
-                </Text>
+                </p>
                 <button
                     onClick={() => navigateTo && navigateTo('commitments')}
                     className="text-xs font-bold text-primary-500 hover:text-primary-600 uppercase tracking-widest"
@@ -41,36 +39,35 @@ export function ProductivityScoreCard({ commitmentStats, navigateTo }: Productiv
     }
 
     return (
-        <div className="premium-gradient text-white p-6 rounded-3xl shadow-2xl overflow-hidden relative flex flex-col justify-between group">
-            <HStack justify="between" align="start" className="mb-4 relative z-10 transition-transform duration-700 group-hover:-translate-y-1">
-                <VStack gap="sm">
-                    <Text size="xs" weight="bold" className="font-black text-white/40 uppercase tracking-[0.2em]">Productivity Score</Text>
-                    <p className="text-5xl font-bold tracking-tighter">{commitmentStats.rate}% <span className="text-xs font-black uppercase opacity-40 ml-1 tracking-widest">Done</span></p>
-                </VStack>
-                <Activity className="w-6 h-6 text-white/20" />
-            </HStack>
-
-            <VStack gap="sm" className="relative z-10">
+        <div className="premium-gradient text-white p-6 rounded-3xl shadow-2xl overflow-hidden relative border border-white/10 flex flex-col justify-between group">
+            <div className="flex justify-between items-start mb-4 relative z-10 transition-transform duration-700 group-hover:-translate-y-1">
                 <div>
-                    <HStack justify="between" className="text-xs font-bold mb-1">
+                    <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Productivity Score</h4>
+                    <p className="text-5xl font-bold tracking-tighter">{commitmentStats.rate}% <span className="text-xs font-black uppercase opacity-40 ml-1 tracking-widest">Done</span></p>
+                </div>
+                <Activity className="w-6 h-6 text-white/20" />
+            </div>
+
+            <div className="space-y-3 relative z-10">
+                <div>
+                    <div className="flex justify-between text-xs font-bold mb-1">
                         <span className="opacity-70">Personal</span>
                         <span>{commitmentStats.personal.completed}/{commitmentStats.personal.total}</span>
-                    </HStack>
+                    </div>
                     <div className="h-1.5 bg-black/20 rounded-full overflow-hidden">
                         <div className="h-full bg-white/80 rounded-full transition-all duration-1000" style={{ width: `${commitmentStats.personal.rate}%` }} />
                     </div>
                 </div>
                 <div>
-                    <HStack justify="between" className="text-xs font-bold mb-1">
+                    <div className="flex justify-between text-xs font-bold mb-1">
                         <span className="opacity-70">Family</span>
                         <span>{commitmentStats.family.completed}/{commitmentStats.family.total}</span>
-                    </HStack>
+                    </div>
                     <div className="h-1.5 bg-black/20 rounded-full overflow-hidden">
                         <div className="h-full bg-white/50 rounded-full transition-all duration-1000" style={{ width: `${commitmentStats.family.rate}%` }} />
                     </div>
                 </div>
-            </VStack>
+            </div>
         </div>
     );
 }
-

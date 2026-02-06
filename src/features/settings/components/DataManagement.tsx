@@ -1,14 +1,8 @@
-/**
- * DataManagement - Data export and wipe functionality
- * DES-002: Migrated to semantic tokens and primitives
- */
-
 import React from 'react';
 import { Database } from 'lucide-react';
 import { useNotifications } from '../../../context/NotificationContext';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
-import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface DataManagementProps {
     userUid: string;
@@ -16,7 +10,11 @@ interface DataManagementProps {
     onWipeData: () => Promise<void>;
 }
 
-export const DataManagement: React.FC<DataManagementProps> = ({ userUid, profile, onWipeData }) => {
+export const DataManagement: React.FC<DataManagementProps> = ({
+    userUid,
+    profile,
+    onWipeData,
+}) => {
     const { showToast } = useNotifications();
 
     const handleExportJson = async () => {
@@ -24,6 +22,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({ userUid, profile
             const { getDocs, collection } = await import('firebase/firestore');
             const { db, APP_ID } = await import('../../../config/firebase');
 
+            // Fetch all data
             const [accSnap, txSnap, tasksSnap] = await Promise.all([
                 getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'accounts')),
                 getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'finance')),
@@ -56,7 +55,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({ userUid, profile
 
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-border-subtle dark:border-border-dark bg-primary-50/30 dark:bg-primary-900/10">
+            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-primary-50/30 dark:bg-primary-900/10">
                 <CardTitle className="text-base font-bold text-primary-900 dark:text-primary-400 flex items-center gap-3">
                     <div className="p-2 bg-primary-500/10 rounded-lg">
                         <Database className="w-5 h-5 text-primary-600 dark:text-primary-400" />
@@ -65,11 +64,11 @@ export const DataManagement: React.FC<DataManagementProps> = ({ userUid, profile
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-                <HStack justify="between" align="center" className="flex-col sm:flex-row gap-6">
-                    <VStack gap="xs">
-                        <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Export Personal Data</Text>
-                        <Text variant="muted" size="sm" className="max-w-sm">Download a JSON copy of all your accounts, transactions, and commitments.</Text>
-                    </VStack>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div>
+                        <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Export Personal Data</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">Download a JSON copy of all your accounts, transactions, and commitments.</p>
+                    </div>
                     <Button
                         onClick={handleExportJson}
                         variant="primary"
@@ -77,27 +76,26 @@ export const DataManagement: React.FC<DataManagementProps> = ({ userUid, profile
                     >
                         Export JSON
                     </Button>
-                </HStack>
+                </div>
 
                 {import.meta.env.MODE !== 'production' && (
-                    <HStack justify="between" align="center" className="flex-col sm:flex-row gap-6 border-t border-border-subtle dark:border-border-dark pt-6">
-                        <VStack gap="xs">
-                            <Text variant="heading" size="xs" weight="bold" className="uppercase tracking-wider">Wipe All Data (Dev Only)</Text>
-                            <Text variant="muted" size="sm" className="max-w-sm">
+                    <div className="border-t border-slate-100 dark:border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div>
+                            <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Wipe All Data (Dev Only)</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
                                 Factory reset your account for testing. Removes all finance and task data, keeps profile.
-                            </Text>
-                        </VStack>
+                            </p>
+                        </div>
                         <Button
                             onClick={onWipeData}
                             variant="secondary"
-                            className="h-10 px-6 text-[10px] font-black uppercase tracking-widest whitespace-nowrap bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 border-danger-200 dark:border-danger-800 hover:bg-danger-500 hover:text-white hover:border-danger-500 transition-all"
+                            className="h-10 px-6 text-[10px] font-black uppercase tracking-widest whitespace-nowrap hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all"
                         >
                             Wipe Data
                         </Button>
-                    </HStack>
+                    </div>
                 )}
             </CardContent>
         </Card>
     );
 };
-

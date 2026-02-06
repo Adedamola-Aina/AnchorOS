@@ -140,6 +140,7 @@ describe('OnboardingView', () => {
         await waitFor(() => {
             expect(mocks.updateProfile).toHaveBeenCalledWith({ onboardingComplete: false });
         });
+        await waitFor(() => screen.getByText('Add Primary Account'));
         expect(screen.getByText('Add Primary Account')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('e.g. Chase Checking')).toBeInTheDocument();
     });
@@ -168,6 +169,7 @@ describe('OnboardingView', () => {
         });
 
         // Should now be on Step 3
+        await waitFor(() => screen.getByText('One Small Habit'), { timeout: 2000 });
         expect(screen.getByText('One Small Habit')).toBeInTheDocument();
     });
 

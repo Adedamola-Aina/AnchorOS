@@ -1,8 +1,13 @@
 /**
  * SwipeableTaskItem - Mobile-optimized task row with swipe-to-delete
- * DES-002: Uses semantic icon colors (red for delete)
+ * 
+ * Like Apple Reminders:
+ * - Swipe left to delete
+ * - Tap title to edit
+ * - Clean design without visible action buttons
+ * 
+ * @module features/commitments/components/SwipeableTaskItem
  */
-
 
 import React from 'react';
 import { Trash2 } from 'lucide-react';
@@ -39,7 +44,7 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
                 onSwipeLeft={() => onDelete(task.id)}
                 rightAction={{
                     label: 'Delete',
-                    color: 'danger',
+                    color: 'red',
                     icon: <Trash2 className="w-4 h-4 mr-1" />,
                 }}
                 disabled={isEditing}

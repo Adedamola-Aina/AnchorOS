@@ -1,12 +1,12 @@
 /**
  * Edit Task Form - Type-Specific Field Components
- * DES-002: Migrated to semantic tokens and primitives
+ * 
+ * Extracted from EditTaskForm.tsx to keep components under 200 lines.
  */
 
 import React from 'react';
 import { Button } from '@anchor-os/ui';
 import type { TimeOfDay } from '../../../types';
-import { Text, VStack, HStack } from '../../../components/primitives';
 
 interface DailyFieldsProps {
     editTime: TimeOfDay;
@@ -14,8 +14,8 @@ interface DailyFieldsProps {
 }
 
 export const DailyFields: React.FC<DailyFieldsProps> = ({ editTime, setEditTime }) => (
-    <VStack gap="xs">
-        <Text variant="subtle" size="xs" weight="bold" className="uppercase">Time of Day</Text>
+    <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] uppercase font-bold text-slate-400">Time of Day</label>
         <div className="grid grid-cols-4 gap-2">
             {(['morning', 'afternoon', 'evening', 'any'] as TimeOfDay[]).map((t) => (
                 <Button
@@ -29,7 +29,7 @@ export const DailyFields: React.FC<DailyFieldsProps> = ({ editTime, setEditTime 
                 </Button>
             ))}
         </div>
-    </VStack>
+    </div>
 );
 
 interface WeeklyFieldsProps {
@@ -38,22 +38,22 @@ interface WeeklyFieldsProps {
 }
 
 export const WeeklyFields: React.FC<WeeklyFieldsProps> = ({ editDays, setEditDays }) => (
-    <VStack gap="xs">
-        <Text variant="subtle" size="xs" weight="bold" className="uppercase">Days</Text>
-        <HStack gap="xs" className="flex-wrap">
+    <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] uppercase font-bold text-slate-400">Days</label>
+        <div className="flex flex-wrap gap-1.5">
             {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
                 <Button
                     key={day}
                     type="button"
                     onClick={() => setEditDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day])}
                     variant={editDays.includes(day) ? 'primary' : 'secondary'}
-                    className={`h-8 px-3 text-[10px] ${editDays.includes(day) ? 'bg-task-600' : ''}`}
+                    className={`h-8 px-3 text-[10px] ${editDays.includes(day) ? 'bg-purple-600' : ''}`}
                 >
                     {day.slice(0, 3)}
                 </Button>
             ))}
-        </HStack>
-    </VStack>
+        </div>
+    </div>
 );
 
 interface MonthlyFieldsProps {
@@ -62,8 +62,8 @@ interface MonthlyFieldsProps {
 }
 
 export const MonthlyFields: React.FC<MonthlyFieldsProps> = ({ editDaysOfMonth, setEditDaysOfMonth }) => (
-    <VStack gap="xs">
-        <Text variant="subtle" size="xs" weight="bold" className="uppercase">Day(s) of Month</Text>
+    <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] uppercase font-bold text-slate-400">Day(s) of Month</label>
         <div className="grid grid-cols-7 gap-1">
             {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
                 <button
@@ -76,13 +76,12 @@ export const MonthlyFields: React.FC<MonthlyFieldsProps> = ({ editDaysOfMonth, s
                     }}
                     className={`w-8 h-8 rounded-lg text-[10px] font-bold border transition-all flex items-center justify-center ${editDaysOfMonth.includes(d)
                         ? 'bg-task-600 text-white border-transparent shadow-md'
-                        : 'bg-surface-2 dark:bg-surface-2-dark text-muted border-[var(--border)] hover:border-task-300'
+                        : 'bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-task-300'
                         }`}
                 >
                     {d}
                 </button>
             ))}
         </div>
-    </VStack>
+    </div>
 );
-

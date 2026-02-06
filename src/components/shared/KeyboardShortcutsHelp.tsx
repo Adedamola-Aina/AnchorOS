@@ -1,7 +1,5 @@
 /**
  * KeyboardShortcutsHelp
- * DES-002: Migrated to semantic tokens
- * WEB-003: Framer Motion hover animations
  * 
  * Modal component showing all available keyboard shortcuts.
  * Accessible via Settings or pressing "?" key.
@@ -11,10 +9,8 @@
  */
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { X, Keyboard } from 'lucide-react';
 import { Modal } from './Modal';
-import { Text, VStack, HStack } from '../primitives';
 
 interface Shortcut {
     keys: string[];
@@ -45,7 +41,7 @@ interface KeyboardShortcutsHelpProps {
 }
 
 const KeyBadge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <kbd className="px-2 py-1 bg-surface-3 dark:bg-surface-3-dark border border-border-subtle rounded-md text-xs font-mono font-bold text-muted dark:text-muted-dark shadow-sm">
+    <kbd className="px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-mono font-bold text-slate-700 dark:text-slate-300 shadow-sm">
         {children}
     </kbd>
 );
@@ -55,71 +51,66 @@ export const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ is
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <VStack gap="none" className="bg-surface-1 dark:bg-surface-2-dark rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
                 {/* Header */}
-                <HStack justify="between" align="center" className="p-4 border-b border-border-subtle">
-                    <HStack gap="sm" align="center">
-                        <div className="p-2 bg-surface-3 dark:bg-surface-3-dark rounded-xl">
-                            <Keyboard className="w-5 h-5 text-muted" />
+                <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl">
+                            <Keyboard className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                         </div>
-                        <Text size="lg" weight="bold" className="text-foreground dark:text-foreground-dark">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                             Keyboard Shortcuts
-                        </Text>
-                    </HStack>
-                    <motion.button
+                        </h2>
+                    </div>
+                    <button
                         onClick={onClose}
-                        className="p-2 hover:bg-surface-3 dark:hover:bg-surface-3-dark rounded-lg transition-colors"
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                         aria-label="Close"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
                     >
-                        <X className="w-5 h-5 text-muted" />
-                    </motion.button>
-                </HStack>
+                        <X className="w-5 h-5 text-slate-500" />
+                    </button>
+                </div>
 
                 {/* Content */}
                 <div className="p-4 overflow-y-auto max-h-[60vh]">
                     {categories.map(category => (
-                        <VStack key={category} gap="sm" className="mb-6 last:mb-0">
-                            <Text size="xs" weight="bold" variant="muted" className="uppercase tracking-wider">
+                        <div key={category} className="mb-6 last:mb-0">
+                            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
                                 {category}
-                            </Text>
-                            <VStack gap="xs">
+                            </h3>
+                            <div className="space-y-2">
                                 {SHORTCUTS.filter(s => s.category === category).map((shortcut, i) => (
-                                    <HStack
+                                    <div
                                         key={i}
-                                        justify="between"
-                                        align="center"
-                                        className="py-2 px-3 rounded-lg hover:bg-surface-3/50 dark:hover:bg-surface-3-dark/50 transition-colors"
+                                        className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
                                     >
-                                        <Text size="sm" className="text-muted dark:text-muted-dark">
+                                        <span className="text-sm text-slate-700 dark:text-slate-300">
                                             {shortcut.description}
-                                        </Text>
-                                        <HStack gap="xs" align="center">
+                                        </span>
+                                        <div className="flex items-center gap-1">
                                             {shortcut.keys.map((key, ki) => (
                                                 <React.Fragment key={ki}>
                                                     <KeyBadge>{key}</KeyBadge>
                                                     {ki < shortcut.keys.length - 1 && (
-                                                        <Text size="xs" variant="muted">+</Text>
+                                                        <span className="text-slate-400 text-xs">+</span>
                                                     )}
                                                 </React.Fragment>
                                             ))}
-                                        </HStack>
-                                    </HStack>
+                                        </div>
+                                    </div>
                                 ))}
-                            </VStack>
-                        </VStack>
+                            </div>
+                        </div>
                     ))}
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-border-subtle bg-surface-2 dark:bg-surface-1-dark">
-                    <Text size="xs" variant="muted" className="text-center">
+                <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
                         Press <KeyBadge>?</KeyBadge> anytime to show this help
-                    </Text>
+                    </p>
                 </div>
-            </VStack>
+            </div>
         </Modal>
     );
 };
-

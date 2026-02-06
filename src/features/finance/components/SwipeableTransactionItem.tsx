@@ -1,8 +1,12 @@
 /**
  * SwipeableTransactionItem - Mobile-optimized transaction row with swipe actions
- * DES-002: Already uses semantic icon colors (blue/red for edit/delete)
+ * 
+ * Wraps TransactionItem with SwipeableRow for mobile gesture support.
+ * On mobile: swipe left to delete, swipe right to edit
+ * On desktop: uses hover-based action buttons (no swipe)
+ * 
+ * @module features/finance/components/SwipeableTransactionItem
  */
-
 
 import React from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
@@ -36,12 +40,12 @@ export const SwipeableTransactionItem: React.FC<SwipeableTransactionItemProps> =
                 onSwipeRight={() => onEdit(transaction)}
                 leftAction={{
                     label: 'Edit',
-                    color: 'primary',
+                    color: 'blue',
                     icon: <Pencil className="w-4 h-4 mr-1" />,
                 }}
                 rightAction={{
                     label: 'Delete',
-                    color: 'danger',
+                    color: 'red',
                     icon: <Trash2 className="w-4 h-4 mr-1" />,
                 }}
             >

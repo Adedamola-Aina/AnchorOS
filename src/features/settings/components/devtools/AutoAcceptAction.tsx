@@ -1,12 +1,11 @@
 /**
  * Auto-Accept Invitation Action
- * DES-002: Migrated to semantic tokens and primitives
+ * Split from DeveloperTools.tsx per CLAUDE.md §3.2 (200-line rule)
  */
 
 import React from 'react';
 import { Button } from '@anchor-os/ui';
 import { useNotifications } from '../../../../context/NotificationContext';
-import { Text, VStack, HStack } from '../../../../components/primitives';
 
 interface AutoAcceptActionProps {
     userUid: string;
@@ -119,18 +118,17 @@ export const AutoAcceptInvitationAction: React.FC<AutoAcceptActionProps> = ({ us
     };
 
     return (
-        <HStack justify="between" align="center" className="mt-6 pt-6 border-t border-border-subtle">
-            <VStack gap="xs">
-                <Text weight="bold" size="xs" className="uppercase tracking-wider">Auto-Accept Invitation</Text>
-                <Text variant="muted" size="sm">Bypass email verification and auto-complete pending family invitations.</Text>
-            </VStack>
+        <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Auto-Accept Invitation</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Bypass email verification and auto-complete pending family invitations.</p>
+            </div>
             <Button
                 onClick={handleAutoAccept}
-                className="bg-warning-600 hover:bg-warning-700 h-10 px-6 text-xs font-black uppercase tracking-widest"
+                className="bg-amber-600 hover:bg-amber-700 h-10 px-6 text-xs font-black uppercase tracking-widest"
             >
                 Auto-Accept
             </Button>
-        </HStack>
+        </div>
     );
 };
-
