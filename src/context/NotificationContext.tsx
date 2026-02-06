@@ -12,7 +12,8 @@ interface Notification {
 }
 
 import { messaging, db, auth, APP_ID } from '../config/firebase';
-import { getToken, onMessage, deleteToken } from 'firebase/messaging';
+import { onMessage, deleteToken } from 'firebase/messaging';
+import { getFcmTokenWithRetry } from '../services/fcmTokenService';
 import { doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 
 // BUG-039: Key to track user's push notification preference
@@ -119,28 +120,12 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                     return null;
                 }
 
-                // Get FCM Token with retry for IDB timing issues
-                const getTokenWithRetry = async (retries = 3, delay = 500): Promise<string | null> => {
-                    try {
-                        const registration = await navigator.serviceWorker.ready;
-                        const token = await getToken(messaging!, {
-                            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-                            serviceWorkerRegistration: registration
-                        });
-                        return token;
-                    } catch (err: any) {
-                        // Retry on IDB connection closing error (PWA navigation timing issue)
-                        if (retries > 0 && (err.message?.includes('closing') || err.name === 'InvalidStateError')) {
-                            console.log(`[Push] IDB timing error, retrying in ${delay}ms... (${retries} left)`);
-                            await new Promise(r => setTimeout(r, delay));
-                            return getTokenWithRetry(retries - 1, delay * 2);
-                        }
-                        throw err;
-                    }
-                };
-
+                // ARCH-003: FCM token retrieval with retry extracted to service
                 try {
-                    const token = await getTokenWithRetry();
+                    const token = await getFcmTokenWithRetry({
+                        messaging: messaging!,
+                        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+                    });
 
                     if (token) {
                         setFcmToken(token);
