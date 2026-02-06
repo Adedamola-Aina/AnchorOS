@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 
@@ -8,7 +8,32 @@ interface ProfileSettingsProps {
     onUpdateName: (name: string) => void;
 }
 
+const DEBOUNCE_MS = 500;
+
 export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onUpdateName }) => {
+    const [localName, setLocalName] = useState(name);
+    const isFirstMount = useRef(true);
+
+    // Sync external prop changes
+    useEffect(() => {
+        setLocalName(name);
+    }, [name]);
+
+    // Debounced update to Firestore
+    useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
+        if (localName === name) return;
+
+        const timer = setTimeout(() => {
+            onUpdateName(localName);
+        }, DEBOUNCE_MS);
+
+        return () => clearTimeout(timer);
+    }, [localName, name, onUpdateName]);
+
     return (
         <Card className="overflow-hidden">
             <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
@@ -25,8 +50,8 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
                         <label className="text-[10px] uppercase font-bold text-slate-400">Display Name</label>
                         <input
                             type="text"
-                            value={name}
-                            onChange={(e) => onUpdateName(e.target.value)}
+                            value={localName}
+                            onChange={(e) => setLocalName(e.target.value)}
                             className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                         />
                     </div>
