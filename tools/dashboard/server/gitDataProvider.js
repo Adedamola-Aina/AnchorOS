@@ -383,6 +383,75 @@ async function getChangelog(limit = 100) {
     };
 }
 
+/**
+ * Get ALL used IDs across git history AND roadmap.json
+ * This is the SINGLE SOURCE OF TRUTH for ID allocation.
+ * Used by intake API to prevent duplicate IDs.
+ * 
+ * Returns: { prefix: Set of used numbers }
+ * Example: { 'BUG': Set([1,2,3,15,16,17,...]), 'UX': Set([1,2,3,...]) }
+ */
+async function getAllUsedIds() {
+    const usedIds = {};
+    
+    // 1. Get IDs from git history (500 commits should cover everything)
+    try {
+        const log = await git.log({ maxCount: 500 });
+        for (const commit of log.all) {
+            const message = commit.message;
+            for (const [type, pattern] of Object.entries(ID_PATTERNS)) {
+                const matches = message.matchAll(pattern);
+                for (const match of matches) {
+                    const prefix = type.toUpperCase();
+                    const num = parseInt(match[1]);
+                    if (!usedIds[prefix]) usedIds[prefix] = new Set();
+                    usedIds[prefix].add(num);
+                }
+            }
+        }
+    } catch (e) {
+        console.error('[getAllUsedIds] Error reading git:', e.message);
+    }
+    
+    // 2. Get IDs from roadmap.json
+    try {
+        const roadmapPath = path.join(__dirname, 'roadmap.json');
+        const roadmapData = JSON.parse(fs.readFileSync(roadmapPath, 'utf8'));
+        for (const item of roadmapData.initiatives) {
+            const match = item.id.match(/^([A-Z]+)-(\d+)$/);
+            if (match) {
+                const prefix = match[1];
+                const num = parseInt(match[2]);
+                if (!usedIds[prefix]) usedIds[prefix] = new Set();
+                usedIds[prefix].add(num);
+            }
+        }
+    } catch (e) {
+        console.error('[getAllUsedIds] Error reading roadmap:', e.message);
+    }
+    
+    return usedIds;
+}
+
+/**
+ * Get next available ID for a given prefix
+ * Checks BOTH git history AND roadmap.json to prevent collisions
+ * Returns max(used numbers) + 1, NOT first gap (keeps IDs sequential)
+ * 
+ * @param {string} prefix - e.g., 'BUG', 'UX', 'FIN'
+ * @returns {Promise<string>} - e.g., 'BUG-057'
+ */
+async function getNextId(prefix) {
+    const usedIds = await getAllUsedIds();
+    const usedNumbers = usedIds[prefix.toUpperCase()] || new Set();
+    
+    // Find max + 1 (not first gap) to keep IDs sequential and predictable
+    const maxNum = usedNumbers.size > 0 ? Math.max(...usedNumbers) : 0;
+    const nextNum = maxNum + 1;
+    
+    return `${prefix.toUpperCase()}-${String(nextNum).padStart(3, '0')}`;
+}
+
 module.exports = {
     getAllTrackedItems,
     getDeployStatus,
@@ -395,5 +464,7 @@ module.exports = {
     extractIds,
     detectType,
     isDashboardCommit,
-    clearCache: clearItemsCache
+    clearCache: clearItemsCache,
+    getAllUsedIds,
+    getNextId
 };

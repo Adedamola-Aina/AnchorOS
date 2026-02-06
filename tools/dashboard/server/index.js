@@ -430,6 +430,10 @@ app.get('/api/git/roadmap', async (req, res) => {
  * POST /api/intake
  * Submit a new bug/feature/enhancement request
  * Auto-generates ticket ID and adds to roadmap.json
+ * 
+ * SINGLE SOURCE OF TRUTH: ID allocation uses gitData.getNextId() which
+ * checks BOTH git history AND roadmap.json to prevent duplicate IDs.
+ * This ensures IDs are never reused even if they only appear in git.
  */
 app.post('/api/intake', async (req, res) => {
     try {
@@ -466,13 +470,9 @@ app.post('/api/intake', async (req, res) => {
 
         const prefix = prefixMap[type.toLowerCase()] || 'MISC';
 
-        // Find next available ID for this prefix
-        const existingIds = roadmapData.initiatives
-            .filter(i => i.id.startsWith(prefix + '-'))
-            .map(i => parseInt(i.id.split('-')[1]) || 0);
-
-        const nextNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-        const newId = `${prefix}-${String(nextNum).padStart(3, '0')}`;
+        // SINGLE SOURCE OF TRUTH: Get next ID from centralized function
+        // This checks BOTH git history AND roadmap.json to prevent collisions
+        const newId = await gitData.getNextId(prefix);
 
         // Determine team based on type if not provided
         const teamMap = {
@@ -494,16 +494,10 @@ app.post('/api/intake', async (req, res) => {
         const assignedTeam = team || teamMap[type.toLowerCase()] || 'Engineering';
         const assignedPriority = priority || 'P1';
 
-        // Generate detection patterns from title and description
-        const words = (title + ' ' + description).toLowerCase()
-            .split(/\s+/)
-            .filter(w => w.length > 4)
-            .slice(0, 5);
-
-        const detectionPatterns = [
-            newId,
-            ...words.filter((w, i, a) => a.indexOf(w) === i) // unique words
-        ];
+        // Detection pattern: ONLY the exact ID
+        // Generic keywords caused massive false positives (53 items falsely marked complete)
+        // Auto-detection now requires exact ID match in commit messages
+        const detectionPatterns = [newId];
 
         // Create new initiative
         const newInitiative = {
@@ -539,10 +533,10 @@ app.post('/api/intake', async (req, res) => {
 /**
  * GET /api/intake/next-id
  * Preview what the next ID would be for a given type
+ * Uses SINGLE SOURCE OF TRUTH: checks both git history AND roadmap.json
  */
-app.get('/api/intake/next-id', (req, res) => {
+app.get('/api/intake/next-id', async (req, res) => {
     try {
-        const fs = require('fs');
         const { type } = req.query;
 
         if (!type) {
@@ -567,17 +561,35 @@ app.get('/api/intake/next-id', (req, res) => {
 
         const prefix = prefixMap[type.toLowerCase()] || 'MISC';
 
-        const roadmapPath = path.join(__dirname, 'roadmap.json');
-        const roadmapData = JSON.parse(fs.readFileSync(roadmapPath, 'utf8'));
-
-        const existingIds = roadmapData.initiatives
-            .filter(i => i.id.startsWith(prefix + '-'))
-            .map(i => parseInt(i.id.split('-')[1]) || 0);
-
-        const nextNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-        const nextId = `${prefix}-${String(nextNum).padStart(3, '0')}`;
+        // SINGLE SOURCE OF TRUTH: Uses centralized ID allocation
+        const nextId = await gitData.getNextId(prefix);
 
         res.json({ type, prefix, nextId });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/intake/used-ids
+ * Returns ALL used IDs across git history AND roadmap.json
+ * This is the SINGLE SOURCE OF TRUTH for ID allocation visibility
+ */
+app.get('/api/intake/used-ids', async (req, res) => {
+    try {
+        const usedIds = await gitData.getAllUsedIds();
+        
+        // Convert Sets to sorted arrays for JSON serialization
+        const result = {};
+        for (const [prefix, numbers] of Object.entries(usedIds)) {
+            result[prefix] = Array.from(numbers).sort((a, b) => a - b);
+        }
+        
+        res.json({
+            source: 'git + roadmap.json',
+            description: 'All IDs used in git history OR roadmap.json - these cannot be reused',
+            usedIds: result
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

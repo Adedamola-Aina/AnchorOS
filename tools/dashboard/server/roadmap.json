@@ -38,12 +38,7 @@
             "description": "shareAccount and disconnectFamily call Cloud Functions with no network check or offline queue. Add offline detection and retry logic for 97% mobile users.",
             "status": "planned",
             "detectionPatterns": [
-                "UX-033",
-                "offline",
-                "error",
-                "handling",
-                "family",
-                "operations"
+                "UX-033"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -57,12 +52,7 @@
             "description": "useFamilySharing shareAccount is binary share:boolean. Add read-only vs read-write permission control. Allow per-account visibility settings.",
             "status": "planned",
             "detectionPatterns": [
-                "FIN-010",
-                "shared",
-                "account",
-                "permission",
-                "granularity",
-                "read-only"
+                "FIN-010"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -76,12 +66,7 @@
             "description": "AppearanceSettings only has theme toggle. Add font size slider, high contrast mode, and reduced motion toggle for accessibility compliance.",
             "status": "planned",
             "detectionPatterns": [
-                "UX-032",
-                "accessibility",
-                "controls",
-                "size,",
-                "contrast,",
-                "reduced"
+                "UX-032"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -95,11 +80,7 @@
             "description": "Onboarding flow has no way to go back to previous step. Users cannot correct mistakes without starting over.",
             "status": "planned",
             "detectionPatterns": [
-                "UX-031",
-                "button",
-                "onboarding",
-                "steps",
-                "previous"
+                "UX-031"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -113,11 +94,7 @@
             "description": "MFA and invite code inputs should auto-submit when 6 characters entered. Saves a tap on mobile.",
             "status": "planned",
             "detectionPatterns": [
-                "UX-030",
-                "auto-submit",
-                "digits",
-                "invite",
-                "codes"
+                "UX-030"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -131,11 +108,7 @@
             "description": "Numeric code inputs should use inputMode=numeric to show number keyboard on mobile. Currently shows full keyboard.",
             "status": "planned",
             "detectionPatterns": [
-                "UX-029",
-                "inputmode=numeric",
-                "invite",
-                "inputs",
-                "numeric"
+                "UX-029"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -149,12 +122,7 @@
             "description": "NotificationSettings only has global toggle. Add per-category controls: family activity, transaction alerts, commitment reminders. Add quiet hours/DND schedule.",
             "status": "planned",
             "detectionPatterns": [
-                "FIN-009",
-                "per-category",
-                "notification",
-                "controls",
-                "notificationsettings",
-                "global"
+                "FIN-009"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -168,11 +136,7 @@
             "description": "DataManagement only exports JSON. Add CSV export which mobile users can open in spreadsheet apps. More accessible format for 97% mobile users.",
             "status": "planned",
             "detectionPatterns": [
-                "FIN-008",
-                "export",
-                "option",
-                "datamanagement",
-                "exports"
+                "FIN-008"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -186,11 +150,7 @@
             "description": "SecuritySettings only has MFA. Add password change capability with current password verification and Firebase Auth reauthentication.",
             "status": "planned",
             "detectionPatterns": [
-                "FIN-007",
-                "password",
-                "change",
-                "settings",
-                "securitysettings"
+                "FIN-007"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -204,12 +164,7 @@
             "description": "2FA enrollment should generate and display recovery codes. Store hashed codes in Firestore. Allow one-time use if user loses authenticator device.",
             "status": "planned",
             "detectionPatterns": [
-                "FIN-006",
-                "recovery",
-                "codes",
-                "enrollment",
-                "should",
-                "generate"
+                "FIN-006"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -223,12 +178,7 @@
             "description": "handleDeleteAccount needs backend implementation. Cloud Function to purge Firestore data, delete Firebase Auth user, comply with GDPR right to erasure.",
             "status": "planned",
             "detectionPatterns": [
-                "FIN-005",
-                "implement",
-                "actual",
-                "account",
-                "deletion",
-                "cloud"
+                "FIN-005"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -242,12 +192,7 @@
             "description": "FamilySettingsV2 sets up own onSnapshot listeners instead of using useFamilySharing hook. Creates 6 concurrent listeners for same data. State can diverge between components.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-056",
-                "familysettingsv2",
-                "duplicates",
-                "firestore",
-                "listeners",
-                "usefamilysharing"
+                "BUG-056"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -261,12 +206,7 @@
             "description": "ProfileSettings onChange calls updateProfile immediately. Typing John triggers 4 Firestore writes and 4 audit logs. Performance and cost disaster on mobile.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-055",
-                "profile",
-                "fires",
-                "firestore",
-                "write",
-                "every"
+                "BUG-055"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -280,12 +220,7 @@
             "description": "handleWipeData uses single writeBatch for all collections. Users with 500+ total documents get Firestore error. No chunking logic.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-054",
-                "writebatch",
-                "exceed",
-                "firestore",
-                "500-op",
-                "limit"
+                "BUG-054"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -299,12 +234,7 @@
             "description": "handleGenerateMfaSecret timeout captures pre-setState isEnrolling value (false). Condition isEnrolling && !mfaQrUrl always false. 10-second timeout error never displays.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-053",
-                "timeout",
-                "stale",
-                "closure",
-                "error",
-                "never"
+                "BUG-053"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -318,12 +248,7 @@
             "description": "Both chart components hardcode naira symbol instead of using account currency. Wrong symbol shown for USD accounts in all visualizations.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-052",
-                "hardcoded",
-                "naira",
-                "charts",
-                "assetdistributionchart",
-                "cashflowchart"
+                "BUG-052"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -337,11 +262,7 @@
             "description": "RecurringTransactionsList always displays naira symbol regardless of transaction currency. USD recurring transactions show wrong symbol.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-051",
-                "recurringtransactionslist",
-                "hardcodes",
-                "currency",
-                "symbol"
+                "BUG-051"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -355,12 +276,7 @@
             "description": "Net worth calculation only sums NGN balances. USD account balances are silently excluded from total net worth.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-050",
-                "calculatenetworth.total",
-                "ignores",
-                "entirely",
-                "worth",
-                "calculation"
+                "BUG-050"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -374,12 +290,7 @@
             "description": "The 30 Day Summary card always calculates from today minus 28 days, ignoring which month the user has selected. Shows current data even when viewing past months.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-049",
-                "summary",
-                "actually",
-                "today",
-                "selected",
-                "month"
+                "BUG-049"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -393,12 +304,7 @@
             "description": "Multi-currency users see meaningless sums. NGN + USD added together using NGN symbol. Should either convert via exchange rate or show per-currency totals.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-048",
-                "monthlyinsight",
-                "first",
-                "account",
-                "currency",
-                "multi-currency"
+                "BUG-048"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -412,12 +318,7 @@
             "description": "Finance view always displays current balance regardless of which month is selected. Users cannot see what their balance was at end of previous months.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-047",
-                "monthly",
-                "opening/closing",
-                "balance",
-                "always",
-                "shows"
+                "BUG-047"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -431,12 +332,7 @@
             "description": "WeeklyView toggle 24px, MonthlyDates 32px, TaskItem checkbox 32px, AssetAllocation expand 16px, notification toggles 24px, toast dismiss 24px, nav hamburger 36px. All below Apple 44px and Google 48px minimums.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-046",
-                "touch",
-                "targets",
-                "below",
-                "platform",
-                "minimum"
+                "BUG-046"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -450,12 +346,7 @@
             "description": "Dashboard loading overlay applies pointer-events-none to body, blocking all scroll and touch. Screen appears frozen during data loads.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-045",
-                "loading",
-                "overlay",
-                "blocks",
-                "scrolling",
-                "pointer-events-none"
+                "BUG-045"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -469,12 +360,7 @@
             "description": "Toasts have min-w-[300px] + right-6 positioning. On 375px phones, toasts are cut off on left edge.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-044",
-                "toast",
-                "notifications",
-                "min-w-300px",
-                "overflows",
-                "small"
+                "BUG-044"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -488,12 +374,7 @@
             "description": "Auth forms use autoComplete=off which blocks iOS/Android password autofill. 97% mobile users must hand-type credentials.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-043",
-                "autocomplete=off",
-                "blocks",
-                "mobile",
-                "autofill",
-                "email"
+                "BUG-043"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -507,12 +388,7 @@
             "description": "6+ files use min-h-screen which does not account for mobile browser chrome. Content hidden behind URL bar. Should use min-h-dvh.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-042",
-                "min-h-screen",
-                "instead",
-                "throughout",
-                "onboarding",
-                "files"
+                "BUG-042"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -526,12 +402,7 @@
             "description": "Finance flow has setTimeout 1300ms before showing confirmation. Users think app is frozen while waiting for dialog.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-041",
-                "1300ms",
-                "delay",
-                "before",
-                "financial",
-                "confirmation"
+                "BUG-041"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -545,12 +416,7 @@
             "description": "WeeklyView component has min-w-[800px] hardcoded. 375px phones show horizontal scroll bar, content unreadable. 97% users are mobile.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-040",
-                "weeklyview",
-                "forces",
-                "min-w-800px",
-                "unusable",
-                "mobile"
+                "BUG-040"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -564,12 +430,7 @@
             "description": "NotificationContext disable path only changes React state. FCM token not deleted from Firestore, browser permission stays granted, useEffect re-restores token on mount. Users cannot disable push.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-039",
-                "notification",
-                "disable",
-                "toggle",
-                "broken",
-                "cannot"
+                "BUG-039"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -583,11 +444,7 @@
             "description": "SettingsView handleDeleteAccount shows toast and logs out but does not delete data. No Cloud Function, no Firestore purge, no Firebase Auth deletion. User data persists forever.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-038",
-                "handledeleteaccount",
-                "no-op",
-                "violation",
-                "settingsview"
+                "BUG-038"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -601,11 +458,7 @@
             "description": "Transfers stored as income/expense type. MonthlyInsight, CashFlowChart, and all summaries include them, showing 2x actual income and expenses.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-037",
-                "transfers",
-                "double-counted",
-                "summary",
-                "aggregations"
+                "BUG-037"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -619,12 +472,7 @@
             "description": "Changing transaction type from income to expense without changing amount causes silent balance corruption due to wrong sign logic.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-036",
-                "change",
-                "income",
-                "expense",
-                "produces",
-                "balance"
+                "BUG-036"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -638,12 +486,7 @@
             "description": "Transfer deletion reads paired transaction with getDoc() outside Firestore runTransaction block. Race condition causes double-deletion or orphaned half-transfers.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-035",
-                "transfer",
-                "deletion",
-                "condition",
-                "getdoc",
-                "outside"
+                "BUG-035"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -657,12 +500,7 @@
             "description": "Editing a cross-currency transfer applies source currency amount to destination account balance, corrupting multi-currency balances.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-034",
-                "cross-currency",
-                "transfer",
-                "corrupts",
-                "destination",
-                "balance"
+                "BUG-034"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -676,12 +514,7 @@
             "description": "addTransaction in TransactionForm.tsx omits scope field, hidden by as any cast. All transactions stored with scope: undefined, breaking shared account filtering entirely.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-033",
-                "transaction",
-                "scope",
-                "field",
-                "missing",
-                "hides"
+                "BUG-033"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -695,11 +528,7 @@
             "description": "Implement budget management feature to track spending against limits per category.",
             "status": "planned",
             "detectionPatterns": [
-                "PRD-006",
-                "budget",
-                "tracking",
-                "implement",
-                "management"
+                "PRD-006"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -713,12 +542,7 @@
             "description": "Implement auto-detection of iOS/Android system theme (dark/light) to respect user device settings.",
             "status": "planned",
             "detectionPatterns": [
-                "PWA-007",
-                "system",
-                "theme",
-                "detection",
-                "implement",
-                "auto-detection"
+                "PWA-007"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -732,12 +556,7 @@
             "description": "Auto-detect dark/light mode preference from iOS and Android system settings using prefers-color-scheme media query",
             "status": "completed",
             "detectionPatterns": [
-                "PWA-006",
-                "system",
-                "theme",
-                "detection",
-                "auto-detect",
-                "dark/light"
+                "PWA-006"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -752,11 +571,7 @@
             "description": "Adaptive height for account transaction lists to eliminate excessive whitespace on short lists",
             "status": "completed",
             "detectionPatterns": [
-                "UX-023",
-                "adaptive height",
-                "UI harmonization",
-                "transaction history",
-                "excessive whitespace"
+                "UX-023"
             ],
             "effort": "small",
             "impact": "medium",
@@ -771,12 +586,7 @@
             "description": "Commits like feat(v1.6.0): Multi-team sprint - GAP-002, GAP-003 should split into individual trackable items in Kanban, Git Timeline, and Env Parity",
             "status": "completed",
             "detectionPatterns": [
-                "UX-022",
-                "parse",
-                "multi-team",
-                "sprint",
-                "commits",
-                "individual"
+                "UX-022"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -791,12 +601,7 @@
             "description": "Click on Completed stats card to filter and see only completed items with details",
             "status": "completed",
             "detectionPatterns": [
-                "UX-021",
-                "clickable",
-                "completed",
-                "widget",
-                "backlog",
-                "roadmap"
+                "UX-021"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -811,12 +616,7 @@
             "description": "Updating API docs for the new intake system.",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-025",
-                "documentation",
-                "update",
-                "updating",
-                "intake",
-                "system."
+                "BUG-025"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -830,12 +630,7 @@
             "description": "Remember selected filters between sessions",
             "status": "planned",
             "detectionPatterns": [
-                "FIN-004",
-                "dashboard",
-                "filter",
-                "persistence",
-                "remember",
-                "selected"
+                "FIN-004"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -849,10 +644,7 @@
             "description": "Testing the new intake system API endpoint",
             "status": "planned",
             "detectionPatterns": [
-                "BUG-024",
-                "intake",
-                "system",
-                "testing"
+                "BUG-024"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -866,12 +658,7 @@
             "description": "iOS/Android via Capacitor or React Native. PWA limitations blocking user engagement",
             "status": "planned",
             "detectionPatterns": [
-                "PLT-001",
-                "native app",
-                "capacitor",
-                "react native",
-                "ios app",
-                "android app"
+                "PLT-001"
             ],
             "effort": "large",
             "impact": "critical"
@@ -884,10 +671,7 @@
             "description": "Firebase Cloud Messaging for task reminders, transaction alerts, family invites",
             "status": "planned",
             "detectionPatterns": [
-                "PLT-002",
-                "push notification",
-                "FCM",
-                "cloud messaging"
+                "PLT-002"
             ],
             "effort": "medium",
             "impact": "high"
@@ -900,9 +684,7 @@
             "description": "Current rateLimits collection exists but Cloud Functions enforcement is incomplete",
             "status": "planned",
             "detectionPatterns": [
-                "SEC-001",
-                "rate limit",
-                "rate-limit"
+                "SEC-001"
             ],
             "effort": "small",
             "impact": "high"
@@ -915,9 +697,7 @@
             "description": "Financial apps require audit trails. Add immutable /audit collection for all money operations",
             "status": "planned",
             "detectionPatterns": [
-                "SEC-002",
-                "audit log",
-                "audit trail"
+                "SEC-002"
             ],
             "effort": "medium",
             "impact": "high"
@@ -930,10 +710,7 @@
             "description": "Add performance monitoring (Web Vitals, error rates) beyond current pm2 dashboard",
             "status": "planned",
             "detectionPatterns": [
-                "SRE-001",
-                "monitoring",
-                "web vitals",
-                "observability"
+                "SRE-001"
             ],
             "effort": "medium",
             "impact": "high"
@@ -946,9 +723,7 @@
             "description": "Deploy failures should auto-rollback; current DEPLOY_PIPELINE.sh lacks this",
             "status": "planned",
             "detectionPatterns": [
-                "SRE-002",
-                "rollback",
-                "auto-rollback"
+                "SRE-002"
             ],
             "effort": "small",
             "impact": "medium"
@@ -961,10 +736,7 @@
             "description": "As a user, I want to set monthly budgets per category and see my progress",
             "status": "planned",
             "detectionPatterns": [
-                "PRD-001",
-                "budget",
-                "budget tracking",
-                "spending limit"
+                "PRD-001"
             ],
             "effort": "large",
             "impact": "critical"
@@ -977,9 +749,7 @@
             "description": "As a user, I want to create savings goals and track contributions",
             "status": "planned",
             "detectionPatterns": [
-                "PRD-002",
-                "savings goal",
-                "savings target"
+                "PRD-002"
             ],
             "effort": "large",
             "impact": "high"
@@ -992,9 +762,7 @@
             "description": "As a user, I want automatic reminders before recurring bills are due",
             "status": "planned",
             "detectionPatterns": [
-                "PRD-003",
-                "bill reminder",
-                "due date reminder"
+                "PRD-003"
             ],
             "effort": "medium",
             "impact": "medium"
@@ -1007,10 +775,7 @@
             "description": "Spending trends, averages, and anomaly detection",
             "status": "planned",
             "detectionPatterns": [
-                "PRD-004",
-                "transaction insight",
-                "spending trend",
-                "anomaly"
+                "PRD-004"
             ],
             "effort": "medium",
             "impact": "high"
@@ -1023,10 +788,7 @@
             "description": "Export data to CSV/PDF for tax or personal review",
             "status": "planned",
             "detectionPatterns": [
-                "PRD-005",
-                "export",
-                "csv export",
-                "pdf report"
+                "PRD-005"
             ],
             "effort": "small",
             "impact": "medium"
@@ -1039,9 +801,7 @@
             "description": "Replace Firestore onSnapshot with dedicated WebSocket for live sync",
             "status": "planned",
             "detectionPatterns": [
-                "ENG-001",
-                "websocket",
-                "socket.io"
+                "ENG-001"
             ],
             "effort": "large",
             "impact": "medium"
@@ -1054,10 +814,7 @@
             "description": "Add background sync, offline transaction queueing",
             "status": "planned",
             "detectionPatterns": [
-                "ENG-002",
-                "service worker",
-                "background sync",
-                "offline queue"
+                "ENG-002"
             ],
             "effort": "medium",
             "impact": "high"
@@ -1070,9 +827,7 @@
             "description": "Versioned Firestore schema migrations",
             "status": "planned",
             "detectionPatterns": [
-                "ENG-003",
-                "migration",
-                "schema migration"
+                "ENG-003"
             ],
             "effort": "medium",
             "impact": "medium"
@@ -1085,10 +840,7 @@
             "description": "Bulk delete, bulk categorize, bulk archive for power users",
             "status": "planned",
             "detectionPatterns": [
-                "ENG-004",
-                "batch",
-                "bulk delete",
-                "bulk operation"
+                "ENG-004"
             ],
             "effort": "small",
             "impact": "medium"
@@ -1101,9 +853,7 @@
             "description": "Consider module federation for independent deployability",
             "status": "planned",
             "detectionPatterns": [
-                "ARCH-020",
-                "micro-frontend",
-                "module federation"
+                "ARCH-020"
             ],
             "effort": "large",
             "impact": "medium"
@@ -1116,9 +866,7 @@
             "description": "Add Apollo Server for flexible querying, reduce over-fetching",
             "status": "planned",
             "detectionPatterns": [
-                "ARCH-021",
-                "graphql",
-                "apollo"
+                "ARCH-021"
             ],
             "effort": "large",
             "impact": "medium"
@@ -1131,9 +879,7 @@
             "description": "Extract components/shared to standalone package",
             "status": "planned",
             "detectionPatterns": [
-                "DES-001",
-                "component library",
-                "design system package"
+                "DES-001"
             ],
             "effort": "medium",
             "impact": "high"
@@ -1146,9 +892,7 @@
             "description": "Sync tokens in tailwind.config.js with Figma",
             "status": "deferred",
             "detectionPatterns": [
-                "DES-002",
-                "design token",
-                "figma sync"
+                "DES-002"
             ],
             "effort": "small",
             "impact": "medium",
@@ -1162,11 +906,7 @@
             "description": "Google, Apple sign-in via Firebase Auth",
             "status": "planned",
             "detectionPatterns": [
-                "AUTH-001",
-                "social sign",
-                "google sign",
-                "apple sign",
-                "oauth"
+                "AUTH-001"
             ],
             "effort": "medium",
             "impact": "high"
@@ -1179,10 +919,7 @@
             "description": "WebAuthn for passwordless login",
             "status": "planned",
             "detectionPatterns": [
-                "AUTH-002",
-                "passkey",
-                "webauthn",
-                "passwordless"
+                "AUTH-002"
             ],
             "effort": "medium",
             "impact": "medium"
@@ -1195,9 +932,7 @@
             "description": "Where you're logged in view with remote logout",
             "status": "planned",
             "detectionPatterns": [
-                "AUTH-003",
-                "session management",
-                "active sessions"
+                "AUTH-003"
             ],
             "effort": "small",
             "impact": "medium"
@@ -1210,10 +945,7 @@
             "description": "Backup codes for MFA recovery",
             "status": "planned",
             "detectionPatterns": [
-                "AUTH-004",
-                "recovery code",
-                "backup code",
-                "mfa recovery"
+                "AUTH-004"
             ],
             "effort": "small",
             "impact": "high"
@@ -1226,9 +958,7 @@
             "description": "Enable regular mutation testing with Stryker",
             "status": "planned",
             "detectionPatterns": [
-                "QA-001",
-                "mutation test",
-                "stryker"
+                "QA-001"
             ],
             "effort": "small",
             "impact": "medium"
@@ -1241,10 +971,7 @@
             "description": "Add Percy or Chromatic for visual diff detection",
             "status": "planned",
             "detectionPatterns": [
-                "QA-002",
-                "visual regression",
-                "percy",
-                "chromatic"
+                "QA-002"
             ],
             "effort": "medium",
             "impact": "medium"
@@ -1257,9 +984,7 @@
             "description": "Add Lighthouse CI to E2E suite",
             "status": "planned",
             "detectionPatterns": [
-                "QA-003",
-                "lighthouse",
-                "performance test"
+                "QA-003"
             ],
             "effort": "small",
             "impact": "medium"
@@ -1272,9 +997,7 @@
             "description": "Better splash screens, icon masking for iOS Safari",
             "status": "planned",
             "detectionPatterns": [
-                "PWA-001",
-                "ios splash",
-                "apple touch icon"
+                "PWA-001"
             ],
             "effort": "small",
             "impact": "medium"
@@ -1287,10 +1010,7 @@
             "description": "Web Share Target, shortcuts, file handlers",
             "status": "planned",
             "detectionPatterns": [
-                "PWA-002",
-                "share target",
-                "web share",
-                "android shortcut"
+                "PWA-002"
             ],
             "effort": "medium",
             "impact": "medium"
@@ -1303,9 +1023,7 @@
             "description": "Queue writes when offline, sync when back online",
             "status": "planned",
             "detectionPatterns": [
-                "PWA-003",
-                "offline queue",
-                "offline transaction"
+                "PWA-003"
             ],
             "effort": "medium",
             "impact": "high"
@@ -1318,10 +1036,7 @@
             "description": "Web Authentication API for fingerprint/face unlock",
             "status": "planned",
             "detectionPatterns": [
-                "PWA-005",
-                "biometric",
-                "fingerprint",
-                "face unlock"
+                "PWA-005"
             ],
             "effort": "medium",
             "impact": "high"
@@ -1334,9 +1049,7 @@
             "description": "Review firestore.indexes.json for unused compound indexes",
             "status": "planned",
             "detectionPatterns": [
-                "DB-001",
-                "index optimization",
-                "firestore index"
+                "DB-001"
             ],
             "effort": "small",
             "impact": "medium"
@@ -1349,10 +1062,7 @@
             "description": "Move old transactions to cold storage (Firestore \u2192 BigQuery)",
             "status": "planned",
             "detectionPatterns": [
-                "DB-003",
-                "archival",
-                "cold storage",
-                "bigquery"
+                "DB-003"
             ],
             "effort": "large",
             "impact": "medium"
@@ -1365,10 +1075,7 @@
             "description": "ML model to auto-categorize transactions from description",
             "status": "planned",
             "detectionPatterns": [
-                "RND-001",
-                "ai categoriz",
-                "ml categor",
-                "auto-categoriz"
+                "RND-001"
             ],
             "effort": "large",
             "impact": "high"
@@ -1381,10 +1088,7 @@
             "description": "Hey Anchor, how much did I spend on food this month?",
             "status": "planned",
             "detectionPatterns": [
-                "RND-002",
-                "voice command",
-                "voice input",
-                "speech recognition"
+                "RND-002"
             ],
             "effort": "large",
             "impact": "medium"
@@ -1397,10 +1101,7 @@
             "description": "Scan receipts to auto-create transactions",
             "status": "planned",
             "detectionPatterns": [
-                "RND-003",
-                "receipt",
-                "ocr",
-                "receipt scan"
+                "RND-003"
             ],
             "effort": "large",
             "impact": "medium"
@@ -1413,11 +1114,7 @@
             "description": "Plaid/Yodlee for automatic transaction import",
             "status": "planned",
             "detectionPatterns": [
-                "RND-004",
-                "plaid",
-                "yodlee",
-                "bank integration",
-                "open banking"
+                "RND-004"
             ],
             "effort": "large",
             "impact": "critical"
@@ -1430,10 +1127,7 @@
             "description": "Firestore \u2192 BigQuery \u2192 Looker Studio for product analytics",
             "status": "planned",
             "detectionPatterns": [
-                "DATA-001",
-                "analytics pipeline",
-                "looker",
-                "bigquery analytics"
+                "DATA-001"
             ],
             "effort": "large",
             "impact": "high"
@@ -1446,9 +1140,7 @@
             "description": "Conversion-optimized landing page",
             "status": "planned",
             "detectionPatterns": [
-                "BRAND-001",
-                "marketing website",
-                "landing page"
+                "BRAND-001"
             ],
             "effort": "large",
             "impact": "high"
@@ -1461,9 +1153,7 @@
             "description": "Invite family, earn premium",
             "status": "planned",
             "detectionPatterns": [
-                "BRAND-005",
-                "referral",
-                "invite bonus"
+                "BRAND-005"
             ],
             "effort": "medium",
             "impact": "high"
@@ -1476,9 +1166,7 @@
             "description": "Customizable widget layout, drag-and-drop",
             "status": "planned",
             "detectionPatterns": [
-                "WEB-001",
-                "customiz dashboard",
-                "drag.drop widget"
+                "WEB-001"
             ],
             "effort": "large",
             "impact": "medium"
@@ -1491,9 +1179,7 @@
             "description": "Framer Motion integration for richer animations",
             "status": "deferred",
             "detectionPatterns": [
-                "WEB-003",
-                "framer motion",
-                "animation library"
+                "WEB-003"
             ],
             "effort": "medium",
             "impact": "medium",
@@ -1507,9 +1193,7 @@
             "description": "Record Transaction from completed commitment pre-fills form",
             "status": "completed",
             "detectionPatterns": [
-                "GAP-001",
-                "fabric prefill",
-                "suggestion prefill"
+                "GAP-001"
             ],
             "completedAt": "2026-01-29",
             "effort": "medium",
@@ -1523,9 +1207,7 @@
             "description": "Inconsistent use of indigo-* tokens instead of semantic primary-* tokens",
             "status": "completed",
             "detectionPatterns": [
-                "GAP-002",
-                "color token",
-                "primary token"
+                "GAP-002"
             ],
             "completedAt": "2026-02-01",
             "effort": "small",
@@ -1539,9 +1221,7 @@
             "description": "Flaky navigation on slow devices due to hardcoded setTimeout(100) hack",
             "status": "completed",
             "detectionPatterns": [
-                "GAP-003",
-                "navigation race",
-                "requestAnimationFrame"
+                "GAP-003"
             ],
             "completedAt": "2026-02-01",
             "effort": "small",
@@ -1555,9 +1235,7 @@
             "description": "Power users see recently used actions at top of Command Palette",
             "status": "completed",
             "detectionPatterns": [
-                "GAP-004",
-                "recent action",
-                "command palette recent"
+                "GAP-004"
             ],
             "completedAt": "2026-02-01",
             "effort": "small",
@@ -1571,10 +1249,7 @@
             "description": "Fire emoji streak badges on tasks with active streaks",
             "status": "completed",
             "detectionPatterns": [
-                "TASK-002",
-                "streak",
-                "habit streak",
-                "gamif"
+                "TASK-002"
             ],
             "completedAt": "2026-02-01",
             "effort": "medium",
@@ -1588,9 +1263,7 @@
             "description": "Scheduled Cloud Function for recurring rules",
             "status": "completed",
             "detectionPatterns": [
-                "FIN-003",
-                "recurring",
-                "recurring transaction"
+                "FIN-003"
             ],
             "completedAt": "2026-01-29",
             "effort": "large",
@@ -1604,9 +1277,7 @@
             "description": "Compact formatting for large currency values",
             "status": "completed",
             "detectionPatterns": [
-                "UX-019",
-                "currency overflow",
-                "compact format"
+                "UX-019"
             ],
             "completedAt": "2026-01-31",
             "effort": "small",
@@ -1620,9 +1291,7 @@
             "description": "Visual animation and haptic feedback on task completion",
             "status": "completed",
             "detectionPatterns": [
-                "UX-020",
-                "haptic",
-                "completion animation"
+                "UX-020"
             ],
             "completedAt": "2026-01-31",
             "effort": "small",
@@ -1636,9 +1305,7 @@
             "description": "Fixed Transfer/Pay Bill modals not accepting keyboard input",
             "status": "completed",
             "detectionPatterns": [
-                "BUG-022",
-                "modal keyboard",
-                "modal input"
+                "BUG-022"
             ],
             "completedAt": "2026-01-31",
             "effort": "small",
@@ -1652,10 +1319,7 @@
             "description": "Fixed checkboxes requiring 2-3 clicks due to Firestore listener issues",
             "status": "completed",
             "detectionPatterns": [
-                "BUG-023",
-                "checkbox",
-                "multiple click",
-                "onSnapshot"
+                "BUG-023"
             ],
             "completedAt": "2026-01-31",
             "effort": "medium",
@@ -1669,9 +1333,7 @@
             "description": "Created useOptimisticMutation hook with automatic rollback",
             "status": "completed",
             "detectionPatterns": [
-                "ARCH-007",
-                "optimistic update",
-                "optimistic mutation"
+                "ARCH-007"
             ],
             "completedAt": "2026-01-29",
             "effort": "medium",
@@ -1685,9 +1347,7 @@
             "description": "Created TelemetryService with trace(), logEvent(), createTracer()",
             "status": "completed",
             "detectionPatterns": [
-                "ARCH-016",
-                "telemetry",
-                "tracing"
+                "ARCH-016"
             ],
             "completedAt": "2026-01-29",
             "effort": "medium",
