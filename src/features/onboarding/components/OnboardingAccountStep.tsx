@@ -18,6 +18,7 @@ interface OnboardingAccountStepProps {
     loading: boolean;
     onSubmit: () => void;
     onSkip: () => void;
+    onBack: () => void;
 }
 
 const accountTypes: { value: AccountType; label: string }[] = [
@@ -29,7 +30,7 @@ const accountTypes: { value: AccountType; label: string }[] = [
 
 export function OnboardingAccountStep({
     accName, setAccName, balance, setBalance, currency, setCurrency,
-    accountType, setAccountType, loading, onSubmit, onSkip,
+    accountType, setAccountType, loading, onSubmit, onSkip, onBack,
 }: OnboardingAccountStepProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
@@ -84,7 +85,8 @@ export function OnboardingAccountStep({
                     {loading ? 'Creating...' : 'Continue'}
                 </button>
 
-                <div className="text-center">
+                <div className="text-center flex justify-center gap-4">
+                    <button onClick={onBack} className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">← Back</button>
                     <button onClick={onSkip} className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Skip for now →</button>
                 </div>
             </div>

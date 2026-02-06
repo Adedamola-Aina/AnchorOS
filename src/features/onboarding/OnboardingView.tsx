@@ -111,6 +111,7 @@ export const OnboardingView = () => {
                         currency={currency} setCurrency={setCurrency}
                         accountType={accountType} setAccountType={setAccountType}
                         loading={loading} onSubmit={handleCreateAccount} onSkip={handleSkip}
+                        onBack={() => setStep(1)}
                     />
                 )}
 
@@ -118,6 +119,7 @@ export const OnboardingView = () => {
                     <OnboardingHabitStep
                         taskTitle={taskTitle} setTaskTitle={setTaskTitle}
                         loading={loading} onSubmit={handleCreateTask} onSkip={handleSkip}
+                        onBack={() => setStep(2)}
                     />
                 )}
             </div>
