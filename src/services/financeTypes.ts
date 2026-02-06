@@ -50,4 +50,7 @@ export interface UpdateTransactionPayload {
     scope?: 'personal' | 'family';
     date?: string;
     transactionDate?: string;
+    // Cross-currency transfer fields
+    destinationAmountCents?: number;
+    exchangeRate?: number;
 }
