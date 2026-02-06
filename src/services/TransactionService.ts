@@ -7,7 +7,7 @@
  * @module services/TransactionService
  */
 
-import { doc, increment, writeBatch, getDoc, runTransaction, type Firestore } from 'firebase/firestore';
+import { doc, increment, writeBatch, runTransaction, type Firestore } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
@@ -89,21 +89,33 @@ export class TransactionService {
         if (!txToDelete) throw new AnchorError('Transaction not found', 'VALIDATION');
 
         try {
-            const batch = writeBatch(this.firestore);
             const timestamp = new Date().toISOString();
             const targetUserId = account.ownerId || userId;
 
-            const txRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'finance', transactionId);
-            batch.update(txRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
-
-            const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
-            const balanceAdj = txToDelete.type === 'income' ? -txToDelete.amountCents : txToDelete.amountCents;
-            batch.update(accRef, { balanceCents: increment(balanceAdj) });
-
+            // BUG-035 Fix: Use runTransaction for linked deletions to prevent race conditions
             if (txToDelete.linkedTransactionId && txToDelete.linkedUserId) {
-                await this.deleteLinkedTransaction(batch, txToDelete, userId, timestamp);
+                await runTransaction(this.firestore, async (transaction) => {
+                    const txRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'finance', transactionId);
+                    transaction.update(txRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
+
+                    const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
+                    const balanceAdj = txToDelete.type === 'income' ? -txToDelete.amountCents : txToDelete.amountCents;
+                    transaction.update(accRef, { balanceCents: increment(balanceAdj) });
+
+                    await this.deleteLinkedTransaction(transaction, txToDelete, userId, timestamp);
+                });
+            } else {
+                // Simple delete uses writeBatch (still atomic, but faster for single ops)
+                const batch = writeBatch(this.firestore);
+                const txRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'finance', transactionId);
+                batch.update(txRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
+
+                const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
+                const balanceAdj = txToDelete.type === 'income' ? -txToDelete.amountCents : txToDelete.amountCents;
+                batch.update(accRef, { balanceCents: increment(balanceAdj) });
+
+                await batch.commit();
             }
-            await batch.commit();
 
             // AUDIT: Log transaction deletion
             auditFinance.transactionDeleted(transactionId, accountId);
@@ -114,15 +126,17 @@ export class TransactionService {
     }
 
     private async deleteLinkedTransaction(
-        batch: ReturnType<typeof writeBatch>, txToDelete: AnchorTransaction, userId: string, timestamp: string
+        transaction: Parameters<Parameters<typeof runTransaction>[1]>[0],
+        txToDelete: AnchorTransaction, userId: string, timestamp: string
     ): Promise<void> {
         const linkedTxRef = doc(this.firestore, 'artifacts', APP_ID, 'users', txToDelete.linkedUserId!, 'finance', txToDelete.linkedTransactionId!);
-        const linkedTxDoc = await getDoc(linkedTxRef);
+        // BUG-035 Fix: Use transaction.get() instead of getDoc() for atomicity
+        const linkedTxDoc = await transaction.get(linkedTxRef);
         if (linkedTxDoc.exists()) {
             const pairedTx = linkedTxDoc.data() as AnchorTransaction;
-            batch.update(linkedTxRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
+            transaction.update(linkedTxRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
             const linkedAccRef = doc(this.firestore, 'artifacts', APP_ID, 'users', txToDelete.linkedUserId!, 'accounts', pairedTx.accountId);
-            batch.update(linkedAccRef, { balanceCents: increment(pairedTx.type === 'income' ? -pairedTx.amountCents : pairedTx.amountCents) });
+            transaction.update(linkedAccRef, { balanceCents: increment(pairedTx.type === 'income' ? -pairedTx.amountCents : pairedTx.amountCents) });
         }
     }
 
