@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Moon } from 'lucide-react';
+import { ToggleSwitch } from '../../../components/shared';
 
 export interface QuietHoursPreferences {
   enabled: boolean;
@@ -29,17 +30,16 @@ export const QuietHoursSettings: React.FC<Props> = ({ preferences, onUpdate }) =
           <p className="text-xs text-slate-400 dark:text-slate-500">Suppress push notifications during set hours</p>
         </div>
       </div>
-      <button
-        onClick={() => onUpdate({ enabled: !preferences.enabled })}
-        className={`relative inline-flex min-h-11 h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${preferences.enabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-        aria-label="Toggle quiet hours"
-      >
-        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
-      </button>
+      <ToggleSwitch
+        enabled={preferences.enabled}
+        onToggle={() => onUpdate({ enabled: !preferences.enabled })}
+        label="Toggle quiet hours"
+        activeColor="bg-indigo-500"
+      />
     </div>
 
     {preferences.enabled && (
-      <div className="animate-in fade-in slide-in-from-top-2 duration-300 flex items-center gap-3 pl-10">
+      <div className="animate-in fade-in slide-in-from-top-2 duration-300 flex flex-wrap items-center gap-3 pl-10">
         <div className="flex items-center gap-2">
           <label className="text-xs font-bold text-slate-400 uppercase">From</label>
           <input

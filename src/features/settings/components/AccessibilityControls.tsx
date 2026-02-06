@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Type, Eye, Zap } from 'lucide-react';
+import { ToggleSwitch } from '../../../components/shared';
 
 export interface AccessibilityPreferences {
   fontSize: 'default' | 'large' | 'xl';
@@ -28,7 +29,7 @@ export const AccessibilityControls: React.FC<Props> = ({ preferences, onUpdate }
     <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Accessibility</p>
 
     {/* Font Size */}
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-3">
         <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">
           <Type className="w-4 h-4 text-slate-500" />
@@ -59,11 +60,7 @@ export const AccessibilityControls: React.FC<Props> = ({ preferences, onUpdate }
           <p className="text-xs text-slate-400">Increase border and text contrast</p>
         </div>
       </div>
-      <button onClick={() => onUpdate({ highContrast: !preferences.highContrast })}
-        className={`relative inline-flex min-h-11 h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${preferences.highContrast ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-        aria-label="Toggle high contrast">
-        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.highContrast ? 'translate-x-6' : 'translate-x-1'}`} />
-      </button>
+      <ToggleSwitch enabled={preferences.highContrast} onToggle={() => onUpdate({ highContrast: !preferences.highContrast })} label="Toggle high contrast" />
     </div>
 
     {/* Reduced Motion */}
@@ -77,11 +74,7 @@ export const AccessibilityControls: React.FC<Props> = ({ preferences, onUpdate }
           <p className="text-xs text-slate-400">Minimize animations and transitions</p>
         </div>
       </div>
-      <button onClick={() => onUpdate({ reducedMotion: !preferences.reducedMotion })}
-        className={`relative inline-flex min-h-11 h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${preferences.reducedMotion ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-        aria-label="Toggle reduced motion">
-        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.reducedMotion ? 'translate-x-6' : 'translate-x-1'}`} />
-      </button>
+      <ToggleSwitch enabled={preferences.reducedMotion} onToggle={() => onUpdate({ reducedMotion: !preferences.reducedMotion })} label="Toggle reduced motion" />
     </div>
   </div>
 );
