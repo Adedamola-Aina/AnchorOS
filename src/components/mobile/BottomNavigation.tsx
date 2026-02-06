@@ -36,8 +36,19 @@ export const BottomNavigation = ({
     const { trigger } = useHaptic();
     const hasSettingsNotification = accountNotifications.length > 0;
 
-    // Detect dark mode for Settings icon accent color
-    const isDarkMode = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
+    // PERF-004: Reactive dark mode detection via MutationObserver
+    const [isDarkMode, setIsDarkMode] = useState(() =>
+        typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
+    );
+
+    useEffect(() => {
+        const target = document.documentElement;
+        const observer = new MutationObserver(() => {
+            setIsDarkMode(target.classList.contains('dark'));
+        });
+        observer.observe(target, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
 
     // Inject animation styles once
     useEffect(() => {
