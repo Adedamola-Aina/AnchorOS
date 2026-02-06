@@ -35,6 +35,7 @@ export function InviteCodeEntry({
             <div>
                 <input
                     type="text"
+                    inputMode="numeric"
                     value={verificationCode}
                     onChange={(e) => {
                         const val = e.target.value.replace(/\D/g, '').slice(0, 6);
