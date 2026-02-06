@@ -62,8 +62,6 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
         return [...currentMonthTx, ...trailing];
     }, [currentMonthTx, carryoverAccountTx]);
 
-    /** The index in accountTransactions where carry-over entries begin (used for divider). */
-    const carryoverStartIndex = currentMonthTx.length;
     const weeklyData = useMemo(() => getWeeklySpending(accountTransactions, currentMonth), [accountTransactions, currentMonth]);
     const maxWeeklyAmount = useMemo(() => Math.max(...weeklyData.flatMap(d => [d.income, d.expense]), 1), [weeklyData]);
     
