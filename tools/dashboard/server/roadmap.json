@@ -255,6 +255,118 @@
             "createdAt": "2026-02-06"
         },
         {
+            "id": "BUG-065",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "WeeklyView toggle buttons under 44px touch target",
+            "description": "Toggle buttons in WeeklyView are only 24px. Fixed with min-w-11 min-h-11 (44px).",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-065"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-066",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "AssetAllocation expand button only 16px",
+            "description": "Expand/collapse chevron button has no size constraint. Fixed with min-w-11 min-h-11.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-066"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-067",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "NotificationSettings toggle switches 24px height",
+            "description": "Push and email toggle switches only h-6 (24px). Added min-h-11 for 44px touch target.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-067"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-068",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "FamilyNotificationBanner buttons under 44px",
+            "description": "View link, prev/next arrows, and dismiss button all under 44px. Fixed all 4 buttons.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-068"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-069",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Confirm dialog buttons under 44px",
+            "description": "Cancel and Confirm buttons in modal dialogs only ~34px. Added min-h-11.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-069"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-070",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Onboarding skip buttons have no touch target",
+            "description": "Skip for now links in 3 onboarding steps have no size constraint. Fixed all 3 with min-h-11.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-070"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-071",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Auth footer links undersized",
+            "description": "Sign up/Sign in toggle links have no touch target. Added min-h-11 and hover background.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-071"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-072",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "SettingsView Sign Out button undersized",
+            "description": "Ghost sm button under 44px. Added min-h-11 class.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-072"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
             "id": "BUG-064",
             "team": "Mobile",
             "priority": "P1",
