@@ -398,7 +398,7 @@
             "id": "BUG-058",
             "team": "Engineering",
             "priority": "P2",
-            "title": "O(n²) percentage calculation in AssetDistributionChart legend",
+            "title": "O(n\u00b2) percentage calculation in AssetDistributionChart legend",
             "description": "Each legend item recalculates total via accountData.reduce() inside map. Pre-compute percentages in useMemo for O(n) performance.",
             "status": "completed",
             "detectionPatterns": [
@@ -1297,7 +1297,7 @@
             "team": "Database",
             "priority": "P2",
             "title": "Archival Strategy",
-            "description": "Move old transactions to cold storage (Firestore → BigQuery)",
+            "description": "Move old transactions to cold storage (Firestore \u2192 BigQuery)",
             "status": "planned",
             "detectionPatterns": [
                 "DB-003"
@@ -1362,7 +1362,7 @@
             "team": "Data",
             "priority": "P3",
             "title": "Analytics Pipeline",
-            "description": "Firestore → BigQuery → Looker Studio for product analytics",
+            "description": "Firestore \u2192 BigQuery \u2192 Looker Studio for product analytics",
             "status": "planned",
             "detectionPatterns": [
                 "DATA-001"
@@ -1760,7 +1760,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-001"],
+            "detectionPatterns": [
+                "FEAT-001"
+            ],
             "completedAt": "2026-02-06",
             "effort": "small",
             "impact": "high"
@@ -1774,7 +1776,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-002"],
+            "detectionPatterns": [
+                "FEAT-002"
+            ],
             "completedAt": "2026-02-06",
             "effort": "medium",
             "impact": "high"
@@ -1788,7 +1792,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-003"],
+            "detectionPatterns": [
+                "FEAT-003"
+            ],
             "completedAt": "2026-02-06",
             "effort": "medium",
             "impact": "high"
@@ -1802,7 +1808,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-004"],
+            "detectionPatterns": [
+                "FEAT-004"
+            ],
             "completedAt": "2026-02-06",
             "effort": "small",
             "impact": "medium"
@@ -1816,7 +1824,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-005"],
+            "detectionPatterns": [
+                "FEAT-005"
+            ],
             "completedAt": "2026-02-06",
             "effort": "small",
             "impact": "medium"
@@ -1830,7 +1840,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-006"],
+            "detectionPatterns": [
+                "FEAT-006"
+            ],
             "completedAt": "2026-02-06",
             "effort": "small",
             "impact": "medium"
@@ -1844,7 +1856,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-007"],
+            "detectionPatterns": [
+                "FEAT-007"
+            ],
             "completedAt": "2026-02-06",
             "effort": "small",
             "impact": "medium"
@@ -1858,7 +1872,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-008"],
+            "detectionPatterns": [
+                "FEAT-008"
+            ],
             "completedAt": "2026-02-06",
             "effort": "small",
             "impact": "medium"
@@ -1872,7 +1888,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-009"],
+            "detectionPatterns": [
+                "FEAT-009"
+            ],
             "completedAt": "2026-02-06",
             "effort": "medium",
             "impact": "high"
@@ -1886,7 +1904,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-010"],
+            "detectionPatterns": [
+                "FEAT-010"
+            ],
             "completedAt": "2026-02-06",
             "effort": "medium",
             "impact": "high"
@@ -1900,7 +1920,9 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-011"],
+            "detectionPatterns": [
+                "FEAT-011"
+            ],
             "completedAt": "2026-02-06",
             "effort": "small",
             "impact": "medium"
@@ -1914,10 +1936,76 @@
             "status": "completed",
             "type": "feature",
             "sprint": "1.5.29",
-            "detectionPatterns": ["FEAT-012"],
+            "detectionPatterns": [
+                "FEAT-012"
+            ],
             "completedAt": "2026-02-06",
             "effort": "small",
             "impact": "medium"
+        },
+        {
+            "id": "BUG-073",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Swipe sensitivity: accidental triggers during vertical scroll",
+            "description": "Added vertical scroll discrimination to SwipeableRow. Tracks startY and locks axis on first significant movement. Cancels horizontal swipe when vertical delta dominates.",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.30",
+            "detectionPatterns": [
+                "BUG-073"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "BUG-074",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Month navigation scroll jump to account widget",
+            "description": "FinanceView now scrolls to the transaction list section after month prev/next navigation instead of jumping to top.",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.30",
+            "detectionPatterns": [
+                "BUG-074"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-013",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Bank/account tag pill on transaction history items",
+            "description": "TransactionItem now renders the accountName prop as an emerald pill in the metadata row.",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.30",
+            "detectionPatterns": [
+                "FEAT-013"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-014",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Previous month carry-over in account detail view",
+            "description": "Account detail view fetches 14 days of trailing transactions from previous month for continuity with Previous month divider.",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.30",
+            "detectionPatterns": [
+                "FEAT-014"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
         }
     ]
 }
