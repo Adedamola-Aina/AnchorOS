@@ -13,6 +13,7 @@ import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { useAccountActivity } from '../../hooks/useAccountActivity';
 import { AccountHeader, SpendingTrendsChart } from './components';
 import { SharedActivitySection } from './components/SharedActivitySection';
+import { SharePermissionPicker } from './components/SharePermissionPicker';
 import { VirtualTransactionList } from './components/VirtualTransactionList';
 import { TransactionFilterHeader } from './components/TransactionListParts';
 import { FamilyNotificationBanner } from '../../components/FamilyNotificationBanner';
@@ -87,6 +88,9 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
                 <div className="grid grid-cols-1 gap-5">
                     {accountTransactions.length > 0 && <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />}
                 </div>
+                {isOwner && account.sharedWith && Object.entries(account.sharedWith).map(([uid, meta]) => (
+                    <SharePermissionPicker key={uid} accountId={account.id} ownerUid={user?.uid || ''} sharedUid={uid} currentPermission={meta.permission || 'read'} />
+                ))}
                 {isSharedAccount && <SharedActivitySection activities={activities} currentUserId={user?.uid} loading={loadingActivities} />}
                 {/* Standardized VirtualTransactionList used in FinanceView for consistency */}
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
