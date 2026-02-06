@@ -12,7 +12,8 @@ export default defineConfig({
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
-    workers: process.env.CI ? 1 : undefined,
+    // Use 50% of available CPUs in CI, auto-detect locally
+    workers: process.env.CI ? '50%' : undefined,
     timeout: 60000,
     reporter: 'html',
 
