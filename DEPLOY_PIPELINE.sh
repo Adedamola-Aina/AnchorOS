@@ -81,7 +81,9 @@ fi
 # 3. Build (with environment mode)
 echo -e "\n${YELLOW}🏗️  Stage 3: Build (${ENV})${NC}"
 BUILD_SCRIPT="build"
-if [[ "$ENV" == "staging" ]]; then
+if [[ "$ENV" == "development" ]]; then
+    BUILD_SCRIPT="build:dev"
+elif [[ "$ENV" == "staging" ]]; then
     BUILD_SCRIPT="build:staging"
 elif [[ "$ENV" == "production" ]]; then
     BUILD_SCRIPT="build:production"
