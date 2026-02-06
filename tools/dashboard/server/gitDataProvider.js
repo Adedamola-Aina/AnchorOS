@@ -247,20 +247,34 @@ async function getFeatures() {
 
 /**
  * Get Kanban board data from git
+ * Filters out items marked as "deferred" in roadmap.json
  */
 async function getKanbanData() {
     const items = await getAllTrackedItems();
+    
+    // Get deferred items from roadmap.json to exclude them
+    const roadmapData = loadRoadmap();
+    const deferredIds = new Set(
+        roadmapData.initiatives
+            .filter(i => i.status === 'deferred')
+            .map(i => i.id)
+    );
+    
+    // Filter out deferred items
+    const activeItems = items.filter(i => !deferredIds.has(i.id));
 
     return {
         backlog: [], // Items not yet in commits are true backlog - we can't track these from git
-        inProgress: items.filter(i => i.status === 'dev'),
-        staging: items.filter(i => i.status === 'staging'),
-        done: items.filter(i => i.status === 'deployed'),
+        inProgress: activeItems.filter(i => i.status === 'dev'),
+        staging: activeItems.filter(i => i.status === 'staging'),
+        done: activeItems.filter(i => i.status === 'deployed'),
+        deferred: items.filter(i => deferredIds.has(i.id)), // Separately track deferred
         summary: {
-            total: items.length,
-            devOnly: items.filter(i => i.status === 'dev').length,
-            stagingOnly: items.filter(i => i.status === 'staging').length,
-            deployed: items.filter(i => i.status === 'deployed').length
+            total: activeItems.length,
+            devOnly: activeItems.filter(i => i.status === 'dev').length,
+            stagingOnly: activeItems.filter(i => i.status === 'staging').length,
+            deployed: activeItems.filter(i => i.status === 'deployed').length,
+            deferred: items.filter(i => deferredIds.has(i.id)).length
         }
     };
 }

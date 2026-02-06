@@ -442,6 +442,114 @@
       "completedDate": "2026-01-24",
       "cycleTime": null,
       "recordedAt": "2026-02-05T19:22:49.372Z"
+    },
+    {
+      "itemId": "DES-002",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.195Z"
+    },
+    {
+      "itemId": "WEB-003",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.196Z"
+    },
+    {
+      "itemId": "f9d3b81",
+      "completedDate": "2026-02-04",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.196Z"
+    },
+    {
+      "itemId": "fb448ad",
+      "completedDate": "2026-02-04",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.196Z"
+    },
+    {
+      "itemId": "193f8f5",
+      "completedDate": "2026-02-04",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.196Z"
+    },
+    {
+      "itemId": "4e69ed9",
+      "completedDate": "2026-02-04",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.196Z"
+    },
+    {
+      "itemId": "408d0aa",
+      "completedDate": "2026-02-04",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.197Z"
+    },
+    {
+      "itemId": "a38461f",
+      "completedDate": "2026-02-04",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.197Z"
+    },
+    {
+      "itemId": "f5e1bd0",
+      "completedDate": "2026-02-04",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.197Z"
+    },
+    {
+      "itemId": "fda66d4",
+      "completedDate": "2026-02-04",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.197Z"
+    },
+    {
+      "itemId": "SEC-001",
+      "completedDate": "2026-02-03",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.197Z"
+    },
+    {
+      "itemId": "SEC-002",
+      "completedDate": "2026-02-03",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.197Z"
+    },
+    {
+      "itemId": "ENG-001",
+      "completedDate": "2026-02-03",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.198Z"
+    },
+    {
+      "itemId": "3bafd2d",
+      "completedDate": "2026-02-03",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.198Z"
+    },
+    {
+      "itemId": "UX-024",
+      "completedDate": "2026-02-03",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.198Z"
+    },
+    {
+      "itemId": "7259fb3",
+      "completedDate": "2026-02-03",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.198Z"
+    },
+    {
+      "itemId": "PLT-003",
+      "completedDate": "2026-02-03",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.198Z"
+    },
+    {
+      "itemId": "PLT-002",
+      "completedDate": "2026-02-03",
+      "cycleTime": null,
+      "recordedAt": "2026-02-06T07:00:00.198Z"
     }
   ],
   "weeklyStats": [
@@ -454,6 +562,11 @@
       "week": "2026-W05",
       "completed": 50,
       "velocity": 50
+    },
+    {
+      "week": "2026-W06",
+      "completed": 18,
+      "velocity": 30.33
     }
   ]
 }

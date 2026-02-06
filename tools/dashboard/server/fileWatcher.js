@@ -2,12 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { runFullSync } = require('./docUpdater');
 
-const DOCS_PATH = path.join(__dirname, '../../../docs');
-const ROADMAP_PATH = path.join(DOCS_PATH, 'ROADMAP.md');
-const KNOWN_ISSUES_PATH = path.join(DOCS_PATH, 'KNOWN_ISSUES.md');
-const FEATURE_SUGGESTIONS_PATH = path.join(DOCS_PATH, 'FEATURE_SUGGESTIONS.md');
-const DEPLOYMENT_STATUS_PATH = path.join(DOCS_PATH, 'DEPLOYMENT_STATUS.md');
-const PROJECT_STATUS_PATH = path.join(DOCS_PATH, 'PROJECT_STATUS.md');
+// Roadmap JSON is the single source of truth for tracked initiatives
+const ROADMAP_JSON_PATH = path.join(__dirname, 'roadmap.json');
 const GIT_DIR = path.join(__dirname, '../../../.git');
 
 let watchers = [];
@@ -40,12 +36,9 @@ function debouncedSync(source) {
 function startFileWatchers() {
     console.log('[FILE WATCHER] Starting file watchers...');
 
+    // Watch roadmap.json - the single source of truth for tracked initiatives
     const filesToWatch = [
-        { path: ROADMAP_PATH, name: 'ROADMAP.md' },
-        { path: KNOWN_ISSUES_PATH, name: 'KNOWN_ISSUES.md' },
-        { path: FEATURE_SUGGESTIONS_PATH, name: 'FEATURE_SUGGESTIONS.md' },
-        { path: DEPLOYMENT_STATUS_PATH, name: 'DEPLOYMENT_STATUS.md' },
-        { path: PROJECT_STATUS_PATH, name: 'PROJECT_STATUS.md' }
+        { path: ROADMAP_JSON_PATH, name: 'roadmap.json' }
     ];
 
     for (const file of filesToWatch) {
