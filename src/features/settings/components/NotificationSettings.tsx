@@ -2,6 +2,7 @@ import React from 'react';
 import { Bell, AlertCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
+import { NotificationCategoryToggles, type CategoryPreferences } from './NotificationCategoryToggles';
 
 interface NotificationSettingsProps {
     emailEnabled: boolean;
@@ -10,6 +11,7 @@ interface NotificationSettingsProps {
     userEmail: string;
     emailVerified: boolean;
     onUpdatePreferences: (prefs: any) => void;
+    categories?: CategoryPreferences;
     pushPermissionStatus: NotificationPermission;
     requestPushPermission: () => void;
 }
@@ -21,6 +23,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     userEmail,
     emailVerified,
     onUpdatePreferences,
+    categories,
     pushPermissionStatus,
     requestPushPermission,
 }) => {
@@ -118,6 +121,13 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                         </div>
                     </div>
                 )}
+
+                <div className="h-px bg-slate-100 dark:bg-slate-800" />
+
+                <NotificationCategoryToggles
+                  categories={categories || { finance: true, commitments: true, family: true }}
+                  onToggle={(cat, enabled) => onUpdatePreferences({ categories: { ...(categories || { finance: true, commitments: true, family: true }), [cat]: enabled } })}
+                />
             </CardContent>
         </Card>
     );
