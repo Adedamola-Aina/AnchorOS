@@ -40,6 +40,13 @@ const colorClasses: Record<string, string> = {
   gray: 'bg-gray-500 text-white',
 };
 
+/**
+ * Vertical movement threshold (px) — if the user's finger moves more than
+ * this vertically before establishing a clear horizontal intent, we treat
+ * it as a scroll and cancel the swipe gesture entirely.
+ */
+const VERTICAL_LOCK_THRESHOLD = 12;
+
 export function SwipeableRow({
   children,
   onSwipeLeft,
@@ -54,7 +61,12 @@ export function SwipeableRow({
   const [isDragging, setIsDragging] = useState(false);
   
   const startXRef = useRef(0);
+  const startYRef = useRef(0);
   const currentXRef = useRef(0);
+  /** Once set to true for a gesture, horizontal swiping is suppressed. */
+  const isVerticalScrollRef = useRef(false);
+  /** Whether the axis has been decided for this gesture (prevents flip-flopping). */
+  const axisLockedRef = useRef(false);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -68,7 +80,10 @@ export function SwipeableRow({
       }
       
       startXRef.current = e.touches[0].clientX;
+      startYRef.current = e.touches[0].clientY;
       currentXRef.current = 0;
+      isVerticalScrollRef.current = false;
+      axisLockedRef.current = false;
       setIsDragging(true);
     },
     [disabled]
@@ -77,8 +92,28 @@ export function SwipeableRow({
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
       if (disabled || !isDragging) return;
-      
+
       const deltaX = e.touches[0].clientX - startXRef.current;
+      const deltaY = e.touches[0].clientY - startYRef.current;
+
+      // Determine dominant axis on first significant movement
+      if (!axisLockedRef.current) {
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+        // Wait until there's enough movement to decide
+        if (absX < 4 && absY < 4) return;
+        axisLockedRef.current = true;
+        if (absY > absX || absY > VERTICAL_LOCK_THRESHOLD) {
+          // Vertical scroll wins — cancel swipe for this gesture
+          isVerticalScrollRef.current = true;
+          setTranslateX(0);
+          setIsDragging(false);
+          return;
+        }
+      }
+
+      if (isVerticalScrollRef.current) return;
+
       currentXRef.current = deltaX;
       
       // Limit swipe distance
@@ -95,6 +130,13 @@ export function SwipeableRow({
     
     setIsDragging(false);
     
+    // If the gesture was a vertical scroll, do nothing
+    if (isVerticalScrollRef.current) {
+      isVerticalScrollRef.current = false;
+      setTranslateX(0);
+      return;
+    }
+
     const deltaX = currentXRef.current;
     
     // Check if swipe exceeded threshold

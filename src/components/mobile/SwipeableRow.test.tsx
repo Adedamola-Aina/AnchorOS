@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { SwipeableRow } from './SwipeableRow';
 
 describe('SwipeableRow', () => {
@@ -174,6 +174,66 @@ describe('SwipeableRow', () => {
 
       const contentWrapper = screen.getByTestId('swipeable-content');
       expect(contentWrapper).toHaveStyle({ transform: 'translateX(0px)' });
+    });
+  });
+
+  describe('Vertical Scroll Discrimination', () => {
+    /**
+     * Simulates a touch sequence (start → moves → end) on the given element
+     * using testing-library's fireEvent which correctly triggers React handlers.
+     */
+    const simulateTouch = (
+      el: HTMLElement,
+      startPos: { clientX: number; clientY: number },
+      moves: { clientX: number; clientY: number }[],
+    ) => {
+      fireEvent.touchStart(el, {
+        touches: [startPos],
+      });
+      for (const m of moves) {
+        fireEvent.touchMove(el, {
+          touches: [m],
+        });
+      }
+      fireEvent.touchEnd(el);
+    };
+
+    it('does NOT trigger swipe when vertical movement dominates', () => {
+      render(
+        <SwipeableRow onSwipeLeft={mockOnSwipeLeft} onSwipeRight={mockOnSwipeRight}>
+          <div>Content</div>
+        </SwipeableRow>
+      );
+
+      const content = screen.getByTestId('swipeable-content');
+
+      // Move primarily downward (vertical scroll) with slight horizontal drift
+      simulateTouch(content, { clientX: 200, clientY: 200 }, [
+        { clientX: 203, clientY: 220 }, // mostly vertical
+        { clientX: 206, clientY: 260 },
+        { clientX: 130, clientY: 300 }, // even if horizontal exceeds threshold later
+      ]);
+
+      expect(mockOnSwipeLeft).not.toHaveBeenCalled();
+      expect(mockOnSwipeRight).not.toHaveBeenCalled();
+    });
+
+    it('DOES trigger swipe when horizontal movement dominates', () => {
+      render(
+        <SwipeableRow onSwipeLeft={mockOnSwipeLeft} onSwipeRight={mockOnSwipeRight}>
+          <div>Content</div>
+        </SwipeableRow>
+      );
+
+      const content = screen.getByTestId('swipeable-content');
+
+      // Move primarily left (horizontal swipe)
+      simulateTouch(content, { clientX: 200, clientY: 200 }, [
+        { clientX: 180, clientY: 202 }, // clear horizontal intent
+        { clientX: 130, clientY: 204 }, // exceeds default 60px threshold
+      ]);
+
+      expect(mockOnSwipeLeft).toHaveBeenCalledTimes(1);
     });
   });
 });
