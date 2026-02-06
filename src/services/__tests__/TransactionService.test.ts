@@ -844,5 +844,53 @@ describe('TransactionService', () => {
             // The key assertion: if destinationAmountCents is in updates, it should be used
             // Otherwise the linked amount change should be proportional
         });
+
+        // BUG-036: Type change income→expense must correct balance even without amount change
+        it('corrects balance when transaction type changes from income to expense (BUG-036)', async () => {
+            // Arrange
+            const userId = 'user-type-change';
+            const account: AnchorAccount = {
+                id: 'acc-1',
+                name: 'Checking',
+                balanceCents: 100000, // $1000
+                type: 'checking',
+                currency: 'USD',
+                color: '#00FF00',
+                scope: 'personal',
+                ownerId: userId,
+            };
+            // Change type from income to expense, same amount
+            const updates: UpdateTransactionPayload = {
+                type: 'expense',
+            };
+
+            let balanceCorrection: number | undefined;
+            vi.mocked(firestore.runTransaction).mockImplementation(async (_db, callback) => {
+                const mockTx = {
+                    get: vi.fn().mockResolvedValue({
+                        exists: () => true,
+                        data: () => ({
+                            id: 'tx-1',
+                            amountCents: 5000, // $50 income
+                            type: 'income',
+                            accountId: 'acc-1',
+                        }),
+                    }),
+                    update: vi.fn((ref, data) => {
+                        if (data.balanceCents?._increment !== undefined) {
+                            balanceCorrection = data.balanceCents._increment;
+                        }
+                    }),
+                };
+                return callback(mockTx as any);
+            });
+
+            // Act
+            await service.updateTransaction(userId, 'tx-1', 'acc-1', updates, [account]);
+
+            // Assert: changing from income to expense requires full reversal
+            // Old income +5000 becomes new expense -5000 = net change of -10000
+            expect(balanceCorrection).toBe(-10000);
+        });
     });
 });
