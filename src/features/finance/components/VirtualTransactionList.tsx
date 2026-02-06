@@ -15,6 +15,8 @@ interface VirtualTransactionListProps {
     searchQuery?: string;
     onClearSearch?: () => void;
     className?: string;
+    /** When provided, a "Previous month" divider is shown before this index. */
+    carryoverStartIndex?: number;
 }
 
 export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
@@ -26,6 +28,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     searchQuery,
     onClearSearch,
     className = "h-[calc(100vh-320px)] min-h-[400px]",
+    carryoverStartIndex,
 }) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const { isMobile } = useResponsive();
@@ -91,6 +94,14 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                             }}
                             className="pb-2" // Gap between transaction cards only
                         >
+                            {/* Carry-over divider */}
+                            {carryoverStartIndex != null && carryoverStartIndex > 0 && virtualRow.index === carryoverStartIndex && (
+                                <div className="flex items-center gap-3 py-2 px-1 mb-1">
+                                    <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 whitespace-nowrap">Previous month</span>
+                                    <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                                </div>
+                            )}
                             {isMobile ? (
                                 <SwipeableTransactionItem
                                     transaction={tx}

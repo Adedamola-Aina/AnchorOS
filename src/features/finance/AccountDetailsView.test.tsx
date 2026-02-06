@@ -133,7 +133,8 @@ describe('AccountDetailsView', () => {
                 onBack={vi.fn()}
             />
         );
-        expect(screen.getByText('Checking Account')).toBeInTheDocument();
+        // Account name appears in header + transaction bank tag pill
+        expect(screen.getAllByText('Checking Account').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText(/\$5,000\.00/)).toBeInTheDocument();
     });
 
