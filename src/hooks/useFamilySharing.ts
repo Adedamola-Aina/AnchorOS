@@ -104,6 +104,11 @@ export function useFamilySharing(userId: string | undefined): UseFamilySharingRe
     const shareAccount = useCallback(async (accountId: string, share: boolean) => {
         if (!connection) return;
 
+        if (!navigator.onLine) {
+            showToast('You are offline. Please reconnect and try again.', 'error');
+            return;
+        }
+
         try {
             const functions = getFunctions();
             const shareAccountFn = httpsCallable<
@@ -123,6 +128,11 @@ export function useFamilySharing(userId: string | undefined): UseFamilySharingRe
     }, [connection, showToast]);
 
     const disconnectFamily = useCallback(async (type: 'remove_member' | 'leave') => {
+        if (!navigator.onLine) {
+            showToast('You are offline. Please reconnect and try again.', 'error');
+            return;
+        }
+
         try {
             const functions = getFunctions();
             const disconnectFn = httpsCallable<
