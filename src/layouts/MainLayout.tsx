@@ -64,7 +64,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     useKeyboardAvoidance();
 
     return (
-        <div className={`adaptive-layout bg-[var(--surface-1)] font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'pt-6 min-h-[calc(100vh-24px)]' : 'min-h-screen'}`}>
+        <div className={`adaptive-layout bg-[var(--surface-1)] font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'pt-6 min-h-[calc(100dvh-24px)]' : 'min-h-dvh'}`}>
             <CommandPalette />
 
             {/* Desktop Sidebar - UNCHANGED per M3.2 */}

@@ -139,7 +139,7 @@ export const AcceptInviteView = () => {
 
     // Main view
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+        <div className="min-h-dvh flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
             <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl max-w-md w-full relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-500" />
 
