@@ -118,3 +118,14 @@ export interface RecurringTransaction {
   lastRunAt?: string;
   failureReason?: string; // If auto-creation failed
 }
+
+/** ARCH-002: Single source of truth for FamilyConnection */
+export interface FamilyConnection {
+  id: string;
+  ownerUid: string;
+  memberUid: string;
+  ownerDisplayName: string;
+  memberDisplayName: string;
+  status: 'active' | 'disconnected';
+  connectedAt: string;
+}

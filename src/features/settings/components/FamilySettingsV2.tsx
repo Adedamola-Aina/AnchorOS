@@ -17,8 +17,8 @@ import { FamilyLoadingState, FamilyPostConnectionMessage, FamilyConnectedState, 
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db, APP_ID } from '../../../config/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import type { FamilyConnection } from '../../../types';
 
-interface FamilyConnection { id: string; ownerUid: string; memberUid: string; ownerDisplayName: string; memberDisplayName: string; status: 'active' | 'disconnected'; connectedAt: string; }
 interface FamilySettingsV2Props { onNavigateToFinance?: () => void; connection?: FamilyConnection | null; connectionLoading?: boolean; }
 
 export function FamilySettingsV2({ onNavigateToFinance, connection: externalConnection, connectionLoading }: FamilySettingsV2Props) {
