@@ -66,6 +66,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Use extracted MFA hook
     const mfaOps = useMfaOperations(user, updateProfile);
 
+    // ARCH-004: Store clearPendingSecret in ref to avoid mfaOps in useEffect deps
+    const clearPendingSecretRef = useRef(mfaOps.clearPendingSecret);
+    clearPendingSecretRef.current = mfaOps.clearPendingSecret;
+
     useEffect(() => {
         const unsubAuth = onAuthStateChanged(auth, async (u) => {
             if (unsubProfRef.current) { unsubProfRef.current(); unsubProfRef.current = null; }
@@ -75,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (wasActive) { sessionStorage.removeItem('anchor_session_active'); window.dispatchEvent(new CustomEvent('anchor:session_expired')); }
             }
             setUser(u);
-            if (!u) { setLoading(false); setProfileLoaded(false); mfaOps.clearPendingSecret(); return; }
+            if (!u) { setLoading(false); setProfileLoaded(false); clearPendingSecretRef.current(); return; }
 
             const profRef = doc(db, 'artifacts', APP_ID, 'users', u.uid);
             unsubProfRef.current = onSnapshot(profRef, async (snap) => {
@@ -99,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
         });
         return () => { unsubAuth(); if (unsubProfRef.current) unsubProfRef.current(); };
-    }, [mfaOps]);
+    }, []); // ARCH-004: Stable deps — mfaOps accessed via ref to prevent re-subscription
 
     const signIn = async (e: string, p: string) => {
         return authTracer.trace('signIn', async () => {
