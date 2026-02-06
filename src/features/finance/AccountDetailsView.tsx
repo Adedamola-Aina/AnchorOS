@@ -15,6 +15,7 @@ import { AccountHeader, SpendingTrendsChart } from './components';
 import { SharedActivitySection } from './components/SharedActivitySection';
 import { VirtualTransactionList } from './components/VirtualTransactionList';
 import { TransactionFilterHeader } from './components/TransactionListParts';
+import { FamilyNotificationBanner } from '../../components/FamilyNotificationBanner';
 
 interface AccountDetailsViewProps { account: AnchorAccount; onBack: () => void; onDelete?: () => void; onShare?: () => void; onTransfer?: () => void; onPayBill?: () => void; onEdit?: (tx: AnchorTransaction) => void; familyMemberId?: string | null; }
 
@@ -81,6 +82,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
         <>
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-6">
                 <NotificationBanner accountId={account.id} />
+                {isSharedAccount && <FamilyNotificationBanner accountId={account.id} />}
                 <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} />
                 <div className="grid grid-cols-1 gap-5">
                     {accountTransactions.length > 0 && <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />}

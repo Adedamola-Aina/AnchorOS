@@ -22,7 +22,7 @@ import { Button } from '@anchor-os/ui';
 import { AccountCard, VirtualTransactionList } from './components';
 import { NetWorthCards } from './components/NetWorthCards';
 import { EmptyAccountsState } from './components/EmptyAccountsState';
-import { FamilyNotificationBanner } from '../../components/FamilyNotificationBanner';
+// FamilyNotificationBanner moved to AccountDetailsView for shared accounts only
 import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { MonthlyInsight } from './MonthlyInsight';
@@ -51,6 +51,10 @@ const FinanceView = () => {
 
   const activeAccounts = useMemo(() => accounts.filter(a => !a.isArchived), [accounts]);
   const selectedAccount = useMemo(() => selectedAccountId ? accounts.find(a => a.id === selectedAccountId) || null : null, [selectedAccountId, accounts]);
+  // Identify shared accounts (owned by someone else) to exclude their txs from main list
+  const sharedAccountIds = useMemo(() => new Set(
+    accounts.filter(a => a.ownerId && a.ownerId !== user?.uid).map(a => a.id)
+  ), [accounts, user?.uid]);
   // F-008: Calculate primary currency based on account count (not just first account)
   const primaryCurrency = useMemo(() => {
     const currencyCount: Record<string, number> = {};
@@ -79,7 +83,12 @@ const FinanceView = () => {
   useEffect(() => { const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300); return () => clearTimeout(timer); }, [searchQuery]);
 
   // Use optimized search hook (BUG-001 fix: sub-500ms for 1000+ transactions)
-  const { filteredTransactions, isSearching } = useTransactionSearch(transactions, debouncedSearch);
+  const { filteredTransactions: allFilteredTransactions, isSearching } = useTransactionSearch(transactions, debouncedSearch);
+  // Exclude shared account transactions from main list — they show inside account detail only
+  const filteredTransactions = useMemo(() =>
+    allFilteredTransactions.filter(t => !sharedAccountIds.has(t.accountId)),
+    [allFilteredTransactions, sharedAccountIds]
+  );
 
   const handleCloseForm = () => { setMode('view'); setEditingTransaction(undefined); setPrefillData(undefined); };
   const handleEdit = (tx: AnchorTransaction) => { setEditingTransaction(tx); setMode('editTx'); };
@@ -116,7 +125,7 @@ const FinanceView = () => {
       <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 relative ${isMobile ? 'space-y-5' : 'space-y-8'}`}>
         <SectionHeader title="Finance" subtitle="Multi-account asset management and cashflow tracking." action={<Button variant="secondary" size="sm" onClick={() => setMode(mode === 'addAcc' ? 'view' : 'addAcc')} className="gap-2"><Landmark className="w-4 h-4" /> <span>Add Account</span></Button>} />
 
-        {!isSearching && (<><FamilyNotificationBanner /><NetWorthCards netWorth={netWorth} /><MonthlyInsight transactions={transactions} currency={primaryCurrency} />
+        {!isSearching && (<><NetWorthCards netWorth={netWorth} /><MonthlyInsight transactions={transactions} currency={primaryCurrency} />
           <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-6'}`}>
             {activeAccounts.map((acc) => (<AccountCard key={acc.id} account={acc} userId={user?.uid || ''} isOwnerOfConnection={isFamilyOwner} familyMemberUid={familyMemberUid || undefined} onEdit={(acc) => setSelectedAccountId(acc.id)} onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)} />))}
             {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}

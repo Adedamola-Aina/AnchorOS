@@ -30,9 +30,10 @@ interface FamilyNotification {
 
 interface FamilyNotificationBannerProps {
     onNavigate?: (path: string) => void;
+    accountId?: string; // When provided, only show notifications for this account
 }
 
-export function FamilyNotificationBanner({ onNavigate }: FamilyNotificationBannerProps) {
+export function FamilyNotificationBanner({ onNavigate, accountId }: FamilyNotificationBannerProps) {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState<FamilyNotification[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -54,11 +55,12 @@ export function FamilyNotificationBanner({ onNavigate }: FamilyNotificationBanne
                 id: doc.id,
                 ...doc.data()
             })) as FamilyNotification[];
-            setNotifications(notifs);
+            // When scoped to a specific account, filter to that account's notifications
+            setNotifications(accountId ? notifs.filter(n => n.accountId === accountId) : notifs);
         });
 
         return () => unsubscribe();
-    }, [user]);
+    }, [user, accountId]);
 
     const handleDismiss = async (notificationId: string) => {
         if (!user) return;
