@@ -31,6 +31,20 @@
     ],
     "initiatives": [
         {
+            "id": "UX-034",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Isolate shared account transactions and notifications to account detail view",
+            "description": "Shared account transactions and family notifications were cluttering the main Finance page. Now personal accounts show on Finance page, shared account data (transactions, notifications, activity) shows only inside the shared account detail view. FamilyNotificationBanner scoped by accountId prop. Clear information boundary between personal and shared finances.",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-034"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "createdAt": "2026-02-06"
+        },
+        {
             "id": "UX-033",
             "team": "Mobile",
             "priority": "P2",
