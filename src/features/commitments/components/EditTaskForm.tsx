@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { AnchorTask, TimeOfDay } from '../../../types';
 import { Button } from '@anchor-os/ui';
@@ -18,6 +18,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     onSave,
     onCancel,
 }) => {
+    const formRef = useRef<HTMLDivElement>(null);
     const [editTitle, setEditTitle] = useState(task.title);
     const [editDomain, setEditDomain] = useState(task.domain || 'Personal Development');
     const [editScope, setEditScope] = useState<'personal' | 'family'>(task.category === 'family' ? 'family' : 'personal');
@@ -25,6 +26,13 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     const [editDays, setEditDays] = useState<string[]>(task.daysOfWeek || []);
     const [editDaysOfMonth, setEditDaysOfMonth] = useState<number[]>(task.daysOfMonth || (task.dayOfMonth ? [task.dayOfMonth] : []));
     const [isSaving, setIsSaving] = useState(false);
+
+    // EDIT-001: Scroll form into view when opened on mobile
+    useEffect(() => {
+        if (formRef.current && typeof formRef.current.scrollIntoView === 'function') {
+            formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, []);
 
     const domains = ['Health', 'Fitness', 'Work', 'Bible', 'Personal Development', 'Financial'];
 
@@ -53,7 +61,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     };
 
     return (
-        <Card className="space-y-4 p-5 border-task-500/20 shadow-xl animate-in slide-in-from-top-2 duration-200">
+        <Card ref={formRef} className="space-y-4 p-5 border-task-500/20 shadow-xl animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Editing {task.type} Commitment</span>
                 <Button variant="ghost" size="icon" onClick={onCancel} className="text-slate-400 h-8 w-8">

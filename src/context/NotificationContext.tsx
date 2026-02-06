@@ -197,11 +197,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         <NotificationContext.Provider value={{ showToast, confirm, requestPushPermission, fcmToken, pushPermissionStatus }}>
             {children}
             {createPortal(
-                <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+                <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-[100] flex flex-col gap-3 pointer-events-none">
                     {notifications.map(n => (
                         <div
                             key={n.id}
-                            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border animate-in slide-in-from-right-8 duration-300 min-w-[300px] max-w-md ${n.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400' :
+                            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border animate-in slide-in-from-right-8 duration-300 w-full sm:min-w-[300px] sm:max-w-md ${n.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400' :
                                 n.type === 'error' ? 'bg-rose-50 dark:bg-rose-800/20 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-400' :
                                     'bg-slate-800 text-white border-slate-700'
                                 }`}
@@ -212,7 +212,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                             <p className="text-sm font-medium pr-4">{n.message}</p>
                             <button
                                 onClick={() => setNotifications(prev => prev.filter(item => item.id !== n.id))}
-                                className="ml-auto p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 opacity-60 hover:opacity-100 transition-all"
+                                className="ml-auto min-w-11 min-h-11 flex items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/5 opacity-60 hover:opacity-100 transition-all"
                             >
                                 <X className="w-4 h-4" />
                             </button>

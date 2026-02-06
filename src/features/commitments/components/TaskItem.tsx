@@ -72,7 +72,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                     <button
                         onClick={handleToggle}
                         disabled={isAnimating}
-                        className={`relative p-2 rounded-full shrink-0 ${isAnimating
+                        className={`relative min-w-11 min-h-11 flex items-center justify-center rounded-full shrink-0 ${isAnimating
                             ? 'bg-emerald-500 text-white scale-150 ring-4 ring-emerald-300 dark:ring-emerald-700 shadow-lg shadow-emerald-500/50'
                             : task.completed
                                 ? 'bg-emerald-500 text-white'

@@ -64,7 +64,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     return (
         <div
             ref={parentRef}
-            className={`bg-transparent overflow-y-auto overscroll-contain ${className} ${loading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : ''}`}
+            className={`bg-transparent overflow-y-auto overscroll-contain ${className} ${loading ? 'opacity-40 grayscale-[0.5]' : ''}`}
         >
             <div
                 style={{

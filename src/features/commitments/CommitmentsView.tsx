@@ -82,7 +82,7 @@ const CommitmentsView = () => {
         <CommitmentsFilterBar filter={filter} viewMode={viewMode} onFilterChange={setFilter} onViewChange={setViewMode} />
         {showAdd && <TaskForm onClose={() => setShowAdd(false)} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} />}
         {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}
-        <div className={loadingTasks ? 'opacity-50 pointer-events-none' : ''}>
+        <div className={loadingTasks ? 'opacity-50' : ''}>
           {viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={toggleTask} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} onConfirmFinancial={handleConfirmFinancial} /> : <WeeklyView tasks={allFiltered} onToggle={toggleTask} />}
         </div>
         {totalFiltered === 0 && !showAdd && <CommitmentsEmptyState filter={filter} hasFamilyActive={hasFamilyActive} onCreateFirst={() => setShowAdd(true)} onLearnMore={() => showToast('Commitment exports will be available in the next update.', 'info')} />}

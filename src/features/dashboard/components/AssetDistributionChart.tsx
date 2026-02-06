@@ -17,7 +17,7 @@ interface AssetDistributionChartProps {
 
 export function AssetDistributionChart({ accountData }: AssetDistributionChartProps) {
     return (
-        <div className="glass-card p-6 min-w-0 flex flex-col min-h-[400px]">
+        <div className="glass-card p-6 min-w-0 flex flex-col min-h-[280px] sm:min-h-[400px]">
             <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Asset Distribution</h4>
             <div className="flex-1 flex flex-col sm:flex-row gap-6 min-h-0">
                 <div className="h-48 md:h-full md:w-1/2">
