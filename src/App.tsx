@@ -20,7 +20,7 @@ const APP_VERSION = (pkg as unknown as { version: string }).version;
 import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OfflineIndicator } from './components/shared/OfflineIndicator';
-import { useVersionCheck } from './hooks/useVersionCheck';
+import { useVersionCheck } from './hooks/useVersionCheck';\nimport { useAccessibility } from './hooks/useAccessibility';
 
 // Environment Banner - Shows in non-production environments
 const EnvironmentBanner = () => {
@@ -41,6 +41,7 @@ const EnvironmentBanner = () => {
 const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
   useLocation();
+  useAccessibility(profile?.accessibility);
 
   // Sync theme to root element with System support (PWA-006)
   React.useEffect(() => {

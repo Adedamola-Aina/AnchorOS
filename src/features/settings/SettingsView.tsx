@@ -92,7 +92,8 @@ const SettingsView = () => {
         )}
 
         <div id="settings-profile"><ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }} /></div>
-        <div id="settings-appearance"><AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }} /></div>
+        <div id="settings-appearance"><AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }}
+          accessibility={profile.accessibility} onUpdateAccessibility={(prefs) => updateProfile({ accessibility: { ...(profile.accessibility || { fontSize: 'default', highContrast: false, reducedMotion: false }), ...prefs } })} /></div>
         <div id="settings-security"><SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={mfa.isEnrolling} show2FASetup={mfa.show2FASetup} mfaQrUrl={mfa.mfaQrUrl} mfaManualKey={mfa.mfaManualKey}
           mfaCode={mfa.mfaCode} mfaError={mfa.mfaError} onSetShow2FASetup={mfa.setShow2FASetup} onSetMfaCode={mfa.setMfaCode} onGenerateMfaSecret={mfa.handleGenerateSecret}
           onEnrollMfa={mfa.handleEnroll} onUnenrollMfa={unenrollMfa} /></div>

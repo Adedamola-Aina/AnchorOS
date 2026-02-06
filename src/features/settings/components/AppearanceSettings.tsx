@@ -2,13 +2,16 @@ import React from 'react';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { ThemeToggle, type Theme } from '../../../components/shared';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
+import { AccessibilityControls, type AccessibilityPreferences } from './AccessibilityControls';
 
 interface AppearanceSettingsProps {
     theme: Theme;
     onSetTheme: (theme: Theme) => void;
+    accessibility?: AccessibilityPreferences;
+    onUpdateAccessibility?: (prefs: Partial<AccessibilityPreferences>) => void;
 }
 
-export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme, onSetTheme }) => {
+export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme, onSetTheme, accessibility, onUpdateAccessibility }) => {
     const getThemeIcon = () => {
         switch (theme) {
             case 'light': return <Sun className="w-5 h-5 text-amber-500" strokeWidth={2} />;
@@ -40,6 +43,12 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme, o
                         onSetTheme={onSetTheme}
                     />
                 </div>
+                {onUpdateAccessibility && (
+                    <AccessibilityControls
+                        preferences={accessibility || { fontSize: 'default', highContrast: false, reducedMotion: false }}
+                        onUpdate={onUpdateAccessibility}
+                    />
+                )}
             </CardContent>
         </Card>
     );

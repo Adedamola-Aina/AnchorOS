@@ -248,3 +248,26 @@
 .mobile-scroll-x::-webkit-scrollbar {
   display: none;
 }
+
+/* Accessibility: Font Size */
+.a11y-font-large { font-size: 112.5%; }
+.a11y-font-xl { font-size: 125%; }
+
+/* Accessibility: High Contrast */
+.a11y-high-contrast {
+  --tw-border-opacity: 1;
+  --tw-text-opacity: 1;
+}
+.a11y-high-contrast * {
+  border-color: currentColor !important;
+}
+
+/* Accessibility: Reduced Motion */
+.a11y-reduced-motion *,
+.a11y-reduced-motion *::before,
+.a11y-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
