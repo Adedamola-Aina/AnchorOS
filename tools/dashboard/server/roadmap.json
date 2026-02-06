@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "lastUpdated": "2026-02-01",
+    "lastUpdated": "2026-02-06",
     "teams": [
         "Product",
         "Engineering",
@@ -30,6 +30,663 @@
         "deferred"
     ],
     "initiatives": [
+        {
+            "id": "UX-033",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Add offline error handling for family operations",
+            "description": "shareAccount and disconnectFamily call Cloud Functions with no network check or offline queue. Add offline detection and retry logic for 97% mobile users.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-033",
+                "offline",
+                "error",
+                "handling",
+                "family",
+                "operations"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-010",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Shared account permission granularity - read-only vs read-write",
+            "description": "useFamilySharing shareAccount is binary share:boolean. Add read-only vs read-write permission control. Allow per-account visibility settings.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-010",
+                "shared",
+                "account",
+                "permission",
+                "granularity",
+                "read-only"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "UX-032",
+            "team": "Design",
+            "priority": "P2",
+            "title": "Accessibility controls - font size, high contrast, reduced motion",
+            "description": "AppearanceSettings only has theme toggle. Add font size slider, high contrast mode, and reduced motion toggle for accessibility compliance.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-032",
+                "accessibility",
+                "controls",
+                "size,",
+                "contrast,",
+                "reduced"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "UX-031",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Add back button in onboarding steps",
+            "description": "Onboarding flow has no way to go back to previous step. Users cannot correct mistakes without starting over.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-031",
+                "button",
+                "onboarding",
+                "steps",
+                "previous"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "UX-030",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Auto-submit at 6 digits for MFA and invite codes",
+            "description": "MFA and invite code inputs should auto-submit when 6 characters entered. Saves a tap on mobile.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-030",
+                "auto-submit",
+                "digits",
+                "invite",
+                "codes"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "UX-029",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Add inputMode=numeric on invite and MFA code inputs",
+            "description": "Numeric code inputs should use inputMode=numeric to show number keyboard on mobile. Currently shows full keyboard.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-029",
+                "inputmode=numeric",
+                "invite",
+                "inputs",
+                "numeric"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-009",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Per-category notification controls",
+            "description": "NotificationSettings only has global toggle. Add per-category controls: family activity, transaction alerts, commitment reminders. Add quiet hours/DND schedule.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-009",
+                "per-category",
+                "notification",
+                "controls",
+                "notificationsettings",
+                "global"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-008",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Add CSV export option for data export",
+            "description": "DataManagement only exports JSON. Add CSV export which mobile users can open in spreadsheet apps. More accessible format for 97% mobile users.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-008",
+                "export",
+                "option",
+                "datamanagement",
+                "exports"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-007",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Add password change flow in settings",
+            "description": "SecuritySettings only has MFA. Add password change capability with current password verification and Firebase Auth reauthentication.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-007",
+                "password",
+                "change",
+                "settings",
+                "securitysettings"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-006",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Add MFA recovery codes",
+            "description": "2FA enrollment should generate and display recovery codes. Store hashed codes in Firestore. Allow one-time use if user loses authenticator device.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-006",
+                "recovery",
+                "codes",
+                "enrollment",
+                "should",
+                "generate"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-005",
+            "team": "Security",
+            "priority": "P0",
+            "title": "Implement actual account deletion Cloud Function",
+            "description": "handleDeleteAccount needs backend implementation. Cloud Function to purge Firestore data, delete Firebase Auth user, comply with GDPR right to erasure.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-005",
+                "implement",
+                "actual",
+                "account",
+                "deletion",
+                "cloud"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-056",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "FamilySettingsV2 duplicates Firestore listeners from useFamilySharing",
+            "description": "FamilySettingsV2 sets up own onSnapshot listeners instead of using useFamilySharing hook. Creates 6 concurrent listeners for same data. State can diverge between components.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-056",
+                "familysettingsv2",
+                "duplicates",
+                "firestore",
+                "listeners",
+                "usefamilysharing"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-055",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Profile name fires Firestore write on every keystroke - no debounce",
+            "description": "ProfileSettings onChange calls updateProfile immediately. Typing John triggers 4 Firestore writes and 4 audit logs. Performance and cost disaster on mobile.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-055",
+                "profile",
+                "fires",
+                "firestore",
+                "write",
+                "every"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-054",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "writeBatch wipe data can exceed Firestore 500-op limit",
+            "description": "handleWipeData uses single writeBatch for all collections. Users with 500+ total documents get Firestore error. No chunking logic.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-054",
+                "writebatch",
+                "exceed",
+                "firestore",
+                "500-op",
+                "limit"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-053",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "MFA timeout stale closure - error never fires",
+            "description": "handleGenerateMfaSecret timeout captures pre-setState isEnrolling value (false). Condition isEnrolling && !mfaQrUrl always false. 10-second timeout error never displays.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-053",
+                "timeout",
+                "stale",
+                "closure",
+                "error",
+                "never"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-052",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Hardcoded naira in charts - AssetDistributionChart and CashFlowChart",
+            "description": "Both chart components hardcode naira symbol instead of using account currency. Wrong symbol shown for USD accounts in all visualizations.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-052",
+                "hardcoded",
+                "naira",
+                "charts",
+                "assetdistributionchart",
+                "cashflowchart"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-051",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "RecurringTransactionsList hardcodes NGN currency symbol",
+            "description": "RecurringTransactionsList always displays naira symbol regardless of transaction currency. USD recurring transactions show wrong symbol.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-051",
+                "recurringtransactionslist",
+                "hardcodes",
+                "currency",
+                "symbol"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-050",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "calculateNetWorth.total ignores USD entirely",
+            "description": "Net worth calculation only sums NGN balances. USD account balances are silently excluded from total net worth.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-050",
+                "calculatenetworth.total",
+                "ignores",
+                "entirely",
+                "worth",
+                "calculation"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-049",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "30 Day Summary is actually 28 days and uses today not selected month",
+            "description": "The 30 Day Summary card always calculates from today minus 28 days, ignoring which month the user has selected. Shows current data even when viewing past months.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-049",
+                "summary",
+                "actually",
+                "today",
+                "selected",
+                "month"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-048",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "MonthlyInsight uses first account currency for multi-currency totals",
+            "description": "Multi-currency users see meaningless sums. NGN + USD added together using NGN symbol. Should either convert via exchange rate or show per-currency totals.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-048",
+                "monthlyinsight",
+                "first",
+                "account",
+                "currency",
+                "multi-currency"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-047",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "No monthly opening/closing balance - always shows today",
+            "description": "Finance view always displays current balance regardless of which month is selected. Users cannot see what their balance was at end of previous months.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-047",
+                "monthly",
+                "opening/closing",
+                "balance",
+                "always",
+                "shows"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-046",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "15+ touch targets below 44px platform minimum",
+            "description": "WeeklyView toggle 24px, MonthlyDates 32px, TaskItem checkbox 32px, AssetAllocation expand 16px, notification toggles 24px, toast dismiss 24px, nav hamburger 36px. All below Apple 44px and Google 48px minimums.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-046",
+                "touch",
+                "targets",
+                "below",
+                "platform",
+                "minimum"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-045",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Loading overlay blocks all scrolling with pointer-events-none",
+            "description": "Dashboard loading overlay applies pointer-events-none to body, blocking all scroll and touch. Screen appears frozen during data loads.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-045",
+                "loading",
+                "overlay",
+                "blocks",
+                "scrolling",
+                "pointer-events-none"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-044",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Toast notifications min-w-300px overflows on small phones",
+            "description": "Toasts have min-w-[300px] + right-6 positioning. On 375px phones, toasts are cut off on left edge.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-044",
+                "toast",
+                "notifications",
+                "min-w-300px",
+                "overflows",
+                "small"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-043",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "autoComplete=off blocks mobile autofill on email and password",
+            "description": "Auth forms use autoComplete=off which blocks iOS/Android password autofill. 97% mobile users must hand-type credentials.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-043",
+                "autocomplete=off",
+                "blocks",
+                "mobile",
+                "autofill",
+                "email"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-042",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "min-h-screen used instead of dvh throughout auth and onboarding",
+            "description": "6+ files use min-h-screen which does not account for mobile browser chrome. Content hidden behind URL bar. Should use min-h-dvh.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-042",
+                "min-h-screen",
+                "instead",
+                "throughout",
+                "onboarding",
+                "files"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-041",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "1300ms hard delay before financial confirmation dialog",
+            "description": "Finance flow has setTimeout 1300ms before showing confirmation. Users think app is frozen while waiting for dialog.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-041",
+                "1300ms",
+                "delay",
+                "before",
+                "financial",
+                "confirmation"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-040",
+            "team": "Mobile",
+            "priority": "P0",
+            "title": "WeeklyView forces min-w-800px - unusable on mobile",
+            "description": "WeeklyView component has min-w-[800px] hardcoded. 375px phones show horizontal scroll bar, content unreadable. 97% users are mobile.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-040",
+                "weeklyview",
+                "forces",
+                "min-w-800px",
+                "unusable",
+                "mobile"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-039",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Push notification disable toggle broken - cannot turn off",
+            "description": "NotificationContext disable path only changes React state. FCM token not deleted from Firestore, browser permission stays granted, useEffect re-restores token on mount. Users cannot disable push.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-039",
+                "notification",
+                "disable",
+                "toggle",
+                "broken",
+                "cannot"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-038",
+            "team": "Security",
+            "priority": "P0",
+            "title": "handleDeleteAccount is no-op - GDPR violation",
+            "description": "SettingsView handleDeleteAccount shows toast and logs out but does not delete data. No Cloud Function, no Firestore purge, no Firebase Auth deletion. User data persists forever.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-038",
+                "handledeleteaccount",
+                "no-op",
+                "violation",
+                "settingsview"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-037",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Transfers double-counted in all summary aggregations",
+            "description": "Transfers stored as income/expense type. MonthlyInsight, CashFlowChart, and all summaries include them, showing 2x actual income and expenses.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-037",
+                "transfers",
+                "double-counted",
+                "summary",
+                "aggregations"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-036",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Type change income to expense produces zero balance correction",
+            "description": "Changing transaction type from income to expense without changing amount causes silent balance corruption due to wrong sign logic.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-036",
+                "change",
+                "income",
+                "expense",
+                "produces",
+                "balance"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-035",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Transfer deletion race condition - getDoc outside transaction",
+            "description": "Transfer deletion reads paired transaction with getDoc() outside Firestore runTransaction block. Race condition causes double-deletion or orphaned half-transfers.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-035",
+                "transfer",
+                "deletion",
+                "condition",
+                "getdoc",
+                "outside"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-034",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Cross-currency transfer edit corrupts destination balance",
+            "description": "Editing a cross-currency transfer applies source currency amount to destination account balance, corrupting multi-currency balances.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-034",
+                "cross-currency",
+                "transfer",
+                "corrupts",
+                "destination",
+                "balance"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-033",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Transaction scope field missing - as any cast hides undefined scope",
+            "description": "addTransaction in TransactionForm.tsx omits scope field, hidden by as any cast. All transactions stored with scope: undefined, breaking shared account filtering entirely.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-033",
+                "transaction",
+                "scope",
+                "field",
+                "missing",
+                "hides"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
         {
             "id": "PRD-006",
             "team": "Product",
@@ -487,14 +1144,15 @@
             "priority": "P1",
             "title": "Design Token Consolidation",
             "description": "Sync tokens in tailwind.config.js with Figma",
-            "status": "planned",
+            "status": "deferred",
             "detectionPatterns": [
                 "DES-002",
                 "design token",
                 "figma sync"
             ],
             "effort": "small",
-            "impact": "medium"
+            "impact": "medium",
+            "deferredReason": "Removed in v1.5.14 revert for environment parity"
         },
         {
             "id": "AUTH-001",
@@ -688,7 +1346,7 @@
             "team": "Database",
             "priority": "P2",
             "title": "Archival Strategy",
-            "description": "Move old transactions to cold storage (Firestore → BigQuery)",
+            "description": "Move old transactions to cold storage (Firestore \u2192 BigQuery)",
             "status": "planned",
             "detectionPatterns": [
                 "DB-003",
@@ -769,7 +1427,7 @@
             "team": "Data",
             "priority": "P3",
             "title": "Analytics Pipeline",
-            "description": "Firestore → BigQuery → Looker Studio for product analytics",
+            "description": "Firestore \u2192 BigQuery \u2192 Looker Studio for product analytics",
             "status": "planned",
             "detectionPatterns": [
                 "DATA-001",
@@ -831,14 +1489,15 @@
             "priority": "P3",
             "title": "Animation Library",
             "description": "Framer Motion integration for richer animations",
-            "status": "planned",
+            "status": "deferred",
             "detectionPatterns": [
                 "WEB-003",
                 "framer motion",
                 "animation library"
             ],
             "effort": "medium",
-            "impact": "medium"
+            "impact": "medium",
+            "deferredReason": "Removed in v1.5.14 revert for environment parity"
         },
         {
             "id": "GAP-001",
