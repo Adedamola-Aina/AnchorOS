@@ -47,9 +47,9 @@ const CommitmentsView = () => {
   };
 
   const handleConfirmFinancial = async (title: string) => {
-    // GAP-003 Fix: Use requestAnimationFrame instead of setTimeout for stable DOM sync
-    // UX-AUDIT: 1300ms total delay = 800ms animation + 500ms pause before dialog
-    await new Promise(resolve => setTimeout(resolve, 1300));
+    // BUG-041 Fix: Remove artificial 1300ms delay that made users think app was frozen
+    // TaskItem already has 800ms animation, no need for additional delay here
+    // Using only requestAnimationFrame to ensure DOM is painted before showing dialog
     await new Promise(resolve => requestAnimationFrame(resolve));
     if (await confirm({
       title: 'Financial Transaction?',
