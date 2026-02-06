@@ -128,9 +128,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                     title: formState.title, amountCents, type: formState.type, category: finalCategory,
                     accountId: formState.selectedAccId, accountName: sourceAccount.name,
                     currency: sourceAccount.currency, date: isoDate,
+                    scope: sourceAccount.scope,
                     destinationAccountId: formState.type === 'transfer' ? formState.destinationAccId : undefined,
                     ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) })
-                } as any);
+                });
                 haptic.trigger('success');
                 showToast('Transaction recorded', 'success');
             }

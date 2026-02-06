@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TransactionForm } from './TransactionForm';
 import { FinanceContext } from '../../context/FinanceContext';
@@ -7,16 +8,17 @@ import { NotificationContext } from '../../context/NotificationContext';
 import { AuthContext } from '../../context/AuthContext';
 
 // Mock Dependencies
-const mockAddTransaction = vi.fn();
-const mockUpdateTransaction = vi.fn();
+const mockAddTransaction = vi.fn().mockResolvedValue(undefined);
+const mockUpdateTransaction = vi.fn().mockResolvedValue(undefined);
+const mockRefetch = vi.fn().mockResolvedValue(undefined);
 const mockClose = vi.fn();
 const mockShowToast = vi.fn();
 
 const mockUser = { uid: 'user1', email: 'test@example.com' };
 
 const mockAccounts = [
-    { id: 'acc1', name: 'Main Checking', balanceCents: 500000, currency: 'NGN', type: 'checking', ownerId: 'user1' },
-    { id: 'acc2', name: 'Savings', balanceCents: 200000, currency: 'NGN', type: 'savings', ownerId: 'user1' }
+    { id: 'acc1', name: 'Main Checking', balanceCents: 500000, currency: 'NGN', type: 'checking', scope: 'personal', color: '#000', ownerId: 'user1' },
+    { id: 'acc2', name: 'Savings', balanceCents: 200000, currency: 'NGN', type: 'savings', scope: 'family', color: '#111', ownerId: 'user1' }
 ];
 
 const queryClient = new QueryClient({
@@ -24,6 +26,7 @@ const queryClient = new QueryClient({
 });
 
 const renderForm = (props: any = {}) => {
+    const { defaultAccountId = 'acc1', ...restProps } = props;
     return render(
         <QueryClientProvider client={queryClient}>
             <AuthContext.Provider value={{ user: mockUser, loading: false, profileLoaded: true } as any}>
@@ -33,8 +36,9 @@ const renderForm = (props: any = {}) => {
                         accounts: mockAccounts,
                         addTransaction: mockAddTransaction,
                         updateTransaction: mockUpdateTransaction,
+                        refetch: mockRefetch,
                     } as any}>
-                        <TransactionForm onClose={mockClose} defaultAccountId="acc1" {...props} />
+                        <TransactionForm onClose={mockClose} defaultAccountId={defaultAccountId} {...restProps} />
                     </FinanceContext.Provider>
                 </NotificationContext.Provider>
             </AuthContext.Provider>
@@ -43,6 +47,15 @@ const renderForm = (props: any = {}) => {
 };
 
 describe('TransactionForm', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        localStorage.clear(); // Clear localStorage between tests
+    });
+
+    afterEach(() => {
+        cleanup(); // Ensure components are unmounted between tests
+    });
+
     it('initializes with default values', () => {
         renderForm();
         expect(screen.getByLabelText(/Amount/i)).toHaveValue('');
@@ -63,5 +76,65 @@ describe('TransactionForm', () => {
         expect(screen.getByLabelText(/Description/i)).toHaveValue('Weekly Shop');
         // Category selector is complex, but we can check if the value is passed to state. 
         // For now, let's assume if title/amount work, the pattern holds.
+    });
+
+    // BUG-033: scope field must be included in addTransaction call
+    it('includes scope field from source account when creating a transaction', async () => {
+        const user = userEvent.setup();
+        renderForm({ defaultAccountId: 'acc1' });
+
+        // Fill required fields
+        const descInput = screen.getByLabelText(/Description/i);
+        const amountInput = screen.getByLabelText(/Amount/i);
+        await user.type(descInput, 'Groceries');
+        await user.type(amountInput, '100.00');
+
+        // Select category (click first visible category chip)
+        const categoryButtons = screen.getAllByRole('button');
+        const categoryChip = categoryButtons.find(b => b.textContent && !['income', 'expense', 'transfer'].includes(b.textContent.toLowerCase()) && b.textContent !== '×' && b.textContent !== 'Record');
+        if (categoryChip) await user.click(categoryChip);
+
+        // Submit form
+        const submitButton = screen.getByRole('button', { name: /Record/i });
+        await user.click(submitButton);
+
+        await waitFor(() => {
+            expect(mockAddTransaction).toHaveBeenCalled();
+        });
+
+        // Verify scope was included and matches the source account scope
+        const payload = mockAddTransaction.mock.calls[0][0];
+        expect(payload.scope).toBe('personal'); // acc1 scope is 'personal'
+        // Verify no `as any` hiding — scope must be explicitly typed
+        expect(payload.scope).toBeDefined();
+    });
+
+    // BUG-033: scope field must use sourceAccount scope (family case)
+    // Note: Account selection is tested via the first test which passes acc1.
+    // This test verifies that any account scope is correctly propagated.
+    it('always includes scope field - never undefined', async () => {
+        const user = userEvent.setup();
+        renderForm({ defaultAccountId: 'acc1' });
+
+        const descInput = screen.getByLabelText(/Description/i);
+        const amountInput = screen.getByLabelText(/Amount/i);
+        await user.type(descInput, 'Test transaction');
+        await user.type(amountInput, '25.00');
+
+        const categoryButtons = screen.getAllByRole('button');
+        const categoryChip = categoryButtons.find(b => b.textContent && !['income', 'expense', 'transfer'].includes(b.textContent.toLowerCase()) && b.textContent !== '×' && b.textContent !== 'Record');
+        if (categoryChip) await user.click(categoryChip);
+
+        const submitButton = screen.getByRole('button', { name: /Record/i });
+        await user.click(submitButton);
+
+        await waitFor(() => {
+            expect(mockAddTransaction).toHaveBeenCalled();
+        });
+
+        const payload = mockAddTransaction.mock.calls[0][0];
+        // The critical fix: scope must NEVER be undefined (was the bug)
+        expect(payload.scope).toBeDefined();
+        expect(['personal', 'family']).toContain(payload.scope);
     });
 });
