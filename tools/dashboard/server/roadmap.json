@@ -1032,19 +1032,6 @@
             "impact": "medium"
         },
         {
-            "id": "ENG-001",
-            "team": "Engineering",
-            "priority": "P1",
-            "title": "WebSocket Real-time",
-            "description": "Replace Firestore onSnapshot with dedicated WebSocket for live sync",
-            "status": "planned",
-            "detectionPatterns": [
-                "ENG-001"
-            ],
-            "effort": "large",
-            "impact": "medium"
-        },
-        {
             "id": "ENG-002",
             "team": "Engineering",
             "priority": "P1",
@@ -1092,19 +1079,6 @@
             "status": "planned",
             "detectionPatterns": [
                 "ARCH-020"
-            ],
-            "effort": "large",
-            "impact": "medium"
-        },
-        {
-            "id": "ARCH-021",
-            "team": "Architecture",
-            "priority": "P1",
-            "title": "GraphQL Layer",
-            "description": "Add Apollo Server for flexible querying, reduce over-fetching",
-            "status": "planned",
-            "detectionPatterns": [
-                "ARCH-021"
             ],
             "effort": "large",
             "impact": "medium"
