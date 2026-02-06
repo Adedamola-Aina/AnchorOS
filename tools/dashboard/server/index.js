@@ -340,37 +340,45 @@ app.get('/api/git/roadmap', async (req, res) => {
         const commitMessages = commits.map(c => c.message.toLowerCase());
 
         // Auto-detect status based on git history
+        // IMPORTANT: Only detect completion if the EXACT ID appears in a commit message
+        // Generic keyword matching caused massive false positives (e.g., "mobile" matching all mobile commits)
+        // Also skip revert/remove commits — those indicate feature was rolled back, not completed
         const enrichedInitiatives = roadmapData.initiatives.map(item => {
-            // If already marked completed, keep it
-            if (item.status === 'completed') {
+            // If already marked completed or deferred, keep it (don't auto-detect)
+            if (item.status === 'completed' || item.status === 'deferred') {
                 return { ...item, detectedFromGit: false };
             }
 
-            // Check if any detection pattern matches git commits
-            const patterns = item.detectionPatterns || [];
+            // Only check for the exact ID (first pattern is always the ID)
+            // This prevents false positives from generic keywords like "mobile", "error", "transfer"
+            const itemId = item.id.toLowerCase();
             const matchedCommits = [];
 
-            for (const pattern of patterns) {
-                const lowerPattern = pattern.toLowerCase();
-                for (let i = 0; i < commits.length; i++) {
-                    if (commitMessages[i].includes(lowerPattern)) {
-                        matchedCommits.push({
-                            hash: commits[i].hash,
-                            message: commits[i].message,
-                            date: commits[i].date
-                        });
-                        break; // One match per pattern is enough
-                    }
+            for (let i = 0; i < commits.length; i++) {
+                const msg = commitMessages[i];
+                // Skip revert/remove commits — they indicate rollback, not completion
+                if (msg.includes('revert') || msg.includes('remove')) {
+                    continue;
+                }
+                // Require the exact ID to appear in the commit message
+                // e.g., "fix: BUG-043 resolve autofill issue" must contain "bug-043"
+                if (msg.includes(itemId)) {
+                    matchedCommits.push({
+                        hash: commits[i].hash,
+                        message: commits[i].message,
+                        date: commits[i].date
+                    });
+                    break; // One match is enough
                 }
             }
 
-            // If we found matches, mark as in-progress or completed
+            // If we found a commit with the exact ID, mark as completed
             if (matchedCommits.length > 0) {
                 return {
                     ...item,
                     status: 'completed',
                     detectedFromGit: true,
-                    matchedCommits: matchedCommits.slice(0, 3) // Top 3 matches
+                    matchedCommits: matchedCommits
                 };
             }
 
