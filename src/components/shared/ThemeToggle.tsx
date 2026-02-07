@@ -7,14 +7,18 @@ interface ThemeToggleProps {
     theme: Theme;
     onSetTheme: (theme: Theme) => void;
     variant?: 'full' | 'minimal';
+    /** Filter which options to show. Defaults to all three. */
+    options?: Theme[];
 }
 
-export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, variant = 'full' }) => {
-    const themes: { value: Theme; icon: typeof Sun; label: string }[] = [
-        { value: 'light', icon: Sun, label: 'Light' },
-        { value: 'system', icon: Monitor, label: 'Auto' },
-        { value: 'dark', icon: Moon, label: 'Dark' },
-    ];
+const allThemes: { value: Theme; icon: typeof Sun; label: string }[] = [
+    { value: 'light', icon: Sun, label: 'Light' },
+    { value: 'system', icon: Monitor, label: 'Auto' },
+    { value: 'dark', icon: Moon, label: 'Dark' },
+];
+
+export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, variant = 'full', options }) => {
+    const themes = options ? allThemes.filter(t => options.includes(t.value)) : allThemes;
 
     return (
         <div className={`flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner transition-all duration-300 ${variant === 'minimal' ? 'scale-90' : ''}`}>
@@ -51,3 +55,4 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onSetTheme, var
         </div>
     );
 };
+
