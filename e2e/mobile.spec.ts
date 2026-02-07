@@ -84,7 +84,7 @@ test.describe('Mobile Viewport - Dashboard', () => {
 
     test('should display mobile navigation correctly', async ({ page }) => {
         // Check if sidebar collapses or hamburger menu appears
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: /Dashboard|Home/ });
         const isLoggedIn = await dashboardBtn.isVisible().catch(() => false);
 
         if (isLoggedIn) {
@@ -97,7 +97,7 @@ test.describe('Mobile Viewport - Dashboard', () => {
     });
 
     test('should have scrollable content on mobile', async ({ page }) => {
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: /Dashboard|Home/ });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
             // Check page is scrollable if content overflows
@@ -109,7 +109,7 @@ test.describe('Mobile Viewport - Dashboard', () => {
     });
 
     test('should display charts responsively', async ({ page }) => {
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: /Dashboard|Home/ });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
             // Charts should resize for mobile
@@ -129,7 +129,7 @@ test.describe('Mobile Viewport - Finance', () => {
     });
 
     test('should display account cards in mobile layout', async ({ page }) => {
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: /Dashboard|Home/ });
 
         if (await page.locator('text=Net Worth').isVisible().catch(() => false)) {
             // We should be on Finance page already due to loginOrSignup default
@@ -147,7 +147,7 @@ test.describe('Mobile Viewport - Finance', () => {
     });
 
     test('should have touch-friendly action buttons', async ({ page }) => {
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: /Dashboard|Home/ });
 
         if (await page.locator('text=Net Worth').isVisible().catch(() => false)) {
             await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible();
@@ -164,7 +164,7 @@ test.describe('Mobile Viewport - Finance', () => {
     });
 
     test('should allow horizontal scroll for transactions on mobile', async ({ page }) => {
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: /Dashboard|Home/ });
 
         if (await page.locator('text=Net Worth').isVisible().catch(() => false)) {
             await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible();

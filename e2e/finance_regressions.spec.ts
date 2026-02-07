@@ -21,26 +21,26 @@ test.describe('Finance Regressions and Fixes', () => {
         const accountName = `Test Account ${Date.now()}`;
         await page.getByRole('button', { name: 'Add Account' }).first().click();
         await page.getByPlaceholder(/Zenith Spending/).fill(accountName);
-        await page.getByRole('combobox', { name: 'Account Type' }).selectOption('checking');
+        await page.locator('select:has(option[value="checking"])').first().selectOption('checking');
         await page.getByPlaceholder('0.00').fill('1000');
         const createBtn = page.getByRole('button', { name: 'Create Account' });
         await expect(createBtn).toBeEnabled();
         await createBtn.click();
 
         // Wait for account to appear and select it to isolate view
-        await expect(page.getByText(accountName)).toBeVisible();
+        await expect(page.getByText(accountName)).toBeVisible({ timeout: 15000 });
         await page.getByText(accountName).click();
 
         // 4. Case A: Positive Savings (Income > Expense)
         // Add Income: $2000
-        await page.getByRole('button', { name: 'Add Transaction' }).click();
+        await page.getByRole('button', { name: 'Pay Bill' }).click();
         await page.getByLabel('Amount').fill('2000');
         await page.getByRole('button', { name: 'Income' }).click();
         await page.getByLabel('Description').fill('Regression Income');
         await page.getByRole('button', { name: 'Record Transaction' }).click();
 
         // Add Expense: $500
-        await page.getByRole('button', { name: 'Add Transaction' }).click();
+        await page.getByRole('button', { name: 'Pay Bill' }).click();
         await page.getByLabel('Amount').fill('500');
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Description').fill('Regression Expense 1');
@@ -53,7 +53,7 @@ test.describe('Finance Regressions and Fixes', () => {
 
         // 5. Case B: Overspending (Expense > Income)
         // Add Expense: $3000 (Total Expense 3500 > Income 2000)
-        await page.getByRole('button', { name: 'Add Transaction' }).click();
+        await page.getByRole('button', { name: 'Pay Bill' }).click();
         await page.getByLabel('Amount').fill('3000');
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Description').fill('Regression Expense 2');
@@ -82,11 +82,12 @@ test.describe('Finance Regressions and Fixes', () => {
         const createBtn = page.getByRole('button', { name: 'Create Account' });
         await expect(createBtn).toBeEnabled();
         await createBtn.click();
+        await expect(page.getByText(accountName)).toBeVisible({ timeout: 15000 });
         await page.getByText(accountName).click();
 
         // 3. Add Transaction
         const txTitle = `Tx to Delete ${Date.now()}`;
-        await page.getByRole('button', { name: 'Add Transaction' }).click();
+        await page.getByRole('button', { name: 'Pay Bill' }).click();
         await page.getByLabel('Amount').fill('123');
         await page.getByLabel('Description').fill(txTitle);
         await page.getByRole('button', { name: 'Expense' }).click();

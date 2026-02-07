@@ -68,24 +68,28 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
         }
     }
 
-    // Wait for Dashboard content - sidebar or dashboard button is a reliable indicator of successful login
+    // Wait for Dashboard content - sidebar (desktop) or bottom nav (mobile) indicates successful login
     // We increase timeout to accommodate cold starts or slow animations
-    const dashboardBtn = page.locator('button:has-text("Dashboard")');
-    const sidebar = page.locator('aside');
-    await expect(dashboardBtn.or(sidebar)).toBeVisible({ timeout: 30000 });
+    await page.waitForFunction(() => {
+        const aside = document.querySelector('aside');
+        const bottomNav = document.querySelector('nav[aria-label="Mobile navigation"]');
+        const asideVisible = aside && getComputedStyle(aside).display !== 'none';
+        const navVisible = bottomNav && getComputedStyle(bottomNav).display !== 'none';
+        return asideVisible || navVisible;
+    }, null, { timeout: 30000 });
 
     // Optional: Navigate to Finance and ensure account exists
     if (!skipNavigation) {
         // We need to handle both Desktop (sidebar visible) and Mobile (bottom nav)
         const aside = page.locator('aside');
-        let financeBtn = aside.getByRole('button', { name: 'Finance' });
+        let financeBtn = aside.getByRole('link', { name: 'Finance' });
 
         // If on mobile, the desktop sidebar is hidden. Use the bottom nav instead.
         const isDesktopSidebarVisible = await aside.isVisible().catch(() => false);
 
         if (!isDesktopSidebarVisible) {
             // Mobile: Use bottom navigation bar
-            financeBtn = page.locator('nav[aria-label="Main navigation"] a, nav[aria-label="Main navigation"] button').filter({ hasText: 'Finance' }).first();
+            financeBtn = page.locator('nav[aria-label="Mobile navigation"] a, nav[aria-label="Mobile navigation"] button').filter({ hasText: 'Finance' }).first();
         }
 
         if (await financeBtn.isVisible()) {

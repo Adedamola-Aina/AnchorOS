@@ -82,7 +82,7 @@ test.describe('Finance - Accounts', () => {
 
     test('Account balance displays correctly', async ({ page }) => {
         // Look for currency symbols indicating balance display
-        const currencyDisplay = page.locator('text=₦, text=$').first();
+        const currencyDisplay = page.locator('text=₦').or(page.locator('text=$')).first();
         const hasCurrency = await currencyDisplay.isVisible().catch(() => false);
 
         // Should have at least one balance displayed
@@ -281,7 +281,7 @@ test.describe('Finance - Account Detail', () => {
         const hasAccount = await openFirstAccount(page);
         if (hasAccount) {
             // Should show history section or transaction list
-            const history = page.locator('text=History, text=Transactions, text=Activity');
+            const history = page.locator('text=History').or(page.locator('text=Transactions')).or(page.locator('text=Activity'));
             const hasHistory = await history.first().isVisible().catch(() => false);
 
             // Account might be empty with no transactions
@@ -295,7 +295,7 @@ test.describe('Finance - Account Detail', () => {
         const hasAccount = await openFirstAccount(page);
         if (hasAccount) {
             // Should show balance with currency symbol
-            const balance = page.locator('text=₦, text=$');
+            const balance = page.locator('text=₦').or(page.locator('text=$'));
             const hasBalance = await balance.first().isVisible().catch(() => false);
 
             // Balance should be visible if account opened successfully
