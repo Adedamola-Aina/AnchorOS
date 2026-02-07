@@ -222,14 +222,14 @@ test.describe('Error Handling - UI Edge Cases', () => {
     test('should handle rapid navigation', async ({ page }) => {
         await login(page);
 
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
             // Rapid navigation between views
-            await page.getByRole('button', { name: 'Finance' }).click();
-            await page.getByRole('button', { name: 'Dashboard' }).click();
-            await page.getByRole('button', { name: 'Commitments' }).click();
-            await page.getByRole('button', { name: 'System' }).click();
+            await page.getByRole('link', { name: 'Finance' }).click();
+            await page.getByRole('link', { name: 'Dashboard' }).click();
+            await page.getByRole('link', { name: 'Commitments' }).click();
+            await page.getByRole('link', { name: 'System' }).click();
 
             // Should not crash
             const body = page.locator('body');
@@ -284,11 +284,11 @@ test.describe('Error Handling - Data Loading', () => {
     test('should show loading states appropriately', async ({ page }) => {
         await login(page);
 
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
             // Navigate to finance (may have loading state)
-            await page.getByRole('button', { name: 'Finance' }).click();
+            await page.getByRole('link', { name: 'Finance' }).click();
 
             // Either data loads or loading indicator shows, then data loads
             await page.waitForTimeout(2000);
@@ -303,10 +303,10 @@ test.describe('Error Handling - Data Loading', () => {
     test('should handle empty data states', async ({ page }) => {
         await login(page);
 
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
-            await page.getByRole('button', { name: 'Finance' }).click();
+            await page.getByRole('link', { name: 'Finance' }).click();
             await page.waitForTimeout(1000);
 
             // Should show "Add Account" button even when empty

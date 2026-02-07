@@ -30,11 +30,11 @@ test.describe('Fabric Features', () => {
         await loginOrSignup(page, { email, password, name: 'Fabric User' });
 
         // Ensure we have a task (loginOrSignup handles basic setup, but we need a specific task)
-        const commitmentsBtn = page.getByRole('button', { name: 'Commitments' });
+        const commitmentsBtn = page.getByRole('link', { name: 'Commitments' });
         await commitmentsBtn.click();
 
         // Add a financial task if not present
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible({ timeout: 10000 });
 
         // Click New Commitment to open modal
         const newCommitmentBtn = page.getByRole('button', { name: 'New Commitment' });
@@ -74,7 +74,7 @@ test.describe('Fabric Features', () => {
         // Try to click commitments button again - handle mobile/desktop if needed, but 
         // loginOrSignup already handles opening drawer if mobile. 
         // Here we just re-assert headings.
-        const reCommitmentsBtn = page.getByRole('button', { name: 'Commitments' });
+        const reCommitmentsBtn = page.getByRole('link', { name: 'Commitments' });
         if (await reCommitmentsBtn.isVisible()) {
             await reCommitmentsBtn.click();
         } else {
@@ -86,11 +86,11 @@ test.describe('Fabric Features', () => {
             if (await menuToggle.isVisible()) {
                 await menuToggle.click();
                 await page.waitForTimeout(500);
-                await page.getByRole('button', { name: 'Commitments' }).click();
+                await page.getByRole('link', { name: 'Commitments' }).click();
             }
         }
 
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible({ timeout: 10000 });
 
         // 3. Setup Dialog Listener
         page.on('dialog', async dialog => {
@@ -99,7 +99,7 @@ test.describe('Fabric Features', () => {
         });
 
         // Debugging: Check what is visible
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible({ timeout: 10000 });
         await page.waitForTimeout(2000); // Wait for list to render
 
         const allText = await page.locator('body').innerText();

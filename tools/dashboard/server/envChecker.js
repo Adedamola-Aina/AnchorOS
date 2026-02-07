@@ -30,7 +30,7 @@ const ENVIRONMENTS = {
     },
     staging: {
         name: 'Staging',
-        url: 'https://anchor-staging.tail2fa2e.ts.net',
+        url: 'https://anchor-os-staging.web.app',
         firebaseProject: 'anchor-os-staging'
     },
     development: {

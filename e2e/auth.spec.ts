@@ -117,7 +117,7 @@ test.describe('Login', () => {
         // Should redirect to dashboard - check for sidebar or welcome message
         const sidebar = page.locator('aside');
         const welcomeBack = page.locator('text=Welcome back');
-        await expect(sidebar.or(welcomeBack)).toBeVisible({ timeout: 15000 });
+        await expect(sidebar.or(welcomeBack).first()).toBeVisible({ timeout: 15000 });
     });
 
     test('Invalid password shows error', async ({ page }) => {
@@ -244,9 +244,11 @@ test.describe('MFA', () => {
     });
 
     test('2FA section is visible in settings', async ({ page }) => {
-        // Look for Identity & Security section which contains 2FA
-        const securitySection = page.locator('text=Identity').or(page.locator('text=Security')).or(page.locator('text=Two-Factor')).or(page.locator('text=2FA'));
-        await expect(securitySection.first()).toBeVisible({ timeout: 5000 });
+        // BUG-064 added SectionNav pill buttons; scroll to the security section first
+        const securitySection = page.locator('#settings-security');
+        await securitySection.scrollIntoViewIfNeeded();
+        const heading = securitySection.locator('text=Identity & Security').or(securitySection.locator('text=Two-Factor')).or(securitySection.locator('text=2FA'));
+        await expect(heading.first()).toBeVisible({ timeout: 5000 });
     });
 
     test('Setup 2FA button shows QR code flow', async ({ page }) => {

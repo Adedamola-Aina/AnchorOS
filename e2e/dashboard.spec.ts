@@ -32,13 +32,15 @@ test.describe('Dashboard', () => {
     });
 
     test('Renders after login', async ({ page }) => {
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
         await expect(dashboardBtn).toBeVisible();
 
-        // Dashboard should be the active view
+        // Dashboard should be the active view (NavLink sets aria-current="page" when active)
         const isActive = await dashboardBtn.evaluate(el =>
+            el.classList.contains('bg-slate-800') ||
             el.classList.contains('bg-amber-50') ||
             el.classList.contains('active') ||
+            el.getAttribute('aria-current') === 'page' ||
             el.getAttribute('aria-selected') === 'true'
         );
         expect(isActive).toBe(true);
@@ -46,7 +48,7 @@ test.describe('Dashboard', () => {
 
     test('Net Worth displays', async ({ page }) => {
         // Look for Net Worth section with currency symbols
-        const netWorthSection = page.locator('text=Net Worth, text=₦, text=$');
+        const netWorthSection = page.locator('text=Net Worth').or(page.locator('text=₦')).or(page.locator('text=$'));
         const hasNetWorth = await netWorthSection.first().isVisible().catch(() => false);
 
         expect(hasNetWorth).toBe(true);
@@ -54,7 +56,7 @@ test.describe('Dashboard', () => {
 
     test('Recent activity displays', async ({ page }) => {
         // Look for activity section
-        const activitySection = page.locator('text=Recent Activity, text=Transactions, text=Today');
+        const activitySection = page.locator('text=Recent Activity').or(page.locator('text=Transactions')).or(page.locator('text=Today'));
         const hasActivity = await activitySection.first().isVisible().catch(() => false);
 
         expect(typeof hasActivity).toBe('boolean');
@@ -71,7 +73,7 @@ test.describe('Dashboard', () => {
     });
 
     test('Navigation to Finance works', async ({ page }) => {
-        const financeBtn = page.locator('aside').getByRole('button', { name: 'Finance' });
+        const financeBtn = page.locator('aside').getByRole('link', { name: 'Finance' });
         await financeBtn.click();
 
         await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible();
@@ -86,7 +88,7 @@ test.describe('Dashboard', () => {
 
     test('Productivity score displays', async ({ page }) => {
         // Look for productivity/score section
-        const productivitySection = page.locator('text=Productivity, text=Score, text=%');
+        const productivitySection = page.locator('text=Productivity').or(page.locator('text=Score')).or(page.locator('text=%'));
         const hasScore = await productivitySection.first().isVisible().catch(() => false);
 
         expect(typeof hasScore).toBe('boolean');
@@ -94,7 +96,7 @@ test.describe('Dashboard', () => {
 
     test('Welcome message shows user name', async ({ page }) => {
         // Look for greeting with user name
-        const greeting = page.locator('text=Hello, text=Welcome, text=Good');
+        const greeting = page.locator('text=Hello').or(page.locator('text=Welcome')).or(page.locator('text=Good'));
         const hasGreeting = await greeting.first().isVisible().catch(() => false);
 
         expect(typeof hasGreeting).toBe('boolean');

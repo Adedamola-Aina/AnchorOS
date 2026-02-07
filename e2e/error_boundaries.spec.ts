@@ -31,7 +31,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
 
     test('Finance: error boundary catches and displays error UI', async ({ page }) => {
         // Navigate to Finance
-        const financeBtn = page.getByRole('button', { name: 'Finance' });
+        const financeBtn = page.getByRole('link', { name: 'Finance' });
         if (await financeBtn.isVisible().catch(() => false)) {
             await financeBtn.click();
             await page.waitForTimeout(1000);
@@ -55,13 +55,13 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
 
     test('Commitments: error in one feature does not crash entire app', async ({ page }) => {
         // Navigate to Commitments
-        const commitmentsBtn = page.getByRole('button', { name: 'Commitments' });
+        const commitmentsBtn = page.getByRole('link', { name: 'Commitments' });
         if (await commitmentsBtn.isVisible().catch(() => false)) {
             await commitmentsBtn.click();
             await page.waitForTimeout(1000);
 
             // Even if Commitments has an error, other navigation should work
-            const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+            const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
             await dashboardBtn.click();
             await page.waitForTimeout(500);
 
@@ -70,7 +70,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
             await expect(body).toBeVisible();
 
             // Can navigate back to Finance
-            const financeBtn = page.getByRole('button', { name: 'Finance' });
+            const financeBtn = page.getByRole('link', { name: 'Finance' });
             if (await financeBtn.isVisible().catch(() => false)) {
                 await financeBtn.click();
                 await page.waitForTimeout(500);
@@ -85,13 +85,13 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
 
     test('Dashboard: error boundary isolates widget failures', async ({ page }) => {
         // Dashboard should be visible
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
         if (await dashboardBtn.isVisible().catch(() => false)) {
             await dashboardBtn.click();
             await page.waitForTimeout(1000);
 
             // Even if dashboard widgets have errors, navigation works
-            const settingsBtn = page.getByRole('button', { name: 'Settings' });
+            const settingsBtn = page.getByRole('link', { name: /System|Settings/ });
             await settingsBtn.click();
             await page.waitForTimeout(500);
 
@@ -104,7 +104,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
 
     test('Settings: error boundary protects security-sensitive operations', async ({ page }) => {
         // Navigate to Settings
-        const settingsBtn = page.getByRole('button', { name: 'Settings' });
+        const settingsBtn = page.getByRole('link', { name: /System|Settings/ });
         if (await settingsBtn.isVisible().catch(() => false)) {
             await settingsBtn.click();
             await page.waitForTimeout(1000);
@@ -114,7 +114,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
             await expect(body).toBeVisible();
 
             // Can navigate away
-            const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+            const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
             await dashboardBtn.click();
             await page.waitForTimeout(500);
 
@@ -135,7 +135,7 @@ test.describe('Feature Error Boundaries - Recovery UI', () => {
         // In a real error scenario, these buttons would appear
 
         // Navigate to Finance to ensure boundary is mounted
-        const financeBtn = page.getByRole('button', { name: 'Finance' });
+        const financeBtn = page.getByRole('link', { name: 'Finance' });
         if (await financeBtn.isVisible().catch(() => false)) {
             await financeBtn.click();
             await page.waitForTimeout(1000);
@@ -160,7 +160,7 @@ test.describe('Feature Error Boundaries - Recovery UI', () => {
         // This test documents the expected behavior
         // The actual mailto link is tested in unit tests
 
-        const settingsBtn = page.getByRole('button', { name: 'Settings' });
+        const settingsBtn = page.getByRole('link', { name: /System|Settings/ });
         if (await settingsBtn.isVisible().catch(() => false)) {
             await settingsBtn.click();
             await page.waitForTimeout(500);
@@ -187,7 +187,7 @@ test.describe('Feature Error Boundaries - Mobile Responsive', () => {
         // Touch targets: min-h-[44px] (iOS standard)
 
         // Navigate to Finance on mobile
-        const financeBtn = page.getByRole('button', { name: 'Finance' });
+        const financeBtn = page.getByRole('link', { name: 'Finance' });
         if (await financeBtn.isVisible().catch(() => false)) {
             await financeBtn.click();
             await page.waitForTimeout(1000);
@@ -210,12 +210,12 @@ test.describe('Feature Error Boundaries - Mobile Responsive', () => {
         // Error boundary buttons comply with min-h-[44px] on mobile
 
         // Navigate through features on mobile
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
         if (await dashboardBtn.isVisible().catch(() => false)) {
             await dashboardBtn.click();
             await page.waitForTimeout(500);
 
-            const commitmentsBtn = page.getByRole('button', { name: 'Commitments' });
+            const commitmentsBtn = page.getByRole('link', { name: 'Commitments' });
             if (await commitmentsBtn.isVisible().catch(() => false)) {
                 await commitmentsBtn.click();
                 await page.waitForTimeout(500);
@@ -264,7 +264,7 @@ test.describe('Feature Error Boundaries - Accessibility', () => {
         // - "Report this issue" for Report Issue button
 
         // Navigate to features to ensure boundaries are mounted
-        const financeBtn = page.getByRole('button', { name: 'Finance' });
+        const financeBtn = page.getByRole('link', { name: 'Finance' });
         if (await financeBtn.isVisible().catch(() => false)) {
             await financeBtn.click();
             await page.waitForTimeout(500);
@@ -282,7 +282,7 @@ test.describe('Feature Error Boundaries - Accessibility', () => {
         // Error boundary buttons are native <button> elements
         // Keyboard navigation: Tab, Enter, Space all work
 
-        const dashboardBtn = page.getByRole('button', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
         if (await dashboardBtn.isVisible().catch(() => false)) {
             // Test keyboard navigation through app
             await page.keyboard.press('Tab');
@@ -309,7 +309,7 @@ test.describe('Feature Error Boundaries - Dark Mode', () => {
         // - border-rose-200 dark:border-rose-900/50
 
         // Toggle dark mode if possible
-        const settingsBtn = page.getByRole('button', { name: 'Settings' });
+        const settingsBtn = page.getByRole('link', { name: /System|Settings/ });
         if (await settingsBtn.isVisible().catch(() => false)) {
             await settingsBtn.click();
             await page.waitForTimeout(1000);
@@ -361,7 +361,7 @@ test.describe('Feature Error Boundaries - Integration', () => {
         // Verify error boundaries are transparent when no errors occur
 
         // Navigate to Finance and perform actions
-        const financeBtn = page.getByRole('button', { name: 'Finance' });
+        const financeBtn = page.getByRole('link', { name: 'Finance' });
         if (await financeBtn.isVisible().catch(() => false)) {
             await financeBtn.click();
             await page.waitForTimeout(1000);
