@@ -26,8 +26,19 @@ export const mapFirebaseError = (error: unknown): string => {
             return 'This sign-in method is not enabled. Please contact support.';
         case 'auth/quota-exceeded':
             return 'Limit exceeded. Please check your usage or try again later.';
+        // Firestore operation errors (BUG-077: improved transfer diagnostics)
+        case 'not-found':
+            return 'The requested record was not found. It may have been deleted.';
+        case 'already-exists':
+            return 'This record already exists. Please refresh and try again.';
+        case 'deadline-exceeded':
+            return 'The operation timed out. Please check your connection and try again.';
+        case 'aborted':
+            return 'The operation was interrupted. Please try again.';
+        case 'failed-precondition':
+            return 'This action cannot be completed right now. Please refresh and try again.';
         default:
             // Strip "Firebase: " prefix if present
-            return msg.replace('Firebase: ', '');
+            return msg.replace('Firebase: ', '') || 'Something went wrong. Please try again.';
     }
 };

@@ -610,6 +610,390 @@
       "completedDate": "2026-02-06",
       "cycleTime": null,
       "recordedAt": "2026-02-06T11:00:00.416Z"
+    },
+    {
+      "itemId": "BUG-075",
+      "completedDate": "2026-02-07",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.768Z"
+    },
+    {
+      "itemId": "BUG-076",
+      "completedDate": "2026-02-07",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.769Z"
+    },
+    {
+      "itemId": "a3d6f23",
+      "completedDate": "2026-02-07",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.770Z"
+    },
+    {
+      "itemId": "dcf99d2",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.771Z"
+    },
+    {
+      "itemId": "7c33821",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.771Z"
+    },
+    {
+      "itemId": "5ae2f8e",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.771Z"
+    },
+    {
+      "itemId": "d65e6b2",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.771Z"
+    },
+    {
+      "itemId": "cab91c8",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.771Z"
+    },
+    {
+      "itemId": "FEATURE-001",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.771Z"
+    },
+    {
+      "itemId": "FEATURE-012",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.772Z"
+    },
+    {
+      "itemId": "073c0cc",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.772Z"
+    },
+    {
+      "itemId": "ef78b03",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.772Z"
+    },
+    {
+      "itemId": "FEATURE-011",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.772Z"
+    },
+    {
+      "itemId": "FEATURE-010",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.772Z"
+    },
+    {
+      "itemId": "FEATURE-009",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.772Z"
+    },
+    {
+      "itemId": "FEATURE-008",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.773Z"
+    },
+    {
+      "itemId": "FEATURE-007",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.773Z"
+    },
+    {
+      "itemId": "FEATURE-006",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.773Z"
+    },
+    {
+      "itemId": "FEATURE-005",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.773Z"
+    },
+    {
+      "itemId": "FEATURE-004",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.773Z"
+    },
+    {
+      "itemId": "FEATURE-003",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.773Z"
+    },
+    {
+      "itemId": "FEATURE-002",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.773Z"
+    },
+    {
+      "itemId": "ARCH-006",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.774Z"
+    },
+    {
+      "itemId": "ARCH-005",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.774Z"
+    },
+    {
+      "itemId": "ARCH-004",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.774Z"
+    },
+    {
+      "itemId": "a4197a8",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.774Z"
+    },
+    {
+      "itemId": "8f9a456",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.774Z"
+    },
+    {
+      "itemId": "0fa842f",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.774Z"
+    },
+    {
+      "itemId": "2a9d892",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.774Z"
+    },
+    {
+      "itemId": "BUG-072",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.775Z"
+    },
+    {
+      "itemId": "BUG-071",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.775Z"
+    },
+    {
+      "itemId": "BUG-070",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.775Z"
+    },
+    {
+      "itemId": "BUG-069",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.775Z"
+    },
+    {
+      "itemId": "BUG-068",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.775Z"
+    },
+    {
+      "itemId": "BUG-067",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.775Z"
+    },
+    {
+      "itemId": "BUG-066",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.776Z"
+    },
+    {
+      "itemId": "BUG-065",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.776Z"
+    },
+    {
+      "itemId": "BUG-064",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.776Z"
+    },
+    {
+      "itemId": "BUG-063",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.776Z"
+    },
+    {
+      "itemId": "BUG-062",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.776Z"
+    },
+    {
+      "itemId": "BUG-061",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.776Z"
+    },
+    {
+      "itemId": "BUG-060",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.776Z"
+    },
+    {
+      "itemId": "BUG-046",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.776Z"
+    },
+    {
+      "itemId": "BUG-045",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.777Z"
+    },
+    {
+      "itemId": "BUG-044",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.777Z"
+    },
+    {
+      "itemId": "BUG-043",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.777Z"
+    },
+    {
+      "itemId": "BUG-059",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.777Z"
+    },
+    {
+      "itemId": "BUG-058",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.777Z"
+    },
+    {
+      "itemId": "BUG-057",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.777Z"
+    },
+    {
+      "itemId": "BUG-054",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.778Z"
+    },
+    {
+      "itemId": "BUG-053",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.778Z"
+    },
+    {
+      "itemId": "BUG-052",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.778Z"
+    },
+    {
+      "itemId": "BUG-051",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.778Z"
+    },
+    {
+      "itemId": "BUG-050",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.778Z"
+    },
+    {
+      "itemId": "BUG-049",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.778Z"
+    },
+    {
+      "itemId": "BUG-048",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.779Z"
+    },
+    {
+      "itemId": "BUG-047",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.779Z"
+    },
+    {
+      "itemId": "0a76dbc",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.779Z"
+    },
+    {
+      "itemId": "fd745a6",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.779Z"
+    },
+    {
+      "itemId": "b355776",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.779Z"
+    },
+    {
+      "itemId": "bdc71db",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.779Z"
+    },
+    {
+      "itemId": "cdf84e2",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.780Z"
+    },
+    {
+      "itemId": "f137fac",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.780Z"
+    },
+    {
+      "itemId": "1ad3d62",
+      "completedDate": "2026-02-06",
+      "cycleTime": null,
+      "recordedAt": "2026-02-07T06:00:00.780Z"
     }
   ],
   "weeklyStats": [
@@ -625,8 +1009,8 @@
     },
     {
       "week": "2026-W06",
-      "completed": 28,
-      "velocity": 33.67
+      "completed": 92,
+      "velocity": 55
     }
   ]
 }

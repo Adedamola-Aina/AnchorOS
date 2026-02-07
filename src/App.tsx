@@ -1,4 +1,5 @@
 import React from 'react';
+import { AnchorLoadingSpinner } from './components/shared/AnchorLoadingSpinner';
 import { AppProvider } from './context/AnchorContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FinanceProvider } from './context/FinanceContext';
@@ -79,7 +80,7 @@ const AppContent = () => {
   if (loading || (user && !profileLoaded)) {
     return (
       <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <AnchorLoadingSpinner size="lg" />
       </div>
     );
   }
@@ -87,7 +88,7 @@ const AppContent = () => {
   // Only show onboarding if user is logged in AND profile loaded AND onboarding is not complete
   if (user && profileLoaded && profile && !profile.onboardingComplete) {
     return (
-      <React.Suspense fallback={<div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+      <React.Suspense fallback={<div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex items-center justify-center"><AnchorLoadingSpinner size="lg" /></div>}>
         <Routes>
           <Route path="/accept-invite" element={
             <ErrorBoundary componentName="Accept Invite">
@@ -115,7 +116,7 @@ const AppContent = () => {
           <MainLayout version={APP_VERSION}>
             <React.Suspense fallback={
               <div className="flex items-center justify-center p-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400"></div>
+                <AnchorLoadingSpinner />
               </div>
             }>
               <Routes>
