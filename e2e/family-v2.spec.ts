@@ -143,11 +143,11 @@ test.describe('Family - Acceptance', () => {
 
     test('Accept invite page handles invalid token', async ({ page }) => {
         await page.goto('/accept-invite?token=invalid-token-12345');
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(3000);
 
-        // Should show "Invitation Invalid" heading
+        // Should show "Invitation Invalid" heading (wait for Firebase function to return)
         const error = page.locator('text=Invitation Invalid').or(page.locator('text=Invalid')).or(page.locator('text=Failed to validate'));
-        const hasError = await error.first().isVisible({ timeout: 5000 }).catch(() => false);
+        const hasError = await error.first().isVisible({ timeout: 10000 }).catch(() => false);
 
         expect(hasError).toBe(true);
     });

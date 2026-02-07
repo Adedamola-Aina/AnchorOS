@@ -76,7 +76,7 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
         const asideVisible = aside && getComputedStyle(aside).display !== 'none';
         const navVisible = bottomNav && getComputedStyle(bottomNav).display !== 'none';
         return asideVisible || navVisible;
-    }, null, { timeout: 30000 });
+    }, null, { timeout: 45000 });
 
     // Optional: Navigate to Finance and ensure account exists
     if (!skipNavigation) {

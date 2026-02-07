@@ -27,8 +27,9 @@ test.describe('Finance Regressions and Fixes', () => {
         await expect(createBtn).toBeEnabled();
         await createBtn.click();
 
-        // Wait for account to appear and select it to isolate view
-        await expect(page.getByText(accountName)).toBeVisible({ timeout: 15000 });
+        // Wait for modal to close and account to appear in list
+        await page.waitForTimeout(2000);
+        await expect(page.getByText(accountName)).toBeVisible({ timeout: 20000 });
         await page.getByText(accountName).click();
 
         // 4. Case A: Positive Savings (Income > Expense)
@@ -82,7 +83,8 @@ test.describe('Finance Regressions and Fixes', () => {
         const createBtn = page.getByRole('button', { name: 'Create Account' });
         await expect(createBtn).toBeEnabled();
         await createBtn.click();
-        await expect(page.getByText(accountName)).toBeVisible({ timeout: 15000 });
+        await page.waitForTimeout(2000);
+        await expect(page.getByText(accountName)).toBeVisible({ timeout: 20000 });
         await page.getByText(accountName).click();
 
         // 3. Add Transaction

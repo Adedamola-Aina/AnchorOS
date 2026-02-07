@@ -90,6 +90,8 @@ test.describe('Fabric Features', () => {
             }
         }
 
+        // Wait for URL to change to /commitments first
+        await page.waitForURL(/.*commitments/, { timeout: 10000 });
         await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible({ timeout: 10000 });
 
         // 3. Setup Dialog Listener

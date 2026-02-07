@@ -342,10 +342,10 @@ test.describe('Feature Error Boundaries - Integration', () => {
         ];
 
         for (const feature of journey) {
-            const btn = page.getByRole('button', { name: feature });
-            if (await btn.isVisible().catch(() => false)) {
-                await btn.click();
-                await page.waitForTimeout(800);
+            const btn = page.getByRole('link', { name: feature }).or(page.getByRole('button', { name: feature }));
+            if (await btn.first().isVisible().catch(() => false)) {
+                await btn.first().click();
+                await page.waitForTimeout(1500);
 
                 // Each feature should load without app crash
                 const body = page.locator('body');
