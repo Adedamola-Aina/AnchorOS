@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.75% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>3/16</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.75% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>3/16</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -127,40 +127,40 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
@@ -177,40 +177,40 @@ export type NotificationType =
     | 'account_shared' 
     | string;
 &nbsp;
-export const getNotificationIcon = <span class="fstat-no" title="function not covered" >(t</span>ype: NotificationType) =&gt; {
-<span class="cstat-no" title="statement not covered" >    switch (type) {</span>
+export const getNotificationIcon = (type: NotificationType) =&gt; {
+    switch (type) {
         case 'family_connected':
         case 'invitation_accepted':
         case 'account_shared':
-<span class="cstat-no" title="statement not covered" >            return Users;</span>
+            return Users;
         default:
-<span class="cstat-no" title="statement not covered" >            return Bell;</span>
+            return Bell;
     }
 };
 &nbsp;
-export const getNotificationBgColor = <span class="fstat-no" title="function not covered" >(t</span>ype: NotificationType): string =&gt; {
-<span class="cstat-no" title="statement not covered" >    switch (type) {</span>
+export const getNotificationBgColor = (type: NotificationType): string =&gt; {
+    switch (type) {
         case 'family_connected':
-<span class="cstat-no" title="statement not covered" >            return 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800';</span>
+            return 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800';
         case 'account_shared':
-<span class="cstat-no" title="statement not covered" >            return 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';</span>
+            return 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
         case 'invitation_accepted':
-<span class="cstat-no" title="statement not covered" >            return 'bg-family-50 dark:bg-family-900/20 border-family-200 dark:border-family-800';</span>
+            return 'bg-family-50 dark:bg-family-900/20 border-family-200 dark:border-family-800';
         default:
-<span class="cstat-no" title="statement not covered" >            return 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700';</span>
+            return 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700';
     }
 };
 &nbsp;
-export const getNotificationIconColor = <span class="fstat-no" title="function not covered" >(t</span>ype: NotificationType): string =&gt; {
-<span class="cstat-no" title="statement not covered" >    switch (type) {</span>
+export const getNotificationIconColor = (type: NotificationType): string =&gt; {
+    switch (type) {
         case 'family_connected':
-<span class="cstat-no" title="statement not covered" >            return 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30';</span>
+            return 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30';
         case 'account_shared':
-<span class="cstat-no" title="statement not covered" >            return 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30';</span>
+            return 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30';
         case 'invitation_accepted':
-<span class="cstat-no" title="statement not covered" >            return 'text-family-600 dark:text-family-400 bg-family-100 dark:bg-family-900/30';</span>
+            return 'text-family-600 dark:text-family-400 bg-family-100 dark:bg-family-900/30';
         default:
-<span class="cstat-no" title="statement not covered" >            return 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800';</span>
+            return 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800';
     }
 };
 &nbsp;</pre></td></tr></table></pre>
@@ -220,7 +220,7 @@ export const getNotificationIconColor = <span class="fstat-no" title="function n
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-08T10:23:09.593Z
+                at 2026-02-08T10:35:25.922Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
