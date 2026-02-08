@@ -76,4 +76,60 @@ describe('PasswordChange', () => {
       expect(screen.getByText(/match/i)).toBeInTheDocument();
     });
   });
+
+  it('validates new password differs from current', async () => {
+    render(<PasswordChange />);
+    fireEvent.click(screen.getByRole('button', { name: /change password/i }));
+
+    fireEvent.change(screen.getByPlaceholderText('Current password'), { target: { value: 'samepass123' } });
+    fireEvent.change(screen.getByPlaceholderText('New password (min 8 chars)'), { target: { value: 'samepass123' } });
+    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), { target: { value: 'samepass123' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /update password/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/differ/i)).toBeInTheDocument();
+    });
+  });
+
+  it('successfully updates password', async () => {
+    render(<PasswordChange />);
+    fireEvent.click(screen.getByRole('button', { name: /change password/i }));
+
+    fireEvent.change(screen.getByPlaceholderText('Current password'), { target: { value: 'oldpass123' } });
+    fireEvent.change(screen.getByPlaceholderText('New password (min 8 chars)'), { target: { value: 'newpass123' } });
+    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), { target: { value: 'newpass123' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /update password/i }));
+
+    await waitFor(() => {
+      expect(mockShowToast).toHaveBeenCalledWith('Password updated successfully.', 'success');
+    });
+  });
+
+  it('shows error on wrong password', async () => {
+    mockReauthenticate.mockRejectedValue({ message: 'auth/wrong-password', code: 'auth/wrong-password' });
+    render(<PasswordChange />);
+    fireEvent.click(screen.getByRole('button', { name: /change password/i }));
+
+    fireEvent.change(screen.getByPlaceholderText('Current password'), { target: { value: 'wrongpass1' } });
+    fireEvent.change(screen.getByPlaceholderText('New password (min 8 chars)'), { target: { value: 'newpass123' } });
+    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), { target: { value: 'newpass123' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /update password/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/incorrect/i)).toBeInTheDocument();
+    });
+  });
+
+  it('cancels and closes form', () => {
+    render(<PasswordChange />);
+    fireEvent.click(screen.getByRole('button', { name: /change password/i }));
+    expect(screen.getByPlaceholderText('Current password')).toBeInTheDocument();
+    
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    // Form should be hidden, back to the initial "Change Password" button
+    expect(screen.queryByPlaceholderText('Current password')).not.toBeInTheDocument();
+  });
 });

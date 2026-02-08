@@ -97,4 +97,10 @@ describe('SettingsView', () => {
     render(<SettingsView />);
     expect(screen.getByText(/manage your preferences/i)).toBeInTheDocument();
   });
+
+  it('opens contact modal via support', () => {
+    render(<SettingsView />);
+    fireEvent.click(screen.getByTestId('support'));
+    expect(screen.getByTestId('contact-modal')).toBeInTheDocument();
+  });
 });
