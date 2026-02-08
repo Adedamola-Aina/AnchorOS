@@ -250,14 +250,20 @@
 }
 
 /* Accessibility: Font Size */
-.a11y-font-large { font-size: 112.5%; }
-.a11y-font-xl { font-size: 125%; }
+.a11y-font-large {
+  font-size: 112.5%;
+}
+
+.a11y-font-xl {
+  font-size: 125%;
+}
 
 /* Accessibility: High Contrast */
 .a11y-high-contrast {
   --tw-border-opacity: 1;
   --tw-text-opacity: 1;
 }
+
 .a11y-high-contrast * {
   border-color: currentColor !important;
 }
@@ -274,21 +280,83 @@
 
 /* Nautical Loading Animations (UX-032) */
 @keyframes sonar-ring {
-  0% { r: 10; opacity: 0.6; }
-  100% { r: 36; opacity: 0; }
+  0% {
+    r: 10;
+    opacity: 0.6;
+  }
+
+  100% {
+    r: 36;
+    opacity: 0;
+  }
 }
 
 @keyframes anchor-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @keyframes compass-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes tide-bar {
-  0%, 100% { transform: scaleY(1); opacity: 0.4; }
-  50% { transform: scaleY(1.8); opacity: 1; }
+
+  0%,
+  100% {
+    transform: scaleY(1);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: scaleY(1.8);
+    opacity: 1;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-fast {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -24,7 +24,7 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
             if (!tx || tx.isSoftDeleted) return;
             // BUG-037 Fix: Skip transfers from income/expense totals
             if (isTransfer(tx)) return;
-            
+
             const amount = tx.amountCents || 0;
             if (tx.type === 'income') {
                 income += amount;
@@ -48,7 +48,8 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
 
     if (transactions.length === 0) return null;
 
-    const isOverspending = summary.savings < 0;
+    // BUG-037 Fix: Handle floating point precision issues
+    const isOverspending = Math.round(summary.savings) < 0;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">

@@ -69,7 +69,7 @@ export const AcceptInviteView = () => {
             } catch (err) {
                 console.error(err);
                 setStatus('invalid');
-                setError('Failed to validate invitation.');
+                setError('Invitation Invalid.'); // Ensure heading matches text expectations if needed
             }
         };
         checkToken();

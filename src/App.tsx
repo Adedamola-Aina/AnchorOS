@@ -5,7 +5,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { FinanceProvider } from './context/FinanceContext';
 import { TaskProvider } from './context/TaskContext';
 const DashboardView = React.lazy(() => import('./features/dashboard/DashboardView'));
-const CommitmentsView = React.lazy(() => import('./features/commitments/CommitmentsView'));
+// Eager load CommitmentsView to prevent chunk load errors/timeouts in staging
+import CommitmentsView from './features/commitments/CommitmentsView';
 const FinanceView = React.lazy(() => import('./features/finance/FinanceView'));
 const SettingsView = React.lazy(() => import('./features/settings/SettingsView'));
 const AcceptInviteView = React.lazy(() => import('./features/onboarding/AcceptInviteView').then(m => ({ default: m.AcceptInviteView })));
