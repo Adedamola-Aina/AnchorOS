@@ -24,7 +24,7 @@ import { SupportSettings } from './components/SupportSettings';
 import { DeveloperTools } from './components/DeveloperTools';
 import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
-import { VerifyEmailBanner, EnableMfaBanner } from './components/SettingsBanners';
+// Notification banners removed — onboarding flow now handles email verify + MFA
 import { ReauthModal } from './components/ReauthModal';
 import { RecoveryCodesDisplay } from './components/RecoveryCodesDisplay';
 import { SectionNav } from './components/SectionNav';
@@ -36,13 +36,12 @@ import { auditSettings } from '../../services/AuditService';
 const SettingsView = () => {
   const {
     profile, updateProfile, user, logout,
-    accountNotifications, sendVerificationEmail, generateMfaSecret, enrollMfa, unenrollMfa, reauthenticate
+    generateMfaSecret, enrollMfa, unenrollMfa, reauthenticate
   } = useAuth();
   const { navigateTo } = useApp();
   const { connection: familyConnection, loading: familyLoading, disconnectFamily } = useFamilySharing(user?.uid);
   const { showToast, pushPermissionStatus, requestPushPermission } = useNotifications();
 
-  const [isResending, setIsResending] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [initialSubject, setInitialSubject] = useState<'question' | 'feedback' | undefined>(undefined);
   const [showReauthModal, setShowReauthModal] = useState(false);
@@ -57,13 +56,6 @@ const SettingsView = () => {
     onRequiresReauth: () => setShowReauthModal(true),
     userId: user?.uid,
   });
-
-  const handleResendVerification = async () => {
-    setIsResending(true);
-    await sendVerificationEmail();
-    showToast('Verification email sent!', 'success');
-    setIsResending(false);
-  };
 
   const onWipeData = () => handleWipeData(user!.uid, showToast);
   const onDeleteAccount = () => handleDeleteAccount(user, familyConnection, disconnectFamily, logout, showToast);
@@ -84,13 +76,6 @@ const SettingsView = () => {
         </div>
 
         <SectionNav />
-
-        {accountNotifications.length > 0 && (
-          <div className="grid gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
-            {accountNotifications.includes('verify_email') && <VerifyEmailBanner isResending={isResending} onResend={handleResendVerification} />}
-            {accountNotifications.includes('enable_2fa') && <EnableMfaBanner onEnable={mfa.handleGenerateSecret} />}
-          </div>
-        )}
 
         <div id="settings-profile"><ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }} /></div>
         <div id="settings-appearance"><AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }}

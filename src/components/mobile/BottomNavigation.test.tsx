@@ -21,7 +21,7 @@ const renderWithRouter = (ui: React.ReactElement, { route = '/dashboard' } = {})
 describe('BottomNavigation', () => {
     describe('rendering', () => {
         it('renders all four navigation items', () => {
-            renderWithRouter(<BottomNavigation accountNotifications={[]} />);
+            renderWithRouter(<BottomNavigation />);
 
             expect(screen.getByText('Home')).toBeInTheDocument();
             expect(screen.getByText('Tasks')).toBeInTheDocument();
@@ -30,7 +30,7 @@ describe('BottomNavigation', () => {
         });
 
         it('renders navigation links with correct hrefs', () => {
-            renderWithRouter(<BottomNavigation accountNotifications={[]} />);
+            renderWithRouter(<BottomNavigation />);
 
             expect(screen.getByRole('link', { name: /home/i })).toHaveAttribute('href', '/dashboard');
             expect(screen.getByRole('link', { name: /tasks/i })).toHaveAttribute('href', '/commitments');
@@ -39,32 +39,23 @@ describe('BottomNavigation', () => {
         });
 
         it('has correct aria-label for accessibility', () => {
-            renderWithRouter(<BottomNavigation accountNotifications={[]} />);
+            renderWithRouter(<BottomNavigation />);
 
             expect(screen.getByRole('navigation', { name: /mobile navigation/i })).toBeInTheDocument();
         });
 
         it('has md:hidden class for responsive visibility', () => {
-            renderWithRouter(<BottomNavigation accountNotifications={[]} />);
+            renderWithRouter(<BottomNavigation />);
 
             const nav = screen.getByRole('navigation');
             expect(nav.className).toContain('md:hidden');
         });
     });
 
-    describe('notification badge', () => {
-        it('shows notification badge on Settings when accountNotifications has items', () => {
+    describe('notification badge (removed)', () => {
+        it('no longer renders red notification dot (onboarding handles it)', () => {
             const { container } = renderWithRouter(
-                <BottomNavigation accountNotifications={['account-1', 'account-2']} />
-            );
-
-            const notificationDot = container.querySelector('.bg-red-500.rounded-full.animate-pulse');
-            expect(notificationDot).toBeInTheDocument();
-        });
-
-        it('hides notification badge when accountNotifications is empty', () => {
-            const { container } = renderWithRouter(
-                <BottomNavigation accountNotifications={[]} />
+                <BottomNavigation />
             );
 
             const notificationDot = container.querySelector('.bg-red-500.rounded-full.animate-pulse');
@@ -74,7 +65,7 @@ describe('BottomNavigation', () => {
 
     describe('touch targets', () => {
         it('has minimum 44px height for touch targets (Apple HIG / WCAG 2.5.5)', () => {
-            renderWithRouter(<BottomNavigation accountNotifications={[]} />);
+            renderWithRouter(<BottomNavigation />);
 
             const links = screen.getAllByRole('link');
             links.forEach(link => {
@@ -85,21 +76,21 @@ describe('BottomNavigation', () => {
 
     describe('active state', () => {
         it('applies active styling when on dashboard route', () => {
-            renderWithRouter(<BottomNavigation accountNotifications={[]} />, { route: '/dashboard' });
+            renderWithRouter(<BottomNavigation />, { route: '/dashboard' });
 
             const homeLink = screen.getByRole('link', { name: /home/i });
             expect(homeLink.className).toContain('text-primary-600');
         });
 
         it('applies active styling when on commitments route', () => {
-            renderWithRouter(<BottomNavigation accountNotifications={[]} />, { route: '/commitments' });
+            renderWithRouter(<BottomNavigation />, { route: '/commitments' });
 
             const tasksLink = screen.getByRole('link', { name: /tasks/i });
             expect(tasksLink.className).toContain('text-primary-600');
         });
 
         it('applies inactive styling to non-active links', () => {
-            renderWithRouter(<BottomNavigation accountNotifications={[]} />, { route: '/dashboard' });
+            renderWithRouter(<BottomNavigation />, { route: '/dashboard' });
 
             const financeLink = screen.getByRole('link', { name: /finance/i });
             expect(financeLink.className).toContain('text-slate-400');

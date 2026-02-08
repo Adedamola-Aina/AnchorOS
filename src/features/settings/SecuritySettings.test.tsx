@@ -184,21 +184,11 @@ describe('SettingsView - Security & MFA', () => {
         expect(screen.getByText("Can't scan?")).toBeInTheDocument();
     });
 
-    it('displays account notification banner when MFA is recommended', () => {
-        renderWithContext(<SettingsView />, {
-            auth: { accountNotifications: ['enable_2fa'] }
-        });
-
-        // Check for specific banner text
-        expect(screen.getByText('MFA Recommended')).toBeInTheDocument();
-        // Check for the "Enable 2FA" button within the banner (might have multiple "Enable 2FA" texts)
-        const buttons = screen.getAllByText('Enable 2FA');
-        expect(buttons.length).toBeGreaterThanOrEqual(1);
-    });
+    // MFA banner test removed — onboarding flow now handles MFA recommendation
 
     it('calls enrollMfa when completing 3-step MFA wizard', async () => {
         const { mocks } = renderWithContext(<SettingsView />, {
-            auth: { accountNotifications: ['enable_2fa'] }
+            auth: { accountNotifications: [] }
         });
 
         // Click Setup 2FA
@@ -227,20 +217,5 @@ describe('SettingsView - Security & MFA', () => {
         });
     });
 
-    it('calls sendVerificationEmail when verifying email from banner', async () => {
-        vi.spyOn(window, 'alert').mockImplementation(() => { });
-
-        const { mocks } = renderWithContext(<SettingsView />, {
-            auth: { accountNotifications: ['verify_email'] }
-        });
-
-        expect(screen.getByText('Email Not Verified')).toBeInTheDocument();
-
-        const verifyBtn = screen.getByText('Verify Now');
-        fireEvent.click(verifyBtn);
-
-        await waitFor(() => {
-            expect(mocks.auth.sendVerificationEmail).toHaveBeenCalled();
-        });
-    });
+    // Email verification banner test removed — onboarding flow now handles this
 });

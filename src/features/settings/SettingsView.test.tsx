@@ -53,10 +53,7 @@ vi.mock('./components/SupportSettings', () => ({ SupportSettings: ({ onOpenConta
 vi.mock('./components/DeveloperTools', () => ({ DeveloperTools: () => <div data-testid="dev-tools">DevTools</div> }));
 vi.mock('./components/DataManagement', () => ({ DataManagement: () => <div data-testid="data-mgmt">Data</div> }));
 vi.mock('./components/DangerZone', () => ({ DangerZone: () => <div data-testid="danger-zone">Danger</div> }));
-vi.mock('./components/SettingsBanners', () => ({
-  VerifyEmailBanner: () => <div data-testid="verify-banner" />,
-  EnableMfaBanner: () => <div data-testid="mfa-banner" />,
-}));
+// Notification banners removed — onboarding handles email verify + MFA
 vi.mock('./components/ReauthModal', () => ({ ReauthModal: () => null }));
 vi.mock('./components/RecoveryCodesDisplay', () => ({ RecoveryCodesDisplay: () => null }));
 vi.mock('./components/SectionNav', () => ({ SectionNav: () => <nav data-testid="section-nav" /> }));

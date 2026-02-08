@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { VerifyEmailBanner, EnableMfaBanner } from './SettingsBanners';
+import { VerifyEmailBanner } from './SettingsBanners';
 
 describe('VerifyEmailBanner', () => {
   it('renders with warning text and verify button', () => {
@@ -20,13 +20,4 @@ describe('VerifyEmailBanner', () => {
   });
 });
 
-describe('EnableMfaBanner', () => {
-  it('renders MFA recommendation', () => {
-    const onEnable = vi.fn();
-    render(<EnableMfaBanner onEnable={onEnable} />);
-    expect(screen.getByText('MFA Recommended')).toBeInTheDocument();
-    expect(screen.getByText(/two-factor authentication/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Enable 2FA'));
-    expect(onEnable).toHaveBeenCalled();
-  });
-});
+// EnableMfaBanner tests removed — component removed, onboarding handles MFA now.
