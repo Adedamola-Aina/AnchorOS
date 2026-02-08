@@ -129,4 +129,65 @@ describe('PullToRefresh', () => {
       expect(wrapper).toBeInTheDocument();
     });
   });
+
+  describe('Touch Gesture Flow', () => {
+    it('handles touch events without errors', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+
+      render(
+        <PullToRefresh onRefresh={mockOnRefresh} threshold={30}>
+          <div>Content</div>
+        </PullToRefresh>
+      );
+
+      const container = screen.getByTestId('pull-to-refresh-container');
+
+      // jsdom doesn't fully support touch events but we verify no crashes
+      expect(() => {
+        fireEvent.touchStart(container, { touches: [{ clientY: 0 }] });
+        fireEvent.touchMove(container, { touches: [{ clientY: 100 }] });
+        fireEvent.touchEnd(container);
+      }).not.toThrow();
+    });
+
+    it('does not trigger refresh when disabled', async () => {
+      const { fireEvent, act } = await import('@testing-library/react');
+
+      render(
+        <PullToRefresh onRefresh={mockOnRefresh} disabled threshold={30}>
+          <div>Content</div>
+        </PullToRefresh>
+      );
+
+      const container = screen.getByTestId('pull-to-refresh-container');
+
+      await act(async () => {
+        fireEvent.touchStart(container, { touches: [{ clientY: 0 }] });
+        fireEvent.touchMove(container, { touches: [{ clientY: 100 }] });
+        fireEvent.touchEnd(container);
+      });
+
+      expect(mockOnRefresh).not.toHaveBeenCalled();
+    });
+
+    it('does not trigger refresh for small pull below threshold', async () => {
+      const { fireEvent, act } = await import('@testing-library/react');
+
+      render(
+        <PullToRefresh onRefresh={mockOnRefresh} threshold={60}>
+          <div>Content</div>
+        </PullToRefresh>
+      );
+
+      const container = screen.getByTestId('pull-to-refresh-container');
+
+      await act(async () => {
+        fireEvent.touchStart(container, { touches: [{ clientY: 0 }] });
+        fireEvent.touchMove(container, { touches: [{ clientY: 10 }] });
+        fireEvent.touchEnd(container);
+      });
+
+      expect(mockOnRefresh).not.toHaveBeenCalled();
+    });
+  });
 });

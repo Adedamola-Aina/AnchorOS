@@ -85,4 +85,44 @@ describe('Modal - REG-003 Regression Test', () => {
 
         window.removeEventListener('keydown', globalHandler);
     });
+
+    it('returns null when not open', () => {
+        const { container } = render(
+            <Modal isOpen={false} onClose={vi.fn()} title="Hidden">
+                <div>Hidden Content</div>
+            </Modal>
+        );
+        expect(screen.queryByText('Hidden Content')).not.toBeInTheDocument();
+    });
+
+    it('has proper ARIA dialog attributes', () => {
+        render(
+            <Modal isOpen={true} onClose={vi.fn()} title="ARIA Test">
+                <div>Content</div>
+            </Modal>
+        );
+        const dialog = screen.getByRole('dialog');
+        expect(dialog).toHaveAttribute('aria-modal', 'true');
+    });
+
+    it('closes on Escape key', () => {
+        const onClose = vi.fn();
+        render(
+            <Modal isOpen={true} onClose={onClose} title="Esc Test">
+                <div>Content</div>
+            </Modal>
+        );
+        fireEvent.keyDown(document, { key: 'Escape' });
+        expect(onClose).toHaveBeenCalled();
+    });
+
+    it('sets body overflow hidden when open', () => {
+        document.body.style.overflow = 'unset';
+        render(
+            <Modal isOpen={true} onClose={vi.fn()} title="Overflow">
+                <div>Content</div>
+            </Modal>
+        );
+        expect(document.body.style.overflow).toBe('hidden');
+    });
 });
