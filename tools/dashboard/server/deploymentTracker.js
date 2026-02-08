@@ -137,19 +137,29 @@ async function parseDeployMarkers() {
                 source: 'missing'
             };
         }
-        if (!deployments.development) {
-            // Default development to HEAD
-            const headHash = await git.revparse(['HEAD']);
-            deployments.development = {
-                version: 'HEAD',
-                markerHash: headHash.trim().substring(0, 7),
-                deployedHash: headHash.trim().substring(0, 7),
-                fullDeployedHash: headHash.trim(),
-                date: new Date().toISOString(),
-                message: 'Current HEAD',
-                source: 'head'
-            };
-        }
+
+        // Development ALWAYS tracks HEAD — the local dev server runs
+        // whatever is checked out, so a stale deploy(dev) marker should
+        // never make dev appear older than production/staging.
+        const headHash = await git.revparse(['HEAD']);
+        const headShort = headHash.trim().substring(0, 7);
+        const pkgVersion = (() => {
+            try {
+                const pkg = JSON.parse(require('fs').readFileSync(
+                    require('path').join(REPO_PATH, 'package.json'), 'utf-8'));
+                return `v${pkg.version}`;
+            } catch { return 'HEAD'; }
+        })();
+
+        deployments.development = {
+            version: pkgVersion,
+            markerHash: headShort,
+            deployedHash: headShort,
+            fullDeployedHash: headHash.trim(),
+            date: new Date().toISOString(),
+            message: `Current HEAD (${headShort})`,
+            source: 'head'
+        };
 
         return deployments;
     } catch (error) {
