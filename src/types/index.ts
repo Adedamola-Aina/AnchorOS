@@ -83,7 +83,8 @@ export const BEYOND_BASICS_ITEMS = [
   'recurring_commitment',
   'review_dashboard',
   'customize_settings',
-  'secure_account',
+  'verify_email',
+  'enable_mfa',
 ] as const;
 
 export type BeyondBasicsItem = typeof BEYOND_BASICS_ITEMS[number];

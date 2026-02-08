@@ -1,5 +1,7 @@
 /**
  * BeyondBasicsChecklist tests — TDD
+ * Updated: items are now clickable with deep-link routes
+ * Updated: secure_account split into verify_email + enable_mfa (6 items)
  */
 
 import { describe, it, expect, vi } from 'vitest';
@@ -11,23 +13,26 @@ vi.mock('lucide-react', () => ({
   X: () => <span data-testid="x-icon" />,
   CheckCircle2: () => <span data-testid="check-icon" />,
   Circle: () => <span data-testid="circle-icon" />,
+  ChevronRight: () => <span data-testid="chevron-icon" />,
 }));
 
 const mockItems: BeyondBasicsItemState[] = [
-  { id: 'explore_finance', label: 'Explore Finance', description: 'Add a transaction', completed: true },
-  { id: 'recurring_commitment', label: 'Set a Recurring Commitment', description: 'Try weekly', completed: false },
-  { id: 'review_dashboard', label: 'Review Your Dashboard', description: 'Visit dashboard', completed: false },
-  { id: 'customize_settings', label: 'Customize Settings', description: 'Make it yours', completed: false },
-  { id: 'secure_account', label: 'Secure Your Account', description: 'Verify + MFA', completed: false },
+  { id: 'explore_finance', label: 'Explore Finance', description: 'Add a transaction', completed: true, route: { tab: 'finance', params: { action: 'add-transaction' } } },
+  { id: 'recurring_commitment', label: 'Set a Recurring Commitment', description: 'Try weekly', completed: false, route: { tab: 'commitments', params: { action: 'add-recurring' } } },
+  { id: 'review_dashboard', label: 'Review Your Dashboard', description: 'Visit dashboard', completed: false, route: { tab: 'dashboard' } },
+  { id: 'customize_settings', label: 'Customize Settings', description: 'Make it yours', completed: false, route: { tab: 'settings', params: { section: 'appearance' } } },
+  { id: 'verify_email', label: 'Verify Your Email', description: 'Confirm email', completed: false, route: { tab: 'settings', params: { section: 'security' } } },
+  { id: 'enable_mfa', label: 'Enable Two-Factor Auth', description: 'Add 2FA', completed: false, route: { tab: 'settings', params: { section: 'security' } } },
 ];
 
 describe('BeyondBasicsChecklist', () => {
   const defaultProps = {
     items: mockItems,
     completedCount: 1,
-    totalCount: 5,
+    totalCount: 6,
     isOpen: true,
     onClose: vi.fn(),
+    onItemClick: vi.fn(),
   };
 
   it('renders nothing when closed', () => {
@@ -43,14 +48,15 @@ describe('BeyondBasicsChecklist', () => {
   it('renders heading and progress count', () => {
     render(<BeyondBasicsChecklist {...defaultProps} />);
     expect(screen.getByText('Beyond the Basics')).toBeInTheDocument();
-    expect(screen.getByText('1 of 5 explored')).toBeInTheDocument();
+    expect(screen.getByText('1 of 6 explored')).toBeInTheDocument();
   });
 
-  it('renders all checklist items', () => {
+  it('renders all 6 checklist items', () => {
     render(<BeyondBasicsChecklist {...defaultProps} />);
     expect(screen.getByTestId('checklist-item-explore_finance')).toBeInTheDocument();
     expect(screen.getByTestId('checklist-item-recurring_commitment')).toBeInTheDocument();
-    expect(screen.getByTestId('checklist-item-secure_account')).toBeInTheDocument();
+    expect(screen.getByTestId('checklist-item-verify_email')).toBeInTheDocument();
+    expect(screen.getByTestId('checklist-item-enable_mfa')).toBeInTheDocument();
   });
 
   it('shows check icon for completed items', () => {
@@ -88,7 +94,39 @@ describe('BeyondBasicsChecklist', () => {
 
   it('shows auto-complete hint text', () => {
     render(<BeyondBasicsChecklist {...defaultProps} />);
-    expect(screen.getByText('These complete automatically as you use Anchor OS.')).toBeInTheDocument();
+    expect(screen.getByText("Tap any item to get started, or they'll complete automatically.")).toBeInTheDocument();
+  });
+
+  it('calls onItemClick when an incomplete item is clicked', () => {
+    const onItemClick = vi.fn();
+    render(<BeyondBasicsChecklist {...defaultProps} onItemClick={onItemClick} />);
+    fireEvent.click(screen.getByTestId('checklist-item-recurring_commitment'));
+    expect(onItemClick).toHaveBeenCalledWith(mockItems[1]);
+  });
+
+  it('does not call onItemClick when a completed item is clicked', () => {
+    const onItemClick = vi.fn();
+    render(<BeyondBasicsChecklist {...defaultProps} onItemClick={onItemClick} />);
+    fireEvent.click(screen.getByTestId('checklist-item-explore_finance'));
+    expect(onItemClick).not.toHaveBeenCalled();
+  });
+
+  it('shows chevron icon on incomplete items', () => {
+    render(<BeyondBasicsChecklist {...defaultProps} />);
+    const incompleteItem = screen.getByTestId('checklist-item-recurring_commitment');
+    expect(incompleteItem.querySelector('[data-testid="chevron-icon"]')).toBeInTheDocument();
+  });
+
+  it('does not show chevron icon on completed items', () => {
+    render(<BeyondBasicsChecklist {...defaultProps} />);
+    const completedItem = screen.getByTestId('checklist-item-explore_finance');
+    expect(completedItem.querySelector('[data-testid="chevron-icon"]')).not.toBeInTheDocument();
+  });
+
+  it('verify_email and enable_mfa are separate items', () => {
+    render(<BeyondBasicsChecklist {...defaultProps} />);
+    expect(screen.getByText('Verify Your Email')).toBeInTheDocument();
+    expect(screen.getByText('Enable Two-Factor Auth')).toBeInTheDocument();
   });
 
   it('renders overlay via portal into document.body', () => {
