@@ -15,7 +15,6 @@ import { navAnimationStyles, getRandomColor, CELEBRATION_COLORS } from './NavIco
 import { AnimatedHomeIcon, AnimatedTasksIcon, AnimatedFinanceIcon, AnimatedSettingsIcon } from './AnimatedNavIcons';
 
 interface BottomNavigationProps {
-    accountNotifications: string[];
     accountColors?: string[]; // Colors from user's accounts for Home animation
 }
 
@@ -28,13 +27,11 @@ const ANIMATIONS = {
 } as const;
 
 export const BottomNavigation = ({
-    accountNotifications,
     accountColors = []
 }: BottomNavigationProps) => {
     const [animatingRoute, setAnimatingRoute] = useState<string | null>(null);
     const [celebrationColor, setCelebrationColor] = useState(CELEBRATION_COLORS[0]);
     const { trigger } = useHaptic();
-    const hasSettingsNotification = accountNotifications.length > 0;
 
     // PERF-004: Reactive dark mode detection via MutationObserver
     const [isDarkMode, setIsDarkMode] = useState(() =>
@@ -151,13 +148,6 @@ export const BottomNavigation = ({
                                 <>
                                     {renderIcon(isAnimating, iconClass)}
                                     <span className="text-[10px] font-medium">{label}</span>
-                                    {to === '/settings' && hasSettingsNotification && (
-                                        <span
-                                            className="absolute top-2 right-1/4 w-2 h-2 bg-red-500 rounded-full animate-pulse"
-                                            role="status"
-                                            aria-label="Notification indicator"
-                                        />
-                                    )}
                                 </>
                             );
                         }}

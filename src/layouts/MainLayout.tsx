@@ -20,28 +20,20 @@ interface NavItemProps {
     to: string;
     label: string;
     icon: React.ElementType;
-    accountNotifications: string[];
 }
 
-const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon, accountNotifications }) => {
-    const hasAudit = to === '/settings' && accountNotifications.length > 0;
-
+const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon }) => {
     return (
         <NavLink
             to={to}
             className={({ isActive }) =>
-                `w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'}`
+                `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'}`
             }
         >
             {({ isActive }) => (
                 <>
-                    <div className="flex items-center gap-3">
-                        <Icon className={`w-5 h-5 ${isActive ? 'text-primary-400' : ''}`} />
-                        <span className="font-medium">{label}</span>
-                    </div>
-                    {hasAudit && (
-                        <span className="text-red-500 text-lg font-black leading-none animate-pulse">*</span>
-                    )}
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-primary-400' : ''}`} />
+                    <span className="font-medium">{label}</span>
                 </>
             )}
         </NavLink>
@@ -49,7 +41,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon, accountNotific
 };
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
-    const { user, profile, logout, accountNotifications } = useAuth();
+    const { user, profile, logout } = useAuth();
     const { isMobile } = useResponsive(); // ← Per M3.2
 
     // Get account colors for Home icon animation (UX-024)
@@ -75,11 +67,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </div>
 
                 <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
-                    <NavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} accountNotifications={accountNotifications} />
-                    <NavItem to="/commitments" label="Commitments" icon={CheckCircle2} accountNotifications={accountNotifications} />
-                    <NavItem to="/finance" label="Finance" icon={CreditCard} accountNotifications={accountNotifications} />
+                    <NavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
+                    <NavItem to="/commitments" label="Commitments" icon={CheckCircle2} />
+                    <NavItem to="/finance" label="Finance" icon={CreditCard} />
                     <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
-                        <NavItem to="/settings" label="System" icon={Settings} accountNotifications={accountNotifications} />
+                        <NavItem to="/settings" label="System" icon={Settings} />
                     </div>
                 </nav>
 
@@ -109,7 +101,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </div>
 
                 {/* Bottom Navigation - NEW, mobile only per M3.2 */}
-                {isMobile && <BottomNavigation accountNotifications={accountNotifications} accountColors={accountColors} />}
+                {isMobile && <BottomNavigation accountColors={accountColors} />}
 
                 {/* PWA Install Prompt */}
                 <InstallPrompt />
