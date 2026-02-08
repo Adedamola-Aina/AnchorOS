@@ -45,4 +45,10 @@ describe('DataManagement', () => {
     render(<DataManagement {...defaultProps} />);
     expect(screen.getByText('Wipe All Data (Dev Only)')).toBeInTheDocument();
   });
+
+  it('renders data management heading', () => {
+    render(<DataManagement {...defaultProps} />);
+    expect(screen.getByText('Data Management')).toBeInTheDocument();
+    expect(screen.getByText(/export personal data/i)).toBeInTheDocument();
+  });
 });
