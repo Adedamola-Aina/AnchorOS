@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/react';
+
 /**
  * Custom error class for Anchor OS application
  */
@@ -26,15 +28,43 @@ export class AnchorError extends Error {
     }
 }
 
+/** Severity mapping: VALIDATION/RATE_LIMIT are warnings, rest are errors */
+const SENTRY_LEVEL: Record<ErrorCategory, 'warning' | 'error' | 'fatal'> = {
+    VALIDATION: 'warning',
+    RATE_LIMIT: 'warning',
+    PERMISSION: 'error',
+    NETWORK: 'error',
+    AUTH: 'error',
+    DATABASE: 'error',
+    UNKNOWN: 'error',
+};
+
 /**
  * Global error handler utility
+ * Logs to console AND reports to Sentry with full context
  */
 export const handleError = (error: any, fallbackMessage: string = 'An unexpected error occurred'): AnchorError => {
     if (AnchorError.isAnchorError(error)) {
         console.error(`[${error.category}] ${error.message}`, error.originalError);
+
+        Sentry.captureException(error.originalError || error, {
+            level: SENTRY_LEVEL[error.category],
+            tags: { category: error.category },
+            extra: {
+                userMessage: error.userMessage,
+                originalError: error.originalError?.message ?? error.originalError,
+            },
+        });
         return error;
     }
 
     console.error('[UNKNOWN]', error);
-    return new AnchorError(fallbackMessage, 'UNKNOWN', error);
+
+    const wrapped = new AnchorError(fallbackMessage, 'UNKNOWN', error);
+    Sentry.captureException(error, {
+        level: 'error',
+        tags: { category: 'UNKNOWN' },
+        extra: { fallbackMessage },
+    });
+    return wrapped;
 };

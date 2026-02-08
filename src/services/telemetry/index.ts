@@ -2,10 +2,11 @@
  * Telemetry Service
  * 
  * Lightweight abstraction for performance tracing and event logging.
- * Currently outputs to console in development; ready for OpenTelemetry integration.
+ * Reports to Sentry in all environments; also outputs to console in development.
  * 
  * @module services/telemetry
  */
+import * as Sentry from '@sentry/react';
 
 interface TraceOptions {
     attributes?: Record<string, string | number | boolean>;
@@ -43,6 +44,18 @@ export async function trace<T>(
     } catch (error) {
         const duration = performance.now() - start;
 
+        // Always add Sentry breadcrumb for failed operations
+        Sentry.addBreadcrumb({
+            category: 'trace',
+            message: `${name} failed (${duration.toFixed(0)}ms)`,
+            level: 'error',
+            data: {
+                duration: `${duration.toFixed(2)}ms`,
+                error: error instanceof Error ? error.message : 'Unknown error',
+                ...options?.attributes,
+            },
+        });
+
         if (isDev) {
             console.error(`[Trace Error] ${name}`, {
                 duration: `${duration.toFixed(2)}ms`,
@@ -65,6 +78,15 @@ export function logEvent(
     if (!isDev && options?.level === 'debug') {
         return; // Skip debug logs in production
     }
+
+    // Always send breadcrumb to Sentry (gives context before errors)
+    Sentry.addBreadcrumb({
+        category: 'event',
+        message: name,
+        level: options?.level === 'error' ? 'error'
+            : options?.level === 'warn' ? 'warning' : 'info',
+        data: options?.attributes as Record<string, unknown> | undefined,
+    });
 
     const logFn = options?.level === 'error'
         ? console.error
