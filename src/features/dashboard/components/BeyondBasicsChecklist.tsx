@@ -1,8 +1,10 @@
 /**
  * BeyondBasicsChecklist - Slide-up checklist for Beyond the Basics items
  * Shows exploration items, not obligations. Calm, not anxious.
+ * Renders via portal to escape ancestor transforms (PullToRefresh).
  */
 
+import { createPortal } from 'react-dom';
 import { X, CheckCircle2, Circle } from 'lucide-react';
 import type { BeyondBasicsItemState } from '../hooks/useBeyondBasics';
 
@@ -23,7 +25,7 @@ export function BeyondBasicsChecklist({
 }: BeyondBasicsChecklistProps) {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" data-testid="beyond-basics-overlay">
       {/* Backdrop */}
       <div
@@ -87,6 +89,7 @@ export function BeyondBasicsChecklist({
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

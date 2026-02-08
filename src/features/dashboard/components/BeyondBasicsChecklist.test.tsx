@@ -84,4 +84,18 @@ describe('BeyondBasicsChecklist', () => {
     render(<BeyondBasicsChecklist {...defaultProps} />);
     expect(screen.getByText('These complete automatically as you use Anchor OS.')).toBeInTheDocument();
   });
+
+  it('renders overlay via portal into document.body', () => {
+    const { baseElement } = render(
+      <div data-testid="parent-transform" style={{ transform: 'translateY(0px)' }}>
+        <BeyondBasicsChecklist {...defaultProps} />
+      </div>,
+    );
+    // The overlay should be a direct child of body, NOT inside the transformed parent
+    const overlay = screen.getByTestId('beyond-basics-overlay');
+    expect(overlay.parentElement).toBe(document.body);
+    // The parent-transform div should NOT contain the overlay
+    const transformDiv = screen.getByTestId('parent-transform');
+    expect(transformDiv.contains(overlay)).toBe(false);
+  });
 });
