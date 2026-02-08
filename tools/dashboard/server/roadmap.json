@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "lastUpdated": "2026-02-06",
+    "lastUpdated": "2026-02-08",
     "teams": [
         "Product",
         "Engineering",
@@ -91,14 +91,15 @@
             "team": "Mobile",
             "priority": "P2",
             "title": "Add back button in onboarding steps",
-            "description": "Onboarding flow has no way to go back to previous step. Users cannot correct mistakes without starting over.",
-            "status": "planned",
+            "description": "Onboarding flow has no way to go back to previous step. Users cannot correct mistakes without starting over. Resolved: GettingStartedSecurity step 4 includes Back button, existing steps 2-3 already had back.",
+            "status": "completed",
             "detectionPatterns": [
                 "UX-031"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-06"
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-02-08"
         },
         {
             "id": "UX-030",
@@ -2011,6 +2012,26 @@
             ],
             "completedAt": "2026-02-07",
             "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-015",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Two-part onboarding: Getting Started + Beyond the Basics",
+            "description": "Redesigned onboarding into two parts. Part 1 'Getting Started' is a 4-step hard gate (Welcome+Name, Account, Commitment, Security with email verify + MFA). Part 2 'Beyond the Basics' is a pulsing CompletionRing on the Dashboard with 5 auto-completing checklist items. Red asterisks suppressed after security step seen. Old OnboardingWelcome replaced by GettingStartedWelcome with editable name.",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.7.0",
+            "detectionPatterns": [
+                "FEAT-015",
+                "onboarding",
+                "completion ring",
+                "beyond the basics",
+                "getting started"
+            ],
+            "completedAt": "2026-02-08",
+            "effort": "large",
             "impact": "high"
         }
     ]
