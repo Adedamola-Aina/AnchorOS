@@ -91,8 +91,7 @@ export function processTransferTransaction(
         accountShares: destAccount.shares || {},
         linkId,
         linkedTransactionId: sourceTxRef.id,
-        linkedUserId: sourceAccount.ownerId || userId,
-        exchangeRate: payload.exchangeRate
+        linkedUserId: sourceAccount.ownerId || userId
     });
 
     // Update balances

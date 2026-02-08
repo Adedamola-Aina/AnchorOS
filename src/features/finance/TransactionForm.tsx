@@ -92,7 +92,12 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             if (isDifferentCurrency) {
                 const rate = parseFloat(formState.exchangeRate);
                 if (isNaN(rate) || rate <= 0) throw new Error('Invalid exchange rate');
-                destinationAmountCents = Math.round(parseFloat(amount) * rate * 100);
+                // BUG-FIX: Use amountCents directly to avoid parsing issues with comma-formatted strings
+                destinationAmountCents = Math.round(amountCents * rate);
+
+                if (destinationAmountCents <= 0) {
+                    throw new Error('Transfer amount too small for this exchange rate');
+                }
             }
 
             const isoDate = new Date(transactionDate + 'T12:00:00').toISOString();
