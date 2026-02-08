@@ -4,6 +4,7 @@ import { NotificationProvider, useNotifications } from './NotificationContext';
 import React from 'react';
 import * as messaging from 'firebase/messaging';
 import * as firestore from 'firebase/firestore';
+import { getFcmTokenWithRetry } from '../services/fcmTokenService';
 
 // Mock Firebase dependencies
 vi.mock('../config/firebase', () => ({
@@ -21,8 +22,17 @@ vi.mock('firebase/messaging', () => ({
 vi.mock('firebase/firestore', () => ({
     doc: vi.fn(() => ({ id: 'mock-doc-ref' })),
     setDoc: vi.fn(),
+    deleteDoc: vi.fn(),
     collection: vi.fn(),
     serverTimestamp: vi.fn(() => 'mock-timestamp'),
+}));
+
+vi.mock('../services/fcmTokenService', () => ({
+    getFcmTokenWithRetry: vi.fn(),
+}));
+
+vi.mock('../utils/error', () => ({
+    captureError: vi.fn(),
 }));
 
 // Mock Notification API
@@ -51,9 +61,9 @@ describe('NotificationContext Token Management', () => {
         global.Notification.permission = 'default';
     });
 
-    // TODO: Fix mock setup - needs navigator.serviceWorker.ready mock for retry logic
-    it.skip('requests permission and retrieves FCM token when granted', async () => {
-        (messaging.getToken as any).mockResolvedValue('mock-fcm-token');
+    // Fixed: mock getFcmTokenWithRetry instead of raw getToken
+    it('requests permission and retrieves FCM token when granted', async () => {
+        vi.mocked(getFcmTokenWithRetry).mockResolvedValue('mock-fcm-token');
 
         render(
             <NotificationProvider>
@@ -65,14 +75,14 @@ describe('NotificationContext Token Management', () => {
 
         await waitFor(() => {
             expect(requestPermissionMock).toHaveBeenCalled();
-            expect(messaging.getToken).toHaveBeenCalled();
+            expect(getFcmTokenWithRetry).toHaveBeenCalled();
             expect(screen.getByTestId('token-display')).toHaveTextContent('mock-fcm-token');
         });
     });
 
-    // TODO: Fix mock setup for new FCM token path (artifacts/APP_ID/users/uid/fcmTokens)
-    it.skip('saves token to Firestore after retrieval', async () => {
-        (messaging.getToken as any).mockResolvedValue('mock-fcm-token');
+    // Fixed: mock getFcmTokenWithRetry and verify Firestore token save
+    it('saves token to Firestore after retrieval', async () => {
+        vi.mocked(getFcmTokenWithRetry).mockResolvedValue('mock-fcm-token');
         const setDocMock = firestore.setDoc as any;
 
         render(
