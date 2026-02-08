@@ -68,3 +68,29 @@ export const handleError = (error: any, fallbackMessage: string = 'An unexpected
     });
     return wrapped;
 };
+
+/**
+ * Lightweight error reporter — sends to Sentry WITHOUT wrapping or re-throwing.
+ * Use in catch blocks that already handle the error (toast, state, etc.)
+ * to get visibility in Sentry without changing existing behavior.
+ *
+ * @example
+ * catch (err) {
+ *   captureError(err, 'TransactionForm.submit');
+ *   showToast('Failed to save', 'error');
+ * }
+ */
+export const captureError = (error: unknown, context: string, extra?: Record<string, unknown>): void => {
+    const err = error instanceof Error ? error : new Error(String(error));
+    Sentry.captureException(err, {
+        level: AnchorError.isAnchorError(error) ? SENTRY_LEVEL[error.category] : 'error',
+        tags: {
+            context,
+            category: AnchorError.isAnchorError(error) ? error.category : 'UNKNOWN',
+        },
+        extra: {
+            ...extra,
+            originalMessage: err.message,
+        },
+    });
+};

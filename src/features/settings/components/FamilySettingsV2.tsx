@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotifications } from '../../../context/NotificationContext';
+import { captureError } from '../../../utils/error';
 import { Card, CardContent, CardHeader, CardTitle } from '@anchor-os/ui';
 import { Users } from 'lucide-react';
 import { InviteFamilyMember } from './InviteFamilyMember';
@@ -71,7 +72,7 @@ export function FamilySettingsV2({ onNavigateToFinance, connection: externalConn
             await disconnectFamily({ type: isOwner ? 'remove_member' : 'leave' });
             showToast('Family connection removed', 'success');
             // Connection state is managed by parent via useFamilySharing — Firestore listener updates automatically
-        } catch (err) { console.error('Disconnect error:', err); showToast('Failed to disconnect', 'error'); }
+        } catch (err) { captureError(err, 'Family.disconnect'); showToast('Failed to disconnect', 'error'); }
         finally { setDisconnecting(false); }
     };
 

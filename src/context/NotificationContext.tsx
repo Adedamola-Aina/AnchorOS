@@ -2,6 +2,7 @@ import React, { useContext, useState, useCallback, type ReactNode } from 'react'
 import { createPortal } from 'react-dom';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 import { NotificationContext, type ConfirmOptions, type NotificationType } from './NotificationContextDefinition';
+import { captureError } from '../utils/error';
 
 export { NotificationContext };
 
@@ -63,7 +64,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                     });
                     if (token) setFcmToken(token);
                 } catch (error) {
-                    console.error('Error restoring token:', error);
+                    captureError(error, 'Notifications.restoreToken');
                 }
             }
         };
@@ -89,7 +90,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                             await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', fcmToken));
                         }
                     } catch (err) {
-                        console.error('Error deleting FCM token:', err);
+                        captureError(err, 'Notifications.deleteToken');
                     }
                 }
                 // Set disabled state and persist to localStorage
@@ -142,7 +143,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                         return token;
                     }
                 } catch (err: any) {
-                    console.error('An error occurred while retrieving token. ', err);
+                    captureError(err, 'Notifications.getToken');
                     showToast(`Token Error: ${err.message || 'Unknown'}`, 'error');
                     return null;
                 }
@@ -150,7 +151,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                 showToast('Notifications blocked. Enable in Settings.', 'error');
             }
         } catch (error: any) {
-            console.error('Unable to get permission to notify.', error);
+            captureError(error, 'Notifications.requestPermission');
             showToast(`Error: ${error.message || 'Permission failed'}`, 'error');
         }
         return null;

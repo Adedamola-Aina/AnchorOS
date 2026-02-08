@@ -7,6 +7,7 @@ import { useCreateRecurringTransaction } from '../../hooks/useRecurringQueries';
 import { getTransactionLabel } from '../../utils/finance';
 import { toCents, fromCents } from '../../utils/moneyUtils';
 import { mapFirebaseError } from '../../utils/errorUtils';
+import { captureError } from '../../utils/error';
 import { containsDangerousPatterns } from '../../utils/validation';
 import type { TransactionType, AnchorTransaction, RecurringFrequency } from '../../types';
 import {
@@ -152,7 +153,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             }
             onClose();
         } catch (error) {
-            console.error('[TransactionForm] Failed to save transaction:', error);
+            captureError(error, 'TransactionForm.submit');
             haptic.trigger('error');
             showToast(mapFirebaseError(error), 'error');
         } finally {

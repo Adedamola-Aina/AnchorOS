@@ -8,6 +8,7 @@ import { Shield, Eye, ArrowRightLeft, Settings } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db, APP_ID } from '../../../config/firebase';
 import { useNotifications } from '../../../context/NotificationContext';
+import { captureError } from '../../../utils/error';
 
 type Permission = 'read' | 'transact' | 'manage';
 
@@ -39,6 +40,7 @@ export const SharePermissionPicker: React.FC<Props> = ({ accountId, ownerUid, sh
       setPermission(newPerm);
       showToast(`Permission updated to ${PERMISSIONS.find(p => p.value === newPerm)?.label}.`, 'success');
     } catch (e) {
+      captureError(e, 'SharePermission.update');
       showToast('Failed to update permission: ' + (e as Error).message, 'error');
     } finally {
       setSaving(false);

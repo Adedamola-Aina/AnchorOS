@@ -3,6 +3,7 @@
  * Extracted from SettingsView.tsx per CLAUDE.md §3.2 (200-line rule)
  * BATCH-001: Fixed Firestore 500-op limit in wipe data
  */
+import { captureError } from '../../../utils/error';
 
 import type { User } from 'firebase/auth';
 
@@ -38,6 +39,7 @@ export async function handleWipeData(userId: string, showToast: ShowToast): Prom
             showToast('Nothing to wipe.', 'info');
         }
     } catch (e) {
+        captureError(e, 'Settings.wipeData');
         showToast('Wipe failed: ' + (e as Error).message, 'error');
     }
 }
@@ -91,6 +93,7 @@ export async function handleDeleteAccount(
 
         setTimeout(() => logout(), 500);
     } catch (e) {
+        captureError(e, 'Settings.deleteAccount');
         showToast('Error: ' + (e as Error).message, 'error');
     }
 }

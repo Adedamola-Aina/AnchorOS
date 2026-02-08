@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { captureError } from '../../utils/error';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
 import { useNotifications } from '../../context/NotificationContext';
@@ -59,7 +60,7 @@ export const OnboardingView = () => {
             });
             setStep(3);
         } catch (e) {
-            console.error(e);
+            captureError(e, 'Onboarding.createAccount');
             showToast('Failed to create account.', 'error');
         } finally {
             setLoading(false);
@@ -78,7 +79,7 @@ export const OnboardingView = () => {
             });
             await updateProfile({ onboardingComplete: true });
         } catch (e) {
-            console.error(e);
+            captureError(e, 'Onboarding.createTask');
             showToast('Failed to create task.', 'error');
         } finally {
             setLoading(false);

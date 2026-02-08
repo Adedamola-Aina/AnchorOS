@@ -5,6 +5,7 @@ import type { AnchorAccount, Currency } from '../../types';
 import { toCents } from '../../utils/moneyUtils';
 import { validateAccount, formatValidationErrors } from '../../utils/validation';
 import { useNotifications } from '../../context/NotificationContext';
+import { captureError } from '../../utils/error';
 
 interface AccountFormProps {
     onClose: () => void;
@@ -57,7 +58,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
             setNewAccBalance('');
             onClose();
         } catch (err) {
-            console.error('[AccountForm] Failed to add account:', err);
+            captureError(err, 'AccountForm.addAccount');
             const msg = err instanceof Error ? err.message : 'Failed to create account';
             setError(msg);
             showToast(msg, 'error');

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useNotifications } from '../../../context/NotificationContext';
 import { useAuth } from '../../../context/AuthContext';
+import { captureError } from '../../../utils/error';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 
@@ -34,6 +35,7 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
             await reauthenticate(password);
             await onDeleteAccount();
         } catch (err: any) {
+            captureError(err, 'DangerZone.deleteAccount');
             showToast(err.message?.includes('wrong-password') ? 'Incorrect password.' : 'Error: ' + err.message, 'error');
         } finally {
             setIsDeleting(false);
