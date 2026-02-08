@@ -4,13 +4,34 @@ import { AppProvider } from './context/AnchorContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FinanceProvider } from './context/FinanceContext';
 import { TaskProvider } from './context/TaskContext';
-const DashboardView = React.lazy(() => import('./features/dashboard/DashboardView'));
+
+/**
+ * Lazy-load wrapper that auto-reloads on chunk load failures.
+ * After a deploy, browsers may cache stale chunk filenames. When the SPA
+ * tries to load the old filename, Firebase returns index.html (rewrite),
+ * which fails with a MIME type error. This detects that and reloads once.
+ */
+function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
+  return React.lazy(() =>
+    factory().catch((error: Error) => {
+      // Only reload once — use sessionStorage flag to prevent infinite loop
+      const key = 'chunk_reload_' + factory.toString().slice(0, 60);
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1');
+        window.location.reload();
+      }
+      throw error;
+    })
+  );
+}
+
+const DashboardView = lazyWithRetry(() => import('./features/dashboard/DashboardView'));
 // Eager load CommitmentsView to prevent chunk load errors/timeouts in staging
 import CommitmentsView from './features/commitments/CommitmentsView';
-const FinanceView = React.lazy(() => import('./features/finance/FinanceView'));
-const SettingsView = React.lazy(() => import('./features/settings/SettingsView'));
-const AcceptInviteView = React.lazy(() => import('./features/onboarding/AcceptInviteView').then(m => ({ default: m.AcceptInviteView })));
-const OnboardingView = React.lazy(() => import('./features/onboarding/OnboardingView').then(m => ({ default: m.OnboardingView })));
+const FinanceView = lazyWithRetry(() => import('./features/finance/FinanceView'));
+const SettingsView = lazyWithRetry(() => import('./features/settings/SettingsView'));
+const AcceptInviteView = lazyWithRetry(() => import('./features/onboarding/AcceptInviteView').then(m => ({ default: m.AcceptInviteView })));
+const OnboardingView = lazyWithRetry(() => import('./features/onboarding/OnboardingView').then(m => ({ default: m.OnboardingView })));
 
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import AuthGate from './components/auth/AuthGate';
