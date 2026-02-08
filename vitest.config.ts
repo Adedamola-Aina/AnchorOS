@@ -31,6 +31,12 @@ export default defineConfig({
         '**/test-setup.ts',
         'e2e/**',
       ],
+      thresholds: {
+        statements: 60,
+        branches: 50,
+        functions: 55,
+        lines: 60,
+      },
     },
   },
 })
