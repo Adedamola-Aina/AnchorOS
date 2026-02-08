@@ -80,6 +80,12 @@ describe('BeyondBasicsChecklist', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('renders backdrop with blur effect', () => {
+    render(<BeyondBasicsChecklist {...defaultProps} />);
+    const backdrop = screen.getByTestId('checklist-backdrop');
+    expect(backdrop.className).toContain('backdrop-blur-sm');
+  });
+
   it('shows auto-complete hint text', () => {
     render(<BeyondBasicsChecklist {...defaultProps} />);
     expect(screen.getByText('These complete automatically as you use Anchor OS.')).toBeInTheDocument();

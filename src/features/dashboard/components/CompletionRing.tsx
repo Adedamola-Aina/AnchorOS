@@ -1,7 +1,8 @@
 /**
  * CompletionRing - SVG progress ring for "Beyond the Basics" onboarding
  * Displays in the upper-right of the Dashboard header.
- * Pulses gently when incomplete, turns green when complete.
+ * Rose-red progressive arc shows how much is done.
+ * Subtle glow-pulse draws attention without being annoying.
  */
 
 interface CompletionRingProps {
@@ -25,8 +26,14 @@ export function CompletionRing({ completed, total, onClick, size = 44 }: Complet
   return (
     <button
       onClick={onClick}
-      className={`relative flex items-center justify-center rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 ${!allDone ? 'animate-pulse-slow' : ''}`}
-      style={{ width: size, height: size, minWidth: size, minHeight: size }}
+      className="relative flex items-center justify-center rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-rose-400"
+      style={{
+        width: size,
+        height: size,
+        minWidth: size,
+        minHeight: size,
+        animation: !allDone ? 'ring-glow 3s ease-in-out infinite' : undefined,
+      }}
       aria-label={`Onboarding progress: ${completed} of ${total} complete`}
       data-testid="completion-ring"
     >
@@ -37,26 +44,25 @@ export function CompletionRing({ completed, total, onClick, size = 44 }: Complet
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="currentColor"
           strokeWidth={3}
-          className="text-slate-200 dark:text-slate-700"
+          className="stroke-slate-200 dark:stroke-slate-700"
         />
-        {/* Progress arc */}
+        {/* Progress arc — rose red */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          strokeWidth={3}
+          strokeWidth={3.5}
           strokeLinecap="round"
-          className="text-primary-500 transition-all duration-700"
+          className="stroke-rose-500 transition-all duration-700"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           data-testid="progress-arc"
         />
       </svg>
       {/* Center count */}
-      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300">
+      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-rose-600 dark:text-rose-400">
         {completed}/{total}
       </span>
     </button>

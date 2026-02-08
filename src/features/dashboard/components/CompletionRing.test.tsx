@@ -32,9 +32,10 @@ describe('CompletionRing', () => {
     expect(onClick).toHaveBeenCalled();
   });
 
-  it('applies pulse animation when not all complete', () => {
+  it('applies ring-glow animation when not all complete', () => {
     render(<CompletionRing {...defaultProps} />);
-    expect(screen.getByTestId('completion-ring').className).toContain('animate-pulse-slow');
+    const btn = screen.getByTestId('completion-ring');
+    expect(btn.style.animation).toContain('ring-glow');
   });
 
   it('returns null when all complete', () => {
@@ -52,6 +53,12 @@ describe('CompletionRing', () => {
     const btn = screen.getByTestId('completion-ring');
     expect(btn.style.width).toBe('56px');
     expect(btn.style.height).toBe('56px');
+  });
+
+  it('shows rose-colored progress text', () => {
+    render(<CompletionRing {...defaultProps} />);
+    const label = screen.getByText('2/5');
+    expect(label.className).toContain('text-rose-600');
   });
 
   it('shows 0/5 when nothing completed', () => {
