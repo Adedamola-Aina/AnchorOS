@@ -309,7 +309,8 @@ describe('useCommitmentService', () => {
   });
 
   describe('Optimistic Updates (BUG-023)', () => {
-    it.skip('should update cache immediately without flash of empty state', async () => {
+    it.todo('should update cache immediately without flash of empty state (BUG-023: optimistic updates not yet implemented)');
+    it.skip('should update cache immediately without flash of empty state — wip', async () => {
       const wrapper = createWrapper();
 
       // Setup initial tasks
@@ -358,7 +359,8 @@ describe('useCommitmentService', () => {
       expect(result.current.tasks.find(t => t.id === 'task-1')?.currentStreak).toBe(6); // Incremented
     });
 
-    it.skip('should handle uncompleting task optimistically', async () => {
+    it.todo('should handle uncompleting task optimistically (BUG-023: optimistic updates not yet implemented)');
+    it.skip('should handle uncompleting task optimistically — wip', async () => {
       const wrapper = createWrapper();
 
       const mockTasks = [

@@ -254,15 +254,16 @@ describe('FinanceView', () => {
       expect(screen.getAllByText('Naira Account').length).toBeGreaterThan(0);
     });
 
-    it.skip('displays account balances with correct currency formatting', () => {
+    it('displays account balances with correct currency formatting', () => {
       renderWithContext(<FinanceView />);
 
-      // USD accounts should show $
+      // USD $5,000 is < 10K threshold → full format
       expect(screen.getAllByText(/\$5,000\.00/).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/\$10,000\.00/).length).toBeGreaterThan(0);
+      // USD $10,000 is at 10K threshold → abbreviated to $10K (trailing .0 stripped)
+      expect(screen.getAllByText(/\$10K/).length).toBeGreaterThan(0);
 
-      // NGN account should show ₦
-      expect(screen.getAllByText(/₦500,000\.00/).length).toBeGreaterThan(0);
+      // NGN ₦500,000 → abbreviated to ₦500K (trailing .0 stripped)
+      expect(screen.getAllByText(/₦500K/).length).toBeGreaterThan(0);
     });
 
     it('displays account type badges correctly', () => {
