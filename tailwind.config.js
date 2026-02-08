@@ -149,11 +149,16 @@ module.exports = {
       // Custom animations
       animation: {
         'pulse-slow': 'pulse-slow 3s ease-in-out infinite',
+        'ring-glow': 'ring-glow 3s ease-in-out infinite',
       },
       keyframes: {
         'pulse-slow': {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.7' },
+        },
+        'ring-glow': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(244,63,94,0)' },
+          '50%': { boxShadow: '0 0 8px 3px rgba(244,63,94,0.35)' },
         },
       },
     }

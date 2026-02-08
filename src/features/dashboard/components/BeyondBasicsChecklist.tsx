@@ -27,9 +27,9 @@ export function BeyondBasicsChecklist({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" data-testid="beyond-basics-overlay">
-      {/* Backdrop */}
+      {/* Backdrop — blur matches ContactModal */}
       <div
-        className="absolute inset-0 bg-black/30 dark:bg-black/50"
+        className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
         onClick={onClose}
         data-testid="checklist-backdrop"
       />
