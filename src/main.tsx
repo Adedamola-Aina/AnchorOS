@@ -21,13 +21,13 @@ Sentry.init({
     debug: import.meta.env.VITE_APP_ENV === 'staging', // Enable debug mode in Staging for diagnosis
 });
 
-// SILENCE LOGS IN PRODUCTION
+// SILENCE VERBOSE LOGS IN PRODUCTION
+// Keep console.error alive — Sentry uses it for breadcrumbs and stack traces
 if (import.meta.env.VITE_APP_ENV === 'production') {
     console.log = () => { };
-    console.warn = () => { };
     console.info = () => { };
     console.debug = () => { };
-    console.error = () => { }; // Also silence error logging to console (Sentry still catches it)
+    // console.warn and console.error are preserved for Sentry breadcrumb capture
 }
 
 createRoot(document.getElementById('root')!).render(
