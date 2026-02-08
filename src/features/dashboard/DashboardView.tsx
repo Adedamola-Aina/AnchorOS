@@ -11,7 +11,6 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
 import { useHaptic } from '../../hooks/useHaptic';
-import { SectionHeader } from '../../components/shared';
 import { getAssetDistribution } from '../../utils/financeInsights';
 import { getProductivityMetrics } from '../../utils/taskInsights';
 import { AssetAllocationWidget } from './components/AssetAllocationWidget';
@@ -58,8 +57,17 @@ const DashboardView = () => {
   const dashboardContent = (
     <FeatureErrorBoundary featureName="Dashboard">
       <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 pb-20 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
-        <div className="flex items-start justify-between">
-          <SectionHeader title={`${getTimeGreeting()}, ${profile.name}`} subtitle="Life at a glance." />
+        <div className="flex items-center justify-between gap-3 mb-6 animate-in fade-in slide-in-from-left-4 duration-700">
+          <div className="min-w-0 flex-1">
+            <p
+              className="text-sm lg:text-base font-medium text-slate-500 dark:text-slate-400 truncate"
+              title={`${getTimeGreeting()}, ${profile.name}`}
+              data-testid="dashboard-greeting"
+            >
+              {getTimeGreeting()}, {profile.name}
+            </p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Life at a glance.</p>
+          </div>
           {!beyondBasics.allComplete && (
             <CompletionRing
               completed={beyondBasics.completedCount}
@@ -75,6 +83,10 @@ const DashboardView = () => {
           totalCount={beyondBasics.totalCount}
           isOpen={checklistOpen}
           onClose={() => setChecklistOpen(false)}
+          onItemClick={(item) => {
+            setChecklistOpen(false);
+            navigateTo(item.route.tab, item.route.params);
+          }}
         />
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-5'} ${isRefreshing ? 'opacity-60' : ''}`}>
