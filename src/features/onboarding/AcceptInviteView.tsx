@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { captureError } from '../../utils/error';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { InviteStatusDisplay } from './components/InviteStatusDisplay';
 import { InviteDetails } from './components/InviteDetails';
@@ -67,7 +68,7 @@ export const AcceptInviteView = () => {
                     setError(data.error || 'Invalid invitation.');
                 }
             } catch (err) {
-                console.error(err);
+                captureError(err, 'AcceptInvite.validate');
                 setStatus('invalid');
                 setError('Invitation Invalid.'); // Ensure heading matches text expectations if needed
             }
@@ -111,7 +112,7 @@ export const AcceptInviteView = () => {
             }
         } catch (err) {
             const error = err as Error & { code?: string };
-            console.error(err);
+            captureError(err, 'AcceptInvite.verifyCode');
             if (error.message?.includes('locked')) {
                 setStatus('locked');
                 setError('This invitation has been locked due to too many failed attempts.');

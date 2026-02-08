@@ -7,6 +7,7 @@ import { useState, useMemo } from 'react';
 import type { AnchorAccount, AnchorTransaction } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
+import { captureError } from '../../utils/error';
 import { getWeeklySpending } from '../../utils/financeInsights';
 import { NotificationBanner } from './NotificationBanner';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
@@ -104,7 +105,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
         if (!newName.trim() || newName === account.name) { setIsEditingName(false); return; }
         setIsRenaming(true);
         try { await renameAccount(account.id, newName); setIsEditingName(false); }
-        catch (err) { console.error('Failed to rename:', err); }
+        catch (err) { captureError(err, 'AccountDetails.rename'); console.error('Failed to rename:', err); }
         finally { setIsRenaming(false); }
     };
 

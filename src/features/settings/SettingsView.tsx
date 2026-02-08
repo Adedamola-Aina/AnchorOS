@@ -8,6 +8,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { captureError } from '../../utils/error';
 import { useNotifications } from '../../context/NotificationContext';
 import { useApp } from '../../context/AnchorContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
@@ -70,7 +71,7 @@ const SettingsView = () => {
   const handleReauthenticate = async () => {
     setIsReauthenticating(true);
     try { await reauthenticate(reauthPassword); setShowReauthModal(false); setReauthPassword(''); showToast('Identity verified. Try enabling 2FA again.', 'success'); }
-    catch (error) { showToast('Authentication failed: ' + (error as Error).message, 'error'); }
+    catch (error) { captureError(error, 'Settings.reauthenticate'); showToast('Authentication failed: ' + (error as Error).message, 'error'); }
     finally { setIsReauthenticating(false); }
   };
 

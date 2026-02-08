@@ -7,6 +7,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { captureError } from '../utils/error';
 import { useNavigate } from 'react-router-dom';
 import {
     onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
@@ -119,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const name = e.split('@')[0];
             await setDoc(doc(db, 'artifacts', APP_ID, 'users', cred.user.uid), { name, theme: 'light', familyMode: false, onboardingComplete: false });
             try { await addDoc(collection(db, 'mail'), { to: [e], message: { subject: 'Welcome to Anchor OS!', html: getWelcomeEmailHtml(name) } }); }
-            catch (err) { console.error('Failed to queue welcome email:', err); }
+            catch (err) { captureError(err, 'Auth.welcomeEmail'); }
         });
     };
 

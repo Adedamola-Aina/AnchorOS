@@ -6,6 +6,7 @@
 
 import { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
+import { captureError } from '../../utils/error';
 import type { AnchorTask } from '../../types';
 import { useApp } from '../../context/AnchorContext';
 import { useAuth } from '../../context/AuthContext';
@@ -38,12 +39,12 @@ const CommitmentsView = () => {
     try {
       if (taskPayload.title.includes('<') || taskPayload.title.includes('>')) { showToast('Title contains invalid content', 'error'); return; }
       await addTask(taskPayload); setShowAdd(false); showToast('Commitment added successfully', 'success');
-    } catch (error: unknown) { showToast(`Failed to add task: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error'); }
+    } catch (error: unknown) { captureError(error, 'Commitments.addTask'); showToast(`Failed to add task: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error'); }
   };
 
   const handleSaveEdit = async (taskId: string, updates: Partial<AnchorTask>) => {
     try { await updateTask(taskId, updates); setEditingTaskId(null); showToast('Commitment updated!', 'success'); }
-    catch { showToast('Could not update commitment. Please try again.', 'error'); }
+    catch (err) { captureError(err, 'Commitments.updateTask'); showToast('Could not update commitment. Please try again.', 'error'); }
   };
 
   const handleConfirmFinancial = async (title: string) => {
@@ -64,7 +65,7 @@ const CommitmentsView = () => {
   const handleDeleteTask = async (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (await confirm({ title: 'Delete Commitment?', message: task?.category === 'family' ? `Are you sure you want to delete "${task?.title}"? This is a family commitment and will no longer be tracked.` : `Are you sure you want to delete "${task?.title}"? This action cannot be undone.`, confirmText: 'Delete', cancelText: 'Keep', type: 'danger' })) {
-      try { await deleteTask(taskId); showToast('Commitment deleted', 'success'); } catch { showToast('Could not delete commitment', 'error'); }
+      try { await deleteTask(taskId); showToast('Commitment deleted', 'success'); } catch (err) { captureError(err, 'Commitments.deleteTask'); showToast('Could not delete commitment', 'error'); }
     }
   };
 

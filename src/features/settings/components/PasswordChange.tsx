@@ -8,6 +8,7 @@ import { KeyRound } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotifications } from '../../../context/NotificationContext';
+import { captureError } from '../../../utils/error';
 import { auth } from '../../../config/firebase';
 import { auditAuth } from '../../../services/AuditService';
 
@@ -42,6 +43,7 @@ export const PasswordChange: React.FC = () => {
       reset();
       setOpen(false);
     } catch (err) {
+      captureError(err, 'Settings.changePassword');
       const msg = (err as Error).message;
       if (msg.includes('wrong-password') || msg.includes('invalid-credential')) {
         setError('Current password is incorrect.');
