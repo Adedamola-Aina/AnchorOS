@@ -19,6 +19,9 @@ import { PortfolioWidget, CashFlowWidget, RecentActivityWidget, ProductivityWidg
 import type { Currency } from '../../types';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { PullToRefresh } from '../../components/mobile/PullToRefresh';
+import { CompletionRing } from './components/CompletionRing';
+import { BeyondBasicsChecklist } from './components/BeyondBasicsChecklist';
+import { useBeyondBasics } from './hooks/useBeyondBasics';
 
 const getTimeGreeting = () => {
   const hour = new Date().getHours();
@@ -35,6 +38,8 @@ const DashboardView = () => {
   const { isMobile } = useResponsive();
   const haptic = useHaptic();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [checklistOpen, setChecklistOpen] = useState(false);
+  const beyondBasics = useBeyondBasics();
 
   const productivity = getProductivityMetrics(tasks);
   const hasCommitments = tasks.length > 0;
@@ -53,7 +58,24 @@ const DashboardView = () => {
   const dashboardContent = (
     <FeatureErrorBoundary featureName="Dashboard">
       <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 pb-20 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
-        <SectionHeader title={`${getTimeGreeting()}, ${profile.name}`} subtitle="Life at a glance." />
+        <div className="flex items-start justify-between">
+          <SectionHeader title={`${getTimeGreeting()}, ${profile.name}`} subtitle="Life at a glance." />
+          {!beyondBasics.allComplete && (
+            <CompletionRing
+              completed={beyondBasics.completedCount}
+              total={beyondBasics.totalCount}
+              onClick={() => setChecklistOpen(true)}
+            />
+          )}
+        </div>
+
+        <BeyondBasicsChecklist
+          items={beyondBasics.items}
+          completedCount={beyondBasics.completedCount}
+          totalCount={beyondBasics.totalCount}
+          isOpen={checklistOpen}
+          onClose={() => setChecklistOpen(false)}
+        />
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-5'} ${isRefreshing ? 'opacity-60' : ''}`}>
           {/* Column 1: Wealth */}

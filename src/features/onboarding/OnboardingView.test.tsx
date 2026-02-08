@@ -15,8 +15,10 @@ import type { UserProfile, TabView } from '../../types';
 vi.mock('lucide-react', () => ({
     ArrowRight: () => <span data-testid="arrow-right" />,
     Wallet: () => <span data-testid="wallet" />,
-    CheckCircle2: () => <span data-testid="check-circle" />,
+    CheckCircle2: (props: Record<string, unknown>) => <span data-testid={props['data-testid'] || 'check-circle'} />,
     Sparkles: () => <span data-testid="sparkles" />,
+    Shield: () => <span data-testid="shield" />,
+    Mail: () => <span data-testid="mail" />,
 }));
 
 vi.mock('../../components/shared', () => ({
@@ -64,9 +66,10 @@ const createMockContexts = (financeOverrides = {}, appOverrides = {}, taskOverri
     };
 
     const auth = {
-        user: { uid: 'test-uid' } as any,
+        user: { uid: 'test-uid', emailVerified: false } as any,
         profile: mockProfile,
         loading: false,
+        profileLoaded: true,
         updateProfile,
         signIn: vi.fn(),
         signUp: vi.fn(),
@@ -75,7 +78,10 @@ const createMockContexts = (financeOverrides = {}, appOverrides = {}, taskOverri
         enrollMfa: vi.fn(),
         unenrollMfa: vi.fn(),
         logout: vi.fn(),
-        sendVerificationEmail: vi.fn(),
+        sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
+        sendPasswordReset: vi.fn(),
+        reauthenticate: vi.fn(),
+        accountNotifications: [],
         ...authOverrides,
     };
 
@@ -127,18 +133,18 @@ describe('OnboardingView', () => {
     it('renders Step 1 (Welcome) initially', () => {
         renderWithContexts();
 
-        expect(screen.getByText(/Welcome aboard/i)).toBeInTheDocument();
-        expect(screen.getByText('Test Captain')).toBeInTheDocument();
-        expect(screen.getByText('Start Setup')).toBeInTheDocument();
+        expect(screen.getByText('Welcome to Anchor OS.')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('Test Captain')).toBeInTheDocument();
+        expect(screen.getByText("Let's Begin")).toBeInTheDocument();
     });
 
     it('transitions to Step 2 (Account) on click', async () => {
         const { mocks } = renderWithContexts();
 
-        fireEvent.click(screen.getByText('Start Setup'));
+        fireEvent.click(screen.getByText("Let's Begin"));
 
         await waitFor(() => {
-            expect(mocks.updateProfile).toHaveBeenCalledWith({ onboardingComplete: false });
+            expect(mocks.updateProfile).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Captain', onboardingComplete: false }));
         });
         await waitFor(() => screen.getByText('Add Primary Account'));
         expect(screen.getByText('Add Primary Account')).toBeInTheDocument();
@@ -149,7 +155,7 @@ describe('OnboardingView', () => {
         const { mocks } = renderWithContexts();
 
         // Go to Step 2
-        fireEvent.click(screen.getByText('Start Setup'));
+        fireEvent.click(screen.getByText("Let's Begin"));
         await waitFor(() => screen.getByText('Add Primary Account'));
 
         // Fill Account Form
@@ -173,11 +179,11 @@ describe('OnboardingView', () => {
         expect(screen.getByText('One Small Habit')).toBeInTheDocument();
     });
 
-    it('calls addTask calls on final step', async () => {
+    it('calls addTask and advances to Step 4 (Security)', async () => {
         const { mocks } = renderWithContexts();
 
         // Step 1 -> 2
-        fireEvent.click(screen.getByText('Start Setup'));
+        fireEvent.click(screen.getByText("Let's Begin"));
         await waitFor(() => screen.getByText('Add Primary Account'));
         // Step 2 -> 3
         fireEvent.change(screen.getByPlaceholderText('e.g. Chase Checking'), { target: { value: 'Bank' } });
@@ -189,7 +195,7 @@ describe('OnboardingView', () => {
         // Fill Task
         fireEvent.change(screen.getByPlaceholderText(/e.g. Drink water/i), { target: { value: 'Run 1 mile' } });
 
-        // Submit
+        // Submit — now advances to Security step instead of finishing
         fireEvent.click(screen.getByText('Finish Setup'));
 
         await waitFor(() => {
@@ -198,6 +204,10 @@ describe('OnboardingView', () => {
                 type: 'daily'
             }));
         });
+
+        // Should now be on Step 4
+        await waitFor(() => screen.getByText('Secure Your Account'));
+        expect(screen.getByText('Secure Your Account')).toBeInTheDocument();
     });
 
     // ========================================
@@ -211,19 +221,22 @@ describe('OnboardingView', () => {
 
         it('shows skip link on Step 2', async () => {
             renderWithContexts();
-            fireEvent.click(screen.getByText('Start Setup'));
+            fireEvent.click(screen.getByText("Let's Begin"));
             await waitFor(() => screen.getByText('Add Primary Account'));
             expect(screen.getByText(/skip/i)).toBeInTheDocument();
         });
 
-        it('clicking skip sets onboardingComplete to true', async () => {
+        it('clicking skip sets onboardingComplete with progress', async () => {
             const { mocks } = renderWithContexts();
 
             const skipLink = screen.getByText(/skip/i);
             fireEvent.click(skipLink);
 
             await waitFor(() => {
-                expect(mocks.updateProfile).toHaveBeenCalledWith({ onboardingComplete: true });
+                expect(mocks.updateProfile).toHaveBeenCalledWith(expect.objectContaining({
+                    onboardingComplete: true,
+                    onboardingProgress: expect.objectContaining({ beyondBasicsComplete: false }),
+                }));
             });
         });
     });
@@ -232,23 +245,23 @@ describe('OnboardingView', () => {
     // NEW TESTS: Progress Indicator
     // ========================================
     describe('Progress Indicator', () => {
-        it('shows Step 1 of 3 on first step', () => {
+        it('shows Step 1 of 4 on first step', () => {
             renderWithContexts();
-            expect(screen.getByText(/step 1 of 3/i)).toBeInTheDocument();
+            expect(screen.getByText(/step 1 of 4/i)).toBeInTheDocument();
         });
 
-        it('shows Step 2 of 3 on account step', async () => {
+        it('shows Step 2 of 4 on account step', async () => {
             renderWithContexts();
-            fireEvent.click(screen.getByText('Start Setup'));
+            fireEvent.click(screen.getByText("Let's Begin"));
             await waitFor(() => screen.getByText('Add Primary Account'));
-            expect(screen.getByText(/step 2 of 3/i)).toBeInTheDocument();
+            expect(screen.getByText(/step 2 of 4/i)).toBeInTheDocument();
         });
 
-        it('shows Step 3 of 3 on habit step', async () => {
-            const { mocks } = renderWithContexts();
+        it('shows Step 3 of 4 on habit step', async () => {
+            renderWithContexts();
 
             // Go to step 2
-            fireEvent.click(screen.getByText('Start Setup'));
+            fireEvent.click(screen.getByText("Let's Begin"));
             await waitFor(() => screen.getByText('Add Primary Account'));
 
             // Fill and submit to go to step 3
@@ -257,7 +270,7 @@ describe('OnboardingView', () => {
             fireEvent.click(screen.getByText('Continue'));
 
             await waitFor(() => screen.getByText('One Small Habit'));
-            expect(screen.getByText(/step 3 of 3/i)).toBeInTheDocument();
+            expect(screen.getByText(/step 3 of 4/i)).toBeInTheDocument();
         });
     });
 
@@ -267,7 +280,7 @@ describe('OnboardingView', () => {
     describe('Account Type Selection', () => {
         it('shows account type selector on Step 2', async () => {
             renderWithContexts();
-            fireEvent.click(screen.getByText('Start Setup'));
+            fireEvent.click(screen.getByText("Let's Begin"));
             await waitFor(() => screen.getByText('Add Primary Account'));
 
             // Should have account type options
@@ -278,7 +291,7 @@ describe('OnboardingView', () => {
         it('passes selected account type to addAccount', async () => {
             const { mocks } = renderWithContexts();
 
-            fireEvent.click(screen.getByText('Start Setup'));
+            fireEvent.click(screen.getByText("Let's Begin"));
             await waitFor(() => screen.getByText('Add Primary Account'));
 
             // Fill form

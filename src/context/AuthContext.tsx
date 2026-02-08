@@ -90,10 +90,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     if (actualMfaEnrolled && !data.mfaEnabled) { await updateDoc(profRef, { mfaEnabled: true }); return; }
                     if (!actualMfaEnrolled && data.mfaEnabled) { await updateDoc(profRef, { mfaEnabled: false }); return; }
                     setProfile(data);
-                    const alerts = [];
+                    const alerts: string[] = [];
                     if (!u.emailVerified && import.meta.env.VITE_APP_ENV === 'production') alerts.push('verify_email');
                     if (!actualMfaEnrolled) alerts.push('enable_2fa');
-                    setAccountNotifications(alerts);
+                    // Suppress nav-level notifications if user saw the security step during onboarding
+                    const securitySeen = data.onboardingProgress?.securityStepSeen === true;
+                    setAccountNotifications(securitySeen ? [] : alerts);
                     setProfileLoaded(true); setLoading(false);
                 } else {
                     if (snap.metadata.fromCache) { console.warn('[AuthContext] Profile not found but data is from cache'); return; }

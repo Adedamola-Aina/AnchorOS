@@ -71,12 +71,30 @@ export interface AnchorTransaction {
   accountOwnerId?: string;
 }
 
+export interface OnboardingProgress {
+  gettingStartedStep: number;
+  securityStepSeen: boolean;
+  beyondBasicsComplete: boolean;
+  completedItems: string[];
+}
+
+export const BEYOND_BASICS_ITEMS = [
+  'explore_finance',
+  'recurring_commitment',
+  'review_dashboard',
+  'customize_settings',
+  'secure_account',
+] as const;
+
+export type BeyondBasicsItem = typeof BEYOND_BASICS_ITEMS[number];
+
 export interface UserProfile {
   name: string;
   familyMode: boolean;
   theme: 'light' | 'dark' | 'system';
   mfaEnabled?: boolean;
   onboardingComplete?: boolean;
+  onboardingProgress?: OnboardingProgress;
   notificationPreferences?: {
     email: string;
     frequency: 'instant' | 'daily' | 'weekly';
