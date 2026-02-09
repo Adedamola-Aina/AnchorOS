@@ -709,7 +709,7 @@ Component (TransactionForm)
 │      │                                                           │
 │      ├─→ git commit                                             │
 │      │       │                                                   │
-│      │       └─→ git push origin main                           │
+│      │       └─→ git push origin master                           │
 │      │                                                           │
 │  LXC 107 (Development Environment)                              │
 │      │                                                           │

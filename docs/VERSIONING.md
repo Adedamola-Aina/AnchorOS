@@ -172,4 +172,4 @@ Each version entry includes:
 **Related Docs**:
 - **Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ - Live version status
 - [DEPLOYMENT_CHECKLIST.md](docs/DEPLOYMENT_CHECKLIST.md) - Deploy procedures
-- [ROADMAP.md](docs/ROADMAP.md) - Planned versions
+- **Git commit history** - Source of truth for changelog and roadmap

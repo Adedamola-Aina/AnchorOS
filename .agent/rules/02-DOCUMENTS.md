@@ -23,7 +23,7 @@ Dashboard browser: https://anchor.tail2fa2e.ts.net:3443/
 | `docs/FIRESTORE_SCHEMA.md` | Database work, security rules |
 | `docs/SECURITY.md` | Auth, permissions, data access |
 | `docs/TESTING_STRATEGY.md` | Writing tests, coverage strategy |
-| `docs/FAMILY_SHARING_V3_*.md` | Family mode work |
+| `docs/adr/FAMILY_SHARING_V3_*.md` | Family mode work |
 | `docs/ANCHOR_FINANCE_SPEC.md` | Finance module work |
 | `docs/ERROR_HANDLING.md` | Error boundaries, recovery patterns |
 

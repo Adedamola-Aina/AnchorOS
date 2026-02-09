@@ -58,9 +58,9 @@
 
 ### Rule 4: Check for Duplicates
 **ALWAYS search before creating:**
-- Bug reports → `docs/KNOWN_ISSUES.md`
-- Feature requests → `docs/FEATURE_SUGGESTIONS.md`
-- Planned work → `docs/ROADMAP.md`
+- Bug reports → `git log --oneline --grep="BUG-"` or Dashboard `/api/git/bugs`
+- Feature requests → Dashboard `/api/git/features`
+- Planned work → Dashboard `/api/command-center`
 
 ### Rule 5: Track via Git & Roadmap
 **Git History is the Source of Truth:**
@@ -89,13 +89,13 @@ When user reports something, classify correctly:
 
 | Type | ID Format | Destination |
 |------|-----------|-------------|
-| **BUG** | BUG-XXX | `docs/KNOWN_ISSUES.md` |
-| **REGRESSION** | REG-XXX | `docs/KNOWN_ISSUES.md` (Regressions) |
-| **GAP** | GAP-XXX | `docs/KNOWN_ISSUES.md` (Gaps) |
-| **FEATURE** | FEAT-XXX | `docs/FEATURE_SUGGESTIONS.md` |
-| **TASK** | TASK-XXX | `docs/PROJECT_STATUS.md` |
+| **BUG** | BUG-XXX | Git commit with `fix:` prefix |
+| **REGRESSION** | REG-XXX | Git commit with `fix:` prefix |
+| **GAP** | GAP-XXX | Git commit with `fix:` or `feat:` prefix |
+| **FEATURE** | FEAT-XXX | Git commit with `feat:` prefix |
+| **TASK** | TASK-XXX | Git commit with `chore:` or `refactor:` prefix |
 
-**Always check for duplicates first!**
+**Always check git history for duplicates first!**
 
 ---
 
@@ -151,19 +151,17 @@ I'm successful when:
 - `docs/ENGINEERING_EXECUTION_STANDARD.md` - Engineering excellence standards
 
 ### 📊 Current State & Planning
-- `docs/PROJECT_STATUS.md` - **What's happening now (READ FIRST)**
-- `docs/ROADMAP.md` - **What's planned and why**
-- `docs/KNOWN_ISSUES.md` - **Active bugs (check for duplicates!)**
-- `docs/DEPLOYMENT_STATUS.md` - **What's deployed where**
-- `docs/FEATURE_SUGGESTIONS.md` - Feature backlog (82 suggestions)
+- **Dashboard** - `https://anchor.tail2fa2e.ts.net:3443/` - Live project state
+- `docs/VERSIONING.md` - Version policy and current versions
 - `docs/USER_FEEDBACK.md` - User feedback and requests
+- **Git commits** - Source of truth for bugs, features, and changelog
 
 ### 🏗️ Architecture & Design
 - `docs/ARCHITECTURE_OVERVIEW.md` - System architecture (50KB - comprehensive!)
 - `docs/FIRESTORE_SCHEMA.md` - Database schema, 8 collections, security rules
 - `docs/ANCHOR_FINANCE_SPEC.md` - Finance module specification
-- `docs/FAMILY_SHARING_V3_REDESIGN.md` - Family sharing architecture
-- `docs/FAMILY_SHARING_V3_IMPLEMENTATION.md` - Family sharing implementation
+- `docs/adr/FAMILY_SHARING_V3_REDESIGN.md` - Family sharing architecture
+- `docs/adr/FAMILY_SHARING_V3_IMPLEMENTATION.md` - Family sharing implementation
 - `docs/architecture/` - Additional architecture docs
 
 ### 🎨 Design System
@@ -197,9 +195,8 @@ I'm successful when:
 ### Before ANY Task
 **ALWAYS READ:**
 1. `CLAUDE.md` - Constitution
-2. `docs/PROJECT_STATUS.md` - Current state
-3. `docs/ROADMAP.md` - Planned work
-4. `docs/KNOWN_ISSUES.md` - Active bugs
+2. Dashboard or `docs/VERSIONING.md` - Current versions & state
+3. `git log --oneline -20` - Recent work
 
 ### Before Implementing Features
 **ALSO READ:**
@@ -222,7 +219,7 @@ I'm successful when:
 
 ### Before Deployment
 **ALSO READ:**
-- `docs/DEPLOYMENT_STATUS.md` - Current deployments
+- `Dashboard (`/api/parity`)` - Current deployments
 - `docs/ENVIRONMENT_SETUP.md` - Deployment process
 - `docs/VERSIONING.md` - Version numbering
 

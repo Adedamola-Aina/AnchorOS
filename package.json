@@ -25,6 +25,7 @@
     "deploy:staging": "./DEPLOY_PIPELINE.sh --env=staging",
     "deploy:production": "./DEPLOY_PIPELINE.sh --env=production",
     "build:analyze": "ANALYZE=true vite build",
+    "audit:docs": "node scripts/audit-docs.mjs",
     "prepare": "husky"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 # ANCHOR OS — TECHNICAL RULES
 
 ## Stack
-TypeScript (strict) · React 18 · Vite · Tailwind CSS · Firebase (Firestore, Auth, Functions, Hosting) · Vitest (unit) · Playwright (E2E)
+TypeScript (strict) · React 19 · Vite · Tailwind CSS · Firebase (Firestore, Auth, Functions, Hosting) · Vitest (unit) · Playwright (E2E)
 
 ## Architecture Mandates
 

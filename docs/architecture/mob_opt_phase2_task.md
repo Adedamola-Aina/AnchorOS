@@ -282,7 +282,7 @@ Mobile Optimization Phase 2 addresses performance bottlenecks and missing mobile
 ## References
 
 - [USER_FEEDBACK.md](file:///root/anchor-os/docs/USER_FEEDBACK.md) - User feedback driving this work
-- [KNOWN_ISSUES.md](file:///root/anchor-os/docs/KNOWN_ISSUES.md) - BUG-001 details
-- [FEATURE_SUGGESTIONS.md](file:///root/anchor-os/docs/FEATURE_SUGGESTIONS.md) - UX-006, UX-008, UX-009
+- Git commit history contains BUG-001 details (formerly in KNOWN_ISSUES.md)
+- Git commit history contains UX-006, UX-008, UX-009 (formerly in FEATURE_SUGGESTIONS.md)
 - [CLAUDE.md §6.5](file:///root/anchor-os/CLAUDE.md) - Index-First Development
 - [TESTING_STRATEGY.md](file:///root/anchor-os/docs/TESTING_STRATEGY.md) - TDD protocol

@@ -348,7 +348,7 @@ it('uses runTransaction for optimistic updates', async () => {
 
 ## 🚀 Future Enhancements
 
-See [FEATURE_SUGGESTIONS.md](../../../docs/FEATURE_SUGGESTIONS.md) for planned improvements:
+Planned improvements tracked via git commits:
 
 - **ARCH-010**: Test Coverage Reporting (CI integration)
 - **ARCH-011**: Mutation Testing (Stryker.js)

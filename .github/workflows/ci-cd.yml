@@ -96,21 +96,9 @@ jobs:
              CLEAN_MSG="$COMMIT_MSG"
           fi
           
-          # Construct new changelog entry
-          NEW_ENTRY="## [$NEW_VERSION] - $DATE\n\n$SECTION\n- $CLEAN_MSG\n"
-          
-          # Update CHANGELOG.md (Insert after header)
-          # Assuming standard header is 7 lines long
-          if [ -f CHANGELOG.md ]; then
-            head -n 7 CHANGELOG.md > temp_changelog.md
-            echo -e "$NEW_ENTRY" >> temp_changelog.md
-            tail -n +8 CHANGELOG.md >> temp_changelog.md
-            mv temp_changelog.md CHANGELOG.md
-          else
-            echo -e "# Changelog\n\n$NEW_ENTRY" > CHANGELOG.md
-          fi
-          
-          git add package.json CHANGELOG.md
+          # Git commits are source of truth (no CHANGELOG.md)
+          # Version bump commit + tag only
+          git add package.json
           git commit -m "chore: bump version to $NEW_VERSION [skip-version]"
           git tag "v$NEW_VERSION"
           git push --follow-tags
