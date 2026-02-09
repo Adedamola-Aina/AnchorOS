@@ -5,9 +5,11 @@ import { downloadCsv } from '../../../utils/csvExport';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 
+import type { UserProfile } from '../../../types';
+
 interface DataManagementProps {
     userUid: string;
-    profile: any;
+    profile: UserProfile;
     onWipeData: () => Promise<void>;
 }
 

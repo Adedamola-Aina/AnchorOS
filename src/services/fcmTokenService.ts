@@ -33,17 +33,18 @@ export async function getFcmTokenWithRetry({
                 serviceWorkerRegistration: registration,
             });
             return token;
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const e = err instanceof Error ? err : new Error(String(err));
             const isRetryable = retries > 0 && (
-                err.message?.includes('closing') ||
-                err.name === 'InvalidStateError'
+                e.message.includes('closing') ||
+                e.name === 'InvalidStateError'
             );
             if (isRetryable) {
-                console.log(`[Push] IDB timing error, retrying in ${delay}ms... (${retries} left)`);
+                if (import.meta.env.DEV) console.warn(`[Push] IDB timing error, retrying in ${delay}ms... (${retries} left)`);
                 await new Promise(r => setTimeout(r, delay));
                 return attempt(retries - 1, delay * 2);
             }
-            throw err;
+            throw e;
         }
     };
 

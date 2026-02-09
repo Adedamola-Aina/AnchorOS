@@ -4,7 +4,7 @@
  */
 
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { EmailAuthProvider, reauthenticateWithCredential, getMultiFactorResolver, TotpMultiFactorGenerator, type MultiFactorResolver } from 'firebase/auth';
+import { EmailAuthProvider, reauthenticateWithCredential, getMultiFactorResolver, TotpMultiFactorGenerator, type MultiFactorResolver, type MultiFactorError } from 'firebase/auth';
 import { auth } from '../../../config/firebase';
 
 interface ConfirmConnectionResult {
@@ -30,7 +30,7 @@ export async function reauthenticateUser(password: string): Promise<void> {
 }
 
 export function getMfaResolver(error: unknown): MultiFactorResolver {
-    return getMultiFactorResolver(auth, error as any);
+    return getMultiFactorResolver(auth, error as MultiFactorError);
 }
 
 export async function verifyMfaAndComplete(resolver: MultiFactorResolver, code: string): Promise<void> {

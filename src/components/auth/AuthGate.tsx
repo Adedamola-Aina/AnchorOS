@@ -11,7 +11,7 @@ import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
 import { useNotifications } from '../../context/NotificationContext';
 import AuthView from '../../features/auth/AuthView';
-import { getMultiFactorResolver, type MultiFactorResolver } from 'firebase/auth';
+import { getMultiFactorResolver, type MultiFactorResolver, type MultiFactorError } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 import { mapFirebaseError } from '../../utils/errorUtils';
 import { AuthLoadingScreen, EmailVerificationGate, OnboardingGate } from './AuthGateParts';
@@ -68,7 +68,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
                         setLoginAttempts(0); localStorage.setItem('anchor_login_attempts', '0');
                     }
                 } catch (err: unknown) {
-                    if ((err as any).code === 'auth/multi-factor-auth-required') { setMfaResolver(getMultiFactorResolver(auth, err as any)); setMfaCode(''); setLoginAttempts(0); }
+                    if ((err as MultiFactorError).code === 'auth/multi-factor-auth-required') { setMfaResolver(getMultiFactorResolver(auth, err as MultiFactorError)); setMfaCode(''); setLoginAttempts(0); }
                     else {
                         const newAttempts = loginAttempts + 1; setLoginAttempts(newAttempts); localStorage.setItem('anchor_login_attempts', newAttempts.toString());
                         if (newAttempts >= 5) { const lockoutTime = Date.now() + 60000; setLockoutUntil(lockoutTime); localStorage.setItem('anchor_lockout_until', lockoutTime.toString()); setAuthError('Too many failed attempts. Login locked for 1 minute.'); }

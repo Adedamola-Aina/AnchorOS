@@ -64,7 +64,7 @@ export function useVersionCheck(enabled: boolean = true) {
 
             // Check if hash has changed
             if (latestHash !== currentHashRef.current) {
-                console.log('[VersionCheck] New version detected! Reloading...');
+                if (import.meta.env.DEV) console.info('[VersionCheck] New version detected! Reloading...');
 
                 // Brief notification before reload
                 const toast = document.createElement('div');

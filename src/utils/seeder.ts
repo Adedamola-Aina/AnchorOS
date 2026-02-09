@@ -3,21 +3,21 @@
  * Refactored per CLAUDE.md §3.2 - data constants extracted to seederData.ts
  */
 
-import { collection, doc, writeBatch, serverTimestamp, getDoc } from 'firebase/firestore';
+import { collection, doc, writeBatch, serverTimestamp, getDoc, type FieldValue } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import type { AnchorAccount, AnchorTask, TimeOfDay } from '../types';
 import { TITLES, ACCOUNT_NAMES, TASK_TITLES, CATEGORIES, DOMAINS, ACCOUNT_COLORS, randomDate, randomItem } from './seederData';
 
 export const seedData = async (userId: string) => {
     if (!userId) throw new Error('User ID required');
-    console.log('🌱 Starting Enhanced Data Seeding...');
+    if (import.meta.env.DEV) console.info('🌱 Starting Enhanced Data Seeding...');
 
     let batch = writeBatch(db);
     let opCount = 0;
     const MAX_BATCH_SIZE = 450;
 
     const commitAndResetBatch = async () => {
-        if (opCount > 0) { await batch.commit(); console.log('Batch committed.'); batch = writeBatch(db); opCount = 0; }
+        if (opCount > 0) { await batch.commit(); if (import.meta.env.DEV) console.info('Batch committed.'); batch = writeBatch(db); opCount = 0; }
     };
 
     // Fetch User Profile for Family Mode
@@ -53,7 +53,7 @@ export const seedData = async (userId: string) => {
         opCount++;
     }
     await commitAndResetBatch();
-    console.log('✅ Accounts Created');
+    if (import.meta.env.DEV) console.info('✅ Accounts Created');
 
     // Create Transactions
     const financeRef = collection(db, 'artifacts', APP_ID, 'users', userId, 'finance');
@@ -100,7 +100,7 @@ export const seedData = async (userId: string) => {
         const taskType = i < 4 ? 'daily' : i < 8 ? 'weekly' : i < 10 ? 'monthly' : 'todo';
         const domain = randomItem(DOMAINS);
         const timeOfDay = ['morning', 'afternoon', 'evening', 'any'][Math.floor(Math.random() * 4)] as TimeOfDay;
-        const taskData: Omit<AnchorTask, 'createdAt'> & { createdAt: any } = { id: doc(tasksRef).id, title, type: taskType, completed: Math.random() > 0.6, category: 'personal', createdAt: serverTimestamp(), domain, reminderTime: '08:00' };
+        const taskData: Omit<AnchorTask, 'createdAt'> & { createdAt: FieldValue } = { id: doc(tasksRef).id, title, type: taskType, completed: Math.random() > 0.6, category: 'personal', createdAt: serverTimestamp(), domain, reminderTime: '08:00' };
         if (taskType === 'daily') taskData.timeOfDay = timeOfDay;
         else if (taskType === 'weekly') taskData.daysOfWeek = ['Monday', 'Wednesday', 'Friday'];
         else if (taskType === 'monthly') taskData.dayOfMonth = 15;
@@ -109,6 +109,6 @@ export const seedData = async (userId: string) => {
     }
 
     await commitAndResetBatch();
-    console.log('✅ Seeding Complete!');
+    if (import.meta.env.DEV) console.info('✅ Seeding Complete!');
     return true;
 };

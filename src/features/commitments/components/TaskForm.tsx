@@ -31,7 +31,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
         if (!newTaskTitle.trim() || isSaving) return;
         setIsSaving(true);
         try {
-            const taskPayload = { title: newTaskTitle, type: newTaskType, completed: false, category: newTaskScope, domain: newTaskDomain, reminderTime: newTaskReminder || null } as any;
+            const taskPayload: Omit<AnchorTask, 'id' | 'createdAt'> = { title: newTaskTitle, type: newTaskType, completed: false, category: newTaskScope, domain: newTaskDomain, reminderTime: newTaskReminder || undefined };
             if (newTaskType === 'daily') taskPayload.timeOfDay = newTaskTime;
             if (newTaskType === 'weekly') taskPayload.daysOfWeek = newTaskDays;
             if (newTaskType === 'monthly') taskPayload.daysOfMonth = newTaskDates;

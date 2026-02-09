@@ -34,9 +34,10 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
         try {
             await reauthenticate(password);
             await onDeleteAccount();
-        } catch (err: any) {
+        } catch (err: unknown) {
             captureError(err, 'DangerZone.deleteAccount');
-            showToast(err.message?.includes('wrong-password') ? 'Incorrect password.' : 'Error: ' + err.message, 'error');
+            const msg = err instanceof Error ? err.message : String(err);
+            showToast(msg.includes('wrong-password') ? 'Incorrect password.' : 'Error: ' + msg, 'error');
         } finally {
             setIsDeleting(false);
             setPassword('');

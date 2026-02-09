@@ -54,7 +54,7 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
         if (!messaging) return;
 
         const unsubscribe = onMessage(messaging, (payload) => {
-            console.log('Foreground message received:', payload);
+            if (import.meta.env.DEV) console.info('Foreground message received:', payload);
             if (payload.notification) {
                 showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
             }
@@ -95,7 +95,7 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
                 localStorage.removeItem(PUSH_DISABLED_KEY);
             }
 
-            console.log('[Push] Requesting permission...');
+            if (import.meta.env.DEV) console.info('[Push] Requesting permission...');
             const permission = await Notification.requestPermission();
             setPushPermissionStatus(permission);
 
@@ -128,17 +128,19 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
                         }
                         return token;
                     }
-                } catch (err: any) {
+                } catch (err: unknown) {
                     captureError(err, 'Notifications.getToken');
-                    showToast(`Token Error: ${err.message || 'Unknown'}`, 'error');
+                    const msg = err instanceof Error ? err.message : 'Unknown';
+                    showToast(`Token Error: ${msg}`, 'error');
                     return null;
                 }
             } else {
                 showToast('Notifications blocked. Enable in Settings.', 'error');
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             captureError(error, 'Notifications.requestPermission');
-            showToast(`Error: ${error.message || 'Permission failed'}`, 'error');
+            const msg = error instanceof Error ? error.message : 'Permission failed';
+            showToast(`Error: ${msg}`, 'error');
         }
         return null;
     }, [pushPermissionStatus, pushDisabled, fcmToken, showToast]);

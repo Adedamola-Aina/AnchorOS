@@ -88,13 +88,14 @@ export function logEvent(
         data: options?.attributes as Record<string, unknown> | undefined,
     });
 
-    const logFn = options?.level === 'error'
-        ? console.error
-        : options?.level === 'warn'
-            ? console.warn
-            : console.log;
-
-    logFn(`[Event] ${name}`, options?.attributes ?? {});
+    if (import.meta.env.DEV) {
+        const logFn = options?.level === 'error'
+            ? console.error
+            : options?.level === 'warn'
+                ? console.warn
+                : console.info;
+        logFn(`[Event] ${name}`, options?.attributes ?? {});
+    }
 }
 
 /**

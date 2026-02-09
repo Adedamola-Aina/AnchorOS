@@ -8,7 +8,7 @@ import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
 interface EditTaskFormProps {
     task: AnchorTask;
     hasFamilyActive: boolean;
-    onSave: (taskId: string, updates: any) => Promise<void>;
+    onSave: (taskId: string, updates: Partial<Omit<AnchorTask, 'id' | 'createdAt' | 'type'>>) => Promise<void>;
     onCancel: () => void;
 }
 
@@ -40,7 +40,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
         if (isSaving) return;
         setIsSaving(true);
         try {
-            const updates: any = {
+            const updates: Partial<Omit<AnchorTask, 'id' | 'createdAt' | 'type'>> = {
                 title: editTitle,
                 domain: editDomain,
                 category: editScope,
