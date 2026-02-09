@@ -3,7 +3,7 @@
  * Target: 95%+ coverage
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { checkRateLimit, resetRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from './rateLimit';
 
 describe('rateLimit', () => {

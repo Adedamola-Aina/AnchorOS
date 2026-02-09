@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
-import { useNotifications } from '../../context/NotificationContext';
-import { useHaptic } from '../../hooks/useHaptic';
-import { useAuth } from '../../context/AuthContext';
-import { useCreateRecurringTransaction } from '../../hooks/useRecurringQueries';
 import { getTransactionLabel } from '../../utils/finance';
 import { toCents, fromCents } from '../../utils/moneyUtils';
-import { mapFirebaseError } from '../../utils/errorUtils';
-import { captureError } from '../../utils/error';
-import { containsDangerousPatterns } from '../../utils/validation';
 import type { TransactionType, AnchorTransaction, RecurringFrequency } from '../../types';
 import {
     AccountSelector, CategorySelector, OverdraftWarning,
@@ -19,6 +12,7 @@ import {
     useTransactionFormState, NoAccountsMessage, SingleAccountTransferMessage,
     DescriptionField, AmountField, DateField
 } from './components/transactionForm';
+import { useTransactionSubmit } from './components/transactionForm/useTransactionSubmit';
 
 interface TransactionFormProps {
     onClose: () => void;
@@ -31,13 +25,7 @@ interface TransactionFormProps {
 export const TransactionForm: React.FC<TransactionFormProps> = ({
     onClose, defaultAccountId, defaultType = 'expense', initialData, prefillData
 }) => {
-    const haptic = useHaptic();
-    const { user } = useAuth();
-    const { transactions, accounts, addTransaction, updateTransaction, refetch } = useFinance();
-    const { mutateAsync: createRecurring } = useCreateRecurringTransaction();
-    const { showToast } = useNotifications();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errors, setErrors] = useState<{ title?: string; amount?: string; destination?: string; category?: string }>({});
+    const { accounts, transactions } = useFinance();
 
     // Recurring State
     const [isRecurring, setIsRecurring] = useState(false);
@@ -53,7 +41,6 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     const [amount, setAmount] = useState(initialAmount);
     const [transactionDate, setTransactionDate] = useState(initialDate);
 
-    // Use extracted hook for complex state management
     const formState = useTransactionFormState({
         accounts, transactions, initialData, defaultAccountId, defaultType, prefillData
     });
@@ -67,99 +54,11 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     const projectedBalance = (formState.type === 'expense' || formState.type === 'transfer') ? currentBalance - expenseAmount : currentBalance + expenseAmount;
     const isOverdraft = (formState.type === 'expense' || formState.type === 'transfer') && projectedBalance < 0;
 
-    const validate = () => {
-        const newErrors: typeof errors = {};
-        if (!formState.title.trim()) newErrors.title = 'Description is required';
-        if (formState.title && containsDangerousPatterns(formState.title)) newErrors.title = 'Description contains invalid content';
-        if (!amount || toCents(amount) <= 0) newErrors.amount = 'Valid amount required';
-        if (!formState.category.trim()) newErrors.category = 'Category is required';
-        if (formState.type === 'transfer' && (!formState.destinationAccId || formState.destinationAccId === formState.selectedAccId)) {
-            newErrors.destination = 'Select a different destination account';
-        }
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (isSubmitting || !validate() || !sourceAccount || !user) return;
-        const amountCents = Math.abs(toCents(amount));
-        if (!amountCents) return;
-
-        setIsSubmitting(true);
-        try {
-            const finalCategory = formState.type === 'transfer' ? 'Transfer' : formState.category;
-            let destinationAmountCents = amountCents;
-            if (isDifferentCurrency) {
-                const rate = parseFloat(formState.exchangeRate);
-                if (isNaN(rate) || rate <= 0) throw new Error('Invalid exchange rate');
-                // BUG-FIX: Use amountCents directly to avoid parsing issues with comma-formatted strings
-                destinationAmountCents = Math.round(amountCents * rate);
-
-                if (destinationAmountCents <= 0) {
-                    throw new Error('Transfer amount too small for this exchange rate');
-                }
-            }
-
-            const isoDate = new Date(transactionDate + 'T12:00:00').toISOString();
-
-            // 1. Handle Recurring Rule Creation
-            if (isRecurring && !initialData) {
-                await createRecurring({
-                    title: formState.title,
-                    amountCents,
-                    type: formState.type,
-                    category: finalCategory,
-                    accountId: formState.selectedAccId,
-                    accountName: sourceAccount.name,
-                    frequency,
-                    interval,
-                    nextRunAt: isoDate, // First run date
-                    status: 'active',
-                    userId: user.uid,
-                    createdAt: new Date().toISOString()
-                });
-                showToast('Recurring rule created!', 'success');
-            }
-
-            // 2. Create Standard Transaction (Immediate)
-            if (initialData) {
-                await updateTransaction(initialData.id, initialData.accountId, {
-                    title: formState.title, amountCents, type: formState.type, category: finalCategory, date: transactionDate,
-                    // BUG-034: Include cross-currency amounts for transfer edits
-                    ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) })
-                });
-                haptic.trigger('success');
-                showToast('Transaction updated', 'success');
-            } else {
-                await addTransaction({
-                    title: formState.title, amountCents, type: formState.type, category: finalCategory,
-                    accountId: formState.selectedAccId, accountName: sourceAccount.name,
-                    currency: sourceAccount.currency, date: isoDate,
-                    scope: sourceAccount.scope,
-                    destinationAccountId: formState.type === 'transfer' ? formState.destinationAccId : undefined,
-                    ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) })
-                });
-                haptic.trigger('success');
-                showToast('Transaction recorded', 'success');
-            }
-
-            await refetch();
-            if (!initialData) {
-                formState.setTitle('');
-                setAmount('');
-                setTransactionDate(new Date().toISOString().split('T')[0]);
-                setIsRecurring(false); // Reset recurring toggle
-            }
-            onClose();
-        } catch (error) {
-            captureError(error, 'TransactionForm.submit');
-            haptic.trigger('error');
-            showToast(mapFirebaseError(error), 'error');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    const { isSubmitting, errors, setErrors, handleSubmit } = useTransactionSubmit({
+        formState, amount, setAmount, transactionDate, setTransactionDate,
+        isRecurring, setIsRecurring, frequency, interval,
+        initialData, sourceAccount, isDifferentCurrency: !!isDifferentCurrency, onClose,
+    });
 
     // Early returns for empty states
     if (accounts.length === 0) return <NoAccountsMessage />;

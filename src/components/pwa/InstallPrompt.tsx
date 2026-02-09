@@ -48,7 +48,7 @@ export const InstallPrompt = () => {
 
         window.addEventListener('beforeinstallprompt', handler);
         return () => window.removeEventListener('beforeinstallprompt', handler);
-    }, [isMobile]);
+    }, [isMobile, isIOS]);
 
     const handleInstall = async () => {
         if (!deferredPrompt) return;

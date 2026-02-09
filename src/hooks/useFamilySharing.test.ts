@@ -5,8 +5,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { onSnapshot, query, where, collection } from 'firebase/firestore';
-import { httpsCallable, getFunctions } from 'firebase/functions';
+import { onSnapshot } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 
 // ── Firebase mocks ────────────────────────────────────────────────
 vi.mock('../config/firebase', () => ({

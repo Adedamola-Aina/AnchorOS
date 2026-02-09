@@ -66,9 +66,9 @@ export function useBeyondBasics() {
   const { tasks } = useTasks();
 
   const progress = profile.onboardingProgress;
-  const completedItems = progress?.completedItems ?? [];
 
   const items: BeyondBasicsItemState[] = useMemo(() => {
+    const completedItems = progress?.completedItems ?? [];
     const hasTransaction = transactions.length > 0;
     const hasRecurring = tasks.some(t => t.type === 'weekly' || t.type === 'monthly');
     const hasDashboardData = tasks.length > 0;
@@ -90,7 +90,7 @@ export function useBeyondBasics() {
         (id === 'verify_email' && emailVerified) ||
         (id === 'enable_mfa' && mfaEnabled),
     }));
-  }, [completedItems, transactions.length, tasks, profile, user?.emailVerified]);
+  }, [progress?.completedItems, transactions.length, tasks, profile, user?.emailVerified]);
 
   const completedCount = items.filter(i => i.completed).length;
   const totalCount = items.length;

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { pendingConfirmationHandlers } from './pendingConfirmationHandlers';
 
 // Mock Firebase modules
 const mockHttpsCallable = vi.fn();
@@ -26,7 +25,6 @@ vi.mock('../../../config/firebase', () => ({
 
 // We need to import the actual functions - they call httpsCallable internally
 // Let's check what the module actually exports
-let handlers: typeof import('./pendingConfirmationHandlers');
 
 describe('pendingConfirmationHandlers', () => {
   beforeEach(() => {
@@ -40,7 +38,7 @@ describe('pendingConfirmationHandlers', () => {
       mockHttpsCallable.mockReturnValue(mockCallable);
 
       const { completeConnectionConfirmation } = await import('./pendingConfirmationHandlers');
-      const result = await completeConnectionConfirmation('invite-123', 'password123');
+      await completeConnectionConfirmation('invite-123', 'password123');
 
       expect(mockHttpsCallable).toHaveBeenCalledWith(expect.anything(), 'confirmConnection');
       expect(mockCallable).toHaveBeenCalledWith({

@@ -33,6 +33,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     const parentRef = useRef<HTMLDivElement>(null);
     const { isMobile } = useResponsive();
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const parentVirtualizer = useVirtualizer({
         count: transactions.length,
         getScrollElement: () => parentRef.current,

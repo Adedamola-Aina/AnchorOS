@@ -98,7 +98,7 @@ const createMockContexts = (financeOverrides = {}) => {
 };
 
 const renderWithContext = (ui: React.ReactElement, { finance = {} } = {}) => {
-    const { finance: mockFinance, app, auth, family, notifications } = createMockContexts(finance);
+    const { finance: mockFinance, app, auth, family: _family, notifications } = createMockContexts(finance);
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     return render(
         <QueryClientProvider client={queryClient}>

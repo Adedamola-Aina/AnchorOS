@@ -7,11 +7,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getSystemTheme, getEffectiveTheme, subscribeToSystemTheme, hasUserThemePreference, clearThemePreference } from './systemTheme';
 
 describe('systemTheme', () => {
-    let matchMediaSpy: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
         localStorage.clear();
-        matchMediaSpy = vi.fn();
     });
 
     afterEach(() => {

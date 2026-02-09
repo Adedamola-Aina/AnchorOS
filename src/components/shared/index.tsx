@@ -2,11 +2,9 @@ import React from 'react';
 import { Sunrise, Sun, Moon } from 'lucide-react';
 import type { AnchorTask } from '../../types';
 export { ThemeToggle, type Theme } from './ThemeToggle';
-export { LoadingScreen } from './LoadingScreen';
 export { ToggleSwitch } from './ToggleSwitch';
 export { CategoryIcon } from './CategoryIcon';
 export { FabricSuggestionToast, FabricSuggestionContainer } from './FabricSuggestionToast';
-export { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
 
 // formatCurrency moved to ../../utils/format.ts
 

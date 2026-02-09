@@ -2,7 +2,7 @@ import React, { useContext, useState, useCallback, type ReactNode } from 'react'
 import { createPortal } from 'react-dom';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 import { NotificationContext, type ConfirmOptions, type NotificationType } from './NotificationContextDefinition';
-import { captureError } from '../utils/error';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 export { NotificationContext };
 
@@ -12,24 +12,8 @@ interface Notification {
     type: NotificationType;
 }
 
-import { messaging, db, auth, APP_ID } from '../config/firebase';
-import { onMessage, deleteToken } from 'firebase/messaging';
-import { getFcmTokenWithRetry } from '../services/fcmTokenService';
-import { doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-
-// BUG-039: Key to track user's push notification preference
-const PUSH_DISABLED_KEY = 'anchor_push_disabled';
-
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [fcmToken, setFcmToken] = useState<string | null>(null);
-    // BUG-039: Track if user has explicitly disabled push notifications
-    const [pushDisabled, setPushDisabled] = useState<boolean>(() => {
-        return localStorage.getItem(PUSH_DISABLED_KEY) === 'true';
-    });
-    const [pushPermissionStatus, setPushPermissionStatus] = useState<NotificationPermission>(
-        typeof Notification !== 'undefined' ? Notification.permission : 'default'
-    );
     const [confirmDialog, setConfirmDialog] = useState<{
         options: ConfirmOptions;
         resolve: (value: boolean) => void;
@@ -49,128 +33,8 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         });
     }, []);
 
-    // Check initial permission state - BUG-039: Only restore if not explicitly disabled
-    React.useEffect(() => {
-        const checkPermission = async () => {
-            if (typeof Notification === 'undefined' || !messaging) return;
-            // BUG-039: Respect user's explicit disable preference
-            if (pushDisabled) return;
-
-            if (Notification.permission === 'granted') {
-                try {
-                    const token = await getFcmTokenWithRetry({
-                        messaging: messaging!,
-                        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-                    });
-                    if (token) setFcmToken(token);
-                } catch (error) {
-                    captureError(error, 'Notifications.restoreToken');
-                }
-            }
-        };
-        checkPermission();
-    }, [pushDisabled]);
-
-    const requestPushPermission = useCallback(async () => {
-        try {
-            if (typeof Notification === 'undefined') {
-                showToast('Notifications not supported on this device', 'error');
-                return null;
-            }
-
-            // BUG-039 Fix: If already granted, properly disable push notifications
-            if (pushPermissionStatus === 'granted' || pushDisabled) {
-                // Actually disable push by deleting token
-                if (messaging && fcmToken) {
-                    try {
-                        // Delete token from Firebase Messaging
-                        await deleteToken(messaging);
-                        // Delete token from Firestore
-                        if (auth.currentUser) {
-                            await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', fcmToken));
-                        }
-                    } catch (err) {
-                        captureError(err, 'Notifications.deleteToken');
-                    }
-                }
-                // Set disabled state and persist to localStorage
-                setPushDisabled(true);
-                localStorage.setItem(PUSH_DISABLED_KEY, 'true');
-                setPushPermissionStatus('default');
-                setFcmToken(null);
-                showToast('Push Notifications Disabled', 'info');
-                return null;
-            }
-
-            // Re-enable if was disabled
-            if (pushDisabled) {
-                setPushDisabled(false);
-                localStorage.removeItem(PUSH_DISABLED_KEY);
-            }
-
-            console.log('[Push] Requesting permission...');
-            const permission = await Notification.requestPermission();
-            setPushPermissionStatus(permission);
-
-            if (permission === 'granted') {
-                showToast('Permission granted! Initializing...', 'success');
-
-                if (!messaging) {
-                    showToast('Messaging service not available', 'error');
-                    return null;
-                }
-
-                // ARCH-003: FCM token retrieval with retry extracted to service
-                try {
-                    const token = await getFcmTokenWithRetry({
-                        messaging: messaging!,
-                        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-                    });
-
-                    if (token) {
-                        setFcmToken(token);
-                        showToast('Push Notifications Enabled!', 'success');
-
-                        if (auth.currentUser) {
-                            const tokenRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', token);
-                            await setDoc(tokenRef, {
-                                token,
-                                platform: 'web',
-                                lastSeen: serverTimestamp(),
-                                userAgent: navigator.userAgent
-                            }, { merge: true });
-                        }
-                        return token;
-                    }
-                } catch (err: any) {
-                    captureError(err, 'Notifications.getToken');
-                    showToast(`Token Error: ${err.message || 'Unknown'}`, 'error');
-                    return null;
-                }
-            } else {
-                showToast('Notifications blocked. Enable in Settings.', 'error');
-            }
-        } catch (error: any) {
-            captureError(error, 'Notifications.requestPermission');
-            showToast(`Error: ${error.message || 'Permission failed'}`, 'error');
-        }
-        return null;
-    }, [pushPermissionStatus, pushDisabled, fcmToken, showToast]);
-
-    // Listen for foreground messages
-    React.useEffect(() => {
-        if (!messaging) return;
-
-        const unsubscribe = onMessage(messaging, (payload) => {
-            console.log('Foreground message received:', payload);
-            if (payload.notification) {
-                showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
-            }
-        });
-        return () => unsubscribe();
-    }, [showToast]);
-
-
+    // Push notification management (FCM, permissions, foreground messages)
+    const { fcmToken, pushPermissionStatus, requestPushPermission } = usePushNotifications({ showToast });
     const handleConfirm = (value: boolean) => {
         if (confirmDialog) {
             confirmDialog.resolve(value);

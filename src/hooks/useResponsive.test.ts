@@ -4,9 +4,9 @@
  * Per MOBILE_OPTIMIZATION_DIRECTIVE.md M1.1: "Write tests for useResponsive FIRST"
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useResponsive, type Breakpoint } from './useResponsive';
+import { useResponsive } from './useResponsive';
 
 // Helper to mock window.innerWidth
 const mockWindowWidth = (width: number) => {

@@ -71,12 +71,12 @@ const FinanceView = () => {
   }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const action = searchParams.get('action');
     if (action === 'new') {
       const amountStr = searchParams.get('amount'); const amount = amountStr ? parseFloat(amountStr) : undefined;
       const category = searchParams.get('category') || undefined; const description = searchParams.get('description') || undefined;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: one-time URL param → state sync on mount
       if (amount || category || description) { setPrefillData({ amount, category, title: description }); setMode('addTx'); setSearchParams({}, { replace: true }); }
     }
   }, [searchParams, setSearchParams]);

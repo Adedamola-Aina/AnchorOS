@@ -3,7 +3,7 @@
  * Target: 80%+ coverage
  */
 
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -155,7 +155,7 @@ describe('AuthContext', () => {
     });
 
     it('creates profile when snapshot does not exist', async () => {
-        const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+        renderHook(() => useAuth(), { wrapper: createWrapper() });
 
         act(() => {
             authCallback?.({ uid: 'user-1', email: 'new@test.com', emailVerified: false });

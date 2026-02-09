@@ -75,7 +75,7 @@ describe('RecurringApi', () => {
         it('creates document and returns ID', async () => {
             vi.mocked(addDoc).mockResolvedValueOnce({ id: 'new-rec-1' } as any);
 
-            const { id, ...data } = buildRecurring();
+            const { id: _id, ...data } = buildRecurring();
             const newId = await api.createRecurring(data);
             expect(newId).toBe('new-rec-1');
             expect(addDoc).toHaveBeenCalledWith(

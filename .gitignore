@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 test-results/
 coverage/
+playwright-report/
+functions/lib/
+src/.claude/
+tools/dashboard/firebase-debug.log
+tools/dashboard/logs/

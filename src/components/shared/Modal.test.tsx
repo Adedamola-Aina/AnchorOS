@@ -87,7 +87,7 @@ describe('Modal - REG-003 Regression Test', () => {
     });
 
     it('returns null when not open', () => {
-        const { container } = render(
+        render(
             <Modal isOpen={false} onClose={vi.fn()} title="Hidden">
                 <div>Hidden Content</div>
             </Modal>

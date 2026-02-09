@@ -24,10 +24,10 @@ export const AnimatedHomeIcon: React.FC<AnimatedHomeIconProps> = ({
     isAnimating = false,
 }) => {
     // Default colors if user has no accounts (matching ACCOUNT_COLORS from seederData)
-    const DEFAULT_COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'];
 
     // Pick first 4 colors from accounts (or defaults) - stable selection for React purity
     const gridColors = useMemo(() => {
+        const DEFAULT_COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'];
         const source = accountColors.length > 0 ? accountColors : DEFAULT_COLORS;
         // Take first 4, or cycle if less than 4
         return [0, 1, 2, 3].map(i => source[i % source.length]);

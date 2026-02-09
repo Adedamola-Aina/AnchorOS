@@ -4,26 +4,7 @@ import { AppProvider } from './context/AnchorContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FinanceProvider } from './context/FinanceContext';
 import { TaskProvider } from './context/TaskContext';
-
-/**
- * Lazy-load wrapper that auto-reloads on chunk load failures.
- * After a deploy, browsers may cache stale chunk filenames. When the SPA
- * tries to load the old filename, Firebase returns index.html (rewrite),
- * which fails with a MIME type error. This detects that and reloads once.
- */
-function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
-  return React.lazy(() =>
-    factory().catch((error: Error) => {
-      // Only reload once — use sessionStorage flag to prevent infinite loop
-      const key = 'chunk_reload_' + factory.toString().slice(0, 60);
-      if (!sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, '1');
-        window.location.reload();
-      }
-      throw error;
-    })
-  );
-}
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
 const DashboardView = lazyWithRetry(() => import('./features/dashboard/DashboardView'));
 // Eager load CommitmentsView to prevent chunk load errors/timeouts in staging
@@ -43,24 +24,9 @@ const APP_VERSION = (pkg as unknown as { version: string }).version;
 import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OfflineIndicator } from './components/shared/OfflineIndicator';
+import { EnvironmentBanner } from './components/shared/EnvironmentBanner';
 import { useVersionCheck } from './hooks/useVersionCheck';
 import { useAccessibility } from './hooks/useAccessibility';
-
-// Environment Banner - Shows in non-production environments
-const EnvironmentBanner = () => {
-  const env = import.meta.env.VITE_APP_ENV;
-  if (!env || env === 'production') return null;
-
-  const colors = env === 'development'
-    ? 'bg-blue-600 text-white'
-    : 'bg-yellow-500 text-black'; // staging - yellow banner
-
-  return (
-    <div className={`fixed top-0 left-0 right-0 h-6 ${colors} flex items-center justify-center text-xs font-bold tracking-widest uppercase z-50`}>
-      {env === 'development' ? 'DEVELOPMENT ENVIRONMENT' : 'STAGING ENVIRONMENT'}
-    </div>
-  );
-};
 
 const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
