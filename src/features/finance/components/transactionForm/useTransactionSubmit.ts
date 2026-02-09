@@ -15,7 +15,7 @@ import { toCents } from '../../../../utils/moneyUtils';
 import { mapFirebaseError } from '../../../../utils/errorUtils';
 import { captureError } from '../../../../utils/error';
 import { containsDangerousPatterns } from '../../../../utils/validation';
-import type { AnchorTransaction, AnchorAccount, RecurringFrequency } from '../../../../types';
+import type { AnchorTransaction, AnchorAccount, RecurringFrequency, TransactionType } from '../../../../types';
 
 export interface FormErrors {
     title?: string;
@@ -27,7 +27,7 @@ export interface FormErrors {
 interface UseTransactionSubmitOptions {
     formState: {
         title: string; setTitle: (v: string) => void;
-        type: string; category: string;
+        type: TransactionType; category: string;
         selectedAccId: string; destinationAccId: string;
         exchangeRate: string; suggestedCategory: string | null;
         setSuggestedCategory: (v: string | null) => void;
@@ -92,7 +92,7 @@ export function useTransactionSubmit(options: UseTransactionSubmitOptions) {
 
             if (isRecurring && !initialData) {
                 await createRecurring({
-                    title: formState.title, amountCents, type: formState.type as any,
+                    title: formState.title, amountCents, type: formState.type,
                     category: finalCategory, accountId: formState.selectedAccId,
                     accountName: sourceAccount.name, frequency, interval,
                     nextRunAt: isoDate, status: 'active',
@@ -103,7 +103,7 @@ export function useTransactionSubmit(options: UseTransactionSubmitOptions) {
 
             if (initialData) {
                 await updateTransaction(initialData.id, initialData.accountId, {
-                    title: formState.title, amountCents, type: formState.type as any,
+                    title: formState.title, amountCents, type: formState.type,
                     category: finalCategory, date: transactionDate,
                     ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) })
                 });
@@ -111,7 +111,7 @@ export function useTransactionSubmit(options: UseTransactionSubmitOptions) {
                 showToast('Transaction updated', 'success');
             } else {
                 await addTransaction({
-                    title: formState.title, amountCents, type: formState.type as any,
+                    title: formState.title, amountCents, type: formState.type,
                     category: finalCategory, accountId: formState.selectedAccId,
                     accountName: sourceAccount.name, currency: sourceAccount.currency,
                     date: isoDate, scope: sourceAccount.scope,

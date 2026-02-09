@@ -8,22 +8,22 @@ export type ErrorCategory = 'VALIDATION' | 'PERMISSION' | 'NETWORK' | 'AUTH' | '
 export class AnchorError extends Error {
     public category: ErrorCategory;
     public userMessage: string;
-    public originalError?: any;
+    public originalError?: unknown;
 
-    constructor(message: string, category: ErrorCategory = 'UNKNOWN', originalError?: any) {
+    constructor(message: string, category: ErrorCategory = 'UNKNOWN', originalError?: unknown) {
         super(message);
         this.name = 'AnchorError';
         this.category = category;
         this.userMessage = message;
         this.originalError = originalError;
 
-        // Ensure stack trace is captured correctly
-        if ((Error as any).captureStackTrace) {
-            (Error as any).captureStackTrace(this, AnchorError);
+        // Ensure stack trace is captured correctly (V8-specific API)
+        if ('captureStackTrace' in Error && typeof Error.captureStackTrace === 'function') {
+            Error.captureStackTrace(this, AnchorError);
         }
     }
 
-    static isAnchorError(error: any): error is AnchorError {
+    static isAnchorError(error: unknown): error is AnchorError {
         return error instanceof AnchorError;
     }
 }
@@ -43,7 +43,7 @@ const SENTRY_LEVEL: Record<ErrorCategory, 'warning' | 'error' | 'fatal'> = {
  * Global error handler utility
  * Logs to console AND reports to Sentry with full context
  */
-export const handleError = (error: any, fallbackMessage: string = 'An unexpected error occurred'): AnchorError => {
+export const handleError = (error: unknown, fallbackMessage: string = 'An unexpected error occurred'): AnchorError => {
     if (AnchorError.isAnchorError(error)) {
         console.error(`[${error.category}] ${error.message}`, error.originalError);
 

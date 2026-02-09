@@ -51,7 +51,7 @@ const firebaseConfig = configs[projectId] || configs['anchor-os'];
 
 // Log which environment we're connecting to
 const env = import.meta.env.VITE_APP_ENV || 'production';
-console.log(`[Firebase] Initializing for ${env} environment (${projectId})...`);
+if (import.meta.env.DEV) console.info(`[Firebase] Initializing for ${env} environment (${projectId})...`);
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
@@ -79,4 +79,4 @@ try {
   console.warn('[Firebase] Messaging not initialized (environment may not support it)');
 }
 export const messaging = messagingInstance;
-console.log(`[Firebase] Connected to ${projectId}`);
+if (import.meta.env.DEV) console.info(`[Firebase] Connected to ${projectId}`);

@@ -88,7 +88,7 @@ export function useMfaEnrollmentUI({
             showToast('2FA enabled successfully!', 'success');
         } catch (err) {
             const msg = (err as Error).message;
-            if (msg.includes('requires-recent-login') || (err as any).code === 'auth/requires-recent-login') {
+            if (msg.includes('requires-recent-login') || ('code' in (err as object) && (err as { code: string }).code === 'auth/requires-recent-login')) {
                 onRequiresReauth();
             } else {
                 setMfaError(msg.includes('invalid-verification-code')

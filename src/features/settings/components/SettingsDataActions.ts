@@ -82,8 +82,10 @@ export async function handleDeleteAccount(
             try {
                 await deleteUser(user);
                 showToast('Account deleted successfully.', 'success');
-            } catch (authErr: any) {
-                if (authErr.code === 'auth/requires-recent-login') {
+            } catch (authErr: unknown) {
+                const errCode = authErr != null && typeof authErr === 'object' && 'code' in authErr
+                    ? (authErr as { code: string }).code : '';
+                if (errCode === 'auth/requires-recent-login') {
                     showToast('Account data deleted. Sign in again to complete deletion.', 'info');
                 } else {
                     throw authErr;

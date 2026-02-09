@@ -12,7 +12,7 @@ interface NotificationSettingsProps {
     frequency: 'instant' | 'daily' | 'weekly';
     userEmail: string;
     emailVerified: boolean;
-    onUpdatePreferences: (prefs: any) => void;
+    onUpdatePreferences: (prefs: Partial<{ enabled: boolean; email: string; frequency: 'instant' | 'daily' | 'weekly'; categories: CategoryPreferences; quietHours: QuietHoursPreferences }>) => void;
     categories?: CategoryPreferences;
     quietHours?: QuietHoursPreferences;
     pushPermissionStatus: NotificationPermission;
