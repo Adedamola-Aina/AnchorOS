@@ -138,11 +138,34 @@ Each version entry includes:
 
 ## 🔄 Release Process
 
-1. **Development**: Work on `master` branch
-2. **Staging**: Deploy via `./DEPLOY_PIPELINE.sh --env=staging`
-3. **Version Bump**: Update `package.json` version
-4. **Deploy Marker**: Commit with `deploy(env): vX.X.X` format
-5. **Production**: Deploy via `./DEPLOY_PIPELINE.sh --env=production`
+**Automated (CI/CD)**:
+1. Commit with conventional commit format (enforced by commitlint)
+2. Push to `master` branch
+3. CI runs tests → auto-bumps version based on commit type:
+   - `feat:` → MINOR bump (v1.4.0 → v1.5.0)
+   - `fix:`, `perf:`, `refactor:` → PATCH bump (v1.4.0 → v1.4.1)
+   - `BREAKING CHANGE` or `!` → MAJOR bump (v1.x → v2.0.0)
+4. CI creates git tag, updates CHANGELOG.md, deploys to staging
+5. Production deploy requires manual approval in GitHub
+
+**Manual Deploy** (if needed):
+1. `./DEPLOY_PIPELINE.sh --env=staging` or `--env=production`
+2. Create deploy marker: `git commit --allow-empty -m "deploy(env): vX.X.X"`
+
+**Conventional Commit Types**:
+| Type | Description | Version Bump |
+|------|-------------|--------------|
+| `feat` | New feature | MINOR |
+| `fix` | Bug fix | PATCH |
+| `perf` | Performance improvement | PATCH |
+| `refactor` | Code restructuring | PATCH |
+| `docs` | Documentation only | none |
+| `style` | Formatting changes | none |
+| `test` | Test changes | none |
+| `chore` | Maintenance | none |
+| `ci` | CI/CD changes | none |
+| `build` | Build system | none |
+| `deploy` | Deploy markers | none |
 
 ---
 
