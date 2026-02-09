@@ -42,7 +42,7 @@ Based on ARCH-003, every significant work item must follow these phases:
   - [ ] [CLAUDE.md](file:///root/anchor-os/CLAUDE.md) - Engineering Constitution
   - [ ] [TESTING_STRATEGY.md](file:///root/anchor-os/docs/TESTING_STRATEGY.md) - Test requirements
   - [ ] [ERROR_HANDLING.md](file:///root/anchor-os/docs/ERROR_HANDLING.md) - Error patterns
-  - [ ] [ARCH-001 mandate](file:///root/anchor-os/docs/FEATURE_SUGGESTIONS.md) - 200-line rule
+  - [ ] ARCH-001 mandate - 200-line max per file rule
   - [ ] Domain-specific standards (as applicable)
 - [ ] Create detailed task checklist (arch_XXX_task.md)
 - [ ] Create implementation plan (arch_XXX_plan.md)
@@ -50,7 +50,7 @@ Based on ARCH-003, every significant work item must follow these phases:
 - [ ] Identify test requirements (unit, integration, E2E)
 - [ ] Define success metrics and coverage targets
 
-**Standard**: Follow [docs/FEATURE_SUGGESTIONS.md](file:///root/anchor-os/docs/FEATURE_SUGGESTIONS.md) item template
+**Standard**: Use git conventional commits to track all work (`feat:`, `fix:`, `refactor:`, etc.)
 
 ---
 
@@ -103,8 +103,7 @@ Required Documentation:
   - [ ] Coverage analysis
   - [ ] Impact assessment
 - [ ] Update **TESTING_STRATEGY.md** with new patterns (if applicable)
-- [ ] Update **ROADMAP.md** with completion status
-- [ ] Update **FEATURE_SUGGESTIONS.md** status
+- [ ] Create conventional commit with appropriate prefix (`feat:`, `fix:`, etc.)
 - [ ] Capture screenshots/recordings (if UI work)
 
 **Standard**: Walkthroughs must be 400+ lines with comprehensive detail (see arch_003_walkthrough.md - 574 lines)
@@ -166,10 +165,9 @@ Every completed work item must have:
 - ✅ Screenshots/recordings (if UI work)
 - ✅ Git commits (one per phase)
 
-### 4. Documentation Updates
-- ✅ ROADMAP.md updated
-- ✅ FEATURE_SUGGESTIONS.md updated
-- ✅ Relevant strategy docs updated (if patterns added)
+### 4. Tracking & Attribution
+- ✅ Conventional commits for all changes
+- ✅ Git tags for version bumps (automated via CI)
 
 ---
 

@@ -88,11 +88,11 @@ Detected from keywords in message:
 
 | Issue Type | Destination File |
 |------------|------------------|
-| BUG | `docs/KNOWN_ISSUES.md` |
-| REGRESSION | `docs/KNOWN_ISSUES.md` (Regressions section) |
-| GAP | `docs/KNOWN_ISSUES.md` (Gaps section) |
-| FEATURE | `docs/FEATURE_SUGGESTIONS.md` |
-| TASK | `docs/PROJECT_STATUS.md` |
+| BUG | `Dashboard `/api/git/bugs`` |
+| REGRESSION | `Dashboard `/api/git/bugs`` (Regressions section) |
+| GAP | `Dashboard `/api/git/bugs`` (Gaps section) |
+| FEATURE | `Dashboard `/api/git/features`` |
+| TASK | `Dashboard `/api/command-center`` |
 
 ## Files
 

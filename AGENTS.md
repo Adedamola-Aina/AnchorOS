@@ -41,5 +41,5 @@ Phase 4 CLOSE: Run tests, commit with prefix, verify dashboard detected it.
 - Commit prefixes: fix: feat: chore: refactor: test: docs: deploy(env):
 
 ## Stack
-TypeScript (strict), React 18, Vite, Tailwind CSS, Firebase, Vitest, Playwright
+TypeScript (strict), React 19, Vite, Tailwind CSS, Firebase, Vitest, Playwright
 EOF

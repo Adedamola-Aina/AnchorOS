@@ -139,21 +139,12 @@ Follow TDD:
 
 ## 📊 CURRENT PROJECT STATE
 
-**Read `docs/PROJECT_STATUS.md` for latest, but key points:**
+**Check Dashboard for live data:** `https://anchor.tail2fa2e.ts.net:3443/`  
+**API endpoints:** `curl http://localhost:3001/api/command-center`
 
-- **Current Focus**: Marketing Website (P0)
-- **Active Bugs in Testing**: BUG-008 through BUG-014
-- **Production**: v1.5.0 (stable)
-- **Dev/Staging**: v1.5.2-dev (testing)
-
-**Active Bug IDs** (check before logging new):
-- BUG-008: Transaction History UI Inconsistency
-- BUG-009: Dark Mode White Edge
-- BUG-010: Transaction List Spacing
-- BUG-011: Empty List Scroll
-- BUG-012: Task Box Too Large
-- BUG-013: Redundant Icons
-- BUG-014: Transaction List Layout
+- **Version tracking**: See `docs/VERSIONING.md` and Dashboard for current versions
+- **Bugs & Issues**: Use `git log --oneline --grep="BUG-"` or Dashboard /api/git/bugs
+- **Git is source of truth** - no separate PROJECT_STATUS.md or CHANGELOG.md
 
 ---
 
@@ -168,7 +159,7 @@ The Internal PM Dashboard at `http://localhost:3001` shows:
 **If you can execute commands**, query it:
 ```bash
 curl http://localhost:3001/api/command-center
-curl http://localhost:3001/api/bugs
+curl http://localhost:3001/api/git/bugs
 curl http://localhost:3001/api/parity
 ```
 

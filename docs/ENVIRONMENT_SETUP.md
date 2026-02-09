@@ -418,7 +418,7 @@ cd /root/anchor-os
 #### Step 3: Pull Latest Code
 
 ```bash
-git pull origin main
+git pull origin master
 ```
 
 #### Step 4: Install Dependencies (If package.json Changed)

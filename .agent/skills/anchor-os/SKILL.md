@@ -5,7 +5,7 @@ description: Deep context about Anchor OS. Load for architecture decisions, comp
 
 # Anchor OS
 
-Self-hosted personal finance and commitment tracking system. TypeScript + React 18 + Vite + Tailwind + Firebase. Used daily by real people.
+Self-hosted personal finance and commitment tracking system. TypeScript + React 19 + Vite + Tailwind + Firebase. Used daily by real people.
 
 ## Key Architecture
 
@@ -40,6 +40,6 @@ The Internal PM Dashboard at `tools/dashboard/` (localhost:3001) is the single s
 - Auto-archival after 30 days
 - Velocity tracking with predictions
 
-## Current Version: 1.5.13-dev
+## Current Version: 1.7.0
 
-Production is on v1.5.0 (stable). Dev/Staging have bug fixes pending verification.
+Production is on v1.7.0 (stable). Dev/Staging have bug fixes pending verification.
