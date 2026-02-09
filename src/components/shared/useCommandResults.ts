@@ -50,7 +50,7 @@ interface UseCommandResultsOptions {
     tasks: AnchorTask[];
     query: string;
     isOpen: boolean;
-    navigateTo: (page: string) => void;
+    navigateTo: (page: 'dashboard' | 'finance' | 'commitments' | 'settings', params?: Record<string, string | number | undefined>) => void;
 }
 
 export function useCommandResults({ accounts, tasks, query, isOpen, navigateTo }: UseCommandResultsOptions) {
