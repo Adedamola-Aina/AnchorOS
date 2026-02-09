@@ -87,7 +87,7 @@ const SettingsView = () => {
         <div id="settings-notifications"><NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
           frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
           categories={profile.notificationPreferences?.categories}
-          onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || {}), ...prefs } })}
+          onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || { email: '', frequency: 'instant' as const, enabled: false }), ...prefs } })}
           pushPermissionStatus={pushPermissionStatus} requestPushPermission={() => requestPushPermission()} /></div>
         <div id="settings-family"><FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} connection={familyConnection} connectionLoading={familyLoading} /></div>
         <div id="settings-support"><SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} /></div>

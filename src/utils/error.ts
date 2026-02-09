@@ -52,7 +52,7 @@ export const handleError = (error: unknown, fallbackMessage: string = 'An unexpe
             tags: { category: error.category },
             extra: {
                 userMessage: error.userMessage,
-                originalError: error.originalError?.message ?? error.originalError,
+                originalError: error.originalError instanceof Error ? error.originalError.message : error.originalError,
             },
         });
         return error;
