@@ -24,7 +24,8 @@
     "deploy:dev": "./DEPLOY_PIPELINE.sh --env=development",
     "deploy:staging": "./DEPLOY_PIPELINE.sh --env=staging",
     "deploy:production": "./DEPLOY_PIPELINE.sh --env=production",
-    "build:analyze": "ANALYZE=true vite build"
+    "build:analyze": "ANALYZE=true vite build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -55,6 +56,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.4.1",
+    "@commitlint/config-conventional": "^20.4.1",
     "@eslint/js": "^9.39.1",
     "@firebase/rules-unit-testing": "^5.0.0",
     "@playwright/test": "^1.57.0",
@@ -73,6 +76,7 @@
     "firebase-admin": "^13.6.0",
     "globals": "^17.2.0",
     "happy-dom": "^20.3.0",
+    "husky": "^9.1.7",
     "jsdom": "^27.4.0",
     "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "~5.9.3",

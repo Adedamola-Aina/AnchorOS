@@ -794,9 +794,9 @@ describe('TransactionService', () => {
                 amountCents: 20000, // New source amount (200 USD in cents)
             };
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+             
             let _linkedUpdateCalled = false;
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+             
             let _linkedBalanceUpdate: number | undefined;
 
             vi.mocked(firestore.runTransaction).mockImplementation(async (_db, callback) => {
