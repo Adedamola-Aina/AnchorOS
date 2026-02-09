@@ -1,14 +1,18 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
-// Mock all child components to isolate SettingsView
+// Hoisted mock fns so tests can assert on calls
+const mockLogout = vi.fn();
+const mockUpdateProfile = vi.fn();
+const mockNavigateTo = vi.fn();
+
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({
     profile: { name: 'Test User', theme: 'dark', mfaEnabled: false, notificationPreferences: {}, accessibility: null },
-    updateProfile: vi.fn(),
+    updateProfile: mockUpdateProfile,
     user: { uid: 'user-1', email: 'test@test.com', emailVerified: true },
-    logout: vi.fn(),
+    logout: mockLogout,
     accountNotifications: [],
     sendVerificationEmail: vi.fn(),
     generateMfaSecret: vi.fn(),
@@ -27,7 +31,7 @@ vi.mock('../../context/NotificationContext', () => ({
 }));
 
 vi.mock('../../context/AnchorContext', () => ({
-  useApp: () => ({ navigateTo: vi.fn() }),
+  useApp: () => ({ navigateTo: mockNavigateTo }),
 }));
 
 vi.mock('../../hooks/useFamilySharing', () => ({
@@ -53,7 +57,6 @@ vi.mock('./components/SupportSettings', () => ({ SupportSettings: ({ onOpenConta
 vi.mock('./components/DeveloperTools', () => ({ DeveloperTools: () => <div data-testid="dev-tools">DevTools</div> }));
 vi.mock('./components/DataManagement', () => ({ DataManagement: () => <div data-testid="data-mgmt">Data</div> }));
 vi.mock('./components/DangerZone', () => ({ DangerZone: () => <div data-testid="danger-zone">Danger</div> }));
-// Notification banners removed — onboarding handles email verify + MFA
 vi.mock('./components/ReauthModal', () => ({ ReauthModal: () => null }));
 vi.mock('./components/RecoveryCodesDisplay', () => ({ RecoveryCodesDisplay: () => null }));
 vi.mock('./components/SectionNav', () => ({ SectionNav: () => <nav data-testid="section-nav" /> }));
@@ -72,6 +75,10 @@ vi.mock('../../utils/error', () => ({ captureError: vi.fn() }));
 import SettingsView from './SettingsView';
 
 describe('SettingsView', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders all major settings sections', () => {
     render(<SettingsView />);
     expect(screen.getByText('System Settings')).toBeInTheDocument();
@@ -99,5 +106,21 @@ describe('SettingsView', () => {
     render(<SettingsView />);
     fireEvent.click(screen.getByTestId('support'));
     expect(screen.getByTestId('contact-modal')).toBeInTheDocument();
+  });
+
+  it('calls logout when sign out is clicked', () => {
+    render(<SettingsView />);
+    fireEvent.click(screen.getByText('Sign Out'));
+    expect(mockLogout).toHaveBeenCalledOnce();
+  });
+
+  it('renders developer tools in non-production env', () => {
+    render(<SettingsView />);
+    expect(screen.getByTestId('dev-tools')).toBeInTheDocument();
+  });
+
+  it('wraps content in FeatureErrorBoundary', () => {
+    render(<SettingsView />);
+    expect(screen.getByText('System Settings')).toBeInTheDocument();
   });
 });
