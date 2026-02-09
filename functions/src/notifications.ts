@@ -2,7 +2,7 @@
  * Notifications — get & dismiss user notifications
  */
 
-import * as functions from 'firebase-functions';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
 
@@ -10,15 +10,16 @@ import { enforceRateLimit } from './rateLimit';
 // Get Notifications
 // ============================================================================
 
-export const getNotifications = functions.https.onCall(
-    async (data: { limit?: number; includeRead?: boolean }, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const getNotifications = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const userId = context.auth.uid;
+        const userId = request.auth.uid;
         await enforceRateLimit('getNotifications', userId);
 
+        const data = request.data as { limit?: number; includeRead?: boolean };
         const limit = data?.limit || 50;
         const includeRead = data?.includeRead ?? false;
 
@@ -42,14 +43,14 @@ export const getNotifications = functions.https.onCall(
 // Dismiss Notification
 // ============================================================================
 
-export const dismissNotification = functions.https.onCall(
-    async (data: { notificationId: string }, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const dismissNotification = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const { notificationId } = data;
-        const userId = context.auth.uid;
+        const { notificationId } = request.data as { notificationId: string };
+        const userId = request.auth.uid;
         await enforceRateLimit('dismissNotification', userId);
 
         const notifRef = db.collection('artifacts').doc(APP_ID)
@@ -58,7 +59,7 @@ export const dismissNotification = functions.https.onCall(
 
         const notifDoc = await notifRef.get();
         if (!notifDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Notification not found');
+            throw new HttpsError('not-found', 'Notification not found');
         }
 
         await notifRef.update({ dismissed: true });

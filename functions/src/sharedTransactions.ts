@@ -5,24 +5,25 @@
  * provides a one-time migration to fix account scope flags.
  */
 
-import * as functions from 'firebase-functions';
-import { admin, db, APP_ID } from './config';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { FieldValue } from 'firebase-admin/firestore';
+import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
 
 // ============================================================================
 // Add Transaction to Shared Account
 // ============================================================================
 
-export const addTransactionToSharedAccount = functions.https.onCall(
-    async (data, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
+export const addTransactionToSharedAccount = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Must be authenticated');
         }
 
-        await enforceRateLimit('transactionCreate', context.auth.uid);
+        await enforceRateLimit('transactionCreate', request.auth.uid);
 
-        const callerUid = context.auth.uid;
-        const { accountId, transaction } = data as {
+        const callerUid = request.auth.uid;
+        const { accountId, transaction } = request.data as {
             accountId: string;
             transaction: {
                 title: string;
@@ -34,13 +35,13 @@ export const addTransactionToSharedAccount = functions.https.onCall(
         };
 
         if (!accountId || !transaction) {
-            throw new functions.https.HttpsError('invalid-argument', 'accountId and transaction are required');
+            throw new HttpsError('invalid-argument', 'accountId and transaction are required');
         }
 
-        const sentOwnerId = (data as Record<string, unknown>).accountOwnerId as string | undefined;
+        const sentOwnerId = (request.data as Record<string, unknown>).accountOwnerId as string | undefined;
 
         if (!sentOwnerId) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'invalid-argument',
                 'accountOwnerId is required for shared transactions'
             );
@@ -52,7 +53,7 @@ export const addTransactionToSharedAccount = functions.https.onCall(
         const accountSnap = await accountRef.get();
 
         if (!accountSnap.exists) {
-            throw new functions.https.HttpsError('not-found', 'Account not found');
+            throw new HttpsError('not-found', 'Account not found');
         }
 
         const accountData = accountSnap.data()!;
@@ -61,7 +62,7 @@ export const addTransactionToSharedAccount = functions.https.onCall(
         const hasSharedAccess = accountData.sharedWith?.[callerUid];
 
         if (!isOwner && !hasSharedAccess) {
-            throw new functions.https.HttpsError('permission-denied', 'You do not have access to this account');
+            throw new HttpsError('permission-denied', 'You do not have access to this account');
         }
 
         const callerDoc = await db.collection('artifacts').doc(APP_ID)
@@ -95,7 +96,7 @@ export const addTransactionToSharedAccount = functions.https.onCall(
             : -transaction.amountCents;
 
         await accountRef.update({
-            balanceCents: admin.firestore.FieldValue.increment(balanceChange),
+            balanceCents: FieldValue.increment(balanceChange),
         });
 
         return { success: true, transactionId: newTransactionRef.id };
@@ -106,13 +107,13 @@ export const addTransactionToSharedAccount = functions.https.onCall(
 // One-Time Migration: Fix Shared Account Scopes
 // ============================================================================
 
-export const fixSharedAccountScopes = functions.https.onCall(
-    async (_data: unknown, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const fixSharedAccountScopes = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const userId = context.auth.uid;
+        const userId = request.auth.uid;
 
         const accountsSnapshot = await db
             .collection('artifacts')

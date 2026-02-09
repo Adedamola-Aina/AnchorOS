@@ -10,21 +10,19 @@
  * - Just the commitment title
  */
 
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import { getMessaging, type Message } from 'firebase-admin/messaging';
+import { type DocumentReference } from 'firebase-admin/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { format } from 'date-fns';
-
-const db = admin.firestore();
-const APP_ID = 'anchor-os';
+import { db, APP_ID } from './config';
 
 /**
  * Scheduled function: runs every 5 minutes
  * Queries commitments with reminders in the current time window and sends push notifications.
  */
-export const processReminders = functions.pubsub
-    .schedule('every 1 minutes')
-    .timeZone('Africa/Lagos') // WAT - adjust as needed
-    .onRun(async () => {
+export const processReminders = onSchedule(
+    { schedule: 'every 1 minutes', timeZone: 'Africa/Lagos' },
+    async () => {
         const now = new Date();
         const currentTime = format(now, 'HH:mm');
         const todayDate = format(now, 'yyyy-MM-dd');
@@ -41,7 +39,7 @@ export const processReminders = functions.pubsub
 
             if (snapshot.empty) {
                 console.log('[Reminders] No reminders due at this time.');
-                return null;
+                return;
             }
 
             console.log(`[Reminders] Found ${snapshot.size} commitments with reminders.`);
@@ -90,12 +88,13 @@ export const processReminders = functions.pubsub
             await Promise.allSettled(sendPromises);
             console.log(`[Reminders] Processed ${sendPromises.length} notification(s).`);
 
-            return null;
+            return;
         } catch (error) {
             console.error('[Reminders] Error processing reminders:', error);
             throw error;
         }
-    });
+    }
+);
 
 /**
  * Send a single FCM notification for a commitment reminder.
@@ -107,11 +106,11 @@ export const processReminders = functions.pubsub
 async function sendReminderNotification(
     token: string,
     title: string,
-    commitmentRef: admin.firestore.DocumentReference,
+    commitmentRef: DocumentReference,
     todayDate: string
 ): Promise<void> {
     // FCM message - minimal, calm, direct
-    const message: admin.messaging.Message = {
+    const message: Message = {
         token,
         notification: {
             title: title,  // Just the commitment. No "Reminder:" prefix.
@@ -147,21 +146,22 @@ async function sendReminderNotification(
     };
 
     try {
-        await admin.messaging().send(message);
+        await getMessaging().send(message);
         console.log(`[Reminders] Sent notification to token: ${token.substring(0, 10)}...`);
 
         // Mark as notified today to prevent duplicates
         await commitmentRef.update({
             lastReminderSent: todayDate
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const err = error as { code?: string; message?: string };
         // Handle stale tokens
-        if (error.code === 'messaging/registration-token-not-registered' ||
-            error.code === 'messaging/invalid-registration-token') {
+        if (err.code === 'messaging/registration-token-not-registered' ||
+            err.code === 'messaging/invalid-registration-token') {
             console.warn(`[Reminders] Removing stale token: ${token.substring(0, 10)}...`);
             // Token is invalid, could delete it here if needed
         } else {
-            console.error(`[Reminders] Failed to send to ${token.substring(0, 10)}...:`, error.message);
+            console.error(`[Reminders] Failed to send to ${token.substring(0, 10)}...:`, err.message);
         }
     }
 }

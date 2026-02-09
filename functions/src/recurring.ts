@@ -1,10 +1,8 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { FieldValue } from 'firebase-admin/firestore';
 import { addWeeks, addMonths, addYears, parseISO } from 'date-fns';
+import { db, APP_ID } from './config';
 import { RecurringTransaction } from './types';
-
-const db = admin.firestore();
-const APP_ID = 'anchor-os';
 
 const calculateNextRun = (currentDate: Date, frequency: string, interval: number): Date => {
     switch (frequency) {
@@ -23,7 +21,9 @@ const calculateNextRun = (currentDate: Date, frequency: string, interval: number
  * Scheduled function to process recurring transactions.
  * Runs every day at 00:00 UTC.
  */
-export const processRecurringTransactions = functions.pubsub.schedule('every day 00:00').onRun(async (_context) => {
+export const processRecurringTransactions = onSchedule(
+    { schedule: 'every day 00:00', timeZone: 'UTC' },
+    async () => {
     console.log('Processing recurring transactions...');
     const now = new Date();
     const nowIso = now.toISOString();
@@ -38,7 +38,7 @@ export const processRecurringTransactions = functions.pubsub.schedule('every day
 
     if (snapshot.empty) {
         console.log('No recurring transactions to process.');
-        return null;
+        return;
     }
 
     console.log(`Found ${snapshot.size} recurring transactions to process.`);
@@ -121,7 +121,7 @@ export const processRecurringTransactions = functions.pubsub.schedule('every day
 
             if (balanceChange !== 0) {
                 batch.update(accountRef, {
-                    balanceCents: admin.firestore.FieldValue.increment(balanceChange)
+                    balanceCents: FieldValue.increment(balanceChange)
                 });
             }
 
@@ -153,5 +153,6 @@ export const processRecurringTransactions = functions.pubsub.schedule('every day
         console.log(`Successfully committed batch of ${batchCount} transaction sets.`);
     }
 
-    return null;
-});
+    return;
+}
+);

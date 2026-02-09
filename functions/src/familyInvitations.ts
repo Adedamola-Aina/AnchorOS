@@ -5,7 +5,7 @@
  * The confirmConnection step lives in familyConnection.ts.
  */
 
-import * as functions from 'firebase-functions';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as bcrypt from 'bcrypt';
 import { db, APP_ID, BCRYPT_SALT_ROUNDS, getResend, EMAIL_FROM, APP_URL } from './config';
 import { enforceRateLimit } from './rateLimit';
@@ -20,22 +20,22 @@ import type { FamilyInvitation } from './types';
 // Create Invitation
 // ============================================================================
 
-export const createFamilyInvitation = functions.https.onCall(
-    async (data: { inviteeEmail: string; password: string }, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const createFamilyInvitation = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const { inviteeEmail, password: _password } = data;
-        const ownerUid = context.auth.uid;
-        const ownerEmail = context.auth.token.email;
+        const { inviteeEmail, password: _password } = request.data as { inviteeEmail: string; password: string };
+        const ownerUid = request.auth.uid;
+        const ownerEmail = request.auth.token.email;
 
         if (!ownerEmail) {
-            throw new functions.https.HttpsError('failed-precondition', 'Your email must be verified');
+            throw new HttpsError('failed-precondition', 'Your email must be verified');
         }
 
         if (!inviteeEmail || !_password) {
-            throw new functions.https.HttpsError('invalid-argument', 'Invitee email and password are required');
+            throw new HttpsError('invalid-argument', 'Invitee email and password are required');
         }
 
         const rateLimitRef = db.collection('rateLimits').doc(`invite:${ownerUid}`);
@@ -46,7 +46,7 @@ export const createFamilyInvitation = functions.https.onCall(
         const recentInvites = (rateLimitData?.attempts || []).filter((ts: number) => ts > dayAgo);
 
         if (recentInvites.length >= 10) {
-            throw new functions.https.HttpsError('resource-exhausted', 'Maximum 10 invitations per day');
+            throw new HttpsError('resource-exhausted', 'Maximum 10 invitations per day');
         }
 
         const invitationsRef = db.collection('artifacts').doc(APP_ID).collection('family_invitations');
@@ -58,12 +58,12 @@ export const createFamilyInvitation = functions.https.onCall(
             .get();
 
         if (!existingQuery.empty) {
-            throw new functions.https.HttpsError('already-exists', 'You already have a pending invitation to this email');
+            throw new HttpsError('already-exists', 'You already have a pending invitation to this email');
         }
 
         const existingConnection = await getActiveConnection(ownerUid);
         if (existingConnection) {
-            throw new functions.https.HttpsError('already-exists', 'You already have an active family connection');
+            throw new HttpsError('already-exists', 'You already have an active family connection');
         }
 
         const ownerProfileRef = db.collection('artifacts').doc(APP_ID).collection('users').doc(ownerUid);
@@ -121,14 +121,14 @@ function buildInvitationEmail(ownerName: string, inviteId: string, code: string)
 // Revoke Invitation
 // ============================================================================
 
-export const revokeInvitation = functions.https.onCall(
-    async (data: { inviteId: string }, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const revokeInvitation = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const { inviteId } = data;
-        const ownerUid = context.auth.uid;
+        const { inviteId } = request.data as { inviteId: string };
+        const ownerUid = request.auth.uid;
 
         await enforceRateLimit('revokeInvitation', ownerUid);
 
@@ -136,17 +136,17 @@ export const revokeInvitation = functions.https.onCall(
         const inviteDoc = await inviteRef.get();
 
         if (!inviteDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Invitation not found');
+            throw new HttpsError('not-found', 'Invitation not found');
         }
 
         const invite = inviteDoc.data() as FamilyInvitation;
 
         if (invite.ownerUid !== ownerUid) {
-            throw new functions.https.HttpsError('permission-denied', 'You can only revoke your own invitations');
+            throw new HttpsError('permission-denied', 'You can only revoke your own invitations');
         }
 
         if (invite.status !== 'pending') {
-            throw new functions.https.HttpsError('failed-precondition', 'Only pending invitations can be revoked');
+            throw new HttpsError('failed-precondition', 'Only pending invitations can be revoked');
         }
 
         await inviteRef.update({ status: 'revoked', revokedAt: new Date().toISOString() });
@@ -160,12 +160,12 @@ export const revokeInvitation = functions.https.onCall(
 // Validate Invitation Token
 // ============================================================================
 
-export const validateInvitationToken = functions.https.onCall(
-    async (data: { token: string }) => {
-        const { token } = data;
+export const validateInvitationToken = onCall(
+    async (request) => {
+        const { token } = request.data as { token: string };
 
         if (!token) {
-            throw new functions.https.HttpsError('invalid-argument', 'Token is required');
+            throw new HttpsError('invalid-argument', 'Token is required');
         }
 
         await enforceRateLimit('tokenValidation', token);

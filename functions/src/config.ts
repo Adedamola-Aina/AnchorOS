@@ -5,13 +5,13 @@
  * and environment-aware URL resolution.
  */
 
-import * as admin from 'firebase-admin';
+import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 
-admin.initializeApp();
+initializeApp();
 
-export { admin };
-export const db = admin.firestore();
+export const db = getFirestore();
 export const APP_ID = 'anchor-os';
 export const BCRYPT_SALT_ROUNDS = 10;
 

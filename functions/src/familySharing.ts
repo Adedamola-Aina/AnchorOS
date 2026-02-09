@@ -5,8 +5,9 @@
  * Firestore write trigger, scheduled cleanup, and v1→v2 migration.
  */
 
-import * as functions from 'firebase-functions';
-import { admin, db, APP_ID } from './config';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { FieldValue } from 'firebase-admin/firestore';
+import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
 import { createAuditLog, createNotification, getActiveConnection } from './helpers';
 
@@ -14,23 +15,23 @@ import { createAuditLog, createNotification, getActiveConnection } from './helpe
 // Share / Unshare Account
 // ============================================================================
 
-export const shareAccount = functions.https.onCall(
-    async (data: { accountId: string; share: boolean }, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const shareAccount = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const { accountId, share } = data;
-        const ownerUid = context.auth.uid;
+        const { accountId, share } = request.data as { accountId: string; share: boolean };
+        const ownerUid = request.auth.uid;
 
         await enforceRateLimit('shareAccount', ownerUid);
 
         const connection = await getActiveConnection(ownerUid);
         if (!connection) {
-            throw new functions.https.HttpsError('failed-precondition', 'No active family connection');
+            throw new HttpsError('failed-precondition', 'No active family connection');
         }
         if (connection.ownerUid !== ownerUid) {
-            throw new functions.https.HttpsError('permission-denied', 'Only the account owner can share accounts');
+            throw new HttpsError('permission-denied', 'Only the account owner can share accounts');
         }
 
         const memberUid = connection.memberUid;
@@ -40,7 +41,7 @@ export const shareAccount = functions.https.onCall(
         const accountDoc = await accountRef.get();
 
         if (!accountDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Account not found');
+            throw new HttpsError('not-found', 'Account not found');
         }
 
         const accountName = accountDoc.data()?.name || 'Unknown Account';
@@ -58,7 +59,7 @@ export const shareAccount = functions.https.onCall(
             await createAuditLog('account_shared', ownerUid, { accountId, accountName, memberUid });
         } else {
             await accountRef.update({
-                [`sharedWith.${memberUid}`]: admin.firestore.FieldValue.delete(),
+                [`sharedWith.${memberUid}`]: FieldValue.delete(),
             });
             await createNotification(
                 memberUid, 'account_unshared', 'Account Access Removed',
@@ -76,13 +77,13 @@ export const shareAccount = functions.https.onCall(
 // Get Shared Accounts With Me
 // ============================================================================
 
-export const getSharedAccountsWithMe = functions.https.onCall(
-    async (_data: unknown, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const getSharedAccountsWithMe = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const memberUid = context.auth.uid;
+        const memberUid = request.auth.uid;
         const accountsQuery = db.collectionGroup('accounts')
             .where(`sharedWith.${memberUid}.grantedAt`, '!=', null);
         const snapshot = await accountsQuery.get();
@@ -113,18 +114,18 @@ export const getSharedAccountsWithMe = functions.https.onCall(
 // Disconnect Family
 // ============================================================================
 
-export const disconnectFamily = functions.https.onCall(
-    async (data: { type: 'remove_member' | 'leave' }, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const disconnectFamily = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const callerUid = context.auth.uid;
+        const callerUid = request.auth.uid;
         await enforceRateLimit('disconnectFamily', callerUid);
 
         const connection = await getActiveConnection(callerUid);
         if (!connection) {
-            throw new functions.https.HttpsError('failed-precondition', 'No active family connection');
+            throw new HttpsError('failed-precondition', 'No active family connection');
         }
 
         const isOwner = connection.ownerUid === callerUid;
@@ -149,7 +150,7 @@ export const disconnectFamily = functions.https.onCall(
                 const docData = doc.data();
                 if (docData.sharedWith?.[otherUid]) {
                     batch.update(doc.ref, {
-                        [`sharedWith.${otherUid}`]: admin.firestore.FieldValue.delete(),
+                        [`sharedWith.${otherUid}`]: FieldValue.delete(),
                     });
                 }
             });

@@ -5,7 +5,7 @@
  * connections to the v2 family_connections document model.
  */
 
-import * as functions from 'firebase-functions';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db, APP_ID } from './config';
 import { createAuditLog } from './helpers';
 
@@ -13,13 +13,13 @@ import { createAuditLog } from './helpers';
 // Migration: V1 → V2 Family Connections
 // ============================================================================
 
-export const migrateFamilyConnectionsV2 = functions.https.onCall(
-    async (_data, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated to run migration');
+export const migrateFamilyConnectionsV2 = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Must be authenticated to run migration');
         }
 
-        const callerUid = context.auth.uid;
+        const callerUid = request.auth.uid;
 
         const results: Array<{
             ownerUid: string;
@@ -88,7 +88,7 @@ export const migrateFamilyConnectionsV2 = functions.https.onCall(
             };
         } catch (error) {
             console.error('Migration error:', error);
-            throw new functions.https.HttpsError('internal', 'Migration failed: ' + (error as Error).message);
+            throw new HttpsError('internal', 'Migration failed: ' + (error as Error).message);
         }
     }
 );
