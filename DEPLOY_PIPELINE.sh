@@ -69,6 +69,20 @@ else
     exit 1
 fi
 
+# 1b. Security Audit
+echo -e "\n${YELLOW}🔒 Stage 1b: Security Audit (npm audit)${NC}"
+AUDIT_LEVEL="high"
+if [[ "$ENV" == "production" ]]; then
+    AUDIT_LEVEL="moderate"
+fi
+if npm audit --audit-level="$AUDIT_LEVEL" 2>/dev/null; then
+    echo -e "${GREEN}✅ No ${AUDIT_LEVEL}+ vulnerabilities found.${NC}"
+else
+    echo -e "${RED}❌ npm audit found ${AUDIT_LEVEL}+ severity vulnerabilities. Deployment blocked.${NC}"
+    echo -e "${YELLOW}   Run 'npm audit' for details and 'npm audit fix' to resolve.${NC}"
+    exit 1
+fi
+
 # 2. Automated Unit Testing
 echo -e "\n${YELLOW}🧪 Stage 2: Automated Testing (Unit & Integration)${NC}"
 if npx vitest run; then

@@ -18,6 +18,7 @@
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:headed": "npx playwright test --headed",
     "test:integration": "./scripts/test-with-emulator.sh",
+    "test:rules": "firebase emulators:exec --only firestore 'npx vitest run --config vitest.rules.config.ts'",
     "emulator:start": "firebase emulators:start",
     "build:dev": "tsc -b tsconfig.app.json tsconfig.node.json && vite build --mode development",
     "deploy:dev": "./DEPLOY_PIPELINE.sh --env=development",

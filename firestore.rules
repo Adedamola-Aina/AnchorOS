@@ -44,26 +44,56 @@ service cloud.firestore {
       }
       
       // ======================================================================
-      // Family Mode v2: Invitations (simplified for dev/staging)
+      // Family Mode v2: Invitations
+      // Cloud Functions (Admin SDK) handle most writes; client rules for reads + DevTools
       // ======================================================================
       match /family_invitations/{inviteId} {
-        // Allow authenticated users to read/write for dev testing
-        allow read, write: if request.auth != null;
+        // Read: only the invitation owner or the invitee
+        allow read: if request.auth != null
+                    && (resource.data.ownerUid == request.auth.uid
+                        || resource.data.inviteeEmail == request.auth.token.email
+                        || resource.data.get('inviteeUid', '') == request.auth.uid);
+        // Create: only the owner (ownerUid must match auth uid)
+        allow create: if request.auth != null
+                      && request.resource.data.ownerUid == request.auth.uid;
+        // Update: owner can revoke; invitee can accept/reject
+        allow update: if request.auth != null
+                      && (resource.data.ownerUid == request.auth.uid
+                          || resource.data.inviteeEmail == request.auth.token.email
+                          || resource.data.get('inviteeUid', '') == request.auth.uid);
+        // Delete: owner only
+        allow delete: if request.auth != null
+                      && resource.data.ownerUid == request.auth.uid;
       }
 
       // ======================================================================
-      // Family Mode v2: Connections (simplified for dev/staging)
+      // Family Mode v2: Connections
+      // Cloud Functions (Admin SDK) handle creation; client rules for reads + DevTools
       // ======================================================================
       match /family_connections/{connectionId} {
-        // Allow authenticated users to read/write for dev testing
-        allow read, write: if request.auth != null;
+        // Read: only the two connected parties
+        allow read: if request.auth != null
+                    && (resource.data.ownerUid == request.auth.uid
+                        || resource.data.memberUid == request.auth.uid);
+        // Create: one of the two parties must be the authenticated user
+        allow create: if request.auth != null
+                      && (request.resource.data.ownerUid == request.auth.uid
+                          || request.resource.data.memberUid == request.auth.uid);
+        // Update: only connected parties (e.g. disconnect)
+        allow update: if request.auth != null
+                      && (resource.data.ownerUid == request.auth.uid
+                          || resource.data.memberUid == request.auth.uid);
+        // Delete: only connected parties
+        allow delete: if request.auth != null
+                      && (resource.data.ownerUid == request.auth.uid
+                          || resource.data.memberUid == request.auth.uid);
       }
 
       // ======================================================================
       // Legacy Invitations (kept for backwards compatibility)
       // ======================================================================
       match /invitations/{token} {
-        allow get: if true;
+        allow get: if request.auth != null;
         allow list: if request.auth != null && 
                       (request.query.senderUid == request.auth.uid || 
                        request.query.recipientEmail == request.auth.token.email);
@@ -236,10 +266,12 @@ service cloud.firestore {
 
     // ========================================================================
     // Collection Group Query: Activity on Shared Accounts
-    // Allows shared members to read activity using collection group queries
+    // Owner can query all their activity via collection group;
+    // shared members access via the nested accounts/activity rule above
     // ========================================================================
     match /{path=**}/activity/{activityId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null
+                  && resource.data.accountOwnerId == request.auth.uid;
     }
 
     // Rate limits (Cloud Functions only)
