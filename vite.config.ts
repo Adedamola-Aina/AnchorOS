@@ -54,13 +54,25 @@ export default defineConfig(({ mode }) => ({
         manualChunks: (id) => {
           // Only split in production to avoid duplicate React in dev
           if (id.includes('node_modules')) {
-            // Firebase
+            // Firebase - large, changes rarely
             if (id.includes('firebase')) {
               return 'firebase';
             }
-            // Charts
+            // Charts - only loaded on dashboard/finance
             if (id.includes('recharts')) {
               return 'recharts';
+            }
+            // Radix UI components - commonly used across app
+            if (id.includes('@radix-ui')) {
+              return 'radix';
+            }
+            // Date utilities
+            if (id.includes('date-fns')) {
+              return 'date-fns';
+            }
+            // Icons - large but compressed well
+            if (id.includes('lucide-react')) {
+              return 'icons';
             }
             // React ecosystem - keep together to avoid duplicate instances
             if (id.includes('react') || id.includes('@tanstack/react-virtual')) {
@@ -69,6 +81,10 @@ export default defineConfig(({ mode }) => ({
             // Data management
             if (id.includes('@tanstack/react-query')) {
               return 'query';
+            }
+            // Sentry - load after app is interactive
+            if (id.includes('@sentry')) {
+              return 'sentry';
             }
           }
         },
