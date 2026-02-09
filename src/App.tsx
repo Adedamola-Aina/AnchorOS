@@ -103,8 +103,8 @@ const AppContent = () => {
         <AuthGate>
           <MainLayout version={APP_VERSION}>
             <React.Suspense fallback={
-              <div className="flex items-center justify-center p-12">
-                <AnchorLoadingSpinner />
+              <div className="flex items-center justify-center p-12 animate-in fade-in duration-300">
+                <AnchorLoadingSpinner message="Loading..." />
               </div>
             }>
               <Routes>
