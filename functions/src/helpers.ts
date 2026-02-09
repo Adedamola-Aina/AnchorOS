@@ -5,7 +5,7 @@
  * and verification code generation.
  */
 
-import * as admin from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { db, APP_ID } from './config';
 import type { FamilyConnection } from './types';
 
@@ -24,7 +24,7 @@ export async function createAuditLog(
         actorUid,
         targetUid: targetUid || null,
         metadata,
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        timestamp: FieldValue.serverTimestamp(),
     });
 }
 
@@ -47,7 +47,7 @@ export async function createNotification(
             actorName,
             read: false,
             dismissed: false,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: FieldValue.serverTimestamp(),
             ...extra,
         });
 }

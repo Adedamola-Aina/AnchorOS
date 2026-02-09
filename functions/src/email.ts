@@ -4,7 +4,7 @@
  * Legacy template-based email callable kept for compatibility.
  */
 
-import * as functions from 'firebase-functions';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { enforceRateLimit } from './rateLimit';
 
 // ============================================================================
@@ -21,15 +21,15 @@ interface EmailTemplateData {
 // Public API
 // ============================================================================
 
-export const sendTemplatedEmail = functions.https.onCall(
-    async (data: EmailTemplateData, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const sendTemplatedEmail = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        await enforceRateLimit('emailSend', context.auth.uid);
+        await enforceRateLimit('emailSend', request.auth.uid);
 
-        const { template, recipient, data: templateData } = data;
+        const { template, recipient, data: templateData } = request.data as EmailTemplateData;
 
         const templates: Record<string, { subject: string; body: string }> = {
             invitation: {
@@ -75,7 +75,7 @@ export const sendTemplatedEmail = functions.https.onCall(
 
         const emailTemplate = templates[template];
         if (!emailTemplate) {
-            throw new functions.https.HttpsError('invalid-argument', `Unknown email template: ${template}`);
+            throw new HttpsError('invalid-argument', `Unknown email template: ${template}`);
         }
 
         console.log('Email to send:', {

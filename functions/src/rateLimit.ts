@@ -4,7 +4,7 @@
  * Protects all Cloud Functions from abuse with per-action rate limits.
  */
 
-import * as functions from 'firebase-functions';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db } from './config';
 import { createAuditLog } from './helpers';
 import type { RateLimitConfig } from './types';
@@ -63,7 +63,7 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
                     severity: 'high',
                 });
 
-                throw new functions.https.HttpsError(
+                throw new HttpsError(
                     'resource-exhausted',
                     `Too many attempts. Please try again in ${remainingMin} minute(s).`
                 );
@@ -82,7 +82,7 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
                     severity: 'critical',
                 });
 
-                throw new functions.https.HttpsError(
+                throw new HttpsError(
                     'resource-exhausted',
                     'Rate limit exceeded. You have been temporarily blocked.'
                 );
@@ -100,7 +100,7 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
             transaction.set(rateLimitRef, { attempts, blockedUntil: null, lastAttempt: now });
         });
     } catch (error) {
-        if (error instanceof functions.https.HttpsError) throw error;
+        if (error instanceof HttpsError) throw error;
         console.error('[RateLimit] Enforcement failed:', error);
     }
 }
@@ -109,17 +109,17 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
 // Public API — callable functions
 // ============================================================================
 
-export const checkRateLimit = functions.https.onCall(
-    async (data: { action: string; identifier: string }) => {
-        const { action, identifier } = data;
+export const checkRateLimit = onCall(
+    async (request) => {
+        const { action, identifier } = request.data as { action: string; identifier: string };
 
         if (!action || !identifier) {
-            throw new functions.https.HttpsError('invalid-argument', 'Action and identifier are required');
+            throw new HttpsError('invalid-argument', 'Action and identifier are required');
         }
 
         const config = RATE_LIMITS[action];
         if (!config) {
-            throw new functions.https.HttpsError('invalid-argument', `Unknown rate limit action: ${action}`);
+            throw new HttpsError('invalid-argument', `Unknown rate limit action: ${action}`);
         }
 
         const rateLimitRef = db.collection('rateLimits').doc(`${action}:${identifier}`);
@@ -163,13 +163,13 @@ export const checkRateLimit = functions.https.onCall(
     }
 );
 
-export const resetRateLimit = functions.https.onCall(
-    async (data: { action: string; identifier: string }, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const resetRateLimit = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const { action, identifier } = data;
+        const { action, identifier } = request.data as { action: string; identifier: string };
         const rateLimitRef = db.collection('rateLimits').doc(`${action}:${identifier}`);
         await rateLimitRef.delete();
 

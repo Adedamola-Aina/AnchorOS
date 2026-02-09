@@ -67,11 +67,11 @@ Is it a BUG FIX or HOTFIX?
 
 | Environment | Version | Deployed Commit | Status |
 |-------------|---------|-----------------|--------|
-| **Production** | v1.5.12 | e222534 | Stable |
-| **Staging** | v1.5.11-revert | 82e3d43 | Reverted (pre-DES-002/WEB-003) |
-| **Development** | v1.5.11-revert | 82e3d43 | Reverted (pre-DES-002/WEB-003) |
+| **Production** | v1.6.0 | bfbafe1 | Stable |
+| **Staging** | v1.7.0 | 5db16df | Cloud Functions v2 + CSP headers |
+| **Development** | v1.7.0 | 5db16df | Cloud Functions v2 + CSP headers |
 
-**Last Updated**: 2026-02-05
+**Last Updated**: 2025-07-18
 
 **Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (live environment parity)
 

@@ -4,7 +4,8 @@
  * Background / scheduled functions that support the family mode feature.
  */
 
-import * as functions from 'firebase-functions';
+import { onDocumentWritten } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db, APP_ID } from './config';
 import { createAuditLog, createNotification } from './helpers';
 
@@ -12,32 +13,32 @@ import { createAuditLog, createNotification } from './helpers';
 // Firestore Trigger — Shared Transaction Notification
 // ============================================================================
 
-export const onSharedTransactionWrite = functions.firestore
-    .document('artifacts/{appId}/users/{userId}/finance/{transactionId}')
-    .onWrite(async (change, context) => {
-        const { userId, transactionId } = context.params;
-        const before = change.before.data();
-        const after = change.after.data();
+export const onSharedTransactionWrite = onDocumentWritten(
+    'artifacts/{appId}/users/{userId}/finance/{transactionId}',
+    async (event) => {
+        const { userId, transactionId } = event.params;
+        const before = event.data?.before.data();
+        const after = event.data?.after.data();
 
         let action: 'added' | 'modified' | 'deleted';
         if (!before && after) action = 'added';
         else if (before && !after) action = 'deleted';
         else if (before && after) action = 'modified';
-        else return null;
+        else return;
 
         const txData = after || before;
-        if (!txData?.accountId) return null;
+        if (!txData?.accountId) return;
 
         const accountRef = db.collection('artifacts').doc(APP_ID)
             .collection('users').doc(userId)
             .collection('accounts').doc(txData.accountId);
         const accountDoc = await accountRef.get();
-        if (!accountDoc.exists) return null;
+        if (!accountDoc.exists) return;
 
         const accountData = accountDoc.data();
         const sharedWith = accountData?.sharedWith || {};
         const sharedUserIds = Object.keys(sharedWith);
-        if (sharedUserIds.length === 0) return null;
+        if (sharedUserIds.length === 0) return;
 
         const actorProfileRef = db.collection('artifacts').doc(APP_ID).collection('users').doc(userId);
         const actorProfile = await actorProfileRef.get();
@@ -88,17 +89,17 @@ export const onSharedTransactionWrite = functions.firestore
         }
 
         await Promise.all(notifications);
-        return null;
-    });
+        return;
+    }
+);
 
 // ============================================================================
 // Scheduled Cleanup — Expired Invitations
 // ============================================================================
 
-export const cleanupExpiredInvitations = functions.pubsub
-    .schedule('0 3 * * *')
-    .timeZone('UTC')
-    .onRun(async () => {
+export const cleanupExpiredInvitations = onSchedule(
+    { schedule: '0 3 * * *', timeZone: 'UTC' },
+    async () => {
         const now = new Date();
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         const invitationsRef = db.collection('artifacts').doc(APP_ID).collection('family_invitations');
@@ -126,9 +127,10 @@ export const cleanupExpiredInvitations = functions.pubsub
                 console.log(`Deleted ${oldSnap.size} old invitations`);
             }
 
-            return null;
+            return;
         } catch (error) {
             console.error('Invitation cleanup failed:', error);
             throw error;
         }
-    });
+    }
+);

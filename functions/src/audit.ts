@@ -5,7 +5,7 @@
  * structured audit events (auth, finance, settings, commitments).
  */
 
-import * as functions from 'firebase-functions';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { createAuditLog } from './helpers';
 
 // ============================================================================
@@ -43,16 +43,16 @@ const ALLOWED_AUDIT_EVENTS = new Set([
 // Public API
 // ============================================================================
 
-export const logAuditEvent = functions.https.onCall(
-    async (data: { action: string; metadata?: Record<string, unknown> }, context) => {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'Authentication required');
+export const logAuditEvent = onCall(
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
         }
 
-        const { action, metadata = {} } = data;
+        const { action, metadata = {} } = request.data as { action: string; metadata?: Record<string, unknown> };
 
         if (!ALLOWED_AUDIT_EVENTS.has(action)) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'invalid-argument',
                 `Unknown or disallowed audit event: ${action}`
             );
@@ -64,7 +64,7 @@ export const logAuditEvent = functions.https.onCall(
             source: 'client',
         };
 
-        await createAuditLog(action, context.auth.uid, enrichedMetadata);
+        await createAuditLog(action, request.auth.uid, enrichedMetadata);
 
         return { success: true };
     }
