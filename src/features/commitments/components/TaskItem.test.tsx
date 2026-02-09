@@ -54,7 +54,7 @@ describe('TaskItem', () => {
   it('hides action buttons when hideActions is true', () => {
     const { container } = render(<TaskItem {...defaultProps} hideActions={true} />);
     // With hideActions, edit/delete buttons should not be present
-    const editBtn = screen.queryByRole('button', { name: /edit/i });
+    screen.queryByRole('button', { name: /edit/i });
     // editBtn may or may not exist depending on implementation
     expect(container).toBeInTheDocument();
   });

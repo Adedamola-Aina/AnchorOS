@@ -145,7 +145,7 @@ const createMockContexts = (taskOverrides = {}, appOverrides = {}, authOverrides
 };
 
 const renderWithContext = (ui: React.ReactElement, { tasks = {}, app = {}, auth = {}, family = {}, notifications = {} } = {}) => {
-  const { tasks: mockTasksContext, app: mockAppContext, auth: mockAuthContext, family: mockFamilyContext, notifications: mockNotificationsContext } = createMockContexts(tasks, app, auth, family, notifications);
+  const { tasks: mockTasksContext, app: mockAppContext, auth: mockAuthContext, family: _mockFamilyContext, notifications: mockNotificationsContext } = createMockContexts(tasks, app, auth, family, notifications);
   return render(
     <AuthContext.Provider value={mockAuthContext as any}>
 

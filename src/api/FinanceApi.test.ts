@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { collection, onSnapshot, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, onSnapshot, where, orderBy, limit } from 'firebase/firestore';
 import { FinanceApi } from './FinanceApi';
 
 describe('FinanceApi', () => {

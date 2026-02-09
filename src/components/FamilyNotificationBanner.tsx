@@ -97,7 +97,6 @@ export function FamilyNotificationBanner({ onNavigate, accountId }: FamilyNotifi
     const notification = notifications[currentIndex];
     if (!notification) return null;
 
-    // eslint-disable-next-line
     const Icon = getNotificationIcon(notification.type);
     const bgColor = getNotificationBgColor(notification.type);
     const iconColor = getNotificationIconColor(notification.type);

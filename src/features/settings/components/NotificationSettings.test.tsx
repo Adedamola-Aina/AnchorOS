@@ -5,7 +5,7 @@ import { NotificationSettings } from './NotificationSettings';
 
 // Mock child components to isolate this test
 vi.mock('./NotificationCategoryToggles', () => ({
-  NotificationCategoryToggles: ({ categories, onToggle }: any) => (
+  NotificationCategoryToggles: ({ categories: _categories, onToggle }: any) => (
     <div data-testid="category-toggles">
       <button onClick={() => onToggle('finance', false)}>toggle-finance</button>
     </div>
@@ -13,7 +13,7 @@ vi.mock('./NotificationCategoryToggles', () => ({
 }));
 
 vi.mock('./QuietHoursSettings', () => ({
-  QuietHoursSettings: ({ preferences, onUpdate }: any) => (
+  QuietHoursSettings: ({ preferences: _preferences, onUpdate }: any) => (
     <div data-testid="quiet-hours">
       <button onClick={() => onUpdate({ enabled: true })}>toggle-quiet</button>
     </div>

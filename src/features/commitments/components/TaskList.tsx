@@ -33,6 +33,7 @@ export const TaskList: React.FC<TaskListProps> = ({
     const parentRef = useRef<HTMLDivElement>(null);
     const useVirtual = activeTasks.length > VIRTUALIZE_THRESHOLD;
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const virtualizer = useVirtualizer({
         count: useVirtual ? activeTasks.length : 0,
         getScrollElement: () => parentRef.current,

@@ -1,0 +1,147 @@
+/**
+ * Push notification management hook.
+ *
+ * Encapsulates FCM token registration, permission requests, foreground
+ * message handling, and the BUG-039 disable/re-enable flow.
+ */
+
+import { useState, useCallback, useEffect } from 'react';
+import { messaging, db, auth, APP_ID } from '../config/firebase';
+import { onMessage, deleteToken } from 'firebase/messaging';
+import { getFcmTokenWithRetry } from '../services/fcmTokenService';
+import { doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { captureError } from '../utils/error';
+import type { NotificationType } from '../context/NotificationContextDefinition';
+
+const PUSH_DISABLED_KEY = 'anchor_push_disabled';
+
+interface UsePushNotificationsOptions {
+    showToast: (message: string, type: NotificationType) => void;
+}
+
+export function usePushNotifications({ showToast }: UsePushNotificationsOptions) {
+    const [fcmToken, setFcmToken] = useState<string | null>(null);
+    const [pushDisabled, setPushDisabled] = useState<boolean>(() =>
+        localStorage.getItem(PUSH_DISABLED_KEY) === 'true'
+    );
+    const [pushPermissionStatus, setPushPermissionStatus] = useState<NotificationPermission>(
+        typeof Notification !== 'undefined' ? Notification.permission : 'default'
+    );
+
+    // Restore token on mount if already granted and not explicitly disabled
+    useEffect(() => {
+        const restoreToken = async () => {
+            if (typeof Notification === 'undefined' || !messaging) return;
+            if (pushDisabled) return;
+
+            if (Notification.permission === 'granted') {
+                try {
+                    const token = await getFcmTokenWithRetry({
+                        messaging: messaging!,
+                        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+                    });
+                    if (token) setFcmToken(token);
+                } catch (error) {
+                    captureError(error, 'Notifications.restoreToken');
+                }
+            }
+        };
+        restoreToken();
+    }, [pushDisabled]);
+
+    // Listen for foreground messages
+    useEffect(() => {
+        if (!messaging) return;
+
+        const unsubscribe = onMessage(messaging, (payload) => {
+            console.log('Foreground message received:', payload);
+            if (payload.notification) {
+                showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
+            }
+        });
+        return () => unsubscribe();
+    }, [showToast]);
+
+    const requestPushPermission = useCallback(async () => {
+        try {
+            if (typeof Notification === 'undefined') {
+                showToast('Notifications not supported on this device', 'error');
+                return null;
+            }
+
+            // BUG-039: Toggle off when already granted
+            if (pushPermissionStatus === 'granted' || pushDisabled) {
+                if (messaging && fcmToken) {
+                    try {
+                        await deleteToken(messaging);
+                        if (auth.currentUser) {
+                            await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', fcmToken));
+                        }
+                    } catch (err) {
+                        captureError(err, 'Notifications.deleteToken');
+                    }
+                }
+                setPushDisabled(true);
+                localStorage.setItem(PUSH_DISABLED_KEY, 'true');
+                setPushPermissionStatus('default');
+                setFcmToken(null);
+                showToast('Push Notifications Disabled', 'info');
+                return null;
+            }
+
+            // Re-enable if was disabled
+            if (pushDisabled) {
+                setPushDisabled(false);
+                localStorage.removeItem(PUSH_DISABLED_KEY);
+            }
+
+            console.log('[Push] Requesting permission...');
+            const permission = await Notification.requestPermission();
+            setPushPermissionStatus(permission);
+
+            if (permission === 'granted') {
+                showToast('Permission granted! Initializing...', 'success');
+
+                if (!messaging) {
+                    showToast('Messaging service not available', 'error');
+                    return null;
+                }
+
+                try {
+                    const token = await getFcmTokenWithRetry({
+                        messaging: messaging!,
+                        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+                    });
+
+                    if (token) {
+                        setFcmToken(token);
+                        showToast('Push Notifications Enabled!', 'success');
+
+                        if (auth.currentUser) {
+                            const tokenRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', token);
+                            await setDoc(tokenRef, {
+                                token,
+                                platform: 'web',
+                                lastSeen: serverTimestamp(),
+                                userAgent: navigator.userAgent
+                            }, { merge: true });
+                        }
+                        return token;
+                    }
+                } catch (err: any) {
+                    captureError(err, 'Notifications.getToken');
+                    showToast(`Token Error: ${err.message || 'Unknown'}`, 'error');
+                    return null;
+                }
+            } else {
+                showToast('Notifications blocked. Enable in Settings.', 'error');
+            }
+        } catch (error: any) {
+            captureError(error, 'Notifications.requestPermission');
+            showToast(`Error: ${error.message || 'Permission failed'}`, 'error');
+        }
+        return null;
+    }, [pushPermissionStatus, pushDisabled, fcmToken, showToast]);
+
+    return { fcmToken, pushPermissionStatus, requestPushPermission };
+}

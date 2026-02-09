@@ -34,30 +34,24 @@ export function useTransactionFormState({
     const [title, setTitle] = useState(initialData?.title || prefillData?.title || '');
 
     // Initial destination setup (run once)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (accounts.length > 1 && !destinationAccId) {
             const dest = accounts.find(a => a.id !== selectedAccId);
             if (dest) setDestinationAccId(dest.id);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Prevent same-account transfer
-    // Prevent same-account transfer
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (selectedAccId === destinationAccId && accounts.length > 1) {
             const next = accounts.find(a => a.id !== selectedAccId);
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             if (next) setDestinationAccId(next.id);
         }
     }, [selectedAccId, destinationAccId, accounts]);
 
     // Reset exchange rate on account change
-    // Reset exchange rate on account change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setExchangeRate('1.0');
     }, [selectedAccId, destinationAccId]);
 
@@ -75,7 +69,6 @@ export function useTransactionFormState({
                 }
             }, 300);
         } else {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSuggestedCategory(null);
         }
         return () => { if (suggestionTimeoutRef.current) clearTimeout(suggestionTimeoutRef.current); };

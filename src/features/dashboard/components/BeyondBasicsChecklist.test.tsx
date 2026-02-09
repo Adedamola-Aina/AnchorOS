@@ -130,7 +130,7 @@ describe('BeyondBasicsChecklist', () => {
   });
 
   it('renders overlay via portal into document.body', () => {
-    const { baseElement } = render(
+    render(
       <div data-testid="parent-transform" style={{ transform: 'translateY(0px)' }}>
         <BeyondBasicsChecklist {...defaultProps} />
       </div>,

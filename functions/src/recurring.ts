@@ -23,7 +23,7 @@ const calculateNextRun = (currentDate: Date, frequency: string, interval: number
  * Scheduled function to process recurring transactions.
  * Runs every day at 00:00 UTC.
  */
-export const processRecurringTransactions = functions.pubsub.schedule('every day 00:00').onRun(async (context) => {
+export const processRecurringTransactions = functions.pubsub.schedule('every day 00:00').onRun(async (_context) => {
     console.log('Processing recurring transactions...');
     const now = new Date();
     const nowIso = now.toISOString();

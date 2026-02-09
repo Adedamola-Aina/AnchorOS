@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   createActivityEntry,
   formatActivityMessage,
-  getActivityIcon,
   getActivityColor,
   type AccountActivity,
 } from './activity';
@@ -70,18 +69,6 @@ describe('activity', () => {
     it('handles unknown action', () => {
       expect(formatActivityMessage({ ...base, action: 'unknown' as any, details: {} }))
         .toBe('Sarah performed an action');
-    });
-  });
-
-  describe('getActivityIcon', () => {
-    it('returns correct icons for each action', () => {
-      expect(getActivityIcon('transaction_added')).toBe('plus-circle');
-      expect(getActivityIcon('transaction_edited')).toBe('pencil');
-      expect(getActivityIcon('transaction_deleted')).toBe('trash-2');
-      expect(getActivityIcon('account_renamed')).toBe('type');
-      expect(getActivityIcon('account_shared')).toBe('user-plus');
-      expect(getActivityIcon('account_unshared')).toBe('user-minus');
-      expect(getActivityIcon('unknown' as any)).toBe('activity');
     });
   });
 

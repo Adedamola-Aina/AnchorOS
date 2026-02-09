@@ -89,27 +89,7 @@ export const formatActivityMessage = (activity: AccountActivity): string => {
     }
 };
 
-/**
- * Get icon name for activity type
- */
-export const getActivityIcon = (action: ActivityAction): string => {
-    switch (action) {
-        case 'transaction_added':
-            return 'plus-circle';
-        case 'transaction_edited':
-            return 'pencil';
-        case 'transaction_deleted':
-            return 'trash-2';
-        case 'account_renamed':
-            return 'type';
-        case 'account_shared':
-            return 'user-plus';
-        case 'account_unshared':
-            return 'user-minus';
-        default:
-            return 'activity';
-    }
-};
+
 
 /**
  * Get color class for activity type

@@ -75,7 +75,7 @@ export const functions = getFunctions(app, 'us-central1'); // Region must match 
 let messagingInstance;
 try {
   messagingInstance = getMessaging(app);
-} catch (e) {
+} catch (_e) {
   console.warn('[Firebase] Messaging not initialized (environment may not support it)');
 }
 export const messaging = messagingInstance;

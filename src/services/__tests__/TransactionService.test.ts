@@ -794,8 +794,10 @@ describe('TransactionService', () => {
                 amountCents: 20000, // New source amount (200 USD in cents)
             };
 
-            let linkedUpdateCalled = false;
-            let linkedBalanceUpdate: number | undefined;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            let _linkedUpdateCalled = false;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            let _linkedBalanceUpdate: number | undefined;
 
             vi.mocked(firestore.runTransaction).mockImplementation(async (_db, callback) => {
                 const mockTx = {
@@ -827,8 +829,8 @@ describe('TransactionService', () => {
                     update: vi.fn((ref, data) => {
                         // Track the update to the linked transaction balance
                         if (data.balanceCents && ref.path?.includes('acc-dest')) {
-                            linkedBalanceUpdate = data.balanceCents.operand;
-                            linkedUpdateCalled = true;
+                            _linkedBalanceUpdate = data.balanceCents.operand;
+                            _linkedUpdateCalled = true;
                         }
                     }),
                 };

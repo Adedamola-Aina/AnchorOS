@@ -38,7 +38,6 @@ const {
   addDoc,
   updateDoc,
   deleteDoc,
-  doc,
   runTransaction,
 } = await import('firebase/firestore');
 
