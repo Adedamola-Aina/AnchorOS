@@ -6,6 +6,8 @@ import { defineConfig, devices } from '@playwright/test';
  * Run all tests: npx playwright test
  * Run with UI:   npx playwright test --ui
  * Run specific:  npx playwright test auth.spec.ts
+ * Run visual:    npx playwright test visual.spec.ts
+ * Update snaps:  npx playwright test visual.spec.ts --update-snapshots
  */
 export default defineConfig({
     testDir: './e2e',
@@ -16,6 +18,18 @@ export default defineConfig({
     workers: process.env.CI ? '50%' : undefined,
     timeout: 60000,
     reporter: 'html',
+
+    // Visual regression snapshot settings
+    snapshotDir: './e2e/__snapshots__',
+    snapshotPathTemplate: '{snapshotDir}/{testFilePath}/{arg}{ext}',
+    expect: {
+        toHaveScreenshot: {
+            // Visual comparison thresholds
+            maxDiffPixelRatio: 0.02,      // Allow 2% pixel difference
+            threshold: 0.2,                // Per-pixel color difference threshold
+            animations: 'disabled',        // Disable CSS animations for consistency
+        },
+    },
 
     use: {
         baseURL: process.env.E2E_BASE_URL || 'http://localhost:5173',
@@ -28,6 +42,12 @@ export default defineConfig({
         {
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
+        },
+        // Mobile viewport for responsive visual testing
+        {
+            name: 'mobile',
+            use: { ...devices['iPhone 13'] },
+            testMatch: /visual\.spec\.ts/, // Only run visual tests on mobile
         },
     ],
 

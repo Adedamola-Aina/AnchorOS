@@ -35,6 +35,38 @@ jobs:
       - name: Run unit tests
         run: npm run test -- --run
 
+  # Job 1.5: E2E Tests
+  e2e-tests:
+    name: 🎭 E2E Tests
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+
   # Job 2: Auto-bump version (only on main branch)
   version-bump:
     name: 📦 Version Bump
@@ -204,11 +236,47 @@ jobs:
           name: production-build
           path: dist/
 
+  # Job 4.5: Lighthouse CI (performance gates)
+  lighthouse:
+    name: 🔦 Lighthouse CI
+    runs-on: ubuntu-latest
+    needs: build-production
+    if: github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Lighthouse CI
+        run: npm run lighthouse
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+
   # Job 5: Deploy to production (requires manual approval)
   deploy-production:
     name: 🚀 Deploy to Production
     runs-on: ubuntu-latest
-    needs: build-production
+    needs: [build-production, lighthouse, e2e-tests]
     if: github.ref == 'refs/heads/master'
     environment: production  # This requires manual approval in GitHub settings
     
