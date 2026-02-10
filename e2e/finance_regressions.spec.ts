@@ -56,7 +56,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByLabel('Amount').fill('500');
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Description').fill('Regression Expense 1');
-        await page.getByLabel('Category').fill('Food');
+        await page.getByLabel('Category').selectOption({ label: 'Food' });
         await page.getByRole('button', { name: 'Record Transaction' }).click();
 
         // Verify "Potential Savings"
@@ -69,7 +69,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByLabel('Amount').fill('3000');
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Description').fill('Regression Expense 2');
-        await page.getByLabel('Category').fill('Food');
+        await page.getByLabel('Category').selectOption({ label: 'Food' });
         await page.getByRole('button', { name: 'Record Transaction' }).click();
 
         await expect(page.getByText('Regression Expense 2')).toBeVisible();
@@ -112,7 +112,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByLabel('Amount').fill('123');
         await page.getByLabel('Description').fill(txTitle);
         await page.getByRole('button', { name: 'Expense' }).click();
-        await page.getByLabel('Category').fill('General');
+        await page.getByLabel('Category').selectOption({ label: 'General' });
         await page.getByRole('button', { name: 'Record Transaction' }).click();
 
         // Verify it exists in list
