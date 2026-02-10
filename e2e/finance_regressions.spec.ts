@@ -37,7 +37,7 @@ test.describe('Finance Regressions and Fixes', () => {
         } catch (e) {
             // Fallback: created account didn't appear in list within timeout.
             // Click the first account card available to proceed with test flow.
-            const firstAccountHeading = page.locator('main').locator('h3').first();
+            const firstAccountHeading = page.locator('[data-testid^="account-name-"]').first();
             await firstAccountHeading.waitFor({ state: 'visible', timeout: 10000 });
             await firstAccountHeading.click();
             clicked = true;
@@ -101,7 +101,7 @@ test.describe('Finance Regressions and Fixes', () => {
             await accountLocator2.click();
         } catch (e) {
             // If not visible, click the first account card as a fallback
-            const firstAccountHeading = page.locator('main').locator('h3').first();
+            const firstAccountHeading = page.locator('[data-testid^="account-name-"]').first();
             await firstAccountHeading.waitFor({ state: 'visible', timeout: 10000 });
             await firstAccountHeading.click();
         }
