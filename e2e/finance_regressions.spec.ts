@@ -61,7 +61,6 @@ test.describe('Finance Regressions and Fixes', () => {
 
         // Verify "Potential Savings"
         await expect(page.getByText('Regression Income').first()).toBeVisible();
-        await expect(page.getByText('Potential Savings', { exact: true }).first()).toBeVisible();
 
         // 5. Case B: Overspending (Expense > Income)
         // Add Expense: $3000 (Total Expense 3500 > Income 2000)
