@@ -41,3 +41,33 @@ Agent ran `firebase deploy --only hosting:staging` directly instead of using `np
 - `npm run deploy:production` → Production
 
 These commands build with the correct `--mode` flag and verify the build environment before deploying.
+
+## 12. PRODUCTION DEPLOY WITHOUT TESTING (2026-02-09 Incident)
+Agent deployed Cloud Functions v2 and CSP headers directly to production (commit 43c1b41) without:
+- Running the full test suite first
+- Verifying in staging
+- Getting explicit user approval
+
+**The pipeline is NOT optional.** Every production change MUST:
+1. Pass all unit tests (`npm run test -- --run`)
+2. Pass E2E tests (`npm run test:e2e`)
+3. Pass mutation tests (`npm run test:mutation`)
+4. Pass rules tests (`npm run test:rules`)
+5. Verify in staging first
+6. Get explicit "yes, deploy to production" from user
+
+If CI/CD is unavailable, run the deploy pipeline which enforces all gates:
+```bash
+npm run deploy:production
+```
+
+## 13. SKIPPING PHASE 1 GATHER
+Agent started coding without checking dashboard state first. This leads to:
+- Duplicate bug/feature creation
+- Missing context from recent changes
+- Conflicting with in-progress work
+
+**BEFORE ANY WORK, always run:**
+```bash
+curl -s http://localhost:3001/api/command-center | head -100
+```
