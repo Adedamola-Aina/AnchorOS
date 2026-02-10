@@ -60,8 +60,8 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByRole('button', { name: 'Record Transaction' }).click();
 
         // Verify "Potential Savings"
-        await expect(page.getByText('Regression Income')).toBeVisible();
-        await expect(page.getByText('Potential Savings', { exact: true })).toBeVisible();
+        await expect(page.getByText('Regression Income').first()).toBeVisible();
+        await expect(page.getByText('Potential Savings', { exact: true }).first()).toBeVisible();
 
         // 5. Case B: Overspending (Expense > Income)
         // Add Expense: $3000 (Total Expense 3500 > Income 2000)
@@ -72,7 +72,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByLabel('Category').selectOption({ label: 'Food' });
         await page.getByRole('button', { name: 'Record Transaction' }).click();
 
-        await expect(page.getByText('Regression Expense 2')).toBeVisible();
+        await expect(page.getByText('Regression Expense 2').first()).toBeVisible();
 
         // Verify "Overspending" label replaces "Potential Savings"
         await expect(page.getByText('Overspending', { exact: true })).toBeVisible();
@@ -134,10 +134,10 @@ test.describe('Finance Regressions and Fixes', () => {
         // There is NO ConfirmationModal for transactions in FinanceView.tsx (only for accounts).
 
         // 5. Verify it is gone AND stays gone
-        await expect(page.getByText(txTitle)).not.toBeVisible();
+        await expect(page.getByText(txTitle).first()).not.toBeVisible();
 
         // Wait 3 seconds to ensure no zombie return (optimistic UI revert)
         await page.waitForTimeout(3000);
-        await expect(page.getByText(txTitle)).not.toBeVisible();
+        await expect(page.getByText(txTitle).first()).not.toBeVisible();
     });
 });
