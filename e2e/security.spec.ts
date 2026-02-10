@@ -132,43 +132,22 @@ test.describe('MFA Setup Flow', () => {
     });
 });
 
-test.describe('Account Notification Banners', () => {
+test.describe('MFA Setup Access', () => {
+    // MFA banner removed — onboarding flow now handles MFA recommendation.
+    // These tests verify the Setup 2FA / Disable buttons remain accessible in Security Settings.
     test.beforeEach(async ({ page }) => {
         await goToSettings(page);
     });
 
-    test('should display MFA recommendation banner if MFA not enabled', async ({ page }) => {
+    test('should show Setup 2FA or Disable button in Security Settings', async ({ page }) => {
         if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
-        // Check if the MFA recommendation banner is visible
-        // This depends on whether the test user has MFA enabled or not
-        // The MFA recommendation UI may appear in Settings, Onboarding, or Dashboard.
-        // Check for banner or related buttons globally to handle onboarding reflow.
-        const mfaBanner = page.locator('text=MFA Recommended').first();
-        const mfaEnabled = page.locator('button:has-text("Disable")').first();
-        const enableBtn = page.locator('button:has-text("Enable 2FA")').first();
         const setupBtn = page.locator('button:has-text("Setup 2FA")').first();
+        const disableBtn = page.locator('button:has-text("Disable")').first();
 
-        const bannerVisible = await mfaBanner.isVisible({ timeout: 5000 }).catch(() => false);
-        const mfaAlreadyEnabled = await mfaEnabled.isVisible({ timeout: 5000 }).catch(() => false);
-        const hasEnableButton = await enableBtn.isVisible({ timeout: 5000 }).catch(() => false);
-        const hasSetupButton = await setupBtn.isVisible({ timeout: 5000 }).catch(() => false);
+        const hasSetup = await setupBtn.isVisible({ timeout: 5000 }).catch(() => false);
+        const hasDisable = await disableBtn.isVisible({ timeout: 5000 }).catch(() => false);
 
-        // Accept any of the known MFA indicators so the test is resilient to UI moves.
-        expect(bannerVisible || mfaAlreadyEnabled || hasEnableButton || hasSetupButton).toBe(true);
-    });
-
-    test('should have Enable 2FA button in banner if shown', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
-        // Check for Enable 2FA or Setup 2FA buttons anywhere (onboarding or settings)
-        const enableBtn = page.locator('button:has-text("Enable 2FA")').first();
-        const setupBtn = page.locator('button:has-text("Setup 2FA")').first();
-
-        const hasEnableButton = await enableBtn.isVisible({ timeout: 3000 }).catch(() => false);
-        const hasSetupButton = await setupBtn.isVisible({ timeout: 3000 }).catch(() => false);
-
-        if (hasEnableButton || hasSetupButton) {
-            expect(hasEnableButton || hasSetupButton).toBe(true);
-        }
+        expect(hasSetup || hasDisable).toBe(true);
     });
 });
 
