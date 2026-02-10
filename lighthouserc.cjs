@@ -4,8 +4,8 @@ module.exports = {
       staticDistDir: './dist',
       numberOfRuns: 3,
       url: [
-        'http://localhost/',
-        'http://localhost/login',
+        'http://localhost:4173/',
+        'http://localhost:4173/login',
       ],
       settings: {
         formFactor: 'mobile',
