@@ -145,8 +145,9 @@ test.describe('Account Notification Banners', () => {
         const mfaEnabled = page.locator('button:has-text("Disable")');
 
         // Either the banner shows (MFA disabled) or the disable button shows (MFA enabled)
-        const bannerVisible = await mfaBanner.isVisible().catch(() => false);
-        const mfaAlreadyEnabled = await mfaEnabled.isVisible().catch(() => false);
+        // Use a short timeout to avoid flakiness caused by timing/animations
+        const bannerVisible = await mfaBanner.first().isVisible({ timeout: 5000 }).catch(() => false);
+        const mfaAlreadyEnabled = await mfaEnabled.first().isVisible({ timeout: 5000 }).catch(() => false);
 
         expect(bannerVisible || mfaAlreadyEnabled).toBe(true);
     });
