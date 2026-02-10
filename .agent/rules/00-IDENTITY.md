@@ -81,3 +81,32 @@ Dev → Staging → [VERIFY] → [GET EXPLICIT APPROVAL] → Production
 
 **NEVER deploy to production without the user saying "yes, deploy to production."**
 The 2026-01-29 incident happened because this rule was broken. We rolled back production. It must never happen again.
+
+### Pre-Deploy Checklist (NON-NEGOTIABLE)
+
+Before ANY deploy command, verify ALL of these:
+
+```bash
+# 1. Run full test suite
+npm run test -- --run
+
+# 2. Run linter
+npm run lint
+
+# 3. Check dashboard for alerts
+curl -s http://localhost:3001/api/command-center | grep -A5 '"alerts"'
+
+# 4. Use ONLY the deploy scripts (never raw firebase deploy)
+npm run deploy:staging   # For staging
+npm run deploy:production  # For production (requires explicit approval)
+```
+
+### Deploy Commands (ONLY USE THESE)
+
+| Environment | Command | Notes |
+|-------------|---------|-------|
+| Development | `npm run deploy:dev` | Auto-runs tests |
+| Staging | `npm run deploy:staging` | Auto-runs tests + E2E |
+| Production | `npm run deploy:production` | Requires user confirmation |
+
+**NEVER run `firebase deploy` directly. The deploy scripts enforce all quality gates.**

@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Prevent pushing untested code to master
+# This hook runs the full test suite before any push to master
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$branch" = "master" ]; then
+  echo "🔒 Pushing to master - running full test suite..."
+  
+  # Run unit tests
+  echo "📋 Running unit tests..."
+  npm run test -- --run
+  if [ $? -ne 0 ]; then
+    echo "❌ Unit tests failed. Push blocked."
+    exit 1
+  fi
+  
+  # Run lint
+  echo "📋 Running linter..."
+  npm run lint
+  if [ $? -ne 0 ]; then
+    echo "❌ Linting failed. Push blocked."
+    exit 1
+  fi
+  
+  echo "✅ All tests passed. Push allowed."
+fi
