@@ -118,6 +118,36 @@ else
     exit 1
 fi
 
+# 3c. Mutation Testing (production only - catches weak tests)
+if [[ "$ENV" == "production" ]]; then
+    echo -e "\n${YELLOW}🧬 Stage 3c: Mutation Testing${NC}"
+    if npm run test:mutation; then
+        echo -e "${GREEN}✅ Mutation tests passed (score above threshold).${NC}"
+    else
+        echo -e "${RED}❌ Mutation score below threshold. Deployment blocked.${NC}"
+        exit 1
+    fi
+else
+    echo -e "\n${YELLOW}⏭️  Stage 3c: Mutation Tests Skipped (${ENV} only)${NC}"
+fi
+
+# 3d. Firestore Rules Testing (staging + production)
+if [[ "$ENV" != "development" ]]; then
+    echo -e "\n${YELLOW}🔒 Stage 3d: Firestore Rules Testing${NC}"
+    if command -v firebase &> /dev/null; then
+        if npm run test:rules; then
+            echo -e "${GREEN}✅ Firestore rules tests passed.${NC}"
+        else
+            echo -e "${RED}❌ Firestore rules tests failed. Deployment blocked.${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${YELLOW}⚠️  Firebase CLI not found — skipping rules tests.${NC}"
+    fi
+else
+    echo -e "\n${YELLOW}⏭️  Stage 3d: Rules Tests Skipped (dev only)${NC}"
+fi
+
 # 4. E2E Testing (only for staging and production, unless skipped)
 if [[ "$SKIP_E2E" == false ]] && [[ "$ENV" != "development" ]]; then
     echo -e "\n${YELLOW}🎭 Stage 4: End-to-End Testing${NC}"

@@ -47,7 +47,7 @@ Mobile Optimization Phase 2 addresses performance bottlenecks and missing mobile
 - [x] Check existing Firestore indexes in `firestore.indexes.json`
 - [x] Review `useFinanceData.ts` data fetching patterns
 - [x] Identify user feedback in `USER_FEEDBACK.md`
-- [x] Check `KNOWN_ISSUES.md` for BUG-001 details
+- [x] Check git history for BUG-001 details (formerly KNOWN_ISSUES.md)
 
 ### Planning Artifacts
 - [x] Create task checklist (this document)
@@ -228,9 +228,9 @@ Mobile Optimization Phase 2 addresses performance bottlenecks and missing mobile
 **Effort**: 0.5 days
 
 ### Documentation Tasks
-- [x] Update ROADMAP.md with completion status
+- [x] Update git history with completion status (formerly ROADMAP.md)
 - [x] Update FEATURE_SUGGESTIONS.md (mark UX-006, UX-008, UX-009 complete)
-- [x] Update KNOWN_ISSUES.md (close BUG-001)
+- [x] Update git history (close BUG-001, formerly KNOWN_ISSUES.md)
 - [x] Update velocity.json with completions
 - [ ] Create `mob_opt_phase2_walkthrough.md` (400+ lines) - *Deferred*
 - [ ] Update CHANGELOG.md with v1.5.1 changes - *Deferred to release*

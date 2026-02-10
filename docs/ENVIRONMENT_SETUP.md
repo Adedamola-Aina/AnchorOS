@@ -394,7 +394,7 @@ Local Development (LXC) → Build → Deploy to Firebase Hosting → Live on CDN
 | **IP Address (Tailscale)** | 100.112.129.21 |
 | **Tailscale Hostname** | anchor.tail2fa2e.ts.net |
 | **Container Type** | Unprivileged |
-| **Docker Version** | 28.5.1 (not 29.x - see KNOWN_ISSUES.md) |
+| **Docker Version** | 28.5.1 (not 29.x - see git history for Docker issues) |
 | **Purpose** | Local development & build environment |
 
 ### Deployment Process
@@ -771,12 +771,12 @@ docker --version
 **Solution**:
 
 ```bash
-# Downgrade to Docker 28.5.1 (see KNOWN_ISSUES.md #004)
+# Downgrade to Docker 28.5.1 (see git history for Docker issues)
 sudo apt-get remove docker-ce docker-ce-cli containerd.io
 sudo apt-get install docker-ce=5:28.5.1-1~ubuntu.24.04~noble
 ```
 
-**Reference**: KNOWN_ISSUES.md #004
+**Reference**: Git commit history (search: Docker 28.5.1)
 
 ---
 
@@ -785,7 +785,7 @@ sudo apt-get install docker-ce=5:28.5.1-1~ubuntu.24.04~noble
 ### Related Documentation
 
 - **DEPLOYMENT_STATUS.md** - Current deployment state
-- **KNOWN_ISSUES.md** - Known bugs and workarounds
+- **Git commit history** - Known bugs tracked via `fix:` commit prefixes
 - **CLAUDE.md** - Development constitution
 
 ### Firebase Console Links

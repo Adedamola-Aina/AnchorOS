@@ -8,7 +8,7 @@ Before ANY work, read these 4 files in .agent/rules/:
 1. 00-IDENTITY.md — WHO you are + 4-phase mandatory sequence
 2. 01-TECHNICAL.md — Stack, architecture mandates, environments
 3. 02-DOCUMENTS.md — Where to find everything
-4. 03-ANTI-PATTERNS.md — 10 mistakes we NEVER repeat
+4. 03-ANTI-PATTERNS.md — 13 mistakes we NEVER repeat
 
 ## MANDATORY: Use Dashboard MCP Tools
 

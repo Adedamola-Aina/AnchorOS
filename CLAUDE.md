@@ -7,7 +7,7 @@
 - **Identity & Workflow**: `.agent/rules/00-IDENTITY.md` — 4-phase mandatory sequence
 - **Technical Rules**: `.agent/rules/01-TECHNICAL.md` — stack, mandates, environments
 - **Document Reference**: `.agent/rules/02-DOCUMENTS.md` — where to find everything
-- **Anti-Patterns**: `.agent/rules/03-ANTI-PATTERNS.md` — 10 mistakes we NEVER repeat
+- **Anti-Patterns**: `.agent/rules/03-ANTI-PATTERNS.md` — 13 mistakes we NEVER repeat
 
 ## The Single Source of Truth
 

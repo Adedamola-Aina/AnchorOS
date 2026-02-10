@@ -252,7 +252,7 @@ Morning:
 ├── Run full test suite (unit + integration + E2E)
 ├── Generate coverage report
 ├── Create walkthrough document
-├── Update ROADMAP.md, FEATURE_SUGGESTIONS.md, KNOWN_ISSUES.md
+├── Update git commit history with correct prefixes (dashboard auto-detects)
 ├── Deploy to dev environment
 ├── Smoke test on real devices
 └── Create PR for staging deploy
@@ -329,5 +329,5 @@ If any phase introduces regressions:
 
 1. **Begin Phase 1**: Create `useTransactionSearch` hook with TDD
 2. **Deploy Index**: Add any needed Firestore indexes before code
-3. **Daily Standups**: Update PROJECT_STATUS.md with progress
+3. **Daily Standups**: Commit with correct prefixes (dashboard auto-tracks)
 4. **Final Review**: Run full verification checklist before merge
