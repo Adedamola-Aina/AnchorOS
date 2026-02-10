@@ -19,7 +19,7 @@
     "test:e2e:headed": "npx playwright test --headed",
     "test:visual": "npx playwright test visual.spec.ts",
     "test:visual:update": "npx playwright test visual.spec.ts --update-snapshots",
-    "lighthouse": "lhci autorun",
+    "lighthouse": "lhci autorun --config=lighthouserc.cjs",
     "lighthouse:collect": "lhci collect",
     "test:integration": "./scripts/test-with-emulator.sh",
     "test:rules": "firebase emulators:exec --only firestore 'npx vitest run --config vitest.rules.config.ts'",
