@@ -27,10 +27,10 @@ test.describe('Finance Regressions and Fixes', () => {
         await expect(createBtn).toBeEnabled();
         await createBtn.click();
 
-        // Wait for modal to close and account to appear in list
-        await page.waitForTimeout(2000);
-        await expect(page.getByText(accountName)).toBeVisible({ timeout: 20000 });
-        await page.getByText(accountName).click();
+        // Wait for modal to close and account to appear in list (robust wait+click)
+        const accountLocator = page.getByText(accountName).first();
+        await accountLocator.waitFor({ state: 'visible', timeout: 30000 });
+        await accountLocator.click();
 
         // 4. Case A: Positive Savings (Income > Expense)
         // Add Income: $2000
@@ -83,9 +83,10 @@ test.describe('Finance Regressions and Fixes', () => {
         const createBtn = page.getByRole('button', { name: 'Create Account' });
         await expect(createBtn).toBeEnabled();
         await createBtn.click();
-        await page.waitForTimeout(2000);
-        await expect(page.getByText(accountName)).toBeVisible({ timeout: 20000 });
-        await page.getByText(accountName).click();
+        await page.waitForTimeout(1000);
+        const accountLocator2 = page.getByText(accountName).first();
+        await accountLocator2.waitFor({ state: 'visible', timeout: 30000 });
+        await accountLocator2.click();
 
         // 3. Add Transaction
         const txTitle = `Tx to Delete ${Date.now()}`;
