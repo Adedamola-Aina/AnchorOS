@@ -39,6 +39,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
     return (
         <div
             onClick={() => onEdit(account)}
+            data-testid={`account-card-${account.id}`}
             className={`cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all group overflow-hidden relative ${account.currency === 'USD' ? 'hover:border-primary-500/30' : 'hover:border-finance-500/30'}`}
         >
             <div className="flex justify-between items-start mb-4 relative z-10">
@@ -64,7 +65,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
 
             <div className="relative z-10 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-slate-900 dark:text-white truncate flex-1 min-w-0">
+                    <h3 data-testid={`account-name-${account.id}`} className="font-semibold text-slate-900 dark:text-white truncate flex-1 min-w-0">
                         {account.name}
                     </h3>
                     {/* Show 👥 emoji for shared accounts (v2) */}
