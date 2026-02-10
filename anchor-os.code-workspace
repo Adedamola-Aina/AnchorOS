@@ -29,7 +29,9 @@
             "dbaeumer.vscode-eslint",
             "esbenp.prettier-vscode",
             "bradlc.vscode-tailwindcss",
-            "ms-playwright.playwright"
+            "ms-playwright.playwright",
+            "github.copilot",
+            "github.copilot-chat"
         ]
     }
 }
