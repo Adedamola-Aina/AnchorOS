@@ -1,0 +1,45 @@
+name: CI Failure Email Notifier
+
+on:
+  workflow_run:
+    types: [completed]
+
+jobs:
+  notify:
+    if: ${{ github.event.workflow_run.conclusion != 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch failing run logs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching failing logs for ${{ github.event.workflow_run.head_branch }}"
+          # run script safely (no-fail)
+          bash ./tools/ci/fetch_failed_logs.sh ${{ github.repository_owner }} ${{ github.event.repository.name }} ${{ github.event.workflow_run.head_branch }} 1 || true
+
+      - name: Upload collected logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: failing-ci-logs-${{ github.event.workflow_run.id }}
+          path: ./ci-logs
+
+      - name: Send notification email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "CI Failure: ${{ github.event.workflow_run.name }} (run #${{ github.event.workflow_run.run_number }})"
+          body: |
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.event.workflow_run.name }}
+            Conclusion: ${{ github.event.workflow_run.conclusion }}
+            Branch: ${{ github.event.workflow_run.head_branch }}
+            Run URL: ${{ github.event.workflow_run.html_url }}
+            Logs artifact: failing-ci-logs-${{ github.event.workflow_run.id }}
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: ${{ secrets.SMTP_FROM }}
