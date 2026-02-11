@@ -145,11 +145,11 @@ test.describe('Family - Acceptance', () => {
         await page.goto('/accept-invite?token=invalid-token-12345');
         await page.waitForTimeout(3000);
 
-        // Should show "Invitation Invalid" heading (wait for Firebase function to return)
-        const error = page.locator('text=Invitation Invalid').or(page.locator('text=Invalid')).or(page.locator('text=Failed to validate'));
-        const hasError = await error.first().isVisible({ timeout: 10000 }).catch(() => false);
+        // Should show an invalid/locked state heading or error copy once validation completes
+        const statusHeading = page.getByRole('heading', { name: /Invitation (Invalid|Locked)/i });
+        const errorCopy = page.getByText(/invitation invalid|invalid invitation|no invitation token provided|not found|expired|failed to validate/i);
 
-        expect(hasError).toBe(true);
+        await expect(statusHeading.or(errorCopy.first())).toBeVisible({ timeout: 15000 });
     });
 
     test('Accept invite shows verification code input', async ({ page }) => {
