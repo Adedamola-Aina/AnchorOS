@@ -215,7 +215,7 @@ Reporter: ${issue.reporter}
 
 [Automated by conversation analyzer]`;
 
-        execSync(`git commit -m "${message.replace(/"/g, '\\"')}"`, { cwd: projectRoot });
+        execSync('git commit -m ' + JSON.stringify(message), { cwd: projectRoot });
 
         console.log(`✅ Auto-committed ${issue.id}`);
         return true;

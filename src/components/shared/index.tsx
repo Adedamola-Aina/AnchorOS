@@ -32,7 +32,7 @@ export const Badge = ({ children, type, variant = 'solid' }: { children: React.R
 
   const baseStyle = styles[type] || styles.todo;
   const finalStyle = variant === 'outline'
-    ? `border ${baseStyle.replace('bg-', 'border-').replace('text-', 'text-')} bg-transparent`
+    ? `border ${baseStyle.replace('bg-', 'border-')} bg-transparent`
     : baseStyle;
 
   return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${finalStyle}`}>{children}</span>;

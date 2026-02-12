@@ -5,6 +5,10 @@ on:
     workflows: ["CI/CD Pipeline"]
     types: [completed]
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   notify:
     if: ${{ github.event.workflow_run.conclusion != 'success' }}
@@ -16,10 +20,12 @@ jobs:
       - name: Fetch failing run logs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          echo "Fetching failing logs for ${{ github.event.workflow_run.head_branch }}"
-          # run script safely (no-fail)
-          bash ./tools/ci/fetch_failed_logs.sh ${{ github.repository_owner }} ${{ github.event.repository.name }} ${{ github.event.workflow_run.head_branch }} 1 || true
+          echo "Fetching failing logs for ${HEAD_BRANCH}"
+          bash ./tools/ci/fetch_failed_logs.sh "${REPO_OWNER}" "${REPO_NAME}" "${HEAD_BRANCH}" 1 || true
 
       - name: Upload collected logs
         uses: actions/upload-artifact@v4

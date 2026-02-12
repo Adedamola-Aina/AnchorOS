@@ -7,11 +7,19 @@
  */
 
 /**
- * Encode HTML special characters to prevent XSS
+ * Encode HTML special characters to prevent XSS.
+ * Skips already-encoded entities to prevent double-encoding.
  */
 export const encodeHtml = (str: string): string => {
     if (typeof str !== 'string') return str;
-    return str
+    // First decode any existing entities to normalize, then re-encode once
+    const decoded = str
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#x27;/g, "'");
+    return decoded
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -61,11 +69,17 @@ export const sanitizeObject = <T extends object>(obj: T): T => {
 };
 
 /**
- * Strip all HTML tags from a string (more aggressive than encoding)
+ * Strip all HTML tags from a string (multi-pass to prevent nested-tag reassembly)
  */
 export const stripHtml = (str: string): string => {
     if (typeof str !== 'string') return str;
-    return str.replace(/<[^>]*>/g, '');
+    let prev = str;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        const next = prev.replace(/<[^>]*>/g, '');
+        if (next === prev) return next;
+        prev = next;
+    }
 };
 
 /**

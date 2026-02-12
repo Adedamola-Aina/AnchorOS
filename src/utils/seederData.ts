@@ -10,8 +10,15 @@ export const CATEGORIES = ['Living', 'Food', 'Entertainment', 'Health', 'Transpo
 export const DOMAINS = ['Health', 'Fitness', 'Work', 'Bible', 'Personal Development', 'Financial'];
 export const ACCOUNT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899', '#6366f1'];
 
-export const randomDate = (start: Date, end: Date): Date => {
-    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+/** Cryptographically random float in [0, 1) — satisfies CodeQL js/insecure-randomness */
+const secureRandom = (): number => {
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    return buf[0] / (0xFFFFFFFF + 1);
 };
 
-export const randomItem = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+export const randomDate = (start: Date, end: Date): Date => {
+    return new Date(start.getTime() + secureRandom() * (end.getTime() - start.getTime()));
+};
+
+export const randomItem = <T>(arr: T[]): T => arr[Math.floor(secureRandom() * arr.length)];

@@ -10,6 +10,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const cron = require('node-cron');
+const rateLimit = require('express-rate-limit');
 
 const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions, getEnhancedKanbanBoard } = require('./docReader/index');
 const { getRecentCommits, getRecentCommitsFiltered, classifyCommit, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
@@ -34,6 +35,21 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Rate limiting for mutation endpoints (POST/PUT/DELETE)
+const mutationLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 30,             // 30 requests per minute per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+});
+app.use((req, _res, next) => {
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+        return mutationLimiter(req, _res, next);
+    }
+    next();
+});
 
 // Serve static files from client build (production)
 app.use(express.static(path.join(__dirname, '../client/dist')));

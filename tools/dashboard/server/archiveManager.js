@@ -74,7 +74,7 @@ function detectCompletedItems() {
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         // Look for completed items: - [x] or * [x]
-        if (line.match(/^[\s]*[-*]\s*\[x\]/i)) {
+        if (line.match(/^\s*[-*]\s*\[x\]/i)) {
             const completionDate = extractCompletionDate(line);
             completedItems.push({
                 text: line,
@@ -210,7 +210,7 @@ function getArchivedItems() {
             currentMonth = line.replace('## ', '').trim();
         } else if (line.startsWith('### ')) {
             currentWeek = line.replace('### ', '').trim();
-        } else if (line.match(/^[\s]*[-*]\s*\[x\]/i)) {
+        } else if (line.match(/^\s*[-*]\s*\[x\]/i)) {
             archivedItems.push({
                 text: line,
                 month: currentMonth,

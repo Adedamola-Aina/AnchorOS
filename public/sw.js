@@ -49,9 +49,9 @@ const firebaseConfig = {
 const hostname = self.location.hostname;
 let env = 'production'; // Default to production for safety
 
-if (hostname === 'localhost' || hostname.includes('tail2fa2e')) {
+if (hostname === 'localhost' || hostname.endsWith('.tail2fa2e.ts.net') || hostname === 'tail2fa2e.ts.net') {
     env = 'development';
-} else if (hostname.includes('anchor-os-staging')) {
+} else if (hostname === 'anchor-os-staging.web.app' || hostname === 'anchor-os-staging.firebaseapp.com') {
     env = 'staging';
 }
 

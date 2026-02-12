@@ -11,8 +11,7 @@ interface PendingMfaSecret extends TotpSecret {
 }
 
 interface SerializedMfaSecret {
-    secretKey: string;
-    hashingAlgorithm: string;
+    hasPending: boolean;
     codeLength: number;
     codeInterval: number;
     timestamp: number;
@@ -35,15 +34,15 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
         pendingMfaSecretRef.current = result;
 
         try {
+            // Store only a flag that enrollment is pending — the secret stays in memory only
             sessionStorage.setItem('anchor_mfa_pending', JSON.stringify({
-                secretKey: result.secretKey,
-                hashingAlgorithm: result.hashingAlgorithm,
+                hasPending: true,
                 codeLength: result.codeLength,
                 codeInterval: (result as PendingMfaSecret).codeInterval || 30,
                 timestamp: Date.now()
             }));
         } catch (e) {
-            console.warn('Failed to save MFA secret to storage', e);
+            console.warn('Failed to save MFA state to storage', e);
         }
 
         return {
@@ -68,13 +67,14 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
             if (stored) {
                 try {
                     const data = JSON.parse(stored) as SerializedMfaSecret;
-                    if (Date.now() - data.timestamp < 15 * 60 * 1000) {
-                        pendingMfaSecretRef.current = {
-                            ...data,
-                            generateQrCodeUrl: () => '',
-                        } as unknown as TotpSecret;
+                    if (Date.now() - data.timestamp < 15 * 60 * 1000 && data.hasPending) {
+                        // Secret is no longer recoverable from storage — user must re-generate
+                        throw new Error('MFA verification expired. Please regenerate the QR code.');
                     }
-                } catch { /* Failed to restore */ }
+                } catch (e) {
+                    if (e instanceof Error && e.message.includes('expired')) throw e;
+                    /* Failed to restore */
+                }
             }
         }
 
