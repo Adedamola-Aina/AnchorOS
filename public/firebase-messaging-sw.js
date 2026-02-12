@@ -17,24 +17,22 @@ if (!activeConfig || !activeConfig.apiKey) {
 
     const messaging = firebase.messaging();
 
-const messaging = firebase.messaging();
+    // Handle background messages
+    messaging.onBackgroundMessage((payload) => {
+        console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
-// Handle background messages
-messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+        if (payload.notification) {
+            const notificationTitle = payload.notification.title;
+            const notificationOptions = {
+                body: payload.notification.body,
+                icon: '/favicon.svg',
+                badge: '/favicon.svg',
+                // Mobile Specifics
+                vibrate: [200, 100, 200],
+                actions: payload.data?.actions ? JSON.parse(payload.data.actions) : []
+            };
 
-    if (payload.notification) {
-        const notificationTitle = payload.notification.title;
-        const notificationOptions = {
-            body: payload.notification.body,
-            icon: '/favicon.svg',
-            badge: '/favicon.svg',
-            // Mobile Specifics
-            vibrate: [200, 100, 200],
-            actions: payload.data?.actions ? JSON.parse(payload.data.actions) : []
-        };
-
-        self.registration.showNotification(notificationTitle, notificationOptions);
-    }
-});
+            self.registration.showNotification(notificationTitle, notificationOptions);
+        }
+    });
 }

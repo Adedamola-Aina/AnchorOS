@@ -6,7 +6,7 @@ export default {
   // Use Vitest runner with in-place mutation
   testRunner: 'vitest',
   vitest: {
-    configFile: 'vitest.config.ts',
+    configFile: 'config/vitest.config.ts',
   },
   
   // Run mutations in-place (avoids sandbox file resolution issues with Vite)
@@ -14,7 +14,7 @@ export default {
   
   // TypeScript type checking
   checkers: ['typescript'],
-  tsconfigFile: 'tsconfig.app.json',
+  tsconfigFile: 'config/tsconfig.app.json',
   
   // Files to mutate (core business logic only - start small)
   mutate: [

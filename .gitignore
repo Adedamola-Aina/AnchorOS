@@ -41,3 +41,4 @@ src/.claude/
 tools/dashboard/firebase-debug.log
 tools/dashboard/logs/
 .firebase/
+firestore-debug.log

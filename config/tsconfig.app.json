@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "tsBuildInfoFile": "../node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": [
@@ -30,23 +30,23 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/*": [
-        "./src/*"
+        "../src/*"
       ],
       "@anchor-os/ui": [
-        "./src/libs/ui"
+        "../src/libs/ui"
       ]
     }
   },
   "include": [
-    "src"
+    "../src"
   ],
   "exclude": [
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "src/**/*.emulator.ts",
-    "src/test/**/*",
-    "e2e/**/*",
-    "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "../src/**/*.test.ts",
+    "../src/**/*.test.tsx",
+    "../src/**/*.emulator.ts",
+    "../src/test/**/*",
+    "../e2e/**/*",
+    "../**/*.spec.ts",
+    "../**/*.spec.tsx"
   ]
 }

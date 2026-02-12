@@ -10,7 +10,7 @@ module.exports = {
   ci: {
     collect: {
       // Start a static server to test the built app
-      staticDistDir: './dist',
+      staticDistDir: '../dist',
       
       // Run 3 audits for more stable results
       numberOfRuns: 3,

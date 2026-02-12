@@ -11,8 +11,8 @@
         "noUnusedParameters": false
     },
     "include": [
-        "src/**/*",
-        "e2e/**/*"
+        "../src/**/*",
+        "../e2e/**/*"
     ],
     "exclude": []
 }

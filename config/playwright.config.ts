@@ -10,7 +10,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Update snaps:  npx playwright test visual.spec.ts --update-snapshots
  */
 export default defineConfig({
-    testDir: './e2e',
+    testDir: '../e2e',
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
@@ -20,7 +20,7 @@ export default defineConfig({
     reporter: 'html',
 
     // Visual regression snapshot settings
-    snapshotDir: './e2e/__snapshots__',
+    snapshotDir: '../e2e/__snapshots__',
     snapshotPathTemplate: '{snapshotDir}/{testFilePath}/{arg}{ext}',
     expect: {
         toHaveScreenshot: {

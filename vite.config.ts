@@ -84,6 +84,9 @@ export default defineConfig(({ mode }) => ({
       '@anchor-os/ui': path.resolve(__dirname, 'src/libs/ui'),
     },
   },
+  css: {
+    postcss: path.resolve(__dirname, 'config'),
+  },
   build: {
     sourcemap: true, // Required for Sentry
     rollupOptions: {
