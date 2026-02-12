@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { fileURLToPath } from 'url'
@@ -28,11 +28,49 @@ function buildEnvMarker(mode: string) {
   };
 }
 
+/**
+ * Vite plugin to generate __firebase-config.js for the service worker.
+ * Service workers can't use import.meta.env, so we inject Firebase config
+ * from environment variables into a JS file during build and dev server start.
+ */
+function generateFirebaseSwConfig() {
+  function writeConfig(envDir: string, mode: string) {
+    const env = loadEnv(mode, envDir, 'VITE_');
+    const config = {
+      apiKey: env.VITE_FIREBASE_API_KEY || '',
+      authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || '',
+      projectId: env.VITE_FIREBASE_PROJECT_ID || '',
+      storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || '',
+      messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+      appId: env.VITE_FIREBASE_APP_ID || '',
+      measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || '',
+    };
+    const content = `// Auto-generated — do not edit. Built from .env variables.\nself.__FIREBASE_CONFIG = ${JSON.stringify(config, null, 2)};\n`;
+    fs.writeFileSync(path.resolve(__dirname, 'public/__firebase-config.js'), content, 'utf-8');
+  }
+
+  return {
+    name: 'generate-firebase-sw-config',
+    configResolved(config: { mode: string; envDir: string }) {
+      writeConfig(config.envDir, config.mode);
+    },
+    closeBundle() {
+      // Also copy to dist/ since public/ is copied before plugin runs
+      const src = path.resolve(__dirname, 'public/__firebase-config.js');
+      const dest = path.resolve(__dirname, 'dist/__firebase-config.js');
+      if (fs.existsSync(src) && fs.existsSync(path.resolve(__dirname, 'dist'))) {
+        fs.copyFileSync(src, dest);
+      }
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     buildEnvMarker(mode),
+    generateFirebaseSwConfig(),
     process.env.ANALYZE === 'true' && visualizer({
       open: true,
       filename: 'dist/stats.html',

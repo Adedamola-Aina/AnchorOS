@@ -3,55 +3,20 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 // Environment-based Firebase configuration
-// Reads from .env.development, .env.staging, or .env.production
-const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'anchor-os';
-
-// Firebase configurations for each environment
-const configs: Record<string, {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-  measurementId?: string;
-}> = {
-  // Production (default)
-  'anchor-os': {
-    apiKey: "AIzaSyBiJ9rSE11D29A-356F9KtzvnTV6Ajs_mQ",
-    authDomain: "anchor-os.firebaseapp.com",
-    projectId: "anchor-os",
-    storageBucket: "anchor-os.firebasestorage.app",
-    messagingSenderId: "501329205014",
-    appId: "1:501329205014:web:1092c50e54faa5216ea237",
-    measurementId: "G-LBNK80WWNS"
-  },
-  // Staging
-  'anchor-os-staging': {
-    apiKey: "AIzaSyDoQevJKyequof4p1XdIXCPz3hE3QaKSUc",
-    authDomain: "anchor-os-staging.firebaseapp.com",
-    projectId: "anchor-os-staging",
-    storageBucket: "anchor-os-staging.firebasestorage.app",
-    messagingSenderId: "251281982839",
-    appId: "1:251281982839:web:bae102a18f2d209432cd72"
-  },
-  // Development
-  'anchor-os-dev-1c6ec': {
-    apiKey: "AIzaSyAcRCcHADYhsh1YLo_qZs4sXLgLEEJd5PA",
-    authDomain: "anchor-os-dev-1c6ec.firebaseapp.com",
-    projectId: "anchor-os-dev-1c6ec",
-    storageBucket: "anchor-os-dev-1c6ec.firebasestorage.app",
-    messagingSenderId: "151437822604",
-    appId: "1:151437822604:web:fdd06a38842d7992d109a9"
-  }
+// All values come from .env.development, .env.staging, or .env.production
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || undefined,
 };
-
-// Select config based on environment
-const firebaseConfig = configs[projectId] || configs['anchor-os'];
 
 // Log which environment we're connecting to
 const env = import.meta.env.VITE_APP_ENV || 'production';
-if (import.meta.env.DEV) console.info(`[Firebase] Initializing for ${env} environment (${projectId})...`);
+if (import.meta.env.DEV) console.info(`[Firebase] Initializing for ${env} environment (${firebaseConfig.projectId})...`);
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
@@ -79,4 +44,4 @@ try {
   console.warn('[Firebase] Messaging not initialized (environment may not support it)');
 }
 export const messaging = messagingInstance;
-if (import.meta.env.DEV) console.info(`[Firebase] Connected to ${projectId}`);
+if (import.meta.env.DEV) console.info(`[Firebase] Connected to ${firebaseConfig.projectId}`);
