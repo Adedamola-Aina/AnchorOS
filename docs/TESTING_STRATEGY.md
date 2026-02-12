@@ -885,8 +885,8 @@ const account = buildAccount({ name: 'Savings', type: 'savings' });
 ### Documentation References
 
 - **CLAUDE.md** - Full TDD protocol (Article 2)
-- **vitest.config.ts** - Unit test configuration
-- **playwright.config.ts** - E2E test configuration
+- **config/vitest.config.ts** - Unit test configuration
+- **config/playwright.config.ts** - E2E test configuration
 - **src/test/setup.ts** - Global test mocks and setup
 
 ### External Resources

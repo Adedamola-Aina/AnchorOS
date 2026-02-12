@@ -2,7 +2,7 @@
     "folders": [
         {
             "name": "Anchor OS",
-            "path": "."
+            "path": ".."
         }
     ],
     "settings": {

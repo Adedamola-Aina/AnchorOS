@@ -44,7 +44,7 @@ Mobile Optimization Phase 2 addresses performance bottlenecks and missing mobile
 - [x] Analyze current search implementation in `FinanceView.tsx`
 - [x] Review `VirtualTransactionList.tsx` rendering approach
 - [x] Review `TransactionItem.tsx` component structure
-- [x] Check existing Firestore indexes in `firestore.indexes.json`
+- [x] Check existing Firestore indexes in `config/firestore.indexes.json`
 - [x] Review `useFinanceData.ts` data fetching patterns
 - [x] Identify user feedback in `USER_FEEDBACK.md`
 - [x] Check git history for BUG-001 details (formerly KNOWN_ISSUES.md)

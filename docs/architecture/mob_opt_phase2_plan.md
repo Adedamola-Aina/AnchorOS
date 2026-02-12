@@ -160,7 +160,7 @@ export const useHaptic = () => {
 | `src/features/finance/components/VirtualTransactionList.tsx` | Wrap with `PullToRefresh` |
 | `src/features/finance/components/TransactionItem.tsx` | Integrate `SwipeableRow` on mobile |
 | `src/context/FinanceContext.tsx` | Add `refetch` method for pull-to-refresh |
-| `firestore.indexes.json` | Add composite index for transactions (if needed) |
+| `config/firestore.indexes.json` | Add composite index for transactions (if needed) |
 
 ---
 

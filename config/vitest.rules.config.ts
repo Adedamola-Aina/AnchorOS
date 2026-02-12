@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config';
  *
  * Usage:
  *   firebase emulators:exec --only firestore \
- *     "npx vitest run --config vitest.rules.config.ts"
+ *     "npx vitest run --config config/vitest.rules.config.ts"
  */
 export default defineConfig({
   test: {

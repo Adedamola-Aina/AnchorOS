@@ -443,13 +443,13 @@ WE ONE COMMAND for Build, Test, and Deploy.
 
 ```bash
 # Deploy to development
-./DEPLOY_PIPELINE.sh --env=development
+./scripts/DEPLOY_PIPELINE.sh --env=development
 
 # Deploy to staging
-./DEPLOY_PIPELINE.sh --env=staging
+./scripts/DEPLOY_PIPELINE.sh --env=staging
 
 # Deploy to production (fast)
-./DEPLOY_PIPELINE.sh --env=production --skip-e2e
+./scripts/DEPLOY_PIPELINE.sh --env=production --skip-e2e
 ```
 
 **Deployment Time**: ~30-60 seconds (CDN propagation)

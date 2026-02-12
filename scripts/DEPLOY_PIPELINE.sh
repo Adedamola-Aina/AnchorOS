@@ -22,7 +22,7 @@ set -e # Exit immediately if a command exits with a non-zero status.
 # ============================================================================
 
 # Ensure we are running from the project root
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 # Colors
 GREEN='\033[0;32m'

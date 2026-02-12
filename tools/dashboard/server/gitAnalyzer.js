@@ -40,74 +40,103 @@ const DASHBOARD_PATHS = [
     'docs/DASHBOARD'
 ];
 
-// Paths that indicate Anchor OS product changes
-const ANCHOR_OS_PATHS = [
+// Paths that indicate actual Anchor OS product source changes
+const PRODUCT_SOURCE_PATHS = [
     'src/',
     'public/',
     'e2e/',
-    'index.html',
-    'vite.config',
-    'tailwind.config',
-    'firebase.json',
-    'firestore'
+    'index.html'
 ];
 
+// Legacy alias — kept for backward compatibility with getRepoStats
+const ANCHOR_OS_PATHS = PRODUCT_SOURCE_PATHS;
+
 /**
- * Check if commit only touches dashboard files
+ * Classify a commit into categories: 'anchorOS', 'dashboard', or 'infra'
+ *
+ * - anchorOS : product-meaningful commit (feat, fix, test, perf, hotfix)
+ *              that touches product source (src/, public/, e2e/, index.html)
+ * - dashboard: only touches dashboard / tooling files
+ * - infra   : infrastructure changes — refactor/chore commits, OR commits
+ *             touching only config/, docs/, scripts/, root config files
  */
-async function isDashboardOnlyCommit(commitHash) {
+async function classifyCommit(commitHash) {
     try {
         const diff = await git.show([commitHash, '--name-only', '--format=']);
         const files = diff.split('\n').filter(f => f.trim());
 
-        // If any file is in Anchor OS paths, it's not dashboard-only
-        for (const file of files) {
-            for (const anchorPath of ANCHOR_OS_PATHS) {
-                if (file.startsWith(anchorPath) || file.includes(anchorPath)) {
-                    return false;
-                }
-            }
+        if (files.length === 0) return 'infra';
+
+        // Get commit message for type-based classification
+        const commitInfo = await git.show([commitHash, '--format=%s', '--no-patch']);
+        const commitType = extractCommitType(commitInfo.trim());
+
+        // Refactor & chore commits are always infra — they never represent
+        // product feature changes, even if they touch src/ files
+        if (commitType === 'refactor' || commitType === 'chore') {
+            return 'infra';
         }
 
-        // Check if at least one file is in dashboard paths
+        let touchesProductSource = false;
+        let touchesDashboard = false;
+
         for (const file of files) {
+            // Check product source paths
+            for (const prodPath of PRODUCT_SOURCE_PATHS) {
+                if (file.startsWith(prodPath) || file === prodPath) {
+                    touchesProductSource = true;
+                    break;
+                }
+            }
+
+            // Check dashboard paths
             for (const dashPath of DASHBOARD_PATHS) {
                 if (file.startsWith(dashPath) || file.includes(dashPath)) {
-                    return true;
+                    touchesDashboard = true;
                 }
             }
         }
 
-        // Doc-only commits (DEPLOYMENT_STATUS, etc.) are dashboard changes
-        if (files.every(f => f.startsWith('docs/') || f.endsWith('.md'))) {
-            return true;
-        }
+        // Product source touched → anchorOS (even if config also changed)
+        if (touchesProductSource) return 'anchorOS';
 
-        return false;
+        // Dashboard-only files
+        if (touchesDashboard) return 'dashboard';
+
+        // Everything else: config/, docs/, scripts/, root-level files → infra
+        return 'infra';
     } catch (error) {
-        return false;
+        return 'infra';
     }
 }
 
 /**
- * Get commits filtered by category (anchorOS or dashboard)
- * @param {string} category - 'anchorOS', 'dashboard', or 'all'
+ * Backward-compatible wrapper
+ */
+async function isDashboardOnlyCommit(commitHash) {
+    return (await classifyCommit(commitHash)) === 'dashboard';
+}
+
+/**
+ * Get commits filtered by category (anchorOS, dashboard, infra, or all)
+ * @param {string} category - 'anchorOS', 'dashboard', 'infra', or 'all'
  * @param {number} limit - Max commits to return
  */
 async function getRecentCommitsFiltered(category = 'all', limit = 50) {
     try {
         // Fetch more commits to account for filtering
-        const log = await git.log({ maxCount: limit * 2 });
+        const log = await git.log({ maxCount: limit * 3 });
         const commits = [];
 
         for (const commit of log.all) {
             if (commits.length >= limit) break;
 
-            const isDashboard = await isDashboardOnlyCommit(commit.hash);
+            const commitCategory = await classifyCommit(commit.hash);
 
             // Filter based on category
-            if (category === 'dashboard' && !isDashboard) continue;
-            if (category === 'anchorOS' && isDashboard) continue;
+            if (category === 'dashboard' && commitCategory !== 'dashboard') continue;
+            if (category === 'anchorOS' && commitCategory !== 'anchorOS') continue;
+            if (category === 'infra' && commitCategory !== 'infra') continue;
 
             commits.push({
                 hash: commit.hash.substring(0, 7),
@@ -117,7 +146,7 @@ async function getRecentCommitsFiltered(category = 'all', limit = 50) {
                 author: commit.author_name,
                 feature: extractFeature(commit.message),
                 type: extractCommitType(commit.message),
-                category: isDashboard ? 'dashboard' : 'anchorOS'
+                category: commitCategory
             });
         }
 
@@ -618,6 +647,7 @@ function generateRecommendedTests(areas) {
 module.exports = {
     getRecentCommits,
     getRecentCommitsFiltered,
+    classifyCommit,
     getCommitsBetweenVersions,
     getTags,
     getActualDeployments,

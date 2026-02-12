@@ -36,7 +36,7 @@
 
 ```bash
 # Deploy to Development
-./DEPLOY_PIPELINE.sh --env=development
+./scripts/DEPLOY_PIPELINE.sh --env=development
 
 # ✅ Should see BLUE banner: "DEVELOPMENT ENVIRONMENT"
 ```
@@ -51,7 +51,7 @@
 
 ```bash
 # Deploy to Staging
-./DEPLOY_PIPELINE.sh --env=staging
+./scripts/DEPLOY_PIPELINE.sh --env=staging
 
 # ✅ Should see YELLOW banner: "STAGING ENVIRONMENT"
 ```
@@ -66,7 +66,7 @@
 
 ```bash
 # Deploy to Production (fast)
-./DEPLOY_PIPELINE.sh --env=production --skip-e2e
+./scripts/DEPLOY_PIPELINE.sh --env=production --skip-e2e
 
 # ✅ Should see NO banner
 ```

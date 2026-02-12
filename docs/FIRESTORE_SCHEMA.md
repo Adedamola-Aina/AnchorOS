@@ -742,7 +742,7 @@ const activity = await getDocs(
 
 ### Composite Indexes
 
-Firestore requires composite indexes for queries with multiple conditions or orderBy clauses. These are defined in `firestore.indexes.json`:
+Firestore requires composite indexes for queries with multiple conditions or orderBy clauses. These are defined in `config/firestore.indexes.json`:
 
 #### Family Invitations
 
@@ -1139,8 +1139,8 @@ export const getSharedAccountTransactions = onCall(async (request) => {
 
 ### Related Documentation
 
-- **firestore.rules** - Full security rules implementation
-- **firestore.indexes.json** - Complete index definitions
+- **config/firestore.rules** - Full security rules implementation
+- **config/firestore.indexes.json** - Complete index definitions
 - **CLAUDE.md** - Development constitution
 - **FAMILY_SHARING_V3_IMPLEMENTATION.md** - Detailed Family Mode spec
 

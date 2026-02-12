@@ -149,7 +149,7 @@ Each version entry includes:
 5. Production deploy requires manual approval in GitHub
 
 **Manual Deploy** (if needed):
-1. `./DEPLOY_PIPELINE.sh --env=staging` or `--env=production`
+1. `./scripts/DEPLOY_PIPELINE.sh --env=staging` or `--env=production`
 2. Create deploy marker: `git commit --allow-empty -m "deploy(env): vX.X.X"`
 
 **Conventional Commit Types**:

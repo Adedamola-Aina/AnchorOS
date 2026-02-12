@@ -12,7 +12,7 @@ const path = require('path');
 const cron = require('node-cron');
 
 const { readDoc, getAllDocs, getProjectBoard, getFeatureSuggestions, getEnhancedKanbanBoard } = require('./docReader/index');
-const { getRecentCommits, getRecentCommitsFiltered, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
+const { getRecentCommits, getRecentCommitsFiltered, classifyCommit, getDeploymentTimeline, getRepoStats, searchBugInCommits, getImpactAnalysis } = require('./gitAnalyzer');
 const { getEnvironmentStatus, checkEnvParity, checkEnvParityByGit } = require('./envChecker');
 const { getPrioritySuggestions } = require('./prioritySuggester');
 const { getDependencyHealth } = require('./dependencyChecker');
@@ -185,7 +185,7 @@ app.get('/api/git/commits', async (req, res) => {
 
 /**
  * GET /api/git/commits/anchorOS
- * Returns only Anchor OS product commits (excludes dashboard/tooling)
+ * Returns only Anchor OS product source commits (excludes dashboard, infra, and config-only changes)
  */
 app.get('/api/git/commits/anchorOS', async (req, res) => {
     try {
@@ -193,7 +193,26 @@ app.get('/api/git/commits/anchorOS', async (req, res) => {
         const commits = await getRecentCommitsFiltered('anchorOS', limit);
         res.json({
             category: 'anchorOS',
-            description: 'Anchor OS product changes (src/, e2e/, public/, etc.)',
+            description: 'Anchor OS product source changes (src/, e2e/, public/, index.html)',
+            count: commits.length,
+            commits
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/commits/infra
+ * Returns infrastructure / config-only commits (config/, docs/, scripts/, root configs)
+ */
+app.get('/api/git/commits/infra', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 30;
+        const commits = await getRecentCommitsFiltered('infra', limit);
+        res.json({
+            category: 'infra',
+            description: 'Infrastructure & config changes (config/, docs/, scripts/, root files)',
             count: commits.length,
             commits
         });

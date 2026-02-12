@@ -179,9 +179,9 @@ function main() {
   
   // Also check key config files
   const configFiles = [
-    'CLAUDE.md',
-    'AGENTS.md',
-    'commitlint.config.js',
+    '.github/CLAUDE.md',
+    '.github/AGENTS.md',
+    'config/commitlint.config.js',
   ].map(f => join(ROOT, f)).filter(existsSync);
   
   const filesToCheck = [...new Set([...allFiles, ...configFiles])];

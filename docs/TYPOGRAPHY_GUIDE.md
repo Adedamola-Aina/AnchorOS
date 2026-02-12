@@ -357,7 +357,7 @@ function SettingsView() {
 
 ## Tailwind Config Reference
 
-Typography tokens are defined in `tailwind.config.js`:
+Typography tokens are defined in `config/tailwind.config.js`:
 
 ```javascript
 fontSize: {
