@@ -308,7 +308,6 @@ When implementing new buttons:
 ## Related Documentation
 
 - **UX-001**: [DESIGN_TOKENS.md](file:///root/anchor-os/docs/DESIGN_TOKENS.md) - Semantic color system
-- **UX-011**: [ux_011_plan.md](file:///root/.gemini/antigravity/brain/91e5ec0b-4865-4baf-9a94-6684078a367d/ux_011_plan.md) - Implementation plan
 - **Mobile**: [MOBILE_OPTIMIZATION_DIRECTIVE.md](file:///root/anchor-os/docs/architecture/mob_opt_phase2_task.md) - Touch target standards
 - **Accessibility**: [DESIGN_PHILOSOPHY.md](file:///root/anchor-os/docs/DESIGN_PHILOSOPHY.md) - WCAG compliance
 

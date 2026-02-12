@@ -380,7 +380,6 @@ fontSize: {
 
 - **UX-001**: [DESIGN_TOKENS.md](file:///root/anchor-os/docs/DESIGN_TOKENS.md) - Semantic color system
 - **UX-011**: [BUTTON_GUIDELINES.md](file:///root/anchor-os/docs/BUTTON_GUIDELINES.md) - Button variants
-- **UX-013 Plan**: [ux_013_plan.md](file:///root/.gemini/antigravity/brain/91e5ec0b-4865-4baf-9a94-6684078a367d/ux_013_plan.md) - Implementation plan
 - **Mobile**: [MOBILE_OPTIMIZATION_DIRECTIVE.md](file:///root/anchor-os/docs/architecture/mob_opt_phase2_task.md) - Responsive standards
 
 ---

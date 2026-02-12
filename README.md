@@ -110,6 +110,11 @@ See [docs/CI_CD_TESTING.md](docs/CI_CD_TESTING.md) for pipeline details.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for branching strategy, code review requirements, and task linking.
 
-## Author
+## Product Ownership & Support
 
-**Adedamola Aina**
+| Contact | Channel |
+|---------|---------|
+| Product Owner | Adedamola Aina |
+| Engineering Support | File a Jira ticket under the `AOS` project |
+| Infrastructure | Jira `INFRA-*` ticket for environment access or Firebase IAM changes |
+| Security Issues | Report via Jira `AOS-SEC-*` with severity tag |

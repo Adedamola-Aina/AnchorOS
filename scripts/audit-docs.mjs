@@ -122,8 +122,8 @@ function checkInternalLinks(content, filePath) {
     // Skip external links, anchors, and http(s) links
     if (linkPath.startsWith('http') || linkPath.startsWith('#') || linkPath.startsWith('mailto:')) continue;
     
-    // Skip links to external paths outside the repo (like .gemini)
-    if (linkPath.includes('.gemini') || linkPath.includes('antigravity')) continue;
+    // Skip links to external paths outside the repo
+    if (linkPath.includes('.gemini')) continue;
     
     // Clean up file:// prefix if present
     let cleanPath = linkPath.replace('file://', '').replace(/^\/root\/anchor-os\//, '');

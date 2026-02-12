@@ -36,7 +36,7 @@ describe('FinanceService Integration', () => {
         // Load Firestore rules
         let rules: string;
         try {
-            rules = readFileSync(resolve(__dirname, '../../../firestore.rules'), 'utf-8');
+            rules = readFileSync(resolve(__dirname, '../../../config/firestore.rules'), 'utf-8');
         } catch {
             console.log('Could not load firestore.rules, using permissive rules for testing');
             rules = `rules_version = '2'; service cloud.firestore { match /{document=**} { allow read, write: if true; } }`;

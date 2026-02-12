@@ -228,9 +228,7 @@ The following practices are **explicitly forbidden**:
 ## 📚 Reference Implementations
 
 ### Gold Standard: ARCH-003
-**What**: Service Layer Tests  
-**Walkthrough**: [arch_003_walkthrough.md](file:///root/.gemini/antigravity/brain/91e5ec0b-4865-4baf-9a94-6684078a367d/arch_003_walkthrough.md)  
-**Task List**: [arch_003_task.md](file:///root/.gemini/antigravity/brain/91e5ec0b-4865-4baf-9a94-6684078a367d/arch_003_task.md)
+**What**: Service Layer Tests
 
 **Metrics**:
 - 7 phases completed
@@ -394,7 +392,7 @@ Before marking ANY work as complete:
 ## 📞 Questions?
 
 Review the reference implementations:
-- **ARCH-003**: [Task](file:///root/.gemini/antigravity/brain/91e5ec0b-4865-4baf-9a94-6684078a367d/arch_003_task.md) | [Walkthrough](file:///root/.gemini/antigravity/brain/91e5ec0b-4865-4baf-9a94-6684078a367d/arch_003_walkthrough.md)
+- **ARCH-003**: Service Layer Tests (see metrics in Reference Implementations section above)
 
 When in doubt, **default to higher quality**.
 

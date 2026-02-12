@@ -23,7 +23,7 @@ import { resolve } from 'path';
 import { describe, it, beforeAll, afterAll, beforeEach } from 'vitest';
 
 const PROJECT_ID = `rules-test-${Date.now()}`;
-const RULES_PATH = resolve(__dirname, '../../firestore.rules');
+const RULES_PATH = resolve(__dirname, '../../config/firestore.rules');
 
 let testEnv: RulesTestEnvironment;
 
