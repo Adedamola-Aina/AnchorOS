@@ -435,6 +435,10 @@ async function getDeploymentTimeline(days = 14) {
         const date = new Date(commit.date);
         if (date < cutoff) continue;
 
+        // Exclude infra/refactor/chore commits from the product timeline
+        const commitType = extractCommitType(commit.message);
+        if (commitType === 'refactor' || commitType === 'chore') continue;
+
         const dateKey = date.toISOString().split('T')[0];
         if (!timeline[dateKey]) {
             timeline[dateKey] = { date: dateKey, commits: [], features: new Set() };

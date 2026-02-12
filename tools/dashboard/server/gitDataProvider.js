@@ -102,13 +102,14 @@ function extractIds(message) {
     return ids;
 }
 
-// Check if commit is dashboard/tooling (should be filtered from product view)
+// Check if commit is dashboard/tooling/infra (should be filtered from product view)
 function isDashboardCommit(message) {
     const msg = message.toLowerCase();
     return msg.includes('dashboard') ||
         msg.includes('deployment_status') ||
         msg.includes('docs:') ||
         msg.includes('chore:') ||
+        msg.includes('refactor:') ||
         msg.includes('project_status') ||
         msg.includes('known_issues') ||
         msg.includes('post-implementation') ||
@@ -168,7 +169,7 @@ async function getAllTrackedItems(limit = 200) {
             // Also track commits without explicit IDs
             if (ids.length === 0) {
                 const type = detectType(commit.message);
-                if (type !== 'docs' && type !== 'chore' && type !== 'other') {
+                if (type !== 'docs' && type !== 'chore' && type !== 'refactor' && type !== 'other') {
                     if (!items.has(shortHash)) {
                         items.set(shortHash, {
                             id: shortHash,

@@ -180,7 +180,7 @@ async function checkEnvParity() {
 
             // Detect type
             const type = detectType(fullMsg);
-            if (type === 'docs' || type === 'chore' || type === 'other') continue;
+            if (type === 'docs' || type === 'chore' || type === 'refactor' || type === 'other') continue;
 
             // Extract ID
             const id = extractId(fullMsg) || commit.hash.substring(0, 7);
