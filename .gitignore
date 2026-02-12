@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Environment files (contain secrets — never commit)
+.env
+.env.development
+.env.staging
+.env.production
+.env.local
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -29,3 +37,4 @@ functions/lib/
 src/.claude/
 tools/dashboard/firebase-debug.log
 tools/dashboard/logs/
+.firebase/
