@@ -58,13 +58,13 @@ describe('useMfaOperations', () => {
       expect(secret.manualKey).toBe('ABCDEF123456');
     });
 
-    it('saves secret to sessionStorage', async () => {
+    it('does not store secret in sessionStorage', async () => {
       const { result } = renderHook(() => useMfaOperations(mockUser, mockUpdateProfile));
       await act(async () => {
         await result.current.generateMfaSecret();
       });
-      const stored = JSON.parse(sessionStorage.getItem('anchor_mfa_pending')!);
-      expect(stored.secretKey).toBe('ABCDEF123456');
+      const stored = sessionStorage.getItem('anchor_mfa_pending');
+      expect(stored).toBeNull();
     });
 
     it('throws when user is null', async () => {
@@ -91,14 +91,12 @@ describe('useMfaOperations', () => {
       ).rejects.toThrow('MFA verification expired');
     });
 
-    it('restores secret from sessionStorage', async () => {
-      sessionStorage.setItem('anchor_mfa_pending', JSON.stringify({
-        secretKey: 'RESTORED', hashingAlgorithm: 'SHA1', codeLength: 6,
-        codeInterval: 30, timestamp: Date.now(),
-      }));
+    it('throws when pending secret lost (no sessionStorage fallback)', async () => {
+      // Security fix: secret is never stored in sessionStorage
       const { result } = renderHook(() => useMfaOperations(mockUser, mockUpdateProfile));
-      await act(async () => { await result.current.enrollMfa('123456'); });
-      expect(mockUpdateProfile).toHaveBeenCalledWith({ mfaEnabled: true });
+      await expect(
+        act(async () => { await result.current.enrollMfa('123456'); })
+      ).rejects.toThrow('MFA verification expired');
     });
 
     it('skips enrollment if already enrolled', async () => {
