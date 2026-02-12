@@ -72,8 +72,7 @@ export const sanitizeObject = <T extends object>(obj: T): T => {
 export const stripHtml = (str: string): string => {
     if (typeof str !== 'string') return str;
     let prev = str;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
+    for (;;) {
         const next = prev.replace(/<[^>]*>/g, '');
         if (next === prev) return next;
         prev = next;

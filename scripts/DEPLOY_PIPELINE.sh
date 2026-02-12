@@ -85,7 +85,7 @@ fi
 
 # 2. Automated Unit Testing
 echo -e "\n${YELLOW}🧪 Stage 2: Automated Testing (Unit & Integration)${NC}"
-if npx vitest run; then
+if npm run test:run; then
     echo -e "${GREEN}✅ All unit tests passed.${NC}"
 else
     echo -e "${RED}❌ Unit tests failed. Deployment prevented.${NC}"
