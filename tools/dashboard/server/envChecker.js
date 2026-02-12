@@ -25,7 +25,7 @@ const git = simpleGit(REPO_PATH);
 const ENVIRONMENTS = {
     production: {
         name: 'Production',
-        url: 'https://anchor.tail2fa2e.ts.net',
+        url: 'https://anchor-os.web.app',
         firebaseProject: 'anchor-os'
     },
     staging: {
