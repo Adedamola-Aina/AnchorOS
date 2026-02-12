@@ -201,7 +201,7 @@ fi
 
 # 6. Deployment
 echo -e "\n${YELLOW}🚀 Stage 6: Deploying to ${ENV^}...${NC}"
-if firebase deploy --config config/firebase.json --only hosting:"$HOSTING_TARGET",firestore:rules --project "$FIREBASE_PROJECT"; then
+if firebase deploy --only hosting:"$HOSTING_TARGET",firestore:rules --project "$FIREBASE_PROJECT"; then
     echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL!${NC}"
     echo -e "🌍 Live at: https://${HOSTING_URL}"
 else
