@@ -30,6 +30,8 @@ Anchor OS is a multi-tenant web application for managing shared household financ
 | Testing | Vitest (unit), Playwright (E2E), Stryker (mutation) |
 | CI/CD | GitHub Actions, Lighthouse CI gates |
 
+See [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md) for the full system architecture diagram.
+
 ## Getting Started
 
 ### Prerequisites
