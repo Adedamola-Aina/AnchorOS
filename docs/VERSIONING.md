@@ -63,21 +63,7 @@ Is it a BUG FIX or HOTFIX?
 
 ---
 
-## 🎯 Current Version Status
-
-| Environment | Version | Deployed Commit | Status |
-|-------------|---------|-----------------|--------|
-| **Production** | v1.6.0 | bfbafe1 | Stable |
-| **Staging** | v1.7.0 | 5db16df | Cloud Functions v2 + CSP headers |
-| **Development** | v1.7.0 | 5db16df | Cloud Functions v2 + CSP headers |
-
-**Last Updated**: 2025-07-18
-
-**Dashboard**: https://anchor.tail2fa2e.ts.net:3443/ (live environment parity)
-
----
-
-## 🏷️ Deploy Marker Format
+## ️ Deploy Marker Format
 
 Deploy markers are git commits that tell the dashboard what's deployed where.
 
