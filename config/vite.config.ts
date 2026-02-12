@@ -7,6 +7,7 @@ import path from 'path'
 import fs from 'fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootDir = path.resolve(__dirname, '..')
 
 /**
  * Vite plugin to write a build environment marker file.
@@ -21,7 +22,7 @@ function buildEnvMarker(mode: string) {
       const env = mode === 'staging' ? 'staging' 
                 : mode === 'production' ? 'production'
                 : 'development';
-      const markerPath = path.resolve(__dirname, 'dist/.build-env');
+      const markerPath = path.resolve(rootDir, 'dist/.build-env');
       fs.writeFileSync(markerPath, env, 'utf-8');
       console.log(`\n✓ Build environment marker written: ${env}`);
     },
@@ -46,7 +47,7 @@ function generateFirebaseSwConfig() {
       measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || '',
     };
     const content = `// Auto-generated — do not edit. Built from .env variables.\nself.__FIREBASE_CONFIG = ${JSON.stringify(config, null, 2)};\n`;
-    fs.writeFileSync(path.resolve(__dirname, 'public/__firebase-config.js'), content, 'utf-8');
+    fs.writeFileSync(path.resolve(rootDir, 'public/__firebase-config.js'), content, 'utf-8');
   }
 
   return {
@@ -56,9 +57,9 @@ function generateFirebaseSwConfig() {
     },
     closeBundle() {
       // Also copy to dist/ since public/ is copied before plugin runs
-      const src = path.resolve(__dirname, 'public/__firebase-config.js');
-      const dest = path.resolve(__dirname, 'dist/__firebase-config.js');
-      if (fs.existsSync(src) && fs.existsSync(path.resolve(__dirname, 'dist'))) {
+      const src = path.resolve(rootDir, 'public/__firebase-config.js');
+      const dest = path.resolve(rootDir, 'dist/__firebase-config.js');
+      if (fs.existsSync(src) && fs.existsSync(path.resolve(rootDir, 'dist'))) {
         fs.copyFileSync(src, dest);
       }
     },
@@ -78,19 +79,20 @@ export default defineConfig(({ mode }) => ({
       brotliSize: true,
     }),
   ].filter(Boolean),
+  root: rootDir,
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@anchor-os/ui': path.resolve(__dirname, 'src/libs/ui'),
+      '@': path.resolve(rootDir, 'src'),
+      '@anchor-os/ui': path.resolve(rootDir, 'src/libs/ui'),
     },
   },
   css: {
-    postcss: path.resolve(__dirname, 'config'),
+    postcss: __dirname,
   },
   build: {
     sourcemap: true, // Required for Sentry
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html'),
+      input: path.resolve(rootDir, 'index.html'),
       output: {
         manualChunks: (id) => {
           // Only split in production to avoid duplicate React in dev
