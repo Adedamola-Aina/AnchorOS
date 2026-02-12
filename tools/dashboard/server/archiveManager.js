@@ -252,11 +252,11 @@ function restoreItem(itemText) {
     const completedSectionMatch = roadmapContent.match(/## .*Completed.*/i);
     if (completedSectionMatch) {
         const insertIndex = roadmapContent.indexOf(completedSectionMatch[0]) + completedSectionMatch[0].length;
-        const restoredLine = itemText.replace(/\(Archived:.*?\)/, '').trim();
+        const restoredLine = itemText.replace(/\(Archived:[^)]*\)/, '').trim();
         roadmapContent = roadmapContent.slice(0, insertIndex) + '\n' + restoredLine + roadmapContent.slice(insertIndex);
     } else {
         // No completed section, add at end
-        roadmapContent += '\n\n## Completed\n' + itemText.replace(/\(Archived:.*?\)/, '').trim() + '\n';
+        roadmapContent += '\n\n## Completed\n' + itemText.replace(/\(Archived:[^)]*\)/, '').trim() + '\n';
     }
 
     fs.writeFileSync(ROADMAP_PATH, roadmapContent);

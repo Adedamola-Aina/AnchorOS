@@ -10,13 +10,6 @@ interface PendingMfaSecret extends TotpSecret {
     codeInterval?: number;
 }
 
-interface SerializedMfaSecret {
-    hasPending: boolean;
-    codeLength: number;
-    codeInterval: number;
-    timestamp: number;
-}
-
 export function useMfaOperations(user: User | null, updateProfile: (updates: { mfaEnabled: boolean }) => Promise<void>) {
     const pendingMfaSecretRef = useRef<PendingMfaSecret | null>(null);
 
@@ -32,18 +25,6 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
         const session = await multiFactor(user).getSession();
         const result = await TotpMultiFactorGenerator.generateSecret(session);
         pendingMfaSecretRef.current = result;
-
-        try {
-            // Store only a flag that enrollment is pending — the secret stays in memory only
-            sessionStorage.setItem('anchor_mfa_pending', JSON.stringify({
-                hasPending: true,
-                codeLength: result.codeLength,
-                codeInterval: (result as PendingMfaSecret).codeInterval || 30,
-                timestamp: Date.now()
-            }));
-        } catch (e) {
-            console.warn('Failed to save MFA state to storage', e);
-        }
 
         return {
             qrCodeUrl: result.generateQrCodeUrl('Anchor OS', user.email || 'user'),
@@ -63,22 +44,6 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
         const { TotpMultiFactorGenerator } = await import('firebase/auth');
 
         if (!pendingMfaSecretRef.current) {
-            const stored = sessionStorage.getItem('anchor_mfa_pending');
-            if (stored) {
-                try {
-                    const data = JSON.parse(stored) as SerializedMfaSecret;
-                    if (Date.now() - data.timestamp < 15 * 60 * 1000 && data.hasPending) {
-                        // Secret is no longer recoverable from storage — user must re-generate
-                        throw new Error('MFA verification expired. Please regenerate the QR code.');
-                    }
-                } catch (e) {
-                    if (e instanceof Error && e.message.includes('expired')) throw e;
-                    /* Failed to restore */
-                }
-            }
-        }
-
-        if (!pendingMfaSecretRef.current) {
             throw new Error('MFA verification expired. Please regenerate the QR code.');
         }
 
@@ -87,7 +52,6 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
         await updateProfile({ mfaEnabled: true });
 
         pendingMfaSecretRef.current = null;
-        sessionStorage.removeItem('anchor_mfa_pending');
     }, [user, updateProfile]);
 
     const unenrollMfa = useCallback(async () => {

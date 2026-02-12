@@ -8,19 +8,12 @@
 
 /**
  * Encode HTML special characters to prevent XSS.
- * Skips already-encoded entities to prevent double-encoding.
+ * Uses negative lookahead to avoid double-encoding already-encoded entities.
  */
 export const encodeHtml = (str: string): string => {
     if (typeof str !== 'string') return str;
-    // First decode any existing entities to normalize, then re-encode once
-    const decoded = str
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#x27;/g, "'");
-    return decoded
-        .replace(/&/g, '&amp;')
+    return str
+        .replace(/&(?!amp;|lt;|gt;|quot;|#x27;)/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
@@ -28,16 +21,21 @@ export const encodeHtml = (str: string): string => {
 };
 
 /**
- * Decode HTML entities back to original characters
+ * Decode HTML entities back to original characters.
+ * Single-pass only — caller is responsible for not double-decoding.
  */
 export const decodeHtml = (str: string): string => {
     if (typeof str !== 'string') return str;
-    return str
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#x27;/g, "'");
+    // Use DOMParser when available for correct single-pass decoding
+    if (typeof DOMParser !== 'undefined') {
+        const doc = new DOMParser().parseFromString(str, 'text/html');
+        return doc.documentElement.textContent ?? str;
+    }
+    // Fallback: manual single-pass replacement via callback
+    return str.replace(/&(amp|lt|gt|quot|#x27);/g, (_match, entity) => {
+        const map: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', '#x27': "'" };
+        return map[entity] ?? _match;
+    });
 };
 
 /**
