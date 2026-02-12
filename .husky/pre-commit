@@ -1,1 +1,2 @@
+bash scripts/pre-commit-test-guard.sh
 npm run lint && npx tsc -p config/tsconfig.json --noEmit
