@@ -249,7 +249,7 @@ function restoreItem(itemText) {
     let roadmapContent = fs.readFileSync(ROADMAP_PATH, 'utf8');
 
     // Find the "Completed" section
-    const completedSectionMatch = roadmapContent.match(/## .*Completed.*/i);
+    const completedSectionMatch = roadmapContent.match(/^## [^\n]*Completed[^\n]*/im);
     if (completedSectionMatch) {
         const insertIndex = roadmapContent.indexOf(completedSectionMatch[0]) + completedSectionMatch[0].length;
         const restoredLine = itemText.replace(/\(Archived:[^)]*\)/, '').trim();
