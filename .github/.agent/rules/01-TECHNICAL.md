@@ -1,48 +1,73 @@
-# ANCHOR OS — TECHNICAL RULES
+# ANCHOR OS — TECHNICAL REFERENCE
 
 ## Stack
 TypeScript (strict) · React 19 · Vite · Tailwind CSS · Firebase (Firestore, Auth, Functions, Hosting) · Vitest (unit) · Playwright (E2E)
 
 ## Architecture Mandates
 
-**ARCH-001**: All source files under 200 lines. Test files exempt. Check: `find src -name "*.ts" -o -name "*.tsx" | grep -v test | xargs wc -l | awk '$1>200'`
+| ID | Rule | Check |
+|----|------|-------|
+| ARCH-001 | Source files under 200 lines (test files exempt) | `find src -name "*.ts" -o -name "*.tsx" \| grep -v test \| xargs wc -l \| awk '$1>200'` |
+| ARCH-002 | Error boundaries on all major views | Verify in `src/features/*/` |
+| ARCH-003 | All DB through `src/utils/secureDb.ts` | Never raw Firestore imports |
+| ARCH-004 | Mobile-first (75% mobile users, touch targets ≥44px) | Test on 375px viewport |
 
-**ARCH-002**: Error boundaries on all major views.
+## Testing Requirements
 
-**ARCH-003**: All DB operations through `src/utils/secureDb.ts`. Never raw Firestore.
+| Type | Location | Tool | Minimum |
+|------|----------|------|---------|
+| Unit | `src/**/*.test.ts` | Vitest | 80% coverage |
+| E2E | `e2e/*.spec.ts` | Playwright | Critical user flows |
+| Integration | `npm run test:integration` | Firebase emulators | Service layer |
+| Mutation | `npm run test:mutation` | Stryker | Score > 70% |
+| Rules | `npm run test:rules` | Vitest | Firestore security rules |
 
-**ARCH-004**: Mobile-first. 75% of users are mobile. Touch targets ≥44px. Design mobile → desktop.
+## Commit Prefixes (Dashboard auto-detects these)
 
-## Testing (Non-Negotiable)
-- Unit: `src/**/*.test.ts` (Vitest) — 80% coverage minimum
-- E2E: `e2e/*.spec.ts` (Playwright) — critical user flows
-- Integration: `npm run test:integration` with Firebase emulators
-- **No code ships without tests covering every path**
-
-## Commit Format
 ```
-type(scope): brief description
-
-fix(finance): BUG-XXX prevent negative balance
-feat(commitments): FEAT-XXX add weekly planning
-deploy(staging): v1.5.14 @ abc1234
+fix(scope): BUG-XXX description     — Bug fix
+feat(scope): FEAT-XXX description   — New feature
+refactor(scope): description        — Code improvement
+test(scope): description            — Test additions
+docs(scope): description            — Documentation
+chore(scope): description           — Maintenance
+deploy(env): vX.X.X @ HASH          — Deployment record
 ```
-The dashboard auto-detects bugs, features, and deployments from these prefixes.
-
-## Forbidden
-- ❌ `any` type in TypeScript
-- ❌ `console.log` in production code
-- ❌ Hardcoded API keys or secrets
-- ❌ Deploying without tests passing
-- ❌ Files over 200 lines (ARCH-001)
-- ❌ Skipping Phase 1 (GATHER)
-- ❌ Raw Firestore access (use secureDb)
 
 ## Environments
-| Env | URL | Firebase Project | Deploy |
-|-----|-----|-----------------|--------|
-| Dev | anchor-os-dev-1c6ec.web.app | anchor-os-dev-1c6ec | `npm run deploy:dev` |
-| Staging | anchor-os-staging.web.app | anchor-os-staging | `npm run deploy:staging` |
-| Production | anchor-os.web.app | anchor-os | `npm run deploy:production` ⚠️ APPROVAL REQUIRED |
+
+| Env | URL | Deploy Command |
+|-----|-----|----------------|
+| Dev | anchor-os-dev-1c6ec.web.app | `npm run deploy:dev` |
+| Staging | anchor-os-staging.web.app | `npm run deploy:staging` |
+| Production | anchor-os.web.app | `npm run deploy:production` ⚠️ |
 
 Dev server: `npm run dev` on LXC 107 (192.168.0.57 / Tailscale 100.112.129.21)
+
+## Forbidden
+
+- `any` type in TypeScript
+- `console.log` in production code
+- Hardcoded API keys or secrets
+- Raw Firestore access (use secureDb)
+- Raw `firebase deploy` (use npm scripts)
+- Files over 200 lines
+- Skipping Phase 1 (GATHER)
+- Deploying without tests passing
+- Optimistic UI updates without rollback
+
+## Key Directories
+
+```
+src/features/{feature}/     — Feature modules (View + components/ + hooks/)
+src/services/               — AccountService, TransactionService, AuditService
+src/hooks/                  — Shared hooks (useFinanceService, useFamilySharing)
+src/utils/secureDb.ts       — ALL database operations
+src/components/             — Shared UI components
+packages/design-system/     — Badge, Card, Stack, Surface, Skeleton
+functions/src/              — Cloud Functions (recurring txns, reminders)
+tools/dashboard/            — Internal PM Dashboard (localhost:3001)
+tools/mcp-server/           — MCP server wrapping dashboard API
+e2e/                        — Playwright E2E tests
+config/                     — Build configs (vite, tailwind, playwright, etc.)
+```

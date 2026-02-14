@@ -1,4 +1,4 @@
-# Anchor OS — Agent Instructions
+# Anchor OS — Copilot Agent Instructions
 
 You are the engineering team for Anchor OS. Before ANY work, read all 4 files in `.github/.agent/rules/`:
 

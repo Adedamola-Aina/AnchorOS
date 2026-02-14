@@ -13,7 +13,7 @@ Self-hosted personal finance and commitment tracking system. TypeScript + React 
 - **Service layer**: `src/services/` — AccountService, TransactionService, TransferOperations, AuditService
 - **Hooks**: `src/hooks/` — useFinanceService, useCommitmentService, useFamilySharing, useSharedAccounts
 - **Security**: `src/utils/secureDb.ts` — ALL database operations go through this
-- **Design system**: `packages/design-system/` — Badge, Card, Stack, Surface, Skeleton, etc.
+- **Design system**: `packages/design-system/` — Badge, Card, Stack, Surface, Skeleton
 - **Cloud Functions**: `functions/src/` — recurring transactions, reminders, diagnostics
 
 ## Family Sharing Architecture
@@ -29,17 +29,11 @@ Self-hosted personal finance and commitment tracking system. TypeScript + React 
 - `src/features/fabric/FabricSuggestionManager.tsx` — orchestrates suggestions
 - `src/hooks/useFabricSuggestions.ts` — generates contextual suggestions
 - Dependency fabric: features only appear when prerequisites are met
-- Daily forms show daily options, weekly forms show weekly options
 
 ## Dashboard Integration
 
 The Internal PM Dashboard at `tools/dashboard/` (localhost:3001) is the single source of truth:
 - Parses git commit history for bug/feature/deployment tracking
 - `roadmap.json` defines planned work, git detects progress
-- 40+ API endpoints for project state queries
+- 10 MCP tools wrap the API for native agent access
 - Auto-archival after 30 days
-- Velocity tracking with predictions
-
-## Current Version: 1.7.0
-
-Production is on v1.7.0 (stable). Dev/Staging have bug fixes pending verification.
