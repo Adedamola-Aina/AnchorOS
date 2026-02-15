@@ -13,9 +13,9 @@ import {
     onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
     signOut, sendEmailVerification, multiFactor, type User, type MultiFactorResolver
 } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc, setDoc, addDoc, collection } from 'firebase/firestore';
-import { auth, db, APP_ID } from '../config/firebase';
+import { auth } from '../config/firebase';
 import type { UserProfile } from '../types';
+import { subscribeToProfile, updateUserProfile, createUserProfile, queueWelcomeEmail } from '../api/AuthProfileApi';
 import { useMfaOperations, getWelcomeEmailHtml } from './auth';
 import { createTracer } from '../services/telemetry';
 import { getEffectiveTheme } from '../utils/systemTheme';
@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (updates.theme) localStorage.setItem('anchor_theme', updates.theme);
             return;
         }
-        await updateDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid), updates);
+        await updateUserProfile(user.uid, updates);
     }, [user]);
 
     // Use extracted MFA hook
@@ -82,13 +82,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(u);
             if (!u) { setLoading(false); setProfileLoaded(false); clearPendingSecretRef.current(); return; }
 
-            const profRef = doc(db, 'artifacts', APP_ID, 'users', u.uid);
-            unsubProfRef.current = onSnapshot(profRef, async (snap) => {
+            unsubProfRef.current = subscribeToProfile(u.uid, async (snap) => {
                 if (snap.exists()) {
                     const data = snap.data() as UserProfile;
                     const actualMfaEnrolled = multiFactor(u).enrolledFactors.length > 0;
-                    if (actualMfaEnrolled && !data.mfaEnabled) { await updateDoc(profRef, { mfaEnabled: true }); return; }
-                    if (!actualMfaEnrolled && data.mfaEnabled) { await updateDoc(profRef, { mfaEnabled: false }); return; }
+                    if (actualMfaEnrolled && !data.mfaEnabled) { await updateUserProfile(u.uid, { mfaEnabled: true }); return; }
+                    if (!actualMfaEnrolled && data.mfaEnabled) { await updateUserProfile(u.uid, { mfaEnabled: false }); return; }
                     setProfile(data);
                     const alerts: string[] = [];
                     if (!u.emailVerified && import.meta.env.VITE_APP_ENV === 'production') alerts.push('verify_email');
@@ -100,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 } else {
                     if (snap.metadata.fromCache) { console.warn('[AuthContext] Profile not found but data is from cache'); return; }
                     if (import.meta.env.DEV) console.debug('[AuthContext] Creating new profile');
-                    setDoc(profRef, { name: u.email?.split('@')[0] || 'User', theme: 'light', familyMode: false, onboardingComplete: false });
+                    createUserProfile(u.uid, { name: u.email?.split('@')[0] || 'User', theme: 'light', familyMode: false, onboardingComplete: false });
                     setProfileLoaded(true); setLoading(false);
                 }
             });
@@ -120,8 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return authTracer.trace('signUp', async () => {
             const cred = await createUserWithEmailAndPassword(auth, e, p);
             const name = e.split('@')[0];
-            await setDoc(doc(db, 'artifacts', APP_ID, 'users', cred.user.uid), { name, theme: 'light', familyMode: false, onboardingComplete: false });
-            try { await addDoc(collection(db, 'mail'), { to: [e], message: { subject: 'Welcome to Anchor OS!', html: getWelcomeEmailHtml(name) } }); }
+            await createUserProfile(cred.user.uid, { name, theme: 'light', familyMode: false, onboardingComplete: false });
+            try { await queueWelcomeEmail(e, getWelcomeEmailHtml(name)); }
             catch (err) { captureError(err, 'Auth.welcomeEmail'); }
         });
     };

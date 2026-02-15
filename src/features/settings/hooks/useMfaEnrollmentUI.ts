@@ -7,8 +7,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { generateRecoveryCodes } from '../../../services/mfaRecoveryService';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, APP_ID } from '../../../config/firebase';
+import { saveMfaRecoveryCodes } from '../../../api/MfaRecoveryApi';
 
 interface UseMfaEnrollmentUIOptions {
     generateMfaSecret: () => Promise<{ qrCodeUrl: string; manualKey: string }>;
@@ -73,7 +72,7 @@ export function useMfaEnrollmentUI({
             try {
                 const { plainCodes, hashedCodes } = await generateRecoveryCodes();
                 if (userId) {
-                    await setDoc(doc(db, 'artifacts', APP_ID, 'users', userId, 'security', 'mfaRecovery'), {
+                    await saveMfaRecoveryCodes(userId, {
                         hashedCodes,
                         generatedAt: new Date().toISOString(),
                         codesRemaining: hashedCodes.length,

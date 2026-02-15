@@ -7,9 +7,8 @@
 
 import { useEffect } from 'react';
 import type { User } from 'firebase/auth';
-import { updateDoc, doc } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
 import type { AnchorTask } from '../types';
+import { resetCommitmentCompletion, resetCommitmentStreak } from '../api/CommitmentResetApi';
 
 export function useCommitmentResetEffect(user: User | null, rawTasks: AnchorTask[]) {
     useEffect(() => {
@@ -47,9 +46,7 @@ export function useCommitmentResetEffect(user: User | null, rawTasks: AnchorTask
                 }
 
                 if (shouldReset) {
-                    updateDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', t.id), {
-                        completed: false
-                    });
+                    void resetCommitmentCompletion(user.uid, t.id);
                 }
             }
 
@@ -65,9 +62,7 @@ export function useCommitmentResetEffect(user: User | null, rawTasks: AnchorTask
                 if (t.type === 'monthly' && diffDays > 32) broken = true;
 
                 if (broken) {
-                    updateDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', t.id), {
-                        currentStreak: 0
-                    });
+                    void resetCommitmentStreak(user.uid, t.id);
                 }
             }
         });

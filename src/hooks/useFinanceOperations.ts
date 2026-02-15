@@ -9,8 +9,6 @@
 
 import { useCallback, useMemo } from 'react';
 import type { User } from 'firebase/auth';
-import { db, APP_ID } from '../config/firebase';
-import { doc, collection, writeBatch, increment } from 'firebase/firestore';
 import type { AnchorTransaction, AnchorAccount, TransactionType } from '../types';
 import { financeService } from '../services/FinanceService';
 import type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from '../services/FinanceService';
@@ -19,6 +17,7 @@ import { withTimeout } from '../utils/secureDb';
 import { canDeleteTransaction } from '../features/finance/utils/permissions';
 import { logTransactionAdded, logTransactionDeleted, logTransactionEdited } from './financeActivityLogging';
 import { createTracer } from '../services/telemetry';
+import { convertCurrencyAcrossAccounts, restoreSoftDeletedTransaction } from '../api/FinanceOperationsApi';
 
 const OPERATION_TIMEOUT = 10000;
 const financeTracer = createTracer('Finance');
@@ -120,13 +119,8 @@ export const useFinanceOperations = (
         try {
             const account = accounts.find(a => a.id === accountId);
             if (!account) return;
-            const batch = writeBatch(db);
             const targetUserId = account.ownerId || user.uid;
-            const txRef = doc(db, 'artifacts', APP_ID, 'users', targetUserId, 'finance', id);
-            batch.update(txRef, { isSoftDeleted: false, deletedBy: null, deletedAt: null });
-            const accRef = doc(db, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
-            batch.update(accRef, { balanceCents: increment(type === 'income' ? amountCents : -amountCents) });
-            await batch.commit();
+            await restoreSoftDeletedTransaction(targetUserId, id, accountId, amountCents, type);
         } catch (err) {
             throw handleError(err);
         }
@@ -139,30 +133,7 @@ export const useFinanceOperations = (
             const toAcc = accounts.find(a => a.id === toAccountId);
             if (!fromAcc || !toAcc) return;
 
-            const batch = writeBatch(db);
-            const linkId = crypto.randomUUID();
-            const now = new Date().toISOString();
-
-            const fromOwnerId = fromAcc.ownerId || user.uid;
-            const outRef = doc(collection(db, 'artifacts', APP_ID, 'users', fromOwnerId, 'finance'));
-            batch.set(outRef, {
-                title: `Conversion to ${toAcc.currency}`, amountCents, type: 'expense', category: 'Conversion',
-                accountId: fromAccountId, accountName: fromAcc.name, currency: fromAcc.currency,
-                scope: 'family', date: now, createdBy: user.uid, linkId, conversionRate: rate
-            });
-            batch.update(doc(db, 'artifacts', APP_ID, 'users', fromOwnerId, 'accounts', fromAccountId), { balanceCents: increment(-amountCents) });
-
-            const toOwnerId = toAcc.ownerId || user.uid;
-            const convertedAmountCents = Math.round(amountCents * rate);
-            const inRef = doc(collection(db, 'artifacts', APP_ID, 'users', toOwnerId, 'finance'));
-            batch.set(inRef, {
-                title: `Conversion from ${fromAcc.currency}`, amountCents: convertedAmountCents, type: 'income', category: 'Conversion',
-                accountId: toAccountId, accountName: toAcc.name, currency: toAcc.currency,
-                scope: 'family', date: now, createdBy: user.uid, linkId, conversionRate: rate
-            });
-            batch.update(doc(db, 'artifacts', APP_ID, 'users', toOwnerId, 'accounts', toAccountId), { balanceCents: increment(convertedAmountCents) });
-
-            await batch.commit();
+            await convertCurrencyAcrossAccounts(user.uid, fromAcc, toAcc, amountCents, rate);
         } catch (err) {
             throw handleError(err);
         }

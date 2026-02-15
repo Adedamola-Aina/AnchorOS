@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import type { AnchorAccount, AnchorTransaction } from '../types';
-import { subscribeToTransactions, subscribeToAccountDetails } from './sharedAccountSubscriptions';
+import { subscribeToSharedAccountDetails, subscribeToSharedAccountTransactions } from '../api/SharedAccountSubscriptionsApi';
 
 interface SharedAccountFromServer {
     id: string;
@@ -95,7 +95,7 @@ export function useSharedAccounts(
                 const accountInfo = { id: acc.id, ownerUid: acc.ownerUid };
 
                 // Transaction Subscription
-                const txUnsubscribe = subscribeToTransactions(
+                const txUnsubscribe = subscribeToSharedAccountTransactions(
                     accountInfo,
                     allTransactions,
                     setSharedTransactions
@@ -103,7 +103,7 @@ export function useSharedAccounts(
                 subscriptionsRef.current.set(key + ':tx', txUnsubscribe);
 
                 // Account Details Subscription (Real-time Balance)
-                const accUnsubscribe = subscribeToAccountDetails(
+                const accUnsubscribe = subscribeToSharedAccountDetails(
                     accountInfo,
                     setSharedAccounts
                 );

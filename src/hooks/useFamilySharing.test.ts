@@ -5,25 +5,21 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { onSnapshot } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
 
-// ── Firebase mocks ────────────────────────────────────────────────
-vi.mock('../config/firebase', () => ({
-    db: {},
-    APP_ID: 'test-app',
+const {
+    mockSubscribeToActiveFamilyConnection,
+    mockShareFamilyAccount,
+    mockDisconnectFamilyConnection,
+} = vi.hoisted(() => ({
+    mockSubscribeToActiveFamilyConnection: vi.fn(),
+    mockShareFamilyAccount: vi.fn(),
+    mockDisconnectFamilyConnection: vi.fn(),
 }));
 
-vi.mock('firebase/firestore', () => ({
-    collection: vi.fn(() => 'col-ref'),
-    query: vi.fn(() => 'q-ref'),
-    where: vi.fn(() => 'w-ref'),
-    onSnapshot: vi.fn(),
-}));
-
-vi.mock('firebase/functions', () => ({
-    getFunctions: vi.fn(() => ({})),
-    httpsCallable: vi.fn(),
+vi.mock('../api/FamilyConnectionApi', () => ({
+    subscribeToActiveFamilyConnection: mockSubscribeToActiveFamilyConnection,
+    shareFamilyAccount: mockShareFamilyAccount,
+    disconnectFamilyConnection: mockDisconnectFamilyConnection,
 }));
 
 const mockShowToast = vi.fn();
@@ -34,29 +30,23 @@ vi.mock('../context/NotificationContext', () => ({
 import { useFamilySharing } from './useFamilySharing';
 
 describe('useFamilySharing', () => {
-    let ownerCallback: ((snap: any) => void) | null = null;
-    let memberCallback: ((snap: any) => void) | null = null;
-    const unsubOwner = vi.fn();
-    const unsubMember = vi.fn();
+    let onDataCallback: ((connection: any) => void) | null = null;
+    let onLoadedCallback: (() => void) | null = null;
+    const unsubscribe = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        ownerCallback = null;
-        memberCallback = null;
+        onDataCallback = null;
+        onLoadedCallback = null;
 
-        // onSnapshot is called twice: once for owner query, once for member query
-        let callCount = 0;
-        vi.mocked(onSnapshot).mockImplementation((_ref: any, cb: any) => {
-            if (callCount === 0) {
-                ownerCallback = cb;
-                callCount++;
-                return unsubOwner;
-            } else {
-                memberCallback = cb;
-                callCount++;
-                return unsubMember;
-            }
+        mockSubscribeToActiveFamilyConnection.mockImplementation((_userId: string, onData: any, onLoaded: any) => {
+            onDataCallback = onData;
+            onLoadedCallback = onLoaded;
+            return unsubscribe;
         });
+
+        mockShareFamilyAccount.mockResolvedValue(undefined);
+        mockDisconnectFamilyConnection.mockResolvedValue(undefined);
     });
 
     it('returns loading=true initially', () => {
@@ -74,19 +64,15 @@ describe('useFamilySharing', () => {
         const { result } = renderHook(() => useFamilySharing('user-1'));
 
         act(() => {
-            ownerCallback?.({
-                empty: false,
-                docs: [{
+            onDataCallback?.({
                     id: 'conn-1',
-                    data: () => ({
-                        ownerUid: 'user-1',
-                        memberUid: 'user-2',
-                        memberDisplayName: 'Spouse',
-                        ownerDisplayName: 'Me',
-                        status: 'active',
-                    }),
-                }],
+                    ownerUid: 'user-1',
+                    memberUid: 'user-2',
+                    memberDisplayName: 'Spouse',
+                    ownerDisplayName: 'Me',
+                    status: 'active',
             });
+            onLoadedCallback?.();
         });
 
         await waitFor(() => {
@@ -101,24 +87,16 @@ describe('useFamilySharing', () => {
     it('detects member connection from snapshot', async () => {
         const { result } = renderHook(() => useFamilySharing('user-2'));
 
-        // Empty owner query
-        act(() => { ownerCallback?.({ empty: true, docs: [] }); });
-
-        // Member query has data
         act(() => {
-            memberCallback?.({
-                empty: false,
-                docs: [{
+            onDataCallback?.({
                     id: 'conn-1',
-                    data: () => ({
-                        ownerUid: 'user-1',
-                        memberUid: 'user-2',
-                        memberDisplayName: 'Spouse',
-                        ownerDisplayName: 'Me',
-                        status: 'active',
-                    }),
-                }],
+                    ownerUid: 'user-1',
+                    memberUid: 'user-2',
+                    memberDisplayName: 'Spouse',
+                    ownerDisplayName: 'Me',
+                    status: 'active',
             });
+            onLoadedCallback?.();
         });
 
         await waitFor(() => {
@@ -133,24 +111,20 @@ describe('useFamilySharing', () => {
         const { result } = renderHook(() => useFamilySharing('user-1'));
 
         act(() => {
-            ownerCallback?.({
-                empty: false,
-                docs: [{
+            onDataCallback?.({
                     id: 'conn-1',
-                    data: () => ({
-                        ownerUid: 'user-1',
-                        memberUid: 'user-2',
-                        memberDisplayName: 'Spouse',
-                        ownerDisplayName: 'Me',
-                        status: 'active',
-                    }),
-                }],
+                    ownerUid: 'user-1',
+                    memberUid: 'user-2',
+                    memberDisplayName: 'Spouse',
+                    ownerDisplayName: 'Me',
+                    status: 'active',
             });
+            onLoadedCallback?.();
         });
 
         expect(result.current.connection).toBeTruthy();
 
-        act(() => { ownerCallback?.({ empty: true, docs: [] }); });
+        act(() => { onDataCallback?.(null); });
 
         await waitFor(() => {
             expect(result.current.connection).toBeNull();
@@ -158,33 +132,26 @@ describe('useFamilySharing', () => {
     });
 
     it('shareAccount calls Cloud Function and shows toast', async () => {
-        const mockCallable = vi.fn().mockResolvedValue({ data: { success: true } });
-        vi.mocked(httpsCallable).mockReturnValue(mockCallable);
-
         const { result } = renderHook(() => useFamilySharing('user-1'));
 
         // Set up connection
         act(() => {
-            ownerCallback?.({
-                empty: false,
-                docs: [{
+            onDataCallback?.({
                     id: 'conn-1',
-                    data: () => ({
-                        ownerUid: 'user-1',
-                        memberUid: 'user-2',
-                        memberDisplayName: 'S',
-                        ownerDisplayName: 'M',
-                        status: 'active',
-                    }),
-                }],
+                    ownerUid: 'user-1',
+                    memberUid: 'user-2',
+                    memberDisplayName: 'S',
+                    ownerDisplayName: 'M',
+                    status: 'active',
             });
+            onLoadedCallback?.();
         });
 
         await act(async () => {
             await result.current.shareAccount('acc-1', true);
         });
 
-        expect(mockCallable).toHaveBeenCalledWith({ accountId: 'acc-1', share: true });
+        expect(mockShareFamilyAccount).toHaveBeenCalledWith('acc-1', true);
         expect(mockShowToast).toHaveBeenCalledWith('Account shared with family', 'success');
     });
 
@@ -195,7 +162,7 @@ describe('useFamilySharing', () => {
             await result.current.shareAccount('acc-1', true);
         });
 
-        expect(httpsCallable).not.toHaveBeenCalled();
+        expect(mockShareFamilyAccount).not.toHaveBeenCalled();
     });
 
     it('shareAccount shows error offline', async () => {
@@ -203,13 +170,15 @@ describe('useFamilySharing', () => {
 
         // Set up connection
         act(() => {
-            ownerCallback?.({
-                empty: false,
-                docs: [{
-                    id: 'conn-1',
-                    data: () => ({ ownerUid: 'user-1', memberUid: 'u2', memberDisplayName: 'S', ownerDisplayName: 'M', status: 'active' }),
-                }],
+            onDataCallback?.({
+                id: 'conn-1',
+                ownerUid: 'user-1',
+                memberUid: 'u2',
+                memberDisplayName: 'S',
+                ownerDisplayName: 'M',
+                status: 'active',
             });
+            onLoadedCallback?.();
         });
 
         // Go offline
@@ -229,16 +198,13 @@ describe('useFamilySharing', () => {
     });
 
     it('disconnectFamily calls Cloud Function', async () => {
-        const mockCallable = vi.fn().mockResolvedValue({ data: { success: true } });
-        vi.mocked(httpsCallable).mockReturnValue(mockCallable);
-
         const { result } = renderHook(() => useFamilySharing('user-1'));
 
         await act(async () => {
             await result.current.disconnectFamily('leave');
         });
 
-        expect(mockCallable).toHaveBeenCalledWith({ type: 'leave' });
+        expect(mockDisconnectFamilyConnection).toHaveBeenCalledWith('leave');
         expect(mockShowToast).toHaveBeenCalledWith('Family connection removed', 'success');
     });
 
@@ -262,7 +228,6 @@ describe('useFamilySharing', () => {
     it('unsubscribes both listeners on unmount', () => {
         const { unmount } = renderHook(() => useFamilySharing('user-1'));
         unmount();
-        expect(unsubOwner).toHaveBeenCalled();
-        expect(unsubMember).toHaveBeenCalled();
+        expect(unsubscribe).toHaveBeenCalled();
     });
 });

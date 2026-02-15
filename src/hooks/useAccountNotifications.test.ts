@@ -8,69 +8,49 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: vi.fn(() => ({ user: mockUser })),
 }));
 
-// Capture onSnapshot callback
-let snapshotCallback: ((snap: any) => void) | null = null;
-const unsubscribeMock = vi.fn();
-
-vi.mock('firebase/firestore', async () => {
-  const actual = await vi.importActual('firebase/firestore');
-  return {
-    ...actual,
-    collection: vi.fn((_db, ...paths) => ({ path: paths.join('/') })),
-    query: vi.fn((ref) => ref),
-    orderBy: vi.fn(),
-    limit: vi.fn(),
-    where: vi.fn(),
-    doc: vi.fn((_db, ...paths) => ({ path: paths.join('/') })),
-    updateDoc: vi.fn(() => Promise.resolve()),
-    onSnapshot: vi.fn((_q, cb) => {
-      snapshotCallback = cb;
-      return unsubscribeMock;
-    }),
-    writeBatch: vi.fn(() => ({
-      update: vi.fn(),
-      commit: vi.fn(() => Promise.resolve()),
-    })),
-  };
-});
-
-vi.mock('../config/firebase', () => ({
-  db: {},
-  APP_ID: 'test-app',
+const {
+  mockSubscribeToAccountNotifications,
+  mockMarkAccountNotificationAsRead,
+  mockMarkAllAccountNotificationsAsRead,
+} = vi.hoisted(() => ({
+  mockSubscribeToAccountNotifications: vi.fn(),
+  mockMarkAccountNotificationAsRead: vi.fn(),
+  mockMarkAllAccountNotificationsAsRead: vi.fn(),
 }));
 
-const { onSnapshot, updateDoc, where, writeBatch } = await import('firebase/firestore');
+vi.mock('../api/AccountNotificationsApi', () => ({
+  subscribeToAccountNotifications: mockSubscribeToAccountNotifications,
+  markAccountNotificationAsRead: mockMarkAccountNotificationAsRead,
+  markAllAccountNotificationsAsRead: mockMarkAllAccountNotificationsAsRead,
+}));
 
-function makeSnapshotDocs(docs: Array<{ id: string; [k: string]: any }>) {
-  return {
-    docs: docs.map(d => ({
-      id: d.id,
-      data: () => {
-        const { id: _, ...rest } = d;
-        return rest;
-      },
-    })),
-  };
-}
+let notificationsCallback: ((notifications: any[]) => void) | null = null;
+const unsubscribeMock = vi.fn();
 
 describe('useAccountNotifications', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    snapshotCallback = null;
+    notificationsCallback = null;
+    mockSubscribeToAccountNotifications.mockImplementation((_uid: string, _accountId: string | undefined, cb: any) => {
+      notificationsCallback = cb;
+      return unsubscribeMock;
+    });
+    mockMarkAccountNotificationAsRead.mockResolvedValue(undefined);
+    mockMarkAllAccountNotificationsAsRead.mockResolvedValue(undefined);
   });
 
   it('subscribes to notifications on mount and returns them', async () => {
     const { result } = renderHook(() => useAccountNotifications());
 
     expect(result.current.loading).toBe(true);
-    expect(onSnapshot).toHaveBeenCalled();
+    expect(mockSubscribeToAccountNotifications).toHaveBeenCalled();
 
-    // Simulate snapshot
+    // Simulate subscription callback payload
     act(() => {
-      snapshotCallback!(makeSnapshotDocs([
+      notificationsCallback!([
         { id: 'n1', message: 'Transaction added', read: false, date: '2026-01-01' },
         { id: 'n2', message: 'Account shared', read: true, date: '2026-01-02' },
-      ]));
+      ]);
     });
 
     expect(result.current.loading).toBe(false);
@@ -80,7 +60,7 @@ describe('useAccountNotifications', () => {
 
   it('filters by accountId when provided', () => {
     renderHook(() => useAccountNotifications('acct-1'));
-    expect(where).toHaveBeenCalledWith('accountId', '==', 'acct-1');
+    expect(mockSubscribeToAccountNotifications).toHaveBeenCalledWith('user-1', 'acct-1', expect.any(Function));
   });
 
   it('handles no user gracefully', async () => {
@@ -91,7 +71,7 @@ describe('useAccountNotifications', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.notifications).toEqual([]);
-    expect(onSnapshot).not.toHaveBeenCalled();
+    expect(mockSubscribeToAccountNotifications).not.toHaveBeenCalled();
 
     mockUser = saved;
   });
@@ -106,9 +86,9 @@ describe('useAccountNotifications', () => {
     const { result } = renderHook(() => useAccountNotifications());
 
     act(() => {
-      snapshotCallback!(makeSnapshotDocs([
+      notificationsCallback!([
         { id: 'n1', message: 'Test', read: false, date: '2026-01-01' },
-      ]));
+      ]);
     });
 
     expect(result.current.notifications[0].read).toBe(false);
@@ -117,34 +97,32 @@ describe('useAccountNotifications', () => {
       await result.current.markAsRead('n1');
     });
 
-    expect(updateDoc).toHaveBeenCalledWith(
-      expect.objectContaining({ path: expect.stringContaining('notifications') }),
-      { read: true }
-    );
+    expect(mockMarkAccountNotificationAsRead).toHaveBeenCalledWith('user-1', 'n1');
     expect(result.current.notifications[0].read).toBe(true);
   });
 
   it('markAllAsRead batches all unread notifications', async () => {
-    const mockBatch = { update: vi.fn(), commit: vi.fn(() => Promise.resolve()) };
-    vi.mocked(writeBatch).mockReturnValue(mockBatch as any);
-
     const { result } = renderHook(() => useAccountNotifications());
 
     act(() => {
-      snapshotCallback!(makeSnapshotDocs([
+      notificationsCallback!([
         { id: 'n1', message: 'A', read: false, date: '2026-01-01' },
         { id: 'n2', message: 'B', read: false, date: '2026-01-02' },
         { id: 'n3', message: 'C', read: true, date: '2026-01-03' },
-      ]));
+      ]);
     });
 
     await act(async () => {
       await result.current.markAllAsRead();
     });
 
-    // Should update only unread (n1, n2), not n3
-    expect(mockBatch.update).toHaveBeenCalledTimes(2);
-    expect(mockBatch.commit).toHaveBeenCalled();
+    expect(mockMarkAllAccountNotificationsAsRead).toHaveBeenCalledWith(
+      'user-1',
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'n1' }),
+        expect.objectContaining({ id: 'n2' }),
+      ])
+    );
     // All should now be read
     result.current.notifications.forEach(n => {
       expect(n.read).toBe(true);
@@ -155,14 +133,14 @@ describe('useAccountNotifications', () => {
     const { result } = renderHook(() => useAccountNotifications());
 
     act(() => {
-      snapshotCallback!(makeSnapshotDocs([]));
+      notificationsCallback!([]);
     });
 
     await act(async () => {
       await result.current.markAllAsRead();
     });
 
-    expect(writeBatch).not.toHaveBeenCalled();
+    expect(mockMarkAllAccountNotificationsAsRead).not.toHaveBeenCalled();
   });
 
   it('markAsRead is no-op when user is null', async () => {
@@ -175,7 +153,7 @@ describe('useAccountNotifications', () => {
       await result.current.markAsRead('n1');
     });
 
-    expect(updateDoc).not.toHaveBeenCalled();
+    expect(mockMarkAccountNotificationAsRead).not.toHaveBeenCalled();
     mockUser = saved;
   });
 });

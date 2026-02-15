@@ -6,12 +6,12 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { messaging, db, auth, APP_ID } from '../config/firebase';
+import { messaging, auth } from '../config/firebase';
 import { onMessage, deleteToken } from 'firebase/messaging';
 import { getFcmTokenWithRetry } from '../services/fcmTokenService';
-import { doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { captureError } from '../utils/error';
 import type { NotificationType } from '../context/NotificationContextDefinition';
+import { deleteStoredPushToken, upsertPushToken } from '../api/PushTokenApi';
 
 const PUSH_DISABLED_KEY = 'anchor_push_disabled';
 
@@ -75,7 +75,7 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
                     try {
                         await deleteToken(messaging);
                         if (auth.currentUser) {
-                            await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', fcmToken));
+                            await deleteStoredPushToken(auth.currentUser.uid, fcmToken);
                         }
                     } catch (err) {
                         captureError(err, 'Notifications.deleteToken');
@@ -118,13 +118,7 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
                         showToast('Push Notifications Enabled!', 'success');
 
                         if (auth.currentUser) {
-                            const tokenRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'fcmTokens', token);
-                            await setDoc(tokenRef, {
-                                token,
-                                platform: 'web',
-                                lastSeen: serverTimestamp(),
-                                userAgent: navigator.userAgent
-                            }, { merge: true });
+                            await upsertPushToken(auth.currentUser.uid, token, navigator.userAgent);
                         }
                         return token;
                     }

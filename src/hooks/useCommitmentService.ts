@@ -1,13 +1,17 @@
 import { useMemo, useCallback } from 'react';
 import type { User } from 'firebase/auth';
-import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, runTransaction } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
 import type { AnchorTask } from '../types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTasksQuery, TASK_KEYS } from './queries/useTaskQueries';
 import { auditCommitments } from '../services/AuditService';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
 import { useCommitmentResetEffect } from './useCommitmentReset';
+import {
+  createCommitment,
+  deleteCommitment,
+  toggleCommitmentCompletion,
+  updateCommitment,
+} from '../api/CommitmentApi';
 
 export const useCommitmentService = (user: User | null) => {
   const queryClient = useQueryClient();
@@ -36,12 +40,7 @@ export const useCommitmentService = (user: User | null) => {
       throw new Error(`Too many commitments created. Please try again in ${formatRetryTime(rateCheck.retryAfterMs || 0)}.`);
     }
 
-    const docRef = await addDoc(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments'), {
-      ...task,
-      createdAt: serverTimestamp(),
-      currentStreak: 0,
-      longestStreak: 0
-    });
+    const docRef = await createCommitment(user.uid, task);
     // AUDIT: Log commitment creation
     auditCommitments.created(docRef.id, task.title);
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
@@ -63,8 +62,6 @@ export const useCommitmentService = (user: User | null) => {
    */
   const toggleTask = useCallback(async (id: string, currentStatus: boolean) => {
     if (!user) return;
-
-    const taskRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id);
 
     // ✅ OPTIMISTIC UPDATE: Update cache immediately for instant UI feedback
     queryClient.setQueryData<AnchorTask[]>(
@@ -101,30 +98,7 @@ export const useCommitmentService = (user: User | null) => {
     // Execute Firestore transaction
     // onSnapshot listener will automatically sync the final state from Firestore
     try {
-      await runTransaction(db, async (transaction) => {
-        const taskDoc = await transaction.get(taskRef);
-        if (!taskDoc.exists()) return;
-
-        const task = taskDoc.data() as AnchorTask;
-        const updates: Partial<AnchorTask> = { completed: !currentStatus };
-
-        if (!currentStatus) {
-          // Completing
-          updates.lastCompletedAt = new Date().toISOString();
-          const currentStreak = task.currentStreak || 0;
-          const newStreak = currentStreak + 1;
-          updates.currentStreak = newStreak;
-          updates.longestStreak = Math.max(newStreak, task.longestStreak || 0);
-        } else {
-          // Uncompleting
-          const currentStreak = task.currentStreak || 0;
-          if (currentStreak > 0) {
-            updates.currentStreak = currentStreak - 1;
-          }
-        }
-
-        transaction.update(taskRef, updates);
-      });
+      await toggleCommitmentCompletion(user.uid, id, currentStatus);
 
       // ✅ NO REFETCH NEEDED: onSnapshot listener handles real-time sync automatically
       // The listener will fire when Firestore confirms the update, ensuring UI stays in sync
@@ -146,13 +120,13 @@ export const useCommitmentService = (user: User | null) => {
     if (!user) return;
     // AUDIT: Log commitment deletion
     auditCommitments.deleted(id);
-    await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id));
+    await deleteCommitment(user.uid, id);
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
   }, [user, queryClient]);
 
   const updateTask = useCallback(async (id: string, updates: Partial<Omit<AnchorTask, 'id' | 'createdAt' | 'type'>>) => {
     if (!user) return;
-    await updateDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'commitments', id), updates);
+    await updateCommitment(user.uid, id, updates);
     queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
   }, [user, queryClient]);
 

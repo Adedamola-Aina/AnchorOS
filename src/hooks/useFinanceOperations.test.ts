@@ -7,7 +7,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFinanceOperations } from './useFinanceOperations';
 import { buildAccount, buildTransaction, buildAuthUser } from '../test/factories';
-import { writeBatch } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
 
 // Mock telemetry
@@ -60,6 +59,13 @@ vi.mock('../utils/error', () => ({
     handleError: vi.fn((err: any) => err),
 }));
 
+const mockRestoreSoftDeletedTransaction = vi.fn(async () => {});
+const mockConvertCurrencyAcrossAccounts = vi.fn(async () => {});
+vi.mock('../api/FinanceOperationsApi', () => ({
+    restoreSoftDeletedTransaction: (...args: any[]) => mockRestoreSoftDeletedTransaction(...args),
+    convertCurrencyAcrossAccounts: (...args: any[]) => mockConvertCurrencyAcrossAccounts(...args),
+}));
+
 describe('useFinanceOperations', () => {
     const user = buildAuthUser() as unknown as User;
     const userName = 'Test User';
@@ -73,6 +79,8 @@ describe('useFinanceOperations', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        mockRestoreSoftDeletedTransaction.mockResolvedValue(undefined);
+        mockConvertCurrencyAcrossAccounts.mockResolvedValue(undefined);
     });
 
     function getHook() {
@@ -222,20 +230,12 @@ describe('useFinanceOperations', () => {
     // ── restoreTransaction ──────────────────────────────────────────
     describe('restoreTransaction', () => {
         it('restores transaction with balance increment for expense', async () => {
-            const mockCommit = vi.fn(() => Promise.resolve());
-            vi.mocked(writeBatch).mockReturnValueOnce({
-                update: vi.fn(),
-                set: vi.fn(),
-                delete: vi.fn(),
-                commit: mockCommit,
-            } as any);
-
             const { result } = getHook();
             await act(async () => {
                 await result.current.restoreTransaction('tx-1', 'acc-1', 5000, 'expense');
             });
 
-            expect(mockCommit).toHaveBeenCalled();
+            expect(mockRestoreSoftDeletedTransaction).toHaveBeenCalledWith('user-1', 'tx-1', 'acc-1', 5000, 'expense');
         });
 
         it('does nothing when user is null', async () => {
@@ -245,27 +245,25 @@ describe('useFinanceOperations', () => {
             await act(async () => {
                 await result.current.restoreTransaction('tx-1', 'acc-1', 5000, 'expense');
             });
-            expect(writeBatch).not.toHaveBeenCalled();
+            expect(mockRestoreSoftDeletedTransaction).not.toHaveBeenCalled();
         });
     });
 
     // ── convertCurrency ─────────────────────────────────────────────
     describe('convertCurrency', () => {
         it('creates batch write with linked transactions', async () => {
-            const mockCommit = vi.fn(() => Promise.resolve());
-            vi.mocked(writeBatch).mockReturnValueOnce({
-                update: vi.fn(),
-                set: vi.fn(),
-                delete: vi.fn(),
-                commit: mockCommit,
-            } as any);
-
             const { result } = getHook();
             await act(async () => {
                 await result.current.convertCurrency('acc-1', 'acc-2', 10000, 0.0007);
             });
 
-            expect(mockCommit).toHaveBeenCalled();
+            expect(mockConvertCurrencyAcrossAccounts).toHaveBeenCalledWith(
+                'user-1',
+                expect.objectContaining({ id: 'acc-1' }),
+                expect.objectContaining({ id: 'acc-2' }),
+                10000,
+                0.0007
+            );
         });
 
         it('does nothing for non-existent accounts', async () => {
@@ -273,7 +271,7 @@ describe('useFinanceOperations', () => {
             await act(async () => {
                 await result.current.convertCurrency('nonexistent', 'acc-2', 10000, 1);
             });
-            expect(writeBatch).not.toHaveBeenCalled();
+            expect(mockConvertCurrencyAcrossAccounts).not.toHaveBeenCalled();
         });
     });
 });

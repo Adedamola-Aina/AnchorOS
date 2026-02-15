@@ -5,11 +5,14 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { db, APP_ID } from '../config/firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useNotifications } from '../context/NotificationContext';
 import type { FamilyConnection } from '../types';
+import {
+    disconnectFamilyConnection,
+    shareFamilyAccount,
+    subscribeToActiveFamilyConnection,
+    type DisconnectType,
+} from '../api/FamilyConnectionApi';
 
 interface UseFamilySharingResult {
     connection: FamilyConnection | null;
@@ -41,56 +44,9 @@ export function useFamilySharing(userId: string | undefined): UseFamilySharingRe
             return;
         }
 
-        const connectionsRef = collection(db, 'artifacts', APP_ID, 'family_connections');
-
-        // Check as owner
-        const ownerQuery = query(
-            connectionsRef,
-            where('ownerUid', '==', userId),
-            where('status', '==', 'active')
-        );
-
-        // Check as member
-        const memberQuery = query(
-            connectionsRef,
-            where('memberUid', '==', userId),
-            where('status', '==', 'active')
-        );
-
-        let ownerConnection: FamilyConnection | null = null;
-        let memberConnection: FamilyConnection | null = null;
-
-        const unsubOwner = onSnapshot(ownerQuery, (snapshot) => {
-            if (!snapshot.empty) {
-                const doc = snapshot.docs[0];
-                ownerConnection = { id: doc.id, ...doc.data() } as FamilyConnection;
-                setConnection(ownerConnection);
-            } else {
-                ownerConnection = null;
-                if (!memberConnection) {
-                    setConnection(null);
-                }
-            }
+        return subscribeToActiveFamilyConnection(userId, setConnection, () => {
             setDataLoaded(true);
         });
-
-        const unsubMember = onSnapshot(memberQuery, (snapshot) => {
-            if (!snapshot.empty) {
-                const doc = snapshot.docs[0];
-                memberConnection = { id: doc.id, ...doc.data() } as FamilyConnection;
-                if (!ownerConnection) {
-                    setConnection(memberConnection);
-                }
-            } else {
-                memberConnection = null;
-            }
-            setDataLoaded(true);
-        });
-
-        return () => {
-            unsubOwner();
-            unsubMember();
-        };
     }, [userId]);
 
     const isOwner = connection?.ownerUid === userId;
@@ -110,13 +66,7 @@ export function useFamilySharing(userId: string | undefined): UseFamilySharingRe
         }
 
         try {
-            const functions = getFunctions();
-            const shareAccountFn = httpsCallable<
-                { accountId: string; share: boolean },
-                { success: boolean }
-            >(functions, 'shareAccount');
-
-            await shareAccountFn({ accountId, share });
+            await shareFamilyAccount(accountId, share);
             showToast(
                 share ? 'Account shared with family' : 'Account sharing removed',
                 'success'
@@ -127,20 +77,14 @@ export function useFamilySharing(userId: string | undefined): UseFamilySharingRe
         }
     }, [connection, showToast]);
 
-    const disconnectFamily = useCallback(async (type: 'remove_member' | 'leave') => {
+    const disconnectFamily = useCallback(async (type: DisconnectType) => {
         if (!navigator.onLine) {
             showToast('You are offline. Please reconnect and try again.', 'error');
             return;
         }
 
         try {
-            const functions = getFunctions();
-            const disconnectFn = httpsCallable<
-                { type: 'remove_member' | 'leave' },
-                { success: boolean }
-            >(functions, 'disconnectFamily');
-
-            await disconnectFn({ type });
+            await disconnectFamilyConnection(type);
             showToast('Family connection removed', 'success');
             setConnection(null);
         } catch (err) {

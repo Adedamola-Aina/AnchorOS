@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, onSnapshot, doc, updateDoc, where } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import type { AnchorNotification } from '../types';
+import {
+    markAccountNotificationAsRead,
+    markAllAccountNotificationsAsRead,
+    subscribeToAccountNotifications,
+} from '../api/AccountNotificationsApi';
 
 export const useAccountNotifications = (accountId?: string) => {
     const { user } = useAuth();
@@ -11,19 +14,12 @@ export const useAccountNotifications = (accountId?: string) => {
 
     useEffect(() => {
         if (!user) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setLoading(false);
             return;
         }
 
-        const colRef = collection(db, 'artifacts', APP_ID, 'users', user.uid, 'notifications');
-        let q = query(colRef, orderBy('date', 'desc'), limit(50));
-
-        if (accountId) {
-            q = query(colRef, where('accountId', '==', accountId), orderBy('date', 'desc'), limit(20));
-        }
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as AnchorNotification));
+        const unsubscribe = subscribeToAccountNotifications(user.uid, accountId, (msgs) => {
             // Client-side filtering for unread if needed, or we just show them.
             // We want to show unread ones prominently.
             setNotifications(msgs);
@@ -35,20 +31,14 @@ export const useAccountNotifications = (accountId?: string) => {
 
     const markAsRead = async (id: string) => {
         if (!user) return;
-        const ref = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'notifications', id);
-        await updateDoc(ref, { read: true });
+        await markAccountNotificationAsRead(user.uid, id);
         // Optimistic update
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     };
 
     const markAllAsRead = async () => {
         if (!user || notifications.length === 0) return;
-        const batch = (await import('firebase/firestore')).writeBatch(db);
-        notifications.filter(n => !n.read).forEach(n => {
-            const ref = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'notifications', n.id);
-            batch.update(ref, { read: true });
-        });
-        await batch.commit();
+        await markAllAccountNotificationsAsRead(user.uid, notifications);
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     };
 

@@ -9,24 +9,14 @@
 
 import { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
-import { db, APP_ID } from '../config/firebase';
-import { collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { getNotificationIcon, getNotificationBgColor, getNotificationIconColor } from './notificationStyles';
-
-interface FamilyNotification {
-    id: string;
-    type: string;
-    title: string;
-    message: string;
-    actorUid: string;
-    actorName: string;
-    read: boolean;
-    dismissed: boolean;
-    createdAt: { seconds: number };
-    accountId?: string;
-    accountName?: string;
-}
+import {
+    dismissNotification,
+    markNotificationRead,
+    subscribeToUnreadNotifications,
+    type FamilyNotification,
+} from '../api/FamilyNotificationApi';
 
 interface FamilyNotificationBannerProps {
     onNavigate?: (path: string) => void;
@@ -41,20 +31,7 @@ export function FamilyNotificationBanner({ onNavigate, accountId }: FamilyNotifi
     useEffect(() => {
         if (!user) return;
 
-        const notificationsRef = collection(db, 'artifacts', APP_ID, 'users', user.uid, 'notifications');
-        const q = query(
-            notificationsRef,
-            where('dismissed', '==', false),
-            where('read', '==', false),
-            orderBy('createdAt', 'desc'),
-            limit(5)
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const notifs = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as FamilyNotification[];
+        const unsubscribe = subscribeToUnreadNotifications(user.uid, (notifs) => {
             // When scoped to a specific account, filter to that account's notifications
             setNotifications(accountId ? notifs.filter(n => n.accountId === accountId) : notifs);
         });
@@ -65,8 +42,7 @@ export function FamilyNotificationBanner({ onNavigate, accountId }: FamilyNotifi
     const handleDismiss = async (notificationId: string) => {
         if (!user) return;
 
-        const notifRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'notifications', notificationId);
-        await updateDoc(notifRef, { dismissed: true });
+        await dismissNotification(user.uid, notificationId);
 
         // Move to next notification or remove
         if (currentIndex >= notifications.length - 1) {
@@ -77,8 +53,7 @@ export function FamilyNotificationBanner({ onNavigate, accountId }: FamilyNotifi
     const handleMarkRead = async (notificationId: string) => {
         if (!user) return;
 
-        const notifRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'notifications', notificationId);
-        await updateDoc(notifRef, { read: true });
+        await markNotificationRead(user.uid, notificationId);
     };
 
     const handleAction = (notification: FamilyNotification) => {

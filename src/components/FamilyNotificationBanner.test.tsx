@@ -3,25 +3,16 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 
 // Hoist mocks so vi.mock factories can reference them
-const { mockOnSnapshot, mockUpdateDoc } = vi.hoisted(() => ({
-    mockOnSnapshot: vi.fn(),
-    mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
+const { mockSubscribeToUnreadNotifications, mockDismissNotification, mockMarkNotificationRead } = vi.hoisted(() => ({
+    mockSubscribeToUnreadNotifications: vi.fn(),
+    mockDismissNotification: vi.fn().mockResolvedValue(undefined),
+    mockMarkNotificationRead: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('../config/firebase', () => ({
-    db: {},
-    APP_ID: 'anchor-os',
-}));
-
-vi.mock('firebase/firestore', () => ({
-    collection: vi.fn(),
-    query: vi.fn(),
-    where: vi.fn(),
-    orderBy: vi.fn(),
-    limit: vi.fn(),
-    onSnapshot: mockOnSnapshot,
-    doc: vi.fn(),
-    updateDoc: mockUpdateDoc,
+vi.mock('../api/FamilyNotificationApi', () => ({
+    subscribeToUnreadNotifications: mockSubscribeToUnreadNotifications,
+    dismissNotification: mockDismissNotification,
+    markNotificationRead: mockMarkNotificationRead,
 }));
 
 vi.mock('../context/AuthContext', () => ({
@@ -41,7 +32,7 @@ vi.mock('./notificationStyles', () => ({
 
 import { FamilyNotificationBanner } from './FamilyNotificationBanner';
 
-type SnapshotCallback = (snap: { docs: { id: string; data: () => Record<string, unknown> }[] }) => void;
+type SnapshotCallback = (notifications: Record<string, unknown>[]) => void;
 
 const makeFakeNotif = (overrides: Partial<{ id: string; type: string; title: string; message: string; actorUid: string; actorName: string; read: boolean; dismissed: boolean; createdAt: { seconds: number }; accountId: string; }> = {}) => ({
     id: 'notif-1',
@@ -62,7 +53,7 @@ describe('FamilyNotificationBanner', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         // Capture the callback but don't call it synchronously
-        mockOnSnapshot.mockImplementation((_q: unknown, cb: SnapshotCallback) => {
+        mockSubscribeToUnreadNotifications.mockImplementation((_uid: string, cb: SnapshotCallback) => {
             snapshotCb = cb;
             return vi.fn(); // unsubscribe
         });
@@ -71,14 +62,14 @@ describe('FamilyNotificationBanner', () => {
     it('returns null when no notifications', () => {
         const { container } = render(<FamilyNotificationBanner />);
         // Before snapshot callback fires, should be empty
-        act(() => snapshotCb({ docs: [] }));
+        act(() => snapshotCb([]));
         expect(container.firstChild).toBeNull();
     });
 
     it('renders a notification when present', () => {
         render(<FamilyNotificationBanner />);
         const notif = makeFakeNotif();
-        act(() => snapshotCb({ docs: [{ id: notif.id, data: () => notif }] }));
+        act(() => snapshotCb([notif]));
         expect(screen.getByText('Family Connected')).toBeInTheDocument();
         expect(screen.getByText('Jane joined your family')).toBeInTheDocument();
     });
@@ -86,7 +77,7 @@ describe('FamilyNotificationBanner', () => {
     it('shows View action button', () => {
         render(<FamilyNotificationBanner />);
         const notif = makeFakeNotif();
-        act(() => snapshotCb({ docs: [{ id: notif.id, data: () => notif }] }));
+        act(() => snapshotCb([notif]));
         expect(screen.getByText('View')).toBeInTheDocument();
     });
 
@@ -94,7 +85,7 @@ describe('FamilyNotificationBanner', () => {
         const onNavigate = vi.fn();
         render(<FamilyNotificationBanner onNavigate={onNavigate} />);
         const notif = makeFakeNotif({ type: 'family_connected' });
-        act(() => snapshotCb({ docs: [{ id: notif.id, data: () => notif }] }));
+        act(() => snapshotCb([notif]));
         fireEvent.click(screen.getByText('View'));
         expect(onNavigate).toHaveBeenCalledWith('settings');
     });
@@ -103,7 +94,7 @@ describe('FamilyNotificationBanner', () => {
         const onNavigate = vi.fn();
         render(<FamilyNotificationBanner onNavigate={onNavigate} />);
         const notif = makeFakeNotif({ type: 'shared_account_update' });
-        act(() => snapshotCb({ docs: [{ id: notif.id, data: () => notif }] }));
+        act(() => snapshotCb([notif]));
         fireEvent.click(screen.getByText('View'));
         expect(onNavigate).toHaveBeenCalledWith('finance');
     });
@@ -111,23 +102,18 @@ describe('FamilyNotificationBanner', () => {
     it('dismisses notification on X click', async () => {
         render(<FamilyNotificationBanner />);
         const notif = makeFakeNotif();
-        act(() => snapshotCb({ docs: [{ id: notif.id, data: () => notif }] }));
+        act(() => snapshotCb([notif]));
         await act(async () => {
             fireEvent.click(screen.getByTitle('Dismiss'));
         });
-        expect(mockUpdateDoc).toHaveBeenCalledWith(undefined, { dismissed: true });
+        expect(mockDismissNotification).toHaveBeenCalledWith('user-1', 'notif-1');
     });
 
     it('shows pagination when multiple notifications', () => {
         render(<FamilyNotificationBanner />);
         const n1 = makeFakeNotif({ id: 'n1', title: 'First' });
         const n2 = makeFakeNotif({ id: 'n2', title: 'Second' });
-        act(() => snapshotCb({
-            docs: [
-                { id: n1.id, data: () => n1 },
-                { id: n2.id, data: () => n2 },
-            ]
-        }));
+        act(() => snapshotCb([n1, n2]));
         expect(screen.getByText('1 of 2')).toBeInTheDocument();
     });
 
@@ -135,12 +121,7 @@ describe('FamilyNotificationBanner', () => {
         render(<FamilyNotificationBanner />);
         const n1 = makeFakeNotif({ id: 'n1', title: 'First' });
         const n2 = makeFakeNotif({ id: 'n2', title: 'Second' });
-        act(() => snapshotCb({
-            docs: [
-                { id: n1.id, data: () => n1 },
-                { id: n2.id, data: () => n2 },
-            ]
-        }));
+        act(() => snapshotCb([n1, n2]));
         expect(screen.getByText('First')).toBeInTheDocument();
 
         fireEvent.click(screen.getByText('→'));
@@ -155,19 +136,14 @@ describe('FamilyNotificationBanner', () => {
         render(<FamilyNotificationBanner accountId="acc-1" />);
         const n1 = makeFakeNotif({ id: 'n1', title: 'Match', accountId: 'acc-1' });
         const n2 = makeFakeNotif({ id: 'n2', title: 'NoMatch', accountId: 'acc-2' });
-        act(() => snapshotCb({
-            docs: [
-                { id: n1.id, data: () => n1 },
-                { id: n2.id, data: () => n2 },
-            ]
-        }));
+        act(() => snapshotCb([n1, n2]));
         expect(screen.getByText('Match')).toBeInTheDocument();
         expect(screen.queryByText('NoMatch')).not.toBeInTheDocument();
     });
 
     it('unsubscribes on unmount', () => {
         const unsubscribe = vi.fn();
-        mockOnSnapshot.mockImplementation((_q: unknown, cb: SnapshotCallback) => {
+        mockSubscribeToUnreadNotifications.mockImplementation((_uid: string, cb: SnapshotCallback) => {
             snapshotCb = cb;
             return unsubscribe;
         });

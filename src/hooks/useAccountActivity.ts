@@ -6,17 +6,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { db, APP_ID } from '../config/firebase';
-import {
-    collection,
-    query,
-    orderBy,
-    limit,
-    onSnapshot,
-    addDoc
-} from 'firebase/firestore';
 import type { AccountActivity, ActivityAction } from '../types/activity';
 import { createActivityEntry } from '../types/activity';
+import { createAccountActivity, subscribeToAccountActivity } from '../api/AccountActivityApi';
 
 interface UseAccountActivityOptions {
     accountId: string;
@@ -59,32 +51,12 @@ export const useAccountActivity = ({
 
         setLoading(true);
 
-        const activitiesRef = collection(
-            db,
-            'artifacts',
-            APP_ID,
-            'users',
-            accountOwnerId,
-            'accounts',
+        const unsubscribe = subscribeToAccountActivity(
             accountId,
-            'activity'
-        );
-
-        const q = query(
-            activitiesRef,
-            orderBy('timestamp', 'desc'),
-            limit(maxItems)
-        );
-
-        const unsubscribe = onSnapshot(
-            q,
+            accountOwnerId,
+            maxItems,
             (snapshot) => {
-                const activityList: AccountActivity[] = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                } as AccountActivity));
-
-                setActivities(activityList);
+                setActivities(snapshot);
                 setLoading(false);
                 setError(null);
             },
@@ -108,17 +80,6 @@ export const useAccountActivity = ({
         if (!accountId || !accountOwnerId) return;
 
         try {
-            const activitiesRef = collection(
-                db,
-                'artifacts',
-                APP_ID,
-                'users',
-                accountOwnerId,
-                'accounts',
-                accountId,
-                'activity'
-            );
-
             const activityData = createActivityEntry(
                 action,
                 accountId,
@@ -128,7 +89,7 @@ export const useAccountActivity = ({
                 details
             );
 
-            await addDoc(activitiesRef, activityData);
+            await createAccountActivity(accountId, accountOwnerId, activityData);
         } catch (err) {
             console.error('Failed to log activity:', err);
             // Don't throw - activity logging should be non-blocking
