@@ -16,10 +16,13 @@ export default {
   checkers: ['typescript'],
   tsconfigFile: 'config/tsconfig.app.json',
   
-  // Files to mutate (core business logic only - start small)
+  // Files to mutate (incremental expansion to hooks/utils)
   mutate: [
     'src/services/**/*.ts',
-    'src/utils/secureDb.ts',
+    'src/hooks/use*Service.ts',
+    'src/hooks/useAccessibility.ts',
+    'src/hooks/useVersionCheck.ts',
+    'src/utils/**/*.ts',
     '!src/**/*.test.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/**/index.ts',
