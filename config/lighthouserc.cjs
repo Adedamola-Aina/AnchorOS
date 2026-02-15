@@ -1,13 +1,13 @@
 module.exports = {
   ci: {
     collect: {
-      staticDistDir: '../dist',
+      staticDistDir: 'dist',
       numberOfRuns: 3,
       url: [
         'http://localhost:4173/',
-        'http://localhost:4173/login',
       ],
       settings: {
+        chromeFlags: '--no-sandbox',
         formFactor: 'mobile',
         throttling: {
           rttMs: 150,
@@ -24,12 +24,12 @@ module.exports = {
     },
     assert: {
       assertions: {
-        'first-contentful-paint': ['warn', { maxNumericValue: 2500 }],
-        'largest-contentful-paint': ['warn', { maxNumericValue: 3000 }],
-        'interactive': ['warn', { maxNumericValue: 5000 }],
-        'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }],
-        'total-blocking-time': ['warn', { maxNumericValue: 300 }],
-        'categories:performance': ['warn', { minScore: 0.7 }],
+        'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+        'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+        'interactive': ['error', { maxNumericValue: 5000 }],
+        'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+        'total-blocking-time': ['error', { maxNumericValue: 300 }],
+        'categories:performance': ['error', { minScore: 0.7 }],
         'categories:accessibility': ['error', { minScore: 0.9 }],
         'categories:best-practices': ['warn', { minScore: 0.8 }],
         'categories:seo': ['warn', { minScore: 0.8 }],

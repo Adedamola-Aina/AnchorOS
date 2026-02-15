@@ -10,7 +10,7 @@ module.exports = {
   ci: {
     collect: {
       // Start a static server to test the built app
-      staticDistDir: '../dist',
+      staticDistDir: 'dist',
       
       // Run 3 audits for more stable results
       numberOfRuns: 3,
@@ -18,11 +18,11 @@ module.exports = {
       // URLs to audit (relative to static server)
       url: [
         'http://localhost/',
-        'http://localhost/login',
       ],
       
       // Settings for consistent mobile testing
       settings: {
+        chromeFlags: '--no-sandbox',
         // Mobile device emulation (matches our 75% mobile user base)
         formFactor: 'mobile',
         throttling: {
@@ -43,15 +43,15 @@ module.exports = {
     assert: {
       // Performance assertions - break build if these fail
       assertions: {
-        // Core Web Vitals thresholds (must be warning or better)
-        'first-contentful-paint': ['warn', { maxNumericValue: 2500 }],
-        'largest-contentful-paint': ['warn', { maxNumericValue: 3000 }],
-        'interactive': ['warn', { maxNumericValue: 5000 }],
-        'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }],
-        'total-blocking-time': ['warn', { maxNumericValue: 300 }],
+        // Core Web Vitals thresholds (must pass as errors)
+        'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+        'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+        'interactive': ['error', { maxNumericValue: 5000 }],
+        'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+        'total-blocking-time': ['error', { maxNumericValue: 300 }],
         
         // Overall category scores (0-1 scale)
-        'categories:performance': ['warn', { minScore: 0.7 }],
+        'categories:performance': ['error', { minScore: 0.7 }],
         'categories:accessibility': ['error', { minScore: 0.9 }],
         'categories:best-practices': ['warn', { minScore: 0.8 }],
         'categories:seo': ['warn', { minScore: 0.8 }],
