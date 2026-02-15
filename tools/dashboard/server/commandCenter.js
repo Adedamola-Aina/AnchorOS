@@ -17,7 +17,7 @@ const gitData = require('./gitDataProvider');
 const { getEnvironmentStatus, checkEnvParity } = require('./envChecker');
 const { getDependencyHealth } = require('./dependencyChecker');
 const { getHealthReport } = require('./fileHealthMonitor');
-const { getRecentCommits, getDeploymentTimeline } = require('./gitAnalyzer');
+const { getRecentCommits, getRecentCommitsFiltered, getDeploymentTimeline } = require('./gitAnalyzer');
 const { getVelocityStats } = require('./velocityTracker');
 
 /**
@@ -247,14 +247,24 @@ async function getCommandCenterData() {
         environment,
         deployHistory,
         dependencies,
-        timeline
+        timeline,
+        anchorOSCommits,
+        dashboardCommits,
+        docsCommits,
+        infraCommits,
+        coverageData
     ] = await Promise.all([
         getProactiveAlerts(),
         getWorkSummary(),
         getEnvironmentStatus(),
         getDeploymentHistory(),
         getDependencyHealth().catch(() => ({})),
-        getDeploymentTimeline(7).catch(() => [])
+        getDeploymentTimeline(7).catch(() => []),
+        getRecentCommitsFiltered('anchorOS', 20).catch(() => []),
+        getRecentCommitsFiltered('dashboard', 20).catch(() => []),
+        getRecentCommitsFiltered('docs', 20).catch(() => []),
+        getRecentCommitsFiltered('infra', 20).catch(() => []),
+        getCoverageSummary()
     ]);
 
     // Get velocity stats (sync function)
@@ -288,6 +298,17 @@ async function getCommandCenterData() {
             cycleTime: velocity.averageCycleTime || 0,
             details: workSummary
         },
+
+        // Work by category — bird's eye view of ALL activity
+        workByCategory: {
+            anchorOS: { count: anchorOSCommits.length, recent: anchorOSCommits.slice(0, 5).map(c => ({ hash: c.hash, message: c.message.split('\n')[0], date: c.date })) },
+            dashboard: { count: dashboardCommits.length, recent: dashboardCommits.slice(0, 5).map(c => ({ hash: c.hash, message: c.message.split('\n')[0], date: c.date })) },
+            docs: { count: docsCommits.length, recent: docsCommits.slice(0, 5).map(c => ({ hash: c.hash, message: c.message.split('\n')[0], date: c.date })) },
+            infra: { count: infraCommits.length, recent: infraCommits.slice(0, 5).map(c => ({ hash: c.hash, message: c.message.split('\n')[0], date: c.date })) }
+        },
+
+        // Test coverage — from latest coverage run
+        coverage: coverageData,
 
         // Environment parity - deployment status
         environments: {
@@ -328,9 +349,70 @@ async function getCommandCenterData() {
             parity: '/api/parity',
             backlog: '/api/git/backlog',
             changelog: '/api/git/changelog',
-            timeline: '/api/git/timeline'
+            timeline: '/api/git/timeline',
+            coverage: '/api/coverage',
+            commitsByCategory: {
+                anchorOS: '/api/git/commits/anchorOS',
+                dashboard: '/api/git/commits/dashboard',
+                docs: '/api/git/commits/docs',
+                infra: '/api/git/commits/infra'
+            }
         }
     };
+}
+
+/**
+ * Read coverage summary from coverage-final.json (if available)
+ */
+async function getCoverageSummary() {
+    try {
+        const fs = require('fs');
+        const coveragePath = require('path').join(__dirname, '../../..', 'coverage', 'coverage-final.json');
+
+        if (!fs.existsSync(coveragePath)) {
+            return { available: false };
+        }
+
+        const raw = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
+        const stats = fs.statSync(coveragePath);
+
+        let totalStatements = 0, coveredStatements = 0;
+        let totalBranches = 0, coveredBranches = 0;
+        let totalFunctions = 0, coveredFunctions = 0;
+
+        for (const file of Object.values(raw)) {
+            const s = file.s || {};
+            for (const count of Object.values(s)) {
+                totalStatements++;
+                if (count > 0) coveredStatements++;
+            }
+            const b = file.b || {};
+            for (const counts of Object.values(b)) {
+                for (const count of counts) {
+                    totalBranches++;
+                    if (count > 0) coveredBranches++;
+                }
+            }
+            const f = file.f || {};
+            for (const count of Object.values(f)) {
+                totalFunctions++;
+                if (count > 0) coveredFunctions++;
+            }
+        }
+
+        const pct = (covered, total) => total === 0 ? 100 : Math.round((covered / total) * 10000) / 100;
+
+        return {
+            available: true,
+            generatedAt: stats.mtime.toISOString(),
+            statements: pct(coveredStatements, totalStatements),
+            branches: pct(coveredBranches, totalBranches),
+            functions: pct(coveredFunctions, totalFunctions),
+            filesAnalyzed: Object.keys(raw).length
+        };
+    } catch {
+        return { available: false };
+    }
 }
 
 module.exports = {

@@ -16,13 +16,14 @@ interface TimelineDay {
     }[];
 }
 
-type FilterType = 'all' | 'anchorOS' | 'dashboard';
+type FilterType = 'all' | 'anchorOS' | 'dashboard' | 'docs' | 'infra';
 
 export function GitTimeline() {
     const [timeline, setTimeline] = useState<TimelineDay[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
     const [filter, setFilter] = useState<FilterType>('anchorOS'); // Default to Anchor OS
+    const [categoryStats, setCategoryStats] = useState<Record<string, number>>({});
 
     useEffect(() => {
         async function fetchTimeline() {
@@ -30,6 +31,37 @@ export function GitTimeline() {
             try {
                 const res = await axios.get('/api/git/timeline?days=14');
                 setTimeline(res.data);
+
+                // Classify each commit via server category (enriched in timeline)
+                // Also fetch category counts for the stats bar
+                const [anchorOS, dashboard, docs, infra] = await Promise.all([
+                    axios.get('/api/git/commits/anchorOS?limit=50'),
+                    axios.get('/api/git/commits/dashboard?limit=50'),
+                    axios.get('/api/git/commits/docs?limit=50'),
+                    axios.get('/api/git/commits/infra?limit=50'),
+                ]);
+                setCategoryStats({
+                    anchorOS: anchorOS.data.count,
+                    dashboard: dashboard.data.count,
+                    docs: docs.data.count,
+                    infra: infra.data.count,
+                });
+
+                // Build a hash→category lookup from the filtered endpoints
+                const categoryMap: Record<string, string> = {};
+                for (const c of anchorOS.data.commits) categoryMap[c.hash] = 'anchorOS';
+                for (const c of dashboard.data.commits) categoryMap[c.hash] = 'dashboard';
+                for (const c of docs.data.commits) categoryMap[c.hash] = 'docs';
+                for (const c of infra.data.commits) categoryMap[c.hash] = 'infra';
+
+                // Enrich timeline commits with server-side category
+                setTimeline(prev => prev.map(day => ({
+                    ...day,
+                    commits: day.commits.map(commit => ({
+                        ...commit,
+                        category: categoryMap[commit.hash] || commit.category || 'infra'
+                    }))
+                })));
             } catch (error) {
                 console.error('Failed to fetch timeline:', error);
             } finally {
@@ -39,24 +71,10 @@ export function GitTimeline() {
         fetchTimeline();
     }, []);
 
-    // Filter commits based on selected filter
-    const filterCommit = (commit: { message: string; hash: string }) => {
+    // Filter commits based on server-side category
+    const filterCommit = (commit: { category?: string }) => {
         if (filter === 'all') return true;
-
-        // Dashboard-related keywords
-        const dashboardKeywords = [
-            'dashboard', 'DEPLOYMENT_STATUS', 'PROJECT_STATUS',
-            'KNOWN_ISSUES', 'FEATURE_SUGGESTIONS', 'tools/',
-            '.agent/', 'docs:', 'chore:', 'post-implementation'
-        ];
-
-        const isDashboard = dashboardKeywords.some(kw =>
-            commit.message.toLowerCase().includes(kw.toLowerCase())
-        );
-
-        if (filter === 'dashboard') return isDashboard;
-        if (filter === 'anchorOS') return !isDashboard;
-        return true;
+        return commit.category === filter;
     };
 
     // Filter timeline data
@@ -96,9 +114,11 @@ export function GitTimeline() {
     };
 
     const filterLabels: Record<FilterType, string> = {
-        all: 'All Commits',
-        anchorOS: '⚓ Anchor OS',
-        dashboard: '📊 Dashboard'
+        all: 'All',
+        anchorOS: '⚓ Product',
+        dashboard: '📊 Dashboard',
+        docs: '📝 Docs',
+        infra: '⚙️ Infra'
     };
 
     return (
@@ -109,7 +129,7 @@ export function GitTimeline() {
                     <Filter className="w-4 h-4 text-slate-400" />
                     <span className="text-sm text-slate-400">Filter:</span>
                     <div className="flex gap-1">
-                        {(['anchorOS', 'dashboard', 'all'] as FilterType[]).map(f => (
+                        {(['anchorOS', 'dashboard', 'docs', 'infra', 'all'] as FilterType[]).map(f => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -119,6 +139,9 @@ export function GitTimeline() {
                                     }`}
                             >
                                 {filterLabels[f]}
+                                {categoryStats[f] !== undefined && (
+                                    <span className="ml-1 text-xs opacity-60">({categoryStats[f]})</span>
+                                )}
                             </button>
                         ))}
                     </div>
@@ -160,8 +183,10 @@ export function GitTimeline() {
             {/* Timeline */}
             <div className="card">
                 <h3 className="card-header">
-                    {filter === 'anchorOS' && '⚓ Anchor OS '}
+                    {filter === 'anchorOS' && '⚓ Product '}
                     {filter === 'dashboard' && '📊 Dashboard '}
+                    {filter === 'docs' && '📝 Docs & Governance '}
+                    {filter === 'infra' && '⚙️ Infrastructure '}
                     Commit Timeline (Last 14 Days)
                 </h3>
                 <div className="relative">
@@ -171,13 +196,21 @@ export function GitTimeline() {
                     <div className="space-y-6">
                         {filteredTimeline.length === 0 ? (
                             <div className="pl-10 text-slate-500">
-                                No {filter === 'all' ? '' : filter === 'anchorOS' ? 'Anchor OS' : 'Dashboard'} commits in the last 14 days.
+                                No {filter === 'all' ? '' :
+                                    filter === 'anchorOS' ? 'Product' :
+                                    filter === 'dashboard' ? 'Dashboard' :
+                                    filter === 'docs' ? 'Docs & Governance' :
+                                    'Infrastructure'} commits in the last 14 days.
                             </div>
                         ) : (
                             filteredTimeline.map((day) => (
                                 <div key={day.date} className="relative pl-10">
                                     {/* Dot */}
-                                    <div className={`absolute left-2.5 w-3 h-3 rounded-full ring-4 ring-slate-800 ${filter === 'dashboard' ? 'bg-blue-500' : 'bg-emerald-500'
+                                    <div className={`absolute left-2.5 w-3 h-3 rounded-full ring-4 ring-slate-800 ${
+                                        filter === 'dashboard' ? 'bg-blue-500' :
+                                        filter === 'docs' ? 'bg-amber-500' :
+                                        filter === 'infra' ? 'bg-slate-500' :
+                                        'bg-emerald-500'
                                         }`} />
 
                                     {/* Content */}

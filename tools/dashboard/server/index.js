@@ -355,9 +355,114 @@ app.get('/api/git/commits/dashboard', async (req, res) => {
         const commits = await getRecentCommitsFiltered('dashboard', limit);
         res.json({
             category: 'dashboard',
-            description: 'Internal Dashboard & tooling changes (tools/, docs/, .agent/, etc.)',
+            description: 'Internal Dashboard & tooling changes (tools/dashboard/, tools/mcp-server/)',
             count: commits.length,
             commits
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/git/commits/docs
+ * Returns documentation & process governance commits
+ */
+app.get('/api/git/commits/docs', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 30;
+        const commits = await getRecentCommitsFiltered('docs', limit);
+        res.json({
+            category: 'docs',
+            description: 'Documentation & process governance (docs/, .github/, CLAUDE.md, CONTRIBUTING.md)',
+            count: commits.length,
+            commits
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/coverage
+ * Returns test coverage summary from the latest coverage run
+ */
+app.get('/api/coverage', async (_req, res) => {
+    try {
+        const fs = require('fs');
+        const coveragePath = path.join(__dirname, '../../..', 'coverage', 'coverage-final.json');
+
+        if (!fs.existsSync(coveragePath)) {
+            return res.json({
+                available: false,
+                message: 'No coverage data. Run: npm run test -- --run --coverage'
+            });
+        }
+
+        const raw = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
+        const stats = fs.statSync(coveragePath);
+
+        let totalStatements = 0, coveredStatements = 0;
+        let totalBranches = 0, coveredBranches = 0;
+        let totalFunctions = 0, coveredFunctions = 0;
+        let totalLines = 0, coveredLines = 0;
+
+        for (const file of Object.values(raw)) {
+            // Statements
+            const s = file.s || {};
+            for (const count of Object.values(s)) {
+                totalStatements++;
+                if (count > 0) coveredStatements++;
+            }
+            // Branches
+            const b = file.b || {};
+            for (const counts of Object.values(b)) {
+                for (const count of counts) {
+                    totalBranches++;
+                    if (count > 0) coveredBranches++;
+                }
+            }
+            // Functions
+            const f = file.f || {};
+            for (const count of Object.values(f)) {
+                totalFunctions++;
+                if (count > 0) coveredFunctions++;
+            }
+            // Lines (derive from statementMap + s)
+            const sm = file.statementMap || {};
+            const lineSet = new Set();
+            const coveredLineSet = new Set();
+            for (const [key, loc] of Object.entries(sm)) {
+                const line = loc.start?.line;
+                if (line) {
+                    lineSet.add(line);
+                    if (s[key] > 0) coveredLineSet.add(line);
+                }
+            }
+            totalLines += lineSet.size;
+            coveredLines += coveredLineSet.size;
+        }
+
+        const pct = (covered, total) => total === 0 ? 100 : Math.round((covered / total) * 10000) / 100;
+
+        const thresholds = { statements: 80, branches: 70, functions: 90, lines: 80 };
+        const coverage = {
+            statements: { covered: coveredStatements, total: totalStatements, pct: pct(coveredStatements, totalStatements) },
+            branches: { covered: coveredBranches, total: totalBranches, pct: pct(coveredBranches, totalBranches) },
+            functions: { covered: coveredFunctions, total: totalFunctions, pct: pct(coveredFunctions, totalFunctions) },
+            lines: { covered: coveredLines, total: totalLines, pct: pct(coveredLines, totalLines) }
+        };
+
+        const passing = Object.entries(coverage).every(([key, val]) => val.pct >= (thresholds[key] || 0));
+
+        res.json({
+            available: true,
+            generatedAt: stats.mtime.toISOString(),
+            filesAnalyzed: Object.keys(raw).length,
+            coverage,
+            thresholds,
+            passing,
+            status: passing ? 'healthy' : 'below-threshold'
         });
     } catch (error) {
         res.status(500).json({ error: error.message });

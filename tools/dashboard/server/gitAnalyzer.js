@@ -35,7 +35,7 @@ async function getRecentCommits(limit = 50) {
 // Paths that indicate dashboard-only changes
 const DASHBOARD_PATHS = [
     'tools/dashboard/',
-    '.agent/',
+    'tools/mcp-server/',
     'scripts/',
     'docs/DASHBOARD'
 ];
@@ -48,17 +48,30 @@ const PRODUCT_SOURCE_PATHS = [
     'index.html'
 ];
 
+// Paths that indicate documentation / process governance changes
+const DOCS_PATHS = [
+    'docs/',
+    '.github/',
+    'CLAUDE.md',
+    'CONTRIBUTING.md',
+    'README.md',
+    'COPYRIGHT',
+    'LICENSE'
+];
+
 // Legacy alias — kept for backward compatibility with getRepoStats
 const ANCHOR_OS_PATHS = PRODUCT_SOURCE_PATHS;
 
 /**
- * Classify a commit into categories: 'anchorOS', 'dashboard', or 'infra'
+ * Classify a commit into categories: 'anchorOS', 'dashboard', 'docs', or 'infra'
  *
- * - anchorOS : product-meaningful commit (feat, fix, test, perf, hotfix)
- *              that touches product source (src/, public/, e2e/, index.html)
- * - dashboard: only touches dashboard / tooling files
- * - infra   : infrastructure changes — refactor/chore commits, OR commits
- *             touching only config/, docs/, scripts/, root config files
+ * - anchorOS  : product-meaningful commit (feat, fix, test, perf, hotfix)
+ *               that touches product source (src/, public/, e2e/, index.html)
+ * - dashboard : only touches dashboard / tooling files
+ * - docs      : documentation & process governance changes (docs/, .github/,
+ *               CLAUDE.md, CONTRIBUTING.md, README.md)
+ * - infra     : infrastructure changes — refactor/chore commits, OR commits
+ *               touching only config/, root config files
  */
 async function classifyCommit(commitHash) {
     try {
@@ -79,31 +92,56 @@ async function classifyCommit(commitHash) {
 
         let touchesProductSource = false;
         let touchesDashboard = false;
+        let touchesDocs = false;
+        let touchesOther = false;
 
         for (const file of files) {
+            let matched = false;
+
             // Check product source paths
             for (const prodPath of PRODUCT_SOURCE_PATHS) {
                 if (file.startsWith(prodPath) || file === prodPath) {
                     touchesProductSource = true;
+                    matched = true;
                     break;
                 }
             }
+            if (matched) continue;
 
             // Check dashboard paths
             for (const dashPath of DASHBOARD_PATHS) {
                 if (file.startsWith(dashPath) || file.includes(dashPath)) {
                     touchesDashboard = true;
+                    matched = true;
+                    break;
                 }
             }
+            if (matched) continue;
+
+            // Check docs/governance paths
+            for (const docPath of DOCS_PATHS) {
+                if (file.startsWith(docPath) || file === docPath) {
+                    touchesDocs = true;
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) continue;
+
+            touchesOther = true;
         }
 
         // Product source touched → anchorOS (even if config also changed)
         if (touchesProductSource) return 'anchorOS';
 
         // Dashboard-only files
-        if (touchesDashboard) return 'dashboard';
+        if (touchesDashboard && !touchesDocs && !touchesOther) return 'dashboard';
 
-        // Everything else: config/, docs/, scripts/, root-level files → infra
+        // Docs-only commits (also matches docs prefix in commit message)
+        if (touchesDocs && !touchesDashboard && !touchesOther) return 'docs';
+        if (commitType === 'docs') return 'docs';
+
+        // Everything else: config/, root-level files → infra
         return 'infra';
     } catch (error) {
         return 'infra';
@@ -118,8 +156,8 @@ async function isDashboardOnlyCommit(commitHash) {
 }
 
 /**
- * Get commits filtered by category (anchorOS, dashboard, infra, or all)
- * @param {string} category - 'anchorOS', 'dashboard', 'infra', or 'all'
+ * Get commits filtered by category (anchorOS, dashboard, docs, infra, or all)
+ * @param {string} category - 'anchorOS', 'dashboard', 'docs', 'infra', or 'all'
  * @param {number} limit - Max commits to return
  */
 async function getRecentCommitsFiltered(category = 'all', limit = 50) {
@@ -136,6 +174,7 @@ async function getRecentCommitsFiltered(category = 'all', limit = 50) {
             // Filter based on category
             if (category === 'dashboard' && commitCategory !== 'dashboard') continue;
             if (category === 'anchorOS' && commitCategory !== 'anchorOS') continue;
+            if (category === 'docs' && commitCategory !== 'docs') continue;
             if (category === 'infra' && commitCategory !== 'infra') continue;
 
             commits.push({
