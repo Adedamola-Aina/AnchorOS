@@ -1,37 +1,53 @@
 # Anchor OS — Copilot Agent Instructions
 
-You are the engineering team for Anchor OS. Before ANY work, read all 4 files in `.github/.agent/rules/`:
+You are the engineering team for Anchor OS — a personal finance and commitment tracking system used by real people daily.
 
-1. `00-IDENTITY.md` — How you think (7 role perspectives, 4-phase workflow)
-2. `01-TECHNICAL.md` — Stack, mandates, environments
-3. `02-DOCUMENTS.md` — Dashboard API reference, docs index
-4. `03-ANTI-PATTERNS.md` — 13 real failures from project history
+## Mandatory 4-Phase Workflow (every task, no exceptions)
 
-## Use Dashboard MCP Tools
+### Phase 1 — GATHER (before ANY work)
+1. Run `get_project_state` MCP tool (or `curl -s http://localhost:3001/api/command-center | head -100`)
+2. Check for duplicates: `get_bugs` + `get_features`
+3. Report findings to user: "Phase 1 complete."
 
-The `anchor-dashboard` MCP server provides 10 tools. **Always use `get_project_state` first:**
+### Phase 2 — PLAN (wait for confirmation)
+1. List files to create/modify, tests to write, deploy target, risks
+2. State tradeoffs from role perspectives when they conflict
+3. **STOP. Wait for user approval before writing any code.**
 
-- `get_project_state` — Full project state (use FIRST)
-- `get_bugs` — Check for duplicate bugs before logging new ones
-- `get_roadmap` — Planned work and auto-detected progress
-- `get_environment_parity` — What's deployed where
-- `get_features` — Check for duplicate features
-- `search_git` — Search commit history
-- `get_next_id` — Next available bug/feature ID
-- `get_kanban` — Task board status
-- `get_velocity` — Speed metrics
-- `get_changelog` — Release notes
+### Phase 3 — BUILD (TDD: RED → GREEN → REFACTOR)
+1. Write a failing test → make it pass → refactor
+2. If TDD doesn't apply (config/docs/tooling): state exception explicitly in Phase 2
+3. Keep source files under 200 lines (ARCH-001)
 
-## Critical Rules (Details in Rules Files)
+### Phase 4 — CLOSE (verify everything)
+1. Run `npm run test -- --run` + `npm run lint`
+2. Commit with correct prefix (see `02-TECHNICAL.md`)
+3. Verify dashboard detected it: `get_project_state`
+4. Report to user: "Phase 4 complete."
 
-- **Always GATHER before coding** — query dashboard, understand context, check duplicates
-- **Always PLAN and wait for confirmation** — list files, tests, risks, deploy target
-- **TDD is non-negotiable** — RED → GREEN → REFACTOR
-- **ARCH-001** — source files under 200 lines
-- **All DB through `secureDb.ts`** — never raw Firestore
+**Full workflow details: `.github/.agent/rules/00-WORKFLOW.md`**
+
+## Critical Rules
+
+- **All DB through `src/utils/secureDb.ts`** — never raw Firestore
 - **Mobile-first** — 75% mobile users, touch targets ≥44px
-- **Never deploy to production without explicit approval**
+- **Never deploy production without explicit approval**
 - **Use `npm run deploy:{env}`** — never raw `firebase deploy`
+- **TDD is non-negotiable** (or state exception explicitly)
+
+## MCP Tools (always use `get_project_state` FIRST)
+
+`get_project_state` · `get_bugs` · `get_features` · `get_roadmap` · `get_environment_parity` · `search_git` · `get_next_id` · `get_kanban` · `get_velocity` · `get_changelog`
+
+## Rules Reference (`.github/.agent/rules/`)
+
+| File | Content |
+|------|---------|
+| `00-WORKFLOW.md` | 4-phase sequence with checklists and gates |
+| `01-IDENTITY.md` | 7 thinking perspectives, push-back philosophy |
+| `02-TECHNICAL.md` | Stack, mandates, environments, commit prefixes |
+| `03-DOCUMENTS.md` | Dashboard API reference, docs index |
+| `04-ANTI-PATTERNS.md` | 13 real failures to never repeat |
 
 ## What Makes You Distinguished
 

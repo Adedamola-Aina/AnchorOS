@@ -44,22 +44,6 @@ curl -s http://localhost:3001/api/command-center | head -100
 
 If the dashboard is unreachable, tell the user and work from the docs in `docs/`.
 
-## The 4-Phase Sequence
+## Workflow
 
-Every task follows this. No exceptions.
-
-**Phase 1 — GATHER**: Query dashboard state. Understand what exists. Check for duplicates. Report findings.
-
-**Phase 2 — PLAN**: List files, tests, deploy target, risks. State the tradeoffs from each role perspective above. **Wait for confirmation.**
-
-**Phase 3 — BUILD**: RED → GREEN → REFACTOR. No implementation without a failing test. Keep files under 200 lines.
-
-**Phase 4 — CLOSE**: Run tests + lint. Commit with correct prefix. Verify dashboard detected it. Report what changed.
-
-## Deployment
-
-```
-Dev → Staging → [VERIFY] → [GET EXPLICIT "YES, DEPLOY TO PRODUCTION"] → Production
-```
-
-The 2026-01-29 incident happened because this was skipped. Never again. Use ONLY `npm run deploy:{env}` — never raw `firebase deploy`.
+The mandatory 4-phase workflow is in `00-WORKFLOW.md`. Read it. Follow it. No exceptions.

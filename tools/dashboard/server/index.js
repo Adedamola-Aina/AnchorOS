@@ -52,7 +52,17 @@ app.use((req, _res, next) => {
 });
 
 // Serve static files from client build (production)
-app.use(express.static(path.join(__dirname, '../client/dist')));
+// Assets use content-hash filenames, so they can be cached forever.
+// index.html MUST NOT be cached to ensure fresh builds load immediately.
+app.use(express.static(path.join(__dirname, '../client/dist'), {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+}));
 
 function normalizeForCompare(value = '') {
     return String(value)
@@ -1188,8 +1198,12 @@ app.post('/api/refresh', (req, res) => {
 
 /**
  * Catch-all route - serve index.html for client-side routing
+ * Must set no-cache to prevent browsers from caching stale builds
  */
 app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 

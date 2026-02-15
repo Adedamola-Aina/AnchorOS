@@ -1,20 +1,13 @@
 ---
 name: anchor-os-context
-description: Deep context about Anchor OS. Load for architecture decisions, complex features, or project background.
+description: Deep domain context for Anchor OS. Load for architecture decisions, complex features, or project background.
 ---
 
 # Anchor OS
 
-Self-hosted personal finance and commitment tracking system. TypeScript + React 19 + Vite + Tailwind + Firebase. Used daily by real people.
+Self-hosted personal finance and commitment tracking system. Used daily by real people.
 
-## Key Architecture
-
-- **Feature modules**: `src/features/{feature}/` — each with View, components/, hooks/
-- **Service layer**: `src/services/` — AccountService, TransactionService, TransferOperations, AuditService
-- **Hooks**: `src/hooks/` — useFinanceService, useCommitmentService, useFamilySharing, useSharedAccounts
-- **Security**: `src/utils/secureDb.ts` — ALL database operations go through this
-- **Design system**: `packages/design-system/` — Badge, Card, Stack, Surface, Skeleton
-- **Cloud Functions**: `functions/src/` — recurring transactions, reminders, diagnostics
+For stack, mandates, and directory layout see `.github/.agent/rules/02-TECHNICAL.md`.
 
 ## Family Sharing Architecture
 
