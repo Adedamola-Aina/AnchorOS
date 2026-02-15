@@ -17,6 +17,7 @@ const path = require('path');
 const fs = require('fs');
 const simpleGit = require('simple-git');
 const deploymentTracker = require('./deploymentTracker');
+const { classifyCommit } = require('./gitAnalyzer');
 
 const REPO_PATH = path.join(__dirname, '../../..');
 const git = simpleGit(REPO_PATH);
@@ -134,21 +135,8 @@ function detectType(message) {
     return 'other';
 }
 
-/**
- * Check if a commit message indicates a dashboard-only change
- */
-function isDashboardCommit(message) {
-    const msg = message.toLowerCase();
-    return msg.includes('dashboard') ||
-        msg.includes('deployment_status') ||
-        msg.includes('project_status') ||
-        msg.includes('known_issues') ||
-        msg.includes('post-implementation') ||
-        msg.includes('.agent/') ||
-        msg.includes('tools/dashboard') ||
-        (msg.startsWith('docs:') && !msg.includes('versioning')) ||
-        (msg.startsWith('chore:') && !msg.includes('deploy'));
-}
+// isDashboardCommit() REMOVED — replaced by classifyCommit() from gitAnalyzer.js
+// which uses actual file paths instead of fragile message-keyword matching
 
 /**
  * Check environment parity using GIT ANCESTRY
@@ -164,25 +152,26 @@ async function checkEnvParity() {
         const versions = await getEnvironmentVersions();
         const log = await git.log({ maxCount: 100 });
 
-        // Collect product commits (exclude dashboard/docs)
+        // Skip deploy markers, then classify all remaining commits by file paths
+        const candidates = log.all.filter(c => !c.message.toLowerCase().includes('deploy('));
+
+        // Batch-classify commits using file-path analysis (not message parsing)
+        const classifications = await Promise.all(
+            candidates.map(async c => ({
+                commit: c,
+                category: await classifyCommit(c.hash)
+            }))
+        );
+
+        // ONLY anchorOS (product) commits belong in environment parity
         const productCommits = [];
         const seenIds = new Set();
 
-        for (const commit of log.all) {
-            const msg = commit.message.toLowerCase();
+        for (const { commit, category } of classifications) {
+            if (category !== 'anchorOS') continue;
+
             const fullMsg = commit.message;
-            
-            // Skip deploy markers themselves
-            if (msg.includes('deploy(')) continue;
-            
-            // Skip dashboard-only commits
-            if (isDashboardCommit(fullMsg)) continue;
-
-            // Detect type
             const type = detectType(fullMsg);
-            if (type === 'docs' || type === 'chore' || type === 'refactor' || type === 'other') continue;
-
-            // Extract ID
             const id = extractId(fullMsg) || commit.hash.substring(0, 7);
             if (seenIds.has(id)) continue;
             seenIds.add(id);
