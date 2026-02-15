@@ -28,6 +28,7 @@ A task = any request involving code, files, commands, or decisions. If in doubt,
 
 ## Critical Rules
 
+- **Session limit: 4-5 completed tasks per conversation** — then recommend a fresh conversation to reload rules and state
 - **All DB through `src/utils/secureDb.ts`** — never raw Firestore
 - **Mobile-first** — 75% mobile users, touch targets ≥44px
 - **Never deploy production without explicit approval**

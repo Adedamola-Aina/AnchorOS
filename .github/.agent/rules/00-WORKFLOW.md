@@ -98,6 +98,18 @@ Required output to user:
 | 3 → 4 (Build → Close) | Must have passing tests or stated exception |
 | 4 → Next task | Must restart from Phase 1 for every new task |
 
+## Session Length (Non-Negotiable)
+
+After completing 4-5 tasks in a single conversation, tell the user:
+
+> "We've completed [N] tasks in this session. To keep context fresh and avoid drift, I recommend starting a new conversation for the next piece of work. This ensures I reload all project rules and get the latest dashboard state."
+
+A **task** = one complete cycle through the 4 phases (GATHER → PLAN → BUILD → CLOSE). Quick questions, clarifications, and planning discussions do NOT count as tasks.
+
+Why this exists: Long conversations cause context drift — instructions fade from the context window, mistakes compound, and the agent stops thinking like a distinguished engineer and starts pattern-matching from earlier in the thread. A fresh conversation forces a full reload of rules, anti-patterns, and project state.
+
+---
+
 ## Deployment Gate (Additional)
 
 ```
