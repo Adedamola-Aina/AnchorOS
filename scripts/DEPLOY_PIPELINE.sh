@@ -209,6 +209,20 @@ else
     exit 1
 fi
 
+# 6b. Deploy Marker (git commit for dashboard tracking)
+echo -e "\n${YELLOW}📌 Stage 6b: Recording Deploy Marker...${NC}"
+DEPLOY_VERSION=$(node -p "require('./package.json').version")
+DEPLOY_HASH=$(git rev-parse --short HEAD)
+DEPLOY_MSG="deploy(${ENV}): v${DEPLOY_VERSION} @ ${DEPLOY_HASH}"
+
+# Create an empty commit as a deploy marker (no file changes needed)
+if git commit --allow-empty --no-verify -m "$DEPLOY_MSG"; then
+    git push --no-verify origin master 2>/dev/null || true
+    echo -e "${GREEN}✅ Deploy marker recorded: ${DEPLOY_MSG}${NC}"
+else
+    echo -e "${YELLOW}⚠️  Deploy marker commit failed (non-blocking).${NC}"
+fi
+
 # 7. Dashboard Sync
 echo -e "\n${YELLOW}🔄 Stage 7: Syncing Internal Dashboard...${NC}"
 # Dashboard URLs:
