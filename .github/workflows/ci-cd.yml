@@ -17,6 +17,221 @@ env:
   NODE_VERSION: '20'
 
 jobs:
+  governance-gates:
+    name: 🛡️ PR Governance Gates
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Validate PR template governance sections
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.info('Not a pull request event. Skipping governance gate.');
+              return;
+            }
+
+            const body = pr.body || '';
+            const marker = '<!-- governance-gate-feedback -->';
+            const requiredHeadings = [
+              'Risk Class',
+              'Success Metric',
+              'Guardrail Metrics',
+              'Rollout Plan',
+              'Rollback Plan',
+              'Observability',
+              'Test-to-Risk Mapping'
+            ];
+
+            function getSectionContent(heading) {
+              const sectionRegex = new RegExp(`###\\s+${heading}\\s*([\\s\\S]*?)(?=\\n###\\s+|$)`, 'i');
+              const match = body.match(sectionRegex);
+              if (!match) return '';
+
+              return match[1]
+                .replace(/<!--([\\s\\S]*?)-->/g, '')
+                .replace(/\r/g, '')
+                .trim();
+            }
+
+            const missingHeadings = requiredHeadings.filter((heading) => {
+              const headingRegex = new RegExp(`^###\\s+${heading}\\s*$`, 'im');
+              return !headingRegex.test(body);
+            });
+
+            function hasMeaningfulContent(heading) {
+              const content = getSectionContent(heading);
+              if (!content) return false;
+
+              if (content.length < 12) return false;
+              if (/^(tbd|todo|n\\/?a|none)$/i.test(content)) return false;
+              return true;
+            }
+
+            const emptySections = requiredHeadings.filter((heading) => !hasMeaningfulContent(heading));
+
+            const requiredChecks = [
+              'I defined success + guardrail metrics',
+              'I defined rollout + rollback plan',
+              'I mapped tests to risk/failure modes'
+            ];
+
+            const unchecked = requiredChecks.filter((item) => {
+              const checkedRegex = new RegExp(`-\\s*\\[x\\]\\s*${item.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`, 'i');
+              return !checkedRegex.test(body);
+            });
+
+            const errors = [];
+            if (missingHeadings.length) errors.push(`Missing headings: ${missingHeadings.join(', ')}`);
+            if (emptySections.length) errors.push(`Sections need meaningful content: ${emptySections.join(', ')}`);
+            if (unchecked.length) errors.push(`Required checklist items must be checked: ${unchecked.join(', ')}`);
+
+            const riskClassContent = getSectionContent('Risk Class');
+            const riskMatch = riskClassContent.match(/\b([ABC])\b/i);
+            const riskClass = riskMatch ? riskMatch[1].toUpperCase() : null;
+
+            if (!riskClass) {
+              errors.push('Risk Class must explicitly include one of: A, B, or C.');
+            }
+
+            const linkedInitiativeContent = getSectionContent('Linked Initiative Issue');
+            const issueReferenceRegex = /#\d+\b|https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/\d+/i;
+            const hasInitiativeReference = issueReferenceRegex.test(linkedInitiativeContent);
+
+            if ((riskClass === 'A' || riskClass === 'B') && !hasInitiativeReference) {
+              errors.push('Risk Class A/B PRs must include a linked initiative issue reference in "Linked Initiative Issue" (e.g., #123).');
+            }
+
+            // Block PRs that reference deferred/completed roadmap IDs unless explicitly overridden.
+            // This prevents accidental re-work or duplicate delivery on closed/deferred initiatives.
+            const overrideLabels = new Set(['governance-override', 'allow-completed-id']);
+            const labelNames = new Set((pr.labels || []).map((label) => String(label.name || '').toLowerCase()));
+            const hasOverrideLabel = [...overrideLabels].some((label) => labelNames.has(label));
+
+            try {
+              const roadmapPath = 'tools/dashboard/server/roadmap.json';
+              const { data: roadmapFile } = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: roadmapPath,
+              });
+
+              if (!Array.isArray(roadmapFile) && roadmapFile?.content) {
+                const roadmapRaw = Buffer.from(roadmapFile.content, 'base64').toString('utf8');
+                const roadmap = JSON.parse(roadmapRaw);
+                const initiatives = Array.isArray(roadmap?.initiatives) ? roadmap.initiatives : [];
+
+                const roadmapById = new Map(
+                  initiatives
+                    .filter((item) => item?.id && item?.status)
+                    .map((item) => [String(item.id).toUpperCase(), { status: String(item.status).toLowerCase(), title: item.title || '' }])
+                );
+
+                const referencedIds = new Set((`${pr.title || ''}\n${body}`).toUpperCase().match(/\b[A-Z]{2,6}-\d{3}\b/g) || []);
+                const blockedIds = [];
+
+                for (const id of referencedIds) {
+                  const roadmapItem = roadmapById.get(id);
+                  if (!roadmapItem) continue;
+                  if (roadmapItem.status === 'completed' || roadmapItem.status === 'deferred') {
+                    blockedIds.push({ id, status: roadmapItem.status, title: roadmapItem.title });
+                  }
+                }
+
+                if (blockedIds.length > 0 && !hasOverrideLabel) {
+                  const summary = blockedIds
+                    .slice(0, 5)
+                    .map((item) => `${item.id} (${item.status})${item.title ? `: ${item.title}` : ''}`)
+                    .join('; ');
+
+                  errors.push(
+                    `PR references deferred/completed roadmap item(s): ${summary}. Add label 'governance-override' (or 'allow-completed-id') with justification if this is intentional.`
+                  );
+                }
+              }
+            } catch (roadmapErr) {
+              core.warning(`Roadmap status check skipped: ${roadmapErr.message}`);
+            }
+
+            if (errors.length > 0) {
+              const checklistLines = [
+                '- Ensure all required headings exist: `Risk Class`, `Linked Initiative Issue`, `Success Metric`, `Guardrail Metrics`, `Rollout Plan`, `Rollback Plan`, `Observability`, `Test-to-Risk Mapping`.',
+                '- Add meaningful content in each required section (not `TBD`, `TODO`, `N/A`, or very short placeholders).',
+                '- Check required checklist items in PR body:',
+                '  - `I defined success + guardrail metrics`',
+                '  - `I defined rollout + rollback plan`',
+                '  - `I mapped tests to risk/failure modes`',
+                '- Set `Risk Class` explicitly to `A`, `B`, or `C`.',
+                '- If risk is `A` or `B`, add a linked initiative issue reference in `Linked Initiative Issue` (example: `#123`).'
+              ];
+
+              const body = [
+                marker,
+                '## 🛡️ PR Governance Gate Failed',
+                '',
+                'The governance check found the following issues:',
+                ...errors.map((error) => `- ${error}`),
+                '',
+                '### How to fix',
+                ...checklistLines,
+                '',
+                '_This comment is automatically updated by CI._'
+              ].join('\n');
+
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                per_page: 100,
+              });
+
+              const existing = comments.find((comment) =>
+                comment.user?.type === 'Bot' && comment.body?.includes(marker)
+              );
+
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body,
+                });
+              }
+
+              core.setFailed(`PR governance gate failed. ${errors.join(' | ')}`);
+              return;
+            }
+
+            const { data: passComments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
+
+            const stale = passComments.find((comment) =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+
+            if (stale) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: stale.id,
+              });
+            }
+
+            core.info('PR governance gate passed.');
+
   # Job 1: Run linting and unit tests
   test:
     name: 🧪 Test
