@@ -407,6 +407,69 @@ jobs:
         run: |
           git push origin master --follow-tags || echo "⚠️ Push failed — add CI_PAT secret (Settings → Secrets → Actions) with a PAT that has repo write access"
 
+  # Job 2.5: Auto-deploy to dev (dev always tracks master HEAD)
+  build-dev:
+    name: 🏗️ Build Dev
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for development
+        run: npm run build:dev
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-build
+          path: dist/
+
+  deploy-dev:
+    name: 🚀 Deploy to Dev
+    runs-on: ubuntu-latest
+    needs: build-dev
+    if: github.ref == 'refs/heads/master'
+    # No environment gate — dev auto-deploys on every push to master
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dev-build
+          path: dist/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy to Firebase Dev
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
+          projectId: anchor-os-dev-1c6ec
+          channelId: live
+
   # Job 3: Build for staging
   build-staging:
     name: 🏗️ Build Staging
