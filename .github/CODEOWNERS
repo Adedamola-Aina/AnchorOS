@@ -1,0 +1,19 @@
+# Global default owner
+* @anchor-os/engineering
+
+# Core application
+/src/ @anchor-os/engineering
+/src/features/ @anchor-os/product
+/src/components/ @anchor-os/design
+/src/services/ @anchor-os/engineering
+/src/utils/ @anchor-os/architecture
+
+# Backend and infrastructure
+/functions/ @anchor-os/backend
+/config/ @anchor-os/devops
+/scripts/ @anchor-os/devops
+
+# Internal tooling and governance
+/tools/ @anchor-os/platform
+/.github/ @anchor-os/architecture
+/docs/ @anchor-os/product
