@@ -12,7 +12,19 @@
 > **"Every implementation, bug fix, or action must follow a thorough and detailed process that covers all aspects of the implementation. No half-assing or cutting corners."**  
 > — Product Owner, 2026-01-27
 
-This standard establishes ARCH-003 (Service Layer Tests) as the **baseline quality level** for all engineering work in Anchor OS.
+This standard establishes ARCH-003 (Service Layer Tests) as the **baseline quality level** for major architecture work in Anchor OS.
+
+## 📌 Applicability
+
+This 7-Phase standard applies to **ARCH-XXX architecture items** and major cross-cutting initiatives. It extends (not replaces) the mandatory 4-Phase workflow defined in `.github/.agent/rules/00-WORKFLOW.md`.
+
+| Work Type | Process |
+|-----------|--------|
+| ARCH-XXX architecture items | 7-Phase (this document) |
+| Features, bug fixes, refactors | 4-Phase (`.github/.agent/rules/00-WORKFLOW.md`) |
+| Docs, config, tooling | 4-Phase with stated TDD exception |
+
+The 4-Phase workflow (GATHER → PLAN → BUILD → CLOSE) is always the outer loop. This standard adds depth within Phase 3 (BUILD) for architecture work.
 
 ---
 
@@ -273,30 +285,15 @@ Same process, but:
 
 ---
 
-## 🎓 Virtual Engineering Team Guidance
+## 🎓 Reference Documents
 
 Follow all guidance from:
 
-1. **CLAUDE.md** - Engineering Constitution
-   - Article 1: Product Philosophy
-   - Article 2: TDD Mandate
-   - Article 3: Quality Standards
-
-2. **TESTING_STRATEGY.md** - Testing Standards
-   - Test categories and coverage goals
-   - AAA pattern
-   - Performance SLAs
-
-3. **ERROR_HANDLING.md** - Error Handling Patterns
-   - AnchorError usage
-   - Error boundaries
-   - User-facing messages
-
-4. **Workflows** (.agent/workflows/)
-   - /master - Master workflow for all work
-   - /bug-tracking - Bug tracking standards
-   - /deployment - Deployment pipeline
-   - /task-completion - Task completion checklist
+1. **CLAUDE.md** — Agent instructions and mandatory 4-Phase workflow
+2. **`.github/.agent/rules/`** — Workflow, identity, technical mandates, anti-patterns
+3. **`docs/TESTING_STRATEGY.md`** — Test categories, coverage goals, AAA pattern, performance SLAs
+4. **`docs/ERROR_HANDLING.md`** — AnchorError usage, error boundaries, user-facing messages
+5. **`.github/.agent/workflows/deploy.md`** — Deployment checklist and verification
 
 ---
 
@@ -325,17 +322,18 @@ Follow all guidance from:
 
 ### When This Standard Applies
 
-**ALWAYS** - This is the baseline for all engineering work:
-- ✅ New features (any size)
-- ✅ Bug fixes (if test coverage required)
-- ✅ Refactors (architectural changes)
+**Full 7-Phase process** (this document):
 - ✅ Architecture improvements (ARCH-XXX items)
-- ✅ Major enhancements
+- ✅ Major cross-cutting refactors
+- ✅ New infrastructure or service patterns
 
-**Simplified Process Allowed** (but still thorough):
-- Simple one-line bug fixes (obvious typos)
+**4-Phase workflow only** (`.github/.agent/rules/00-WORKFLOW.md`):
+- Features, bug fixes, refactors
 - Documentation-only changes
 - Configuration changes
+- Simple one-line fixes
+
+The 4-Phase workflow applies to ALL work. This standard adds additional rigor for architecture items.
 
 ---
 

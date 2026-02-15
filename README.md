@@ -39,7 +39,7 @@ See [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md) for the full sy
 - Node.js 20+
 - npm 9+
 - Java 21+ (Firebase emulator)
-- Access to the team's Firebase projects (request via Jira `INFRA-*` ticket)
+- Access to the team's Firebase projects (request from Product Owner)
 
 ### Setup
 
@@ -115,6 +115,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branching strategy, code review requi
 | Contact | Channel |
 |---------|---------|
 | Product Owner | Adedamola Aina |
-| Engineering Support | File a Jira ticket under the `AOS` project |
-| Infrastructure | Jira `INFRA-*` ticket for environment access or Firebase IAM changes |
-| Security Issues | Report via Jira `AOS-SEC-*` with severity tag |
+| Engineering Support | GitHub Issue using `bug_report` or `feature_request` template |
+| Infrastructure | Contact Product Owner for environment access or Firebase IAM changes |
+| Security Issues | GitHub Issue using `bug_report` template with `[Security]` prefix |

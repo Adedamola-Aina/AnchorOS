@@ -1,69 +1,66 @@
 # Internal Development Workflow
 
-This document covers the branching strategy, code review requirements, and task-linking conventions for Anchor OS.
+This document covers commit conventions, quality standards, and the development process for Anchor OS.
 
 ---
 
-## Branching Strategy
+## How Work Is Tracked
 
-All work is performed on short-lived feature branches created from `master`.
+Anchor OS uses **git commits as the single source of truth**. The Internal PM Dashboard (`localhost:3001`) auto-detects bugs, features, and deployments from commit history. There is no external issue tracker.
 
-| Branch Pattern | Purpose | Example |
-|---------------|---------|---------|
-| `feat/<ticket>-description` | New feature | `feat/AOS-142-csv-export` |
-| `fix/<ticket>-description` | Bug fix | `fix/AOS-215-transfer-validation` |
-| `refactor/<ticket>-description` | Code improvement | `refactor/AOS-301-extract-card` |
-| `chore/<ticket>-description` | Tooling, deps, config | `chore/AOS-88-upgrade-vite` |
-| `test/<ticket>-description` | Test additions/fixes | `test/AOS-190-e2e-onboarding` |
+### ID Prefixes (auto-detected by dashboard)
 
-### Rules
+| Prefix | Purpose | Example |
+|--------|---------|---------|
+| `BUG-XXX` | Bug fix | `BUG-077` |
+| `FEAT-XXX` | New feature | `FEAT-012` |
+| `GAP-XXX` | Missing capability | `GAP-005` |
+| `REG-XXX` | Regression | `REG-003` |
+| `UX-XXX` | UX improvement | `UX-032` |
+| `REM-XXX` | Remediation item | `REM-007` |
 
-- Branch from `master`. Merge back to `master`.
-- Rebase onto `master` before opening a PR — no merge commits in feature branches.
-- Delete the branch after merge.
-- Hotfixes follow the same pattern (`fix/<ticket>-description`) and are fast-tracked through review.
+Use `get_next_id` MCP tool (or `/api/intake/next-id?type=bug`) to get the next available ID.
 
 ## Commit Conventions
 
-Every commit message must use a [Conventional Commit](https://www.conventionalcommits.org/) prefix and reference the task ticket:
+Every commit message must use a [Conventional Commit](https://www.conventionalcommits.org/) prefix:
 
 ```
-feat(finance): add CSV export for transactions [AOS-142]
-fix(auth): resolve TOTP enrollment race condition [AOS-215]
-chore(deps): upgrade Vite to 7.2 [AOS-88]
-refactor(settings): extract AccountCard to shared component [AOS-301]
-test(e2e): add onboarding happy-path coverage [AOS-190]
-docs(arch): update Firestore schema documentation [AOS-305]
+fix(scope): BUG-XXX description        — Bug fix
+feat(scope): FEAT-XXX description       — New feature
+refactor(scope): description            — Code improvement
+test(scope): description                — Test additions
+docs(scope): description                — Documentation
+chore(scope): description               — Maintenance
+deploy(env): vX.X.X @ HASH             — Deployment record
 ```
 
 Commitlint enforces prefix validation on every commit via Husky.
 
-## Task Linking
+## Quality Checklist (Self-Review)
 
-- Every PR title must include the ticket ID: `[AOS-142] Add CSV export for transactions`
-- The PR description must link to the Jira ticket
-- Use Jira smart commits where applicable (`AOS-142 #done`, `AOS-142 #in-review`)
-
-## Code Review Requirements
-
-All PRs require **at least one approving review** before merge.
-
-### Reviewer Checklist
+Every change must pass this checklist before commit:
 
 1. **Tests** — New/changed behavior has corresponding unit and/or E2E tests
 2. **Types** — No `any` types in production code; strict TypeScript compliance
-3. **File size** — Source files stay under 200 lines (test files exempt)
-4. **Mobile-first** — UI changes tested at 375px viewport width
+3. **File size** — Source files stay under 200 lines (test files exempt) — ARCH-001
+4. **Mobile-first** — UI changes tested at 375px viewport width; touch targets ≥ 44px
 5. **Security** — All database access through `src/utils/secureDb.ts`; no raw Firestore calls
 6. **Performance** — No unnecessary re-renders; lazy-load heavy components
 7. **Accessibility** — Interactive elements have ARIA labels; `data-testid` on new components
 
-### Merge Criteria
+## PR Governance (CI-Enforced)
 
-- All CI checks pass (lint, type check, unit tests, E2E)
-- At least one approving review
-- No unresolved review comments
-- Branch is rebased onto latest `master`
+PRs require these sections (see `.github/PULL_REQUEST_TEMPLATE.md`):
+
+- Risk Class (A/B/C)
+- Success Metric
+- Guardrail Metrics
+- Rollout & Rollback Plan
+- Observability
+- Test-to-Risk Mapping
+
+CI automatically blocks PRs that are missing governance sections. See `docs/SHIP_GATES.md` for full gate definitions.
 
 ## Development Standards
 
@@ -88,16 +85,18 @@ All PRs require **at least one approving review** before merge.
 - Custom hooks in `src/hooks/`
 - Max 200 lines per source file; refactor if exceeded
 
-## Environment Access
+## Environments & Deployment
 
-| Environment | Access | Deploy Method |
-|-------------|--------|---------------|
-| Development | All developers | `npm run dev` (local) |
-| Staging | CI auto-deploy | Push to `master` → CI pipeline |
-| Production | Manual approval | `npm run deploy:production` (requires authorization) |
+| Environment | URL | Deploy Command |
+|-------------|-----|----------------|
+| Development | anchor-os-dev-1c6ec.web.app | `npm run deploy:dev` |
+| Staging | anchor-os-staging.web.app | `npm run deploy:staging` |
+| Production | anchor-os.web.app | `npm run deploy:production` ⚠️ |
 
-Request environment credentials via a Jira `INFRA-*` ticket. Firebase project access is managed through IAM roles.
+**Never run `firebase deploy` directly.** Always use `npm run deploy:{env}`.
+
+Production deploys require: all tests passing → staging verification → explicit owner approval.
 
 ## Questions
 
-Reach out on the team's internal channel or file a Jira ticket under the `AOS` project.
+Contact the Product Owner (Adedamola Aina) directly or file a GitHub Issue using the appropriate template.

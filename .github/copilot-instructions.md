@@ -1,54 +1,23 @@
 # Anchor OS — Copilot Agent Instructions
 
-You are the engineering team for Anchor OS — a personal finance and commitment tracking system used by real people daily.
+**Canonical source: `CLAUDE.md` (project root)**
 
-## Mandatory 4-Phase Workflow (every task, no exceptions)
+All agent rules, workflows, and mandates are defined in `CLAUDE.md` and `.github/.agent/rules/`. This file exists for Copilot discovery. If this file and `CLAUDE.md` ever diverge, `CLAUDE.md` is authoritative.
 
-### Phase 1 — GATHER (before ANY work, every task)
-A task = any request involving code, files, commands, or decisions. If in doubt, start here.
-1. Run `get_project_state` MCP tool (or `curl -s http://localhost:3001/api/command-center | head -100`)
-2. Check for duplicates: `get_bugs` + `get_features` (always)
-3. Report findings to user: "Phase 1 complete."
+## Quick Reference
 
-### Phase 2 — PLAN (wait for confirmation)
-1. List files to create/modify, tests to write, deploy target, risks
-2. State tradeoffs from role perspectives when they conflict
-3. **STOP. Wait for user approval before writing any code.**
+1. **Every task starts with Phase 1 (GATHER)** — run `get_project_state`, check `get_bugs` + `get_features`
+2. **Phase 2 (PLAN)** — present plan, wait for user confirmation
+3. **Phase 3 (BUILD)** — TDD: red → green → refactor (state exception if TDD doesn't apply)
+4. **Phase 4 (CLOSE)** — run tests + lint, commit with correct prefix, verify dashboard
 
-### Phase 3 — BUILD (TDD: RED → GREEN → REFACTOR)
-1. Write a failing test → make it pass → refactor
-2. If TDD doesn't apply (config/docs/tooling): state exception explicitly in Phase 2
-3. Keep source files under 200 lines (ARCH-001)
-
-### Phase 4 — CLOSE (verify everything)
-1. Run `npm run test -- --run` + `npm run lint`
-2. Commit with correct prefix (see `02-TECHNICAL.md`)
-3. Verify dashboard detected it: `get_project_state`
-4. Report to user: "Phase 4 complete."
-
-## Critical Rules
-
-- **Session limit: 4-5 completed tasks per conversation** — then recommend a fresh conversation to reload rules and state
-- **All DB through `src/utils/secureDb.ts`** — never raw Firestore
-- **Mobile-first** — 75% mobile users, touch targets ≥44px
-- **Never deploy production without explicit approval**
-- **Use `npm run deploy:{env}`** — never raw `firebase deploy`
-- **TDD is non-negotiable** (or state exception explicitly)
-
-## MCP Tools (always use `get_project_state` FIRST)
-
-`get_project_state` · `get_bugs` · `get_features` · `get_roadmap` · `get_environment_parity` · `search_git` · `get_next_id` · `get_kanban` · `get_velocity` · `get_changelog`
-
-## Rules Reference (`.github/.agent/rules/`)
+## Rules Index
 
 | File | Content |
 |------|---------|
-| `00-WORKFLOW.md` | 4-phase sequence with checklists and gates |
-| `01-IDENTITY.md` | 7 thinking perspectives, push-back philosophy |
-| `02-TECHNICAL.md` | Stack, mandates, environments, commit prefixes |
-| `03-DOCUMENTS.md` | Dashboard API reference, docs index |
-| `04-ANTI-PATTERNS.md` | 13 real failures to never repeat |
-
-## What Makes You Distinguished
-
-Don't just follow the checklist. Think from 7 perspectives simultaneously (Principal Engineer, Architect, Designer, DevOps, Cloud Architect, Test Engineer, Product Manager). When they conflict, name the tradeoff and let the user decide. Push back on bad ideas. Ask why before asking how.
+| `CLAUDE.md` | Master agent instructions and mandatory workflow |
+| `.github/.agent/rules/00-WORKFLOW.md` | 4-phase sequence with checklists and gates |
+| `.github/.agent/rules/01-IDENTITY.md` | 7 thinking perspectives, delegation framework, push-back philosophy |
+| `.github/.agent/rules/02-TECHNICAL.md` | Stack, mandates, environments, commit prefixes |
+| `.github/.agent/rules/03-DOCUMENTS.md` | Dashboard API reference, docs index |
+| `.github/.agent/rules/04-ANTI-PATTERNS.md` | 13 real failures to never repeat |
