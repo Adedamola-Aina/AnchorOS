@@ -13,7 +13,7 @@ vi.mock('@sentry/react', () => ({
 // We need to control import.meta.env.DEV
 // By default in vitest environment DEV=true
 
-import { trace, logEvent, createTracer } from './index';
+import { trace, logEvent, logProductEvent, createTracer } from './index';
 
 describe('trace', () => {
     beforeEach(() => vi.clearAllMocks());
@@ -136,5 +136,23 @@ describe('createTracer', () => {
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             message: expect.stringContaining('Tasks.save'),
         }));
+    });
+});
+
+describe('logProductEvent', () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it('logs validated product events with product prefix', () => {
+        logProductEvent('onboarding_started', { source: 'new_user' });
+
+        expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
+            category: 'event',
+            message: 'product.onboarding_started',
+            data: { source: 'new_user' },
+        }));
+    });
+
+    it('throws for invalid contract payload', () => {
+        expect(() => logProductEvent('onboarding_completed', { durationMs: -1 })).toThrow();
     });
 });

@@ -7,6 +7,7 @@
  * @module services/telemetry
  */
 import * as Sentry from '@sentry/react';
+import { validateAnalyticsEvent, type AnalyticsEventName } from '../../analytics/contract';
 
 interface TraceOptions {
     attributes?: Record<string, string | number | boolean>;
@@ -98,6 +99,14 @@ export function logEvent(
     }
 }
 
+export function logProductEvent(name: AnalyticsEventName, payload: Record<string, unknown>): void {
+    const event = validateAnalyticsEvent({ name, payload });
+    logEvent(`product.${event.name}`, {
+        level: 'info',
+        attributes: event.payload,
+    });
+}
+
 /**
  * Create a scoped tracer for a specific feature
  */
@@ -114,6 +123,7 @@ export function createTracer(featureName: string) {
 export const TelemetryService = {
     trace,
     logEvent,
+    logProductEvent,
     createTracer,
 };
 
