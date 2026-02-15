@@ -23,10 +23,10 @@ export const SectionHeader = ({ title, subtitle, action }: { title: string, subt
 
 export const Badge = ({ children, type, variant = 'solid' }: { children: React.ReactNode, type: string, variant?: 'solid' | 'outline' }) => {
   const styles: Record<string, string> = {
-    personal: 'bg-anchor-personal-light text-anchor-personal dark:bg-anchor-personal-dark/30 dark:text-anchor-personal-light',
-    family: 'bg-anchor-family-light text-anchor-family dark:bg-anchor-family-dark/30 dark:text-anchor-family-light',
-    checking: 'bg-anchor-success-light text-anchor-success dark:bg-anchor-success-dark/30 dark:text-anchor-success-light',
-    savings: 'bg-anchor-finance-light text-anchor-finance dark:bg-anchor-finance-dark/30 dark:text-anchor-finance-light',
+    personal: 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300',
+    family: 'bg-family-50 text-family-700 dark:bg-family-900/30 dark:text-family-300',
+    checking: 'bg-finance-50 text-finance-700 dark:bg-finance-900/30 dark:text-finance-300',
+    savings: 'bg-task-50 text-task-700 dark:bg-task-900/30 dark:text-task-300',
     todo: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
   };
 

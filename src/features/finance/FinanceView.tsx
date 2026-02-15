@@ -132,7 +132,7 @@ const FinanceView = () => {
 
   return (
     <FeatureErrorBoundary featureName="Finance">
-      <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 relative ${isMobile ? 'space-y-5' : 'space-y-8'}`}>
+      <div className={`relative ${isMobile ? 'space-y-5' : 'space-y-8'}`}>
         <SectionHeader title="Finance" subtitle="Multi-account asset management and cashflow tracking." action={<Button variant="secondary" size="sm" onClick={() => setMode(mode === 'addAcc' ? 'view' : 'addAcc')} className="gap-2"><Landmark className="w-4 h-4" /> <span>Add Account</span></Button>} />
 
         {!isSearching && (<><NetWorthCards netWorth={netWorth} /><MonthlyInsight transactions={transactions} currency={primaryCurrency} />

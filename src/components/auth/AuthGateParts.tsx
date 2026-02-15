@@ -6,7 +6,10 @@
 import React from 'react';
 import { Mail } from 'lucide-react';
 import { AnchorLogo } from '../shared';
-import { OnboardingView } from '../../features/onboarding/OnboardingView';
+
+const LazyOnboardingView = React.lazy(() =>
+    import('../../features/onboarding/OnboardingView').then((module) => ({ default: module.OnboardingView }))
+);
 
 export const AuthLoadingScreen: React.FC = () => (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 gap-6">
@@ -37,4 +40,11 @@ export const EmailVerificationGate: React.FC<EmailVerificationGateProps> = ({ em
 );
 
 interface OnboardingGateProps { show: boolean; }
-export const OnboardingGate: React.FC<OnboardingGateProps> = ({ show }) => show ? <OnboardingView /> : null;
+export const OnboardingGate: React.FC<OnboardingGateProps> = ({ show }) => {
+    if (!show) return null;
+    return (
+        <React.Suspense fallback={<AuthLoadingScreen />}>
+            <LazyOnboardingView />
+        </React.Suspense>
+    );
+};

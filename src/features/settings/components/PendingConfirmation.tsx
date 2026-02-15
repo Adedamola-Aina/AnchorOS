@@ -7,14 +7,12 @@
 import { useState, useEffect } from 'react';
 import { useNotifications } from '../../../context/NotificationContext';
 import type { MultiFactorResolver } from 'firebase/auth';
-import { db, APP_ID } from '../../../config/firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { AwaitingConfirmationCard } from './AwaitingConfirmationCard';
 import { PendingInviteCard } from './PendingInviteCard';
 import { MfaConfirmationCard } from './MfaConfirmationCard';
 import { completeConnectionConfirmation, reauthenticateUser, getMfaResolver, verifyMfaAndComplete, rejectInvitation, cancelInvitation } from './pendingConfirmationHandlers';
+import { subscribeToOwnerPendingInvitations, type PendingInvitation } from '../../../api/FamilyInvitationApi';
 
-interface PendingInvitation { id: string; inviteeEmail: string; status: 'pending' | 'awaiting_confirmation'; createdAt: string; }
 interface PendingConfirmationProps { userId: string; onConnectionConfirmed: (redirectTo: string, message: string) => void; }
 
 export function PendingConfirmation({ userId, onConnectionConfirmed }: PendingConfirmationProps) {
@@ -29,12 +27,9 @@ export function PendingConfirmation({ userId, onConnectionConfirmed }: PendingCo
     const [mfaCode, setMfaCode] = useState('');
 
     useEffect(() => {
-        const invitationsRef = collection(db, 'artifacts', APP_ID, 'family_invitations');
-        const q = query(invitationsRef, where('ownerUid', '==', userId), where('status', 'in', ['pending', 'awaiting_confirmation']));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            if (!snapshot.empty) {
-                const doc = snapshot.docs[0]; const data = doc.data();
-                setPendingInvite({ id: doc.id, inviteeEmail: data.inviteeEmail, status: data.status, createdAt: data.createdAt });
+        const unsubscribe = subscribeToOwnerPendingInvitations(userId, (invitations) => {
+            if (invitations.length > 0) {
+                setPendingInvite(invitations[0]);
             } else { setPendingInvite(null); }
             setLoading(false);
         });

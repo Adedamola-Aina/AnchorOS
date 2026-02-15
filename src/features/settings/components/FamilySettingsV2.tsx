@@ -16,9 +16,8 @@ import { InviteFamilyMember } from './InviteFamilyMember';
 import { PendingConfirmation } from './PendingConfirmation';
 import { FamilyLoadingState, FamilyPostConnectionMessage, FamilyConnectedState, FamilyInviteCard } from './FamilySettingsStates';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { db, APP_ID } from '../../../config/firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import type { FamilyConnection } from '../../../types';
+import { subscribeToOwnerPendingInvitations } from '../../../api/FamilyInvitationApi';
 
 interface FamilySettingsV2Props { onNavigateToFinance?: () => void; connection?: FamilyConnection | null; connectionLoading?: boolean; }
 
@@ -39,9 +38,9 @@ export function FamilySettingsV2({ onNavigateToFinance, connection: externalConn
     // Only listen for pending invites (unique to this component)
     useEffect(() => {
         if (!user) return;
-        const invitesRef = collection(db, 'artifacts', APP_ID, 'family_invitations');
-        const pendingQuery = query(invitesRef, where('ownerUid', '==', user.uid), where('status', 'in', ['pending', 'awaiting_confirmation']));
-        const unsubPending = onSnapshot(pendingQuery, (snapshot) => { setHasPendingInvite(!snapshot.empty); });
+        const unsubPending = subscribeToOwnerPendingInvitations(user.uid, (invitations) => {
+            setHasPendingInvite(invitations.length > 0);
+        });
         return () => { unsubPending(); };
     }, [user]);
 

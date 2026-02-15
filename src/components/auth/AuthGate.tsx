@@ -7,8 +7,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useFinance } from '../../context/FinanceContext';
-import { useTasks } from '../../context/TaskContext';
 import { useNotifications } from '../../context/NotificationContext';
 import AuthView from '../../features/auth/AuthView';
 import { getMultiFactorResolver, type MultiFactorResolver, type MultiFactorError } from 'firebase/auth';
@@ -20,8 +18,6 @@ interface AuthGateProps { children: React.ReactNode; }
 
 const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     const { user, loading, profile, updateProfile, signIn, signUp, verifyMfa, logout, sendVerificationEmail, sendPasswordReset } = useAuth();
-    const { accounts } = useFinance();
-    const { tasks } = useTasks();
     const { showToast } = useNotifications();
     const navigate = useNavigate();
     const location = useLocation();
@@ -84,8 +80,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     const isTestUser = user.email === 'test@anchor-os.com' || user.email?.endsWith('@anchor-os.com');
     if (!user.emailVerified && !isDevOrStaging && !isTestUser) return <EmailVerificationGate email={user.email!} onResend={async () => { await sendVerificationEmail(); showToast('Verification email sent!', 'success'); }} onRefresh={() => window.location.reload()} onLogout={logout} />;
 
-    const isBrandNew = accounts.length === 0 && tasks.length === 0;
-    const showOnboarding = !isTestUser && ((profile.onboardingComplete === false) || (isBrandNew && profile.onboardingComplete !== true));
+    const showOnboarding = !isTestUser && profile.onboardingComplete === false;
     if (showOnboarding) return <OnboardingGate show={true} />;
 
     return <>{children}</>;

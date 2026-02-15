@@ -5,12 +5,11 @@
 
 import React, { useState } from 'react';
 import { Shield, Eye, ArrowRightLeft, Settings } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db, APP_ID } from '../../../config/firebase';
 import { useNotifications } from '../../../context/NotificationContext';
 import { captureError } from '../../../utils/error';
+import { updateSharedPermission, type SharePermission } from '../../../api/AccountSharingApi';
 
-type Permission = 'read' | 'transact' | 'manage';
+type Permission = SharePermission;
 
 const PERMISSIONS: { value: Permission; label: string; desc: string; Icon: React.FC<{ className?: string }> }[] = [
   { value: 'read', label: 'View Only', desc: 'Can see balance and transactions', Icon: Eye },
@@ -35,8 +34,7 @@ export const SharePermissionPicker: React.FC<Props> = ({ accountId, ownerUid, sh
     if (newPerm === permission) return;
     setSaving(true);
     try {
-      const accountRef = doc(db, 'artifacts', APP_ID, 'users', ownerUid, 'accounts', accountId);
-      await updateDoc(accountRef, { [`sharedWith.${sharedUid}.permission`]: newPerm });
+      await updateSharedPermission(ownerUid, accountId, sharedUid, newPerm);
       setPermission(newPerm);
       showToast(`Permission updated to ${PERMISSIONS.find(p => p.value === newPerm)?.label}.`, 'success');
     } catch (e) {

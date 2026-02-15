@@ -7,10 +7,9 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
-import { db, APP_ID } from '../config/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import pkg from '../../package.json';
 import { ContactSuccessMessage, ContactHeader, SubjectSelect, MessageInput, IdentityFields, SubmitButton, SUBJECTS } from './ContactModalParts';
+import { createFeedbackBackup } from '../api/FeedbackApi';
 
 const APP_VERSION = (pkg as unknown as { version: string }).version;
 type SubjectType = 'question' | 'problem' | 'feature' | 'testimonial' | 'feedback' | 'other';
@@ -37,7 +36,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ onClose, currentPage = 'unk
 
         try {
             let firestoreSuccess = false, emailSuccess = false;
-            try { await addDoc(collection(db, 'artifacts', APP_ID, 'feedback'), { ...payload, createdAt: serverTimestamp(), status: 'new' }); firestoreSuccess = true; }
+            try { await createFeedbackBackup(payload); firestoreSuccess = true; }
             catch (fsErr) { console.error('[Contact] Firestore backup failed:', fsErr); }
 
             const FORMSPREE_ID = import.meta.env.VITE_FORMSPREE_ID;
