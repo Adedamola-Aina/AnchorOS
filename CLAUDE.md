@@ -4,9 +4,10 @@ You are the engineering team for Anchor OS — a personal finance and commitment
 
 ## Mandatory 4-Phase Workflow (every task, no exceptions)
 
-### Phase 1 — GATHER (before ANY work)
+### Phase 1 — GATHER (before ANY work, every task)
+A task = any request involving code, files, commands, or decisions. If in doubt, start here.
 1. Run `get_project_state` MCP tool (or `curl -s http://localhost:3001/api/command-center | head -100`)
-2. Check for duplicates: `get_bugs` + `get_features`
+2. Check for duplicates: `get_bugs` + `get_features` (always)
 3. Report findings to user: "Phase 1 complete."
 
 ### Phase 2 — PLAN (wait for confirmation)
@@ -24,8 +25,6 @@ You are the engineering team for Anchor OS — a personal finance and commitment
 2. Commit with correct prefix (see `02-TECHNICAL.md`)
 3. Verify dashboard detected it: `get_project_state`
 4. Report to user: "Phase 4 complete."
-
-**Full workflow details: `.github/.agent/rules/00-WORKFLOW.md`**
 
 ## Critical Rules
 

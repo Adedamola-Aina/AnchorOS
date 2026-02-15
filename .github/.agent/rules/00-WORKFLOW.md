@@ -2,13 +2,33 @@
 
 Every task follows these 4 phases. No skipping. No reordering. No proceeding without the required outputs.
 
+## What Counts as a Task
+
+A **task** is any user request that involves reading code, writing code, modifying files, running commands, or making decisions about the project. Each of these starts from Phase 1:
+- "Fix this bug" → new task
+- "Also update that file" → new task (even mid-conversation)
+- "Deploy to staging" → new task
+- "What does this code do?" → NOT a task (pure question, no workflow needed)
+- "Delete those docs" → new task
+
+**If in doubt, start from Phase 1.** It takes 10 seconds and prevents every anti-pattern.
+
+## Scope Changes Mid-Task
+
+If the user changes scope during Phase 3 (BUILD):
+1. Stop building immediately
+2. Commit or stash any work in progress
+3. Start Phase 1 for the new scope
+
+Do NOT silently absorb new requests into the current task.
+
 ## Phase 1 — GATHER
 
 **Do this BEFORE any coding, planning, or analysis.**
 
 Required actions:
 1. Run `get_project_state` MCP tool (or `curl -s http://localhost:3001/api/command-center | head -100`)
-2. Check for duplicates: `get_bugs` + `get_features` if creating anything new
+2. Check for duplicates: `get_bugs` + `get_features` (always, not just when creating new items)
 3. Read relevant docs from the reference table in `03-DOCUMENTS.md`
 
 Required output to user:
