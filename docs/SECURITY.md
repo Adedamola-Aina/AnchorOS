@@ -18,6 +18,7 @@
 7. [Security Review Checklist](#security-review-checklist)
 8. [Incident Response](#incident-response)
 9. [Vulnerability Disclosure](#vulnerability-disclosure)
+10. [SAST Workflow Policy](#sast-workflow-policy)
 
 ---
 
@@ -709,6 +710,31 @@ Day 28: Public disclosure (if appropriate)
 3. **Verify Connections**: Only accept Family Mode invitations from known contacts
 4. **Review Activity**: Check activity logs on shared accounts
 5. **Report Issues**: Report suspicious activity immediately
+
+---
+
+## SAST Workflow Policy
+
+Anchor OS uses a policy-gated Checkmarx workflow in `.github/workflows/checkmarx-one.yml`.
+
+### Enablement Rules
+
+- Workflow scan execution is **disabled by default** unless repository variable `CHECKMARX_ENABLED` is set to `true`.
+- Required repository secrets:
+  - `CX_CLIENT_ID`
+  - `CX_CLIENT_SECRET`
+  - `CX_TENANT`
+- If the variable is not enabled or any secret is missing, the workflow exits cleanly and logs an explicit skip reason.
+
+### Operational Decision
+
+- **Decision**: Keep the workflow, but run only under explicit enablement and valid credentials.
+- **Rationale**: Prevents false confidence from template-style configuration while preserving a ready path for active SAST scanning.
+
+### Ownership
+
+- Security owner: DevOps + Security.
+- Quarterly task: verify variable/secrets health and confirm scans are producing SARIF output.
 
 ---
 

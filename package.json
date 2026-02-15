@@ -30,8 +30,9 @@
     "deploy:production": "./scripts/DEPLOY_PIPELINE.sh --env=production",
     "build:analyze": "ANALYZE=true vite build --config config/vite.config.ts",
     "audit:docs": "node scripts/audit-docs.mjs",
-    "test:mutation": "stryker run --configFile config/stryker.config.mjs",
-    "test:mutation:dry": "stryker run --dryRunOnly --configFile config/stryker.config.mjs",
+    "analytics:validate": "vitest --config config/vitest.config.ts --run src/analytics/contract.test.ts",
+    "test:mutation": "stryker run config/stryker.config.mjs",
+    "test:mutation:dry": "stryker run --dryRunOnly config/stryker.config.mjs",
     "prepare": "husky"
   },
   "dependencies": {

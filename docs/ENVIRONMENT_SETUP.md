@@ -102,10 +102,12 @@ VITE_FORMSPREE_ID=your_formspree_endpoint_id
 # ----------------------------------------------------------------------------
 # FEATURE FLAGS (Optional)
 # ----------------------------------------------------------------------------
-# Enable/disable features in development
-# VITE_ENABLE_ANALYTICS=false
-# VITE_ENABLE_DEBUG_PANEL=true
-# VITE_ENABLE_FIREBASE_EMULATOR=false
+# Global kill-switch for all rollout flags
+# VITE_FLAG_DISABLE_ALL=false
+
+# Fabric suggestions progressive rollout controls
+# VITE_FLAG_FABRIC_SUGGESTIONS=true
+# VITE_FLAG_FABRIC_SUGGESTIONS_ROLLOUT=100
 
 # ----------------------------------------------------------------------------
 # DEPLOYMENT TARGET (For build scripts)
@@ -196,6 +198,55 @@ const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
 ```
 
 **Default**: `undefined` (contact form disabled)
+
+---
+
+#### VITE_FLAG_DISABLE_ALL
+
+**Type**: `string` (`true`/`false`)  
+**Purpose**: Global kill-switch that disables all runtime feature flags
+
+**Usage in Code**:
+
+```typescript
+if (import.meta.env.VITE_FLAG_DISABLE_ALL === 'true') {
+  return false;
+}
+```
+
+**Default**: `undefined` (no global override)
+
+---
+
+#### VITE_FLAG_FABRIC_SUGGESTIONS
+
+**Type**: `string` (`true`/`false`)  
+**Purpose**: Force-enable or force-disable Fabric suggestions regardless of rollout percentage
+
+**Usage in Code**:
+
+```typescript
+const forced = import.meta.env.VITE_FLAG_FABRIC_SUGGESTIONS;
+// when set to 'true' or 'false', overrides rollout logic
+```
+
+**Default**: `undefined` (uses rollout logic)
+
+---
+
+#### VITE_FLAG_FABRIC_SUGGESTIONS_ROLLOUT
+
+**Type**: `string` (numeric percentage `0-100`)  
+**Purpose**: Gradual rollout control for Fabric suggestions by stable user cohort
+
+**Usage in Code**:
+
+```typescript
+const rollout = Number(import.meta.env.VITE_FLAG_FABRIC_SUGGESTIONS_ROLLOUT ?? '100');
+// users are deterministically bucketed 0-99, enabled when bucket < rollout
+```
+
+**Default**: `100`
 
 ---
 
