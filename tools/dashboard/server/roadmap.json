@@ -1,2038 +1,2150 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2026-02-08",
-  "teams": [
-    "Product",
-    "Engineering",
-    "Architecture",
-    "Security",
-    "Database",
-    "DevOps",
-    "QA",
-    "Auth",
-    "Mobile",
-    "Design",
-    "Innovation",
-    "Data",
-    "Marketing",
-    "Branding"
-  ],
-  "priorities": [
-    "P0",
-    "P1",
-    "P2",
-    "P3"
-  ],
-  "statuses": [
-    "planned",
-    "in-progress",
-    "completed",
-    "deferred"
-  ],
-  "initiatives": [
-    {
-      "id": "UX-034",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Isolate shared account transactions and notifications to account detail view",
-      "description": "Shared account transactions and family notifications were cluttering the main Finance page. Now personal accounts show on Finance page, shared account data (transactions, notifications, activity) shows only inside the shared account detail view. FamilyNotificationBanner scoped by accountId prop. Clear information boundary between personal and shared finances.",
-      "status": "completed",
-      "detectionPatterns": [
-        "UX-034"
-      ],
-      "effort": "medium",
-      "impact": "high",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "UX-033",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "Add offline error handling for family operations",
-      "description": "shareAccount and disconnectFamily call Cloud Functions with no network check or offline queue. Add offline detection and retry logic for 97% mobile users.",
-      "status": "planned",
-      "detectionPatterns": [
-        "UX-033"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "FIN-010",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Shared account permission granularity - read-only vs read-write",
-      "description": "useFamilySharing shareAccount is binary share:boolean. Add read-only vs read-write permission control. Allow per-account visibility settings.",
-      "status": "planned",
-      "detectionPatterns": [
-        "FIN-010"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "UX-032",
-      "team": "Design",
-      "priority": "P2",
-      "title": "Accessibility controls - font size, high contrast, reduced motion",
-      "description": "AppearanceSettings only has theme toggle. Add font size slider, high contrast mode, and reduced motion toggle for accessibility compliance.",
-      "status": "planned",
-      "detectionPatterns": [
-        "UX-032"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "UX-031",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "Add back button in onboarding steps",
-      "description": "Onboarding flow has no way to go back to previous step. Users cannot correct mistakes without starting over. Resolved: GettingStartedSecurity step 4 includes Back button, existing steps 2-3 already had back.",
-      "status": "completed",
-      "detectionPatterns": [
-        "UX-031"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06",
-      "completedAt": "2026-02-08"
-    },
-    {
-      "id": "UX-030",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "Auto-submit at 6 digits for MFA and invite codes",
-      "description": "MFA and invite code inputs should auto-submit when 6 characters entered. Saves a tap on mobile.",
-      "status": "planned",
-      "detectionPatterns": [
-        "UX-030"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "UX-029",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "Add inputMode=numeric on invite and MFA code inputs",
-      "description": "Numeric code inputs should use inputMode=numeric to show number keyboard on mobile. Currently shows full keyboard.",
-      "status": "planned",
-      "detectionPatterns": [
-        "UX-029"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "FIN-009",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Per-category notification controls",
-      "description": "NotificationSettings only has global toggle. Add per-category controls: family activity, transaction alerts, commitment reminders. Add quiet hours/DND schedule.",
-      "status": "planned",
-      "detectionPatterns": [
-        "FIN-009"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "FIN-008",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Add CSV export option for data export",
-      "description": "DataManagement only exports JSON. Add CSV export which mobile users can open in spreadsheet apps. More accessible format for 97% mobile users.",
-      "status": "planned",
-      "detectionPatterns": [
-        "FIN-008"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "FIN-007",
-      "team": "Security",
-      "priority": "P1",
-      "title": "Add password change flow in settings",
-      "description": "SecuritySettings only has MFA. Add password change capability with current password verification and Firebase Auth reauthentication.",
-      "status": "planned",
-      "detectionPatterns": [
-        "FIN-007"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "FIN-006",
-      "team": "Security",
-      "priority": "P1",
-      "title": "Add MFA recovery codes",
-      "description": "2FA enrollment should generate and display recovery codes. Store hashed codes in Firestore. Allow one-time use if user loses authenticator device.",
-      "status": "planned",
-      "detectionPatterns": [
-        "FIN-006"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "FIN-005",
-      "team": "Security",
-      "priority": "P0",
-      "title": "Implement actual account deletion Cloud Function",
-      "description": "handleDeleteAccount needs backend implementation. Cloud Function to purge Firestore data, delete Firebase Auth user, comply with GDPR right to erasure.",
-      "status": "planned",
-      "detectionPatterns": [
-        "FIN-005"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-060",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Chrome native pull-to-refresh conflicts with app scroll",
-      "description": "Chrome pull-to-refresh reloads the page instead of using in-app refresh. Fixed with e.preventDefault() on touchmove.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-060"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-061",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "AssetDistributionChart not responsive for mobile height",
-      "description": "Chart container has fixed height that clips on mobile viewports. Made responsive.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-061"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-062",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Keyboard covers input on AuthView and OnboardingView",
-      "description": "Mobile keyboard covers form inputs. Fixed with useKeyboardAvoidance hook.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-062"
-      ],
-      "effort": "medium",
-      "impact": "high",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-063",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "EditTaskForm not visible when opened below fold",
-      "description": "EditTaskForm opens below viewport on long lists. Fixed with scrollIntoView on mount.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-063"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-065",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "WeeklyView toggle buttons under 44px touch target",
-      "description": "Toggle buttons in WeeklyView are only 24px. Fixed with min-w-11 min-h-11 (44px).",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-065"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-066",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "AssetAllocation expand button only 16px",
-      "description": "Expand/collapse chevron button has no size constraint. Fixed with min-w-11 min-h-11.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-066"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-067",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "NotificationSettings toggle switches 24px height",
-      "description": "Push and email toggle switches only h-6 (24px). Added min-h-11 for 44px touch target.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-067"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-068",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "FamilyNotificationBanner buttons under 44px",
-      "description": "View link, prev/next arrows, and dismiss button all under 44px. Fixed all 4 buttons.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-068"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-069",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Confirm dialog buttons under 44px",
-      "description": "Cancel and Confirm buttons in modal dialogs only ~34px. Added min-h-11.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-069"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-070",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Onboarding skip buttons have no touch target",
-      "description": "Skip for now links in 3 onboarding steps have no size constraint. Fixed all 3 with min-h-11.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-070"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-071",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Auth footer links undersized",
-      "description": "Sign up/Sign in toggle links have no touch target. Added min-h-11 and hover background.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-071"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-072",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "SettingsView Sign Out button undersized",
-      "description": "Ghost sm button under 44px. Added min-h-11 class.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-072"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-064",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "No quick section navigation in Settings on mobile",
-      "description": "Long Settings page requires excessive scrolling. Added SectionNav for quick mobile navigation.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-064"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-059",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Pay Bill transaction identical to regular expense - no category distinction",
-      "description": "Pay Bill creates a transaction with no distinguishing category. Should pre-fill category as Bills & Utilities to differentiate from regular expenses.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-059"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-058",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "O(n\u00b2) percentage calculation in AssetDistributionChart legend",
-      "description": "Each legend item recalculates total via accountData.reduce() inside map. Pre-compute percentages in useMemo for O(n) performance.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-058"
-      ],
-      "effort": "small",
-      "impact": "small",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-057",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Negative account balances crash AssetDistributionChart percentages",
-      "description": "Negative account balances pass to pie chart producing negative percentages and rendering errors. Chart should filter to positive balances only and show warning.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-057"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-056",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "FamilySettingsV2 duplicates Firestore listeners from useFamilySharing",
-      "description": "FamilySettingsV2 sets up own onSnapshot listeners instead of using useFamilySharing hook. Creates 6 concurrent listeners for same data. State can diverge between components.",
-      "status": "planned",
-      "detectionPatterns": [
-        "BUG-056"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-055",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Profile name fires Firestore write on every keystroke - no debounce",
-      "description": "ProfileSettings onChange calls updateProfile immediately. Typing John triggers 4 Firestore writes and 4 audit logs. Performance and cost disaster on mobile.",
-      "status": "planned",
-      "detectionPatterns": [
-        "BUG-055"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-054",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "writeBatch wipe data can exceed Firestore 500-op limit",
-      "description": "handleWipeData uses single writeBatch for all collections. Users with 500+ total documents get Firestore error. No chunking logic.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-054"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-053",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "MFA timeout stale closure - error never fires",
-      "description": "handleGenerateMfaSecret timeout captures pre-setState isEnrolling value (false). Condition isEnrolling && !mfaQrUrl always false. 10-second timeout error never displays.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-053"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-052",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Hardcoded naira in charts - AssetDistributionChart and CashFlowChart",
-      "description": "Both chart components hardcode naira symbol instead of using account currency. Wrong symbol shown for USD accounts in all visualizations.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-052"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-051",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "RecurringTransactionsList hardcodes NGN currency symbol",
-      "description": "RecurringTransactionsList always displays naira symbol regardless of transaction currency. USD recurring transactions show wrong symbol.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-051"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-050",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "calculateNetWorth.total ignores USD entirely",
-      "description": "Net worth calculation only sums NGN balances. USD account balances are silently excluded from total net worth.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-050"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-049",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "30 Day Summary is actually 28 days and uses today not selected month",
-      "description": "The 30 Day Summary card always calculates from today minus 28 days, ignoring which month the user has selected. Shows current data even when viewing past months.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-049"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-048",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "MonthlyInsight uses first account currency for multi-currency totals",
-      "description": "Multi-currency users see meaningless sums. NGN + USD added together using NGN symbol. Should either convert via exchange rate or show per-currency totals.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-048"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-047",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "No monthly opening/closing balance - always shows today",
-      "description": "Finance view always displays current balance regardless of which month is selected. Users cannot see what their balance was at end of previous months.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-047"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-046",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "15+ touch targets below 44px platform minimum",
-      "description": "WeeklyView toggle 24px, MonthlyDates 32px, TaskItem checkbox 32px, AssetAllocation expand 16px, notification toggles 24px, toast dismiss 24px, nav hamburger 36px. All below Apple 44px and Google 48px minimums.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-046"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-045",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Loading overlay blocks all scrolling with pointer-events-none",
-      "description": "Dashboard loading overlay applies pointer-events-none to body, blocking all scroll and touch. Screen appears frozen during data loads.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-045"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-044",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Toast notifications min-w-300px overflows on small phones",
-      "description": "Toasts have min-w-[300px] + right-6 positioning. On 375px phones, toasts are cut off on left edge.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-044"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-043",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "autoComplete=off blocks mobile autofill on email and password",
-      "description": "Auth forms use autoComplete=off which blocks iOS/Android password autofill. 97% mobile users must hand-type credentials.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-043"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-042",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "min-h-screen used instead of dvh throughout auth and onboarding",
-      "description": "6+ files use min-h-screen which does not account for mobile browser chrome. Content hidden behind URL bar. Should use min-h-dvh.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-042"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-041",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "1300ms hard delay before financial confirmation dialog",
-      "description": "Finance flow has setTimeout 1300ms before showing confirmation. Users think app is frozen while waiting for dialog.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-041"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-040",
-      "team": "Mobile",
-      "priority": "P0",
-      "title": "WeeklyView forces min-w-800px - unusable on mobile",
-      "description": "WeeklyView component has min-w-[800px] hardcoded. 375px phones show horizontal scroll bar, content unreadable. 97% users are mobile.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-040"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-039",
-      "team": "Engineering",
-      "priority": "P0",
-      "title": "Push notification disable toggle broken - cannot turn off",
-      "description": "NotificationContext disable path only changes React state. FCM token not deleted from Firestore, browser permission stays granted, useEffect re-restores token on mount. Users cannot disable push.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-039"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-038",
-      "team": "Security",
-      "priority": "P0",
-      "title": "handleDeleteAccount is no-op - GDPR violation",
-      "description": "SettingsView handleDeleteAccount shows toast and logs out but does not delete data. No Cloud Function, no Firestore purge, no Firebase Auth deletion. User data persists forever.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-038"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-037",
-      "team": "Engineering",
-      "priority": "P0",
-      "title": "Transfers double-counted in all summary aggregations",
-      "description": "Transfers stored as income/expense type. MonthlyInsight, CashFlowChart, and all summaries include them, showing 2x actual income and expenses.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-037"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-036",
-      "team": "Engineering",
-      "priority": "P0",
-      "title": "Type change income to expense produces zero balance correction",
-      "description": "Changing transaction type from income to expense without changing amount causes silent balance corruption due to wrong sign logic.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-036"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-035",
-      "team": "Engineering",
-      "priority": "P0",
-      "title": "Transfer deletion race condition - getDoc outside transaction",
-      "description": "Transfer deletion reads paired transaction with getDoc() outside Firestore runTransaction block. Race condition causes double-deletion or orphaned half-transfers.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-035"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-034",
-      "team": "Engineering",
-      "priority": "P0",
-      "title": "Cross-currency transfer edit corrupts destination balance",
-      "description": "Editing a cross-currency transfer applies source currency amount to destination account balance, corrupting multi-currency balances.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-034"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "BUG-033",
-      "team": "Engineering",
-      "priority": "P0",
-      "title": "Transaction scope field missing - as any cast hides undefined scope",
-      "description": "addTransaction in TransactionForm.tsx omits scope field, hidden by as any cast. All transactions stored with scope: undefined, breaking shared account filtering entirely.",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-033"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-06"
-    },
-    {
-      "id": "PRD-006",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Budget Tracking",
-      "description": "Implement budget management feature to track spending against limits per category.",
-      "status": "planned",
-      "detectionPatterns": [
-        "PRD-006"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-01"
-    },
-    {
-      "id": "PWA-007",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "PWA System Theme Detection",
-      "description": "Implement auto-detection of iOS/Android system theme (dark/light) to respect user device settings.",
-      "status": "planned",
-      "detectionPatterns": [
-        "PWA-007"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-01"
-    },
-    {
-      "id": "PWA-006",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "PWA system theme detection",
-      "description": "Auto-detect dark/light mode preference from iOS and Android system settings using prefers-color-scheme media query",
-      "status": "completed",
-      "detectionPatterns": [
-        "PWA-006"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-01",
-      "completedAt": "2026-02-01"
-    },
-    {
-      "id": "UX-023",
-      "team": "Design",
-      "priority": "P2",
-      "title": "Account Transaction History UI Harmonization",
-      "description": "Adaptive height for account transaction lists to eliminate excessive whitespace on short lists",
-      "status": "completed",
-      "detectionPatterns": [
-        "UX-023"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "createdAt": "2026-02-01",
-      "completedAt": "2026-02-01"
-    },
-    {
-      "id": "UX-022",
-      "team": "Design",
-      "priority": "P0",
-      "title": "Parse multi-team sprint commits into individual items",
-      "description": "Commits like feat(v1.6.0): Multi-team sprint - GAP-002, GAP-003 should split into individual trackable items in Kanban, Git Timeline, and Env Parity",
-      "status": "completed",
-      "detectionPatterns": [
-        "UX-022"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-01",
-      "completedAt": "2026-02-01"
-    },
-    {
-      "id": "UX-021",
-      "team": "Design",
-      "priority": "P1",
-      "title": "Clickable completed widget in Backlog & Roadmap",
-      "description": "Click on Completed stats card to filter and see only completed items with details",
-      "status": "completed",
-      "detectionPatterns": [
-        "UX-021"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-01",
-      "completedAt": "2026-02-01"
-    },
-    {
-      "id": "BUG-025",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "API documentation update",
-      "description": "Updating API docs for the new intake system.",
-      "status": "planned",
-      "detectionPatterns": [
-        "BUG-025"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-01"
-    },
-    {
-      "id": "FIN-004",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Dashboard filter persistence",
-      "description": "Remember selected filters between sessions",
-      "status": "planned",
-      "detectionPatterns": [
-        "FIN-004"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-01"
-    },
-    {
-      "id": "BUG-024",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Test intake system",
-      "description": "Testing the new intake system API endpoint",
-      "status": "planned",
-      "detectionPatterns": [
-        "BUG-024"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "createdAt": "2026-02-01"
-    },
-    {
-      "id": "PLT-001",
-      "team": "Platform",
-      "priority": "P0",
-      "title": "Native Mobile Apps",
-      "description": "iOS/Android via Capacitor or React Native. PWA limitations blocking user engagement",
-      "status": "planned",
-      "detectionPatterns": [
-        "PLT-001"
-      ],
-      "effort": "large",
-      "impact": "critical"
-    },
-    {
-      "id": "PLT-002",
-      "team": "Platform",
-      "priority": "P0",
-      "title": "Push Notification Infrastructure",
-      "description": "Firebase Cloud Messaging for task reminders, transaction alerts, family invites",
-      "status": "planned",
-      "detectionPatterns": [
-        "PLT-002"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "SEC-001",
-      "team": "Security",
-      "priority": "P0",
-      "title": "Rate Limiting Enhancement",
-      "description": "Current rateLimits collection exists but Cloud Functions enforcement is incomplete",
-      "status": "planned",
-      "detectionPatterns": [
-        "SEC-001"
-      ],
-      "effort": "small",
-      "impact": "high"
-    },
-    {
-      "id": "SEC-002",
-      "team": "Security",
-      "priority": "P0",
-      "title": "Audit Logging Service",
-      "description": "Financial apps require audit trails. Add immutable /audit collection for all money operations",
-      "status": "planned",
-      "detectionPatterns": [
-        "SEC-002"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "SRE-001",
-      "team": "DevOps",
-      "priority": "P0",
-      "title": "Production Monitoring",
-      "description": "Add performance monitoring (Web Vitals, error rates) beyond current pm2 dashboard",
-      "status": "planned",
-      "detectionPatterns": [
-        "SRE-001"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "SRE-002",
-      "team": "DevOps",
-      "priority": "P0",
-      "title": "Automated Rollback",
-      "description": "Deploy failures should auto-rollback; current DEPLOY_PIPELINE.sh lacks this",
-      "status": "planned",
-      "detectionPatterns": [
-        "SRE-002"
-      ],
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "PRD-001",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Budget Tracking",
-      "description": "As a user, I want to set monthly budgets per category and see my progress",
-      "status": "planned",
-      "detectionPatterns": [
-        "PRD-001"
-      ],
-      "effort": "large",
-      "impact": "critical"
-    },
-    {
-      "id": "PRD-002",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Goals & Savings",
-      "description": "As a user, I want to create savings goals and track contributions",
-      "status": "planned",
-      "detectionPatterns": [
-        "PRD-002"
-      ],
-      "effort": "large",
-      "impact": "high"
-    },
-    {
-      "id": "PRD-003",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Bill Reminders",
-      "description": "As a user, I want automatic reminders before recurring bills are due",
-      "status": "planned",
-      "detectionPatterns": [
-        "PRD-003"
-      ],
-      "effort": "medium",
-      "impact": "medium"
-    },
-    {
-      "id": "PRD-004",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Transaction Insights",
-      "description": "Spending trends, averages, and anomaly detection",
-      "status": "planned",
-      "detectionPatterns": [
-        "PRD-004"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "PRD-005",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Export/Reports",
-      "description": "Export data to CSV/PDF for tax or personal review",
-      "status": "planned",
-      "detectionPatterns": [
-        "PRD-005"
-      ],
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "ENG-002",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Service Worker V2",
-      "description": "Add background sync, offline transaction queueing",
-      "status": "planned",
-      "detectionPatterns": [
-        "ENG-002"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "ENG-003",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Database Migrations",
-      "description": "Versioned Firestore schema migrations",
-      "status": "planned",
-      "detectionPatterns": [
-        "ENG-003"
-      ],
-      "effort": "medium",
-      "impact": "medium"
-    },
-    {
-      "id": "ENG-004",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Batch Operations",
-      "description": "Bulk delete, bulk categorize, bulk archive for power users",
-      "status": "planned",
-      "detectionPatterns": [
-        "ENG-004"
-      ],
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "ARCH-020",
-      "team": "Architecture",
-      "priority": "P1",
-      "title": "Micro-Frontend Exploration",
-      "description": "Consider module federation for independent deployability",
-      "status": "planned",
-      "detectionPatterns": [
-        "ARCH-020"
-      ],
-      "effort": "large",
-      "impact": "medium"
-    },
-    {
-      "id": "DES-001",
-      "team": "Design",
-      "priority": "P1",
-      "title": "Component Library Extraction",
-      "description": "Extract components/shared to standalone package",
-      "status": "planned",
-      "detectionPatterns": [
-        "DES-001"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "DES-002",
-      "team": "Design",
-      "priority": "P1",
-      "title": "Design Token Consolidation",
-      "description": "Sync tokens in tailwind.config.js with Figma",
-      "status": "deferred",
-      "detectionPatterns": [
-        "DES-002"
-      ],
-      "effort": "small",
-      "impact": "medium",
-      "deferredReason": "Removed in v1.5.14 revert for environment parity"
-    },
-    {
-      "id": "AUTH-001",
-      "team": "Auth",
-      "priority": "P2",
-      "title": "Social Sign-In",
-      "description": "Google, Apple sign-in via Firebase Auth",
-      "status": "planned",
-      "detectionPatterns": [
-        "AUTH-001"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "AUTH-002",
-      "team": "Auth",
-      "priority": "P2",
-      "title": "Passkey Support",
-      "description": "WebAuthn for passwordless login",
-      "status": "planned",
-      "detectionPatterns": [
-        "AUTH-002"
-      ],
-      "effort": "medium",
-      "impact": "medium"
-    },
-    {
-      "id": "AUTH-003",
-      "team": "Auth",
-      "priority": "P2",
-      "title": "Session Management UI",
-      "description": "Where you're logged in view with remote logout",
-      "status": "planned",
-      "detectionPatterns": [
-        "AUTH-003"
-      ],
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "AUTH-004",
-      "team": "Auth",
-      "priority": "P2",
-      "title": "MFA Recovery Codes",
-      "description": "Backup codes for MFA recovery",
-      "status": "planned",
-      "detectionPatterns": [
-        "AUTH-004"
-      ],
-      "effort": "small",
-      "impact": "high"
-    },
-    {
-      "id": "QA-001",
-      "team": "QA",
-      "priority": "P2",
-      "title": "Mutation Testing",
-      "description": "Enable regular mutation testing with Stryker",
-      "status": "planned",
-      "detectionPatterns": [
-        "QA-001"
-      ],
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "QA-002",
-      "team": "QA",
-      "priority": "P2",
-      "title": "Visual Regression Testing",
-      "description": "Add Percy or Chromatic for visual diff detection",
-      "status": "planned",
-      "detectionPatterns": [
-        "QA-002"
-      ],
-      "effort": "medium",
-      "impact": "medium"
-    },
-    {
-      "id": "QA-003",
-      "team": "QA",
-      "priority": "P2",
-      "title": "Performance E2E Tests",
-      "description": "Add Lighthouse CI to E2E suite",
-      "status": "planned",
-      "detectionPatterns": [
-        "QA-003"
-      ],
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "PWA-001",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "iOS Home Screen Polish",
-      "description": "Better splash screens, icon masking for iOS Safari",
-      "status": "planned",
-      "detectionPatterns": [
-        "PWA-001"
-      ],
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "PWA-002",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "Android Deep Integration",
-      "description": "Web Share Target, shortcuts, file handlers",
-      "status": "planned",
-      "detectionPatterns": [
-        "PWA-002"
-      ],
-      "effort": "medium",
-      "impact": "medium"
-    },
-    {
-      "id": "PWA-003",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "Offline Transaction Queue",
-      "description": "Queue writes when offline, sync when back online",
-      "status": "planned",
-      "detectionPatterns": [
-        "PWA-003"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "PWA-005",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "Biometric Auth",
-      "description": "Web Authentication API for fingerprint/face unlock",
-      "status": "planned",
-      "detectionPatterns": [
-        "PWA-005"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "DB-001",
-      "team": "Database",
-      "priority": "P2",
-      "title": "Firestore Index Optimization",
-      "description": "Review firestore.indexes.json for unused compound indexes",
-      "status": "planned",
-      "detectionPatterns": [
-        "DB-001"
-      ],
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "DB-003",
-      "team": "Database",
-      "priority": "P2",
-      "title": "Archival Strategy",
-      "description": "Move old transactions to cold storage (Firestore \u2192 BigQuery)",
-      "status": "planned",
-      "detectionPatterns": [
-        "DB-003"
-      ],
-      "effort": "large",
-      "impact": "medium"
-    },
-    {
-      "id": "RND-001",
-      "team": "Innovation",
-      "priority": "P3",
-      "title": "AI Categorization",
-      "description": "ML model to auto-categorize transactions from description",
-      "status": "planned",
-      "detectionPatterns": [
-        "RND-001"
-      ],
-      "effort": "large",
-      "impact": "high"
-    },
-    {
-      "id": "RND-002",
-      "team": "Innovation",
-      "priority": "P3",
-      "title": "Voice Commands",
-      "description": "Hey Anchor, how much did I spend on food this month?",
-      "status": "planned",
-      "detectionPatterns": [
-        "RND-002"
-      ],
-      "effort": "large",
-      "impact": "medium"
-    },
-    {
-      "id": "RND-003",
-      "team": "Innovation",
-      "priority": "P3",
-      "title": "Receipt OCR",
-      "description": "Scan receipts to auto-create transactions",
-      "status": "planned",
-      "detectionPatterns": [
-        "RND-003"
-      ],
-      "effort": "large",
-      "impact": "medium"
-    },
-    {
-      "id": "RND-004",
-      "team": "Innovation",
-      "priority": "P3",
-      "title": "Bank Integration",
-      "description": "Plaid/Yodlee for automatic transaction import",
-      "status": "planned",
-      "detectionPatterns": [
-        "RND-004"
-      ],
-      "effort": "large",
-      "impact": "critical"
-    },
-    {
-      "id": "DATA-001",
-      "team": "Data",
-      "priority": "P3",
-      "title": "Analytics Pipeline",
-      "description": "Firestore \u2192 BigQuery \u2192 Looker Studio for product analytics",
-      "status": "planned",
-      "detectionPatterns": [
-        "DATA-001"
-      ],
-      "effort": "large",
-      "impact": "high"
-    },
-    {
-      "id": "BRAND-001",
-      "team": "Marketing",
-      "priority": "P3",
-      "title": "Marketing Website",
-      "description": "Conversion-optimized landing page",
-      "status": "planned",
-      "detectionPatterns": [
-        "BRAND-001"
-      ],
-      "effort": "large",
-      "impact": "high"
-    },
-    {
-      "id": "BRAND-005",
-      "team": "Marketing",
-      "priority": "P3",
-      "title": "Referral Program",
-      "description": "Invite family, earn premium",
-      "status": "planned",
-      "detectionPatterns": [
-        "BRAND-005"
-      ],
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "WEB-001",
-      "team": "Design",
-      "priority": "P3",
-      "title": "Dashboard 2.0",
-      "description": "Customizable widget layout, drag-and-drop",
-      "status": "planned",
-      "detectionPatterns": [
-        "WEB-001"
-      ],
-      "effort": "large",
-      "impact": "medium"
-    },
-    {
-      "id": "WEB-003",
-      "team": "Design",
-      "priority": "P3",
-      "title": "Animation Library",
-      "description": "Framer Motion integration for richer animations",
-      "status": "deferred",
-      "detectionPatterns": [
-        "WEB-003"
-      ],
-      "effort": "medium",
-      "impact": "medium",
-      "deferredReason": "Removed in v1.5.14 revert for environment parity"
-    },
-    {
-      "id": "GAP-001",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Fabric Suggestion Pre-fill",
-      "description": "Record Transaction from completed commitment pre-fills form",
-      "status": "completed",
-      "detectionPatterns": [
-        "GAP-001"
-      ],
-      "completedAt": "2026-01-29",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "GAP-002",
-      "team": "Design",
-      "priority": "P1",
-      "title": "Design System Color Token Fragmentation",
-      "description": "Inconsistent use of indigo-* tokens instead of semantic primary-* tokens",
-      "status": "completed",
-      "detectionPatterns": [
-        "GAP-002"
-      ],
-      "completedAt": "2026-02-01",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "GAP-003",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Navigation Race Condition",
-      "description": "Flaky navigation on slow devices due to hardcoded setTimeout(100) hack",
-      "status": "completed",
-      "detectionPatterns": [
-        "GAP-003"
-      ],
-      "completedAt": "2026-02-01",
-      "effort": "small",
-      "impact": "high"
-    },
-    {
-      "id": "GAP-004",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Command Palette Recent Actions",
-      "description": "Power users see recently used actions at top of Command Palette",
-      "status": "completed",
-      "detectionPatterns": [
-        "GAP-004"
-      ],
-      "completedAt": "2026-02-01",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "TASK-002",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Habit Streaks & Gamification",
-      "description": "Fire emoji streak badges on tasks with active streaks",
-      "status": "completed",
-      "detectionPatterns": [
-        "TASK-002"
-      ],
-      "completedAt": "2026-02-01",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "FIN-003",
-      "team": "Product",
-      "priority": "P1",
-      "title": "Recurring Transactions",
-      "description": "Scheduled Cloud Function for recurring rules",
-      "status": "completed",
-      "detectionPatterns": [
-        "FIN-003"
-      ],
-      "completedAt": "2026-01-29",
-      "effort": "large",
-      "impact": "critical"
-    },
-    {
-      "id": "UX-019",
-      "team": "Design",
-      "priority": "P1",
-      "title": "Currency Overflow Protection",
-      "description": "Compact formatting for large currency values",
-      "status": "completed",
-      "detectionPatterns": [
-        "UX-019"
-      ],
-      "completedAt": "2026-01-31",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "UX-020",
-      "team": "Design",
-      "priority": "P1",
-      "title": "Task Completion Animation + Haptic",
-      "description": "Visual animation and haptic feedback on task completion",
-      "status": "completed",
-      "detectionPatterns": [
-        "UX-020"
-      ],
-      "completedAt": "2026-01-31",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "BUG-022",
-      "team": "Engineering",
-      "priority": "P0",
-      "title": "Modal Keyboard Input Fix",
-      "description": "Fixed Transfer/Pay Bill modals not accepting keyboard input",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-022"
-      ],
-      "completedAt": "2026-01-31",
-      "effort": "small",
-      "impact": "critical"
-    },
-    {
-      "id": "BUG-023",
-      "team": "Engineering",
-      "priority": "P0",
-      "title": "Commitment Checkbox Multiple Clicks",
-      "description": "Fixed checkboxes requiring 2-3 clicks due to Firestore listener issues",
-      "status": "completed",
-      "detectionPatterns": [
-        "BUG-023"
-      ],
-      "completedAt": "2026-01-31",
-      "effort": "medium",
-      "impact": "critical"
-    },
-    {
-      "id": "ARCH-007",
-      "team": "Architecture",
-      "priority": "P1",
-      "title": "Optimistic Updates",
-      "description": "Created useOptimisticMutation hook with automatic rollback",
-      "status": "completed",
-      "detectionPatterns": [
-        "ARCH-007"
-      ],
-      "completedAt": "2026-01-29",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "ARCH-016",
-      "team": "Architecture",
-      "priority": "P1",
-      "title": "Telemetry Tracing",
-      "description": "Created TelemetryService with trace(), logEvent(), createTracer()",
-      "status": "completed",
-      "detectionPatterns": [
-        "ARCH-016"
-      ],
-      "completedAt": "2026-01-29",
-      "effort": "medium",
-      "impact": "medium"
-    },
-    {
-      "id": "PERF-001",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Add 500ms debounce to profile name input",
-      "description": "Bug fix: Added 500ms debounce to profile name input to prevent excessive Firestore writes",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "PERF-001"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "PERF-002",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Remove duplicate Firestore listeners in FamilySettingsV2",
-      "description": "Bug fix: Removed duplicate Firestore listeners in FamilySettingsV2 that caused redundant reads and potential memory leaks",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "PERF-002"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "PERF-003",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Add list virtualization to TaskList component",
-      "description": "Feature: Added list virtualization to TaskList component for improved rendering performance with large task lists",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "PERF-003"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "medium"
-    },
-    {
-      "id": "PERF-004",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Make dark mode detection reactive in BottomNavigation",
-      "description": "Bug fix: Made dark mode detection reactive in BottomNavigation so theme changes apply without page reload",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "PERF-004"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "ARCH-001",
-      "team": "Architecture",
-      "priority": "P1",
-      "title": "Encapsulate MFA enrollment UI state in dedicated hook",
-      "description": "Feature: Encapsulated MFA enrollment UI state in a dedicated hook to reduce component complexity and improve testability",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "ARCH-001"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "ARCH-002",
-      "team": "Architecture",
-      "priority": "P2",
-      "title": "Consolidate FamilyConnection interface to single source",
-      "description": "Feature: Consolidated FamilyConnection interface to a single source of truth, eliminating duplicated type definitions",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "ARCH-002"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "ARCH-003",
-      "team": "Architecture",
-      "priority": "P2",
-      "title": "Extract FCM token retry logic to dedicated service",
-      "description": "Feature: Extracted FCM token retry logic to a dedicated service for better separation of concerns and reusability",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "ARCH-003"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "medium"
-    },
-    {
-      "id": "ARCH-004",
-      "team": "Architecture",
-      "priority": "P1",
-      "title": "Remove mfaOps from useEffect dependency array",
-      "description": "Bug fix: Removed mfaOps from useEffect dependency array to prevent infinite re-render loop in MFA enrollment flow",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "ARCH-004"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "high"
-    },
-    {
-      "id": "ARCH-005",
-      "team": "Architecture",
-      "priority": "P3",
-      "title": "Remove dead returnAfterAuth sessionStorage code",
-      "description": "Bug fix: Removed dead returnAfterAuth sessionStorage code that was no longer referenced anywhere in the codebase",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "ARCH-005"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "low"
-    },
-    {
-      "id": "ARCH-006",
-      "team": "Architecture",
-      "priority": "P2",
-      "title": "Use system theme preference for auth view default",
-      "description": "Bug fix: Replaced hardcoded light theme default with system theme preference detection using getEffectiveTheme() to eliminate dark-mode flash",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.28",
-      "detectionPatterns": [
-        "ARCH-006"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "FEAT-001",
-      "team": "Security",
-      "priority": "P1",
-      "title": "Account deletion requires password reauthentication",
-      "description": "DangerZone now prompts for current password before deleting account via Firebase reauthenticate()",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-001"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "high"
-    },
-    {
-      "id": "FEAT-002",
-      "team": "Security",
-      "priority": "P1",
-      "title": "MFA recovery codes generated after enrollment",
-      "description": "Generates 8 one-time backup codes with SHA-256 hashing, displayed in grid with copy/download, stored in Firestore",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-002"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "FEAT-003",
-      "team": "Security",
-      "priority": "P1",
-      "title": "Password change flow in SecuritySettings",
-      "description": "Inline collapsible form: reauthenticate with current password then updatePassword via Firebase Auth, with audit logging",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-003"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "FEAT-004",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "CSV export alongside existing JSON export",
-      "description": "New csvExport utility with proper cell escaping, sectioned output for accounts/transactions/commitments",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-004"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "FEAT-005",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Per-category notification controls",
-      "description": "Toggle notifications for finance, commitments, and family categories independently",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-005"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "FEAT-006",
-      "team": "Mobile",
-      "priority": "P2",
-      "title": "inputMode numeric on InviteCodeEntry",
-      "description": "Shows numeric keyboard on mobile for 6-digit invite code input",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-006"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "FEAT-007",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Auto-submit when 6-digit code is complete",
-      "description": "All 4 code input components auto-submit on 6th digit with ref guard to prevent double-submit",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-007"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "FEAT-008",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Onboarding back button on steps 2 and 3",
-      "description": "Added back navigation to OnboardingAccountStep and OnboardingHabitStep",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-008"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "FEAT-009",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Accessibility controls: font size, high contrast, reduced motion",
-      "description": "New AccessibilityControls component with CSS class application via useAccessibility hook",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-009"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "FEAT-010",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Shared account permission picker (read/transact/manage)",
-      "description": "SharePermissionPicker renders in AccountDetailsView for owners, updates Firestore sharedWith[uid].permission directly",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-010"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "FEAT-011",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Offline guard for family Cloud Function calls",
-      "description": "shareAccount and disconnectFamily check navigator.onLine before calling CFs, show offline toast",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-011"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "FEAT-012",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Quiet hours / Do Not Disturb settings",
-      "description": "QuietHoursSettings component with toggle and time range pickers, persisted in notification preferences",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.29",
-      "detectionPatterns": [
-        "FEAT-012"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "BUG-073",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Swipe sensitivity: accidental triggers during vertical scroll",
-      "description": "Added vertical scroll discrimination to SwipeableRow. Tracks startY and locks axis on first significant movement. Cancels horizontal swipe when vertical delta dominates.",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.30",
-      "detectionPatterns": [
-        "BUG-073"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "BUG-074",
-      "team": "Mobile",
-      "priority": "P1",
-      "title": "Month navigation scroll jump to account widget",
-      "description": "FinanceView now scrolls to the transaction list section after month prev/next navigation instead of jumping to top.",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.30",
-      "detectionPatterns": [
-        "BUG-074"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "high"
-    },
-    {
-      "id": "FEAT-013",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Bank/account tag pill on transaction history items",
-      "description": "TransactionItem now renders the accountName prop as an emerald pill in the metadata row.",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.30",
-      "detectionPatterns": [
-        "FEAT-013"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "small",
-      "impact": "medium"
-    },
-    {
-      "id": "FEAT-014",
-      "team": "Engineering",
-      "priority": "P2",
-      "title": "Previous month carry-over in account detail view",
-      "description": "Account detail view fetches 14 days of trailing transactions from previous month for continuity with Previous month divider.",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.5.30",
-      "detectionPatterns": [
-        "FEAT-014"
-      ],
-      "completedAt": "2026-02-06",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "BUG-075",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Remove redundant hamburger menu on mobile",
-      "description": "Bottom navigation already has Settings tab. Removed mobile header, drawer overlay, and mobileMenuOpen state from MainLayout.",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.31",
-      "detectionPatterns": [
-        "BUG-075"
-      ],
-      "completedAt": "2026-02-07",
-      "effort": "small",
-      "impact": "high"
-    },
-    {
-      "id": "BUG-076",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Extract shared ToggleSwitch, align toggles on mobile",
-      "description": "Created reusable ToggleSwitch component with 44px touch target. Replaced 7 inline copies across 4 settings files. Standardized rows to always-inline layout.",
-      "status": "completed",
-      "type": "bug",
-      "sprint": "1.5.31",
-      "detectionPatterns": [
-        "BUG-076"
-      ],
-      "completedAt": "2026-02-07",
-      "effort": "medium",
-      "impact": "high"
-    },
-    {
-      "id": "FEAT-015",
-      "team": "Engineering",
-      "priority": "P1",
-      "title": "Two-part onboarding: Getting Started + Beyond the Basics",
-      "description": "Redesigned onboarding into two parts. Part 1 'Getting Started' is a 4-step hard gate (Welcome+Name, Account, Commitment, Security with email verify + MFA). Part 2 'Beyond the Basics' is a pulsing CompletionRing on the Dashboard with 5 auto-completing checklist items. Red asterisks suppressed after security step seen. Old OnboardingWelcome replaced by GettingStartedWelcome with editable name.",
-      "status": "completed",
-      "type": "feature",
-      "sprint": "1.7.0",
-      "detectionPatterns": [
-        "FEAT-015",
-        "onboarding",
-        "completion ring",
-        "beyond the basics",
-        "getting started"
-      ],
-      "completedAt": "2026-02-08",
-      "effort": "large",
-      "impact": "high"
-    }
-  ]
+    "version": "1.0.0",
+    "lastUpdated": "2026-02-14",
+    "teams": [
+        "Product",
+        "Engineering",
+        "Architecture",
+        "Security",
+        "Database",
+        "DevOps",
+        "QA",
+        "Auth",
+        "Mobile",
+        "Design",
+        "Innovation",
+        "Data",
+        "Marketing",
+        "Branding"
+    ],
+    "priorities": [
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+    ],
+    "statuses": [
+        "planned",
+        "in-progress",
+        "completed",
+        "deferred"
+    ],
+    "initiatives": [
+        {
+            "id": "GAP-010",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Reduce direct Firestore imports behind service boundaries",
+            "description": "Refactor feature/hook Firestore SDK access into service/API boundaries for maintainability and testability. [REM-010]",
+            "status": "planned",
+            "detectionPatterns": [
+                "GAP-010"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-14"
+        },
+        {
+            "id": "GAP-009",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Validate Checkmarx workflow health and ownership",
+            "description": "Verify Checkmarx secrets/configuration, operational usefulness, and keep/tune/remove decision with documented owner. [REM-012]",
+            "status": "planned",
+            "detectionPatterns": [
+                "GAP-009"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-14"
+        },
+        {
+            "id": "GAP-008",
+            "team": "Design",
+            "priority": "P2",
+            "title": "Remove legacy anchor color token system",
+            "description": "Migrate remaining legacy anchor.* token usage to semantic token system, then remove legacy token block. [REM-011]",
+            "status": "planned",
+            "detectionPatterns": [
+                "GAP-008"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-14"
+        },
+        {
+            "id": "UX-035",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Add dedicated 404 and 500 route-level error views",
+            "description": "Introduce explicit NotFound and ServerError views to improve user recovery for invalid routes and failure states. [REM-009]",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-035"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-14"
+        },
+        {
+            "id": "FIN-011",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Feature flag and progressive rollout framework",
+            "description": "Implement runtime feature flags, kill switches, staged rollout policy, and rollback governance for high-risk changes. [REM-007]",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-011"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-14"
+        },
+        {
+            "id": "GAP-007",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Add CODEOWNERS for review accountability",
+            "description": "Create CODEOWNERS mappings for core directories so PR ownership routing is automatic and enforceable. [REM-003]",
+            "status": "planned",
+            "detectionPatterns": [
+                "GAP-007"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-14"
+        },
+        {
+            "id": "GAP-006",
+            "team": "QA",
+            "priority": "P0",
+            "title": "Raise automated test coverage thresholds to policy baseline",
+            "description": "Increase Vitest coverage thresholds and close minimum required gaps, prioritizing branch coverage quality. [REM-002]",
+            "status": "planned",
+            "detectionPatterns": [
+                "GAP-006"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-14"
+        },
+        {
+            "id": "GAP-005",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Enforce strict TypeScript safety (no-explicit-any)",
+            "description": "Set @typescript-eslint/no-explicit-any to error and eliminate violations so CI prevents type-safety regressions. [REM-001]",
+            "status": "planned",
+            "detectionPatterns": [
+                "GAP-005"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-14"
+        },
+        {
+            "id": "UX-034",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Isolate shared account transactions and notifications to account detail view",
+            "description": "Shared account transactions and family notifications were cluttering the main Finance page. Now personal accounts show on Finance page, shared account data (transactions, notifications, activity) shows only inside the shared account detail view. FamilyNotificationBanner scoped by accountId prop. Clear information boundary between personal and shared finances.",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-034"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "UX-033",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Add offline error handling for family operations",
+            "description": "shareAccount and disconnectFamily call Cloud Functions with no network check or offline queue. Add offline detection and retry logic for 97% mobile users.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-033"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-010",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Shared account permission granularity - read-only vs read-write",
+            "description": "useFamilySharing shareAccount is binary share:boolean. Add read-only vs read-write permission control. Allow per-account visibility settings.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-010"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "UX-032",
+            "team": "Design",
+            "priority": "P2",
+            "title": "Accessibility controls - font size, high contrast, reduced motion",
+            "description": "AppearanceSettings only has theme toggle. Add font size slider, high contrast mode, and reduced motion toggle for accessibility compliance.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-032"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "UX-031",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Add back button in onboarding steps",
+            "description": "Onboarding flow has no way to go back to previous step. Users cannot correct mistakes without starting over. Resolved: GettingStartedSecurity step 4 includes Back button, existing steps 2-3 already had back.",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-031"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-02-08"
+        },
+        {
+            "id": "UX-030",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Auto-submit at 6 digits for MFA and invite codes",
+            "description": "MFA and invite code inputs should auto-submit when 6 characters entered. Saves a tap on mobile.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-030"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "UX-029",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Add inputMode=numeric on invite and MFA code inputs",
+            "description": "Numeric code inputs should use inputMode=numeric to show number keyboard on mobile. Currently shows full keyboard.",
+            "status": "planned",
+            "detectionPatterns": [
+                "UX-029"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-009",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Per-category notification controls",
+            "description": "NotificationSettings only has global toggle. Add per-category controls: family activity, transaction alerts, commitment reminders. Add quiet hours/DND schedule.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-009"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-008",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Add CSV export option for data export",
+            "description": "DataManagement only exports JSON. Add CSV export which mobile users can open in spreadsheet apps. More accessible format for 97% mobile users.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-008"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-007",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Add password change flow in settings",
+            "description": "SecuritySettings only has MFA. Add password change capability with current password verification and Firebase Auth reauthentication.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-007"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-006",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Add MFA recovery codes",
+            "description": "2FA enrollment should generate and display recovery codes. Store hashed codes in Firestore. Allow one-time use if user loses authenticator device.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-006"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "FIN-005",
+            "team": "Security",
+            "priority": "P0",
+            "title": "Implement actual account deletion Cloud Function",
+            "description": "handleDeleteAccount needs backend implementation. Cloud Function to purge Firestore data, delete Firebase Auth user, comply with GDPR right to erasure.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-005"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-060",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Chrome native pull-to-refresh conflicts with app scroll",
+            "description": "Chrome pull-to-refresh reloads the page instead of using in-app refresh. Fixed with e.preventDefault() on touchmove.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-060"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-061",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "AssetDistributionChart not responsive for mobile height",
+            "description": "Chart container has fixed height that clips on mobile viewports. Made responsive.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-061"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-062",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Keyboard covers input on AuthView and OnboardingView",
+            "description": "Mobile keyboard covers form inputs. Fixed with useKeyboardAvoidance hook.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-062"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-063",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "EditTaskForm not visible when opened below fold",
+            "description": "EditTaskForm opens below viewport on long lists. Fixed with scrollIntoView on mount.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-063"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-065",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "WeeklyView toggle buttons under 44px touch target",
+            "description": "Toggle buttons in WeeklyView are only 24px. Fixed with min-w-11 min-h-11 (44px).",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-065"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-066",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "AssetAllocation expand button only 16px",
+            "description": "Expand/collapse chevron button has no size constraint. Fixed with min-w-11 min-h-11.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-066"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-067",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "NotificationSettings toggle switches 24px height",
+            "description": "Push and email toggle switches only h-6 (24px). Added min-h-11 for 44px touch target.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-067"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-068",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "FamilyNotificationBanner buttons under 44px",
+            "description": "View link, prev/next arrows, and dismiss button all under 44px. Fixed all 4 buttons.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-068"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-069",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Confirm dialog buttons under 44px",
+            "description": "Cancel and Confirm buttons in modal dialogs only ~34px. Added min-h-11.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-069"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-070",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Onboarding skip buttons have no touch target",
+            "description": "Skip for now links in 3 onboarding steps have no size constraint. Fixed all 3 with min-h-11.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-070"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-071",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Auth footer links undersized",
+            "description": "Sign up/Sign in toggle links have no touch target. Added min-h-11 and hover background.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-071"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-072",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "SettingsView Sign Out button undersized",
+            "description": "Ghost sm button under 44px. Added min-h-11 class.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-072"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-064",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "No quick section navigation in Settings on mobile",
+            "description": "Long Settings page requires excessive scrolling. Added SectionNav for quick mobile navigation.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-064"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-059",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Pay Bill transaction identical to regular expense - no category distinction",
+            "description": "Pay Bill creates a transaction with no distinguishing category. Should pre-fill category as Bills & Utilities to differentiate from regular expenses.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-059"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-058",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "O(n²) percentage calculation in AssetDistributionChart legend",
+            "description": "Each legend item recalculates total via accountData.reduce() inside map. Pre-compute percentages in useMemo for O(n) performance.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-058"
+            ],
+            "effort": "small",
+            "impact": "small",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-057",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Negative account balances crash AssetDistributionChart percentages",
+            "description": "Negative account balances pass to pie chart producing negative percentages and rendering errors. Chart should filter to positive balances only and show warning.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-057"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-056",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "FamilySettingsV2 duplicates Firestore listeners from useFamilySharing",
+            "description": "FamilySettingsV2 sets up own onSnapshot listeners instead of using useFamilySharing hook. Creates 6 concurrent listeners for same data. State can diverge between components.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-056"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-055",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Profile name fires Firestore write on every keystroke - no debounce",
+            "description": "ProfileSettings onChange calls updateProfile immediately. Typing John triggers 4 Firestore writes and 4 audit logs. Performance and cost disaster on mobile.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-055"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-054",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "writeBatch wipe data can exceed Firestore 500-op limit",
+            "description": "handleWipeData uses single writeBatch for all collections. Users with 500+ total documents get Firestore error. No chunking logic.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-054"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-053",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "MFA timeout stale closure - error never fires",
+            "description": "handleGenerateMfaSecret timeout captures pre-setState isEnrolling value (false). Condition isEnrolling && !mfaQrUrl always false. 10-second timeout error never displays.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-053"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-052",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Hardcoded naira in charts - AssetDistributionChart and CashFlowChart",
+            "description": "Both chart components hardcode naira symbol instead of using account currency. Wrong symbol shown for USD accounts in all visualizations.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-052"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-051",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "RecurringTransactionsList hardcodes NGN currency symbol",
+            "description": "RecurringTransactionsList always displays naira symbol regardless of transaction currency. USD recurring transactions show wrong symbol.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-051"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-050",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "calculateNetWorth.total ignores USD entirely",
+            "description": "Net worth calculation only sums NGN balances. USD account balances are silently excluded from total net worth.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-050"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-049",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "30 Day Summary is actually 28 days and uses today not selected month",
+            "description": "The 30 Day Summary card always calculates from today minus 28 days, ignoring which month the user has selected. Shows current data even when viewing past months.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-049"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-048",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "MonthlyInsight uses first account currency for multi-currency totals",
+            "description": "Multi-currency users see meaningless sums. NGN + USD added together using NGN symbol. Should either convert via exchange rate or show per-currency totals.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-048"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-047",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "No monthly opening/closing balance - always shows today",
+            "description": "Finance view always displays current balance regardless of which month is selected. Users cannot see what their balance was at end of previous months.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-047"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-046",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "15+ touch targets below 44px platform minimum",
+            "description": "WeeklyView toggle 24px, MonthlyDates 32px, TaskItem checkbox 32px, AssetAllocation expand 16px, notification toggles 24px, toast dismiss 24px, nav hamburger 36px. All below Apple 44px and Google 48px minimums.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-046"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-045",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Loading overlay blocks all scrolling with pointer-events-none",
+            "description": "Dashboard loading overlay applies pointer-events-none to body, blocking all scroll and touch. Screen appears frozen during data loads.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-045"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-044",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Toast notifications min-w-300px overflows on small phones",
+            "description": "Toasts have min-w-[300px] + right-6 positioning. On 375px phones, toasts are cut off on left edge.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-044"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-043",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "autoComplete=off blocks mobile autofill on email and password",
+            "description": "Auth forms use autoComplete=off which blocks iOS/Android password autofill. 97% mobile users must hand-type credentials.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-043"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-042",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "min-h-screen used instead of dvh throughout auth and onboarding",
+            "description": "6+ files use min-h-screen which does not account for mobile browser chrome. Content hidden behind URL bar. Should use min-h-dvh.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-042"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-041",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "1300ms hard delay before financial confirmation dialog",
+            "description": "Finance flow has setTimeout 1300ms before showing confirmation. Users think app is frozen while waiting for dialog.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-041"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-040",
+            "team": "Mobile",
+            "priority": "P0",
+            "title": "WeeklyView forces min-w-800px - unusable on mobile",
+            "description": "WeeklyView component has min-w-[800px] hardcoded. 375px phones show horizontal scroll bar, content unreadable. 97% users are mobile.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-040"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-039",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Push notification disable toggle broken - cannot turn off",
+            "description": "NotificationContext disable path only changes React state. FCM token not deleted from Firestore, browser permission stays granted, useEffect re-restores token on mount. Users cannot disable push.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-039"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-038",
+            "team": "Security",
+            "priority": "P0",
+            "title": "handleDeleteAccount is no-op - GDPR violation",
+            "description": "SettingsView handleDeleteAccount shows toast and logs out but does not delete data. No Cloud Function, no Firestore purge, no Firebase Auth deletion. User data persists forever.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-038"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-037",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Transfers double-counted in all summary aggregations",
+            "description": "Transfers stored as income/expense type. MonthlyInsight, CashFlowChart, and all summaries include them, showing 2x actual income and expenses.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-037"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-036",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Type change income to expense produces zero balance correction",
+            "description": "Changing transaction type from income to expense without changing amount causes silent balance corruption due to wrong sign logic.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-036"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-035",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Transfer deletion race condition - getDoc outside transaction",
+            "description": "Transfer deletion reads paired transaction with getDoc() outside Firestore runTransaction block. Race condition causes double-deletion or orphaned half-transfers.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-035"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-034",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Cross-currency transfer edit corrupts destination balance",
+            "description": "Editing a cross-currency transfer applies source currency amount to destination account balance, corrupting multi-currency balances.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-034"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "BUG-033",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Transaction scope field missing - as any cast hides undefined scope",
+            "description": "addTransaction in TransactionForm.tsx omits scope field, hidden by as any cast. All transactions stored with scope: undefined, breaking shared account filtering entirely.",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-033"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-06"
+        },
+        {
+            "id": "PRD-006",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Budget Tracking",
+            "description": "Implement budget management feature to track spending against limits per category.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-006"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "PWA-007",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "PWA System Theme Detection",
+            "description": "Implement auto-detection of iOS/Android system theme (dark/light) to respect user device settings.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-007"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "PWA-006",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "PWA system theme detection",
+            "description": "Auto-detect dark/light mode preference from iOS and Android system settings using prefers-color-scheme media query",
+            "status": "completed",
+            "detectionPatterns": [
+                "PWA-006"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-02-01"
+        },
+        {
+            "id": "UX-023",
+            "team": "Design",
+            "priority": "P2",
+            "title": "Account Transaction History UI Harmonization",
+            "description": "Adaptive height for account transaction lists to eliminate excessive whitespace on short lists",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-023"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-02-01"
+        },
+        {
+            "id": "UX-022",
+            "team": "Design",
+            "priority": "P0",
+            "title": "Parse multi-team sprint commits into individual items",
+            "description": "Commits like feat(v1.6.0): Multi-team sprint - GAP-002, GAP-003 should split into individual trackable items in Kanban, Git Timeline, and Env Parity",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-022"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-02-01"
+        },
+        {
+            "id": "UX-021",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Clickable completed widget in Backlog & Roadmap",
+            "description": "Click on Completed stats card to filter and see only completed items with details",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-021"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-02-01"
+        },
+        {
+            "id": "BUG-025",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "API documentation update",
+            "description": "Updating API docs for the new intake system.",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-025"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "FIN-004",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Dashboard filter persistence",
+            "description": "Remember selected filters between sessions",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-004"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "BUG-024",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Test intake system",
+            "description": "Testing the new intake system API endpoint",
+            "status": "planned",
+            "detectionPatterns": [
+                "BUG-024"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "createdAt": "2026-02-01"
+        },
+        {
+            "id": "PLT-001",
+            "team": "Platform",
+            "priority": "P0",
+            "title": "Native Mobile Apps",
+            "description": "iOS/Android via Capacitor or React Native. PWA limitations blocking user engagement",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-001"
+            ],
+            "effort": "large",
+            "impact": "critical"
+        },
+        {
+            "id": "PLT-002",
+            "team": "Platform",
+            "priority": "P0",
+            "title": "Push Notification Infrastructure",
+            "description": "Firebase Cloud Messaging for task reminders, transaction alerts, family invites",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-002"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "SEC-001",
+            "team": "Security",
+            "priority": "P0",
+            "title": "Rate Limiting Enhancement",
+            "description": "Current rateLimits collection exists but Cloud Functions enforcement is incomplete",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-001"
+            ],
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "SEC-002",
+            "team": "Security",
+            "priority": "P0",
+            "title": "Audit Logging Service",
+            "description": "Financial apps require audit trails. Add immutable /audit collection for all money operations",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-002"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "SRE-001",
+            "team": "DevOps",
+            "priority": "P0",
+            "title": "Production Monitoring",
+            "description": "Add performance monitoring (Web Vitals, error rates) beyond current pm2 dashboard",
+            "status": "planned",
+            "detectionPatterns": [
+                "SRE-001"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "SRE-002",
+            "team": "DevOps",
+            "priority": "P0",
+            "title": "Automated Rollback",
+            "description": "Deploy failures should auto-rollback; current DEPLOY_PIPELINE.sh lacks this",
+            "status": "planned",
+            "detectionPatterns": [
+                "SRE-002"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "PRD-001",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Budget Tracking",
+            "description": "As a user, I want to set monthly budgets per category and see my progress",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-001"
+            ],
+            "effort": "large",
+            "impact": "critical"
+        },
+        {
+            "id": "PRD-002",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Goals & Savings",
+            "description": "As a user, I want to create savings goals and track contributions",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-002"
+            ],
+            "effort": "large",
+            "impact": "high"
+        },
+        {
+            "id": "PRD-003",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Bill Reminders",
+            "description": "As a user, I want automatic reminders before recurring bills are due",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-003"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "PRD-004",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Transaction Insights",
+            "description": "Spending trends, averages, and anomaly detection",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-004"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "PRD-005",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Export/Reports",
+            "description": "Export data to CSV/PDF for tax or personal review",
+            "status": "planned",
+            "detectionPatterns": [
+                "PRD-005"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "ENG-002",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Service Worker V2",
+            "description": "Add background sync, offline transaction queueing",
+            "status": "planned",
+            "detectionPatterns": [
+                "ENG-002"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "ENG-003",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Database Migrations",
+            "description": "Versioned Firestore schema migrations",
+            "status": "planned",
+            "detectionPatterns": [
+                "ENG-003"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "ENG-004",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Batch Operations",
+            "description": "Bulk delete, bulk categorize, bulk archive for power users",
+            "status": "planned",
+            "detectionPatterns": [
+                "ENG-004"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-020",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Micro-Frontend Exploration",
+            "description": "Consider module federation for independent deployability",
+            "status": "planned",
+            "detectionPatterns": [
+                "ARCH-020"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "DES-001",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Component Library Extraction",
+            "description": "Extract components/shared to standalone package",
+            "status": "planned",
+            "detectionPatterns": [
+                "DES-001"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "DES-002",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Design Token Consolidation",
+            "description": "Sync tokens in tailwind.config.js with Figma",
+            "status": "deferred",
+            "detectionPatterns": [
+                "DES-002"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "deferredReason": "Removed in v1.5.14 revert for environment parity"
+        },
+        {
+            "id": "AUTH-001",
+            "team": "Auth",
+            "priority": "P2",
+            "title": "Social Sign-In",
+            "description": "Google, Apple sign-in via Firebase Auth",
+            "status": "planned",
+            "detectionPatterns": [
+                "AUTH-001"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "AUTH-002",
+            "team": "Auth",
+            "priority": "P2",
+            "title": "Passkey Support",
+            "description": "WebAuthn for passwordless login",
+            "status": "planned",
+            "detectionPatterns": [
+                "AUTH-002"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "AUTH-003",
+            "team": "Auth",
+            "priority": "P2",
+            "title": "Session Management UI",
+            "description": "Where you're logged in view with remote logout",
+            "status": "planned",
+            "detectionPatterns": [
+                "AUTH-003"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "AUTH-004",
+            "team": "Auth",
+            "priority": "P2",
+            "title": "MFA Recovery Codes",
+            "description": "Backup codes for MFA recovery",
+            "status": "planned",
+            "detectionPatterns": [
+                "AUTH-004"
+            ],
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "QA-001",
+            "team": "QA",
+            "priority": "P2",
+            "title": "Mutation Testing",
+            "description": "Enable regular mutation testing with Stryker",
+            "status": "planned",
+            "detectionPatterns": [
+                "QA-001"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "QA-002",
+            "team": "QA",
+            "priority": "P2",
+            "title": "Visual Regression Testing",
+            "description": "Add Percy or Chromatic for visual diff detection",
+            "status": "planned",
+            "detectionPatterns": [
+                "QA-002"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "QA-003",
+            "team": "QA",
+            "priority": "P2",
+            "title": "Performance E2E Tests",
+            "description": "Add Lighthouse CI to E2E suite",
+            "status": "planned",
+            "detectionPatterns": [
+                "QA-003"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "PWA-001",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "iOS Home Screen Polish",
+            "description": "Better splash screens, icon masking for iOS Safari",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-001"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "PWA-002",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Android Deep Integration",
+            "description": "Web Share Target, shortcuts, file handlers",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-002"
+            ],
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "PWA-003",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Offline Transaction Queue",
+            "description": "Queue writes when offline, sync when back online",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-003"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "PWA-005",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Biometric Auth",
+            "description": "Web Authentication API for fingerprint/face unlock",
+            "status": "planned",
+            "detectionPatterns": [
+                "PWA-005"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "DB-001",
+            "team": "Database",
+            "priority": "P2",
+            "title": "Firestore Index Optimization",
+            "description": "Review firestore.indexes.json for unused compound indexes",
+            "status": "planned",
+            "detectionPatterns": [
+                "DB-001"
+            ],
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "DB-003",
+            "team": "Database",
+            "priority": "P2",
+            "title": "Archival Strategy",
+            "description": "Move old transactions to cold storage (Firestore → BigQuery)",
+            "status": "planned",
+            "detectionPatterns": [
+                "DB-003"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "RND-001",
+            "team": "Innovation",
+            "priority": "P3",
+            "title": "AI Categorization",
+            "description": "ML model to auto-categorize transactions from description",
+            "status": "planned",
+            "detectionPatterns": [
+                "RND-001"
+            ],
+            "effort": "large",
+            "impact": "high"
+        },
+        {
+            "id": "RND-002",
+            "team": "Innovation",
+            "priority": "P3",
+            "title": "Voice Commands",
+            "description": "Hey Anchor, how much did I spend on food this month?",
+            "status": "planned",
+            "detectionPatterns": [
+                "RND-002"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "RND-003",
+            "team": "Innovation",
+            "priority": "P3",
+            "title": "Receipt OCR",
+            "description": "Scan receipts to auto-create transactions",
+            "status": "planned",
+            "detectionPatterns": [
+                "RND-003"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "RND-004",
+            "team": "Innovation",
+            "priority": "P3",
+            "title": "Bank Integration",
+            "description": "Plaid/Yodlee for automatic transaction import",
+            "status": "planned",
+            "detectionPatterns": [
+                "RND-004"
+            ],
+            "effort": "large",
+            "impact": "critical"
+        },
+        {
+            "id": "DATA-001",
+            "team": "Data",
+            "priority": "P3",
+            "title": "Analytics Pipeline",
+            "description": "Firestore → BigQuery → Looker Studio for product analytics",
+            "status": "planned",
+            "detectionPatterns": [
+                "DATA-001"
+            ],
+            "effort": "large",
+            "impact": "high"
+        },
+        {
+            "id": "BRAND-001",
+            "team": "Marketing",
+            "priority": "P3",
+            "title": "Marketing Website",
+            "description": "Conversion-optimized landing page",
+            "status": "planned",
+            "detectionPatterns": [
+                "BRAND-001"
+            ],
+            "effort": "large",
+            "impact": "high"
+        },
+        {
+            "id": "BRAND-005",
+            "team": "Marketing",
+            "priority": "P3",
+            "title": "Referral Program",
+            "description": "Invite family, earn premium",
+            "status": "planned",
+            "detectionPatterns": [
+                "BRAND-005"
+            ],
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "WEB-001",
+            "team": "Design",
+            "priority": "P3",
+            "title": "Dashboard 2.0",
+            "description": "Customizable widget layout, drag-and-drop",
+            "status": "planned",
+            "detectionPatterns": [
+                "WEB-001"
+            ],
+            "effort": "large",
+            "impact": "medium"
+        },
+        {
+            "id": "WEB-003",
+            "team": "Design",
+            "priority": "P3",
+            "title": "Animation Library",
+            "description": "Framer Motion integration for richer animations",
+            "status": "deferred",
+            "detectionPatterns": [
+                "WEB-003"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "deferredReason": "Removed in v1.5.14 revert for environment parity"
+        },
+        {
+            "id": "GAP-001",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Fabric Suggestion Pre-fill",
+            "description": "Record Transaction from completed commitment pre-fills form",
+            "status": "completed",
+            "detectionPatterns": [
+                "GAP-001"
+            ],
+            "completedAt": "2026-01-29",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "GAP-002",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Design System Color Token Fragmentation",
+            "description": "Inconsistent use of indigo-* tokens instead of semantic primary-* tokens",
+            "status": "completed",
+            "detectionPatterns": [
+                "GAP-002"
+            ],
+            "completedAt": "2026-02-01",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "GAP-003",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Navigation Race Condition",
+            "description": "Flaky navigation on slow devices due to hardcoded setTimeout(100) hack",
+            "status": "completed",
+            "detectionPatterns": [
+                "GAP-003"
+            ],
+            "completedAt": "2026-02-01",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "GAP-004",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Command Palette Recent Actions",
+            "description": "Power users see recently used actions at top of Command Palette",
+            "status": "completed",
+            "detectionPatterns": [
+                "GAP-004"
+            ],
+            "completedAt": "2026-02-01",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "TASK-002",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Habit Streaks & Gamification",
+            "description": "Fire emoji streak badges on tasks with active streaks",
+            "status": "completed",
+            "detectionPatterns": [
+                "TASK-002"
+            ],
+            "completedAt": "2026-02-01",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "FIN-003",
+            "team": "Product",
+            "priority": "P1",
+            "title": "Recurring Transactions",
+            "description": "Scheduled Cloud Function for recurring rules",
+            "status": "completed",
+            "detectionPatterns": [
+                "FIN-003"
+            ],
+            "completedAt": "2026-01-29",
+            "effort": "large",
+            "impact": "critical"
+        },
+        {
+            "id": "UX-019",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Currency Overflow Protection",
+            "description": "Compact formatting for large currency values",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-019"
+            ],
+            "completedAt": "2026-01-31",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "UX-020",
+            "team": "Design",
+            "priority": "P1",
+            "title": "Task Completion Animation + Haptic",
+            "description": "Visual animation and haptic feedback on task completion",
+            "status": "completed",
+            "detectionPatterns": [
+                "UX-020"
+            ],
+            "completedAt": "2026-01-31",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "BUG-022",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Modal Keyboard Input Fix",
+            "description": "Fixed Transfer/Pay Bill modals not accepting keyboard input",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-022"
+            ],
+            "completedAt": "2026-01-31",
+            "effort": "small",
+            "impact": "critical"
+        },
+        {
+            "id": "BUG-023",
+            "team": "Engineering",
+            "priority": "P0",
+            "title": "Commitment Checkbox Multiple Clicks",
+            "description": "Fixed checkboxes requiring 2-3 clicks due to Firestore listener issues",
+            "status": "completed",
+            "detectionPatterns": [
+                "BUG-023"
+            ],
+            "completedAt": "2026-01-31",
+            "effort": "medium",
+            "impact": "critical"
+        },
+        {
+            "id": "ARCH-007",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Optimistic Updates",
+            "description": "Created useOptimisticMutation hook with automatic rollback",
+            "status": "completed",
+            "detectionPatterns": [
+                "ARCH-007"
+            ],
+            "completedAt": "2026-01-29",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "ARCH-016",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Telemetry Tracing",
+            "description": "Created TelemetryService with trace(), logEvent(), createTracer()",
+            "status": "completed",
+            "detectionPatterns": [
+                "ARCH-016"
+            ],
+            "completedAt": "2026-01-29",
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "PERF-001",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Add 500ms debounce to profile name input",
+            "description": "Bug fix: Added 500ms debounce to profile name input to prevent excessive Firestore writes",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "PERF-001"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "PERF-002",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Remove duplicate Firestore listeners in FamilySettingsV2",
+            "description": "Bug fix: Removed duplicate Firestore listeners in FamilySettingsV2 that caused redundant reads and potential memory leaks",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "PERF-002"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "PERF-003",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Add list virtualization to TaskList component",
+            "description": "Feature: Added list virtualization to TaskList component for improved rendering performance with large task lists",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "PERF-003"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "PERF-004",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Make dark mode detection reactive in BottomNavigation",
+            "description": "Bug fix: Made dark mode detection reactive in BottomNavigation so theme changes apply without page reload",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "PERF-004"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-001",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Encapsulate MFA enrollment UI state in dedicated hook",
+            "description": "Feature: Encapsulated MFA enrollment UI state in a dedicated hook to reduce component complexity and improve testability",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-001"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "ARCH-002",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Consolidate FamilyConnection interface to single source",
+            "description": "Feature: Consolidated FamilyConnection interface to a single source of truth, eliminating duplicated type definitions",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-002"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-003",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Extract FCM token retry logic to dedicated service",
+            "description": "Feature: Extracted FCM token retry logic to a dedicated service for better separation of concerns and reusability",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-003"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "medium"
+        },
+        {
+            "id": "ARCH-004",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Remove mfaOps from useEffect dependency array",
+            "description": "Bug fix: Removed mfaOps from useEffect dependency array to prevent infinite re-render loop in MFA enrollment flow",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-004"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "ARCH-005",
+            "team": "Architecture",
+            "priority": "P3",
+            "title": "Remove dead returnAfterAuth sessionStorage code",
+            "description": "Bug fix: Removed dead returnAfterAuth sessionStorage code that was no longer referenced anywhere in the codebase",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-005"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "low"
+        },
+        {
+            "id": "ARCH-006",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Use system theme preference for auth view default",
+            "description": "Bug fix: Replaced hardcoded light theme default with system theme preference detection using getEffectiveTheme() to eliminate dark-mode flash",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.28",
+            "detectionPatterns": [
+                "ARCH-006"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-001",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Account deletion requires password reauthentication",
+            "description": "DangerZone now prompts for current password before deleting account via Firebase reauthenticate()",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-001"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-002",
+            "team": "Security",
+            "priority": "P1",
+            "title": "MFA recovery codes generated after enrollment",
+            "description": "Generates 8 one-time backup codes with SHA-256 hashing, displayed in grid with copy/download, stored in Firestore",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-002"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-003",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Password change flow in SecuritySettings",
+            "description": "Inline collapsible form: reauthenticate with current password then updatePassword via Firebase Auth, with audit logging",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-003"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-004",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "CSV export alongside existing JSON export",
+            "description": "New csvExport utility with proper cell escaping, sectioned output for accounts/transactions/commitments",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-004"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-005",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Per-category notification controls",
+            "description": "Toggle notifications for finance, commitments, and family categories independently",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-005"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-006",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "inputMode numeric on InviteCodeEntry",
+            "description": "Shows numeric keyboard on mobile for 6-digit invite code input",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-006"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-007",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Auto-submit when 6-digit code is complete",
+            "description": "All 4 code input components auto-submit on 6th digit with ref guard to prevent double-submit",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-007"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-008",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Onboarding back button on steps 2 and 3",
+            "description": "Added back navigation to OnboardingAccountStep and OnboardingHabitStep",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-008"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-009",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Accessibility controls: font size, high contrast, reduced motion",
+            "description": "New AccessibilityControls component with CSS class application via useAccessibility hook",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-009"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-010",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Shared account permission picker (read/transact/manage)",
+            "description": "SharePermissionPicker renders in AccountDetailsView for owners, updates Firestore sharedWith[uid].permission directly",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-010"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-011",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Offline guard for family Cloud Function calls",
+            "description": "shareAccount and disconnectFamily check navigator.onLine before calling CFs, show offline toast",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-011"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-012",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Quiet hours / Do Not Disturb settings",
+            "description": "QuietHoursSettings component with toggle and time range pickers, persisted in notification preferences",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.29",
+            "detectionPatterns": [
+                "FEAT-012"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "BUG-073",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Swipe sensitivity: accidental triggers during vertical scroll",
+            "description": "Added vertical scroll discrimination to SwipeableRow. Tracks startY and locks axis on first significant movement. Cancels horizontal swipe when vertical delta dominates.",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.30",
+            "detectionPatterns": [
+                "BUG-073"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "BUG-074",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Month navigation scroll jump to account widget",
+            "description": "FinanceView now scrolls to the transaction list section after month prev/next navigation instead of jumping to top.",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.30",
+            "detectionPatterns": [
+                "BUG-074"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-013",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Bank/account tag pill on transaction history items",
+            "description": "TransactionItem now renders the accountName prop as an emerald pill in the metadata row.",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.30",
+            "detectionPatterns": [
+                "FEAT-013"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "small",
+            "impact": "medium"
+        },
+        {
+            "id": "FEAT-014",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Previous month carry-over in account detail view",
+            "description": "Account detail view fetches 14 days of trailing transactions from previous month for continuity with Previous month divider.",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.5.30",
+            "detectionPatterns": [
+                "FEAT-014"
+            ],
+            "completedAt": "2026-02-06",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "BUG-075",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Remove redundant hamburger menu on mobile",
+            "description": "Bottom navigation already has Settings tab. Removed mobile header, drawer overlay, and mobileMenuOpen state from MainLayout.",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.31",
+            "detectionPatterns": [
+                "BUG-075"
+            ],
+            "completedAt": "2026-02-07",
+            "effort": "small",
+            "impact": "high"
+        },
+        {
+            "id": "BUG-076",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Extract shared ToggleSwitch, align toggles on mobile",
+            "description": "Created reusable ToggleSwitch component with 44px touch target. Replaced 7 inline copies across 4 settings files. Standardized rows to always-inline layout.",
+            "status": "completed",
+            "type": "bug",
+            "sprint": "1.5.31",
+            "detectionPatterns": [
+                "BUG-076"
+            ],
+            "completedAt": "2026-02-07",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "id": "FEAT-015",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Two-part onboarding: Getting Started + Beyond the Basics",
+            "description": "Redesigned onboarding into two parts. Part 1 'Getting Started' is a 4-step hard gate (Welcome+Name, Account, Commitment, Security with email verify + MFA). Part 2 'Beyond the Basics' is a pulsing CompletionRing on the Dashboard with 5 auto-completing checklist items. Red asterisks suppressed after security step seen. Old OnboardingWelcome replaced by GettingStartedWelcome with editable name.",
+            "status": "completed",
+            "type": "feature",
+            "sprint": "1.7.0",
+            "detectionPatterns": [
+                "FEAT-015",
+                "onboarding",
+                "completion ring",
+                "beyond the basics",
+                "getting started"
+            ],
+            "completedAt": "2026-02-08",
+            "effort": "large",
+            "impact": "high"
+        }
+    ]
 }

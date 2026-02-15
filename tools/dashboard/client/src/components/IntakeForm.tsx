@@ -65,7 +65,23 @@ export function IntakeForm({ onSubmit }: IntakeFormProps) {
 
             onSubmit?.();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to create ticket');
+            if (axios.isAxiosError(err)) {
+                const status = err.response?.status;
+                const data = err.response?.data as {
+                    error?: string;
+                    duplicate?: { id?: string; title?: string; reason?: string };
+                } | undefined;
+
+                if (status === 409 && data?.duplicate?.id) {
+                    setError(
+                        `Duplicate detected: ${data.duplicate.id} — ${data.duplicate.title || 'Existing initiative'} (${data.duplicate.reason || 'overlap'}). Update that item instead of creating a new one.`
+                    );
+                } else {
+                    setError(data?.error || err.message || 'Failed to create ticket');
+                }
+            } else {
+                setError(err instanceof Error ? err.message : 'Failed to create ticket');
+            }
         } finally {
             setLoading(false);
         }

@@ -67,6 +67,11 @@ interface KanbanData {
     error?: string;
 }
 
+interface VelocityStatsSummary {
+    currentVelocity: number;
+    averageCycleTime: number | null;
+}
+
 export function EnterpriseKanban() {
     const [data, setData] = useState<KanbanData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -79,7 +84,7 @@ export function EnterpriseKanban() {
     const [filterPriority, setFilterPriority] = useState<string>('all');
     const [filterAssignee, setFilterAssignee] = useState<string>('all');
     const [showFilters, setShowFilters] = useState(false);
-    const [velocityStats, setVelocityStats] = useState<any>(null);
+    const [velocityStats, setVelocityStats] = useState<VelocityStatsSummary | null>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -173,7 +178,7 @@ export function EnterpriseKanban() {
 
         async function fetchVelocity() {
             try {
-                const res = await axios.get('/api/velocity/stats');
+                const res = await axios.get<VelocityStatsSummary>('/api/velocity/stats');
                 setVelocityStats(res.data);
             } catch (error) {
                 console.error('Failed to fetch velocity:', error);

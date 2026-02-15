@@ -19,12 +19,18 @@ interface VelocityStats {
     }>;
 }
 
+interface CompletionPrediction {
+    weeksRemaining: number;
+    daysRemaining: number;
+    date: string;
+}
+
 export function VelocityDashboard() {
     const [stats, setStats] = useState<VelocityStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [remainingItems, setRemainingItems] = useState(10);
-    const [prediction, setPrediction] = useState<any>(null);
+    const [prediction, setPrediction] = useState<CompletionPrediction | null>(null);
 
     useEffect(() => {
         fetchVelocityStats();
@@ -59,7 +65,7 @@ export function VelocityDashboard() {
 
     const handlePredict = async () => {
         try {
-            const res = await axios.post('/api/velocity/predict', { remainingItems });
+            const res = await axios.post<CompletionPrediction>('/api/velocity/predict', { remainingItems });
             setPrediction(res.data);
         } catch {
             alert('Failed to predict completion date');
