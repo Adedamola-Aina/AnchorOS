@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { LayoutDashboard, CheckCircle2, CreditCard, Settings, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,7 @@ import { useKeyboardAvoidance } from '../hooks/useKeyboardAvoidance';
 import { BottomNavigation } from '../components/mobile/BottomNavigation';
 import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { useFinanceService } from '../hooks/useFinanceService';
+import { useUnsavedChangesGuard } from '../hooks/useUnsavedChanges';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -23,9 +24,15 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon }) => {
+    const { isDirty, confirmDiscard } = useUnsavedChangesGuard();
+    const handleClick = useCallback((e: React.MouseEvent) => {
+        if (isDirty && !confirmDiscard()) e.preventDefault();
+    }, [isDirty, confirmDiscard]);
+
     return (
         <NavLink
             to={to}
+            onClick={handleClick}
             className={({ isActive }) =>
                 `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'}`
             }

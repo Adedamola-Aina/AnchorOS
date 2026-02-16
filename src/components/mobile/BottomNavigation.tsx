@@ -11,6 +11,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useHaptic } from '../../hooks/useHaptic';
+import { useUnsavedChangesGuard } from '../../hooks/useUnsavedChanges';
 import { navAnimationStyles, getRandomColor, CELEBRATION_COLORS } from './NavIconAnimations';
 import { AnimatedHomeIcon, AnimatedTasksIcon, AnimatedFinanceIcon, AnimatedSettingsIcon } from './AnimatedNavIcons';
 
@@ -58,14 +59,21 @@ export const BottomNavigation = ({
         }
     }, []);
 
-    const handleTap = useCallback((route: string) => {
+    const { isDirty, confirmDiscard } = useUnsavedChangesGuard();
+
+    const handleTap = useCallback((route: string, e: React.MouseEvent) => {
+        // Block navigation if form has unsaved changes
+        if (isDirty && !confirmDiscard()) {
+            e.preventDefault();
+            return;
+        }
         trigger('light');
         if (route === '/commitments') {
             setCelebrationColor(getRandomColor());
         }
         setAnimatingRoute(route);
         setTimeout(() => setAnimatingRoute(null), 200);
-    }, [trigger]);
+    }, [trigger, isDirty, confirmDiscard]);
 
     // Get dynamic color class for icons during animation
     const getIconColorClass = useCallback((route: string, isActive: boolean) => {
@@ -134,7 +142,7 @@ export const BottomNavigation = ({
                     <NavLink
                         key={to}
                         to={to}
-                        onClick={() => handleTap(to)}
+                        onClick={(e) => handleTap(to, e)}
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center gap-1 relative transition-colors min-h-[44px] ${getIconColorClass(to, isActive)}`
                         }
