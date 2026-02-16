@@ -1,10 +1,17 @@
 /**
  * Tests for csvExport.ts — downloadCsv, escapeCell, toCsv
- * Target: 95%+ coverage
+ * Target: 95%+ coverage, high mutation kill rate
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { downloadCsv } from './csvExport';
+
+/**
+ * Capture the raw string content passed to `new Blob([content])`.
+ * happy-dom's Blob doesn't support `.text()`, so we intercept the constructor.
+ */
+let lastBlobContent = '';
+const OrigBlob = globalThis.Blob;
 
 describe('downloadCsv', () => {
     let mockAnchor: HTMLAnchorElement;
@@ -12,6 +19,15 @@ describe('downloadCsv', () => {
     let revokeObjectURLSpy: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
+        lastBlobContent = '';
+        // Override Blob to capture content
+        globalThis.Blob = class extends OrigBlob {
+            constructor(parts?: BlobPart[], options?: BlobPropertyBag) {
+                super(parts, options);
+                lastBlobContent = typeof parts?.[0] === 'string' ? parts[0] : '';
+            }
+        } as typeof Blob;
+
         mockAnchor = {
             href: '',
             download: '',
@@ -25,6 +41,10 @@ describe('downloadCsv', () => {
         revokeObjectURLSpy = vi.fn();
         globalThis.URL.createObjectURL = createObjectURLSpy;
         globalThis.URL.revokeObjectURL = revokeObjectURLSpy;
+    });
+
+    afterEach(() => {
+        globalThis.Blob = OrigBlob;
     });
 
     // ── Empty data ──────────────────────────────────────────────────
@@ -131,5 +151,123 @@ describe('downloadCsv', () => {
             commitments: [{ title: 'C' }],
         });
         expect(mockAnchor.click).toHaveBeenCalledOnce();
+    });
+
+    // ── CSV content verification ────────────────────────────────────
+    it('generates correct CSV headers and rows', () => {
+        downloadCsv({
+            accounts: [{ name: 'Savings', balance: 5000 }],
+            transactions: [],
+            commitments: [],
+        });
+
+        expect(lastBlobContent).toContain('# Accounts');
+        expect(lastBlobContent).toContain('name,balance');
+        expect(lastBlobContent).toContain('Savings,5000');
+    });
+
+    it('separates sections with double newlines', () => {
+        downloadCsv({
+            accounts: [{ id: '1' }],
+            transactions: [{ id: '2' }],
+            commitments: [{ id: '3' }],
+        });
+
+        expect(lastBlobContent).toContain('# Accounts');
+        expect(lastBlobContent).toContain('# Transactions');
+        expect(lastBlobContent).toContain('# Commitments');
+        // Sections are separated by double newline
+        const sections = lastBlobContent.split('\n\n');
+        expect(sections.length).toBe(3);
+    });
+
+    it('escapes commas in CSV cell values', () => {
+        downloadCsv({
+            accounts: [{ name: 'Main, Backup', amount: 100 }],
+            transactions: [],
+            commitments: [],
+        });
+
+        // Comma in value should be wrapped in quotes
+        expect(lastBlobContent).toContain('"Main, Backup"');
+    });
+
+    it('escapes double quotes in CSV cell values', () => {
+        downloadCsv({
+            accounts: [{ name: 'Account "A"' }],
+            transactions: [],
+            commitments: [],
+        });
+
+        // Double quotes should be escaped as ""
+        expect(lastBlobContent).toContain('"Account ""A"""');
+    });
+
+    it('escapes newlines in CSV cell values', () => {
+        downloadCsv({
+            accounts: [{ note: 'line1\nline2' }],
+            transactions: [],
+            commitments: [],
+        });
+
+        expect(lastBlobContent).toContain('"line1\nline2"');
+    });
+
+    it('handles null and undefined values as empty strings', () => {
+        downloadCsv({
+            accounts: [{ name: null, other: undefined }],
+            transactions: [],
+            commitments: [],
+        });
+
+        // null/undefined should result in empty cells
+        expect(lastBlobContent).toContain('name,other');
+        expect(lastBlobContent).toContain(','); // empty values
+    });
+
+    it('serializes object values as JSON', () => {
+        downloadCsv({
+            accounts: [{ meta: { nested: true } }],
+            transactions: [],
+            commitments: [],
+        });
+
+        // Object should be JSON.stringify'd; commas trigger CSV quoting with doubled internal quotes
+        expect(lastBlobContent).toContain('"{""nested"":true}"');
+    });
+
+    it('generates empty content when all sections empty', () => {
+        downloadCsv({ accounts: [], transactions: [], commitments: [] });
+
+        expect(lastBlobContent).toBe('');
+    });
+
+    it('handles multiple rows in a section', () => {
+        downloadCsv({
+            accounts: [
+                { name: 'A', type: 'checking' },
+                { name: 'B', type: 'savings' },
+            ],
+            transactions: [],
+            commitments: [],
+        });
+
+        const lines = lastBlobContent.split('\n');
+        // # Accounts header, CSV header row, 2 data rows
+        expect(lines).toContain('name,type');
+        expect(lines).toContain('A,checking');
+        expect(lines).toContain('B,savings');
+    });
+
+    it('only includes sections with data (skips empty)', () => {
+        downloadCsv({
+            accounts: [],
+            transactions: [{ title: 'Coffee', amount: 5 }],
+            commitments: [],
+        });
+
+        expect(lastBlobContent).not.toContain('# Accounts');
+        expect(lastBlobContent).toContain('# Transactions');
+        expect(lastBlobContent).not.toContain('# Commitments');
     });
 });

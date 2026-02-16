@@ -26,6 +26,7 @@ export default {
     '!src/**/*.test.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/**/index.ts',
+    '!src/utils/seeder.ts',      // Dev-only Firestore seeder — requires emulators, not production code
   ],
   
   // Reporters

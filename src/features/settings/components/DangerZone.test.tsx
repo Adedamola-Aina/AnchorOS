@@ -41,6 +41,10 @@ describe('DangerZone', () => {
   it('shows password prompt after confirmation', async () => {
     render(<DangerZone onDeleteAccount={mockDelete} />);
     fireEvent.click(screen.getByRole('button', { name: /delete.*account/i }));
+    // Complete name-typing step first (BUG-087 added this step)
+    await waitFor(() => screen.getByPlaceholderText('User'));
+    fireEvent.change(screen.getByPlaceholderText('User'), { target: { value: 'User' } });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
     });
@@ -57,6 +61,10 @@ describe('DangerZone', () => {
   it('calls onDeleteAccount after password re-auth', async () => {
     render(<DangerZone onDeleteAccount={mockDelete} />);
     fireEvent.click(screen.getByRole('button', { name: /delete.*account/i }));
+    // Complete name-typing step first (BUG-087 added this step)
+    await waitFor(() => screen.getByPlaceholderText('User'));
+    fireEvent.change(screen.getByPlaceholderText('User'), { target: { value: 'User' } });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
     await waitFor(() => screen.getByPlaceholderText(/password/i));
 
     fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'mypass123' } });

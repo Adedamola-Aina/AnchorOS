@@ -146,4 +146,116 @@ describe('secureDb', () => {
             await expect(secureDb.deleteDocument('user-1', ['x'])).rejects.toThrow('permission-denied');
         });
     });
+
+    // ── Options pass-through ────────────────────────────────────────
+    describe('options pass-through', () => {
+        it('getDocument passes options', async () => {
+            vi.mocked(getDoc).mockResolvedValueOnce({
+                exists: () => true,
+                data: () => ({ name: 'Test' }),
+                id: 'doc-1',
+            } as any);
+
+            const result = await secureDb.getDocument('user-1', ['accounts', 'a1'], { timeoutMs: 10000 });
+            expect(result).toEqual({ id: 'doc-1', name: 'Test' });
+        });
+
+        it('queryCollection passes options', async () => {
+            vi.mocked(getDocs).mockResolvedValueOnce({ docs: [] } as any);
+            const result = await secureDb.queryCollection('user-1', 'accounts', [], { timeoutMs: 10000 });
+            expect(result).toEqual([]);
+        });
+
+        it('setDocument passes options', async () => {
+            await secureDb.setDocument('user-1', ['profile'], { name: 'Test' }, { timeoutMs: 10000 });
+            expect(setDoc).toHaveBeenCalled();
+        });
+
+        it('updateDocument passes options', async () => {
+            await secureDb.updateDocument('user-1', ['accounts', 'a1'], { name: 'Updated' }, { timeoutMs: 10000 });
+            expect(updateDoc).toHaveBeenCalled();
+        });
+
+        it('deleteDocument passes options', async () => {
+            await secureDb.deleteDocument('user-1', ['accounts', 'a1'], { timeoutMs: 10000 });
+            expect(deleteDoc).toHaveBeenCalled();
+        });
+    });
+
+    // ── Path joining ────────────────────────────────────────────────
+    describe('path handling', () => {
+        it('getDocument joins multi-segment paths', async () => {
+            vi.mocked(getDoc).mockResolvedValueOnce({
+                exists: () => false,
+                data: () => null,
+                id: 'x',
+            } as any);
+
+            await secureDb.getDocument('user-1', ['accounts', 'a1', 'activity', 'log-1']);
+            expect(getDoc).toHaveBeenCalled();
+        });
+
+        it('setDocument joins single segment path', async () => {
+            await secureDb.setDocument('user-1', ['profile'], { theme: 'dark' });
+            expect(setDoc).toHaveBeenCalled();
+        });
+    });
+
+    // ── Error logging ───────────────────────────────────────────────
+    describe('error logging', () => {
+        it('logs error message on getDocument failure', async () => {
+            vi.mocked(getDoc).mockRejectedValueOnce(new Error('test'));
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            await expect(secureDb.getDocument('user-1', ['bad'])).rejects.toThrow('test');
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[SecureDb] Error getting document'),
+                expect.any(Error)
+            );
+        });
+
+        it('logs error message on queryCollection failure', async () => {
+            vi.mocked(getDocs).mockRejectedValueOnce(new Error('query-fail'));
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            await expect(secureDb.queryCollection('user-1', 'accounts')).rejects.toThrow('query-fail');
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[SecureDb] Error querying collection'),
+                expect.any(Error)
+            );
+        });
+
+        it('logs error message on setDocument failure', async () => {
+            vi.mocked(setDoc).mockRejectedValueOnce(new Error('set-fail'));
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            await expect(secureDb.setDocument('user-1', ['x'], {})).rejects.toThrow('set-fail');
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[SecureDb] Error setting document'),
+                expect.any(Error)
+            );
+        });
+
+        it('logs error message on updateDocument failure', async () => {
+            vi.mocked(updateDoc).mockRejectedValueOnce(new Error('update-fail'));
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            await expect(secureDb.updateDocument('user-1', ['x'], {})).rejects.toThrow('update-fail');
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[SecureDb] Error updating document'),
+                expect.any(Error)
+            );
+        });
+
+        it('logs error message on deleteDocument failure', async () => {
+            vi.mocked(deleteDoc).mockRejectedValueOnce(new Error('delete-fail'));
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            await expect(secureDb.deleteDocument('user-1', ['x'])).rejects.toThrow('delete-fail');
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[SecureDb] Error deleting document'),
+                expect.any(Error)
+            );
+        });
+    });
 });

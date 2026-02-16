@@ -1252,6 +1252,186 @@
       "completedDate": "2026-02-06",
       "cycleTime": null,
       "recordedAt": "2026-02-12T17:00:00.896Z"
+    },
+    {
+      "itemId": "c5a3e44",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.838Z"
+    },
+    {
+      "itemId": "66ed527",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.839Z"
+    },
+    {
+      "itemId": "a3257f0",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.840Z"
+    },
+    {
+      "itemId": "c96aaf3",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.840Z"
+    },
+    {
+      "itemId": "8e20b8b",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.841Z"
+    },
+    {
+      "itemId": "0d2e6cb",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.841Z"
+    },
+    {
+      "itemId": "ca712cc",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.841Z"
+    },
+    {
+      "itemId": "a4a86d5",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.841Z"
+    },
+    {
+      "itemId": "818e718",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.841Z"
+    },
+    {
+      "itemId": "c4cfe80",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.842Z"
+    },
+    {
+      "itemId": "d411c5a",
+      "completedDate": "2026-02-15",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.842Z"
+    },
+    {
+      "itemId": "af943a1",
+      "completedDate": "2026-02-14",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.843Z"
+    },
+    {
+      "itemId": "1351742",
+      "completedDate": "2026-02-13",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.843Z"
+    },
+    {
+      "itemId": "31b9d89",
+      "completedDate": "2026-02-12",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.843Z"
+    },
+    {
+      "itemId": "9d651dd",
+      "completedDate": "2026-02-12",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.843Z"
+    },
+    {
+      "itemId": "4f6aeb6",
+      "completedDate": "2026-02-12",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.843Z"
+    },
+    {
+      "itemId": "178112e",
+      "completedDate": "2026-02-12",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.844Z"
+    },
+    {
+      "itemId": "0cf6b9b",
+      "completedDate": "2026-02-12",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.844Z"
+    },
+    {
+      "itemId": "472d40b",
+      "completedDate": "2026-02-12",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.844Z"
+    },
+    {
+      "itemId": "3de910f",
+      "completedDate": "2026-02-12",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.844Z"
+    },
+    {
+      "itemId": "786e606",
+      "completedDate": "2026-02-11",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.844Z"
+    },
+    {
+      "itemId": "7b71660",
+      "completedDate": "2026-02-10",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.845Z"
+    },
+    {
+      "itemId": "c530503",
+      "completedDate": "2026-02-10",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.845Z"
+    },
+    {
+      "itemId": "f49f6bd",
+      "completedDate": "2026-02-10",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.845Z"
+    },
+    {
+      "itemId": "7d44b96",
+      "completedDate": "2026-02-09",
+      "cycleTime": null,
+      "recordedAt": "2026-02-15T20:00:00.845Z"
+    },
+    {
+      "itemId": "SEC-1",
+      "completedDate": "2026-02-09",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T06:00:00.014Z"
+    },
+    {
+      "itemId": "SEC-2",
+      "completedDate": "2026-02-09",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T06:00:00.015Z"
+    },
+    {
+      "itemId": "SEC-3",
+      "completedDate": "2026-02-09",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T06:00:00.016Z"
+    },
+    {
+      "itemId": "SEC-6",
+      "completedDate": "2026-02-09",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T06:00:00.016Z"
+    },
+    {
+      "itemId": "UX-033",
+      "completedDate": "2026-02-07",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T06:00:00.016Z"
     }
   ],
   "weeklyStats": [
@@ -1267,13 +1447,13 @@
     },
     {
       "week": "2026-W06",
-      "completed": 129,
-      "velocity": 67.33
+      "completed": 130,
+      "velocity": 67.67
     },
     {
       "week": "2026-W07",
-      "completed": 6,
-      "velocity": 45.25
+      "completed": 35,
+      "velocity": 59.25
     }
   ]
 }

@@ -54,7 +54,7 @@ app.use((req, _res, next) => {
 // Serve static files from client build (production)
 // Assets use content-hash filenames, so they can be cached forever.
 // index.html MUST NOT be cached to ensure fresh builds load immediately.
-app.use(express.static(path.join(__dirname, '../client/dist'), {
+const staticOptions = {
     setHeaders: (res, filePath) => {
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -62,7 +62,11 @@ app.use(express.static(path.join(__dirname, '../client/dist'), {
             res.setHeader('Expires', '0');
         }
     }
-}));
+};
+// Serve at root (direct port 3001 access)
+app.use(express.static(path.join(__dirname, '../client/dist'), staticOptions));
+// Serve at /dashboard (Tailscale proxy access)
+app.use('/dashboard', express.static(path.join(__dirname, '../client/dist'), staticOptions));
 
 function normalizeForCompare(value = '') {
     return String(value)
@@ -846,13 +850,13 @@ app.get('/api/intake/next-id', async (req, res) => {
 app.get('/api/intake/used-ids', async (req, res) => {
     try {
         const usedIds = await gitData.getAllUsedIds();
-        
+
         // Convert Sets to sorted arrays for JSON serialization
         const result = {};
         for (const [prefix, numbers] of Object.entries(usedIds)) {
             result[prefix] = Array.from(numbers).sort((a, b) => a - b);
         }
-        
+
         res.json({
             source: 'git + roadmap.json',
             description: 'All IDs used in git history OR roadmap.json - these cannot be reused',
@@ -1304,8 +1308,17 @@ app.post('/api/refresh', (req, res) => {
 /**
  * Catch-all route - serve index.html for client-side routing
  * Must set no-cache to prevent browsers from caching stale builds
+ * Handles both direct access (/) and Tailscale proxy (/dashboard/*)
  */
+app.get(['/dashboard', '/dashboard/*'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 app.get('*', (req, res) => {
+    // Skip API routes (they have their own handlers)
+    if (req.path.startsWith('/api/')) return;
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');

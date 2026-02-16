@@ -1,8 +1,8 @@
 {
-  "lastSync": "2026-02-15T09:42:44.452Z",
+  "lastSync": "2026-02-16T07:15:01.391Z",
   "syncHistory": [
     {
-      "timestamp": "2026-02-15T09:42:44.452Z",
+      "timestamp": "2026-02-16T07:15:01.391Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -10,7 +10,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T09:42:44.452Z",
+      "timestamp": "2026-02-16T07:15:01.390Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -18,7 +18,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T09:36:43.418Z",
+      "timestamp": "2026-02-16T06:50:00.386Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T09:36:43.417Z",
+      "timestamp": "2026-02-16T06:50:00.385Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -34,7 +34,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T09:10:57.313Z",
+      "timestamp": "2026-02-16T06:22:32.927Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -42,7 +42,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T09:10:57.311Z",
+      "timestamp": "2026-02-16T06:22:32.926Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -50,7 +50,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:30:21.834Z",
+      "timestamp": "2026-02-16T06:16:55.245Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -58,7 +58,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:30:21.834Z",
+      "timestamp": "2026-02-16T06:16:55.244Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -66,7 +66,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:30:14.576Z",
+      "timestamp": "2026-02-16T06:16:34.934Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -74,7 +74,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:30:14.576Z",
+      "timestamp": "2026-02-16T06:16:34.934Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -82,7 +82,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:30:07.035Z",
+      "timestamp": "2026-02-16T06:04:23.001Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -90,7 +90,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:30:07.035Z",
+      "timestamp": "2026-02-16T06:04:23.001Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -98,7 +98,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:52.431Z",
+      "timestamp": "2026-02-16T06:04:00.116Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -106,7 +106,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:52.430Z",
+      "timestamp": "2026-02-16T06:04:00.116Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -114,7 +114,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:43.053Z",
+      "timestamp": "2026-02-16T05:27:39.352Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -122,7 +122,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:43.053Z",
+      "timestamp": "2026-02-16T05:27:39.351Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -130,7 +130,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:24.639Z",
+      "timestamp": "2026-02-16T05:27:30.956Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -138,7 +138,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:24.639Z",
+      "timestamp": "2026-02-16T05:27:30.955Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -146,7 +146,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:15.785Z",
+      "timestamp": "2026-02-16T05:27:11.087Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -154,7 +154,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:15.785Z",
+      "timestamp": "2026-02-16T05:27:11.086Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -162,7 +162,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:08.462Z",
+      "timestamp": "2026-02-16T05:27:04.412Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -170,7 +170,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:08.461Z",
+      "timestamp": "2026-02-16T05:27:04.411Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -178,7 +178,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:00.776Z",
+      "timestamp": "2026-02-16T05:26:39.136Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -186,7 +186,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:29:00.775Z",
+      "timestamp": "2026-02-16T05:26:39.135Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -194,7 +194,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:52.692Z",
+      "timestamp": "2026-02-16T05:26:20.963Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -202,7 +202,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:52.692Z",
+      "timestamp": "2026-02-16T05:26:20.962Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -210,7 +210,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:44.720Z",
+      "timestamp": "2026-02-16T05:26:14.420Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -218,7 +218,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:44.720Z",
+      "timestamp": "2026-02-16T05:26:14.419Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -226,7 +226,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:35.516Z",
+      "timestamp": "2026-02-16T05:24:47.953Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -234,7 +234,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:35.515Z",
+      "timestamp": "2026-02-16T05:24:47.953Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -242,7 +242,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:28.575Z",
+      "timestamp": "2026-02-16T05:24:41.148Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -250,7 +250,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:28.575Z",
+      "timestamp": "2026-02-16T05:24:41.147Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -258,7 +258,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:21.521Z",
+      "timestamp": "2026-02-16T05:24:20.187Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -266,7 +266,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:21.520Z",
+      "timestamp": "2026-02-16T05:24:20.187Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -274,7 +274,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:13.652Z",
+      "timestamp": "2026-02-16T05:24:13.148Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -282,7 +282,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:28:13.651Z",
+      "timestamp": "2026-02-16T05:24:13.148Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -290,7 +290,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:27:28.961Z",
+      "timestamp": "2026-02-16T05:23:37.034Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -298,7 +298,7 @@
       }
     },
     {
-      "timestamp": "2026-02-15T07:27:28.961Z",
+      "timestamp": "2026-02-16T05:23:37.033Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -306,7 +306,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T17:39:04.468Z",
+      "timestamp": "2026-02-16T05:23:24.229Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -314,7 +314,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T17:39:04.467Z",
+      "timestamp": "2026-02-16T05:23:24.228Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -322,7 +322,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T17:37:13.808Z",
+      "timestamp": "2026-02-16T05:23:17.770Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -330,7 +330,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T17:37:13.807Z",
+      "timestamp": "2026-02-16T05:23:17.767Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -338,7 +338,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T17:24:26.009Z",
+      "timestamp": "2026-02-16T05:23:09.875Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -346,7 +346,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T17:24:26.007Z",
+      "timestamp": "2026-02-16T05:23:09.874Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -354,7 +354,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T03:29:07.671Z",
+      "timestamp": "2026-02-16T05:22:38.978Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -362,7 +362,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T03:29:07.671Z",
+      "timestamp": "2026-02-16T05:22:38.977Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -370,7 +370,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T03:28:57.495Z",
+      "timestamp": "2026-02-16T05:22:20.251Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -378,7 +378,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T03:28:57.494Z",
+      "timestamp": "2026-02-16T05:22:20.251Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -386,7 +386,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T02:10:47.910Z",
+      "timestamp": "2026-02-16T05:10:53.726Z",
       "type": "archive",
       "details": {
         "archivedCount": 0,
@@ -394,7 +394,7 @@
       }
     },
     {
-      "timestamp": "2026-02-14T02:10:47.906Z",
+      "timestamp": "2026-02-16T05:10:53.726Z",
       "type": "velocity",
       "details": {
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
@@ -403,9 +403,9 @@
     }
   ],
   "stats": {
-    "totalSyncs": 1469,
-    "lastVelocityUpdate": "2026-02-15T09:42:44.452Z",
+    "totalSyncs": 1541,
+    "lastVelocityUpdate": "2026-02-16T07:15:01.390Z",
     "lastPriorityUpdate": "2026-02-01T07:00:00.010Z",
-    "lastArchiveRun": "2026-02-15T09:42:44.452Z"
+    "lastArchiveRun": "2026-02-16T07:15:01.391Z"
   }
 }

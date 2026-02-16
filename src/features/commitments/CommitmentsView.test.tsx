@@ -87,7 +87,7 @@ const mockTasks: AnchorTask[] = [
     completed: false,
     category: 'personal',
     createdAt: new Date('2024-01-01'),
-    dayOfMonth: 15,
+    dayOfMonth: 28,
   },
 ];
 
@@ -209,8 +209,8 @@ describe('CommitmentsView', () => {
 
     it('shows day of month for monthly tasks', () => {
       renderWithContext(<CommitmentsView />);
-      // Monthly Bill Payment on 15th, rendered as '15' by TaskContextBadge
-      expect(screen.getByText('15')).toBeInTheDocument();
+      // Monthly Bill Payment on 28th, rendered as '28' by TaskContextBadge
+      expect(screen.getByText('28')).toBeInTheDocument();
     });
 
     it('shows empty state when no tasks match filter', async () => {

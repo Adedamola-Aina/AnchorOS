@@ -58,6 +58,12 @@ describe('validateString', () => {
         expect(validateString(undefined, 'Title')).toEqual({ field: 'Title', message: 'Title is required' });
     });
 
+    it('rejects non-string types', () => {
+        expect(validateString(123, 'Title')).toEqual({ field: 'Title', message: 'Title must be a string' });
+        expect(validateString(true, 'Field')).toEqual({ field: 'Field', message: 'Field must be a string' });
+        expect(validateString({}, 'Field')).toEqual({ field: 'Field', message: 'Field must be a string' });
+    });
+
     it('allows empty optional strings', () => {
         expect(validateString('', 'Title', { required: false })).toBeNull();
     });
@@ -92,6 +98,47 @@ describe('validateString', () => {
         expect(validateString('Coffee & Bagels', 'Title')).toBeNull();
         expect(validateString('A'.repeat(255), 'Name', { maxLength: 255 })).toBeNull();
     });
+
+    it('accepts string at exact minLength boundary', () => {
+        expect(validateString('abc', 'Title', { minLength: 3 })).toBeNull();
+    });
+
+    it('accepts string at exact maxLength boundary', () => {
+        expect(validateString('abc', 'Title', { maxLength: 3 })).toBeNull();
+    });
+
+    it('returns null for non-required empty values', () => {
+        expect(validateString(null, 'Title', { required: false })).toBeNull();
+        expect(validateString(undefined, 'Title', { required: false })).toBeNull();
+    });
+
+    it('detects SVG event handler XSS patterns', () => {
+        expect(validateString('<svg onload=alert(1)>', 'Field')).not.toBeNull();
+    });
+
+    it('detects vbscript protocol', () => {
+        expect(validateString('vbscript:exec', 'Field')).not.toBeNull();
+    });
+
+    it('detects base tag manipulation', () => {
+        expect(validateString('<base href="evil">', 'Field')).not.toBeNull();
+    });
+
+    it('detects form injection', () => {
+        expect(validateString('<form action="evil">', 'Field')).not.toBeNull();
+    });
+
+    it('detects CSS expression XSS', () => {
+        expect(validateString('expression(alert(1))', 'Field')).not.toBeNull();
+    });
+
+    it('detects math tag XSS', () => {
+        expect(validateString('<math><maction>click</maction></math>', 'Field')).not.toBeNull();
+    });
+
+    it('detects closing script tag', () => {
+        expect(validateString('text</script>', 'Field')).not.toBeNull();
+    });
 });
 
 describe('validateNumber', () => {
@@ -124,6 +171,43 @@ describe('validateNumber', () => {
         expect(validateNumber(1000, 'Amount', { min: 1, integer: true })).toBeNull();
         expect(validateNumber(99.99, 'Rate', { min: 0 })).toBeNull();
     });
+
+    it('enforces maximum', () => {
+        expect(validateNumber(101, 'Rate', { max: 100 })).toEqual({
+            field: 'Rate',
+            message: 'Rate must be at most 100'
+        });
+    });
+
+    it('accepts number at exact min boundary', () => {
+        expect(validateNumber(1, 'Amount', { min: 1 })).toBeNull();
+    });
+
+    it('accepts number at exact max boundary', () => {
+        expect(validateNumber(100, 'Rate', { max: 100 })).toBeNull();
+    });
+
+    it('accepts valid integer', () => {
+        expect(validateNumber(42, 'Count', { integer: true })).toBeNull();
+    });
+
+    it('allows null/undefined when not required', () => {
+        expect(validateNumber(null, 'Amount', { required: false })).toBeNull();
+        expect(validateNumber(undefined, 'Amount', { required: false })).toBeNull();
+    });
+
+    it('rejects null/undefined when required', () => {
+        expect(validateNumber(null, 'Amount')).toEqual({ field: 'Amount', message: 'Amount is required' });
+        expect(validateNumber(undefined, 'Amount')).toEqual({ field: 'Amount', message: 'Amount is required' });
+    });
+
+    it('accepts negative numbers when no min specified', () => {
+        expect(validateNumber(-50, 'Adjustment')).toBeNull();
+    });
+
+    it('accepts zero', () => {
+        expect(validateNumber(0, 'Count')).toBeNull();
+    });
 });
 
 describe('validateDate', () => {
@@ -141,6 +225,35 @@ describe('validateDate', () => {
 
     it('allows empty optional dates', () => {
         expect(validateDate('', 'Date', { required: false })).toBeNull();
+    });
+
+    it('rejects required empty dates', () => {
+        expect(validateDate('', 'Date')).toEqual({ field: 'Date', message: 'Date is required' });
+    });
+
+    it('rejects null required dates', () => {
+        expect(validateDate(null, 'Date')).toEqual({ field: 'Date', message: 'Date is required' });
+    });
+
+    it('rejects undefined required dates', () => {
+        expect(validateDate(undefined, 'Date')).toEqual({ field: 'Date', message: 'Date is required' });
+    });
+
+    it('allows null optional dates', () => {
+        expect(validateDate(null, 'Date', { required: false })).toBeNull();
+    });
+
+    it('allows undefined optional dates', () => {
+        expect(validateDate(undefined, 'Date', { required: false })).toBeNull();
+    });
+
+    it('rejects non-string date values', () => {
+        expect(validateDate(123, 'Date')).toEqual({ field: 'Date', message: 'Date must be a date string' });
+        expect(validateDate(true, 'Date')).toEqual({ field: 'Date', message: 'Date must be a date string' });
+    });
+
+    it('accepts ISO date-time format', () => {
+        expect(validateDate('2025-01-15T10:30:00.000Z', 'Date')).toBeNull();
     });
 });
 
