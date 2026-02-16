@@ -14,7 +14,8 @@ export const EnvironmentBanner: React.FC = () => {
     : 'bg-yellow-500 text-black';
 
   return (
-    <div className={`fixed top-0 left-0 right-0 h-6 ${colors} flex items-center justify-center text-xs font-bold tracking-widest uppercase z-50`}>
+    <div className={`fixed top-0 left-0 right-0 ${colors} flex items-center justify-center text-xs font-bold tracking-widest uppercase z-50`}
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)', height: 'calc(24px + env(safe-area-inset-top, 0px))' }}>
       {env === 'development' ? 'DEVELOPMENT ENVIRONMENT' : 'STAGING ENVIRONMENT'}
     </div>
   );
