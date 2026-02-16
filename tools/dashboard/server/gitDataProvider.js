@@ -142,18 +142,31 @@ async function getAllTrackedItems(limit = 200) {
         for (const commit of log.all) {
             if (isDashboardCommit(commit.message)) continue;
 
-            const ids = extractIds(commit.message);
+            // Check both subject and body for IDs
+            const fullMessage = commit.body
+                ? `${commit.message}\n${commit.body}`
+                : commit.message;
+            const ids = extractIds(fullMessage);
             const shortHash = commit.hash.substring(0, 7);
+
+            // Build a lookup of ID → body line for per-ID titles
+            const bodyLines = (commit.body || '').split('\n').filter(l => l.trim());
+            const idTitleMap = {};
+            for (const line of bodyLines) {
+                const idMatch = line.match(/^([A-Z]+-\d+)[:\s]+(.+)/);
+                if (idMatch) idTitleMap[idMatch[1].toUpperCase()] = idMatch[2].trim();
+            }
 
             for (const idInfo of ids) {
                 if (!items.has(idInfo.id)) {
                     const roadmapTitle = getInitiativeTitle(idInfo.id);
+                    const bodyTitle = idTitleMap[idInfo.id.toUpperCase()];
                     const commitTitle = commit.message.split('\n')[0].substring(0, 100);
 
                     items.set(idInfo.id, {
                         id: idInfo.id,
                         type: idInfo.type,
-                        title: roadmapTitle || commitTitle,
+                        title: roadmapTitle || bodyTitle || commitTitle,
                         commitMessage: commitTitle,
                         hash: shortHash,
                         fullHash: commit.hash,
