@@ -33,29 +33,15 @@ describe('AccountRenameInput', () => {
 describe('AccountActionButtons', () => {
   const account = { id: 'a1', currency: 'NGN' } as any;
 
-  it('renders Record, Transfer and Pay Bill', () => {
+  it('renders a single Record Transaction button', () => {
     render(<AccountActionButtons account={account} />);
-    expect(screen.getByText('Record')).toBeInTheDocument();
-    expect(screen.getByText('Transfer')).toBeInTheDocument();
-    expect(screen.getByText('Pay Bill')).toBeInTheDocument();
+    expect(screen.getByText('Record Transaction')).toBeInTheDocument();
   });
 
-  it('shows currency symbol on Pay Bill', () => {
-    render(<AccountActionButtons account={{ ...account, currency: 'USD' }} />);
-    expect(screen.getByText('$')).toBeInTheDocument();
-  });
-
-  it('calls onTransfer', () => {
-    const onTransfer = vi.fn();
-    render(<AccountActionButtons account={account} onTransfer={onTransfer} />);
-    fireEvent.click(screen.getByText('Transfer'));
-    expect(onTransfer).toHaveBeenCalled();
-  });
-
-  it('calls onAddTransaction', () => {
+  it('calls onAddTransaction when clicked', () => {
     const onAdd = vi.fn();
     render(<AccountActionButtons account={account} onAddTransaction={onAdd} />);
-    fireEvent.click(screen.getByText('Record'));
+    fireEvent.click(screen.getByText('Record Transaction'));
     expect(onAdd).toHaveBeenCalled();
   });
 });

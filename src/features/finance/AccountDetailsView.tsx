@@ -23,9 +23,9 @@ import { useTransactionsQuery } from '../../hooks/queries/useFinanceQueries';
 /** Number of days of carry-over from the previous month shown for continuity. */
 const CARRYOVER_DAYS = 14;
 
-interface AccountDetailsViewProps { account: AnchorAccount; onBack: () => void; onDelete?: () => void; onShare?: () => void; onTransfer?: () => void; onPayBill?: () => void; onAddTransaction?: () => void; onEdit?: (tx: AnchorTransaction) => void; familyMemberId?: string | null; }
+interface AccountDetailsViewProps { account: AnchorAccount; onBack: () => void; onDelete?: () => void; onShare?: () => void; onAddTransaction?: () => void; onEdit?: (tx: AnchorTransaction) => void; familyMemberId?: string | null; }
 
-export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTransfer, onPayBill, onAddTransaction, onEdit, familyMemberId }: AccountDetailsViewProps) => {
+export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onAddTransaction, onEdit, familyMemberId }: AccountDetailsViewProps) => {
     const { transactions, deleteTransaction, renameAccount, currentMonth } = useFinance();
     const { user } = useAuth();
 
@@ -115,7 +115,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
                 {/* Only show notification banner for owned accounts — shared account notifications are in Recent Activity */}
                 {isOwner && <NotificationBanner accountId={account.id} />}
                 {isSharedAccount && <FamilyNotificationBanner accountId={account.id} />}
-                <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onAddTransaction={onAddTransaction} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} />
+                <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onAddTransaction={onAddTransaction} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} />
                 <div className="grid grid-cols-1 gap-5">
                     {accountTransactions.length > 0 && <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />}
                 </div>

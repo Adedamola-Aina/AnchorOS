@@ -120,7 +120,6 @@ const FinanceView = () => {
         <AccountDetailsContainer account={selectedAccount} mode={mode} editingTransaction={editingTransaction} initialTransactionType={initialTransactionType}
           accountToDelete={accountToDelete} accountToUnshare={accountToUnshare} familyMemberUid={familyMemberUid || undefined} familyMemberName={familyMemberName || undefined} prefillData={prefillData}
           onBack={() => setSelectedAccountId(null)} onShare={() => { if (!familyMemberUid) return; const isShared = selectedAccount.sharedWith?.[familyMemberUid]; if (isShared) setAccountToUnshare(selectedAccount); else toggleShareAccount(selectedAccount.id, true); }}
-          onTransfer={() => { setInitialTransactionType('transfer'); setMode('addTx'); }} onPayBill={() => { setInitialTransactionType('expense'); setPrefillData({ category: 'Bills & Utilities' }); setMode('addTx'); }}
           onAddTransaction={() => { setInitialTransactionType('expense'); setPrefillData(undefined); setMode('addTx'); }}
           onEdit={handleEdit} onDelete={() => setAccountToDelete(selectedAccount)} onCloseForm={handleCloseForm}
           onDeleteAccount={() => { if (accountToDelete) { deleteAccount(accountToDelete.id); setAccountToDelete(null); setSelectedAccountId(null); } }}

@@ -31,8 +31,6 @@ interface AccountHeaderProps {
     onBack: () => void;
     onDelete?: () => void;
     onShare?: () => void;
-    onTransfer?: () => void;
-    onPayBill?: () => void;
     onAddTransaction?: () => void;
     onStartRename: () => void;
     onCancelRename: () => void;
@@ -61,7 +59,7 @@ const getAccountStyle = (account: AnchorAccount) => {
 export const AccountHeader = ({
     account, isOwner, familyMemberId,
     isEditingName, newName, isRenaming,
-    onBack, onDelete, onShare, onTransfer, onPayBill, onAddTransaction,
+    onBack, onDelete, onShare, onAddTransaction,
     onStartRename, onCancelRename, onConfirmRename, onNameChange,
     monthlyBalance,
 }: AccountHeaderProps) => {
@@ -165,7 +163,7 @@ export const AccountHeader = ({
                 </div>
 
                 {/* Action Buttons */}
-                <AccountActionButtons account={account} onAddTransaction={onAddTransaction} onTransfer={onTransfer} onPayBill={onPayBill} />
+                <AccountActionButtons account={account} onAddTransaction={onAddTransaction} />
             </div>
         </div>
     );

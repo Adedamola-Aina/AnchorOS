@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Check, X, ArrowUpRight, Plus } from 'lucide-react';
+import { Check, X, Plus } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
 
 interface RenameInputProps {
@@ -59,42 +59,21 @@ export const AccountRenameInput: React.FC<RenameInputProps> = ({
 interface ActionButtonsProps {
     account: AnchorAccount;
     onAddTransaction?: () => void;
-    onTransfer?: () => void;
-    onPayBill?: () => void;
 }
 
 /**
- * Account action buttons: Record (expense/income), Transfer, Pay Bill
+ * Single action button — opens the Record form which covers expense, income, transfer, and pay bill.
  */
 export const AccountActionButtons: React.FC<ActionButtonsProps> = ({
-    account,
     onAddTransaction,
-    onTransfer,
-    onPayBill,
 }) => (
-    <div className="flex flex-wrap gap-3">
+    <div>
         <button
             onClick={onAddTransaction}
-            className="flex-1 min-w-[100px] bg-white text-slate-900 hover:bg-white/90 px-5 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+            className="w-full bg-white text-slate-900 hover:bg-white/90 px-5 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
         >
             <Plus className="w-5 h-5" />
-            Record
-        </button>
-        <button
-            onClick={onTransfer}
-            className="flex-1 min-w-[100px] bg-white/15 hover:bg-white/25 backdrop-blur-xl px-5 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-white/10"
-        >
-            <ArrowUpRight className="w-5 h-5" />
-            Transfer
-        </button>
-        <button
-            onClick={onPayBill}
-            className="flex-1 min-w-[100px] bg-white/15 hover:bg-white/25 backdrop-blur-xl px-5 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-white/10"
-        >
-            <span className="w-5 h-5 flex items-center justify-center text-lg font-bold">
-                {account.currency === 'USD' ? '$' : '₦'}
-            </span>
-            Pay Bill
+            Record Transaction
         </button>
     </div>
 );

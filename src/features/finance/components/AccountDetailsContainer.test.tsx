@@ -32,7 +32,7 @@ describe('AccountDetailsContainer', () => {
         initialTransactionType="expense"
         accountToDelete={null}
         accountToUnshare={null}
-        onBack={noop} onShare={noop} onTransfer={noop} onPayBill={noop}
+        onBack={noop} onShare={noop} onAddTransaction={noop}
         onEdit={noop} onDelete={noop} onCloseForm={noop} onDeleteAccount={noop}
         setAccountToDelete={noop} onUnshareAccount={noop} setAccountToUnshare={noop}
       />,
@@ -49,7 +49,7 @@ describe('AccountDetailsContainer', () => {
         initialTransactionType="expense"
         accountToDelete={null}
         accountToUnshare={null}
-        onBack={noop} onShare={noop} onTransfer={noop} onPayBill={noop}
+        onBack={noop} onShare={noop} onAddTransaction={noop}
         onEdit={noop} onDelete={noop} onCloseForm={noop} onDeleteAccount={noop}
         setAccountToDelete={noop} onUnshareAccount={noop} setAccountToUnshare={noop}
       />,
@@ -66,7 +66,7 @@ describe('AccountDetailsContainer', () => {
         initialTransactionType="expense"
         accountToDelete={baseAccount as any}
         accountToUnshare={null}
-        onBack={noop} onShare={noop} onTransfer={noop} onPayBill={noop}
+        onBack={noop} onShare={noop} onAddTransaction={noop}
         onEdit={noop} onDelete={noop} onCloseForm={noop} onDeleteAccount={noop}
         setAccountToDelete={noop} onUnshareAccount={noop} setAccountToUnshare={noop}
       />,
@@ -84,7 +84,7 @@ describe('AccountDetailsContainer', () => {
         accountToDelete={null}
         accountToUnshare={baseAccount as any}
         familyMemberName="Sarah"
-        onBack={noop} onShare={noop} onTransfer={noop} onPayBill={noop}
+        onBack={noop} onShare={noop} onAddTransaction={noop}
         onEdit={noop} onDelete={noop} onCloseForm={noop} onDeleteAccount={noop}
         setAccountToDelete={noop} onUnshareAccount={noop} setAccountToUnshare={noop}
       />,

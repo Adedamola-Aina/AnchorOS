@@ -23,8 +23,6 @@ interface AccountDetailsContainerProps {
     prefillData?: { amount?: number; title?: string; category?: string };
     onBack: () => void;
     onShare: () => void;
-    onTransfer: () => void;
-    onPayBill: () => void;
     onAddTransaction: () => void;
     onEdit: (tx: AnchorTransaction) => void;
     onDelete: () => void;
@@ -37,16 +35,16 @@ interface AccountDetailsContainerProps {
 
 export const AccountDetailsContainer: React.FC<AccountDetailsContainerProps> = ({
     account, mode, editingTransaction, initialTransactionType, accountToDelete, accountToUnshare,
-    familyMemberUid, familyMemberName, prefillData, onBack, onShare, onTransfer, onPayBill, onAddTransaction, onEdit, onDelete,
+    familyMemberUid, familyMemberName, prefillData, onBack, onShare, onAddTransaction, onEdit, onDelete,
     onCloseForm, onDeleteAccount, setAccountToDelete, onUnshareAccount, setAccountToUnshare
 }) => (
     <>
         <ErrorBoundary componentName="Account Details">
-            <AccountDetailsView account={account} onBack={onBack} familyMemberId={familyMemberUid} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onAddTransaction={onAddTransaction} onEdit={onEdit} onDelete={onDelete} />
+            <AccountDetailsView account={account} onBack={onBack} familyMemberId={familyMemberUid} onShare={onShare} onAddTransaction={onAddTransaction} onEdit={onEdit} onDelete={onDelete} />
         </ErrorBoundary>
 
         <Modal isOpen={mode === 'addTx' || mode === 'editTx'} onClose={onCloseForm}
-            title={mode === 'editTx' ? 'Edit Transaction' : initialTransactionType === 'transfer' ? 'Transfer Funds' : 'Pay Bill / Add Expense'} maxWidth="max-w-2xl">
+            title={mode === 'editTx' ? 'Edit Transaction' : 'Record Transaction'} maxWidth="max-w-2xl">
             <TransactionForm onClose={onCloseForm} defaultAccountId={account.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} lockedAccount />
         </Modal>
 
