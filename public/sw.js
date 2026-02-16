@@ -1,4 +1,4 @@
-const CACHE_NAME = 'anchor-os-v1.7.3';
+const CACHE_NAME = 'anchor-os-v1.7.7';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -101,7 +101,7 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch: Stale-While-Revalidate strategy
+// Fetch: Network-first for HTML/JS, Stale-While-Revalidate for static assets
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     // Skip non-GET requests, non-http requests (extensions), and Firestore/Firebase Auth calls
@@ -114,6 +114,24 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Network-first for navigation (HTML) and JS bundles — prevents serving stale app shell
+    const isNavigation = event.request.mode === 'navigate';
+    const isJsAsset = url.pathname.endsWith('.js') && url.origin === self.location.origin;
+
+    if (isNavigation || isJsAsset) {
+        event.respondWith(
+            fetch(event.request)
+                .then((networkResponse) => {
+                    const clone = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                    return networkResponse;
+                })
+                .catch(() => caches.match(event.request))
+        );
+        return;
+    }
+
+    // Stale-while-revalidate for other static assets (images, CSS, fonts)
     event.respondWith(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.match(event.request).then((cachedResponse) => {
