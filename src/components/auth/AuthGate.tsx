@@ -17,7 +17,7 @@ import { AuthLoadingScreen, EmailVerificationGate, OnboardingGate } from './Auth
 interface AuthGateProps { children: React.ReactNode; }
 
 const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
-    const { user, loading, profile, updateProfile, signIn, signUp, verifyMfa, logout, sendVerificationEmail, sendPasswordReset } = useAuth();
+    const { user, loading, profile, profileLoaded, updateProfile, signIn, signUp, verifyMfa, logout, sendVerificationEmail, sendPasswordReset } = useAuth();
     const { showToast } = useNotifications();
     const navigate = useNavigate();
     const location = useLocation();
@@ -80,7 +80,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     const isTestUser = user.email === 'test@anchor-os.com' || user.email?.endsWith('@anchor-os.com');
     if (!user.emailVerified && !isDevOrStaging && !isTestUser) return <EmailVerificationGate email={user.email!} onResend={async () => { await sendVerificationEmail(); showToast('Verification email sent!', 'success'); }} onRefresh={() => window.location.reload()} onLogout={logout} />;
 
-    const showOnboarding = !isTestUser && profile.onboardingComplete === false;
+    const showOnboarding = !isTestUser && profileLoaded && profile.onboardingComplete === false;
     if (showOnboarding) return <OnboardingGate show={true} />;
 
     return <>{children}</>;
