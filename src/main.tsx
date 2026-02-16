@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
+import { UnsavedChangesProvider } from './hooks/useUnsavedChanges'
 
 const initSentryDeferred = async () => {
     if (!import.meta.env.VITE_SENTRY_DSN) return;
@@ -43,7 +44,9 @@ if (import.meta.env.VITE_APP_ENV === 'production') {
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <BrowserRouter>
-            <App />
+            <UnsavedChangesProvider>
+                <App />
+            </UnsavedChangesProvider>
         </BrowserRouter>
     </StrictMode>,
 )
