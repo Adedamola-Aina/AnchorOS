@@ -150,6 +150,15 @@
   }
 }
 
+/* iOS: Hide keyboard form assistant toolbar (Previous/Next/Done bar) */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
