@@ -101,6 +101,13 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                             </span>
                         )}
 
+                        {/* Recurring Pill */}
+                        {transaction.recurringId && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 border border-purple-100 dark:border-purple-800/50">
+                                Recurring
+                            </span>
+                        )}
+
                         {/* Backdated Pill */}
                         {isBackdated && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 border border-amber-100 dark:border-amber-800/50">

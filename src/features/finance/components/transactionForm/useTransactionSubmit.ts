@@ -90,8 +90,11 @@ export function useTransactionSubmit(options: UseTransactionSubmitOptions) {
 
             const isoDate = new Date(transactionDate + 'T12:00:00').toISOString();
 
+            // Capture recurringId so we can link the transaction to its rule
+            let recurringId: string | undefined;
+
             if (isRecurring && !initialData) {
-                await createRecurring({
+                recurringId = await createRecurring({
                     title: formState.title, amountCents, type: formState.type,
                     category: finalCategory, accountId: formState.selectedAccId,
                     accountName: sourceAccount.name, frequency, interval,
@@ -116,7 +119,8 @@ export function useTransactionSubmit(options: UseTransactionSubmitOptions) {
                     accountName: sourceAccount.name, currency: sourceAccount.currency,
                     date: isoDate, scope: sourceAccount.scope,
                     destinationAccountId: formState.type === 'transfer' ? formState.destinationAccId : undefined,
-                    ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) })
+                    ...(isDifferentCurrency && { destinationAmountCents, exchangeRate: parseFloat(formState.exchangeRate) }),
+                    ...(recurringId && { recurringId }),
                 });
                 haptic.trigger('success');
                 showToast('Transaction recorded', 'success');

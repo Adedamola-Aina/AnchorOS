@@ -63,6 +63,8 @@ export interface AnchorTransaction {
   destinationAccountId?: string;
   linkedTransactionId?: string;
   linkedUserId?: string;
+  // Recurring link
+  recurringId?: string; // Links to RecurringTransaction.id when created from a recurring rule
   // Internal fields
   linkId?: string;
   isSoftDeleted?: boolean;
