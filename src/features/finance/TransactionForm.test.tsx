@@ -137,4 +137,57 @@ describe('TransactionForm', () => {
         expect(payload.scope).toBeDefined();
         expect(['personal', 'family']).toContain(payload.scope);
     });
+
+    // ── Context-aware form behavior ─────────────────────────────────
+    describe('context-aware layout', () => {
+        it('shows compact account badge when lockedAccount is true', () => {
+            renderForm({ defaultAccountId: 'acc1', lockedAccount: true });
+            // Compact badge shows account name as text, not inside a button grid
+            expect(screen.getByText('Main Checking')).toBeInTheDocument();
+            // The full account selector grid should NOT be rendered
+            expect(screen.queryByText('Savings')).not.toBeInTheDocument();
+        });
+
+        it('shows full account grid when lockedAccount is false (main view)', () => {
+            renderForm({ defaultAccountId: 'acc1' });
+            // All accounts visible as selectable cards
+            expect(screen.getByText('Main Checking')).toBeInTheDocument();
+            expect(screen.getByText('Savings')).toBeInTheDocument();
+        });
+
+        it('hides type selector for transfer intent (lockedAccount + transfer)', () => {
+            renderForm({ defaultAccountId: 'acc1', defaultType: 'transfer', lockedAccount: true });
+            // Transfer and Expense/Income buttons should not exist
+            expect(screen.queryByRole('button', { name: /^Expense$/i })).not.toBeInTheDocument();
+            expect(screen.queryByRole('button', { name: /^Income$/i })).not.toBeInTheDocument();
+        });
+
+        it('hides type selector for pay bill intent', () => {
+            renderForm({
+                defaultAccountId: 'acc1', defaultType: 'expense', lockedAccount: true,
+                prefillData: { category: 'Bills & Utilities' }
+            });
+            // Type toggle buttons should not exist
+            expect(screen.queryByRole('button', { name: /^Expense$/i })).not.toBeInTheDocument();
+            expect(screen.queryByRole('button', { name: /^Income$/i })).not.toBeInTheDocument();
+            // Header should say "Pay Bill"
+            expect(screen.getByRole('heading', { name: /Pay Bill/i })).toBeInTheDocument();
+            // Submit button should say "Pay Bill" too
+            expect(screen.getByRole('button', { name: /^Pay Bill$/i })).toBeInTheDocument();
+        });
+
+        it('shows type selector for generic add from account detail', () => {
+            renderForm({ defaultAccountId: 'acc1', defaultType: 'expense', lockedAccount: true });
+            // Compact badge but type selector visible (no special prefill)
+            expect(screen.getByText('Main Checking')).toBeInTheDocument();
+            // Type selector has exact-name buttons
+            expect(screen.getByRole('button', { name: /^Expense$/i })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /^Income$/i })).toBeInTheDocument();
+        });
+
+        it('shows specific submit labels per type', () => {
+            renderForm({ defaultAccountId: 'acc1', defaultType: 'expense' });
+            expect(screen.getByRole('button', { name: /Record Expense/i })).toBeInTheDocument();
+        });
+    });
 });

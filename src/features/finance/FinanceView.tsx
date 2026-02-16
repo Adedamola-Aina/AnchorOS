@@ -118,7 +118,7 @@ const FinanceView = () => {
     return (
       <FeatureErrorBoundary featureName="Finance">
         <AccountDetailsContainer account={selectedAccount} mode={mode} editingTransaction={editingTransaction} initialTransactionType={initialTransactionType}
-          accountToDelete={accountToDelete} accountToUnshare={accountToUnshare} familyMemberUid={familyMemberUid || undefined} familyMemberName={familyMemberName || undefined}
+          accountToDelete={accountToDelete} accountToUnshare={accountToUnshare} familyMemberUid={familyMemberUid || undefined} familyMemberName={familyMemberName || undefined} prefillData={prefillData}
           onBack={() => setSelectedAccountId(null)} onShare={() => { if (!familyMemberUid) return; const isShared = selectedAccount.sharedWith?.[familyMemberUid]; if (isShared) setAccountToUnshare(selectedAccount); else toggleShareAccount(selectedAccount.id, true); }}
           onTransfer={() => { setInitialTransactionType('transfer'); setMode('addTx'); }} onPayBill={() => { setInitialTransactionType('expense'); setPrefillData({ category: 'Bills & Utilities' }); setMode('addTx'); }}
           onEdit={handleEdit} onDelete={() => setAccountToDelete(selectedAccount)} onCloseForm={handleCloseForm}
