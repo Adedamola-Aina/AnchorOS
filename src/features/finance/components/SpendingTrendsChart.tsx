@@ -43,13 +43,18 @@ export const SpendingTrendsChart = ({
     );
     const net = totals.income - totals.expense;
 
+    // Selected week summary
+    const selectedWeek = selectedWeekStart
+        ? weeklyData.find(d => d.weekStart.getTime() === selectedWeekStart.getTime())
+        : null;
+
     return (
         <div className="glass-card p-5">
             {/* Header with Summary */}
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                     <TrendingUp className="w-3.5 h-3.5" />
-                    Monthly Summary
+                    {selectedWeek ? 'Weekly Summary' : 'Monthly Summary'}
                 </h3>
                 {selectedWeekStart && (
                     <button
@@ -61,7 +66,7 @@ export const SpendingTrendsChart = ({
                 )}
             </div>
 
-            {/* Summary Stats */}
+            {/* Summary Stats — shows selected week totals when filtered, monthly totals otherwise */}
             <div className="grid grid-cols-3 gap-3 mb-5">
                 <div className="text-center p-3 rounded-xl bg-finance-50 dark:bg-finance-900/20">
                     <div className="flex items-center justify-center gap-1 mb-1">
@@ -69,7 +74,7 @@ export const SpendingTrendsChart = ({
                         <span className="text-[9px] font-bold text-finance-600 dark:text-finance-400 uppercase">In</span>
                     </div>
                     <p className="font-bold text-sm text-finance-600 dark:text-finance-400 tabular-nums">
-                        {formatCurrencyCompact(totals.income, currency)}
+                        {formatCurrencyCompact(selectedWeek ? selectedWeek.income : totals.income, currency)}
                     </p>
                 </div>
                 <div className="text-center p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20">
@@ -78,16 +83,16 @@ export const SpendingTrendsChart = ({
                         <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase">Out</span>
                     </div>
                     <p className="font-bold text-sm text-rose-600 dark:text-rose-400 tabular-nums">
-                        {formatCurrencyCompact(totals.expense, currency)}
+                        {formatCurrencyCompact(selectedWeek ? selectedWeek.expense : totals.expense, currency)}
                     </p>
                 </div>
-                <div className={`text-center p-3 rounded-xl ${net >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
+                <div className={`text-center p-3 rounded-xl ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
                     <div className="flex items-center justify-center gap-1 mb-1">
-                        {net >= 0 ? <TrendingUp className="w-3 h-3 text-blue-500" /> : <TrendingDown className="w-3 h-3 text-amber-500" />}
-                        <span className={`text-[9px] font-bold uppercase ${net >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>Net</span>
+                        {(selectedWeek ? selectedWeek.net : net) >= 0 ? <TrendingUp className="w-3 h-3 text-blue-500" /> : <TrendingDown className="w-3 h-3 text-amber-500" />}
+                        <span className={`text-[9px] font-bold uppercase ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>Net</span>
                     </div>
-                    <p className={`font-bold text-sm tabular-nums ${net >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                        {net > 0 ? '+' : ''}{formatCurrencyCompact(net, currency)}
+                    <p className={`font-bold text-sm tabular-nums ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                        {(selectedWeek ? selectedWeek.net : net) > 0 ? '+' : ''}{formatCurrencyCompact(selectedWeek ? selectedWeek.net : net, currency)}
                     </p>
                 </div>
             </div>
