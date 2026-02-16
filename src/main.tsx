@@ -2,9 +2,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import './styles/capacitor.css'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { UnsavedChangesProvider } from './hooks/useUnsavedChanges'
+import { getPlatformClasses } from './utils/platform'
 
 const initSentryDeferred = async () => {
     if (!import.meta.env.VITE_SENTRY_DSN) return;
@@ -40,6 +42,11 @@ if (import.meta.env.VITE_APP_ENV === 'production') {
     console.info = () => { };
     console.debug = () => { };
     // console.warn and console.error are preserved for Sentry breadcrumb capture
+}
+
+// Add platform classes to body for native styling
+if (document.body) {
+    document.body.className = getPlatformClasses();
 }
 
 createRoot(document.getElementById('root')!).render(

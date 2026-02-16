@@ -43,3 +43,9 @@ tools/dashboard/logs/
 .firebase/
 firestore-debug.log
 tools/dashboard/data/doc_sync_log.json
+
+# Capacitor
+ios/
+android/
+.capacitor/
+Capacitor.asar

@@ -18,3 +18,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
     readonly env: ImportMetaEnv;
 }
+
+// Capacitor types
+declare module '@capacitor/core' {
+    export * from '@capacitor/core/dist/esm/index';
+}
