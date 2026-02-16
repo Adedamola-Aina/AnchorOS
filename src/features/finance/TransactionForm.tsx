@@ -138,7 +138,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                 {formState.type === 'transfer' && (
                     <TransferDetails accounts={accounts} sourceAccount={sourceAccount} destinationAccId={formState.destinationAccId}
                         onDestinationChange={(id) => { formState.setDestinationAccId(id); if (errors.destination) setErrors({ ...errors, destination: undefined }); }}
-                        exchangeRate={formState.exchangeRate} onExchangeRateChange={formState.setExchangeRate} amount={amount} error={errors.destination} />
+                        exchangeRate={formState.exchangeRate} onExchangeRateChange={formState.setExchangeRate} amount={amount} error={errors.destination} lockedAccount={hasAccountContext} />
                 )}
 
                 {/* Category + Date row (category hidden for transfers) */}

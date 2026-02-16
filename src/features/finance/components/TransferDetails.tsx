@@ -19,6 +19,8 @@ interface TransferDetailsProps {
     onExchangeRateChange: (rate: string) => void;
     amount: string;
     error?: string;
+    /** When true, source account is already displayed elsewhere — hide the From row */
+    lockedAccount?: boolean;
 }
 
 export const TransferDetails: React.FC<TransferDetailsProps> = ({
@@ -29,7 +31,8 @@ export const TransferDetails: React.FC<TransferDetailsProps> = ({
     exchangeRate,
     onExchangeRateChange,
     amount,
-    error
+    error,
+    lockedAccount
 }) => {
     const destAccount = accounts.find(a => a.id === destinationAccId);
     const isDifferentCurrency = sourceAccount && destAccount && sourceAccount.currency !== destAccount.currency;
@@ -52,11 +55,15 @@ export const TransferDetails: React.FC<TransferDetailsProps> = ({
             </label>
 
             <div className="p-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50 dark:bg-slate-800/50 flex flex-col gap-2">
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                    <span>From:</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-300">{sourceAccount?.name}</span>
-                </div>
-                <div className="h-px bg-slate-200 dark:bg-slate-700" />
+                {!lockedAccount && (
+                    <>
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                            <span>From:</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-300">{sourceAccount?.name}</span>
+                        </div>
+                        <div className="h-px bg-slate-200 dark:bg-slate-700" />
+                    </>
+                )}
                 <div className="flex items-center justify-between">
                     <span className="text-xs text-slate-500">To:</span>
                     <select

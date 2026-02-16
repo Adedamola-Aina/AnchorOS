@@ -162,6 +162,15 @@ describe('TransactionForm', () => {
             expect(screen.queryByRole('button', { name: /^Income$/i })).not.toBeInTheDocument();
         });
 
+        it('hides duplicate From row in transfer when account context is set', () => {
+            renderForm({ defaultAccountId: 'acc1', defaultType: 'transfer', lockedAccount: true });
+            // Compact badge already shows "From" + account name at the top
+            expect(screen.getByText('From')).toBeInTheDocument();
+            // The TransferDetails "From:" label inside the transfer box should NOT appear
+            const fromLabels = screen.queryAllByText('From:');
+            expect(fromLabels).toHaveLength(0);
+        });
+
         it('hides type selector for pay bill intent', () => {
             renderForm({
                 defaultAccountId: 'acc1', defaultType: 'expense', lockedAccount: true,
