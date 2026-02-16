@@ -112,7 +112,8 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onTrans
     return (
         <>
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-6">
-                <NotificationBanner accountId={account.id} />
+                {/* Only show notification banner for owned accounts — shared account notifications are in Recent Activity */}
+                {isOwner && <NotificationBanner accountId={account.id} />}
                 {isSharedAccount && <FamilyNotificationBanner accountId={account.id} />}
                 <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} />
                 <div className="grid grid-cols-1 gap-5">
