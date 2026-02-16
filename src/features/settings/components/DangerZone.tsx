@@ -12,10 +12,14 @@ interface DangerZoneProps {
 
 export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
     const { confirm, showToast } = useNotifications();
-    const { reauthenticate } = useAuth();
+    const { reauthenticate, profile } = useAuth();
     const [password, setPassword] = useState('');
-    const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+    const [nameConfirm, setNameConfirm] = useState('');
+    const [step, setStep] = useState<'idle' | 'name' | 'password'>('idle');
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const displayName = profile?.name || 'User';
+    const nameMatches = nameConfirm.trim().toLowerCase() === displayName.trim().toLowerCase();
 
     const handleDelete = async () => {
         const confirmed = await confirm({
@@ -25,8 +29,15 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
             type: 'danger'
         });
         if (!confirmed) return;
-        setShowPasswordPrompt(true);
+        setStep('name');
     };
+
+    const handleNameConfirmed = () => {
+        if (!nameMatches) { showToast('Name does not match.', 'error'); return; }
+        setStep('password');
+    };
+
+    const resetFlow = () => { setStep('idle'); setPassword(''); setNameConfirm(''); };
 
     const handleConfirmDelete = async () => {
         if (!password) { showToast('Password required.', 'error'); return; }
@@ -40,8 +51,7 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
             showToast(msg.includes('wrong-password') ? 'Incorrect password.' : 'Error: ' + msg, 'error');
         } finally {
             setIsDeleting(false);
-            setPassword('');
-            setShowPasswordPrompt(false);
+            resetFlow();
         }
     };
 
@@ -72,7 +82,25 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
                     </Button>
                 </div>
 
-                {showPasswordPrompt && (
+                {step === 'name' && (
+                    <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800 animate-in slide-in-from-top-2 duration-300">
+                        <p className="text-sm font-bold text-rose-900 dark:text-rose-300 mb-1">Type your name to confirm</p>
+                        <p className="text-xs text-rose-700 dark:text-rose-400 mb-3">
+                            Please type <span className="font-bold">{displayName}</span> below to continue.
+                        </p>
+                        <input type="text" value={nameConfirm} onChange={(e) => setNameConfirm(e.target.value)}
+                            placeholder={displayName} autoComplete="off"
+                            className="w-full p-3 border border-rose-200 dark:border-rose-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500/20 outline-none mb-3"
+                            onKeyDown={(e) => e.key === 'Enter' && handleNameConfirmed()} />
+                        <div className="flex gap-2">
+                            <Button variant="secondary" size="sm" onClick={resetFlow}>Cancel</Button>
+                            <Button variant="primary" size="sm" disabled={!nameMatches} onClick={handleNameConfirmed}
+                                className="bg-rose-500 hover:bg-rose-600 disabled:opacity-40">Next</Button>
+                        </div>
+                    </div>
+                )}
+
+                {step === 'password' && (
                     <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800 animate-in slide-in-from-top-2 duration-300">
                         <p className="text-sm font-bold text-rose-900 dark:text-rose-300 mb-3">Confirm your password to proceed</p>
                         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
@@ -80,7 +108,7 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
                             className="w-full p-3 border border-rose-200 dark:border-rose-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500/20 outline-none mb-3"
                             onKeyDown={(e) => e.key === 'Enter' && handleConfirmDelete()} />
                         <div className="flex gap-2">
-                            <Button variant="secondary" size="sm" onClick={() => { setShowPasswordPrompt(false); setPassword(''); }}>Cancel</Button>
+                            <Button variant="secondary" size="sm" onClick={resetFlow}>Cancel</Button>
                             <Button variant="primary" size="sm" isLoading={isDeleting} onClick={handleConfirmDelete}
                                 className="bg-rose-500 hover:bg-rose-600">Confirm Deletion</Button>
                         </div>
