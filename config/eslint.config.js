@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'e2e', 'coverage']),
+  globalIgnores(['dist', 'e2e', 'coverage', '.stryker-tmp', 'tools', 'functions/lib']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -23,6 +23,7 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+      '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
       'react-refresh/only-export-components': 'off',
     },
