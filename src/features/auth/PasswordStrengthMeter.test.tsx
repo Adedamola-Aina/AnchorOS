@@ -31,8 +31,8 @@ describe('PasswordStrengthMeter', () => {
     expect(screen.getByText('Symbol')).toBeInTheDocument();
   });
 
-  it('shows Vault Layer at maximum strength', () => {
+  it('shows Ironclad at maximum strength', () => {
     render(<PasswordStrengthMeter password="MyLongPassword123!" />);
-    expect(screen.getByText('Vault Layer')).toBeInTheDocument();
+    expect(screen.getByText('Ironclad')).toBeInTheDocument();
   });
 });

@@ -22,7 +22,7 @@ const getStrength = (pass: string) => {
     return score;
 };
 
-const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong', 'Extra Secure', 'Vault Layer'];
+const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong', 'Extra Secure', 'Ironclad'];
 const strengthColors = [
     { bar: 'bg-slate-300', text: 'text-slate-400' },
     { bar: 'bg-red-400', text: 'text-red-500' },
