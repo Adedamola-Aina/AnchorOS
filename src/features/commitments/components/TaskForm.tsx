@@ -48,7 +48,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <DetailsHeader taskType={newTaskType} onBack={() => setCreationStep('frequency')} onClose={onClose} />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
                         <div className="space-y-4">
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-[10px] uppercase font-bold text-slate-400">Name</label>
@@ -69,13 +69,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                                 </div>
                             )}
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-4 min-w-0">
                             {newTaskType === 'daily' && <DailyTimeField value={newTaskTime} onChange={setNewTaskTime} />}
                             {newTaskType === 'weekly' && <WeeklyDaysField value={newTaskDays} onChange={setNewTaskDays} />}
                             {newTaskType === 'monthly' && <MonthlyDatesField value={newTaskDates} onChange={setNewTaskDates} />}
                             <div className="flex flex-col gap-1.5 pt-2">
                                 <label className="text-[10px] uppercase font-bold text-slate-400">Reminder (Optional)</label>
-                                <input type="time" className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 transition-all" value={newTaskReminder} onChange={(e) => setNewTaskReminder(e.target.value)} />
+                                <input type="time" inputMode="none" className="w-full min-w-0 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 transition-all" value={newTaskReminder} onChange={(e) => setNewTaskReminder(e.target.value)} />
                             </div>
                         </div>
                     </div>
