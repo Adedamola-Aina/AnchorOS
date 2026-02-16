@@ -74,7 +74,10 @@ export const BottomNavigation = ({
             setCelebrationColor(getRandomColor());
         }
         setAnimatingRoute(route);
-        setTimeout(() => setAnimatingRoute(null), 200);
+        // Use rAF instead of setTimeout for snappier visual feedback
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => setAnimatingRoute(null));
+        });
     }, [trigger, isDirty, confirmDiscard]);
 
     // Get dynamic color class for icons during animation
@@ -138,6 +141,7 @@ export const BottomNavigation = ({
             role="navigation"
             className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 pb-safe-nav z-40"
             aria-label="Mobile navigation"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
         >
             <div className="grid grid-cols-4 h-16">
                 {navItems.map(({ to, label, renderIcon }) => (
@@ -146,7 +150,7 @@ export const BottomNavigation = ({
                         to={to}
                         onClick={(e) => handleTap(to, e)}
                         className={({ isActive }) =>
-                            `flex flex-col items-center justify-center gap-1 relative transition-colors min-h-[44px] ${getIconColorClass(to, isActive)}`
+                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 min-h-[44px] will-change-transform ${getIconColorClass(to, isActive)}`
                         }
                     >
                         {({ isActive }) => {

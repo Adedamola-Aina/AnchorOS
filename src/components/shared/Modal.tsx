@@ -118,8 +118,8 @@ export const Modal: React.FC<ModalProps> = ({
                 </div>
 
                 {/* Scrollable Body - with safe area padding on mobile */}
-                <div className={`p-6 overflow-y-auto flex-1 ${fullScreenMobile ? 'pb-safe' : ''
-                    }`}>
+                <div className={`p-6 overflow-y-auto flex-1 overscroll-contain ${fullScreenMobile ? 'pb-safe' : ''
+                    }`} style={{ WebkitOverflowScrolling: 'touch' }}>
                     {children}
                 </div>
             </div>

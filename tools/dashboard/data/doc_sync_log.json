@@ -1,6 +1,22 @@
 {
-  "lastSync": "2026-02-16T10:32:36.383Z",
+  "lastSync": "2026-02-16T17:59:25.368Z",
   "syncHistory": [
+    {
+      "timestamp": "2026-02-16T17:59:25.368Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-02-16T17:59:25.367Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
     {
       "timestamp": "2026-02-16T10:32:36.383Z",
       "type": "archive",
@@ -384,28 +400,12 @@
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
         "success": false
       }
-    },
-    {
-      "timestamp": "2026-02-16T05:24:41.148Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-02-16T05:24:41.147Z",
-      "type": "velocity",
-      "details": {
-        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
-        "success": false
-      }
     }
   ],
   "stats": {
-    "totalSyncs": 1559,
-    "lastVelocityUpdate": "2026-02-16T10:32:36.383Z",
+    "totalSyncs": 1561,
+    "lastVelocityUpdate": "2026-02-16T17:59:25.367Z",
     "lastPriorityUpdate": "2026-02-01T07:00:00.010Z",
-    "lastArchiveRun": "2026-02-16T10:32:36.383Z"
+    "lastArchiveRun": "2026-02-16T17:59:25.368Z"
   }
 }

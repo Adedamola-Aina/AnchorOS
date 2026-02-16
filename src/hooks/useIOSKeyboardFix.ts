@@ -54,6 +54,10 @@ export function useIOSKeyboardFix(): void {
           target.setAttribute('autocorrect', 'off');
           target.setAttribute('autocapitalize', 'off');
           target.setAttribute('spellcheck', 'false');
+          // Suppress iOS form navigation (Previous/Next) by hinting single-field
+          if (!target.hasAttribute('enterkeyhint')) {
+            target.setAttribute('enterkeyhint', 'done');
+          }
         }
       }
 

@@ -21,6 +21,7 @@ interface ActivityFeedProps {
     currentUserId?: string;
     loading?: boolean;
     maxItems?: number;
+    compact?: boolean;
 }
 
 export const ActivityFeed: React.FC<ActivityFeedProps> = ({
@@ -28,6 +29,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
     currentUserId,
     loading = false,
     maxItems = 10,
+    compact = false,
 }) => {
     const displayActivities = activities.slice(0, maxItems);
 
@@ -74,13 +76,13 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                     <div
                         key={activity.id}
                         className={`
-              flex gap-3 p-3 rounded-xl transition-colors
+              flex gap-2.5 ${compact ? 'py-1.5 px-2' : 'p-3'} rounded-xl transition-colors
               ${index === 0 ? 'bg-slate-50 dark:bg-slate-800/50' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'}
             `}
                     >
                         {/* Icon */}
                         <div className={`
-              w-8 h-8 rounded-full flex items-center justify-center shrink-0
+              ${compact ? 'w-6 h-6' : 'w-8 h-8'} rounded-full flex items-center justify-center shrink-0
               ${colorClasses}
             `}>
                             {getActivityIcon(activity.action)}
@@ -88,7 +90,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm text-slate-700 dark:text-slate-200">
+                            <p className={`${compact ? 'text-xs' : 'text-sm'} text-slate-700 dark:text-slate-200`}>
                                 <span className={`font-semibold ${isCurrentUser ? 'text-primary-600 dark:text-primary-400' : ''}`}>
                                     {isCurrentUser ? 'You' : activity.actorName}
                                 </span>
@@ -122,7 +124,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                             )}
 
                             {/* Timestamp */}
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                            <p className={`text-[10px] text-slate-400 dark:text-slate-500 ${compact ? 'mt-0.5' : 'mt-1'} flex items-center gap-1`}>
                                 <Clock className="w-3 h-3" />
                                 {formatRelativeTime(activity.timestamp)}
                             </p>

@@ -161,12 +161,21 @@
 .is-ios select {
   font-size: 16px !important;
   touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Disable iOS automatic text detection that triggers toolbar */
 .is-ios input:not([type="password"]):not([type="email"]),
 .is-ios textarea {
   -webkit-user-modify: read-write-plaintext-only;
+}
+
+/* Suppress iOS form assistant bar on focused inputs */
+.is-ios input:focus,
+.is-ios textarea:focus,
+.is-ios select:focus {
+  -webkit-user-select: none;
+  user-select: text;
 }
 
 /* Hide autofill suggestion buttons (complementary) */
@@ -239,6 +248,12 @@ input::-webkit-credentials-auto-fill-button {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Global touch optimization: eliminate 300ms tap delay on all interactive elements */
+a, button, input, select, textarea, [role="button"], [tabindex] {
+  touch-action: manipulation;
 }
 
 #root {
