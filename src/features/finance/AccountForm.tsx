@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Landmark } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 import type { AnchorAccount, Currency } from '../../types';
@@ -6,6 +6,7 @@ import { toCents } from '../../utils/moneyUtils';
 import { validateAccount, formatValidationErrors } from '../../utils/validation';
 import { useNotifications } from '../../context/NotificationContext';
 import { captureError } from '../../utils/error';
+import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 
 interface AccountFormProps {
     onClose: () => void;
@@ -21,6 +22,10 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
     const [newAccType, setNewAccType] = useState<AnchorAccount['type']>('checking');
     const [newAccCurrency, setNewAccCurrency] = useState<Currency>('NGN');
     const [newAccBalance, setNewAccBalance] = useState('');
+
+    // Guard against losing unsaved form data on accidental tab switch
+    const isDirty = useMemo(() => !!(newAccName.trim() || newAccBalance), [newAccName, newAccBalance]);
+    useUnsavedChanges(isDirty);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

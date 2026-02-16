@@ -4,11 +4,12 @@
  * Wizard steps and field components extracted to TaskFormParts.tsx
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { TaskType, TimeOfDay, AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
 import { Card } from '@anchor-os/ui';
 import { FrequencyStep, DetailsHeader, DailyTimeField, WeeklyDaysField, MonthlyDatesField } from './TaskFormParts';
+import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
 
 interface TaskFormProps { onClose: () => void; onAdd: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>; hasFamilyActive: boolean; }
 
@@ -25,6 +26,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
     const [isSaving, setIsSaving] = useState(false);
 
     const domains = ['Health', 'Fitness', 'Work', 'Bible', 'Personal Development', 'Financial'];
+
+    // Guard against losing unsaved form data on accidental tab switch
+    const isDirty = useMemo(() => !!(newTaskTitle.trim() || newTaskReminder), [newTaskTitle, newTaskReminder]);
+    useUnsavedChanges(isDirty);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
