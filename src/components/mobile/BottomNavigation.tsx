@@ -143,7 +143,7 @@ export const BottomNavigation = ({
             aria-label="Mobile navigation"
             style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-            <div className="grid grid-cols-4 h-16">
+            <div className="grid grid-cols-4 h-12">
                 {navItems.map(({ to, label, renderIcon }) => (
                     <NavLink
                         key={to}
