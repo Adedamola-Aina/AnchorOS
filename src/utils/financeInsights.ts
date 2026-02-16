@@ -48,9 +48,10 @@ export const getCashFlowAnalysis = (transactions: AnchorTransaction[]): CashFlow
 };
 
 export const getAssetDistribution = (accounts: import('../types').AnchorAccount[]): AssetClass[] => {
-    const total = accounts.reduce((sum, a) => sum + fromCents(a.balanceCents), 0);
+    const active = accounts.filter(a => !a.isArchived);
+    const total = active.reduce((sum, a) => sum + fromCents(a.balanceCents), 0);
     if (total === 0) return [];
-    return accounts.map(a => ({ id: a.id, name: a.name, amount: fromCents(a.balanceCents), percent: (fromCents(a.balanceCents) / total) * 100, currency: a.currency, type: a.type })).sort((a, b) => b.amount - a.amount);
+    return active.map(a => ({ id: a.id, name: a.name, amount: fromCents(a.balanceCents), percent: (fromCents(a.balanceCents) / total) * 100, currency: a.currency, type: a.type })).sort((a, b) => b.amount - a.amount);
 };
 
 export const getExpenseCategoryBreakdown = (transactions: AnchorTransaction[]): CheckpointCategory[] => {
