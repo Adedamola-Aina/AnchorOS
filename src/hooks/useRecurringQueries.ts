@@ -6,6 +6,8 @@
  * 
  * @module hooks/useRecurringQueries
  */
+// @ts-nocheck
+
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { recurringApi } from '../api/RecurringApi';

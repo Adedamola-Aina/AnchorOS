@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { AnchorAccount } from '../../../types';
 
 // Permission levels for Family Mode

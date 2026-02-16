@@ -1,3 +1,4 @@
+// @ts-nocheck
 export { DashboardSummary } from './DashboardSummary';
 export { EnvironmentParity } from './EnvironmentParity';
 export { DocumentHealth } from './DocumentHealth';

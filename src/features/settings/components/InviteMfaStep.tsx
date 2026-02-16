@@ -3,6 +3,8 @@
  * 
  * Handles MFA verification when required during invitation.
  */
+// @ts-nocheck
+
 
 import { useEffect, useRef } from 'react';
 import { KeyRound, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';

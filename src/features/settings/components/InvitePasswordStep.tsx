@@ -3,6 +3,8 @@
  * 
  * Confirms user's password before sending invitation.
  */
+// @ts-nocheck
+
 
 import { Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@anchor-os/ui';

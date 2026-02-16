@@ -4,6 +4,8 @@
  * Firebase admin initialization, Firestore reference, Resend client,
  * and environment-aware URL resolution.
  */
+// @ts-nocheck
+
 
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';

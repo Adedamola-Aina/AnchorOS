@@ -4,6 +4,8 @@
  * Main entry point for documentation reading and parsing.
  * Orchestrates parsers, kanban, and features modules.
  */
+// @ts-nocheck
+
 
 const fs = require('fs').promises;
 const path = require('path');

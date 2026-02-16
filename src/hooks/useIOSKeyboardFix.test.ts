@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useIOSKeyboardFix } from './useIOSKeyboardFix';

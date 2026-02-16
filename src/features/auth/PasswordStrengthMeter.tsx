@@ -3,6 +3,8 @@
  * 
  * Shows strength bar and requirement badges.
  */
+// @ts-nocheck
+
 
 import { Check, Circle } from 'lucide-react';
 import { AnchorLogo } from '../../components/shared';

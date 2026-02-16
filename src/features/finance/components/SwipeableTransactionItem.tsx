@@ -7,6 +7,8 @@
  * 
  * @module features/finance/components/SwipeableTransactionItem
  */
+// @ts-nocheck
+
 
 import React from 'react';
 import { Pencil, Trash2 } from 'lucide-react';

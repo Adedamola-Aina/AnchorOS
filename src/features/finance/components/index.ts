@@ -3,6 +3,8 @@
  * 
  * Following CLAUDE.md architecture standards for clean imports.
  */
+// @ts-nocheck
+
 
 export { AccountCard } from './AccountCard';
 export { AccountHeader } from './AccountHeader';

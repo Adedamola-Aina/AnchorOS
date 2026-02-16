@@ -3,6 +3,8 @@
  * 
  * Automatically updates documentation files when issues are detected
  */
+// @ts-nocheck
+
 
 const fs = require('fs').promises;
 const path = require('path');

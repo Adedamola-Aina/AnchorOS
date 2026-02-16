@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Search",
+      "ListDir",
+      "Bash(npm run test*)",
+      "Bash(npm run lint*)",
+      "Bash(npx tsc*)",
+      "Bash(git *)",
+      "Bash(curl -s http://localhost:3001/*)",
+      "Bash(node tools/mcp-server/index.js*)"
+    ],
+    "deny": [
+      "Bash(firebase deploy*)",
+      "Bash(rm -rf /)*",
+      "Read(.env*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_FILE_PATH\"; if [[ \"$FILE\" == *.ts || \"$FILE\" == *.tsx ]] && [[ \"$FILE\" != *.test.* ]] && [[ \"$FILE\" != *.spec.* ]]; then LINES=$(wc -l < \"$FILE\" 2>/dev/null || echo 0); if [ \"$LINES\" -gt 200 ]; then echo \"⚠️ ARCH-001 VIOLATION: $FILE has $LINES lines (limit: 200). Extract logic into a separate file.\"; fi; fi'"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"📅 $(date +\"%Y-%m-%d %H:%M %Z\")\" && echo \"📋 Workflow: GATHER → PLAN → BUILD → CLOSE (see AGENTS.md)\" && echo \"🔧 MCP: get_project_state first, always\" && curl -s http://localhost:3001/api/command-center 2>/dev/null | head -5 || echo \"⚠️ Dashboard unreachable — work from docs/\"'"
+          }
+        ]
+      }
+    ]
+  }
+}

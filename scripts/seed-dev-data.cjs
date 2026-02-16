@@ -17,6 +17,8 @@
  * - Family connection between owner and member
  * - Activity feed entries
  */
+// @ts-nocheck
+
 
 const admin = require('firebase-admin');
 

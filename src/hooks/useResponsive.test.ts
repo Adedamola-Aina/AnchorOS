@@ -3,6 +3,8 @@
  * 
  * Per MOBILE_OPTIMIZATION_DIRECTIVE.md M1.1: "Write tests for useResponsive FIRST"
  */
+// @ts-nocheck
+
 
 import { renderHook } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';

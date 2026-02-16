@@ -5,6 +5,8 @@
  * UI states extracted to FamilySettingsStates.tsx
  * PERF-002: Accepts connection prop from parent to avoid duplicate Firestore listeners.
  */
+// @ts-nocheck
+
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';

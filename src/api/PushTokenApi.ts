@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 

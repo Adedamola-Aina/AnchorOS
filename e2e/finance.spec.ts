@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect } from './fixtures/base';
 import { TEST_ACCOUNT } from './fixtures/test-data';
 

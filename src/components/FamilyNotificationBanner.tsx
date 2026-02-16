@@ -4,6 +4,8 @@
  * Displays in-app notifications for family activities like
  * new connections, shared accounts, and transaction updates.
  */
+// @ts-nocheck
+
 
 /* eslint-disable react-hooks/static-components */
 

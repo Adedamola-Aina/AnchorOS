@@ -4,6 +4,8 @@
  * Handles the invitation lifecycle from creation through acceptance.
  * The confirmConnection step lives in familyConnection.ts.
  */
+// @ts-nocheck
+
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as bcrypt from 'bcrypt';

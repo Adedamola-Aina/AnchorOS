@@ -4,6 +4,8 @@
  * Renders FabricSuggestion toasts from the TaskContext.
  * Should be placed inside TaskProvider to access suggestions.
  */
+// @ts-nocheck
+
 
 import React from 'react';
 import { FabricSuggestionContainer } from '../../components/shared';

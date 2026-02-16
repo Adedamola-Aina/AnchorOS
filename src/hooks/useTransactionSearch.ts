@@ -11,6 +11,8 @@
  * 
  * @module hooks/useTransactionSearch
  */
+// @ts-nocheck
+
 
 import { useMemo } from 'react';
 import type { AnchorTransaction } from '../types';

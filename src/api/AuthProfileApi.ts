@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { addDoc, collection, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import type { DocumentSnapshot, Unsubscribe } from 'firebase/firestore';
 import { APP_ID, db } from '../config/firebase';

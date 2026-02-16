@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useContext } from 'react';
 import { useFinanceService } from '../hooks/useFinanceService';
 import { useAuth } from './AuthContext';

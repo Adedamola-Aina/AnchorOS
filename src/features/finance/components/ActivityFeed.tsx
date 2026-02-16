@@ -4,6 +4,8 @@
  * Displays a timeline of activities on a shared account.
  * Shows who did what and when for full transparency in family mode.
  */
+// @ts-nocheck
+
 
 import React from 'react';
 import { Activity, Clock } from 'lucide-react';

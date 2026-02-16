@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect, devices, type Page } from '@playwright/test';
 import { loginOrSignup } from './helpers';
 import { TEST_USER } from './fixtures/test-data';

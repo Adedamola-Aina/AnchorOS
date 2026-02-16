@@ -4,6 +4,8 @@
  * Tracks project progress using roadmap.json + git-based data.
  * Replaced old ROADMAP.md parsing with automated git-based tracking.
  */
+// @ts-nocheck
+
 
 const fs = require('fs');
 const path = require('path');

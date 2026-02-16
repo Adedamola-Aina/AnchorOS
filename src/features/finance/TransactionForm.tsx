@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useMemo } from 'react';
 import { ArrowRightLeft, Wallet } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';

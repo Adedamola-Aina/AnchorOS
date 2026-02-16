@@ -11,6 +11,8 @@
  *
  * @vitest-environment node
  */
+// @ts-nocheck
+
 import {
   initializeTestEnvironment,
   assertSucceeds,

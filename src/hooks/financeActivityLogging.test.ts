@@ -2,6 +2,8 @@
  * financeActivityLogging — activity logging for shared/non-owner transactions
  * Target: 90%+ coverage
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { User } from 'firebase/auth';

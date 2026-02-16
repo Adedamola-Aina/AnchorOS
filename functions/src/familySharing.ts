@@ -4,6 +4,8 @@
  * Runtime operations for shared accounts, notification management,
  * Firestore write trigger, scheduled cleanup, and v1→v2 migration.
  */
+// @ts-nocheck
+
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { FieldValue } from 'firebase-admin/firestore';

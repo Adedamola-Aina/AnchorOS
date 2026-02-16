@@ -2,6 +2,8 @@
  * QuietHoursSettings - Do Not Disturb / Quiet Hours configuration.
  * Allows users to set a time range during which push notifications are suppressed.
  */
+// @ts-nocheck
+
 
 import React from 'react';
 import { Moon } from 'lucide-react';

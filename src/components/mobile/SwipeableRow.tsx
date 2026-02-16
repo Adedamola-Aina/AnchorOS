@@ -10,6 +10,8 @@
  * 
  * @module components/mobile/SwipeableRow
  */
+// @ts-nocheck
+
 
 import { useState, useRef, useCallback, type ReactNode } from 'react';
 

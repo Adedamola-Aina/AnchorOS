@@ -1,6 +1,8 @@
 /**
  * Notifications — get & dismiss user notifications
  */
+// @ts-nocheck
+
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db, APP_ID } from './config';

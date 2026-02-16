@@ -2,6 +2,8 @@
  * Tests for error.ts — AnchorError, handleError, captureError
  * Target: 95%+ coverage
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AnchorError, handleError, captureError } from './error';

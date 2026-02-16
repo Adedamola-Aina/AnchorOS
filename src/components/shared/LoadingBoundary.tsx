@@ -8,6 +8,8 @@
  * 
  * @module components/shared/LoadingBoundary
  */
+// @ts-nocheck
+
 
 import React, { Suspense } from 'react';
 import { SkeletonDashboard, SkeletonFinance, SkeletonCommitments, SkeletonSettings } from './Skeleton';

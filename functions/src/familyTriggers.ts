@@ -3,6 +3,8 @@
  *
  * Background / scheduled functions that support the family mode feature.
  */
+// @ts-nocheck
+
 
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';

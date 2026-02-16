@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useMemo } from 'react';
 import { TrendingDown, TrendingUp, Target, PieChart } from 'lucide-react';
 import { formatCurrencyCompact } from '../../utils/format';

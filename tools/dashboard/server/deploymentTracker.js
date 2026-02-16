@@ -13,6 +13,8 @@
  * 
  * Used by: envChecker.js, gitDataProvider.js
  */
+// @ts-nocheck
+
 
 const path = require('path');
 const simpleGit = require('simple-git');

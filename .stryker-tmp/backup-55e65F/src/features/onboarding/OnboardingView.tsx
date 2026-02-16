@@ -1,0 +1,171 @@
+/**
+ * OnboardingView - 4-step "Getting Started" onboarding experience
+ *
+ * Part 1 of the two-part onboarding system.
+ * Steps: Welcome → Account → Commitment → Security
+ * Refactored per CLAUDE.md 200-line rule.
+ */
+
+import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { captureError } from '../../utils/error';
+import { useFinance } from '../../context/FinanceContext';
+import { useTasks } from '../../context/TaskContext';
+import { useNotifications } from '../../context/NotificationContext';
+import { useKeyboardAvoidance } from '../../hooks/useKeyboardAvoidance';
+import { toCents } from '../../utils/moneyUtils';
+import { GettingStartedWelcome } from './components/GettingStartedWelcome';
+import { OnboardingAccountStep } from './components/OnboardingAccountStep';
+import { OnboardingHabitStep } from './components/OnboardingHabitStep';
+import { GettingStartedSecurity } from './components/GettingStartedSecurity';
+import { OnboardingProgress } from './components/OnboardingProgress';
+
+const TOTAL_STEPS = 4;
+type AccountType = 'checking' | 'savings' | 'salary' | 'investment';
+
+export const OnboardingView = () => {
+  useKeyboardAvoidance();
+
+  const { profile, updateProfile, sendVerificationEmail, user } = useAuth();
+  const { addAccount } = useFinance();
+  const { addTask } = useTasks();
+  const { showToast } = useNotifications();
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  // Account form state
+  const [accName, setAccName] = useState('Main Checking');
+  const [balance, setBalance] = useState('');
+  const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD');
+  const [accountType, setAccountType] = useState<AccountType>('checking');
+
+  // Task form state
+  const [taskTitle, setTaskTitle] = useState('Read for 15 mins');
+
+  const handleStart = async (name: string) => {
+    await updateProfile({ name, onboardingComplete: false });
+    setStep(2);
+  };
+
+  const handleSkip = async () => {
+    await updateProfile({
+      onboardingComplete: true,
+      onboardingProgress: {
+        gettingStartedStep: step,
+        securityStepSeen: step >= 4,
+        beyondBasicsComplete: false,
+        completedItems: [],
+      },
+    });
+  };
+
+  const handleCreateAccount = async () => {
+    setLoading(true);
+    try {
+      await addAccount({
+        name: accName,
+        type: accountType,
+        currency,
+        balanceCents: toCents(balance),
+        color: 'bg-blue-500',
+        scope: profile.familyMode ? 'family' : 'personal',
+      });
+      setStep(3);
+    } catch (e) {
+      captureError(e, 'Onboarding.createAccount');
+      showToast('Failed to create account.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateTask = async () => {
+    setLoading(true);
+    try {
+      await addTask({
+        title: taskTitle,
+        type: 'daily',
+        completed: false,
+        category: 'personal',
+        timeOfDay: 'morning',
+      });
+      setStep(4);
+    } catch (e) {
+      captureError(e, 'Onboarding.createTask');
+      showToast('Failed to create task.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSecurityFinish = async () => {
+    await updateProfile({
+      onboardingComplete: true,
+      onboardingProgress: {
+        gettingStartedStep: 4,
+        securityStepSeen: true,
+        beyondBasicsComplete: false,
+        completedItems: [],
+      },
+    });
+  };
+
+  const handleSecuritySkip = async () => {
+    await updateProfile({
+      onboardingComplete: true,
+      onboardingProgress: {
+        gettingStartedStep: 4,
+        securityStepSeen: true,
+        beyondBasicsComplete: false,
+        completedItems: [],
+      },
+    });
+  };
+
+  return (
+    <div className="h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
+      <div className="w-full max-w-lg">
+        <OnboardingProgress currentStep={step} totalSteps={TOTAL_STEPS} />
+
+        {step === 1 && (
+          <GettingStartedWelcome
+            userName={profile.name || 'User'}
+            onStart={handleStart}
+            onSkip={handleSkip}
+          />
+        )}
+
+        {step === 2 && (
+          <OnboardingAccountStep
+            accName={accName} setAccName={setAccName}
+            balance={balance} setBalance={setBalance}
+            currency={currency} setCurrency={setCurrency}
+            accountType={accountType} setAccountType={setAccountType}
+            loading={loading} onSubmit={handleCreateAccount}
+            onSkip={handleSkip} onBack={() => setStep(1)}
+          />
+        )}
+
+        {step === 3 && (
+          <OnboardingHabitStep
+            taskTitle={taskTitle} setTaskTitle={setTaskTitle}
+            loading={loading} onSubmit={handleCreateTask}
+            onSkip={handleSkip} onBack={() => setStep(2)}
+          />
+        )}
+
+        {step === 4 && (
+          <GettingStartedSecurity
+            emailVerified={user?.emailVerified ?? false}
+            mfaEnabled={profile.mfaEnabled ?? false}
+            onVerifyEmail={sendVerificationEmail}
+            onEnableMfa={() => showToast('MFA setup will open in Settings after onboarding.', 'info')}
+            onFinish={handleSecurityFinish}
+            onSkip={handleSecuritySkip}
+            onBack={() => setStep(3)}
+          />
+        )}
+      </div>
+    </div>
+  );
+};

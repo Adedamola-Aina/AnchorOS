@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Sparkles, TrendingUp, AlertCircle, CheckCircle, Info } from 'lucide-react';

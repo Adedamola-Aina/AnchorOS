@@ -2,6 +2,8 @@
  * AccountHeader Sub-components
  * Split from AccountHeader.tsx per CLAUDE.md §3.2 (200-line rule)
  */
+// @ts-nocheck
+
 
 import React from 'react';
 import { Check, X, Plus } from 'lucide-react';

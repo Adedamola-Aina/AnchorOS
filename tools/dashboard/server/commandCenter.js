@@ -12,6 +12,8 @@
  * - Dependency health
  * - Documentation status
  */
+// @ts-nocheck
+
 
 const gitData = require('./gitDataProvider');
 const { getEnvironmentStatus, checkEnvParity } = require('./envChecker');

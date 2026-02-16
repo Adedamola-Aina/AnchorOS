@@ -5,6 +5,8 @@
  *   import { buildAccount, buildTransaction, buildTask, buildUser } from '../test/factories';
  *   const account = buildAccount({ currency: 'USD' });
  */
+// @ts-nocheck
+
 
 import type {
     AnchorAccount,

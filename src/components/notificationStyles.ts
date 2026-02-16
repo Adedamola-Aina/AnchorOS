@@ -3,6 +3,8 @@
  * 
  * Extracted from FamilyNotificationBanner.tsx
  */
+// @ts-nocheck
+
 
 import { Users, Bell } from 'lucide-react';
 

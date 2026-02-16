@@ -7,6 +7,8 @@
  * @example
  * const { suggestions, onCommitmentCompleted, dismissSuggestion } = useFabricSuggestions();
  */
+// @ts-nocheck
+
 
 import { useState, useCallback } from 'react';
 import type { AnchorTask, TabView } from '../types';

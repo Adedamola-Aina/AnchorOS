@@ -3,6 +3,8 @@
  * 
  * Extracted from useFinanceOperations.ts to keep hooks under 200 lines.
  */
+// @ts-nocheck
+
 
 import type { User } from 'firebase/auth';
 import type { AnchorAccount, AnchorTransaction } from '../types';

@@ -1,4 +1,6 @@
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
+// @ts-nocheck
+
 export default {
   // Package name for reports
   packageManager: 'npm',

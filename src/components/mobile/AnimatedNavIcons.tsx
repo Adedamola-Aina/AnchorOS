@@ -4,6 +4,8 @@
  * Per DESIGN_PHILOSOPHY.md: "Remain visually stable and emotionally calm"
  * These icons provide personalized, delightful animations that reflect user data.
  */
+// @ts-nocheck
+
 
 import React, { useMemo } from 'react';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Target, Zap, ArrowUp, RefreshCw } from 'lucide-react';

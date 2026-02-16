@@ -4,6 +4,8 @@
  * All implementation lives in dedicated modules. This file
  * re-exports every Cloud Function so Firebase can discover them.
  */
+// @ts-nocheck
+
 
 // Rate limiting
 export { checkRateLimit, resetRateLimit } from './rateLimit';

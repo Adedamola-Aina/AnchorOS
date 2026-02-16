@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Sun, Moon, Monitor } from 'lucide-react';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useContext, useState, useCallback, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';

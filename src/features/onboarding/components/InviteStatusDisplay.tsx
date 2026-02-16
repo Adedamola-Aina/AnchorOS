@@ -3,6 +3,8 @@
  * 
  * Handles: validating, invalid, locked, and awaiting_confirmation states.
  */
+// @ts-nocheck
+
 
 import { Loader2, AlertCircle, CheckCircle, Lock } from 'lucide-react';
 

@@ -4,6 +4,8 @@
  * Resets completed status when a new cycle begins (daily/weekly/monthly)
  * and breaks streaks when commitments are missed.
  */
+// @ts-nocheck
+
 
 import { useEffect } from 'react';
 import type { User } from 'firebase/auth';

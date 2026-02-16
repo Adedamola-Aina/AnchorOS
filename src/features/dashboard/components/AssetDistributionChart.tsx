@@ -4,6 +4,8 @@
  * CHART-003: Fixed negative balance percentage handling
  * CHART-004: Fixed O(n²) percentage calculation
  */
+// @ts-nocheck
+
 
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';

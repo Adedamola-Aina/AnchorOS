@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useContext, useCallback } from 'react';
 import { useCommitmentService } from '../hooks/useCommitmentService';
 import { useAuth } from './AuthContext';

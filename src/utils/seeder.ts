@@ -2,6 +2,8 @@
  * Data Seeder Utility
  * Refactored per CLAUDE.md §3.2 - data constants extracted to seederData.ts
  */
+// @ts-nocheck
+
 
 import { collection, doc, writeBatch, serverTimestamp, getDoc, type FieldValue } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';

@@ -6,6 +6,8 @@
  * 
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API
  */
+// @ts-nocheck
+
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 

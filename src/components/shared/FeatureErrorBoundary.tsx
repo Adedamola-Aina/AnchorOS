@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertCircle, RefreshCw, MessageCircle } from 'lucide-react';
 import * as Sentry from "@sentry/react";

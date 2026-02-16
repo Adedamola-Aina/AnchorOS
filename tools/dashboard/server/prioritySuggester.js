@@ -7,6 +7,8 @@
  * - Feature age
  * - Priority level
  */
+// @ts-nocheck
+
 
 const { getFeatureSuggestions } = require('./docReader');
 

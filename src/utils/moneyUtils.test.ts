@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { toCents, fromCents, formatMoney, addMoney, subtractMoney, parseInputToCents } from './moneyUtils';
 

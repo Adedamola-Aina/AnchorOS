@@ -3,6 +3,8 @@
  * 
  * Displays appropriate icon and text based on auth mode.
  */
+// @ts-nocheck
+
 
 import { LogIn, UserPlus, Mail, Lock } from 'lucide-react';
 

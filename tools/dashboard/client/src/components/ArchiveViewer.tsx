@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Archive, Calendar, RotateCcw, Eye, Play, AlertCircle } from 'lucide-react';

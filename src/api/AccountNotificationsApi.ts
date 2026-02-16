@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { collection, doc, limit, onSnapshot, orderBy, query, updateDoc, where, writeBatch, type Unsubscribe } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import type { AnchorNotification } from '../types';

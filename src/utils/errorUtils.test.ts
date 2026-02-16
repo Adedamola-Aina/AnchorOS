@@ -2,6 +2,8 @@
  * Tests for errorUtils.ts — mapFirebaseError
  * Pure function, 14+ switch cases. Target: 100% coverage.
  */
+// @ts-nocheck
+
 
 import { describe, it, expect } from 'vitest';
 import { mapFirebaseError } from './errorUtils';

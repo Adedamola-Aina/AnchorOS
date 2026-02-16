@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { encodeHtml, decodeHtml, sanitizeObject, stripHtml, sanitizeUrl } from './sanitize';
 

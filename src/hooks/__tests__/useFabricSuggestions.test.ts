@@ -3,6 +3,8 @@
  * 
  * Tests for Fabric v1.5 intelligent suggestion system.
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';

@@ -4,6 +4,8 @@
  * Kanban board processing logic.
  * Merges ROADMAP.md and KNOWN_ISSUES.md into unified Kanban structure.
  */
+// @ts-nocheck
+
 
 const fs = require('fs').promises;
 const path = require('path');

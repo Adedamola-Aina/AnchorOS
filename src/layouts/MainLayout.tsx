@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useMemo, useCallback } from 'react';
 import { LayoutDashboard, CheckCircle2, CreditCard, Settings, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';

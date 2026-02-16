@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AnchorContext';

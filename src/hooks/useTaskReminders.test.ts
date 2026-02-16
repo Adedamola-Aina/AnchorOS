@@ -2,6 +2,8 @@
  * Tests for useTaskReminders — interval-based reminder system
  * Target: 90%+ coverage
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';

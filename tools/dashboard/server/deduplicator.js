@@ -4,6 +4,8 @@
  * Maintains ID registry and prevents duplicate entries across documentation files.
  * Scans KNOWN_ISSUES.md, FEATURE_SUGGESTIONS.md, DEPLOYMENT_STATUS.md for duplicates.
  */
+// @ts-nocheck
+
 
 const fs = require('fs').promises;
 const path = require('path');

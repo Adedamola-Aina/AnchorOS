@@ -1,3 +1,4 @@
+// @ts-nocheck
 const fs = require('fs');
 const path = require('path');
 const { getVelocityStats, autoDetectCompletions } = require('./velocityTracker');

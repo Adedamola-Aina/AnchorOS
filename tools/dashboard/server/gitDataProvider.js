@@ -9,6 +9,8 @@
  * - deploymentTracker for accurate deployment status (git ancestry based)
  * - roadmap.json for initiative titles/descriptions
  */
+// @ts-nocheck
+
 
 const simpleGit = require('simple-git');
 const path = require('path');

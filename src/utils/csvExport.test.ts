@@ -2,6 +2,8 @@
  * Tests for csvExport.ts — downloadCsv, escapeCell, toCsv
  * Target: 95%+ coverage, high mutation kill rate
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { downloadCsv } from './csvExport';

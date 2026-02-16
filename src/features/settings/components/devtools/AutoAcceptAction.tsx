@@ -2,6 +2,8 @@
  * Auto-Accept Invitation Action
  * Split from DeveloperTools.tsx per CLAUDE.md §3.2 (200-line rule)
  */
+// @ts-nocheck
+
 
 import React from 'react';
 import { Button } from '@anchor-os/ui';

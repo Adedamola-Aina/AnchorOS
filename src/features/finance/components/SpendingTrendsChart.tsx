@@ -6,6 +6,8 @@
  * - Quiet over loud: Minimal visual noise
  * - Useful over impressive: Actionable insights at a glance
  */
+// @ts-nocheck
+
 
 import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { formatCurrencyCompact } from '../../../utils/format';

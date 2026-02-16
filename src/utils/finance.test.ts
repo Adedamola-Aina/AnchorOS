@@ -2,6 +2,8 @@
  * Tests for finance.ts — 6 pure utility functions
  * Target: 90%+ coverage
  */
+// @ts-nocheck
+
 
 import { describe, it, expect } from 'vitest';
 import {

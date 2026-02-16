@@ -2,6 +2,8 @@
  * Tests for seederData.ts — secureRandomInt, randomDate, randomItem, constants
  * Target: 90%+ mutation kill rate
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {

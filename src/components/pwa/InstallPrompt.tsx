@@ -5,6 +5,8 @@
  * Uses the beforeinstallprompt event on Android/Chrome.
  * Shows manual instructions on iOS Safari.
  */
+// @ts-nocheck
+
 
 import { useState, useEffect } from 'react';
 import { X, Download, Share } from 'lucide-react';

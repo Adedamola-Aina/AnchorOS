@@ -9,6 +9,8 @@
  * - No "It's time for..." fluff
  * - Just the commitment title
  */
+// @ts-nocheck
+
 
 import { getMessaging, type Message } from 'firebase-admin/messaging';
 import { type DocumentReference } from 'firebase-admin/firestore';

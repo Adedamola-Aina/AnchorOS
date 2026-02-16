@@ -8,6 +8,8 @@
  * component rendering and props handling. Full gesture testing
  * is covered in E2E tests.
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';

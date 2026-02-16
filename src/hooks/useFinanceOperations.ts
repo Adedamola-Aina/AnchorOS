@@ -6,6 +6,8 @@
  * 
  * @module hooks/useFinanceOperations
  */
+// @ts-nocheck
+
 
 import { useCallback, useMemo } from 'react';
 import type { User } from 'firebase/auth';

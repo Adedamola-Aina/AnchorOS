@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "anchor-dashboard": {
+      "command": "node",
+      "args": ["./tools/mcp-server/index.js"],
+      "env": {
+        "DASHBOARD_URL": "http://localhost:3001"
+      }
+    }
+  }
+}

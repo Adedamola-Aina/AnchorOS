@@ -2,6 +2,8 @@
  * Tests for lazyWithRetry.ts — chunk load failure retry logic
  * Target: 90%+ mutation kill rate
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';

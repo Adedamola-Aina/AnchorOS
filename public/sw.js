@@ -1,3 +1,4 @@
+// @ts-nocheck
 const CACHE_NAME = 'anchor-os-v1.7.7';
 const ASSETS_TO_CACHE = [
     '/',

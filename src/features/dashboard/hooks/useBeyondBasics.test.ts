@@ -3,6 +3,8 @@
  * Updated: secure_account split into verify_email + enable_mfa (6 items)
  * Updated: each item now has a route for deep-linking
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';

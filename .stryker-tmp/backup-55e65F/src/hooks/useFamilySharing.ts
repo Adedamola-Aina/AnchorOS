@@ -1,0 +1,106 @@
+/**
+ * Family Mode v2 - Account Sharing Hook
+ * 
+ * Provides state and actions for managing account sharing with family members.
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import { useNotifications } from '../context/NotificationContext';
+import type { FamilyConnection } from '../types';
+import {
+    disconnectFamilyConnection,
+    shareFamilyAccount,
+    subscribeToActiveFamilyConnection,
+    type DisconnectType,
+} from '../api/FamilyConnectionApi';
+
+interface UseFamilySharingResult {
+    connection: FamilyConnection | null;
+    isOwner: boolean;
+    familyMemberUid: string | null;
+    familyMemberName: string | null;
+    loading: boolean;
+    shareAccount: (accountId: string, share: boolean) => Promise<void>;
+    disconnectFamily: (type: 'remove_member' | 'leave') => Promise<void>;
+}
+
+export function useFamilySharing(userId: string | undefined): UseFamilySharingResult {
+    const { showToast } = useNotifications();
+    const [connection, setConnection] = useState<FamilyConnection | null>(null);
+    const [dataLoaded, setDataLoaded] = useState(false);
+
+    // Loading is true when we have a userId but haven't loaded data yet
+    const loading = !!userId && !dataLoaded;
+
+    // Reset dataLoaded when userId changes - this is intentional to restart loading
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setDataLoaded(false);
+    }, [userId]);
+
+    // Listen for active family connection
+    useEffect(() => {
+        if (!userId) {
+            return;
+        }
+
+        return subscribeToActiveFamilyConnection(userId, setConnection, () => {
+            setDataLoaded(true);
+        });
+    }, [userId]);
+
+    const isOwner = connection?.ownerUid === userId;
+    const familyMemberUid = connection
+        ? (isOwner ? connection.memberUid : connection.ownerUid)
+        : null;
+    const familyMemberName = connection
+        ? (isOwner ? connection.memberDisplayName : connection.ownerDisplayName)
+        : null;
+
+    const shareAccount = useCallback(async (accountId: string, share: boolean) => {
+        if (!connection) return;
+
+        if (!navigator.onLine) {
+            showToast('You are offline. Please reconnect and try again.', 'error');
+            return;
+        }
+
+        try {
+            await shareFamilyAccount(accountId, share);
+            showToast(
+                share ? 'Account shared with family' : 'Account sharing removed',
+                'success'
+            );
+        } catch (err) {
+            console.error('Share account error:', err);
+            showToast('Failed to update sharing', 'error');
+        }
+    }, [connection, showToast]);
+
+    const disconnectFamily = useCallback(async (type: DisconnectType) => {
+        if (!navigator.onLine) {
+            showToast('You are offline. Please reconnect and try again.', 'error');
+            return;
+        }
+
+        try {
+            await disconnectFamilyConnection(type);
+            showToast('Family connection removed', 'success');
+            setConnection(null);
+        } catch (err) {
+            console.error('Disconnect error:', err);
+            showToast('Failed to disconnect', 'error');
+            throw err;
+        }
+    }, [showToast]);
+
+    return {
+        connection,
+        isOwner,
+        familyMemberUid,
+        familyMemberName,
+        loading,
+        shareAccount,
+        disconnectFamily,
+    };
+}

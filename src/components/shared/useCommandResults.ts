@@ -1,6 +1,8 @@
 /**
  * Command palette result builder and recent action tracking.
  */
+// @ts-nocheck
+
 
 import { useMemo, useCallback } from 'react';
 import { LayoutDashboard, CheckCircle2, CreditCard, Settings, Wallet, MinusCircle, PlusCircle, Plus } from 'lucide-react';

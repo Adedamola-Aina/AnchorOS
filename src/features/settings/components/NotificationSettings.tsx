@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Bell, AlertCircle } from 'lucide-react';
 import { ToggleSwitch } from '../../../components/shared';

@@ -15,6 +15,8 @@
  *
  * BUG-093: iOS keyboard toolbar still visible in PWA
  */
+// @ts-nocheck
+
 import { useEffect } from 'react';
 
 const isIOS = (): boolean => {

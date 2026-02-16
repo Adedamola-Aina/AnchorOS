@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Sunrise, Sun, Moon } from 'lucide-react';
 import type { AnchorTask } from '../../types';

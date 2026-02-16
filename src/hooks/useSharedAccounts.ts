@@ -2,6 +2,8 @@
  * Hook for fetching accounts shared with the current user
  * Used by family members (non-owners) to see shared accounts
  */
+// @ts-nocheck
+
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';

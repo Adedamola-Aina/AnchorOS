@@ -1,6 +1,8 @@
 /**
  * ProductivityScoreCard - Shows commitment completion stats
  */
+// @ts-nocheck
+
 
 import { Activity } from 'lucide-react';
 

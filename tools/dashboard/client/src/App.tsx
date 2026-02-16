@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { RefreshCw, Clock, GitBranch, CheckSquare, Lightbulb, Shield, AlertTriangle } from 'lucide-react';

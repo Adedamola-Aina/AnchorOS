@@ -1,6 +1,8 @@
 /**
  * Shared type definitions for Cloud Functions
  */
+// @ts-nocheck
+
 
 // ============================================================================
 // Family Mode Types

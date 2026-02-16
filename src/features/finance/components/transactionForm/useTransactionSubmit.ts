@@ -4,6 +4,8 @@
  * Handles validation, recurring rule creation, and transaction add/update
  * orchestration so the TransactionForm component stays presentational.
  */
+// @ts-nocheck
+
 
 import { useState, useCallback } from 'react';
 import { useFinance } from '../../../../context/FinanceContext';

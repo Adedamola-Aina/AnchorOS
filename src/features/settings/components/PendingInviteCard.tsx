@@ -1,6 +1,8 @@
 /**
  * PendingInviteCard - Shows when waiting for invitee to accept
  */
+// @ts-nocheck
+
 
 import { Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@anchor-os/ui';

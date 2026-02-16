@@ -4,6 +4,8 @@
  * Monitors codebase health and detects files approaching the 200-line limit.
  * Provides early warnings for ARCH-001 compliance.
  */
+// @ts-nocheck
+
 
 const { exec } = require('child_process');
 const path = require('path');

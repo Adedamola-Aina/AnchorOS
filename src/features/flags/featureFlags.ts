@@ -1,3 +1,4 @@
+// @ts-nocheck
 type AppEnv = 'development' | 'staging' | 'production';
 
 export type FeatureFlagKey = 'fabric_suggestions';

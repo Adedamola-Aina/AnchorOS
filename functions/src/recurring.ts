@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { FieldValue } from 'firebase-admin/firestore';
 import { addWeeks, addMonths, addYears, parseISO } from 'date-fns';

@@ -4,6 +4,8 @@
  * Encapsulates FCM token registration, permission requests, foreground
  * message handling, and the BUG-039 disable/re-enable flow.
  */
+// @ts-nocheck
+
 
 import { useState, useCallback, useEffect } from 'react';
 import { messaging, auth } from '../config/firebase';

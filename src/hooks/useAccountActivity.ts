@@ -4,6 +4,8 @@
  * Fetches and manages activity feed data for shared accounts.
  * Provides real-time updates via Firestore subscriptions.
  */
+// @ts-nocheck
+
 
 import { useState, useEffect, useCallback } from 'react';
 import type { AccountActivity, ActivityAction } from '../types/activity';

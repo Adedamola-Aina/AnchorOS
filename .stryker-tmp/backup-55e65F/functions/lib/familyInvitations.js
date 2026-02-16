@@ -1,0 +1,193 @@
+"use strict";
+/**
+ * Family Invitations — create, revoke, validate, accept
+ *
+ * Handles the invitation lifecycle from creation through acceptance.
+ * The confirmConnection step lives in familyConnection.ts.
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateInvitationToken = exports.revokeInvitation = exports.createFamilyInvitation = void 0;
+const https_1 = require("firebase-functions/v2/https");
+const bcrypt = __importStar(require("bcrypt"));
+const config_1 = require("./config");
+const rateLimit_1 = require("./rateLimit");
+const helpers_1 = require("./helpers");
+// ============================================================================
+// Create Invitation
+// ============================================================================
+exports.createFamilyInvitation = (0, https_1.onCall)(async (request) => {
+    if (!request.auth) {
+        throw new https_1.HttpsError('unauthenticated', 'Authentication required');
+    }
+    const { inviteeEmail, password: _password } = request.data;
+    const ownerUid = request.auth.uid;
+    const ownerEmail = request.auth.token.email;
+    if (!ownerEmail) {
+        throw new https_1.HttpsError('failed-precondition', 'Your email must be verified');
+    }
+    if (!inviteeEmail || !_password) {
+        throw new https_1.HttpsError('invalid-argument', 'Invitee email and password are required');
+    }
+    const rateLimitRef = config_1.db.collection('rateLimits').doc(`invite:${ownerUid}`);
+    const rateLimitDoc = await rateLimitRef.get();
+    const rateLimitData = rateLimitDoc.data();
+    const now = Date.now();
+    const dayAgo = now - 24 * 60 * 60 * 1000;
+    const recentInvites = (rateLimitData?.attempts || []).filter((ts) => ts > dayAgo);
+    if (recentInvites.length >= 10) {
+        throw new https_1.HttpsError('resource-exhausted', 'Maximum 10 invitations per day');
+    }
+    const invitationsRef = config_1.db.collection('artifacts').doc(config_1.APP_ID).collection('family_invitations');
+    const existingQuery = await invitationsRef
+        .where('ownerUid', '==', ownerUid)
+        .where('inviteeEmail', '==', inviteeEmail)
+        .where('status', '==', 'pending')
+        .limit(1)
+        .get();
+    if (!existingQuery.empty) {
+        throw new https_1.HttpsError('already-exists', 'You already have a pending invitation to this email');
+    }
+    const existingConnection = await (0, helpers_1.getActiveConnection)(ownerUid);
+    if (existingConnection) {
+        throw new https_1.HttpsError('already-exists', 'You already have an active family connection');
+    }
+    const ownerProfileRef = config_1.db.collection('artifacts').doc(config_1.APP_ID).collection('users').doc(ownerUid);
+    const ownerProfile = await ownerProfileRef.get();
+    const ownerDisplayName = ownerProfile.data()?.name || ownerEmail.split('@')[0];
+    const verificationCode = (0, helpers_1.generateVerificationCode)();
+    const verificationCodeHash = await bcrypt.hash(verificationCode, config_1.BCRYPT_SALT_ROUNDS);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    const inviteRef = invitationsRef.doc();
+    const invitation = {
+        id: inviteRef.id,
+        ownerUid,
+        ownerEmail,
+        ownerDisplayName,
+        inviteeEmail,
+        status: 'pending',
+        verificationCodeHash,
+        verificationAttempts: 0,
+        createdAt: new Date().toISOString(),
+        expiresAt: expiresAt.toISOString(),
+    };
+    await inviteRef.set(invitation);
+    recentInvites.push(now);
+    await rateLimitRef.set({ attempts: recentInvites, lastAttempt: now });
+    try {
+        await (0, config_1.getResend)().emails.send({
+            from: config_1.EMAIL_FROM,
+            to: inviteeEmail,
+            subject: `${ownerDisplayName} invited you to join their family on Anchor`,
+            html: buildInvitationEmail(ownerDisplayName, inviteRef.id, verificationCode),
+        });
+    }
+    catch (emailError) {
+        console.error('Failed to send invitation email:', emailError);
+    }
+    await (0, helpers_1.createAuditLog)('invitation_sent', ownerUid, { inviteeEmail, inviteId: inviteRef.id });
+    return { success: true, verificationCode, inviteId: inviteRef.id };
+});
+/** Build the HTML email body for a family invitation. */
+function buildInvitationEmail(ownerName, inviteId, code) {
+    return `<!DOCTYPE html><html><body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#f8fafc;"><div style="max-width:600px;margin:40px auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);"><div style="background:#0f172a;padding:32px;text-align:center;"><h1 style="color:white;margin:0;font-size:24px;letter-spacing:-0.5px;">⚓ Anchor OS</h1></div><div style="padding:40px 32px;"><h2 style="color:#0f172a;font-size:24px;margin:0 0 16px;text-align:center;">Join ${ownerName}'s Family</h2><p style="color:#475569;font-size:16px;line-height:1.6;text-align:center;margin-bottom:32px;">You've been invited to connect directly in Anchor OS. This will allow you to share accounts, track shared expenses, and manage your household commitments together.</p><div style="text-align:center;margin-bottom:32px;"><a href="${config_1.APP_URL}/accept-invite?token=${inviteId}&code=${code}" style="display:inline-block;background:#2563eb;color:white;padding:16px 32px;border-radius:12px;text-decoration:none;font-weight:600;font-size:16px;box-shadow:0 4px 6px -1px rgba(37,99,235,0.2);">Accept Invitation</a></div><div style="border-top:1px solid #e2e8f0;padding-top:32px;"><h3 style="color:#0f172a;font-size:16px;margin:0 0 16px;">What happens next?</h3><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="vertical-align:top;width:24px;padding-bottom:16px;"><div style="background:#eff6ff;color:#2563eb;width:24px;height:24px;border-radius:12px;text-align:center;line-height:24px;font-size:14px;font-weight:bold;">1</div></td><td style="padding-left:12px;padding-bottom:16px;"><div style="color:#334155;font-size:14px;font-weight:600;">Create your account</div><div style="color:#64748b;font-size:14px;">If you don't have one, you'll be asked to sign up first.</div></td></tr><tr><td style="vertical-align:top;width:24px;"><div style="background:#eff6ff;color:#2563eb;width:24px;height:24px;border-radius:12px;text-align:center;line-height:24px;font-size:14px;font-weight:bold;">2</div></td><td style="padding-left:12px;"><div style="color:#334155;font-size:14px;font-weight:600;">Confirm & Connect</div><div style="color:#64748b;font-size:14px;">Review the invitation details and confirm the connection.</div></td></tr></table></div></div><div style="background:#f8fafc;padding:24px;text-align:center;border-top:1px solid #e2e8f0;"><p style="color:#94a3b8;font-size:12px;margin:0;">This invitation expires in 7 days. If you didn't expect this, you can ignore this email.</p></div></div></body></html>`;
+}
+// ============================================================================
+// Revoke Invitation
+// ============================================================================
+exports.revokeInvitation = (0, https_1.onCall)(async (request) => {
+    if (!request.auth) {
+        throw new https_1.HttpsError('unauthenticated', 'Authentication required');
+    }
+    const { inviteId } = request.data;
+    const ownerUid = request.auth.uid;
+    await (0, rateLimit_1.enforceRateLimit)('revokeInvitation', ownerUid);
+    const inviteRef = config_1.db.collection('artifacts').doc(config_1.APP_ID).collection('family_invitations').doc(inviteId);
+    const inviteDoc = await inviteRef.get();
+    if (!inviteDoc.exists) {
+        throw new https_1.HttpsError('not-found', 'Invitation not found');
+    }
+    const invite = inviteDoc.data();
+    if (invite.ownerUid !== ownerUid) {
+        throw new https_1.HttpsError('permission-denied', 'You can only revoke your own invitations');
+    }
+    if (invite.status !== 'pending') {
+        throw new https_1.HttpsError('failed-precondition', 'Only pending invitations can be revoked');
+    }
+    await inviteRef.update({ status: 'revoked', revokedAt: new Date().toISOString() });
+    await (0, helpers_1.createAuditLog)('invitation_revoked', ownerUid, { inviteId });
+    return { success: true };
+});
+// ============================================================================
+// Validate Invitation Token
+// ============================================================================
+exports.validateInvitationToken = (0, https_1.onCall)(async (request) => {
+    const { token } = request.data;
+    if (!token) {
+        throw new https_1.HttpsError('invalid-argument', 'Token is required');
+    }
+    await (0, rateLimit_1.enforceRateLimit)('tokenValidation', token);
+    const inviteRef = config_1.db.collection('artifacts').doc(config_1.APP_ID).collection('family_invitations').doc(token);
+    const inviteDoc = await inviteRef.get();
+    if (!inviteDoc.exists) {
+        return { valid: false, error: 'Invalid or expired invitation link.' };
+    }
+    const invite = inviteDoc.data();
+    const now = new Date();
+    if (invite.status === 'locked') {
+        return { valid: false, error: 'This invitation has been locked due to too many failed attempts.', isLocked: true };
+    }
+    if (invite.status === 'revoked') {
+        return { valid: false, error: 'This invitation has been cancelled by the sender.' };
+    }
+    if (invite.status === 'accepted') {
+        return { valid: false, error: 'This invitation has already been accepted.' };
+    }
+    if (new Date(invite.expiresAt) < now) {
+        return { valid: false, error: 'This invitation has expired.', isExpired: true };
+    }
+    if (invite.status !== 'pending' && invite.status !== 'awaiting_confirmation') {
+        return { valid: false, error: 'This invitation is no longer valid.' };
+    }
+    return {
+        valid: true,
+        ownerDisplayName: invite.ownerDisplayName,
+        ownerEmail: invite.ownerEmail,
+        expiresAt: invite.expiresAt,
+        status: invite.status,
+    };
+});
+//# sourceMappingURL=familyInvitations.js.map

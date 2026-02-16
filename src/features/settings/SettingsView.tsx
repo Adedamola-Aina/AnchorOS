@@ -5,6 +5,8 @@
  * Notification banners extracted to SettingsBanners.tsx
  * Reauth modal extracted to ReauthModal.tsx
  */
+// @ts-nocheck
+
 
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';

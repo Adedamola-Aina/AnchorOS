@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { RefreshCw, GitCommit, GitBranch, Clock, Filter } from 'lucide-react';

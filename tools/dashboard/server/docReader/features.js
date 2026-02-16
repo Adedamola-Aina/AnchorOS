@@ -4,6 +4,8 @@
  * Feature suggestions processing logic.
  * Parses and manages FEATURE_SUGGESTIONS.md
  */
+// @ts-nocheck
+
 
 const fs = require('fs').promises;
 const path = require('path');

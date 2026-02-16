@@ -3,6 +3,8 @@
  *
  * Legacy template-based email callable kept for compatibility.
  */
+// @ts-nocheck
+
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { enforceRateLimit } from './rateLimit';

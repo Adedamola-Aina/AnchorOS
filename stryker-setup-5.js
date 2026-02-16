@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { beforeEach, afterAll, beforeAll, afterEach, inject, } from 'vitest';
 // This file is copied to the sandbox dir, don't import anything local!
 // See https://github.com/stryker-mutator/stryker-js/issues/5305

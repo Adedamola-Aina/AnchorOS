@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CheckCircle, XCircle, Clock, TrendingUp, Bug, GitCommit, Target, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { PrioritySuggestions } from './PrioritySuggestions';

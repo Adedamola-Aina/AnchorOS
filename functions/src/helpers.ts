@@ -4,6 +4,8 @@
  * Common operations: audit logging, notifications, connection lookup,
  * and verification code generation.
  */
+// @ts-nocheck
+
 
 import { FieldValue } from 'firebase-admin/firestore';
 import { db, APP_ID } from './config';

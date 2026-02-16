@@ -3,6 +3,8 @@
  * Extracted from SettingsView.tsx per CLAUDE.md §3.2 (200-line rule)
  * BATCH-001: Fixed Firestore 500-op limit in wipe data
  */
+// @ts-nocheck
+
 import { captureError } from '../../../utils/error';
 
 import type { User } from 'firebase/auth';

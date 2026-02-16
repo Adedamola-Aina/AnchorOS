@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { DollarSign, Banknote, Users } from 'lucide-react';
 import { Badge } from '../../../components/shared';

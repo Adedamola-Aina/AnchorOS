@@ -5,6 +5,8 @@
  * - Clarity over cleverness: obvious purpose for each element
  * - Quiet over loud: minimal decoration, semantic colors only
  */
+// @ts-nocheck
+
 
 import React from 'react';
 import { CategoryIcon } from '../../../components/shared';

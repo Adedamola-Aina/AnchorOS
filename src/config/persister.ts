@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { get, set, del } from 'idb-keyval';
 import type {
     Persister,

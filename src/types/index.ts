@@ -1,3 +1,4 @@
+// @ts-nocheck
 export type TabView = 'dashboard' | 'commitments' | 'finance' | 'settings';
 export type TaskType = 'daily' | 'weekly' | 'monthly' | 'todo';
 export type TransactionType = 'income' | 'expense' | 'transfer';

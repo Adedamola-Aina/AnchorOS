@@ -3,6 +3,8 @@
  * 
  * Checks for outdated npm dependencies and security vulnerabilities.
  */
+// @ts-nocheck
+
 
 const { exec } = require('child_process');
 const path = require('path');

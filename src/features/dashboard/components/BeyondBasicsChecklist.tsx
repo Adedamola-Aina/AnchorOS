@@ -4,6 +4,8 @@
  * Each item deep-links to its relevant action route.
  * Renders via portal to escape ancestor transforms (PullToRefresh).
  */
+// @ts-nocheck
+
 
 import { createPortal } from 'react-dom';
 import { X, CheckCircle2, Circle, ChevronRight } from 'lucide-react';

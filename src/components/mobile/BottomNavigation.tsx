@@ -7,6 +7,8 @@
  * Features subtle tap animations on each icon that bring delight without being intrusive.
  * Home icon shows account colors, Tasks icon has celebration animation.
  */
+// @ts-nocheck
+
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';

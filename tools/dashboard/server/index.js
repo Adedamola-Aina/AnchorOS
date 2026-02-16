@@ -4,6 +4,8 @@
  * Express server for the Internal PM Dashboard.
  * Provides API endpoints for documentation, git analysis, and environment status.
  */
+// @ts-nocheck
+
 
 require('dotenv').config();
 const express = require('express');

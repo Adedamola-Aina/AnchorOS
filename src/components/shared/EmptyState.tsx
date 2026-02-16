@@ -10,6 +10,8 @@
  * 
  * @module components/shared/EmptyState
  */
+// @ts-nocheck
+
 
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';

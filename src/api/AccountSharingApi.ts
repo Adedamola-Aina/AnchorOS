@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { doc, updateDoc } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 

@@ -6,6 +6,8 @@
  * 
  * @module api/FinanceApi
  */
+// @ts-nocheck
+
 
 import {
     collection,

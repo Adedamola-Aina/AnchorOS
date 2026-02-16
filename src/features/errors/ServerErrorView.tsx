@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

@@ -4,6 +4,8 @@
  * Analyzes git history to extract commit timeline, feature deployments,
  * and compare code between environments.
  */
+// @ts-nocheck
+
 
 const simpleGit = require('simple-git');
 const path = require('path');

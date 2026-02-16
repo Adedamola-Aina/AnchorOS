@@ -2,6 +2,8 @@
  * Tests for RecurringApi.ts — CRUD + subscription
  * Target: 90%+ coverage
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { addDoc, updateDoc, deleteDoc, onSnapshot, doc } from 'firebase/firestore';

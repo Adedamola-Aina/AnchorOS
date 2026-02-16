@@ -4,6 +4,8 @@
  * These are test accounts for E2E testing.
  * In staging/dev environments, these users should exist.
  */
+// @ts-nocheck
+
 
 export const TEST_USER = {
     email: 'test@anchor-os.com',

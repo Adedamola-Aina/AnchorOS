@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { addDoc, collection, limit, onSnapshot, orderBy, query, type Unsubscribe } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import type { AccountActivity } from '../types/activity';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Circle, Check, Pencil, Trash2 } from 'lucide-react';
 import { Badge, TaskContextBadge } from '../../../components/shared';

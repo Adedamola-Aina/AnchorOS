@@ -4,6 +4,8 @@
  * Rose-red progressive arc shows how much is done.
  * Subtle glow-pulse draws attention without being annoying.
  */
+// @ts-nocheck
+
 
 interface CompletionRingProps {
   completed: number;

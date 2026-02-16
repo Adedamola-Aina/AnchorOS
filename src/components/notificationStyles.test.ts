@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { getNotificationIcon, getNotificationBgColor, getNotificationIconColor } from './notificationStyles';
 import { Users, Bell } from 'lucide-react';

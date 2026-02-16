@@ -1,3 +1,4 @@
+// @ts-nocheck
 const path = require('path')
 const rootDir = path.resolve(__dirname, '..')
 

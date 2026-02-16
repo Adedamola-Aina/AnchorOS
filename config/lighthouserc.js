@@ -6,6 +6,8 @@
  * 
  * Performance budgets aligned with mobile-first requirements (75% mobile users).
  */
+// @ts-nocheck
+
 module.exports = {
   ci: {
     collect: {

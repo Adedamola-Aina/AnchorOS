@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MessageSquare } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';

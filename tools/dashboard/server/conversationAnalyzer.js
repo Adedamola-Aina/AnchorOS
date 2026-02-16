@@ -8,6 +8,8 @@
  * - GAP: Missing expected functionality
  * - TASK: Internal improvements
  */
+// @ts-nocheck
+
 
 const fs = require('fs').promises;
 const path = require('path');

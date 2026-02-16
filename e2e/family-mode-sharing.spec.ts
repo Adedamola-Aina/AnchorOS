@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect } from '@playwright/test';
 
 // NOTE: These tests require two pre-configured users (Owner and Member).

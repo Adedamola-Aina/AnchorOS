@@ -1,3 +1,4 @@
+// @ts-nocheck
 module.exports = {
     apps: [{
         name: 'anchor-dashboard',

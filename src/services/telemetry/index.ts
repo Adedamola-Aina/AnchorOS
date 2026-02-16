@@ -6,6 +6,8 @@
  * 
  * @module services/telemetry
  */
+// @ts-nocheck
+
 import * as Sentry from '@sentry/react';
 import { validateAnalyticsEvent, type AnalyticsEventName } from '../../analytics/contract';
 

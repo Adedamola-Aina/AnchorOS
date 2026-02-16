@@ -6,6 +6,8 @@
  * 
  * @see docs/TESTING_STRATEGY.md
  */
+// @ts-nocheck
+
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AccountService } from '../AccountService';

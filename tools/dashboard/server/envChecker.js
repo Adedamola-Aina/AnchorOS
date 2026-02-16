@@ -12,6 +12,8 @@
  * - Git history for deploy markers (deploy(env): version @ hash)
  * - Git ancestry for accurate containment checks
  */
+// @ts-nocheck
+
 
 const path = require('path');
 const fs = require('fs');

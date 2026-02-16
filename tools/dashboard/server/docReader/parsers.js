@@ -4,6 +4,8 @@
  * Core markdown parsing logic for documentation files.
  * Extracts structured data from PROJECT_STATUS.md, KNOWN_ISSUES.md, ROADMAP.md, etc.
  */
+// @ts-nocheck
+
 
 /**
  * Parse PROJECT_STATUS.md

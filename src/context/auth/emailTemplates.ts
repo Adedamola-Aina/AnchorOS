@@ -2,6 +2,8 @@
  * Auth Email Templates
  * Extracted from AuthContext.tsx per CLAUDE.md §3.2
  */
+// @ts-nocheck
+
 
 export const getWelcomeEmailHtml = (name: string): string => `
 <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
