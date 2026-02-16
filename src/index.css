@@ -266,9 +266,9 @@ a, button, input, select, textarea, [role="button"], [tabindex] {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Bottom navigation safe area with extra 14px spacing from home indicator */
+/* Bottom navigation safe area — respect home indicator only */
 .pb-safe-nav {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .safe-area-top {
