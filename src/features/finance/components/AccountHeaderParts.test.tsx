@@ -33,8 +33,9 @@ describe('AccountRenameInput', () => {
 describe('AccountActionButtons', () => {
   const account = { id: 'a1', currency: 'NGN' } as any;
 
-  it('renders Transfer and Pay Bill', () => {
+  it('renders Record, Transfer and Pay Bill', () => {
     render(<AccountActionButtons account={account} />);
+    expect(screen.getByText('Record')).toBeInTheDocument();
     expect(screen.getByText('Transfer')).toBeInTheDocument();
     expect(screen.getByText('Pay Bill')).toBeInTheDocument();
   });
@@ -49,5 +50,12 @@ describe('AccountActionButtons', () => {
     render(<AccountActionButtons account={account} onTransfer={onTransfer} />);
     fireEvent.click(screen.getByText('Transfer'));
     expect(onTransfer).toHaveBeenCalled();
+  });
+
+  it('calls onAddTransaction', () => {
+    const onAdd = vi.fn();
+    render(<AccountActionButtons account={account} onAddTransaction={onAdd} />);
+    fireEvent.click(screen.getByText('Record'));
+    expect(onAdd).toHaveBeenCalled();
   });
 });

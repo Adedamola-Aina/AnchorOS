@@ -25,6 +25,7 @@ interface AccountDetailsContainerProps {
     onShare: () => void;
     onTransfer: () => void;
     onPayBill: () => void;
+    onAddTransaction: () => void;
     onEdit: (tx: AnchorTransaction) => void;
     onDelete: () => void;
     onCloseForm: () => void;
@@ -36,12 +37,12 @@ interface AccountDetailsContainerProps {
 
 export const AccountDetailsContainer: React.FC<AccountDetailsContainerProps> = ({
     account, mode, editingTransaction, initialTransactionType, accountToDelete, accountToUnshare,
-    familyMemberUid, familyMemberName, prefillData, onBack, onShare, onTransfer, onPayBill, onEdit, onDelete,
+    familyMemberUid, familyMemberName, prefillData, onBack, onShare, onTransfer, onPayBill, onAddTransaction, onEdit, onDelete,
     onCloseForm, onDeleteAccount, setAccountToDelete, onUnshareAccount, setAccountToUnshare
 }) => (
     <>
         <ErrorBoundary componentName="Account Details">
-            <AccountDetailsView account={account} onBack={onBack} familyMemberId={familyMemberUid} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onEdit={onEdit} onDelete={onDelete} />
+            <AccountDetailsView account={account} onBack={onBack} familyMemberId={familyMemberUid} onShare={onShare} onTransfer={onTransfer} onPayBill={onPayBill} onAddTransaction={onAddTransaction} onEdit={onEdit} onDelete={onDelete} />
         </ErrorBoundary>
 
         <Modal isOpen={mode === 'addTx' || mode === 'editTx'} onClose={onCloseForm}
