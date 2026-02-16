@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { getTransactionLabel } from '../../utils/finance';
 import { toCents, fromCents } from '../../utils/moneyUtils';
@@ -13,6 +13,7 @@ import {
     DescriptionField, AmountField, DateField
 } from './components/transactionForm';
 import { useTransactionSubmit } from './components/transactionForm/useTransactionSubmit';
+import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 
 interface TransactionFormProps {
     onClose: () => void;
@@ -25,7 +26,8 @@ interface TransactionFormProps {
 export const TransactionForm: React.FC<TransactionFormProps> = ({
     onClose, defaultAccountId, defaultType = 'expense', initialData, prefillData
 }) => {
-    const { accounts, transactions } = useFinance();
+    const { accounts: allAccounts, transactions } = useFinance();
+    const accounts = allAccounts.filter(a => !a.isArchived);
 
     // Recurring State
     const [isRecurring, setIsRecurring] = useState(false);
@@ -44,6 +46,13 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     const formState = useTransactionFormState({
         accounts, transactions, initialData, defaultAccountId, defaultType, prefillData
     });
+
+    // Guard against losing unsaved form data
+    const isDirty = useMemo(() =>
+        !!(formState.title || amount || isRecurring),
+        [formState.title, amount, isRecurring]
+    );
+    useUnsavedChanges(isDirty);
 
     // Derived state
     const sourceAccount = accounts.find(a => a.id === formState.selectedAccId);
