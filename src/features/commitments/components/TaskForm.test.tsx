@@ -58,3 +58,27 @@ describe('TaskForm — unsaved changes guard', () => {
         expect(allFalse).toBe(true);
     });
 });
+
+describe('TaskForm — reminder field layout (BUG-092)', () => {
+    it('renders reminder field outside the two-column grid as a full-width row', () => {
+        render(<TaskForm {...defaultProps} />);
+        fireEvent.click(screen.getByText('Daily'));
+
+        const reminderLabel = screen.getByText(/reminder/i);
+        expect(reminderLabel).toBeInTheDocument();
+
+        // The reminder container should NOT be inside the grid
+        const grid = document.querySelector('.grid');
+        const reminderContainer = screen.getByTestId('reminder-field');
+        expect(grid?.contains(reminderContainer)).toBe(false);
+    });
+
+    it('reminder input has iOS-safe attributes', () => {
+        render(<TaskForm {...defaultProps} />);
+        fireEvent.click(screen.getByText('Daily'));
+
+        const reminderInput = document.querySelector('input[type="time"]') as HTMLInputElement;
+        expect(reminderInput).not.toBeNull();
+        expect(reminderInput.getAttribute('data-testid')).toBe('reminder-input');
+    });
+});

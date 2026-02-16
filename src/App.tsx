@@ -18,11 +18,13 @@ import { OfflineIndicator } from './components/shared/OfflineIndicator';
 import { EnvironmentBanner } from './components/shared/EnvironmentBanner';
 import { useVersionCheck } from './hooks/useVersionCheck';
 import { useAccessibility } from './hooks/useAccessibility';
+import { useIOSKeyboardFix } from './hooks/useIOSKeyboardFix';
 
 const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
   useLocation();
   useAccessibility(profile?.accessibility);
+  useIOSKeyboardFix();
 
   // Sync theme to root element with System support (PWA-006)
   React.useEffect(() => {

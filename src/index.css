@@ -150,7 +150,26 @@
   }
 }
 
-/* iOS: Hide keyboard form assistant toolbar (Previous/Next/Done bar) */
+/* iOS: Suppress keyboard input accessory toolbar (BUG-093)
+ * The .is-ios class is set by useIOSKeyboardFix hook at runtime.
+ * - font-size 16px prevents iOS auto-zoom on focus
+ * - touch-action prevents double-tap-to-zoom
+ * - user-select manipulation reduces toolbar triggers
+ */
+.is-ios input,
+.is-ios textarea,
+.is-ios select {
+  font-size: 16px !important;
+  touch-action: manipulation;
+}
+
+/* Disable iOS automatic text detection that triggers toolbar */
+.is-ios input:not([type="password"]):not([type="email"]),
+.is-ios textarea {
+  -webkit-user-modify: read-write-plaintext-only;
+}
+
+/* Hide autofill suggestion buttons (complementary) */
 input::-webkit-contacts-auto-fill-button,
 input::-webkit-credentials-auto-fill-button {
   visibility: hidden;
