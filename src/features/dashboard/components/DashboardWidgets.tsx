@@ -57,23 +57,23 @@ export const CashFlowWidget: React.FC<CashFlowWidgetProps> = ({ cashFlow, curren
 interface RecentActivityWidgetProps { activity: AnchorTransaction[]; onNavigate: () => void; }
 export const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ activity, onNavigate }) => (
     <div onClick={onNavigate} className="glass-card p-5 cursor-pointer hover:shadow-xl transition-all group active:scale-[0.99]">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"><Activity className="w-3 h-3" /> Recent Activity</h3>
             <div className="text-primary-500 group-hover:text-primary-600 transition-colors"><ArrowRight className="w-4 h-4" /></div>
         </div>
-        <div className="space-y-4">
-            {activity.slice(0, 3).map(tx => {
+        <div className="space-y-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
+            {activity.slice(0, 8).map(tx => {
                 const displayDate = tx.transactionDate || tx.date;
                 return (
-                    <div key={tx.id} className="flex justify-between items-center group cursor-default p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <div key={tx.id} className="flex justify-between items-center group cursor-default p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{tx.title}</p>
-                            <div className="flex items-center gap-2 mt-1 min-w-0">
-                                <span className="text-[10px] text-slate-400 shrink-0">{new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                                <span className="text-[10px] text-slate-400 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded truncate">{tx.category}</span>
+                            <p className="font-bold text-xs text-slate-900 dark:text-white truncate">{tx.title}</p>
+                            <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                                <span className="text-[9px] text-slate-400 shrink-0">{new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                <span className="text-[9px] text-slate-400 px-1 py-0.5 bg-slate-100 dark:bg-slate-800 rounded truncate">{tx.category}</span>
                             </div>
                         </div>
-                        <span className={`font-mono font-bold text-sm ${tx.type === 'income' ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-300'}`}>
+                        <span className={`font-mono font-bold text-xs ${tx.type === 'income' ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-300'}`}>
                             {tx.type === 'income' ? '+' : ''}{formatCurrencyCompact(fromCents(tx.amountCents || 0), tx.currency)}
                         </span>
                     </div>
