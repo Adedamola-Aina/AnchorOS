@@ -17,6 +17,8 @@ vi.mock('firebase/app', () => ({
 // Mock Firebase Auth with MFA support
 vi.mock('firebase/auth', () => ({
     getAuth: vi.fn(() => ({ currentUser: null })),
+    initializeAuth: vi.fn(() => ({ currentUser: null })),
+    browserLocalPersistence: { type: 'LOCAL' },
     onAuthStateChanged: vi.fn(),
     signInWithEmailAndPassword: vi.fn(),
     signOut: vi.fn(),
