@@ -135,6 +135,25 @@ describe('useMfaOperations', () => {
       await act(async () => { await result.current.unenrollMfa(); });
       expect(mockUpdateProfile).not.toHaveBeenCalled();
     });
+
+    it('throws REQUIRES_RECENT_LOGIN when auth/requires-recent-login error occurs', async () => {
+      const mockUnenroll = vi.fn(() => {
+        const err = new Error('Recent login required');
+        (err as any).code = 'auth/requires-recent-login';
+        return Promise.reject(err);
+      });
+      const { multiFactor } = await import('firebase/auth');
+      vi.mocked(multiFactor).mockReturnValueOnce({
+        enrolledFactors: [{ uid: 'f1' }],
+        unenroll: mockUnenroll,
+      } as any);
+
+      const { result } = renderHook(() => useMfaOperations(mockUser, mockUpdateProfile));
+      await expect(
+        act(async () => { await result.current.unenrollMfa(); })
+      ).rejects.toThrow('REQUIRES_RECENT_LOGIN');
+      expect(mockUpdateProfile).not.toHaveBeenCalled();
+    });
   });
 
   describe('reauthenticate', () => {

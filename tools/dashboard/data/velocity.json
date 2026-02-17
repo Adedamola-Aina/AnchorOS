@@ -1534,6 +1534,78 @@
       "completedDate": "2026-02-16",
       "cycleTime": null,
       "recordedAt": "2026-02-16T18:00:00.023Z"
+    },
+    {
+      "itemId": "BUG-098",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.006Z"
+    },
+    {
+      "itemId": "BUG-097",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.006Z"
+    },
+    {
+      "itemId": "98929c3",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.007Z"
+    },
+    {
+      "itemId": "2d81142",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.007Z"
+    },
+    {
+      "itemId": "8b2f941",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.007Z"
+    },
+    {
+      "itemId": "BUG-092",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.007Z"
+    },
+    {
+      "itemId": "BUG-093",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.008Z"
+    },
+    {
+      "itemId": "BUG-094",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.008Z"
+    },
+    {
+      "itemId": "BUG-095",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.008Z"
+    },
+    {
+      "itemId": "BUG-096",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.009Z"
+    },
+    {
+      "itemId": "UX-038",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.009Z"
+    },
+    {
+      "itemId": "UX-039",
+      "completedDate": "2026-02-16",
+      "cycleTime": null,
+      "recordedAt": "2026-02-16T20:00:00.009Z"
     }
   ],
   "weeklyStats": [
@@ -1559,8 +1631,8 @@
     },
     {
       "week": "2026-W08",
-      "completed": 17,
-      "velocity": 58
+      "completed": 29,
+      "velocity": 61
     }
   ]
 }

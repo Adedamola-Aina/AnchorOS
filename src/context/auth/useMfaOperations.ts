@@ -58,11 +58,19 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
 
     const unenrollMfa = useCallback(async () => {
         if (!user) return;
-        const mfaUser = multiFactor(user);
-        if (mfaUser.enrolledFactors.length > 0) {
-            await mfaUser.unenroll(mfaUser.enrolledFactors[0]);
+        try {
+            const mfaUser = multiFactor(user);
+            if (mfaUser.enrolledFactors.length > 0) {
+                await mfaUser.unenroll(mfaUser.enrolledFactors[0]);
+            }
+            await updateProfile({ mfaEnabled: false });
+        } catch (err: unknown) {
+            const error = err as { code?: string; message?: string };
+            if (error.code === 'auth/requires-recent-login') {
+                throw new Error('REQUIRES_RECENT_LOGIN');
+            }
+            throw err;
         }
-        await updateProfile({ mfaEnabled: false });
     }, [user, updateProfile]);
 
     const reauthenticate = useCallback(async (password: string) => {

@@ -18,9 +18,10 @@ import { PasswordChange } from './PasswordChange';
 interface SecuritySettingsProps {
     mfaEnabled?: boolean; isEnrolling: boolean; show2FASetup: boolean; mfaQrUrl: string; mfaManualKey: string; mfaCode: string; mfaError: string;
     onSetShow2FASetup: (show: boolean) => void; onSetMfaCode: (code: string) => void; onGenerateMfaSecret: () => Promise<void>; onEnrollMfa: (code: string) => Promise<void>; onUnenrollMfa: () => Promise<void>;
+    onRequiresReauthForUnenroll: () => void;
 }
 
-export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, isEnrolling, show2FASetup, mfaQrUrl, mfaManualKey, mfaCode, mfaError, onSetShow2FASetup, onSetMfaCode, onGenerateMfaSecret, onEnrollMfa, onUnenrollMfa }) => {
+export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, isEnrolling, show2FASetup, mfaQrUrl, mfaManualKey, mfaCode, mfaError, onSetShow2FASetup, onSetMfaCode, onGenerateMfaSecret, onEnrollMfa, onUnenrollMfa, onRequiresReauthForUnenroll }) => {
     const { showToast, confirm } = useNotifications();
     const [step, setStep] = useState(1);
     // Reset step when dialog closes - using a ref to track open state would be better, but for now just depend on mount cycle
@@ -34,8 +35,20 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
 
     const handleDisableMfa = async () => {
         if (await confirm({ title: 'Disable 2FA?', message: 'Are you sure you want to disable 2-Factor Authentication? This will significantly reduce your account security.', type: 'danger', confirmText: 'Disable Security', cancelText: 'Keep Enabled' })) {
-            try { await onUnenrollMfa(); showToast('MFA has been disabled.', 'info'); }
-            catch (err) { captureError(err, 'Security.disableMfa'); showToast('Error: ' + (err as Error).message, 'error'); }
+            try {
+                await onUnenrollMfa();
+                showToast('2FA has been disabled.', 'info');
+            }
+            catch (err) {
+                const error = err as Error;
+                if (error.message === 'REQUIRES_RECENT_LOGIN') {
+                    showToast('Please verify your identity to disable 2FA', 'info');
+                    onRequiresReauthForUnenroll();
+                } else {
+                    captureError(err, 'Security.disableMfa');
+                    showToast('Error: ' + error.message, 'error');
+                }
+            }
         }
     };
 

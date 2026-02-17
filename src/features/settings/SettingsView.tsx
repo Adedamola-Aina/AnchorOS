@@ -50,6 +50,7 @@ const SettingsView = () => {
   const [showReauthModal, setShowReauthModal] = useState(false);
   const [reauthPassword, setReauthPassword] = useState('');
   const [isReauthenticating, setIsReauthenticating] = useState(false);
+  const [pendingMfaUnenroll, setPendingMfaUnenroll] = useState(false);
 
   // ARCH-001: MFA enrollment UI state encapsulated in dedicated hook
   const mfa = useMfaEnrollmentUI({
@@ -65,7 +66,25 @@ const SettingsView = () => {
 
   const handleReauthenticate = async () => {
     setIsReauthenticating(true);
-    try { await reauthenticate(reauthPassword); setShowReauthModal(false); setReauthPassword(''); showToast('Identity verified. Try enabling 2FA again.', 'success'); }
+    try {
+      await reauthenticate(reauthPassword);
+      setShowReauthModal(false);
+      setReauthPassword('');
+      
+      // If we were trying to disable MFA, retry now
+      if (pendingMfaUnenroll) {
+        setPendingMfaUnenroll(false);
+        try {
+          await unenrollMfa();
+          showToast('2FA has been disabled.', 'info');
+        } catch (err) {
+          captureError(err, 'Settings.unenrollMfa.afterReauth');
+          showToast('Error disabling 2FA: ' + (err as Error).message, 'error');
+        }
+      } else {
+        showToast('Identity verified. Try enabling 2FA again.', 'success');
+      }
+    }
     catch (error) { captureError(error, 'Settings.reauthenticate'); showToast('Authentication failed: ' + (error as Error).message, 'error'); }
     finally { setIsReauthenticating(false); }
   };
@@ -85,7 +104,7 @@ const SettingsView = () => {
           accessibility={profile.accessibility} onUpdateAccessibility={(prefs) => updateProfile({ accessibility: { ...(profile.accessibility || { fontSize: 'default', highContrast: false, reducedMotion: false }), ...prefs } })} /></div>
         <div id="settings-security"><SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={mfa.isEnrolling} show2FASetup={mfa.show2FASetup} mfaQrUrl={mfa.mfaQrUrl} mfaManualKey={mfa.mfaManualKey}
           mfaCode={mfa.mfaCode} mfaError={mfa.mfaError} onSetShow2FASetup={mfa.setShow2FASetup} onSetMfaCode={mfa.setMfaCode} onGenerateMfaSecret={mfa.handleGenerateSecret}
-          onEnrollMfa={mfa.handleEnroll} onUnenrollMfa={unenrollMfa} /></div>
+          onEnrollMfa={mfa.handleEnroll} onUnenrollMfa={unenrollMfa} onRequiresReauthForUnenroll={() => { setPendingMfaUnenroll(true); setShowReauthModal(true); }} /></div>
         {mfa.recoveryCodes && <RecoveryCodesDisplay codes={mfa.recoveryCodes} onDone={mfa.clearRecoveryCodes} />}
         <div id="settings-notifications"><NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
           frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
