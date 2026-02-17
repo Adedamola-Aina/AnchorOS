@@ -1,7 +1,8 @@
 // @ts-nocheck
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, initializeAuth, browserLocalPersistence } from "firebase/auth";
+import { isNative } from '../utils/platform';
 
 // Environment-based Firebase configuration
 // All values come from .env.development, .env.staging, or .env.production
@@ -21,7 +22,12 @@ if (import.meta.env.DEV) console.info(`[Firebase] Initializing for ${env} enviro
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// PLT-001: Capacitor WebView (capacitor:// origin) blocks IndexedDB persistence,
+// causing signInWithEmailAndPassword to hang indefinitely. Use localStorage instead.
+export const auth = isNative()
+  ? initializeAuth(app, { persistence: browserLocalPersistence })
+  : getAuth(app);
 
 // Initialize Firestore with modern persistence (replaces deprecated enableIndexedDbPersistence)
 import { initializeFirestore, memoryLocalCache } from 'firebase/firestore';

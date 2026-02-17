@@ -16,6 +16,10 @@ import { auth } from '../../config/firebase';
 import { mapFirebaseError } from '../../utils/errorUtils';
 import { AuthLoadingScreen, EmailVerificationGate, OnboardingGate } from './AuthGateParts';
 
+// PLT-001: Timeout wrapper for auth calls that may hang in Capacitor WebView
+const withTimeout = <T,>(promise: Promise<T>, ms = 15000): Promise<T> =>
+    Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Authentication timed out. Please check your connection and try again.')), ms))]);
+
 interface AuthGateProps { children: React.ReactNode; }
 
 const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
@@ -69,8 +73,8 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
                         if (authMode === 'signup') {
                             const matches = [/[A-Z]/.test(password), /[a-z]/.test(password), /[0-9]/.test(password), /[!@#$%^&*(),.?":{}|<>]/.test(password)];
                             if (password.length < 12 || matches.includes(false)) { setAuthError('Password requirements not met.'); setIsAuthenticating(false); return; }
-                            await signUp(email, password);
-                        } else { await signIn(email, password); }
+                            await withTimeout(signUp(email, password));
+                        } else { await withTimeout(signIn(email, password)); }
                         setLoginAttempts(0); localStorage.setItem('anchor_login_attempts', '0');
                     }
                 } catch (err: unknown) {
