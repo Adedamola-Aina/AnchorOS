@@ -139,11 +139,11 @@ export const BottomNavigation = ({
     return (
         <nav
             role="navigation"
-            className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 pb-safe-nav z-40"
+            className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40"
             aria-label="Mobile navigation"
             style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-            <div className="grid grid-cols-4 h-12">
+            <div className="grid grid-cols-4 h-12 pb-safe-nav">
                 {navItems.map(({ to, label, renderIcon }) => (
                     <NavLink
                         key={to}
