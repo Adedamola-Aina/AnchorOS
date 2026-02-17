@@ -31,8 +31,16 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
     const [authError, setAuthError] = useState('');
     const [isAuthenticating, setIsAuthenticating] = useState(false);
-    const [loginAttempts, setLoginAttempts] = useState(() => { const stored = localStorage.getItem('anchor_login_attempts'); return stored ? parseInt(stored, 10) : 0; });
-    const [lockoutUntil, setLockoutUntil] = useState(() => { const stored = localStorage.getItem('anchor_lockout_until'); return stored ? parseInt(stored, 10) : 0; });
+    const [loginAttempts, setLoginAttempts] = useState(() => {
+        const lockout = parseInt(localStorage.getItem('anchor_lockout_until') || '0', 10);
+        if (lockout && Date.now() >= lockout) { localStorage.removeItem('anchor_login_attempts'); localStorage.removeItem('anchor_lockout_until'); return 0; }
+        return parseInt(localStorage.getItem('anchor_login_attempts') || '0', 10);
+    });
+    const [lockoutUntil, setLockoutUntil] = useState(() => {
+        const stored = parseInt(localStorage.getItem('anchor_lockout_until') || '0', 10);
+        if (stored && Date.now() >= stored) { localStorage.removeItem('anchor_lockout_until'); return 0; }
+        return stored;
+    });
 
     React.useEffect(() => {
         const handleExpiry = () => setAuthError('Session expired. Please sign in again.');
