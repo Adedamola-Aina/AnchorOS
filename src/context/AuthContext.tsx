@@ -74,7 +74,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearPendingSecretRef.current = mfaOps.clearPendingSecret;
 
     useEffect(() => {
+        // PLT-001: Failsafe timeout for Capacitor WebView where Firebase Auth
+        // persistence may hang (capacitor:// origin blocks IndexedDB)
+        const authTimeout = setTimeout(() => {
+            setLoading(prev => {
+                if (prev) console.warn('[AuthContext] Auth state timeout — forcing login screen');
+                return prev ? false : prev;
+            });
+        }, 5000);
+
         const unsubAuth = onAuthStateChanged(auth, async (u) => {
+            clearTimeout(authTimeout);
             if (unsubProfRef.current) { unsubProfRef.current(); unsubProfRef.current = null; }
             if (u) { sessionStorage.setItem('anchor_session_active', 'true'); }
             else {
@@ -106,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
             });
         });
-        return () => { unsubAuth(); if (unsubProfRef.current) unsubProfRef.current(); };
+        return () => { clearTimeout(authTimeout); unsubAuth(); if (unsubProfRef.current) unsubProfRef.current(); };
     }, []); // ARCH-004: Stable deps — mfaOps accessed via ref to prevent re-subscription
 
     const signIn = async (e: string, p: string) => {
