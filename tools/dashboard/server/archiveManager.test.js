@@ -1,6 +1,5 @@
 // @ts-nocheck
-const { describe, it, expect } = require('node:test');
-const assert = require('node:assert');
+import { describe, it, expect } from 'vitest';
 
 // Test the removeArchivedTag function logic
 describe('archiveManager security fixes', () => {
@@ -18,17 +17,17 @@ describe('archiveManager security fixes', () => {
     it('removes archived tag with date', () => {
         const input = '- [x] Task completed (Archived: 2026-02-15)';
         const expected = '- [x] Task completed ';
-        assert.strictEqual(removeArchivedTag(input), expected);
+        expect(removeArchivedTag(input)).toBe(expected);
     });
 
     it('handles text without archived tag', () => {
         const input = '- [x] Task completed';
-        assert.strictEqual(removeArchivedTag(input), input);
+        expect(removeArchivedTag(input)).toBe(input);
     });
 
     it('handles unclosed archived tag', () => {
         const input = '- [x] Task (Archived: 2026-02-15';
-        assert.strictEqual(removeArchivedTag(input), input);
+        expect(removeArchivedTag(input)).toBe(input);
     });
 
     it('handles multiple parentheses without ReDoS', () => {
@@ -38,16 +37,16 @@ describe('archiveManager security fixes', () => {
         removeArchivedTag(pathological);
         const duration = Date.now() - start;
         // Should complete quickly even with many parentheses
-        assert.ok(duration < 100, `Took ${duration}ms, should be < 100ms`);
+        expect(duration).toBeLessThan(100);
     });
 
     it('removes only first archived tag', () => {
         const input = '- [x] Task (Archived: 2026-02-15) note (with parens)';
         const result = removeArchivedTag(input);
-        assert.strictEqual(result, '- [x] Task  note (with parens)');
+        expect(result).toBe('- [x] Task  note (with parens)');
     });
 
     it('handles empty string', () => {
-        assert.strictEqual(removeArchivedTag(''), '');
+        expect(removeArchivedTag('')).toBe('');
     });
 });
