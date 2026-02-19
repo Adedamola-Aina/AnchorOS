@@ -223,6 +223,17 @@ function getArchivedItems() {
     return archivedItems;
 }
 
+// Safely remove (Archived: YYYY-MM-DD) tag using string methods to avoid ReDoS
+function removeArchivedTag(text) {
+    const startIdx = text.indexOf('(Archived:');
+    if (startIdx === -1) return text;
+    
+    const endIdx = text.indexOf(')', startIdx);
+    if (endIdx === -1) return text;
+    
+    return text.slice(0, startIdx) + text.slice(endIdx + 1);
+}
+
 // Restore item from archive to ROADMAP
 function restoreItem(itemText) {
     if (!fs.existsSync(ARCHIVE_PATH) || !fs.existsSync(ROADMAP_PATH)) {
@@ -253,11 +264,11 @@ function restoreItem(itemText) {
     const completedSectionMatch = roadmapContent.match(/^## [^\n]*Completed[^\n]*/im);
     if (completedSectionMatch) {
         const insertIndex = roadmapContent.indexOf(completedSectionMatch[0]) + completedSectionMatch[0].length;
-        const restoredLine = itemText.replace(/\(Archived:[^)]*\)/, '').trim();
+        const restoredLine = removeArchivedTag(itemText).trim();
         roadmapContent = roadmapContent.slice(0, insertIndex) + '\n' + restoredLine + roadmapContent.slice(insertIndex);
     } else {
         // No completed section, add at end
-        roadmapContent += '\n\n## Completed\n' + itemText.replace(/\(Archived:[^)]*\)/, '').trim() + '\n';
+        roadmapContent += '\n\n## Completed\n' + removeArchivedTag(itemText).trim() + '\n';
     }
 
     fs.writeFileSync(ROADMAP_PATH, roadmapContent);

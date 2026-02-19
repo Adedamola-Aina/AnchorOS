@@ -158,7 +158,8 @@ export const sanitizeObject = <T extends object,>(obj: T): T => {
 };
 
 /**
- * Strip all HTML tags from a string (multi-pass to prevent nested-tag reassembly)
+ * Strip all HTML tags from a string.
+ * Uses DOMParser when available (browser), falls back to safer regex with length bounds.
  */
 export const stripHtml = (str: string): string => {
   if (stryMutAct_9fa48("1797")) {
@@ -166,10 +167,23 @@ export const stripHtml = (str: string): string => {
   } else {
     stryCov_9fa48("1797");
     if (stryMutAct_9fa48("1800") ? typeof str === 'string' : stryMutAct_9fa48("1799") ? false : stryMutAct_9fa48("1798") ? true : (stryCov_9fa48("1798", "1799", "1800"), typeof str !== (stryMutAct_9fa48("1801") ? "" : (stryCov_9fa48("1801"), 'string')))) return str;
+    
+    // Use DOMParser when available for safe, complete HTML stripping
+    if (stryMutAct_9fa48("1857") ? typeof DOMParser === 'undefined' : stryMutAct_9fa48("1856") ? false : stryMutAct_9fa48("1855") ? true : (stryCov_9fa48("1855", "1856", "1857"), typeof DOMParser !== (stryMutAct_9fa48("1858") ? "" : (stryCov_9fa48("1858"), 'undefined')))) {
+      if (stryMutAct_9fa48("1859")) {
+        {}
+      } else {
+        stryCov_9fa48("1859");
+        const doc = new DOMParser().parseFromString(str, stryMutAct_9fa48("1860") ? "" : (stryCov_9fa48("1860"), 'text/html'));
+        return stryMutAct_9fa48("1861") ? doc.body.textContent && str : (stryCov_9fa48("1861"), doc.body.textContent ?? str);
+      }
+    }
+    
+    // Fallback: multi-pass with safer bounded regex
     let prev = str;
     if (stryMutAct_9fa48("1802")) {
       for (; false;) {
-        const next = prev.replace(/<[^>]*>/g, '');
+        const next = prev.replace(/<[^>]{0,1000}>/g, '');
         if (next === prev) return next;
         prev = next;
       }
@@ -180,7 +194,7 @@ export const stripHtml = (str: string): string => {
           {}
         } else {
           stryCov_9fa48("1803");
-          const next = prev.replace(stryMutAct_9fa48("1805") ? /<[>]*>/g : stryMutAct_9fa48("1804") ? /<[^>]>/g : (stryCov_9fa48("1804", "1805"), /<[^>]*>/g), stryMutAct_9fa48("1806") ? "Stryker was here!" : (stryCov_9fa48("1806"), ''));
+          const next = prev.replace(stryMutAct_9fa48("1805") ? /<[>]{0,1000}>/g : stryMutAct_9fa48("1804") ? /<[^>]>/g : (stryCov_9fa48("1804", "1805"), /<[^>]{0,1000}>/g), stryMutAct_9fa48("1806") ? "Stryker was here!" : (stryCov_9fa48("1806"), ''));
           if (stryMutAct_9fa48("1809") ? next !== prev : stryMutAct_9fa48("1808") ? false : stryMutAct_9fa48("1807") ? true : (stryCov_9fa48("1807", "1808", "1809"), next === prev)) return next;
           prev = next;
         }
