@@ -11,8 +11,11 @@ import { getPlatformClasses } from './utils/platform'
 const initSentryDeferred = async () => {
     if (!import.meta.env.VITE_SENTRY_DSN) return;
     const Sentry = await import('@sentry/react');
+    const { APP_VERSION } = await import('./version');
+
     Sentry.init({
         dsn: import.meta.env.VITE_SENTRY_DSN,
+        release: APP_VERSION,
         integrations: [
             Sentry.browserTracingIntegration(),
             Sentry.replayIntegration(),

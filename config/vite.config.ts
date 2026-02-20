@@ -6,6 +6,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import fs from 'fs'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
@@ -89,6 +90,13 @@ export default defineConfig(({ mode }) => ({
       filename: 'dist/stats.html',
       gzipSize: true,
       brotliSize: true,
+    }),
+    sentryVitePlugin({
+      org: "anchor-os",
+      project: "anchor-os",
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      release: { name: pkg.version },
+      telemetry: false,
     }),
   ].filter(Boolean),
   root: rootDir,

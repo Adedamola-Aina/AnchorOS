@@ -662,3 +662,15 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRODUCTION }}
           projectId: anchor-os
           channelId: live
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          # The tag was pushed in the version-bump job. 
+          # Now that production deploy succeeded, create the actual release.
+          gh release create "v$VERSION" \
+            --title "Release v$VERSION" \
+            --generate-notes \
+            --notes "Production deployment of Anchor OS v$VERSION. See CHANGELOG.md for full commit history." || echo "Release already exists or failed to create"
