@@ -74,6 +74,8 @@ echo -e "\n${YELLOW}🔒 Stage 1b: Security Audit (npm audit)${NC}"
 AUDIT_LEVEL="high"
 if [[ "$ENV" == "production" ]]; then
     AUDIT_LEVEL="moderate"
+elif [[ "$ENV" == "development" ]]; then
+    AUDIT_LEVEL="critical"
 fi
 if npm audit --audit-level="$AUDIT_LEVEL" 2>/dev/null; then
     echo -e "${GREEN}✅ No ${AUDIT_LEVEL}+ vulnerabilities found.${NC}"
