@@ -4,11 +4,18 @@ import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'url'
 import path from 'path'
 
+import fs from 'fs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
+const pkg = JSON.parse(fs.readFileSync(path.resolve(rootDir, 'package.json'), 'utf-8'))
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __APP_ENV__: JSON.stringify('development'),
+  },
   resolve: {
     alias: {
       '@': path.resolve(rootDir, 'src'),

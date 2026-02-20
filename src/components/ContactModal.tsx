@@ -9,11 +9,10 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
-import pkg from '../../package.json';
+import { APP_VERSION } from '../version';
 import { ContactSuccessMessage, ContactHeader, SubjectSelect, MessageInput, IdentityFields, SubmitButton, SUBJECTS } from './ContactModalParts';
 import { createFeedbackBackup } from '../api/FeedbackApi';
 
-const APP_VERSION = (pkg as unknown as { version: string }).version;
 type SubjectType = 'question' | 'problem' | 'feature' | 'testimonial' | 'feedback' | 'other';
 
 interface ContactModalProps { onClose: () => void; currentPage?: string; initialSubject?: SubjectType; }
