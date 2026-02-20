@@ -139,18 +139,18 @@ export const BottomNavigation = ({
     return (
         <nav
             role="navigation"
-            className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40"
+            className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pb-safe-nav pt-1 z-40"
             aria-label="Mobile navigation"
             style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-            <div className="grid grid-cols-4 h-12 pb-safe-nav">
+            <div className="grid grid-cols-4">
                 {navItems.map(({ to, label, renderIcon }) => (
                     <NavLink
                         key={to}
                         to={to}
                         onClick={(e) => handleTap(to, e)}
                         className={({ isActive }) =>
-                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 min-h-[44px] will-change-transform ${getIconColorClass(to, isActive)}`
+                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 min-h-[56px] will-change-transform ${getIconColorClass(to, isActive)}`
                         }
                     >
                         {({ isActive }) => {

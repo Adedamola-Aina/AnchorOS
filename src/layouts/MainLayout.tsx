@@ -102,9 +102,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </div>
             </aside>
 
-            <main className="flex flex-col relative w-full">
+            <main className="flex flex-col relative w-full flex-1 overflow-y-auto">
                 {/* Main Content - ADJUST padding for bottom nav per M3.2 */}
-                <div className={`flex-1 p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto ${isMobile ? 'pb-20' : 'pb-8'  // Extra padding on mobile for bottom nav
+                <div className={`p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto ${isMobile ? 'pb-20' : 'pb-8'  // Extra padding on mobile for bottom nav
                     }`}>
                     {children}
                 </div>

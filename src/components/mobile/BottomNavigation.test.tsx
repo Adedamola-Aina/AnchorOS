@@ -66,12 +66,12 @@ describe('BottomNavigation', () => {
     });
 
     describe('touch targets', () => {
-        it('has minimum 44px height for touch targets (Apple HIG / WCAG 2.5.5)', () => {
+        it('has minimum 56px height for touch targets to accommodate home indicator padding safely', () => {
             renderWithRouter(<BottomNavigation />);
 
             const links = screen.getAllByRole('link');
             links.forEach(link => {
-                expect(link.className).toContain('min-h-[44px]');
+                expect(link.className).toContain('min-h-[56px]');
             });
         });
     });
