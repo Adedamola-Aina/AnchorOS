@@ -2,7 +2,7 @@
 name: Planner
 description: Generate implementation plans for features, bug fixes, or refactoring. Does NOT write code — only analyzes and plans. Use this before starting any significant work.
 tools: ['search', 'fetch', 'githubRepo']
-model: ['Claude Opus 4.6 (copilot)', 'GPT-5.2 (copilot)']
+model: ['claude-3-5-sonnet-20241022', 'gpt-4o']
 handoffs:
   - label: Implement Plan
     agent: implementer

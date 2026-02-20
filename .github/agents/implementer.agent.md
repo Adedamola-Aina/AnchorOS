@@ -2,7 +2,7 @@
 name: Implementer
 description: Build features, fix bugs, and refactor code following the GATHER → PLAN → BUILD → CLOSE workflow. Uses TDD by default.
 tools: ['search', 'editFiles', 'terminalLastCommand', 'runInTerminal', 'fetch', 'githubRepo']
-model: ['Claude Opus 4.6 (copilot)', 'GPT-5.2 (copilot)']
+model: ['claude-3-5-sonnet-20241022', 'gpt-4o']
 handoffs:
   - label: Review Changes
     agent: reviewer

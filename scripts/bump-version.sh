@@ -38,7 +38,7 @@ echo -e "${YELLOW}📦 Current version: ${OLD_VERSION}${NC}"
 
 case $ENV in
     development)
-        npx commit-and-tag-version --prerelease dev --skip.changelog --skip.commit --skip.tag
+        npx commit-and-tag-version --prerelease dev --skip.commit --skip.tag
         ;;
     staging)
         npx commit-and-tag-version --prerelease rc --skip.commit --skip.tag

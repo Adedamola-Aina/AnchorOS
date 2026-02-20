@@ -15,13 +15,11 @@ const CommitmentsView = lazyWithRetry(() => import('../../features/commitments/C
 const FinanceView = lazyWithRetry(() => import('../../features/finance/FinanceView'));
 const SettingsView = lazyWithRetry(() => import('../../features/settings/SettingsView'));
 const NotFoundView = lazyWithRetry(() => import('../../features/errors/NotFoundView'));
-const FabricSuggestionManager = lazyWithRetry(() =>
-  import('../../features/fabric/FabricSuggestionManager').then((module) => ({ default: module.FabricSuggestionManager }))
-);
+
 
 export default function AuthenticatedAppShell() {
   const { user } = useAuth();
-  const isFabricSuggestionsEnabled = useFeatureFlag('fabric_suggestions', user?.uid);
+
 
   return (
     <FinanceProvider>
@@ -43,11 +41,7 @@ export default function AuthenticatedAppShell() {
               <Route path="*" element={<NotFoundView />} />
             </Routes>
           </React.Suspense>
-          {isFabricSuggestionsEnabled ? (
-            <React.Suspense fallback={null}>
-              <FabricSuggestionManager />
-            </React.Suspense>
-          ) : null}
+
         </MainLayout>
       </TaskProvider>
     </FinanceProvider>

@@ -2,7 +2,7 @@
 name: DevOps
 description: Handle deployments, infrastructure, CI/CD, monitoring, and environment management for Anchor OS. Use for deploy tasks, environment issues, or infrastructure work.
 tools: ['search', 'editFiles', 'runInTerminal', 'terminalLastCommand', 'fetch']
-model: ['Claude Opus 4.6 (copilot)', 'GPT-5.2 (copilot)']
+model: ['claude-3-5-sonnet-20241022', 'gpt-4o']
 ---
 
 # DevOps Mode

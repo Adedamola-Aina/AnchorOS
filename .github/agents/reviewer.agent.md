@@ -2,7 +2,7 @@
 name: Reviewer
 description: Review code changes for quality, security, mobile compatibility, test coverage, and AGENTS.md compliance. Use after implementing features or before PRs.
 tools: ['search', 'fetch', 'githubRepo']
-model: ['Claude Opus 4.6 (copilot)', 'GPT-5.2 (copilot)']
+model: ['claude-3-5-sonnet-20241022', 'gpt-4o']
 handoffs:
   - label: Fix Issues
     agent: implementer

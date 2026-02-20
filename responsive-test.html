@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Anchor OS - Multi-Viewport Preview</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1e293b;
+            font-family: system-ui;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .device {
+            background: white;
+            border-radius: 30px;
+            padding: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .device-label {
+            color: white;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        iframe {
+            border: none;
+            border-radius: 20px;
+            background: white;
+            display: block;
+        }
+
+        .iphone-14 iframe {
+            width: 393px;
+            height: 852px;
+        }
+
+        .iphone-se iframe {
+            width: 375px;
+            height: 667px;
+        }
+
+        .pixel-7 iframe {
+            width: 412px;
+            height: 915px;
+        }
+
+        .galaxy-s20 iframe {
+            width: 360px;
+            height: 800px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="device iphone-14">
+        <div class="device-label">iPhone 14 Pro (393×852)</div>
+        <iframe src="http://localhost:5174"></iframe>
+    </div>
+    <div class="device iphone-se">
+        <div class="device-label">iPhone SE (375×667)</div>
+        <iframe src="http://localhost:5174"></iframe>
+    </div>
+    <div class="device pixel-7">
+        <div class="device-label">Pixel 7 (412×915)</div>
+        <iframe src="http://localhost:5174"></iframe>
+    </div>
+    <div class="device galaxy-s20">
+        <div class="device-label">Galaxy S20 (360×800)</div>
+        <iframe src="http://localhost:5174"></iframe>
+    </div>
+</body>
+
+</html>
