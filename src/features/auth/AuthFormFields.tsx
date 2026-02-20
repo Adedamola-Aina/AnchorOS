@@ -46,15 +46,13 @@ export function AuthFormFields({
                 <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-center block">
                     Verification Code
                 </label>
-                {/* Hidden fields to confuse autofill */}
-                <input type="text" name="fakeusernameremembered" style={{ display: 'none' }} />
-                <input type="password" name="fakepasswordremembered" style={{ display: 'none' }} />
+                {/* Removed hidden fields that previously confused autofill heuristics */}
                 <div className="relative group w-full max-w-[280px] mx-auto px-4 sm:px-0">
                     <Lock className="absolute left-6 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
                     <input
                         type="text"
-                        id="mfa-code-input"
-                        name="otp-code"
+                        id="mfa-code" // Standard ID
+                        name="mfa-code" // Standard name
                         inputMode="numeric"
                         pattern="[0-9]*"
                         autoFocus
@@ -88,19 +86,20 @@ export function AuthFormFields({
         <>
             {/* Email Field */}
             <div className="space-y-2">
-                <label className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
+                <label htmlFor="email" className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
                 <div className="relative group">
                     <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${validationErrors.email ? 'text-red-400' : 'text-slate-300 group-focus-within:text-slate-600 dark:group-focus-within:text-slate-300'}`} />
                     <input
                         type="email"
-                        name="anchor_email"
+                        id="email"
+                        name="email"
                         value={email}
                         onChange={(e) => {
                             setEmail(e.target.value);
                             if (validationErrors.email) setValidationErrors({ ...validationErrors, email: undefined });
                         }}
                         placeholder="you@example.com"
-                        autoComplete="email"
+                        autoComplete={authMode === 'login' ? 'username email' : 'email'}
                         className={`w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-4 transition-all font-medium ${validationErrors.email ? 'border-red-400 focus:ring-red-500/10 focus:border-red-400' : 'border-slate-200 dark:border-slate-800 focus:ring-slate-500/5 focus:border-slate-400 dark:focus:border-slate-700'}`}
                     />
                 </div>
@@ -113,7 +112,7 @@ export function AuthFormFields({
             {authMode !== 'reset' && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-500">
                     <div className="flex justify-between items-center">
-                        <label className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Password</label>
+                        <label htmlFor="password" className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Password</label>
                         {authMode === 'login' && (
                             <button type="button" onClick={() => setAuthMode('reset')} className="text-[11px] font-bold text-blue-500 hover:text-blue-600 uppercase tracking-wider transition-colors">
                                 Forgot?
@@ -124,14 +123,15 @@ export function AuthFormFields({
                         <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${validationErrors.password ? 'text-red-400' : 'text-slate-300 group-focus-within:text-slate-600 dark:group-focus-within:text-slate-300'}`} />
                         <input
                             type={showPassword ? 'text' : 'password'}
-                            name="anchor_password"
+                            id="password"
+                            name="password"
                             value={password}
                             onChange={(e) => {
                                 setPassword(e.target.value);
                                 if (validationErrors.password) setValidationErrors({ ...validationErrors, password: undefined });
                             }}
                             placeholder="••••••••"
-                            autoComplete="new-password"
+                            autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
                             className={`w-full pl-12 pr-14 py-3.5 bg-white dark:bg-slate-900 border rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-4 transition-all font-medium ${validationErrors.password ? 'border-red-400 focus:ring-red-500/10 focus:border-red-400' : 'border-slate-200 dark:border-slate-800 focus:ring-slate-500/5 focus:border-slate-400 dark:focus:border-slate-700'}`}
                         />
                         <button

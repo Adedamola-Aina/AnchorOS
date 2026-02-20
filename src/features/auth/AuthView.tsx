@@ -116,7 +116,7 @@ const AuthView: React.FC<AuthViewProps> = ({
                     )}
 
                     {/* Form */}
-                    <form onSubmit={handleFormSubmit} className="space-y-5" noValidate>
+                    <form action="#" method="POST" onSubmit={handleFormSubmit} className="space-y-5" noValidate>
                         <AuthFormFields
                             authMode={authMode} setAuthMode={setAuthMode} email={email} setEmail={setEmail}
                             password={password} setPassword={setPassword} mfaCode={mfaCode} setMfaCode={setMfaCode}
