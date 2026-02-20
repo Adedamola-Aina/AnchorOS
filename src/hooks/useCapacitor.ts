@@ -14,7 +14,7 @@ import { Network } from '@capacitor/network';
 import { getPlatformConfig, isPluginAvailable } from '@/utils/platform';
 
 export function useCapacitor() {
-  const [platform, setPlatform] = useState(getPlatformConfig());
+  const platform = getPlatformConfig();
   const [networkStatus, setNetworkStatus] = useState<{ connected: boolean; connectionType: string } | null>(null);
 
   useEffect(() => {
