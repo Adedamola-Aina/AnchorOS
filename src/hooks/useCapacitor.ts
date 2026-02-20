@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import {  App } from '@capacitor/app';
+import { App } from '@capacitor/app';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Keyboard } from '@capacitor/keyboard';
@@ -18,8 +18,6 @@ export function useCapacitor() {
   const [networkStatus, setNetworkStatus] = useState<{ connected: boolean; connectionType: string } | null>(null);
 
   useEffect(() => {
-    // Update platform config on mount
-    setPlatform(getPlatformConfig());
 
     // Listen to network status changes
     if (isPluginAvailable('Network')) {
