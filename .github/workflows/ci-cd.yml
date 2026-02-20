@@ -534,6 +534,16 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
+      - name: Deploy Firestore Indexes to Firebase Staging
+        run: npx firebase deploy --only firestore:indexes --project anchor-os-staging --force
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Deploy Firestore Rules to Firebase Staging
+        run: npx firebase deploy --only firestore:rules --project anchor-os-staging --force
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
       - name: Deploy to Firebase Staging
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -652,6 +662,16 @@ jobs:
 
       - name: Deploy Cloud Functions to Firebase Production
         run: npx firebase deploy --only functions --project anchor-os --force
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Deploy Firestore Indexes to Firebase Production
+        run: npx firebase deploy --only firestore:indexes --project anchor-os --force
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Deploy Firestore Rules to Firebase Production
+        run: npx firebase deploy --only firestore:rules --project anchor-os --force
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
