@@ -67,8 +67,19 @@ function generateFirebaseSwConfig() {
   };
 }
 
+// Read version from package.json at build time
+const pkg = JSON.parse(fs.readFileSync(path.resolve(rootDir, 'package.json'), 'utf-8'));
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __APP_ENV__: JSON.stringify(
+      mode === 'staging' ? 'staging'
+        : mode === 'production' ? 'production'
+          : 'development'
+    ),
+  },
   plugins: [
     react(),
     buildEnvMarker(mode),

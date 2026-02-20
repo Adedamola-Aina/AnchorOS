@@ -91,6 +91,15 @@ else
     echo -e "${RED}❌ Unit tests failed. Deployment prevented.${NC}"
     exit 1
 fi
+# 2b. Version Bump (automatic per environment)
+echo -e "\n${YELLOW}📦 Stage 2b: Version Bump (${ENV})${NC}"
+if ./scripts/bump-version.sh --env="$ENV"; then
+    NEW_VERSION=$(node -p "require('./package.json').version")
+    echo -e "${GREEN}✅ Version bumped to ${NEW_VERSION}${NC}"
+else
+    echo -e "${RED}❌ Version bump failed.${NC}"
+    exit 1
+fi
 
 # 3. Build (with environment mode)
 echo -e "\n${YELLOW}🏗️  Stage 3: Build (${ENV})${NC}"

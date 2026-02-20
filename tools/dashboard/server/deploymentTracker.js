@@ -50,7 +50,7 @@ function checkCacheValidity() {
 async function parseDeployMarkers() {
     try {
         const log = await git.log({ maxCount: 300 });
-        
+
         const deployments = {
             production: null,
             staging: null,
@@ -58,11 +58,11 @@ async function parseDeployMarkers() {
         };
 
         // Regex patterns for deploy markers
-        // Supports version suffixes like -revert, -hotfix, -dev
+        // Supports version suffixes like -revert, -hotfix, -dev.3, -rc.1
         const markerPatterns = {
-            production: /deploy\(production\):\s*v?(\d+\.\d+\.\d+(?:-[\w]+)?)/i,
-            staging: /deploy\(staging\):\s*v?(\d+\.\d+\.\d+(?:-[\w]+)?)/i,
-            development: /deploy\(dev(?:elopment)?\):\s*v?(\d+\.\d+\.\d+(?:-[\w]+)?)/i
+            production: /deploy\(production\):\s*v?(\d+\.\d+\.\d+(?:-[\w.]+)?)/i,
+            staging: /deploy\(staging\):\s*v?(\d+\.\d+\.\d+(?:-[\w.]+)?)/i,
+            development: /deploy\(dev(?:elopment)?\):\s*v?(\d+\.\d+\.\d+(?:-[\w.]+)?)/i
         };
 
         // Pattern to extract actual deployed hash from marker
@@ -80,10 +80,10 @@ async function parseDeployMarkers() {
                     if (match) {
                         // Check if there's an explicit deployed hash
                         const hashMatch = msg.match(deployedHashPattern);
-                        
+
                         // The deployed code is either the explicit @ HASH or the marker commit
                         const deployedHash = hashMatch ? hashMatch[1] : markerHash;
-                        
+
                         deployments[env] = {
                             version: `v${match[1]}`,
                             markerHash: markerHash,           // The commit containing the deploy marker
@@ -187,10 +187,10 @@ async function parseDeployMarkers() {
  */
 async function isAncestorOf(commitHash, deployedHash) {
     if (!commitHash || !deployedHash) return false;
-    
+
     checkCacheValidity();
     const cacheKey = `${commitHash}:${deployedHash}`;
-    
+
     if (ancestryCache.has(cacheKey)) {
         return ancestryCache.get(cacheKey);
     }
@@ -257,23 +257,23 @@ async function getCommitDeploymentStatus(commitHash, deployments) {
  */
 async function batchCheckDeploymentStatus(commitHashes, deployments) {
     const results = new Map();
-    
+
     // Process in parallel batches to avoid overwhelming git
     const BATCH_SIZE = 10;
-    
+
     for (let i = 0; i < commitHashes.length; i += BATCH_SIZE) {
         const batch = commitHashes.slice(i, i + BATCH_SIZE);
         const promises = batch.map(async (hash) => {
             const status = await getCommitDeploymentStatus(hash, deployments);
             return [hash, status];
         });
-        
+
         const batchResults = await Promise.all(promises);
         batchResults.forEach(([hash, status]) => {
             results.set(hash, status);
         });
     }
-    
+
     return results;
 }
 
@@ -290,7 +290,7 @@ function clearCache() {
  */
 async function getDeploymentSummary() {
     const deployments = await parseDeployMarkers();
-    
+
     return {
         production: {
             version: deployments.production.version,

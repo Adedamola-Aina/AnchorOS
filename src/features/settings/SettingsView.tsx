@@ -34,7 +34,7 @@ import { handleWipeData, handleDeleteAccount } from './components/SettingsDataAc
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { auditSettings } from '../../services/AuditService';
-import pkg from '../../../package.json';
+import { getDisplayVersion } from '../../version';
 
 const SettingsView = () => {
   const {
@@ -70,7 +70,7 @@ const SettingsView = () => {
       await reauthenticate(reauthPassword);
       setShowReauthModal(false);
       setReauthPassword('');
-      
+
       // If we were trying to disable MFA, retry now
       if (pendingMfaUnenroll) {
         setPendingMfaUnenroll(false);
@@ -120,7 +120,7 @@ const SettingsView = () => {
         <div className="mt-8 flex flex-col items-center gap-4 pb-8">
           <Button variant="ghost" size="sm" onClick={() => logout()} className="min-h-11 text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
           <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono tracking-wider">
-            Anchor OS v{(pkg as unknown as { version: string }).version}
+            {getDisplayVersion()}
           </p>
         </div>
 

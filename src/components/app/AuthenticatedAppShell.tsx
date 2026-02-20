@@ -8,9 +8,7 @@ import MainLayout from '../../layouts/MainLayout';
 import { lazyWithRetry } from '../../utils/lazyWithRetry';
 import { useAuth } from '../../context/AuthContext';
 import { useFeatureFlag } from '../../features/flags/useFeatureFlag';
-import pkg from '../../../package.json';
-
-const APP_VERSION = (pkg as unknown as { version: string }).version;
+import { APP_VERSION } from '../../version';
 
 const DashboardView = lazyWithRetry(() => import('../../features/dashboard/DashboardView'));
 const CommitmentsView = lazyWithRetry(() => import('../../features/commitments/CommitmentsView'));
