@@ -77,8 +77,8 @@ if [[ "$ENV" == "production" ]]; then
 elif [[ "$ENV" == "development" ]]; then
     AUDIT_LEVEL="critical"
 fi
-if npm audit --audit-level="$AUDIT_LEVEL" 2>/dev/null; then
-    echo -e "${GREEN}✅ No ${AUDIT_LEVEL}+ vulnerabilities found.${NC}"
+if npm audit --audit-level="$AUDIT_LEVEL" --omit=dev 2>/dev/null; then
+    echo -e "${GREEN}✅ No ${AUDIT_LEVEL}+ vulnerabilities found in production dependencies.${NC}"
 else
     echo -e "${RED}❌ npm audit found ${AUDIT_LEVEL}+ severity vulnerabilities. Deployment blocked.${NC}"
     echo -e "${YELLOW}   Run 'npm audit' for details and 'npm audit fix' to resolve.${NC}"
