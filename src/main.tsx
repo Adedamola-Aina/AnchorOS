@@ -23,8 +23,8 @@ const initSentryDeferred = async () => {
         tracesSampleRate: 1.0,
         replaysSessionSampleRate: 0.1,
         replaysOnErrorSampleRate: 1.0,
-        environment: import.meta.env.VITE_APP_ENV || 'development',
-        debug: import.meta.env.VITE_APP_ENV === 'staging',
+        environment: __APP_ENV__,
+        debug: __APP_ENV__ === 'staging',
     });
 };
 
