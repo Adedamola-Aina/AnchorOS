@@ -132,7 +132,7 @@ export default function App() {
           <AuthProvider>
             <AppProvider>
               <div
-                className="flex flex-col flex-1 w-full"
+                className="flex flex-col flex-1 w-full min-h-0"
                 style={{
                   paddingTop: import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production'
                     ? 'calc(24px + env(safe-area-inset-top, 0px))'

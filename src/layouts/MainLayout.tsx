@@ -61,11 +61,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     useKeyboardAvoidance();
 
     return (
-        <div className={`adaptive-layout bg-[var(--surface-1)] font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 h-full flex-1 w-full`}>
+        <div className={`adaptive-layout bg-[var(--surface-1)] font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 h-full flex-1 w-full min-h-0`}>
             <CommandPalette />
 
             {/* Desktop Sidebar - UNCHANGED per M3.2 */}
-            <aside className={`hidden md:flex flex-col bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 sticky ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'top-6 h-[calc(100vh-24px)]' : 'top-0 h-screen'}`}>
+            <aside className={`hidden md:flex flex-col bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 sticky ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'top-6 h-[calc(100vh-24px)]' : 'top-0 h-screen'} min-h-0`}>
                 <div className="mb-8 px-4 py-2 shrink-0">
                     <h1 className="text-h2 lg:text-h2-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
                         <AnchorLogo className="w-8 h-8 text-slate-900 dark:text-white" />
@@ -74,7 +74,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 tracking-widest uppercase">Anchor v{version}</p>
                 </div>
 
-                <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2">
+                <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2 min-h-0">
                     <NavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
                     <NavItem to="/commitments" label="Commitments" icon={CheckCircle2} />
                     <NavItem to="/finance" label="Finance" icon={CreditCard} />
@@ -101,7 +101,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </div>
             </aside>
 
-            <main className="flex flex-col relative w-full flex-1 overflow-y-auto">
+            <main className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0">
                 {/* Main Content - ADJUST padding for bottom nav per M3.2 */}
                 <div className={`p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto ${isMobile ? 'pb-32' : 'pb-8'  // pb-32 (128px) clears the 94px total nav height
                     }`}>
