@@ -1,6 +1,38 @@
 {
-  "lastSync": "2026-02-22T10:50:44.559Z",
+  "lastSync": "2026-02-22T10:54:35.976Z",
   "syncHistory": [
+    {
+      "timestamp": "2026-02-22T10:54:35.976Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-02-22T10:54:35.975Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
+    {
+      "timestamp": "2026-02-22T10:53:03.185Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-02-22T10:53:03.185Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
     {
       "timestamp": "2026-02-22T10:50:44.559Z",
       "type": "archive",
@@ -368,44 +400,12 @@
         "archivedCount": 0,
         "message": "No items old enough to archive"
       }
-    },
-    {
-      "timestamp": "2026-02-20T19:47:01.808Z",
-      "type": "velocity",
-      "details": {
-        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
-        "success": false
-      }
-    },
-    {
-      "timestamp": "2026-02-20T19:46:20.485Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-02-20T19:46:20.485Z",
-      "type": "velocity",
-      "details": {
-        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
-        "success": false
-      }
-    },
-    {
-      "timestamp": "2026-02-20T18:55:38.017Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
     }
   ],
   "stats": {
-    "totalSyncs": 1642,
-    "lastVelocityUpdate": "2026-02-22T10:50:44.559Z",
+    "totalSyncs": 1646,
+    "lastVelocityUpdate": "2026-02-22T10:54:35.975Z",
     "lastPriorityUpdate": "2026-02-01T07:00:00.010Z",
-    "lastArchiveRun": "2026-02-22T10:50:44.559Z"
+    "lastArchiveRun": "2026-02-22T10:54:35.976Z"
   }
 }
