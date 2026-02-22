@@ -50,7 +50,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByLabel('Amount').fill('2000');
         await page.getByRole('button', { name: 'Income' }).click();
         await page.getByLabel('Description').fill('Regression Income');
-        await page.getByRole('button', { name: 'Record Transaction' }).click();
+        await page.getByRole('button', { name: /Record (Income|Transaction)/i }).click();
 
         // Add Expense: $500
         await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
@@ -58,7 +58,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Description').fill('Regression Expense 1');
         await page.getByLabel('Category').selectOption({ label: 'Food' });
-        await page.getByRole('button', { name: 'Record Transaction' }).click();
+        await page.getByRole('button', { name: /Record (Expense|Transaction)/i }).click();
 
         // Verify "Potential Savings"
         await expect(page.getByText('Regression Income').first()).toBeVisible();
@@ -70,7 +70,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Description').fill('Regression Expense 2');
         await page.getByLabel('Category').selectOption({ label: 'Food' });
-        await page.getByRole('button', { name: 'Record Transaction' }).click();
+        await page.getByRole('button', { name: /Record (Expense|Transaction)/i }).click();
 
         await expect(page.getByText('Regression Expense 2').first()).toBeVisible();
 
@@ -108,7 +108,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await page.getByLabel('Description').fill(txTitle);
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Category').selectOption({ label: 'General' });
-        await page.getByRole('button', { name: 'Record Transaction' }).click();
+        await page.getByRole('button', { name: /Record (Expense|Transaction)/i }).click();
 
         // Verify it exists in list
         const txRow = page.locator('div.group').filter({ hasText: txTitle }).last();

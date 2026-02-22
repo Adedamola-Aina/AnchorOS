@@ -97,7 +97,7 @@ test.describe('Fabric Features', () => {
         }
 
         // Switch to List View since Timeline only shows tasks with valid times, and this defaults to a TODO without a time
-        await page.getByTestId('list-icon').click();
+        await page.getByRole('button', { name: 'List View' }).click();
 
         // Locate the specific task card and click its toggle button (circle icon)
         // Verify title with relaxed matching as requested

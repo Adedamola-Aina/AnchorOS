@@ -1,7 +1,7 @@
 {
   "name": "anchor-os",
   "private": true,
-  "version": "1.8.0-rc.1",
+  "version": "1.8.0-rc.2",
   "type": "module",
   "scripts": {
     "dev": "vite --config config/vite.config.ts",
@@ -45,7 +45,8 @@
     "cap:open:ios": "cap open ios",
     "cap:open:android": "cap open android",
     "cap:run:ios": "cap run ios",
-    "cap:run:android": "cap run android"
+    "cap:run:android": "cap run android",
+    "ui:capture": "npx tsx tools/ui-capture/index.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
