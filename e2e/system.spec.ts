@@ -65,7 +65,7 @@ test.describe('System - Deep Links', () => {
         await page.goto('/finance');
         await page.waitForTimeout(2000);
 
-        const financeHeading = page.getByRole('heading', { name: 'Finance' });
+        const financeHeading = page.getByRole('heading', { name: 'Finance' }).first();
         const hasFinance = await financeHeading.isVisible().catch(() => false);
 
         expect(hasFinance).toBe(true);
@@ -78,7 +78,7 @@ test.describe('System - Deep Links', () => {
         await page.goto('/commitments');
         await page.waitForTimeout(2000);
 
-        const commitmentsHeading = page.getByRole('heading', { name: 'Commitments' });
+        const commitmentsHeading = page.getByRole('heading', { name: 'Commitments' }).first();
         const hasCommitments = await commitmentsHeading.isVisible().catch(() => false);
 
         expect(hasCommitments).toBe(true);
@@ -91,7 +91,7 @@ test.describe('System - Deep Links', () => {
         await page.goto('/settings');
         await page.waitForTimeout(2000);
 
-        const systemHeading = page.getByRole('heading', { name: 'System' });
+        const systemHeading = page.getByRole('heading', { name: 'System' }).first();
         const hasSettings = await systemHeading.isVisible().catch(() => false);
 
         expect(hasSettings).toBe(true);

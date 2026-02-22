@@ -24,11 +24,11 @@ test.describe('Onboarding Flow', () => {
         await page.click('button:has-text("Create Account")');
 
         // 6. Verify Onboarding Wizard appears (Step 1)
-        await expect(page.locator('text=Welcome aboard')).toBeVisible({ timeout: 15000 });
-        await expect(page.locator('text=Start Setup')).toBeVisible();
+        await expect(page.locator('text=Welcome to Anchor OS')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('text=Let\'s Begin')).toBeVisible();
 
         // 7. Proceed to Step 2
-        await page.click('button:has-text("Start Setup")');
+        await page.click('button:has-text("Let\'s Begin")');
         await expect(page.locator('text=Add Primary Account')).toBeVisible();
 
         // 8. Fill Account Details
