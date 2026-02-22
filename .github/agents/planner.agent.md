@@ -1,11 +1,11 @@
 ---
 name: Planner
 description: Generate implementation plans for features, bug fixes, or refactoring. Does NOT write code — only analyzes and plans. Use this before starting any significant work.
-tools: ['search', 'fetch', 'githubRepo']
-model: ['claude-3-5-sonnet-20241022', 'gpt-4o']
+tools: ['execute/runInTerminal', 'read/terminalLastCommand']
+model: 'claude-3-5-sonnet-20241022'
 handoffs:
   - label: Implement Plan
-    agent: implementer
+    agent: Implementer
     prompt: Implement the plan outlined above. Follow the GATHER → PLAN → BUILD → CLOSE workflow from AGENTS.md.
     send: false
 ---

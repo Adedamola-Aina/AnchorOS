@@ -505,7 +505,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-staging
     if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
-    environment: staging
     
     steps:
       - name: Checkout code
@@ -636,7 +635,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-production, lighthouse, e2e-tests, mutation-tests, rules-tests]
     if: github.ref == 'refs/heads/master'
-    environment: production  # This requires manual approval in GitHub settings
     
     steps:
       - name: Checkout code

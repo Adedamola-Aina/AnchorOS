@@ -1,11 +1,11 @@
 ---
 name: Reviewer
 description: Review code changes for quality, security, mobile compatibility, test coverage, and AGENTS.md compliance. Use after implementing features or before PRs.
-tools: ['search', 'fetch', 'githubRepo']
-model: ['claude-3-5-sonnet-20241022', 'gpt-4o']
+tools: ['execute/runInTerminal', 'read/terminalLastCommand']
+model: 'claude-3-5-sonnet-20241022'
 handoffs:
   - label: Fix Issues
-    agent: implementer
+    agent: Implementer
     prompt: Fix the issues identified in the review above.
     send: false
 ---

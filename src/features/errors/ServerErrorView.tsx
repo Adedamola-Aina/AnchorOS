@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export default function ServerErrorView() {
   return (
-    <div className="min-h-dvh bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6">
+    <div className="min-h-dvh flex items-center justify-center p-6">
       <div className="w-full max-w-lg text-center">
         <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center">
           <AlertCircle className="w-8 h-8" />

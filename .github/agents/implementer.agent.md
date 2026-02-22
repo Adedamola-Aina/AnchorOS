@@ -1,11 +1,11 @@
 ---
 name: Implementer
 description: Build features, fix bugs, and refactor code following the GATHER → PLAN → BUILD → CLOSE workflow. Uses TDD by default.
-tools: ['search', 'editFiles', 'terminalLastCommand', 'runInTerminal', 'fetch', 'githubRepo']
-model: ['claude-3-5-sonnet-20241022', 'gpt-4o']
+tools: ['execute/runInTerminal', 'read/terminalLastCommand']
+model: 'claude-3-5-sonnet-20241022'
 handoffs:
   - label: Review Changes
-    agent: reviewer
+    agent: Reviewer
     prompt: Review the changes I just implemented for quality, security, and test coverage.
     send: false
 ---

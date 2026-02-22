@@ -11,7 +11,7 @@ import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Keyboard } from '@capacitor/keyboard';
 import { Network } from '@capacitor/network';
-import { getPlatformConfig, isPluginAvailable } from '@/utils/platform';
+import { getPlatformConfig, isPluginAvailable } from '../utils/platform';
 
 export function useCapacitor() {
   const platform = getPlatformConfig();

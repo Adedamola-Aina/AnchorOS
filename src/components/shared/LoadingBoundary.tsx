@@ -100,7 +100,7 @@ export const LoadingBoundary: React.FC<LoadingBoundaryProps> = ({
  * Uses minimal skeleton with optional message
  */
 export const InlineLoading: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
-  <div 
+  <div
     className="flex items-center justify-center gap-2 py-4 text-slate-500 dark:text-slate-400 animate-in fade-in duration-300"
     role="status"
     aria-label={message}
@@ -115,7 +115,7 @@ export const InlineLoading: React.FC<{ message?: string }> = ({ message = 'Loadi
  * Centers loading indicator in viewport
  */
 export const PageLoading: React.FC<{ message?: string }> = ({ message }) => (
-  <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+  <div className="min-h-dvh flex items-center justify-center">
     <AnchorLoadingSpinner size="lg" message={message} />
   </div>
 );
