@@ -22,16 +22,16 @@ test.describe('Advanced Security (Staging)', () => {
             await page.waitForTimeout(1000);
         }
 
-        // Try to add Transaction with XSS payload via Pay Bill button
+        // Try to add Transaction with XSS payload via Record Transaction button
         console.log("[E2E] Attempt Transaction with XSS payload...");
-        const payBillBtn = page.getByRole('button', { name: 'Pay Bill' });
-        if (await payBillBtn.isVisible({ timeout: 3000 })) {
-            await payBillBtn.click();
+        const recordBtn = page.getByRole('button', { name: /Record Transaction|Add Transaction/i });
+        if (await recordBtn.isVisible({ timeout: 3000 })) {
+            await recordBtn.click();
         } else {
-            // Fallback: try transfer button or any transaction trigger
-            const transferBtn = page.getByRole('button', { name: 'Transfer' });
-            if (await transferBtn.isVisible({ timeout: 2000 })) {
-                await transferBtn.click();
+            // Fallback: any button with a plus icon or generic add
+            const fallbackBtn = page.locator('button:has(svg.lucide-plus)');
+            if (await fallbackBtn.isVisible({ timeout: 2000 })) {
+                await fallbackBtn.click();
             }
         }
         await page.waitForTimeout(500);
@@ -40,10 +40,11 @@ test.describe('Advanced Security (Staging)', () => {
         const titleInput = page.locator('input[placeholder*="Groceries"]').or(page.locator('input[placeholder*="title"]')).or(page.getByLabel(/title/i));
         await titleInput.first().fill(payload);
         await page.fill('input[placeholder*="0.00"]', '100');
-        
-        // Try to submit
-        const submitBtn = page.getByRole('button', { name: /Record|Save|Create|Submit/i });
-        await submitBtn.first().click();
+
+        // Try to submit with force: true to bypass any sticky header interception in the Modal
+        const dialog = page.getByRole('dialog');
+        const submitBtn = dialog.getByRole('button', { name: /Record|Save|Create|Submit/i });
+        await submitBtn.first().click({ force: true });
 
         // EXPECT: Error message about invalid content
         await page.waitForTimeout(2000);
