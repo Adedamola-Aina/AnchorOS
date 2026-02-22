@@ -127,7 +127,7 @@ test.describe('System - Error Handling', () => {
         await page.waitForTimeout(500);
 
         // Should show validation (HTML5 or custom) — check for either invalid state or error message
-        const emailInput = page.locator('input[name="anchor_email"], input[type="email"]').first();
+        const emailInput = page.locator('input[name="email"], input[type="email"]').first();
         const isInvalid = await emailInput.evaluate(el => {
             const input = el as HTMLInputElement;
             return !input.validity.valid || input.value === '';

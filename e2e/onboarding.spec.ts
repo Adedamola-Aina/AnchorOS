@@ -17,8 +17,8 @@ test.describe('Onboarding Flow', () => {
         await page.click('button:has-text("Sign up")'); // Toggle link
 
         // 4. Fill Form
-        await page.fill('input[name="anchor_email"]', email);
-        await page.fill('input[name="anchor_password"]', password);
+        await page.fill('input[name="email"]', email);
+        await page.fill('input[name="password"]', password);
 
         // 5. Submit
         await page.click('button:has-text("Create Account")');

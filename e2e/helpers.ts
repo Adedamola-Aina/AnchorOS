@@ -11,8 +11,8 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     // Fill credentials
-    await page.fill('input[name="anchor_email"]', user.email);
-    await page.fill('input[name="anchor_password"]', user.password);
+    await page.fill('input[name="email"]', user.email);
+    await page.fill('input[name="password"]', user.password);
 
     // Explicit click on the Login button
     await page.click('button:has-text("Sign In")');
@@ -32,8 +32,8 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
             // Might already be in signup mode or link is different
             await page.click('text=Create Account'); // Try to find the switch
         }
-        await page.fill('input[name="anchor_email"]', user.email);
-        await page.fill('input[name="anchor_password"]', user.password);
+        await page.fill('input[name="email"]', user.email);
+        await page.fill('input[name="password"]', user.password);
         await page.click('button:has-text("Create Account")');
         // Wait long for signup to settle
         await page.waitForTimeout(10000);
