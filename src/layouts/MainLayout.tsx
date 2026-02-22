@@ -103,8 +103,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
 
             <main className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0">
                 {/* Main Content - ADJUST padding for bottom nav per M3.2 */}
-                <div className={`p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto ${isMobile ? 'pb-32' : 'pb-8'  // pb-32 (128px) clears the 94px total nav height
-                    }`}>
+                <div className={`p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto ${isMobile ? 'pb-[calc(4rem+env(safe-area-inset-bottom))]' : 'pb-8'}`}>
                     {children}
                 </div>
 

@@ -44,6 +44,9 @@ tools/dashboard/logs/
 firestore-debug.log
 tools/dashboard/data/doc_sync_log.json
 
+# UI Capture output
+.ui-captures/
+
 # Capacitor
 ios/
 android/

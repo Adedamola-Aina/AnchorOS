@@ -1,6 +1,4 @@
-```typescript
 import React from 'react';
-import { useTasks } from '../../../context/TaskContext';
 import type { AnchorTask } from '../../../types';
 import { Card } from '@anchor-os/ui';
 import { Play, Check, Circle, Clock } from 'lucide-react';
@@ -14,7 +12,7 @@ interface TimelineViewProps {
     onDelete: (id: string) => void;
 }
 
-export const TimelineView: React.FC<TimelineViewProps> = ({ tasks, onToggle, onStartFocus, onStartEdit, onDelete }) => {
+export const TimelineView: React.FC<TimelineViewProps> = ({ tasks, onToggle, onStartFocus }) => {
     // Sort tasks by time of day for the visual timeline
     const sortedTasks = [...tasks].sort((a, b) => {
         const timeWeights = { morning: 1, afternoon: 2, evening: 3, anytime: 4 };
@@ -45,12 +43,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ tasks, onToggle, onS
                 return (
                     <div key={task.id} className="relative w-full">
                         {/* Timeline Dot Node */}
-                        <div className={`absolute - left - [30px] sm: -left - [38px] w - 4 h - 4 rounded - full border - 2 ${ task.completed ? 'bg-emerald-500 border-emerald-500' : 'bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700' } shadow - sm z - 10 flex items - center justify - center top - 4`}>
+                        <div className={`absolute - left - [30px] sm: -left - [38px] w - 4 h - 4 rounded - full border - 2 ${task.completed ? 'bg-emerald-500 border-emerald-500' : 'bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700'} shadow - sm z - 10 flex items - center justify - center top - 4`}>
                             {task.completed && <Check className="w-2.5 h-2.5 text-white" strokeWidth={4} />}
                         </div>
 
                         {/* Task Visual Time Block */}
-                        <Card className={`p - 0 overflow - hidden border transition - all ${ task.completed ? 'opacity-60 grayscale-[50%]' : 'hover:shadow-md' } ${ colors } `}>
+                        <Card className={`p - 0 overflow - hidden border transition - all ${task.completed ? 'opacity-60 grayscale-[50%]' : 'hover:shadow-md'} ${colors} `}>
                             <div className="p-4 sm:p-5 flex items-center gap-4">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
@@ -59,7 +57,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ tasks, onToggle, onS
                                             {task.timeOfDay || 'Anytime'}
                                         </span>
                                     </div>
-                                    <h4 className={`text - base sm: text - lg font - bold truncate ${ task.completed ? 'line-through opacity-70' : '' } `}>
+                                    <h4 className={`text - base sm: text - lg font - bold truncate ${task.completed ? 'line-through opacity-70' : ''} `}>
                                         {task.title}
                                     </h4>
 
@@ -85,7 +83,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ tasks, onToggle, onS
                                     )}
                                     <button
                                         onClick={() => onToggle(task.id, task.completed)}
-                                        className={`w - 10 h - 10 flex items - center justify - center rounded - xl transition - all ${ task.completed ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-white/50 hover:bg-emerald-500 hover:text-white dark:bg-black/20 dark:hover:bg-emerald-500' } `}
+                                        className={`w - 10 h - 10 flex items - center justify - center rounded - xl transition - all ${task.completed ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-white/50 hover:bg-emerald-500 hover:text-white dark:bg-black/20 dark:hover:bg-emerald-500'} `}
                                     >
                                         {task.completed ? <Check className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                                     </button>
