@@ -4,7 +4,7 @@ import { Compass, Home } from 'lucide-react';
 
 export default function NotFoundView() {
   return (
-    <div className="min-h-dvh flex items-center justify-center p-6">
+    <div className="h-full w-full flex items-center justify-center p-6">
       <div className="w-full max-w-lg text-center">
         <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
           <Compass className="w-8 h-8" />

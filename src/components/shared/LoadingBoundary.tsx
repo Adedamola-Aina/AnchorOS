@@ -115,7 +115,7 @@ export const InlineLoading: React.FC<{ message?: string }> = ({ message = 'Loadi
  * Centers loading indicator in viewport
  */
 export const PageLoading: React.FC<{ message?: string }> = ({ message }) => (
-  <div className="min-h-dvh flex items-center justify-center">
+  <div className="h-full w-full flex items-center justify-center">
     <AnchorLoadingSpinner size="lg" message={message} />
   </div>
 );

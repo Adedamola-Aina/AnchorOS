@@ -61,7 +61,7 @@ const AppContent = () => {
   // This prevents flash of onboarding screen for users who have already completed it
   if (loading || (user && !profileLoaded)) {
     return (
-      <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="h-full w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <AnchorLoadingSpinner size="lg" />
       </div>
     );
@@ -73,7 +73,7 @@ const AppContent = () => {
 
       <Route path="/accept-invite" element={
         <ErrorBoundary componentName="Accept Invite">
-          <div className={`${profile?.theme === 'dark' ? 'dark' : ''} bg-slate-50 dark:bg-slate-900 min-h-dvh`}>
+          <div className={`${profile?.theme === 'dark' ? 'dark' : ''} bg-slate-50 dark:bg-slate-900 h-full w-full`}>
             <AcceptInviteView />
           </div>
         </ErrorBoundary>
@@ -131,7 +131,18 @@ export default function App() {
         <NotificationProvider>
           <AuthProvider>
             <AppProvider>
-              <AppContent />
+              <div
+                className="flex flex-col flex-1 w-full"
+                style={{
+                  paddingTop: import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production'
+                    ? 'calc(24px + env(safe-area-inset-top, 0px))'
+                    : 'env(safe-area-inset-top, 0px)',
+                  paddingLeft: 'env(safe-area-inset-left, 0px)',
+                  paddingRight: 'env(safe-area-inset-right, 0px)'
+                }}
+              >
+                <AppContent />
+              </div>
             </AppProvider>
           </AuthProvider>
         </NotificationProvider>

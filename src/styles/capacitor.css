@@ -22,13 +22,6 @@ body.platform-native {
   overscroll-behavior: none;
 }
 
-/* Main app container with safe areas */
-.platform-native #root {
-  padding-top: var(--safe-area-inset-top);
-  padding-right: var(--safe-area-inset-right);
-  padding-left: var(--safe-area-inset-left);
-  /* Bottom padding handled by bottom nav itself */
-}
 
 /* iOS-specific adjustments */
 .platform-ios {
@@ -48,11 +41,6 @@ body.platform-native {
 .platform-android textarea {
   -webkit-user-select: text;
   user-select: text;
-}
-
-/* Status bar overlay protection */
-.platform-native .fixed.top-0 {
-  top: var(--safe-area-inset-top);
 }
 
 /* Bottom navigation with safe area */
