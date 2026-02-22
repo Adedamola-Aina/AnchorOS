@@ -61,7 +61,7 @@ const AppContent = () => {
   // This prevents flash of onboarding screen for users who have already completed it
   if (loading || (user && !profileLoaded)) {
     return (
-      <div className="h-full w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="flex-1 h-full w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <AnchorLoadingSpinner size="lg" />
       </div>
     );
@@ -73,7 +73,7 @@ const AppContent = () => {
 
       <Route path="/accept-invite" element={
         <ErrorBoundary componentName="Accept Invite">
-          <div className={`${profile?.theme === 'dark' ? 'dark' : ''} bg-slate-50 dark:bg-slate-900 h-full w-full`}>
+          <div className={`flex-1 ${profile?.theme === 'dark' ? 'dark' : ''} bg-slate-50 dark:bg-slate-900 h-full w-full`}>
             <AcceptInviteView />
           </div>
         </ErrorBoundary>
