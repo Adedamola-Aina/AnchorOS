@@ -8,11 +8,11 @@ import React, { Suspense } from 'react';
 const createLoadingComponent = () => {
   let resolve: () => void;
   const promise = new Promise<void>(r => { resolve = r; });
-  
-  const LazyComponent = React.lazy(() => 
+
+  const LazyComponent = React.lazy(() =>
     promise.then(() => ({ default: () => <div>Loaded Content</div> }))
   );
-  
+
   return { LazyComponent, resolve: resolve! };
 };
 
@@ -38,7 +38,7 @@ describe('LoadingBoundary', () => {
 
   it('accepts custom fallback', () => {
     const { LazyComponent } = createLoadingComponent();
-    
+
     const { container: _container } = render(
       <LoadingBoundary fallback={<div>Custom Loading</div>}>
         <Suspense fallback={null}>
@@ -46,7 +46,7 @@ describe('LoadingBoundary', () => {
         </Suspense>
       </LoadingBoundary>
     );
-    
+
     // Just verify component renders without error
     expect(document.body).toBeInTheDocument();
   });
@@ -83,6 +83,6 @@ describe('PageLoading', () => {
 
   it('has full height class', () => {
     const { container } = render(<PageLoading />);
-    expect(container.firstChild).toHaveClass('min-h-dvh');
+    expect(container.firstChild).toHaveClass('h-full', 'w-full', 'flex', 'items-center', 'justify-center');
   });
 });
