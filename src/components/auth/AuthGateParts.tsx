@@ -41,12 +41,19 @@ export const EmailVerificationGate: React.FC<EmailVerificationGateProps> = ({ em
     </div>
 );
 
+import { FinanceProvider } from '../../context/FinanceContext';
+import { TaskProvider } from '../../context/TaskContext';
+
 interface OnboardingGateProps { show: boolean; }
 export const OnboardingGate: React.FC<OnboardingGateProps> = ({ show }) => {
     if (!show) return null;
     return (
-        <React.Suspense fallback={<AuthLoadingScreen />}>
-            <LazyOnboardingView />
-        </React.Suspense>
+        <FinanceProvider>
+            <TaskProvider>
+                <React.Suspense fallback={<AuthLoadingScreen />}>
+                    <LazyOnboardingView />
+                </React.Suspense>
+            </TaskProvider>
+        </FinanceProvider>
     );
 };
