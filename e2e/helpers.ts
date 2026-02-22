@@ -48,23 +48,11 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
     }
 
     // Check for Onboarding Wizard (New User)
-    const onboardingStart = page.locator('button:has-text("Start Setup")');
-    if (await page.locator('text=Welcome aboard').isVisible()) {
-        console.log("[E2E] New user detected, completing onboarding wizard...");
-        if (await onboardingStart.isVisible()) {
-            await onboardingStart.click();
-
-            // Step 1: Account
-            await expect(page.locator('text=Add Primary Account')).toBeVisible();
-            await page.fill('input[placeholder="e.g. Chase Checking"]', 'Main Bank');
-            await page.fill('input[placeholder="0.00"]', '1000');
-            await page.click('button:has-text("Continue")');
-
-            // Step 2: Habit
-            await expect(page.locator('text=One Small Habit')).toBeVisible();
-            await page.fill('input[placeholder*="e.g. Drink water"]', 'Morning Run');
-            await page.click('button:has-text("Finish Setup")');
-
+    if (await page.locator('text=Welcome to Anchor OS.').isVisible({ timeout: 3000 }).catch(() => false)) {
+        console.log("[E2E] New user detected, skipping onboarding wizard...");
+        const skipBtn = page.locator('button:has-text("Skip for now")');
+        if (await skipBtn.isVisible()) {
+            await skipBtn.click();
             await page.waitForTimeout(3000);
         }
     }
@@ -114,7 +102,7 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
                 await page.waitForTimeout(5000);
 
                 const accountCreated = page.locator('text=Checking').or(page.locator('text=Net Worth'));
-                await expect(accountCreated).toBeVisible({ timeout: 20000 });
+                await expect(accountCreated.first()).toBeVisible({ timeout: 20000 });
                 console.log("[E2E] Account setup complete.");
             }
         }

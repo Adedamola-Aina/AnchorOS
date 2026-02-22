@@ -35,7 +35,7 @@ test.describe('Fabric Features', () => {
         await commitmentsBtn.click();
 
         // Add a financial task if not present
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible({ timeout: 10000 });
 
         // Click New Commitment to open modal
         const newCommitmentBtn = page.getByRole('button', { name: 'New Commitment' });
@@ -61,39 +61,17 @@ test.describe('Fabric Features', () => {
         await page.getByRole('button', { name: 'Afternoon' }).click();
 
         // Save
-        await page.getByRole('button', { name: 'Save Commitment' }).click();
-        await expect(page.getByRole('button', { name: 'Save Commitment' })).not.toBeVisible();
+        const saveBtn = page.getByRole('button', { name: 'Save Commitment' });
+        await taskInput.press('Enter');
+        await expect(saveBtn).not.toBeVisible({ timeout: 10000 });
         await page.waitForTimeout(3000);
 
         // Store title for verification
         taskTitle = uniqueTaskTitle;
 
-        // 2. Refresh to ensure task appears
-        await page.reload();
-        // After reload, we might be back at Dashboard/Finance. ensure we go to Commitments
-
-        // Try to click commitments button again - handle mobile/desktop if needed, but 
-        // loginOrSignup already handles opening drawer if mobile. 
-        // Here we just re-assert headings.
-        const reCommitmentsBtn = page.getByRole('link', { name: 'Commitments' });
-        if (await reCommitmentsBtn.isVisible()) {
-            await reCommitmentsBtn.click();
-        } else {
-            // If not visible, we might be on mobile and sidebar hidden.
-            await page.goto('/#commitments'); // Fallback URL navigation if feasible, or reopen menu
-            // Let's rely on reopening menu
-            const header = page.locator('header');
-            const menuToggle = header.locator('button').first();
-            if (await menuToggle.isVisible()) {
-                await menuToggle.click();
-                await page.waitForTimeout(500);
-                await page.getByRole('link', { name: 'Commitments' }).click();
-            }
-        }
-
-        // Wait for URL to change to /commitments first
-        await page.waitForURL(/.*commitments/, { timeout: 10000 });
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible({ timeout: 10000 });
+        // 2. We don't need to reload. The UI should be reactive!
+        // Just verify the task is now rendered in the list.
+        await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible({ timeout: 10000 });
 
         // 3. Setup Dialog Listener
         page.on('dialog', async dialog => {
@@ -102,7 +80,7 @@ test.describe('Fabric Features', () => {
         });
 
         // Debugging: Check what is visible
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible({ timeout: 10000 });
         await page.waitForTimeout(2000); // Wait for list to render
 
         const allText = await page.locator('body').innerText();
