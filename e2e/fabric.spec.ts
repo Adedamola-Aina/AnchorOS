@@ -86,7 +86,7 @@ test.describe('Fabric Features', () => {
         const allText = await page.locator('body').innerText();
         console.log('Page Content:', allText);
 
-        const cards = await page.locator('.glass-card').allTextContents();
+        const cards = await page.locator('h4').allTextContents();
         console.log('Visible Cards:', cards);
 
         // Check if "Morning Run" (from onboarding) is there
@@ -100,14 +100,14 @@ test.describe('Fabric Features', () => {
         // Verify title with relaxed matching as requested
         await expect(page.getByText(taskTitle, { exact: false })).toBeVisible({ timeout: 10000 });
 
-        // Define the card by filtering for the text
-        const taskCard = page.locator('.glass-card').filter({ hasText: taskTitle });
+        // Define the card by filtering for the text (Title is now in an h4 tag within the timeline block)
+        const taskCard = page.locator('h4').filter({ hasText: taskTitle }).locator('..').locator('..');
 
         // Wait for the specific card to be visible
         await expect(taskCard).toBeVisible({ timeout: 10000 });
 
-        // Find the checkbox button inside that specific card and click
-        await taskCard.locator('button').first().click();
+        // Find the complete button (it's the circular toggle)
+        await taskCard.locator('button').last().click();
 
         // 5. Verify Navigation to Finance (triggered by dialog accept)
         await expect(page.locator('text=Net Worth')).toBeVisible({ timeout: 10000 });

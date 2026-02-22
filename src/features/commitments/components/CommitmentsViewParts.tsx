@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { Plus, CheckCircle2, LayoutList, CalendarDays } from 'lucide-react';
+import { Plus, CheckCircle2, LayoutList, CalendarDays, Clock } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
 
 interface EmptyStateProps { filter: string; hasFamilyActive: boolean; onCreateFirst: () => void; onLearnMore: () => void; }
@@ -29,7 +29,7 @@ export const CommitmentsEmptyState: React.FC<EmptyStateProps> = ({ filter, hasFa
     </div>
 );
 
-interface FilterBarProps { filter: string; viewMode: string; onFilterChange: (f: 'all' | 'daily' | 'weekly' | 'monthly' | 'todo') => void; onViewChange: (v: 'list' | 'calendar') => void; }
+interface FilterBarProps { filter: string; viewMode: string; onFilterChange: (f: 'all' | 'daily' | 'weekly' | 'monthly' | 'todo') => void; onViewChange: (v: 'timeline' | 'list' | 'calendar') => void; }
 export const CommitmentsFilterBar: React.FC<FilterBarProps> = ({ filter, viewMode, onFilterChange, onViewChange }) => (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mb-2">
@@ -38,6 +38,7 @@ export const CommitmentsFilterBar: React.FC<FilterBarProps> = ({ filter, viewMod
             ))}
         </div>
         <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start sm:self-auto">
+            <button onClick={() => onViewChange('timeline')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'timeline' ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-400'}`} title="Timeline View" aria-label="Timeline View"><Clock className="w-4 h-4" /></button>
             <button onClick={() => onViewChange('list')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-400'}`} title="List View" aria-label="List View"><LayoutList className="w-4 h-4" /></button>
             <button onClick={() => onViewChange('calendar')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-400'}`} title="Week View" aria-label="Week View"><CalendarDays className="w-4 h-4" /></button>
         </div>

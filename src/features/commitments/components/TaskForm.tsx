@@ -65,7 +65,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-[10px] uppercase font-bold text-slate-400">Domain</label>
                                 <div className="relative">
-                                    <select value={newTaskDomain} onChange={(e) => setNewTaskDomain(e.target.value)} className="w-full p-3 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all min-h-[44px] text-base">
+                                    <select value={newTaskDomain} onChange={(e) => setNewTaskDomain(e.target.value)} className="w-full p-3 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all min-h-[44px] text-base appearance-none">
                                         {domains.map(d => <option key={d} value={d}>{d}</option>)}
                                     </select>
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />

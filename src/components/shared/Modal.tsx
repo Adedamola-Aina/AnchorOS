@@ -105,7 +105,7 @@ export const Modal: React.FC<ModalProps> = ({
                     }`}
             >
                 {/* Header - with safe area padding on mobile */}
-                <div className={`px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 shrink-0 ${fullScreenMobile ? 'pt-safe' : ''
+                <div className={`px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 shrink-0 ${fullScreenMobile ? 'pt-[calc(1rem+env(safe-area-inset-top,0px))]' : ''
                     }`}>
                     <h3 id={modalId} className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white">{title}</h3>
                     <button
@@ -118,7 +118,7 @@ export const Modal: React.FC<ModalProps> = ({
                 </div>
 
                 {/* Scrollable Body - with safe area padding on mobile */}
-                <div className={`p-6 overflow-y-auto flex-1 overscroll-contain ${fullScreenMobile ? 'pb-safe' : ''
+                <div className={`p-6 overflow-y-auto flex-1 overscroll-contain ${fullScreenMobile ? 'pb-[calc(1rem+env(safe-area-inset-bottom,0px))]' : ''
                     }`} style={{ WebkitOverflowScrolling: 'touch' }}>
                     {children}
                 </div>
