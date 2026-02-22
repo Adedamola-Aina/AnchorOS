@@ -20,6 +20,16 @@ test.describe('Advanced Security (Staging)', () => {
         if (await accountCard.isVisible({ timeout: 3000 })) {
             await accountCard.click();
             await page.waitForTimeout(1000);
+        } else {
+            console.log("[E2E] No account found. Creating one...");
+            await page.getByRole('button', { name: 'Add Account' }).click();
+            await page.getByPlaceholder('e.g., Main Checking').fill('Test Account for XSS');
+            await page.getByRole('button', { name: 'Save Account' }).click();
+            await page.waitForTimeout(1000);
+
+            // Re-select the newly created account
+            await page.locator('[data-testid="account-card"]').first().or(page.locator('.cursor-pointer').filter({ hasText: /\$|₦|€|£/ }).first()).click();
+            await page.waitForTimeout(1000);
         }
 
         // Try to add Transaction with XSS payload via Record Transaction button

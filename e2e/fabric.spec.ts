@@ -96,6 +96,9 @@ test.describe('Fabric Features', () => {
             console.log('Morning Run is NOT visible');
         }
 
+        // Switch to List View since Timeline only shows tasks with valid times, and this defaults to a TODO without a time
+        await page.getByTestId('list-icon').click();
+
         // Locate the specific task card and click its toggle button (circle icon)
         // Verify title with relaxed matching as requested
         await expect(page.getByText(taskTitle, { exact: false })).toBeVisible({ timeout: 10000 });

@@ -46,14 +46,14 @@ test.describe('Finance Regressions and Fixes', () => {
 
         // 4. Case A: Positive Savings (Income > Expense)
         // Add Income: $2000
-        await page.getByRole('button', { name: 'Pay Bill' }).click();
+        await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
         await page.getByLabel('Amount').fill('2000');
         await page.getByRole('button', { name: 'Income' }).click();
         await page.getByLabel('Description').fill('Regression Income');
         await page.getByRole('button', { name: 'Record Transaction' }).click();
 
         // Add Expense: $500
-        await page.getByRole('button', { name: 'Pay Bill' }).click();
+        await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
         await page.getByLabel('Amount').fill('500');
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Description').fill('Regression Expense 1');
@@ -65,7 +65,7 @@ test.describe('Finance Regressions and Fixes', () => {
 
         // 5. Case B: Overspending (Expense > Income)
         // Add Expense: $3000 (Total Expense 3500 > Income 2000)
-        await page.getByRole('button', { name: 'Pay Bill' }).click();
+        await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
         await page.getByLabel('Amount').fill('3000');
         await page.getByRole('button', { name: 'Expense' }).click();
         await page.getByLabel('Description').fill('Regression Expense 2');
@@ -103,7 +103,7 @@ test.describe('Finance Regressions and Fixes', () => {
 
         // 3. Add Transaction
         const txTitle = `Tx to Delete ${Date.now()}`;
-        await page.getByRole('button', { name: 'Pay Bill' }).click();
+        await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
         await page.getByLabel('Amount').fill('123');
         await page.getByLabel('Description').fill(txTitle);
         await page.getByRole('button', { name: 'Expense' }).click();
