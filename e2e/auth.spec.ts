@@ -322,7 +322,7 @@ test.describe('Auth UI Layout', () => {
     });
 
     test('Theme toggle works on auth page', async ({ page }) => {
-        const themeToggle = page.locator('button:has(svg.lucide-sun), button:has(svg.lucide-moon)');
+        const themeToggle = page.locator('button:has(svg.lucide-sun), button:has(svg.lucide-moon)').first();
 
         if (await themeToggle.isVisible()) {
             await themeToggle.click();
