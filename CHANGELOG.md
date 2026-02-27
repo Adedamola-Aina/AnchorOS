@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.14-rc.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.13...v1.8.14-rc.1) (2026-02-27)
+
+
+### Bug Fixes
+
+* **nav:** restore 56px mobile touch target ([e3d1b72](https://github.com/Adedamola-Aina/AnchorOS/commit/e3d1b72860b0f8954e88fc334ebb4f208b6499af))
+* **ux:** fix mfa qr fallback and commitments default view ([80e9cd2](https://github.com/Adedamola-Aina/AnchorOS/commit/80e9cd2dfbec4e15f2d58070006b8f1e1a53f718))
+
 ## [1.8.14-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.13...v1.8.14-rc.0) (2026-02-27)
 
 
