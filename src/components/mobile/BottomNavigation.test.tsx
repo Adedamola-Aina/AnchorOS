@@ -72,6 +72,7 @@ describe('BottomNavigation', () => {
             const links = screen.getAllByRole('link');
             links.forEach(link => {
                 expect(link.className).toContain('min-h-[56px]');
+                expect(link.className).toContain('h-full');
             });
         });
     });

@@ -150,7 +150,7 @@ export const BottomNavigation = ({
                         to={to}
                         onClick={(e) => handleTap(to, e)}
                         className={({ isActive }) =>
-                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 h-full will-change-transform ${getIconColorClass(to, isActive)}`
+                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 h-full min-h-[56px] will-change-transform ${getIconColorClass(to, isActive)}`
                         }
                     >
                         {({ isActive }) => {
