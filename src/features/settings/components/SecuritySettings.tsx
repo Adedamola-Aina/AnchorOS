@@ -83,7 +83,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
                         </div>
                         <div className="p-8">
                             {step === 1 && <MfaStep1GetApp onNext={() => setStep(2)} />}
-                            {step === 2 && <MfaStep2ScanQR qrUrl={mfaQrUrl} manualKey={mfaManualKey} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
+                            {step === 2 && <MfaStep2ScanQR qrUrl={mfaQrUrl} manualKey={mfaManualKey} isLoading={isEnrolling} errorMessage={mfaError} onBack={() => setStep(1)} onNext={() => setStep(3)} onRetry={onGenerateMfaSecret} />}
                             {step === 3 && <MfaStep3Verify mfaCode={mfaCode} mfaError={mfaError} isEnrolling={isEnrolling} onSetMfaCode={onSetMfaCode} onEnroll={() => onEnrollMfa(mfaCode)} onBack={() => setStep(2)} />}
                         </div>
                     </div>

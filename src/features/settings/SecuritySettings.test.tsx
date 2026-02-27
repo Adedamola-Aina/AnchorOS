@@ -218,5 +218,23 @@ describe('SettingsView - Security & MFA', () => {
         });
     });
 
+    it('shows manual-key fallback and allows retry when QR is unavailable', async () => {
+        const { mocks } = renderWithContext(<SettingsView />, {
+            auth: {
+                generateMfaSecret: vi.fn().mockResolvedValue({ qrCodeUrl: '', manualKey: 'ABCD-EFGH-IJKL' }),
+            }
+        });
+
+        fireEvent.click(screen.getByText('Setup 2FA'));
+        await waitFor(() => expect(mocks.auth.generateMfaSecret).toHaveBeenCalledTimes(1));
+
+        fireEvent.click(await screen.findByText('I have the app'));
+        expect(await screen.findByText('QR code unavailable. Use manual key below.')).toBeInTheDocument();
+        expect(screen.getByText('ABCD-EFGH-IJKL')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Retry QR' }));
+        await waitFor(() => expect(mocks.auth.generateMfaSecret).toHaveBeenCalledTimes(2));
+    });
+
     // Email verification banner test removed — onboarding flow now handles this
 });

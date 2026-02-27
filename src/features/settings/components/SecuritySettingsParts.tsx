@@ -22,23 +22,42 @@ export const MfaStep1GetApp: React.FC<Step1Props> = ({ onNext }) => (
     </div>
 );
 
-interface Step2Props { qrUrl: string; manualKey: string; onBack: () => void; onNext: () => void; }
-export const MfaStep2ScanQR: React.FC<Step2Props> = ({ qrUrl, manualKey, onBack, onNext }) => (
-    <div className="space-y-6 text-center animate-in fade-in slide-in-from-right-4 duration-300">
-        <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto text-purple-600 dark:text-purple-400"><QrCode className="w-8 h-8" /></div>
-        <div>
-            <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-2">Scan the QR Code</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Open your authenticator app and choose "Add Account" or "Scan QR Code".</p>
-        </div>
-        <div className="flex justify-center py-2">
-            <div className="p-4 bg-white rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800">
-                {qrUrl ? <QRCodeSVG value={qrUrl} size={160} level="H" /> : <div className="w-40 h-40 flex items-center justify-center bg-slate-50 text-slate-300"><QrCode className="w-8 h-8 animate-pulse" /></div>}
+interface Step2Props { qrUrl: string; manualKey: string; isLoading?: boolean; errorMessage?: string; onBack: () => void; onNext: () => void; onRetry?: () => void; }
+export const MfaStep2ScanQR: React.FC<Step2Props> = ({ qrUrl, manualKey, isLoading = false, errorMessage = '', onBack, onNext, onRetry }) => {
+    const hasRenderableQr = qrUrl.startsWith('otpauth://');
+
+    return (
+        <div className="space-y-6 text-center animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto text-purple-600 dark:text-purple-400"><QrCode className="w-8 h-8" /></div>
+            <div>
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-2">Scan the QR Code</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Open your authenticator app and choose "Add Account" or "Scan QR Code".</p>
             </div>
+            <div className="flex justify-center py-2">
+                <div className="p-4 bg-white rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800 min-h-48 min-w-48 flex items-center justify-center">
+                    {hasRenderableQr ? (
+                        <QRCodeSVG value={qrUrl} size={160} level="H" />
+                    ) : (
+                        <div className="w-40 h-40 flex flex-col items-center justify-center gap-2 bg-slate-50 text-slate-400 rounded-lg">
+                            <QrCode className={`w-8 h-8 ${isLoading ? 'animate-pulse' : ''}`} />
+                            <p className="text-[11px] font-semibold px-2">
+                                {isLoading ? 'Preparing QR code…' : 'QR code unavailable. Use manual key below.'}
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {!hasRenderableQr && !isLoading && onRetry && (
+                <div className="-mt-3">
+                    <Button type="button" variant="secondary" onClick={onRetry}>Retry QR</Button>
+                </div>
+            )}
+            {errorMessage && !isLoading && <p className="text-xs font-semibold text-rose-500 -mt-2">{errorMessage}</p>}
+            <div className="text-xs"><p className="text-slate-400 mb-2 font-bold uppercase tracking-widest">Can't scan?</p><div className="bg-slate-100 dark:bg-slate-800/50 p-3 rounded-lg font-mono text-slate-600 dark:text-slate-400 inline-block max-w-xs break-all select-all">{manualKey || 'Manual key unavailable. Retry QR generation.'}</div></div>
+            <div className="flex justify-center gap-3 pt-4"><Button variant="secondary" onClick={onBack} className="gap-2">Back</Button><Button onClick={onNext} className="gap-2 group">Next <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Button></div>
         </div>
-        <div className="text-xs"><p className="text-slate-400 mb-2 font-bold uppercase tracking-widest">Can't scan?</p><div className="bg-slate-100 dark:bg-slate-800/50 p-3 rounded-lg font-mono text-slate-600 dark:text-slate-400 inline-block max-w-xs break-all select-all">{manualKey}</div></div>
-        <div className="flex justify-center gap-3 pt-4"><Button variant="secondary" onClick={onBack} className="gap-2">Back</Button><Button onClick={onNext} className="gap-2 group">Next <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Button></div>
-    </div>
-);
+    );
+};
 
 interface Step3Props { mfaCode: string; mfaError: string; isEnrolling: boolean; onSetMfaCode: (c: string) => void; onEnroll: () => void; onBack: () => void; }
 export const MfaStep3Verify: React.FC<Step3Props> = ({ mfaCode, mfaError, isEnrolling, onSetMfaCode, onEnroll, onBack }) => {

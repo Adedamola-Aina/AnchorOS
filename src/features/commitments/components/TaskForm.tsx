@@ -50,22 +50,22 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
     const handleSelectType = (type: TaskType) => { setNewTaskType(type); setCreationStep('details'); };
 
     return (
-        <Card className="p-6 mb-8 shadow-2xl animate-in zoom-in-95 duration-200">
+        <Card className="p-4 sm:p-5 mb-6 max-w-2xl mx-auto shadow-xl animate-in zoom-in-95 duration-200">
             {creationStep === 'frequency' ? (
                 <FrequencyStep onSelectType={handleSelectType} onClose={onClose} />
             ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <DetailsHeader taskType={newTaskType} onBack={() => setCreationStep('frequency')} onClose={onClose} />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-3">
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-[10px] uppercase font-bold text-slate-400">Name</label>
-                                <input autoFocus type="text" placeholder="e.g. Morning Prayer, Gym, Rent Payment" className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} />
+                                <input autoFocus type="text" placeholder="e.g. Morning Prayer, Gym, Rent Payment" className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} />
                             </div>
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-[10px] uppercase font-bold text-slate-400">Domain</label>
                                 <div className="relative">
-                                    <select value={newTaskDomain} onChange={(e) => setNewTaskDomain(e.target.value)} className="w-full p-3 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all min-h-[44px] text-base appearance-none">
+                                    <select value={newTaskDomain} onChange={(e) => setNewTaskDomain(e.target.value)} className="w-full px-3 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all min-h-[44px] text-base appearance-none">
                                         {domains.map(d => <option key={d} value={d}>{d}</option>)}
                                     </select>
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -80,19 +80,21 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                                 </div>
                             )}
                         </div>
-                        <div className="space-y-4 min-w-0">
+                        <div className="space-y-3 min-w-0">
                             {newTaskType === 'daily' && <DailyTimeField value={newTaskTime} onChange={setNewTaskTime} />}
                             {newTaskType === 'weekly' && <WeeklyDaysField value={newTaskDays} onChange={setNewTaskDays} />}
                             {newTaskType === 'monthly' && <MonthlyDatesField value={newTaskDates} onChange={setNewTaskDates} />}
                         </div>
                     </div>
                     {/* Reminder field: inline compact layout (BUG-092) */}
-                    <div data-testid="reminder-field" className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Reminder</label>
-                        <input type="time" data-testid="reminder-input" className="flex-1 min-w-0 max-w-[140px] px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 transition-all text-base" value={newTaskReminder} onChange={(e) => setNewTaskReminder(e.target.value)} />
-                        <span className="text-[10px] text-slate-400 hidden sm:inline">Optional</span>
+                    <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <label htmlFor="task-reminder-time" className="text-sm font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap">Reminder</label>
+                        <div className="flex items-center gap-2">
+                            <input id="task-reminder-time" type="time" data-testid="reminder-input" className="h-11 min-h-[44px] w-[132px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2 text-[16px] appearance-auto focus:outline-none focus:ring-2 focus:ring-task-500/20" value={newTaskReminder} onChange={(e) => setNewTaskReminder(e.target.value)} />
+                            <span className="text-[10px] text-slate-400 hidden sm:inline">Optional</span>
+                        </div>
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                         <Button type="button" variant="ghost" onClick={() => setCreationStep('frequency')}>Back</Button>
                         <Button type="submit" isLoading={isSaving} className="px-8">Save Commitment</Button>
                     </div>

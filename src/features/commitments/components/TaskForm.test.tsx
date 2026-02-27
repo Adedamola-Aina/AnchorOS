@@ -81,5 +81,13 @@ describe('TaskForm — reminder field layout (BUG-092)', () => {
         const reminderInput = document.querySelector('input[type="time"]') as HTMLInputElement;
         expect(reminderInput).not.toBeNull();
         expect(reminderInput.getAttribute('data-testid')).toBe('reminder-input');
+        expect(reminderInput.className).toContain('min-h-[44px]');
+        expect(reminderInput.className).toContain('appearance-auto');
+    });
+
+    it('uses compact modal container sizing', () => {
+        const { container } = render(<TaskForm {...defaultProps} />);
+        const card = container.querySelector('.max-w-2xl');
+        expect(card).toBeInTheDocument();
     });
 });

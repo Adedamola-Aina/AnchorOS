@@ -168,6 +168,12 @@ describe('CommitmentsView', () => {
     vi.clearAllMocks();
   });
 
+  it('defaults to list view on first render', async () => {
+    renderWithContext(<CommitmentsView />);
+
+    expect(await screen.findByText(/Completed \(1\)/i)).toBeInTheDocument();
+  });
+
   describe('Task Rendering', () => {
     it('renders all tasks correctly in list view', async () => {
       renderWithContext(<CommitmentsView />);
@@ -845,8 +851,8 @@ describe('CommitmentsView', () => {
       renderWithContext(<CommitmentsView />);
       const user = userEvent.setup();
 
-      // Default is Timeline View, but lucide mocks are tricky, check for correct un-selected list-icon bg instead
-      expect(screen.getByTestId('list-icon').closest('button')).not.toHaveClass('bg-white');
+      // Default is List View
+      expect(screen.getByTestId('list-icon').closest('button')).toHaveClass('bg-white');
 
       // Click List Toggle
       const listBtn = screen.getByTestId('list-icon').closest('button');
