@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.15](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.14...v1.8.15) (2026-02-28)
+
+
+### Bug Fixes
+
+* **security:** remove inline scripts and improve mfa setup errors ([c2f9dc2](https://github.com/Adedamola-Aina/AnchorOS/commit/c2f9dc23bfc7e15f6c1096c1aae46f95bea1548c))
+
 ## [1.8.15-rc.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.14...v1.8.15-rc.1) (2026-02-28)
 
 
