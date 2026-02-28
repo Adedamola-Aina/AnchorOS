@@ -12,6 +12,35 @@ interface PendingMfaSecret extends TotpSecret {
     codeInterval?: number;
 }
 
+interface FirebaseLikeError {
+    code?: string;
+    message?: string;
+}
+
+const mapGenerateMfaSecretError = (error: unknown): Error => {
+    const firebaseError = error as FirebaseLikeError;
+    const errorCode = firebaseError?.code || '';
+    const errorMessage = firebaseError?.message || '';
+
+    if (errorCode === 'auth/requires-recent-login') {
+        return new Error('Please re-authenticate, then try setting up 2FA again.');
+    }
+    if (errorCode === 'auth/invalid-user-token' || errorCode === 'auth/user-token-expired') {
+        return new Error('Your session expired. Please sign in again and retry 2FA setup.');
+    }
+    if (errorCode === 'auth/network-request-failed') {
+        return new Error('Network error while preparing 2FA. Check your connection and retry.');
+    }
+    if (errorCode === 'auth/operation-not-allowed') {
+        return new Error('2FA enrollment is currently unavailable for this account.');
+    }
+    if (errorMessage.includes('INVALID_ID_TOKEN')) {
+        return new Error('Your session token is invalid. Please sign in again and retry.');
+    }
+
+    return new Error(errorMessage || 'Unable to initialize 2FA setup right now. Please try again.');
+};
+
 export function useMfaOperations(user: User | null, updateProfile: (updates: { mfaEnabled: boolean }) => Promise<void>) {
     const pendingMfaSecretRef = useRef<PendingMfaSecret | null>(null);
 
@@ -23,15 +52,20 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
 
     const generateMfaSecret = useCallback(async () => {
         if (!user) throw new Error('Not logged in');
-        const { TotpMultiFactorGenerator } = await import('firebase/auth');
-        const session = await multiFactor(user).getSession();
-        const result = await TotpMultiFactorGenerator.generateSecret(session);
-        pendingMfaSecretRef.current = result;
+        try {
+            const { TotpMultiFactorGenerator } = await import('firebase/auth');
+            const session = await multiFactor(user).getSession();
+            const result = await TotpMultiFactorGenerator.generateSecret(session);
+            pendingMfaSecretRef.current = result;
 
-        return {
-            qrCodeUrl: result.generateQrCodeUrl('Anchor OS', user.email || 'user'),
-            manualKey: result.secretKey
-        };
+            return {
+                qrCodeUrl: result.generateQrCodeUrl('Anchor OS', user.email || 'user'),
+                manualKey: result.secretKey
+            };
+        } catch (error) {
+            pendingMfaSecretRef.current = null;
+            throw mapGenerateMfaSecretError(error);
+        }
     }, [user]);
 
     const enrollMfa = useCallback(async (code: string) => {

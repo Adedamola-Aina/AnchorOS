@@ -74,6 +74,19 @@ describe('useMfaOperations', () => {
         act(async () => { await result.current.generateMfaSecret(); })
       ).rejects.toThrow('Not logged in');
     });
+
+    it('maps requires-recent-login to actionable setup error', async () => {
+      const { TotpMultiFactorGenerator } = await import('firebase/auth');
+      vi.mocked(TotpMultiFactorGenerator.generateSecret).mockRejectedValueOnce({
+        code: 'auth/requires-recent-login',
+        message: 'Requires recent login',
+      } as any);
+
+      const { result } = renderHook(() => useMfaOperations(mockUser, mockUpdateProfile));
+      await expect(
+        act(async () => { await result.current.generateMfaSecret(); })
+      ).rejects.toThrow('Please re-authenticate, then try setting up 2FA again.');
+    });
   });
 
   describe('enrollMfa', () => {

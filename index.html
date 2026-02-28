@@ -15,16 +15,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Anchor" />
   <link rel="apple-touch-icon" href="/favicon.svg" />
-  <script>
-// @ts-nocheck
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.7.3').catch(err => console.log('SW reg failed:', err));
-      });
-    }
-  
-</script>
+  <script src="/sw-register.js" defer></script>
 </head>
 
 <body>
@@ -43,21 +34,7 @@
     }
   </style>
   <script type="module" src="./src/main.tsx"></script>
-  <script>
-// @ts-nocheck
-
-    // Critical Failsafe: Remove boot splash if app fails to remove it (race condition/error)
-    setTimeout(() => {
-      const splash = document.getElementById('boot-splash');
-      if (splash) {
-        console.warn('Anchor OS: Forced boot-splash removal (failsafe trigger)');
-        splash.style.transition = 'opacity 0.5s ease-out';
-        splash.style.opacity = '0';
-        setTimeout(() => splash.remove(), 500);
-      }
-    }, 4000); 
-  
-</script>
+  <script src="/boot-splash-failsafe.js" defer></script>
 </body>
 
 </html>
