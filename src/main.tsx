@@ -7,6 +7,9 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { UnsavedChangesProvider } from './hooks/useUnsavedChanges'
 import { getPlatformClasses } from './utils/platform'
+import { initStagingConsoleCapture } from './utils/stagingConsoleCapture'
+
+initStagingConsoleCapture();
 
 const initSentryDeferred = async () => {
     if (!import.meta.env.VITE_SENTRY_DSN) return;
