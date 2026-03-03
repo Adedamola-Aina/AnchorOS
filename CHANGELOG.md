@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.16-rc.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.15...v1.8.16-rc.1) (2026-03-03)
+
+
+### Bug Fixes
+
+* **debug:** add staging browser console capture ([a4fd9b4](https://github.com/Adedamola-Aina/AnchorOS/commit/a4fd9b4b0486d483971c24fa1e1c435e7a0ade85))
+
 ## [1.8.16-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.15...v1.8.16-rc.0) (2026-03-03)
 
 
