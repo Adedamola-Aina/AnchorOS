@@ -72,6 +72,54 @@ const ID_PATTERNS = {
     web: /WEB-(\d+)/gi
 };
 
+const INITIATIVE_TYPES = [
+    'feature',
+    'enhancement',
+    'ux',
+    'task',
+    'gap',
+    'architecture',
+    'fin',
+    'sec',
+    'prd',
+    'sre',
+    'plt',
+    'des',
+    'eng',
+    'auth',
+    'pwa',
+    'db',
+    'qa',
+    'rnd',
+    'data',
+    'brand',
+    'web'
+];
+
+function isInitiativeType(type) {
+    return INITIATIVE_TYPES.includes(type);
+}
+
+function partitionFeatureBacklog(items) {
+    const initiativeItems = items.filter(i => isInitiativeType(i.type));
+
+    const completed = initiativeItems.filter(i => i.status === 'deployed');
+    const inProgress = initiativeItems.filter(i => i.status === 'staging');
+    const pending = initiativeItems.filter(i => i.status === 'dev');
+
+    return {
+        completed,
+        inProgress,
+        pending,
+        summary: {
+            total: initiativeItems.length,
+            completed: completed.length,
+            inProgress: inProgress.length,
+            pending: pending.length
+        }
+    };
+}
+
 // Commit type detection
 function detectType(message) {
     const msg = message.toLowerCase();
@@ -258,7 +306,7 @@ async function getBugs() {
  */
 async function getFeatures() {
     const items = await getAllTrackedItems();
-    return items.filter(i => ['feature', 'enhancement', 'ux', 'task', 'gap', 'architecture'].includes(i.type));
+    return items.filter(i => isInitiativeType(i.type));
 }
 
 /**
@@ -316,7 +364,7 @@ async function getCommandCenterData() {
 
     // Recent activity
     const recentBugs = items.filter(i => i.type === 'bug').slice(0, 5);
-    const recentFeatures = items.filter(i => ['feature', 'enhancement', 'ux', 'gap'].includes(i.type)).slice(0, 5);
+    const recentFeatures = items.filter(i => isInitiativeType(i.type)).slice(0, 5);
 
     return {
         source: 'git-automated',
@@ -343,19 +391,14 @@ async function getCommandCenterData() {
  */
 async function getFeatureBacklog() {
     const items = await getAllTrackedItems();
-    const features = items.filter(i => ['feature', 'enhancement', 'ux', 'task', 'gap', 'architecture'].includes(i.type));
+    const partitioned = partitionFeatureBacklog(items);
 
     return {
         source: 'git-automated',
-        completed: features.filter(i => i.status === 'deployed'),
-        inProgress: features.filter(i => i.status === 'staging'),
-        pending: features.filter(i => i.status === 'dev'),
-        summary: {
-            total: features.length,
-            completed: features.filter(i => i.status === 'deployed').length,
-            inProgress: features.filter(i => i.status === 'staging').length,
-            pending: features.filter(i => i.status === 'dev').length
-        }
+        completed: partitioned.completed,
+        inProgress: partitioned.inProgress,
+        pending: partitioned.pending,
+        summary: partitioned.summary
     };
 }
 
@@ -494,6 +537,8 @@ module.exports = {
     extractIds,
     detectType,
     isDashboardCommit,
+    isInitiativeType,
+    partitionFeatureBacklog,
     clearCache: clearItemsCache,
     getAllUsedIds,
     getNextId
