@@ -1,23 +1,40 @@
 // @ts-nocheck
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { getVelocityStats, autoDetectCompletions } = require('./velocityTracker');
 const { analyzeBugsFromKnownIssues } = require('./bugPrioritizer');
 const { archiveOldItems } = require('./archiveManager');
 
 const KNOWN_ISSUES_PATH = path.join(__dirname, '../../../docs/KNOWN_ISSUES.md');
-const SYNC_LOG_PATH = path.join(__dirname, '../data/doc_sync_log.json');
+const LEGACY_SYNC_LOG_PATH = path.join(__dirname, '../data/doc_sync_log.json');
+
+function resolveSyncLogPath(env = process.env) {
+    const configuredPath = env.ANCHOR_DASHBOARD_SYNC_LOG_PATH;
+    if (configuredPath && configuredPath.trim()) {
+        return path.resolve(configuredPath.trim());
+    }
+
+    return path.join(os.tmpdir(), 'anchor-dashboard', 'doc_sync_log.json');
+}
+
+const SYNC_LOG_PATH = resolveSyncLogPath();
 
 /**
  * Initialize sync log
  */
 function initializeSyncLog() {
-    const dataDir = path.join(__dirname, '../data');
+    const dataDir = path.dirname(SYNC_LOG_PATH);
     if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
     }
 
     if (!fs.existsSync(SYNC_LOG_PATH)) {
+        if (fs.existsSync(LEGACY_SYNC_LOG_PATH) && LEGACY_SYNC_LOG_PATH !== SYNC_LOG_PATH) {
+            fs.copyFileSync(LEGACY_SYNC_LOG_PATH, SYNC_LOG_PATH);
+            return;
+        }
+
         const initialLog = {
             lastSync: null,
             syncHistory: [],
@@ -278,5 +295,7 @@ module.exports = {
     syncPriorityData,
     syncArchive,
     getSyncStatus,
-    shouldPersistSyncEvent
+    shouldPersistSyncEvent,
+    resolveSyncLogPath,
+    SYNC_LOG_PATH
 };
