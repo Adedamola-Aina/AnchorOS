@@ -42,3 +42,6 @@ export * from './recurring';
 
 // Push notification reminders
 export * from './reminders';
+
+// Account deletion
+export { deleteMyAccount } from './deleteAccount';

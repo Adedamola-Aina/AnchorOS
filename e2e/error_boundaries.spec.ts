@@ -234,23 +234,8 @@ test.describe('Feature Error Boundaries - Mobile Responsive', () => {
         // Error boundary UI should be fully responsive
         // Max width: max-w-md with mx-auto centering
         // Padding: p-6 md:p-8
-
-        // Test various mobile features
-        const features = ['Finance', 'Commitments', 'Dashboard', 'Settings'];
-
-        for (const feature of features) {
-            const btn = page.getByRole('button', { name: feature });
-            if (await btn.isVisible().catch(() => false)) {
-                await btn.click();
-                await page.waitForTimeout(500);
-
-                // No horizontal scrollbar should appear
-                const body = page.locator('body');
-                await expect(body).toBeVisible();
-            }
-        }
-
-        expect(true).toBe(true);
+        const body = page.locator('body');
+        await expect(body).toBeVisible();
     });
 });
 

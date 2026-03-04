@@ -29,6 +29,7 @@ import { InviteEmailStep } from './InviteEmailStep';
 import { InvitePasswordStep } from './InvitePasswordStep';
 import { InviteMfaStep } from './InviteMfaStep';
 import { InviteSuccessStep } from './InviteSuccessStep';
+import { mapInvitationError, mapMfaError, validateInviteeEmail } from './inviteFamilyHelpers';
 
 interface InviteFamilyMemberProps {
     userEmail: string;
@@ -63,12 +64,9 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
     const handleEmailSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (!inviteeEmail.includes('@')) {
-            setError('Please enter a valid email address');
-            return;
-        }
-        if (inviteeEmail.toLowerCase() === userEmail.toLowerCase()) {
-            setError('You cannot invite yourself');
+        const validationError = validateInviteeEmail(inviteeEmail, userEmail);
+        if (validationError) {
+            setError(validationError);
             return;
         }
         setStep('password');
@@ -112,15 +110,7 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
             await completeInvitation();
         } catch (err) {
             const error = err as Error & { code?: string };
-            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                setError('Incorrect password');
-            } else if (error.message?.includes('already have')) {
-                setError(error.message);
-            } else if (error.message?.includes('Maximum')) {
-                setError('You have reached the daily limit of 10 invitations. Please try again tomorrow.');
-            } else {
-                setError('Failed to create invitation. Please try again.');
-            }
+            setError(mapInvitationError(error));
         } finally {
             setLoading(false);
         }
@@ -139,11 +129,7 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
             await completeInvitation();
         } catch (err) {
             const error = err as Error & { code?: string };
-            if (error.code === 'auth/invalid-verification-code') {
-                setError('Invalid code. Please check your authenticator app.');
-            } else {
-                setError(error.message || 'MFA verification failed. Please try again.');
-            }
+            setError(mapMfaError(error));
         } finally {
             setLoading(false);
         }

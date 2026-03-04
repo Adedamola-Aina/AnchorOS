@@ -50,6 +50,25 @@ describe('LoadingBoundary', () => {
     // Just verify component renders without error
     expect(document.body).toBeInTheDocument();
   });
+
+  it.each([
+    'dashboard',
+    'finance',
+    'commitments',
+    'settings',
+    'spinner',
+    'minimal',
+  ] as const)('renders %s skeleton fallback while lazy content is loading', (skeleton) => {
+    const NeverResolves = React.lazy(() => new Promise<never>(() => undefined));
+
+    render(
+      <LoadingBoundary skeleton={skeleton} message="Loading state">
+        <NeverResolves />
+      </LoadingBoundary>
+    );
+
+    expect(screen.getByText('Loading state')).toBeInTheDocument();
+  });
 });
 
 describe('InlineLoading', () => {

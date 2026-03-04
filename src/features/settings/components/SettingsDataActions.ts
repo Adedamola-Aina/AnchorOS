@@ -6,6 +6,8 @@
 // @ts-nocheck
 
 import { captureError } from '../../../utils/error';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../../config/firebase';
 
 import type { User } from 'firebase/auth';
 
@@ -55,48 +57,22 @@ export async function handleDeleteAccount(
 ): Promise<void> {
     try {
         if (familyConnection) await disconnectFamily('leave');
-
-        const { getDocs, collection, writeBatch, doc } = await import('firebase/firestore');
-        const { db, APP_ID } = await import('../../../config/firebase');
         const uid = user?.uid;
         if (!uid) throw new Error('No user ID');
 
-        // BATCH-001: Use chunked batches for safety
-        const docsToDelete: { collection: string; id: string }[] = [];
-        for (const colName of COLLECTIONS) {
-            const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'users', uid, colName));
-            snap.docs.forEach(d => docsToDelete.push({ collection: colName, id: d.id }));
-        }
-        docsToDelete.push({ collection: '', id: '' }); // Placeholder for profile doc
-
-        for (let i = 0; i < docsToDelete.length; i += BATCH_LIMIT) {
-            const chunk = docsToDelete.slice(i, i + BATCH_LIMIT);
-            const batch = writeBatch(db);
-            chunk.forEach(d => {
-                if (d.collection) batch.delete(doc(db, 'artifacts', APP_ID, 'users', uid, d.collection, d.id));
-            });
-            batch.delete(doc(db, 'artifacts', APP_ID, 'users', uid));
-            await batch.commit();
-        }
-
-        const { deleteUser } = await import('firebase/auth');
-        if (user) {
-            try {
-                await deleteUser(user);
-                showToast('Account deleted successfully.', 'success');
-            } catch (authErr: unknown) {
-                const errCode = authErr != null && typeof authErr === 'object' && 'code' in authErr
-                    ? (authErr as { code: string }).code : '';
-                if (errCode === 'auth/requires-recent-login') {
-                    showToast('Account data deleted. Sign in again to complete deletion.', 'info');
-                } else {
-                    throw authErr;
-                }
-            }
-        }
+        const deleteMyAccount = httpsCallable<Record<string, never>, { success: boolean }>(functions, 'deleteMyAccount');
+        await deleteMyAccount({});
+        showToast('Account deleted successfully.', 'success');
 
         setTimeout(() => logout(), 500);
     } catch (e) {
+        const code = e != null && typeof e === 'object' && 'code' in e
+            ? String((e as { code: string }).code)
+            : '';
+        if (code === 'functions/failed-precondition' || code === 'failed-precondition') {
+            showToast('Please re-authenticate and try account deletion again.', 'info');
+            return;
+        }
         captureError(e, 'Settings.deleteAccount');
         showToast('Error: ' + (e as Error).message, 'error');
     }

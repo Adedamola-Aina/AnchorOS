@@ -34,6 +34,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     dismissNotification: { maxAttempts: 30,  windowMs: MIN,      blockDurationMs: 5 * MIN },
     commitmentCreate:    { maxAttempts: 20,  windowMs: DAY,      blockDurationMs: HOUR },
     passwordReset:       { maxAttempts: 3,   windowMs: HOUR,     blockDurationMs: HOUR },
+    deleteAccount:       { maxAttempts: 2,   windowMs: DAY,      blockDurationMs: DAY },
 };
 
 // ============================================================================

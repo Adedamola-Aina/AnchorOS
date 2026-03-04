@@ -84,7 +84,7 @@ test.describe('Dashboard', () => {
         const commitmentsLink = page.locator('aside').getByRole('link', { name: 'Commitments' });
         await commitmentsLink.click();
 
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible();
     });
 
     test('Productivity score displays', async ({ page }) => {

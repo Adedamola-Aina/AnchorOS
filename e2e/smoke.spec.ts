@@ -49,7 +49,7 @@ test.describe('Smoke Tests', () => {
         await loginOrSignup(page, TEST_USER, true);
         // Click Commitments in sidebar
         await page.locator('aside').locator('text=Commitments').click();
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible({ timeout: 10000 });
     });
 
     test('Can navigate to Settings', async ({ page }) => {

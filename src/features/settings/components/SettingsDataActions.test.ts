@@ -13,6 +13,8 @@ const mockWriteBatch = vi.fn();
 const mockDoc = vi.fn((..._a: any[]) => 'mock-doc-ref');
 const mockCollection = vi.fn((..._a: any[]) => 'mock-col-ref');
 const mockDeleteUser = vi.fn();
+const mockHttpsCallable = vi.fn();
+const mockDeleteAccountCallable = vi.fn();
 
 vi.mock('firebase/firestore', () => ({
     getDocs: (...a: any[]) => mockGetDocs(...a),
@@ -25,9 +27,15 @@ vi.mock('firebase/auth', () => ({
     deleteUser: (...a: any[]) => mockDeleteUser(...a),
 }));
 
+vi.mock('firebase/functions', () => ({
+    getFunctions: vi.fn(() => ({})),
+    httpsCallable: (...a: any[]) => mockHttpsCallable(...a),
+}));
+
 vi.mock('../../../config/firebase', () => ({
     db: {},
     APP_ID: 'test-app',
+    functions: {},
 }));
 
 vi.mock('../../../utils/error', () => ({
@@ -103,10 +111,11 @@ describe('handleDeleteAccount', () => {
             commit: mockCommit,
         });
         mockGetDocs.mockResolvedValue({ docs: [] });
+        mockHttpsCallable.mockReturnValue(mockDeleteAccountCallable);
+        mockDeleteAccountCallable.mockResolvedValue({ data: { success: true } });
     });
 
-    it('deletes user data and Firebase auth account', async () => {
-        mockDeleteUser.mockResolvedValue(undefined);
+    it('deletes account through Cloud Function', async () => {
 
         await handleDeleteAccount(
             { uid: 'user-1' } as any,
@@ -116,8 +125,11 @@ describe('handleDeleteAccount', () => {
             showToast
         );
 
-        expect(mockDeleteUser).toHaveBeenCalled();
+        expect(mockHttpsCallable).toHaveBeenCalledWith(expect.anything(), 'deleteMyAccount');
+        expect(mockDeleteAccountCallable).toHaveBeenCalledWith({});
         expect(showToast).toHaveBeenCalledWith('Account deleted successfully.', 'success');
+        expect(mockDeleteUser).not.toHaveBeenCalled();
+        expect(mockGetDocs).not.toHaveBeenCalled();
 
         // Logout after delay
         vi.advanceTimersByTime(500);
@@ -125,8 +137,6 @@ describe('handleDeleteAccount', () => {
     });
 
     it('disconnects family before deletion when connected', async () => {
-        mockDeleteUser.mockResolvedValue(undefined);
-
         await handleDeleteAccount(
             { uid: 'user-1' } as any,
             { id: 'conn-1' }, // has family connection
@@ -139,7 +149,7 @@ describe('handleDeleteAccount', () => {
     });
 
     it('handles requires-recent-login gracefully', async () => {
-        mockDeleteUser.mockRejectedValue({ code: 'auth/requires-recent-login' });
+        mockDeleteAccountCallable.mockRejectedValue({ code: 'functions/failed-precondition' });
 
         await handleDeleteAccount(
             { uid: 'user-1' } as any,
@@ -150,7 +160,7 @@ describe('handleDeleteAccount', () => {
         );
 
         expect(showToast).toHaveBeenCalledWith(
-            'Account data deleted. Sign in again to complete deletion.',
+            'Please re-authenticate and try account deletion again.',
             'info'
         );
     });
@@ -168,7 +178,7 @@ describe('handleDeleteAccount', () => {
     });
 
     it('shows error toast on unexpected failure', async () => {
-        mockDeleteUser.mockRejectedValue(new Error('unexpected'));
+        mockDeleteAccountCallable.mockRejectedValue(new Error('unexpected'));
 
         await handleDeleteAccount(
             { uid: 'user-1' } as any,

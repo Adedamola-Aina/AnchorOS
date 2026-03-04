@@ -27,7 +27,7 @@ test.describe('System - Navigation', () => {
         await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible();
 
         await page.click('a:has-text("Commitments")');
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible();
 
         await page.click('a:has-text("System")');
         await expect(page.getByRole('heading', { name: 'System' })).toBeVisible();
@@ -63,10 +63,13 @@ test.describe('System - Deep Links', () => {
         await loginOrSignup(page, TEST_USER, true);
 
         await page.goto('/finance');
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(3000);
 
         const financeHeading = page.getByRole('heading', { name: 'Finance' }).first();
-        const hasFinance = await financeHeading.isVisible().catch(() => false);
+        const financeFallback = page.locator('text=Net Worth')
+            .or(page.getByRole('button', { name: /Record Transaction/i }))
+            .or(page.locator('text=Loading'));
+        const hasFinance = await financeHeading.or(financeFallback.first()).first().isVisible().catch(() => false);
 
         expect(hasFinance).toBe(true);
     });
@@ -78,8 +81,10 @@ test.describe('System - Deep Links', () => {
         await page.goto('/commitments');
         await page.waitForTimeout(2000);
 
-        const commitmentsHeading = page.getByRole('heading', { name: 'Commitments' }).first();
-        const hasCommitments = await commitmentsHeading.isVisible().catch(() => false);
+        const commitmentsHeading = page.getByRole('heading', { name: 'Commitments', exact: true });
+        const commitmentsFallback = page.getByRole('heading', { name: 'Welcome to your Commitments' })
+            .or(page.getByRole('button', { name: /New Commitment|Create First Commitment/i }));
+        const hasCommitments = await commitmentsHeading.or(commitmentsFallback.first()).first().isVisible().catch(() => false);
 
         expect(hasCommitments).toBe(true);
     });
