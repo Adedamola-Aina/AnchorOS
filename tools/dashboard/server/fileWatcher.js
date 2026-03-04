@@ -19,7 +19,7 @@ function debouncedSync(source) {
     }
     debounceTimers[source] = setTimeout(() => {
         console.log(`[FILE WATCHER] Syncing due to: ${source}`);
-        runFullSync().then(results => {
+        runFullSync({ syncVelocity: false }).then(results => {
             console.log(`[FILE WATCHER] Sync complete (${source}):`, {
                 velocity: results.velocity?.newCompletions || 0,
                 archive: results.archive?.archivedCount || 0,

@@ -1464,7 +1464,7 @@ const server = app.listen(PORT, () => {
     watchMarkerFiles((type, result) => {
         console.log(`[CONVERSATION AI] Auto-filed ${result.processed} ${type}, skipped ${result.skipped} duplicates`);
         // Trigger full sync after filing
-        runFullSync().catch(err => console.error('[CONVERSATION AI] Sync failed:', err.message));
+        runFullSync({ syncVelocity: false }).catch(err => console.error('[CONVERSATION AI] Sync failed:', err.message));
     });
     // Signal PM2 that we're ready
     if (process.send) {

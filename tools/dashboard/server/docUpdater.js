@@ -5,7 +5,6 @@ const { getVelocityStats, autoDetectCompletions } = require('./velocityTracker')
 const { analyzeBugsFromKnownIssues } = require('./bugPrioritizer');
 const { archiveOldItems } = require('./archiveManager');
 
-const ROADMAP_PATH = path.join(__dirname, '../../../docs/ROADMAP.md');
 const KNOWN_ISSUES_PATH = path.join(__dirname, '../../../docs/KNOWN_ISSUES.md');
 const SYNC_LOG_PATH = path.join(__dirname, '../data/doc_sync_log.json');
 
@@ -48,6 +47,26 @@ function writeSyncLog(log) {
     fs.writeFileSync(SYNC_LOG_PATH, JSON.stringify(log, null, 2));
 }
 
+function shouldPersistSyncEvent(type, details = {}) {
+    if (details.error || details.success === false) {
+        return true;
+    }
+
+    if (type === 'velocity') {
+        return (details.newCompletions || 0) > 0;
+    }
+
+    if (type === 'priority') {
+        return (details.needsReview || 0) > 0;
+    }
+
+    if (type === 'archive') {
+        return (details.archivedCount || 0) > 0;
+    }
+
+    return true;
+}
+
 /**
  * Log a sync event
  */
@@ -84,17 +103,21 @@ function logSyncEvent(type, details) {
  */
 async function syncVelocityData() {
     try {
-        const roadmapData = fs.readFileSync(ROADMAP_PATH, 'utf8');
-        const newCompletions = autoDetectCompletions({ content: roadmapData });
+        const newCompletions = await autoDetectCompletions();
+        const completionCount = Number.isFinite(newCompletions) ? newCompletions : 0;
 
-        logSyncEvent('velocity', {
-            newCompletions: newCompletions.length,
-            message: `Detected ${newCompletions.length} new completions`
-        });
+        const details = {
+            newCompletions: completionCount,
+            message: `Detected ${completionCount} new completions`
+        };
+
+        if (shouldPersistSyncEvent('velocity', details)) {
+            logSyncEvent('velocity', details);
+        }
 
         return {
             success: true,
-            newCompletions: newCompletions.length
+            newCompletions: completionCount
         };
     } catch (error) {
         logSyncEvent('velocity', {
@@ -148,11 +171,15 @@ async function syncPriorityData() {
             s.currentPriority && s.currentPriority !== s.suggestedPriority
         );
 
-        logSyncEvent('priority', {
+        const details = {
             totalBugs: suggestions.length,
             needsReview: needsReview.length,
             message: `Analyzed ${suggestions.length} bugs, ${needsReview.length} need priority review`
-        });
+        };
+
+        if (shouldPersistSyncEvent('priority', details)) {
+            logSyncEvent('priority', details);
+        }
 
         return {
             success: true,
@@ -178,10 +205,14 @@ async function syncArchive() {
     try {
         const result = archiveOldItems(30, false);
 
-        logSyncEvent('archive', {
+        const details = {
             archivedCount: result.archivedCount,
             message: result.message
-        });
+        };
+
+        if (shouldPersistSyncEvent('archive', details)) {
+            logSyncEvent('archive', details);
+        }
 
         return result;
     } catch (error) {
@@ -199,12 +230,17 @@ async function syncArchive() {
 /**
  * Run full auto-sync
  */
-async function runFullSync() {
+async function runFullSync(options = {}) {
+    const { syncVelocity = true } = options;
     console.log('[DOC SYNC] Starting full documentation sync...');
+
+    const velocityResult = syncVelocity
+        ? await syncVelocityData()
+        : { success: true, newCompletions: 0, skipped: true };
 
     const results = {
         timestamp: new Date().toISOString(),
-        velocity: await syncVelocityData(),
+        velocity: velocityResult,
         priority: await syncPriorityData(),
         archive: await syncArchive()
     };
@@ -241,5 +277,6 @@ module.exports = {
     syncVelocityData,
     syncPriorityData,
     syncArchive,
-    getSyncStatus
+    getSyncStatus,
+    shouldPersistSyncEvent
 };
