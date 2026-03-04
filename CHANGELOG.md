@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.8.17](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.16...v1.8.17) (2026-03-04)
+
 ## [1.8.17-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.16...v1.8.17-rc.0) (2026-03-04)
 
 ## [1.8.16](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.15...v1.8.16) (2026-03-04)
