@@ -1,10 +1,10 @@
 /**
- * Web Vitals reporting — captures CLS, LCP, INP, FID, TTFB
+ * Web Vitals reporting — captures CLS, LCP, INP, TTFB
  * and reports to Sentry as breadcrumbs for production monitoring.
  */
 
 import * as Sentry from '@sentry/react';
-import { onCLS, onLCP, onINP, onFID, onTTFB } from 'web-vitals';
+import { onCLS, onLCP, onINP, onTTFB } from 'web-vitals';
 import type { Metric } from 'web-vitals';
 
 function sendToSentry(metric: Metric): void {
@@ -25,6 +25,5 @@ export function reportWebVitals(): void {
     onCLS(sendToSentry);
     onLCP(sendToSentry);
     onINP(sendToSentry);
-    onFID(sendToSentry);
     onTTFB(sendToSentry);
 }

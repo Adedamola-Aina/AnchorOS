@@ -15,8 +15,7 @@ describe('reportWebVitals', () => {
             onCLS: vi.fn((cb) => cb({ name: 'CLS', value: 0.05, rating: 'good', id: 'v1-1' })),
             onLCP: vi.fn((cb) => cb({ name: 'LCP', value: 1200, rating: 'good', id: 'v1-2' })),
             onINP: vi.fn((cb) => cb({ name: 'INP', value: 150, rating: 'needs-improvement', id: 'v1-3' })),
-            onFID: vi.fn((cb) => cb({ name: 'FID', value: 50, rating: 'good', id: 'v1-4' })),
-            onTTFB: vi.fn((cb) => cb({ name: 'TTFB', value: 300, rating: 'good', id: 'v1-5' })),
+            onTTFB: vi.fn((cb) => cb({ name: 'TTFB', value: 300, rating: 'good', id: 'v1-4' })),
         }));
 
         const mod = await import('./webVitals');
@@ -27,21 +26,20 @@ describe('reportWebVitals', () => {
         vi.restoreAllMocks();
     });
 
-    it('registers all 5 web vital metrics', async () => {
+    it('registers all 4 web vital metrics', async () => {
         const webVitals = await import('web-vitals');
         reportWebVitals();
 
         expect(webVitals.onCLS).toHaveBeenCalled();
         expect(webVitals.onLCP).toHaveBeenCalled();
         expect(webVitals.onINP).toHaveBeenCalled();
-        expect(webVitals.onFID).toHaveBeenCalled();
         expect(webVitals.onTTFB).toHaveBeenCalled();
     });
 
     it('reports metrics as sentry breadcrumbs', () => {
         reportWebVitals();
 
-        expect(mockSentry.addBreadcrumb).toHaveBeenCalledTimes(5);
+        expect(mockSentry.addBreadcrumb).toHaveBeenCalledTimes(4);
         expect(mockSentry.addBreadcrumb).toHaveBeenCalledWith(
             expect.objectContaining({
                 category: 'web-vital',

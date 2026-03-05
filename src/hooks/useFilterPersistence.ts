@@ -26,7 +26,7 @@ function loadFilters(viewKey: string): PersistedFilters {
 
 export function useFilterPersistence(viewKey: string) {
     const [filters, setFilters] = useState<PersistedFilters>(() => loadFilters(viewKey));
-    const timerRef = useRef<ReturnType<typeof setTimeout>>();
+    const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
     const persist = useCallback((updated: PersistedFilters) => {
         clearTimeout(timerRef.current);
