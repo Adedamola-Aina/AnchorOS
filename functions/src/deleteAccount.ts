@@ -9,7 +9,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue } from 'firebase-admin/firestore';
 import { APP_ID, db } from './config';
-import { createAuditLog } from './helpers';
+import { createFinanceAuditLog } from './helpers';
 import { enforceRateLimit } from './rateLimit';
 
 const REAUTH_WINDOW_SECONDS = 5 * 60;
@@ -126,7 +126,7 @@ export const deleteMyAccount = onCall(async (request) => {
             await deleteDocumentTree(userDocRef);
         }
 
-        await createAuditLog('account_deleted', userUid, {
+        await createFinanceAuditLog('account_deleted', userUid, {
             deletedAt: new Date().toISOString(),
         });
 
@@ -146,7 +146,7 @@ export const deleteMyAccount = onCall(async (request) => {
             deleted: true,
         };
     } catch (error) {
-        await createAuditLog('account_delete_failed', userUid, {
+        await createFinanceAuditLog('account_delete_failed', userUid, {
             deletedAt: new Date().toISOString(),
             reason: error instanceof Error ? error.message : String(error),
         });

@@ -86,6 +86,8 @@ export const getSharedAccountsWithMe = onCall(
         }
 
         const memberUid = request.auth.uid;
+        await enforceRateLimit('getSharedAccounts', memberUid);
+
         const accountsQuery = db.collectionGroup('accounts')
             .where(`sharedWith.${memberUid}.grantedAt`, '!=', null);
         const snapshot = await accountsQuery.get();

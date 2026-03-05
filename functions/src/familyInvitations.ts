@@ -40,16 +40,7 @@ export const createFamilyInvitation = onCall(
             throw new HttpsError('invalid-argument', 'Invitee email and password are required');
         }
 
-        const rateLimitRef = db.collection('rateLimits').doc(`invite:${ownerUid}`);
-        const rateLimitDoc = await rateLimitRef.get();
-        const rateLimitData = rateLimitDoc.data();
-        const now = Date.now();
-        const dayAgo = now - 24 * 60 * 60 * 1000;
-        const recentInvites = (rateLimitData?.attempts || []).filter((ts: number) => ts > dayAgo);
-
-        if (recentInvites.length >= 10) {
-            throw new HttpsError('resource-exhausted', 'Maximum 10 invitations per day');
-        }
+        await enforceRateLimit('createInvitation', ownerUid);
 
         const invitationsRef = db.collection('artifacts').doc(APP_ID).collection('family_invitations');
         const existingQuery = await invitationsRef
@@ -93,9 +84,6 @@ export const createFamilyInvitation = onCall(
         };
 
         await inviteRef.set(invitation);
-
-        recentInvites.push(now);
-        await rateLimitRef.set({ attempts: recentInvites, lastAttempt: now });
 
         try {
             await getResend().emails.send({

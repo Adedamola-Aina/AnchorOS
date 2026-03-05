@@ -8,6 +8,7 @@
 
 
 import { FieldValue } from 'firebase-admin/firestore';
+import { createHash } from 'node:crypto';
 import { db, APP_ID } from './config';
 import type { FamilyConnection } from './types';
 
@@ -21,13 +22,56 @@ export async function createAuditLog(
     metadata: Record<string, unknown> = {},
     targetUid?: string
 ): Promise<void> {
-    await db.collection('artifacts').doc(APP_ID).collection('audit_log').add({
+    const normalizedMetadata = normalizeMetadata(metadata);
+    const metadataJson = stableStringify(normalizedMetadata);
+    const integrityHash = createHash('sha256')
+        .update(`${action}:${actorUid}:${targetUid || ''}:${metadataJson}`)
+        .digest('hex');
+
+    const auditRef = db.collection('artifacts').doc(APP_ID).collection('audit_log').doc();
+    await auditRef.create({
+        eventId: auditRef.id,
+        schemaVersion: 1,
+        immutable: true,
         action,
         actorUid,
         targetUid: targetUid || null,
-        metadata,
+        metadata: normalizedMetadata,
+        integrityHash,
         timestamp: FieldValue.serverTimestamp(),
     });
+}
+
+export async function createFinanceAuditLog(
+    action: string,
+    actorUid: string,
+    metadata: Record<string, unknown> = {},
+    targetUid?: string
+): Promise<void> {
+    await createAuditLog(action, actorUid, { domain: 'finance', ...metadata }, targetUid);
+}
+
+function normalizeMetadata(input: Record<string, unknown>): Record<string, unknown> {
+    try {
+        return JSON.parse(JSON.stringify(input)) as Record<string, unknown>;
+    } catch {
+        return { _warning: 'metadata_not_serializable' };
+    }
+}
+
+function stableStringify(value: unknown): string {
+    if (value === null || typeof value !== 'object') {
+        return JSON.stringify(value);
+    }
+
+    if (Array.isArray(value)) {
+        return `[${value.map((item) => stableStringify(item)).join(',')}]`;
+    }
+
+    const objectValue = value as Record<string, unknown>;
+    const sortedKeys = Object.keys(objectValue).sort();
+    const entries = sortedKeys.map((key) => `${JSON.stringify(key)}:${stableStringify(objectValue[key])}`);
+    return `{${entries.join(',')}}`;
 }
 
 export async function createNotification(

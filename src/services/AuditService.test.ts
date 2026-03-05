@@ -153,6 +153,26 @@ describe('AuditService', () => {
                 })
             );
         });
+
+        it('operationFailed sends operation and reason', async () => {
+            await auditFinance.operationFailed('transaction_delete', {
+                accountId: 'acc-1',
+                transactionId: 'tx-1',
+                reason: 'permission-denied',
+            });
+
+            expect(mockCallable).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    action: 'finance_operation_failed',
+                    metadata: {
+                        operation: 'transaction_delete',
+                        accountId: 'acc-1',
+                        transactionId: 'tx-1',
+                        reason: 'permission-denied',
+                    },
+                })
+            );
+        });
     });
 
     // ── auditSettings ───────────────────────────────────────────────

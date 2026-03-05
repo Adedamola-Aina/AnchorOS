@@ -59,6 +59,11 @@ export async function updateTransaction(
         const changedFields = Object.keys(updates);
         auditFinance.transactionUpdated(transactionId, accountId, changedFields);
     } catch (error) {
+        void auditFinance.operationFailed('transaction_update', {
+            transactionId,
+            accountId,
+            reason: error instanceof Error ? error.message : String(error),
+        });
         if (error instanceof AnchorError) throw error;
         throw new AnchorError('Failed to update transaction', 'DATABASE', error);
     }

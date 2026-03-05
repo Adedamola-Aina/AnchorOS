@@ -71,6 +71,24 @@ describe('rateLimit', () => {
             expect(result.isLimited).toBe(true);
             expect(result.retryAfterMs).toBe(45000);
         });
+
+        it('resets attempts after lockout expires', () => {
+            const now = Date.now();
+            vi.spyOn(Date, 'now')
+                .mockReturnValueOnce(now) // attempt 1
+                .mockReturnValueOnce(now + 1000) // lock triggered
+                .mockReturnValueOnce(now + 32000); // lock expired
+
+            const shortConfig = { maxAttempts: 1, windowMs: 120000, lockoutMs: 30000 };
+            checkRateLimit('lock-key', shortConfig);
+            checkRateLimit('lock-key', shortConfig);
+
+            const resultAfterExpiry = checkRateLimit('lock-key', shortConfig);
+            expect(resultAfterExpiry.isLimited).toBe(false);
+            expect(resultAfterExpiry.attemptsRemaining).toBe(0);
+
+            vi.restoreAllMocks();
+        });
     });
 
     // ── resetRateLimit ──────────────────────────────────────────────

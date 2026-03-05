@@ -10,6 +10,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db, APP_ID } from './config';
 import { createAuditLog } from './helpers';
+import { enforceRateLimit } from './rateLimit';
 
 // ============================================================================
 // Migration: V1 → V2 Family Connections
@@ -22,6 +23,7 @@ export const migrateFamilyConnectionsV2 = onCall(
         }
 
         const callerUid = request.auth.uid;
+        await enforceRateLimit('familyMigration', callerUid);
 
         const results: Array<{
             ownerUid: string;
@@ -74,7 +76,7 @@ export const migrateFamilyConnectionsV2 = onCall(
                     migratedFromV1: true,
                 });
 
-                await createAuditLog(ownerUid, 'migration_v1_to_v2', {
+                await createAuditLog('migration_v1_to_v2', callerUid, {
                     ownerUid, memberUid, actor: callerUid,
                 });
 

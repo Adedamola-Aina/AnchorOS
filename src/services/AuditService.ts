@@ -29,6 +29,7 @@ export type AuditEventType =
     | 'transaction_created'
     | 'transaction_deleted'
     | 'transaction_updated'
+    | 'finance_operation_failed'
     // Settings events
     | 'settings_profile_updated'
     | 'settings_notifications_changed'
@@ -95,6 +96,8 @@ export const auditFinance = {
         logAuditEvent('transaction_deleted', { transactionId, accountId }),
     transactionUpdated: (transactionId: string, accountId: string, changes: string[]) =>
         logAuditEvent('transaction_updated', { transactionId, accountId, changedFields: changes }),
+    operationFailed: (operation: string, metadata: AuditMetadata = {}) =>
+        logAuditEvent('finance_operation_failed', { operation, ...metadata }),
 };
 
 export const auditSettings = {

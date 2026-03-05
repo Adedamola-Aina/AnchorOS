@@ -11,6 +11,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { FieldValue } from 'firebase-admin/firestore';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
+import { createFinanceAuditLog } from './helpers';
 
 // ============================================================================
 // Add Transaction to Shared Account
@@ -101,6 +102,14 @@ export const addTransactionToSharedAccount = onCall(
             balanceCents: FieldValue.increment(balanceChange),
         });
 
+        await createFinanceAuditLog('shared_transaction_created', callerUid, {
+            transactionId: newTransactionRef.id,
+            accountId,
+            accountOwnerId: sentOwnerId,
+            type: transaction.type,
+            amountCents: transaction.amountCents,
+        }, sentOwnerId);
+
         return { success: true, transactionId: newTransactionRef.id };
     }
 );
@@ -116,6 +125,7 @@ export const fixSharedAccountScopes = onCall(
         }
 
         const userId = request.auth.uid;
+        await enforceRateLimit('scopeMigration', userId);
 
         const accountsSnapshot = await db
             .collection('artifacts')
@@ -142,6 +152,10 @@ export const fixSharedAccountScopes = onCall(
         if (fixedCount > 0) {
             await batch.commit();
         }
+
+        await createFinanceAuditLog('shared_scope_migration_completed', userId, {
+            accountsFixed: fixedCount,
+        });
 
         return {
             success: true,

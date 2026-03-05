@@ -53,6 +53,11 @@ export class AccountService {
 
             return docRef.id;
         } catch (error) {
+            void auditFinance.operationFailed('account_create', {
+                accountName: payload.name,
+                type: payload.type,
+                reason: error instanceof Error ? error.message : String(error),
+            });
             throw new AnchorError('Failed to add account', 'DATABASE', error);
         }
     }
@@ -87,6 +92,11 @@ export class AccountService {
             // AUDIT: Log account archival
             auditFinance.accountArchived(account.id, account.name);
         } catch (error) {
+            void auditFinance.operationFailed('account_archive', {
+                accountId: account.id,
+                accountName: account.name,
+                reason: error instanceof Error ? error.message : String(error),
+            });
             throw new AnchorError('Failed to delete account', 'DATABASE', error);
         }
     }
@@ -153,6 +163,12 @@ export class AccountService {
             // AUDIT: Log account rename
             auditFinance.accountRenamed(account.id, account.name, newName);
         } catch (error) {
+            void auditFinance.operationFailed('account_rename', {
+                accountId: account.id,
+                oldName: account.name,
+                newName,
+                reason: error instanceof Error ? error.message : String(error),
+            });
             if (error instanceof AnchorError) throw error;
             throw new AnchorError('Failed to rename account', 'DATABASE', error);
         }

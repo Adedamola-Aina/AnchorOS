@@ -9,6 +9,7 @@
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { createAuditLog } from './helpers';
+import { enforceRateLimit } from './rateLimit';
 
 // ============================================================================
 // Allowed client-side audit event types
@@ -30,6 +31,7 @@ const ALLOWED_AUDIT_EVENTS = new Set([
     'transaction_created',
     'transaction_deleted',
     'transaction_updated',
+    'finance_operation_failed',
     // Settings events
     'settings_profile_updated',
     'settings_notifications_changed',
@@ -50,6 +52,8 @@ export const logAuditEvent = onCall(
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');
         }
+
+        await enforceRateLimit('auditLog', request.auth.uid);
 
         const { action, metadata = {} } = request.data as { action: string; metadata?: Record<string, unknown> };
 

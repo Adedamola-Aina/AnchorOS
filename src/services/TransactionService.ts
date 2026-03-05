@@ -70,6 +70,12 @@ export class TransactionService {
                 payload.type
             );
         } catch (error) {
+            void auditFinance.operationFailed('transaction_create', {
+                accountId: payload.accountId,
+                amountCents: payload.amountCents,
+                type: payload.type,
+                reason: error instanceof Error ? error.message : String(error),
+            });
             if (error instanceof AnchorError) throw error;
             throw new AnchorError('Failed to add transaction', 'DATABASE', error);
         }
@@ -121,6 +127,11 @@ export class TransactionService {
             // AUDIT: Log transaction deletion
             auditFinance.transactionDeleted(transactionId, accountId);
         } catch (error) {
+            void auditFinance.operationFailed('transaction_delete', {
+                transactionId,
+                accountId,
+                reason: error instanceof Error ? error.message : String(error),
+            });
             if (error instanceof AnchorError) throw error;
             throw new AnchorError('Failed to delete transaction', 'DATABASE', error);
         }

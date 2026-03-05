@@ -51,6 +51,16 @@ export function checkRateLimit(key: string, config: RateLimitConfig): {
         };
     }
 
+    // Lockout elapsed: treat next attempt as a fresh window.
+    if (state.lockedUntil && now >= state.lockedUntil) {
+        rateLimitStates.set(key, {
+            attempts: 1,
+            firstAttemptTime: now,
+            lockedUntil: null
+        });
+        return { isLimited: false, attemptsRemaining: config.maxAttempts - 1 };
+    }
+
     // Check if window has expired
     if (now - state.firstAttemptTime > config.windowMs) {
         // Reset the window

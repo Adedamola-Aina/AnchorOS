@@ -23,6 +23,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     auth:                { maxAttempts: 5,   windowMs: 15 * MIN, blockDurationMs: HOUR },
     invite:              { maxAttempts: 10,  windowMs: DAY,      blockDurationMs: DAY },
     shareAccount:        { maxAttempts: 20,  windowMs: HOUR,     blockDurationMs: 30 * MIN },
+    getSharedAccounts:   { maxAttempts: 60,  windowMs: MIN,      blockDurationMs: 5 * MIN },
     tokenValidation:     { maxAttempts: 10,  windowMs: HOUR,     blockDurationMs: HOUR },
     codeVerification:    { maxAttempts: 5,   windowMs: 15 * MIN, blockDurationMs: HOUR },
     disconnectFamily:    { maxAttempts: 3,   windowMs: HOUR,     blockDurationMs: DAY },
@@ -35,6 +36,10 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     commitmentCreate:    { maxAttempts: 20,  windowMs: DAY,      blockDurationMs: HOUR },
     passwordReset:       { maxAttempts: 3,   windowMs: HOUR,     blockDurationMs: HOUR },
     deleteAccount:       { maxAttempts: 2,   windowMs: DAY,      blockDurationMs: DAY },
+    mfaRecovery:         { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
+    auditLog:            { maxAttempts: 120, windowMs: HOUR,     blockDurationMs: 10 * MIN },
+    familyMigration:     { maxAttempts: 1,   windowMs: DAY,      blockDurationMs: DAY },
+    scopeMigration:      { maxAttempts: 3,   windowMs: DAY,      blockDurationMs: HOUR },
 };
 
 // ============================================================================
@@ -44,8 +49,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
 export async function enforceRateLimit(action: string, identifier: string): Promise<void> {
     const config = RATE_LIMITS[action];
     if (!config) {
-        console.warn(`[RateLimit] Unknown action: ${action}. Skipping enforcement.`);
-        return;
+        throw new HttpsError('invalid-argument', `Unknown rate limit action: ${action}`);
     }
 
     const rateLimitRef = db.collection('rateLimits').doc(`${action}:${identifier}`);
@@ -73,7 +77,9 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
             }
 
             const windowStart = now - config.windowMs;
-            const attempts = (docData?.attempts || []).filter((ts: number) => ts > windowStart);
+            const attempts = (docData?.attempts || [])
+                .filter((ts: number) => Number.isFinite(ts))
+                .filter((ts: number) => ts > windowStart);
 
             if (attempts.length >= config.maxAttempts) {
                 const blockedUntil = now + config.blockDurationMs;
@@ -105,6 +111,7 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
     } catch (error) {
         if (error instanceof HttpsError) throw error;
         console.error('[RateLimit] Enforcement failed:', error);
+        throw new HttpsError('internal', 'Unable to validate rate limit. Please try again.');
     }
 }
 
@@ -142,7 +149,9 @@ export const checkRateLimit = onCall(
                 }
 
                 const windowStart = now - config.windowMs;
-                const attempts = (docData?.attempts || []).filter((ts: number) => ts > windowStart);
+                const attempts = (docData?.attempts || [])
+                    .filter((ts: number) => Number.isFinite(ts))
+                    .filter((ts: number) => ts > windowStart);
 
                 if (attempts.length >= config.maxAttempts) {
                     const blockedUntil = now + config.blockDurationMs;
@@ -161,7 +170,7 @@ export const checkRateLimit = onCall(
             return result;
         } catch (error) {
             console.error('Rate limit check failed:', error);
-            return { allowed: true };
+            throw new HttpsError('internal', 'Unable to validate rate limit');
         }
     }
 );
@@ -173,6 +182,18 @@ export const resetRateLimit = onCall(
         }
 
         const { action, identifier } = request.data as { action: string; identifier: string };
+        if (!action || !identifier) {
+            throw new HttpsError('invalid-argument', 'Action and identifier are required');
+        }
+
+        if (!RATE_LIMITS[action]) {
+            throw new HttpsError('invalid-argument', `Unknown rate limit action: ${action}`);
+        }
+
+        if (identifier !== request.auth.uid) {
+            throw new HttpsError('permission-denied', 'You can only reset your own rate limit');
+        }
+
         const rateLimitRef = db.collection('rateLimits').doc(`${action}:${identifier}`);
         await rateLimitRef.delete();
 
