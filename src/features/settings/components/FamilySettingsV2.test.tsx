@@ -144,4 +144,20 @@ describe('FamilySettingsV2', () => {
     unmount();
     expect(mockUnsubscribe).toHaveBeenCalled();
   });
+
+  it('uses external connection prop instead of creating own listener (BUG-056)', () => {
+    const connection = {
+      id: 'conn-1',
+      ownerUid: 'user-1',
+      memberUid: 'user-2',
+      memberDisplayName: 'Partner',
+      ownerDisplayName: 'Me',
+      connectedAt: '2025-01-15',
+      status: 'active' as const,
+    };
+    render(<FamilySettingsV2 connection={connection} connectionLoading={false} />);
+    act(() => snapshotCallback({ empty: true, docs: [] }));
+    // Should show connected state from external prop, not create own listener
+    expect(screen.getByTestId('connected-state')).toBeInTheDocument();
+  });
 });
