@@ -1007,7 +1007,7 @@
             "priority": "P1",
             "title": "Dashboard filter persistence",
             "description": "Remember selected filters between sessions",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "FIN-004"
             ],
@@ -1087,7 +1087,7 @@
             "priority": "P0",
             "title": "Production Monitoring",
             "description": "Add performance monitoring (Web Vitals, error rates) beyond current pm2 dashboard",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "SRE-001"
             ],
@@ -1165,7 +1165,7 @@
             "priority": "P1",
             "title": "Export/Reports",
             "description": "Export data to CSV/PDF for tax or personal review",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "PRD-005"
             ],
