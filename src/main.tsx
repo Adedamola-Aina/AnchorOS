@@ -31,13 +31,20 @@ const initSentryDeferred = async () => {
     });
 };
 
+const initWebVitalsDeferred = async () => {
+    const { reportWebVitals } = await import('./utils/webVitals');
+    reportWebVitals();
+};
+
 if ('requestIdleCallback' in window) {
     window.requestIdleCallback(() => {
         void initSentryDeferred();
+        void initWebVitalsDeferred();
     }, { timeout: 1500 });
 } else {
     setTimeout(() => {
         void initSentryDeferred();
+        void initWebVitalsDeferred();
     }, 500);
 }
 

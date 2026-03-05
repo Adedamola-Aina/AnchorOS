@@ -39,6 +39,7 @@ interface AccountHeaderProps {
     onConfirmRename: () => void;
     onNameChange: (name: string) => void;
     monthlyBalance?: MonthlyBalance;
+    onExportCsv?: () => void;
 }
 
 const getAccountStyle = (account: AnchorAccount) => {
@@ -63,7 +64,7 @@ export const AccountHeader = ({
     isEditingName, newName, isRenaming,
     onBack, onDelete, onShare, onAddTransaction,
     onStartRename, onCancelRename, onConfirmRename, onNameChange,
-    monthlyBalance,
+    monthlyBalance, onExportCsv,
 }: AccountHeaderProps) => {
     const style = getAccountStyle(account);
     const isShared = account.sharedWith && Object.keys(account.sharedWith).length > 0;
@@ -165,7 +166,7 @@ export const AccountHeader = ({
                 </div>
 
                 {/* Action Buttons */}
-                <AccountActionButtons account={account} onAddTransaction={onAddTransaction} />
+                <AccountActionButtons account={account} onAddTransaction={onAddTransaction} onExportCsv={onExportCsv} />
             </div>
         </div>
     );

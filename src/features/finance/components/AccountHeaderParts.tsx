@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { Check, X, Plus } from 'lucide-react';
+import { Check, X, Plus, Download } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
 
 interface RenameInputProps {
@@ -61,21 +61,33 @@ export const AccountRenameInput: React.FC<RenameInputProps> = ({
 interface ActionButtonsProps {
     account: AnchorAccount;
     onAddTransaction?: () => void;
+    onExportCsv?: () => void;
 }
 
 /**
- * Single action button — opens the Record form which covers expense, income, transfer, and pay bill.
+ * Action buttons — Record transaction + Export CSV.
  */
 export const AccountActionButtons: React.FC<ActionButtonsProps> = ({
     onAddTransaction,
+    onExportCsv,
 }) => (
-    <div>
+    <div className="flex gap-3">
         <button
             onClick={onAddTransaction}
-            className="w-full bg-white text-slate-900 hover:bg-white/90 px-5 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+            className="flex-1 bg-white text-slate-900 hover:bg-white/90 px-5 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
         >
             <Plus className="w-5 h-5" />
             Record Transaction
         </button>
+        {onExportCsv && (
+            <button
+                onClick={onExportCsv}
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-xl px-5 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-white/10"
+                title="Export transactions as CSV"
+            >
+                <Download className="w-5 h-5" />
+                <span className="hidden sm:inline">CSV</span>
+            </button>
+        )}
     </div>
 );

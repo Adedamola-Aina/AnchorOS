@@ -11,9 +11,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { captureError } from '../../utils/error';
 import { getWeeklySpending } from '../../utils/financeInsights';
+import { exportAccountCsv } from '../../utils/accountExport';
 import { NotificationBanner } from './NotificationBanner';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { useAccountActivity } from '../../hooks/useAccountActivity';
+import { useFilterPersistence } from '../../hooks/useFilterPersistence';
 import { AccountHeader, SpendingTrendsChart } from './components';
 import { SharedActivitySection } from './components/SharedActivitySection';
 import { SharePermissionPicker } from './components/SharePermissionPicker';
@@ -31,8 +33,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onAddTr
     const { transactions, deleteTransaction, renameAccount, currentMonth } = useFinance();
     const { user } = useAuth();
 
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+    const { searchQuery, setSearchQuery, filterType, setFilterType } = useFilterPersistence(`account-${account.id}`);
     const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
     const [isEditingName, setIsEditingName] = useState(false);
     const [newName, setNewName] = useState(account.name);
@@ -117,7 +118,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onAddTr
                 {/* Only show notification banner for owned accounts — shared account notifications are in Recent Activity */}
                 {isOwner && <NotificationBanner accountId={account.id} />}
                 {isSharedAccount && <FamilyNotificationBanner accountId={account.id} />}
-                <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onAddTransaction={onAddTransaction} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} />
+                <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onAddTransaction={onAddTransaction} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} onExportCsv={() => exportAccountCsv(account.name, filteredList, account.currency)} />
                 <div className="grid grid-cols-1 gap-5">
                     {accountTransactions.length > 0 && <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />}
                 </div>
