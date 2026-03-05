@@ -59,6 +59,11 @@ describe('VirtualTransactionList', () => {
     expect(screen.getByText(/add your first transaction/i)).toBeInTheDocument();
   });
 
+  it('handles undefined transactions defensively', () => {
+    render(<VirtualTransactionList transactions={undefined as unknown as AnchorTransaction[]} onEdit={onEdit} onDelete={onDelete} />);
+    expect(screen.getByText('No transactions yet')).toBeInTheDocument();
+  });
+
   it('shows search-specific empty state', () => {
     render(<VirtualTransactionList transactions={[]} onEdit={onEdit} onDelete={onDelete} searchQuery="groceries" />);
     expect(screen.getByText('No transactions found')).toBeInTheDocument();

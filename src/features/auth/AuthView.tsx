@@ -50,12 +50,6 @@ const AuthView: React.FC<AuthViewProps> = ({
     const [rateLimitError, setRateLimitError] = useState<string | null>(null);
     const attemptsRef = React.useRef<{ count: number; firstAttempt: number }>({ count: 0, firstAttempt: 0 });
 
-    React.useEffect(() => {
-        if (email.includes('test.mfa@anchor-os.dev')) {
-            setEmail(email.replace('test.mfa@anchor-os.dev', ''));
-        }
-    }, [email, setEmail]);
-
     const handleRateLimitedSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const now = Date.now();

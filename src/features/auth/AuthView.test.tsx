@@ -114,4 +114,15 @@ describe('AuthView', () => {
         fireEvent.click(signUpLink);
         expect(defaultProps.setAuthMode).toHaveBeenCalledWith('signup');
     });
+
+    it('does not mutate email value during render', () => {
+        const props = {
+            ...defaultProps,
+            email: 'test.mfa@anchor-os.dev',
+        };
+
+        render(<AuthView {...props} />);
+
+        expect(props.setEmail).not.toHaveBeenCalled();
+    });
 });

@@ -45,3 +45,6 @@ export * from './reminders';
 
 // Account deletion
 export { deleteMyAccount } from './deleteAccount';
+
+// MFA recovery
+export { recoverMfaWithCode } from './mfaRecovery';

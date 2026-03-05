@@ -15,10 +15,13 @@ import { getMultiFactorResolver, type MultiFactorResolver, type MultiFactorError
 import { auth } from '../../config/firebase';
 import { mapFirebaseError } from '../../utils/errorUtils';
 import { AuthLoadingScreen, EmailVerificationGate, OnboardingGate } from './AuthGateParts';
+import { consumeMfaRecoveryCode } from '../../api/MfaRecoveryApi';
 
 // PLT-001: Timeout wrapper for auth calls that may hang in Capacitor WebView
 const withTimeout = <T,>(promise: Promise<T>, ms = 15000): Promise<T> =>
     Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Authentication timed out. Please check your connection and try again.')), ms))]);
+
+const isRecoveryCode = (value: string): boolean => /^[A-Z0-9]{8}$/.test(value.trim().toUpperCase());
 
 interface AuthGateProps { children: React.ReactNode; }
 
@@ -68,7 +71,23 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
                 setIsAuthenticating(true);
                 try {
                     if (authMode === 'reset') { await sendPasswordReset(email); showToast('Password reset email sent!', 'success'); setAuthMode('login'); setAuthError(''); return; }
-                    if (mfaResolver) { await verifyMfa(mfaResolver, mfaCode); setLoginAttempts(0); localStorage.setItem('anchor_login_attempts', '0'); }
+                    if (mfaResolver) {
+                        const normalizedCode = mfaCode.trim().toUpperCase();
+                        if (isRecoveryCode(normalizedCode)) {
+                            await consumeMfaRecoveryCode(email, normalizedCode);
+                            setMfaResolver(null);
+                            setMfaCode('');
+                            setAuthMode('login');
+                            showToast('Recovery code accepted. Sign in again to continue.', 'success');
+                            setLoginAttempts(0);
+                            localStorage.setItem('anchor_login_attempts', '0');
+                            return;
+                        }
+
+                        await verifyMfa(mfaResolver, normalizedCode);
+                        setLoginAttempts(0);
+                        localStorage.setItem('anchor_login_attempts', '0');
+                    }
                     else {
                         if (authMode === 'signup') {
                             const matches = [/[A-Z]/.test(password), /[a-z]/.test(password), /[0-9]/.test(password), /[!@#$%^&*(),.?":{}|<>]/.test(password)];

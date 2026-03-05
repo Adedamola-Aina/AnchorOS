@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { AuthFormFields } from './AuthFormFields';
 
@@ -81,8 +81,17 @@ describe('AuthFormFields Autofill & Accessibility', () => {
             expect(container.querySelector('input[name="fakeusernameremembered"]')).not.toBeInTheDocument();
             expect(container.querySelector('input[name="fakepasswordremembered"]')).not.toBeInTheDocument();
 
-            const otpInput = screen.getByPlaceholderText('000000');
+            const otpInput = screen.getByPlaceholderText('123456 or ABCD1234');
             expect(otpInput).toHaveAttribute('autoComplete', 'one-time-code');
+        });
+
+        it('accepts and normalizes alphanumeric recovery code input', () => {
+            render(<AuthFormFields {...defaultProps} authMode="mfa" />);
+
+            const otpInput = screen.getByPlaceholderText('123456 or ABCD1234');
+            fireEvent.change(otpInput, { target: { value: 'ab-cd12!34' } });
+
+            expect(defaultProps.setMfaCode).toHaveBeenLastCalledWith('ABCD1234');
         });
     });
 });

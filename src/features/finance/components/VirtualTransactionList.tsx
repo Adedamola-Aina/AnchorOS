@@ -33,10 +33,11 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
 }) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const { isMobile } = useResponsive();
+    const safeTransactions = Array.isArray(transactions) ? transactions : [];
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const parentVirtualizer = useVirtualizer({
-        count: transactions.length,
+        count: safeTransactions.length,
         getScrollElement: () => parentRef.current,
         estimateSize: () => 88, // Row height: ~80px card + 8px gap
         overscan: 5,
@@ -44,7 +45,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
 
     const rowVirtualizer = parentVirtualizer;
 
-    if (transactions.length === 0) {
+    if (safeTransactions.length === 0) {
         return (
             <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
                 <Search className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
@@ -79,7 +80,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                 }}
             >
                 {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                    const tx = transactions[virtualRow.index];
+                    const tx = safeTransactions[virtualRow.index];
                     // Safety check: ensure transaction exists (array may have changed)
                     if (!tx) return null;
                     return (
@@ -125,7 +126,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                     );
                 })}
             </div>
-            {!loading && transactions.length > 0 && (
+            {!loading && safeTransactions.length > 0 && (
                 <div className="py-6 text-center">
                     <div className="inline-flex items-center justify-center p-2 rounded-full bg-slate-100 dark:bg-slate-800/50 text-xs font-medium text-slate-400 dark:text-slate-500">
                         <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 mr-2"></span>

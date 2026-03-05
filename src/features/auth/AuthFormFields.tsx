@@ -53,8 +53,8 @@ export function AuthFormFields({
                         type="text"
                         id="mfa-code" // Standard ID
                         name="mfa-code" // Standard name
-                        inputMode="numeric"
-                        pattern="[0-9]*"
+                        inputMode="text"
+                        pattern="[A-Za-z0-9]*"
                         autoFocus
                         autoComplete="one-time-code"
                         autoCorrect="off"
@@ -63,12 +63,12 @@ export function AuthFormFields({
                         data-form-type="other"
                         data-lpignore="true"
                         data-1p-ignore="true"
-                        placeholder="000000"
-                        maxLength={6}
+                        placeholder="123456 or ABCD1234"
+                        maxLength={8}
                         value={mfaCode}
                         onChange={(e) => {
-                            // Only allow numeric input
-                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            // Allow TOTP (6 digits) or 8-char recovery codes.
+                            const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
                             setMfaCode(value);
                         }}
                         className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-400 dark:focus:border-blue-700 transition-all font-mono font-bold text-2xl tracking-[0.3em] text-center"
@@ -76,7 +76,7 @@ export function AuthFormFields({
                 </div>
                 <div className="text-center space-y-2">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Open Authenticator App</p>
-                    <p className="text-xs text-slate-500 max-w-xs mx-auto">Enter the 6-digit code from Google Authenticator or your preferred app.</p>
+                    <p className="text-xs text-slate-500 max-w-xs mx-auto">Enter your 6-digit authenticator code, or an 8-character recovery code.</p>
                 </div>
             </div>
         );

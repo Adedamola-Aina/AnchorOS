@@ -133,6 +133,10 @@ service cloud.firestore {
           allow read, write: if request.auth.uid == userId;
         }
 
+        match /security/{docId} {
+          allow read, write: if request.auth.uid == userId;
+        }
+
 
         // ====================================================================
         // Accounts: Owner or shared member can read
