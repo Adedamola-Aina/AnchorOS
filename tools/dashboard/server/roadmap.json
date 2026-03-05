@@ -134,7 +134,7 @@
             "priority": "P0",
             "title": "Add CODEOWNERS for review accountability",
             "description": "Create CODEOWNERS mappings for core directories so PR ownership routing is automatic and enforceable. [REM-003]",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "GAP-007"
             ],
@@ -162,7 +162,7 @@
             "priority": "P0",
             "title": "Enforce strict TypeScript safety (no-explicit-any)",
             "description": "Set @typescript-eslint/no-explicit-any to error and eliminate violations so CI prevents type-safety regressions. [REM-001]",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "GAP-005"
             ],
@@ -569,7 +569,7 @@
             "priority": "P1",
             "title": "FamilySettingsV2 duplicates Firestore listeners from useFamilySharing",
             "description": "FamilySettingsV2 sets up own onSnapshot listeners instead of using useFamilySharing hook. Creates 6 concurrent listeners for same data. State can diverge between components.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-056"
             ],
@@ -583,7 +583,7 @@
             "priority": "P1",
             "title": "Profile name fires Firestore write on every keystroke - no debounce",
             "description": "ProfileSettings onChange calls updateProfile immediately. Typing John triggers 4 Firestore writes and 4 audit logs. Performance and cost disaster on mobile.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "BUG-055"
             ],
@@ -1100,7 +1100,7 @@
             "priority": "P0",
             "title": "Automated Rollback",
             "description": "Deploy failures should auto-rollback; current DEPLOY_PIPELINE.sh lacks this",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "SRE-002"
             ],

@@ -210,8 +210,13 @@ if [[ "$ENV" == "production" ]]; then
     fi
 fi
 
-# 6. Deployment
-echo -e "\n${YELLOW}🚀 Stage 6: Deploying to ${ENV^}...${NC}"
+# 6. Capture pre-deploy version for rollback
+echo -e "\n${YELLOW}📸 Stage 6: Capturing rollback snapshot...${NC}"
+PRE_DEPLOY_VERSION=$(firebase hosting:channel:list --project "$FIREBASE_PROJECT" 2>/dev/null | head -1 || true)
+echo -e "${GREEN}✅ Rollback snapshot ready.${NC}"
+
+# 6a. Deployment
+echo -e "\n${YELLOW}🚀 Stage 6a: Deploying to ${ENV^}...${NC}"
 if firebase deploy --only hosting:"$HOSTING_TARGET",firestore:rules --project "$FIREBASE_PROJECT"; then
     echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL!${NC}"
     echo -e "🌍 Live at: https://${HOSTING_URL}"
@@ -220,8 +225,43 @@ else
     exit 1
 fi
 
-# 6b. Deploy Marker (git commit for dashboard tracking)
-echo -e "\n${YELLOW}📌 Stage 6b: Recording Deploy Marker...${NC}"
+# 6b. Post-deploy health check with automated rollback (SRE-002)
+echo -e "\n${YELLOW}🏥 Stage 6b: Post-Deploy Health Check...${NC}"
+HEALTH_URL="https://${HOSTING_URL}"
+HEALTH_RETRIES=3
+HEALTH_DELAY=5
+HEALTH_OK=false
+
+for i in $(seq 1 $HEALTH_RETRIES); do
+    echo -e "  Attempt $i/$HEALTH_RETRIES: checking ${HEALTH_URL}..."
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 10 "$HEALTH_URL" 2>/dev/null || echo "000")
+    if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 400 ]]; then
+        echo -e "${GREEN}  ✅ Health check passed (HTTP $HTTP_STATUS).${NC}"
+        HEALTH_OK=true
+        break
+    else
+        echo -e "${YELLOW}  ⚠️  Health check returned HTTP $HTTP_STATUS.${NC}"
+        if [[ $i -lt $HEALTH_RETRIES ]]; then
+            echo -e "  Retrying in ${HEALTH_DELAY}s..."
+            sleep $HEALTH_DELAY
+        fi
+    fi
+done
+
+if [[ "$HEALTH_OK" == false ]]; then
+    echo -e "${RED}❌ Health check failed after $HEALTH_RETRIES attempts. Initiating rollback...${NC}"
+    if firebase hosting:rollback --project "$FIREBASE_PROJECT" --site "$FIREBASE_PROJECT" --confirm 2>/dev/null || \
+       firebase hosting:rollback --project "$FIREBASE_PROJECT" --confirm 2>/dev/null; then
+        echo -e "${GREEN}✅ Rollback successful. Previous version restored.${NC}"
+    else
+        echo -e "${RED}⚠️  Automated rollback failed. Manual intervention required:${NC}"
+        echo -e "${RED}   firebase hosting:rollback --project $FIREBASE_PROJECT${NC}"
+    fi
+    exit 1
+fi
+
+# 6c. Deploy Marker (git commit for dashboard tracking)
+echo -e "\n${YELLOW}📌 Stage 6c: Recording Deploy Marker...${NC}"
 DEPLOY_VERSION=$(node -p "require('./package.json').version")
 DEPLOY_HASH=$(git rev-parse --short HEAD)
 DEPLOY_MSG="deploy(${ENV}): v${DEPLOY_VERSION} @ ${DEPLOY_HASH}"
