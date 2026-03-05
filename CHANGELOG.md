@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.9.0-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.17...v1.9.0-rc.0) (2026-03-05)
+
+
+### Features
+
+* **notifications:** improve push reminder reliability ([4d20428](https://github.com/Adedamola-Aina/AnchorOS/commit/4d204285f38738dc41f3f0e70281ccd223343a67))
+
+
+### Bug Fixes
+
+* **auth:** harden mfa recovery and auth/finance guards ([e265916](https://github.com/Adedamola-Aina/AnchorOS/commit/e2659163a97a552f053cd5b19bc1768d8aa0f8f2))
+* **security:** harden rate limits and immutable audit trail ([8e95d8f](https://github.com/Adedamola-Aina/AnchorOS/commit/8e95d8f158b51be3bb39bc6487100f02bdd482f4))
+* **security:** remediate advisories and trusted iframe sources ([eae3144](https://github.com/Adedamola-Aina/AnchorOS/commit/eae31445b2d4011ee3d524a9244017245e9e478c))
+
 ## [1.8.18-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.17...v1.8.18-dev.0) (2026-03-04)
 
 ## [1.8.17](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.16...v1.8.17) (2026-03-04)
