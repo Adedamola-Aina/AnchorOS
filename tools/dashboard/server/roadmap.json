@@ -539,7 +539,7 @@
             "id": "BUG-058",
             "team": "Engineering",
             "priority": "P2",
-            "title": "O(n²) percentage calculation in AssetDistributionChart legend",
+            "title": "O(n\u00b2) percentage calculation in AssetDistributionChart legend",
             "description": "Each legend item recalculates total via accountData.reduce() inside map. Pre-compute percentages in useMemo for O(n) performance.",
             "status": "completed",
             "detectionPatterns": [
@@ -1139,7 +1139,7 @@
             "priority": "P1",
             "title": "Bill Reminders",
             "description": "As a user, I want automatic reminders before recurring bills are due",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "PRD-003"
             ],
@@ -1152,7 +1152,7 @@
             "priority": "P1",
             "title": "Transaction Insights",
             "description": "Spending trends, averages, and anomaly detection",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "PRD-004"
             ],
@@ -1178,7 +1178,7 @@
             "priority": "P1",
             "title": "Service Worker V2",
             "description": "Add background sync, offline transaction queueing",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "ENG-002"
             ],
@@ -1412,7 +1412,7 @@
             "team": "Database",
             "priority": "P2",
             "title": "Archival Strategy",
-            "description": "Move old transactions to cold storage (Firestore → BigQuery)",
+            "description": "Move old transactions to cold storage (Firestore \u2192 BigQuery)",
             "status": "planned",
             "detectionPatterns": [
                 "DB-003"
@@ -1477,7 +1477,7 @@
             "team": "Data",
             "priority": "P3",
             "title": "Analytics Pipeline",
-            "description": "Firestore → BigQuery → Looker Studio for product analytics",
+            "description": "Firestore \u2192 BigQuery \u2192 Looker Studio for product analytics",
             "status": "planned",
             "detectionPatterns": [
                 "DATA-001"

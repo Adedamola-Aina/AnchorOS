@@ -1,6 +1,70 @@
 {
-  "lastSync": "2026-03-05T22:43:42.961Z",
+  "lastSync": "2026-03-05T23:06:51.681Z",
   "syncHistory": [
+    {
+      "timestamp": "2026-03-05T23:06:51.681Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:06:51.681Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:06:37.787Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:06:37.787Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:06:28.593Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:06:28.592Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
+    {
+      "timestamp": "2026-03-05T22:44:27.654Z",
+      "type": "archive",
+      "details": {
+        "archivedCount": 0,
+        "message": "No items old enough to archive"
+      }
+    },
+    {
+      "timestamp": "2026-03-05T22:44:27.653Z",
+      "type": "velocity",
+      "details": {
+        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
+        "success": false
+      }
+    },
     {
       "timestamp": "2026-03-05T22:43:42.961Z",
       "type": "archive",
@@ -336,76 +400,12 @@
         "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
         "success": false
       }
-    },
-    {
-      "timestamp": "2026-02-22T17:17:01.615Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-02-22T17:17:01.613Z",
-      "type": "velocity",
-      "details": {
-        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
-        "success": false
-      }
-    },
-    {
-      "timestamp": "2026-02-22T16:58:41.877Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-02-22T16:58:41.877Z",
-      "type": "velocity",
-      "details": {
-        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
-        "success": false
-      }
-    },
-    {
-      "timestamp": "2026-02-22T16:57:14.734Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-02-22T16:57:14.732Z",
-      "type": "velocity",
-      "details": {
-        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
-        "success": false
-      }
-    },
-    {
-      "timestamp": "2026-02-22T16:26:32.912Z",
-      "type": "archive",
-      "details": {
-        "archivedCount": 0,
-        "message": "No items old enough to archive"
-      }
-    },
-    {
-      "timestamp": "2026-02-22T16:26:32.911Z",
-      "type": "velocity",
-      "details": {
-        "error": "ENOENT: no such file or directory, open '/root/anchor-os/docs/ROADMAP.md'",
-        "success": false
-      }
     }
   ],
   "stats": {
-    "totalSyncs": 1768,
-    "lastVelocityUpdate": "2026-03-05T22:43:42.960Z",
+    "totalSyncs": 1776,
+    "lastVelocityUpdate": "2026-03-05T23:06:51.681Z",
     "lastPriorityUpdate": "2026-02-01T07:00:00.010Z",
-    "lastArchiveRun": "2026-03-05T22:43:42.961Z"
+    "lastArchiveRun": "2026-03-05T23:06:51.681Z"
   }
 }
