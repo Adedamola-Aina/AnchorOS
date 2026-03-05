@@ -1,39 +1,40 @@
-/**
- * PLT-003: Commitment Reminders - Server-Side Push Delivery
- * 
- * Scheduled function that runs every 5 minutes to check for due reminders
- * and sends native push notifications via FCM.
- * 
- * Design Philosophy: Notifications are minimal, calm, straight to the point.
- * - No emoji clutter
- * - No "It's time for..." fluff
- * - Just the commitment title
- */
 // @ts-nocheck
-
-
-import { getMessaging, type Message } from 'firebase-admin/messaging';
+import { randomUUID } from 'node:crypto';
 import { type DocumentReference } from 'firebase-admin/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { format } from 'date-fns';
 import { db, APP_ID } from './config';
+import { shouldSendReminderForCategory, type NotificationPreferences } from './reminderPreferences';
+import { buildReminderMessage } from './reminderBatching';
+import { buildReminderDeliveryKey, shouldSkipReminderDelivery } from './reminderDedupe';
+import { sendReminderNotification } from './reminderSender';
+import { getReminderLinkPath, type ReminderCategory } from './reminderRouting';
+import { claimReminderDeliverySlot, releaseReminderDeliverySlot } from './reminderClaim';
 
-/**
- * Scheduled function: runs every 5 minutes
- * Queries commitments with reminders in the current time window and sends push notifications.
- */
+interface PendingReminder {
+    title: string;
+    ref: DocumentReference;
+    category: ReminderCategory;
+}
+interface ReminderDeliveryState {
+    key?: string;
+    sentAt?: string;
+    userRef: DocumentReference;
+}
+
 export const processReminders = onSchedule(
     { schedule: 'every 1 minutes', timeZone: 'Africa/Lagos' },
     async () => {
         const now = new Date();
+        const runId = randomUUID();
+        const nowMs = now.getTime();
+        const sentAt = now.toISOString();
         const currentTime = format(now, 'HH:mm');
         const todayDate = format(now, 'yyyy-MM-dd');
 
         console.log(`[Reminders] Processing reminders for ${currentTime} on ${todayDate}`);
 
         try {
-            // Query all incomplete commitments with reminderTime matching current window
-            // Note: This is a collection group query across all users
             const snapshot = await db.collectionGroup('commitments')
                 .where('reminderTime', '==', currentTime)
                 .where('completed', '==', false)
@@ -46,7 +47,10 @@ export const processReminders = onSchedule(
 
             console.log(`[Reminders] Found ${snapshot.size} commitments with reminders.`);
 
-            const sendPromises: Promise<void>[] = [];
+            const remindersByUser = new Map<string, PendingReminder[]>();
+            const preferenceCache = new Map<string, boolean>();
+            const tokenCache = new Map<string, FirebaseFirestore.QueryDocumentSnapshot[]>();
+            const deliveryStateCache = new Map<string, ReminderDeliveryState>();
 
             for (const doc of snapshot.docs) {
                 const commitment = doc.data();
@@ -57,39 +61,136 @@ export const processReminders = onSchedule(
                     continue;
                 }
 
-                // Check if already notified today (prevent duplicates)
-                const lastNotified = commitment.lastReminderSent;
-                if (lastNotified === todayDate) {
+                if (commitment.lastReminderSent === todayDate) {
                     console.log(`[Reminders] Already notified for ${doc.id} today, skipping.`);
                     continue;
                 }
 
-                // Get user's FCM tokens
-                const tokensSnapshot = await db
-                    .collection('artifacts')
-                    .doc(APP_ID)
-                    .collection('users')
-                    .doc(userId)
-                    .collection('fcmTokens')
-                    .get();
+                let notificationsAllowed = preferenceCache.get(userId);
+                if (notificationsAllowed === undefined) {
+                    const userRef = db.collection('artifacts').doc(APP_ID)
+                        .collection('users').doc(userId);
+                    const userDoc = await userRef.get();
 
-                if (tokensSnapshot.empty) {
+                    const prefs = userDoc.data()?.notificationPreferences as NotificationPreferences | undefined;
+                    notificationsAllowed = shouldSendReminderForCategory(prefs, 'commitments', currentTime);
+                    preferenceCache.set(userId, notificationsAllowed);
+
+                    deliveryStateCache.set(userId, {
+                        key: userDoc.data()?.lastReminderDeliveryKey,
+                        sentAt: userDoc.data()?.lastReminderDeliveryAt,
+                        userRef,
+                    });
+                }
+
+                if (!notificationsAllowed) {
+                    continue;
+                }
+
+                let tokenDocs = tokenCache.get(userId);
+                if (!tokenDocs) {
+                    const tokensSnapshot = await db
+                        .collection('artifacts')
+                        .doc(APP_ID)
+                        .collection('users')
+                        .doc(userId)
+                        .collection('fcmTokens')
+                        .get();
+
+                    tokenDocs = tokensSnapshot.docs;
+                    tokenCache.set(userId, tokenDocs);
+                }
+
+                if (tokenDocs.length === 0) {
                     console.log(`[Reminders] No FCM tokens for user ${userId}, skipping.`);
                     continue;
                 }
 
-                // Send notification to each token
-                for (const tokenDoc of tokensSnapshot.docs) {
-                    const token = tokenDoc.id;
-                    sendPromises.push(
-                        sendReminderNotification(token, commitment.title, doc.ref, todayDate)
+                const pending = remindersByUser.get(userId) || [];
+                pending.push({ title: commitment.title, ref: doc.ref, category: 'commitments' });
+                remindersByUser.set(userId, pending);
+            }
+
+            let deliveryCount = 0;
+
+            for (const [userId, reminders] of remindersByUser.entries()) {
+                const tokenDocs = tokenCache.get(userId) || [];
+                const deliveryState = deliveryStateCache.get(userId);
+                if (tokenDocs.length === 0 || !deliveryState) {
+                    continue;
+                }
+
+                const dedupeKey = buildReminderDeliveryKey(
+                    todayDate,
+                    currentTime,
+                    reminders.map((reminder) => reminder.title),
+                );
+
+                if (shouldSkipReminderDelivery({
+                    previousKey: deliveryState.key,
+                    previousSentAt: deliveryState.sentAt,
+                    currentKey: dedupeKey,
+                    nowMs,
+                })) {
+                    console.log(`[Reminders] Skipping duplicate reminder batch for user ${userId}.`);
+                    continue;
+                }
+
+                const hasClaim = await claimReminderDeliverySlot({
+                    userId,
+                    dedupeKey,
+                    runId,
+                    nowMs,
+                });
+
+                if (!hasClaim) {
+                    console.log(`[Reminders] Another run already claimed batch for user ${userId}.`);
+                    continue;
+                }
+
+                try {
+                    const message = buildReminderMessage(reminders.map((reminder) => reminder.title));
+                    const linkPath = getReminderLinkPath(reminders.map((reminder) => reminder.category));
+
+                    const sendResults = await Promise.allSettled(
+                        tokenDocs.map((tokenDoc) =>
+                            sendReminderNotification({
+                                token: tokenDoc.id,
+                                title: message.title,
+                                body: message.body,
+                                tokenDocRef: tokenDoc.ref,
+                                linkPath,
+                            })
+                        )
                     );
+
+                    const hasAnySuccess = sendResults.some(
+                        (result) => result.status === 'fulfilled' && result.value === true
+                    );
+                    if (!hasAnySuccess) {
+                        continue;
+                    }
+
+                    await deliveryState.userRef.set({
+                        lastReminderDeliveryKey: dedupeKey,
+                        lastReminderDeliveryAt: sentAt,
+                    }, { merge: true });
+
+                    deliveryStateCache.set(userId, { ...deliveryState, key: dedupeKey, sentAt });
+                    await Promise.all(reminders.map((reminder) => reminder.ref.update({ lastReminderSent: todayDate })));
+                    deliveryCount += tokenDocs.length;
+                } finally {
+                    await releaseReminderDeliverySlot({
+                        userId,
+                        dedupeKey,
+                        runId,
+                    }).catch((error) => {
+                        console.error(`[Reminders] Failed to release claim for user ${userId}:`, error);
+                    });
                 }
             }
 
-            await Promise.allSettled(sendPromises);
-            console.log(`[Reminders] Processed ${sendPromises.length} notification(s).`);
-
+            console.log(`[Reminders] Processed ${deliveryCount} notification delivery attempt(s).`);
             return;
         } catch (error) {
             console.error('[Reminders] Error processing reminders:', error);
@@ -97,73 +198,3 @@ export const processReminders = onSchedule(
         }
     }
 );
-
-/**
- * Send a single FCM notification for a commitment reminder.
- * 
- * Notification Copy (per DESIGN_PHILOSOPHY.md):
- * - Title: Just the commitment title (no prefix)
- * - Body: Empty or minimal - the title IS the message
- */
-async function sendReminderNotification(
-    token: string,
-    title: string,
-    commitmentRef: DocumentReference,
-    todayDate: string
-): Promise<void> {
-    // FCM message - minimal, calm, direct
-    const message: Message = {
-        token,
-        notification: {
-            title: title,  // Just the commitment. No "Reminder:" prefix.
-            body: undefined // No body - the title says it all
-        },
-        webpush: {
-            notification: {
-                icon: '/favicon.svg',
-                badge: '/favicon.svg',
-                requireInteraction: false,
-                silent: false
-            },
-            fcmOptions: {
-                link: '/commitments' // Open commitments page when tapped
-            }
-        },
-        // For iOS/Android native apps (future)
-        apns: {
-            payload: {
-                aps: {
-                    sound: 'default',
-                    badge: 1
-                }
-            }
-        },
-        android: {
-            priority: 'high',
-            notification: {
-                sound: 'default',
-                channelId: 'reminders'
-            }
-        }
-    };
-
-    try {
-        await getMessaging().send(message);
-        console.log(`[Reminders] Sent notification to token: ${token.substring(0, 10)}...`);
-
-        // Mark as notified today to prevent duplicates
-        await commitmentRef.update({
-            lastReminderSent: todayDate
-        });
-    } catch (error: unknown) {
-        const err = error as { code?: string; message?: string };
-        // Handle stale tokens
-        if (err.code === 'messaging/registration-token-not-registered' ||
-            err.code === 'messaging/invalid-registration-token') {
-            console.warn(`[Reminders] Removing stale token: ${token.substring(0, 10)}...`);
-            // Token is invalid, could delete it here if needed
-        } else {
-            console.error(`[Reminders] Failed to send to ${token.substring(0, 10)}...:`, err.message);
-        }
-    }
-}
