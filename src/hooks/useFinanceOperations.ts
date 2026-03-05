@@ -20,6 +20,7 @@ import { canDeleteTransaction } from '../features/finance/utils/permissions';
 import { logTransactionAdded, logTransactionDeleted, logTransactionEdited } from './financeActivityLogging';
 import { createTracer } from '../services/telemetry';
 import { convertCurrencyAcrossAccounts, restoreSoftDeletedTransaction } from '../api/FinanceOperationsApi';
+import { enqueueTransaction } from '../utils/offlineQueue';
 
 const OPERATION_TIMEOUT = 10000;
 const financeTracer = createTracer('Finance');
@@ -73,6 +74,17 @@ export const useFinanceOperations = (
     // Transaction operations
     const addTransaction = useCallback(async (tx: CreateTransactionPayload) => {
         if (!user) return;
+
+        // ENG-002: Queue transaction offline, sync when connectivity returns
+        if (!navigator.onLine) {
+            await enqueueTransaction(user.uid, tx);
+            if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                const reg = await navigator.serviceWorker.ready;
+                await reg.sync.register('sync-transactions');
+            }
+            return;
+        }
+
         return financeTracer.trace('addTransaction', async () => {
             try {
                 await withTimeout(financeService.addTransaction(user.uid, tx, accounts), OPERATION_TIMEOUT, 'addTransaction');

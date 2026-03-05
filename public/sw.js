@@ -102,6 +102,19 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
+// Background Sync: Process offline transaction queue when connectivity returns
+self.addEventListener('sync', (event) => {
+    if (event.tag === 'sync-transactions') {
+        event.waitUntil(
+            self.clients.matchAll().then((clients) => {
+                clients.forEach((client) => {
+                    client.postMessage({ type: 'PROCESS_OFFLINE_QUEUE' });
+                });
+            })
+        );
+    }
+});
+
 // Fetch: Network-first for HTML/JS, Stale-While-Revalidate for static assets
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);

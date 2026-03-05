@@ -43,6 +43,9 @@ export * from './recurring';
 // Push notification reminders
 export * from './reminders';
 
+// Bill reminders (PRD-003)
+export { processBillReminders } from './billReminderScheduler';
+
 // Account deletion
 export { deleteMyAccount } from './deleteAccount';
 

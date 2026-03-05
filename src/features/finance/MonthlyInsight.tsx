@@ -3,6 +3,8 @@ import React, { useMemo } from 'react';
 import { TrendingDown, TrendingUp, Target, PieChart } from 'lucide-react';
 import { formatCurrencyCompact } from '../../utils/format';
 import { fromCents } from '../../utils/moneyUtils';
+import { getSpendingTrend, detectAnomalies } from '../../utils/insights/transactionInsights';
+import { InsightCards } from './components/InsightCards';
 import type { AnchorTransaction, Currency } from '../../types';
 
 interface MonthlyInsightProps {
@@ -47,12 +49,16 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
         };
     }, [transactions]);
 
+    const trend = useMemo(() => getSpendingTrend(transactions), [transactions]);
+    const anomalies = useMemo(() => detectAnomalies(transactions), [transactions]);
+
     if (transactions.length === 0) return null;
 
     // BUG-037 Fix: Handle floating point precision issues
     const isOverspending = Math.round(summary.savings) < 0;
 
     return (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="glass-card p-4 flex items-center gap-4">
                 <div className="p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-2xl text-emerald-600">
@@ -110,5 +116,7 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                 </div>
             )}
         </div>
+        <InsightCards trend={trend} anomalies={anomalies} currency={currency} />
+        </>
     );
 };
