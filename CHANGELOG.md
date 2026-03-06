@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.9.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.17...v1.9.0) (2026-03-06)
+
+
+### Features
+
+* **finance:** add filter persistence, csv export, and web vitals monitoring ([da46283](https://github.com/Adedamola-Aina/AnchorOS/commit/da46283b68665b9c2c92c93567373d2fe4577fe7))
+* **finance:** add offline queue, bill reminders, and transaction insights ([f7106c8](https://github.com/Adedamola-Aina/AnchorOS/commit/f7106c8221005d967f6e1bd924cb17a7ebc9c6a2))
+* **finance:** mono bank integration and blind spot fixes ([9d70758](https://github.com/Adedamola-Aina/AnchorOS/commit/9d707580cf99a2ecf2c59aabab7e1577902f35d7))
+* **notifications:** improve push reminder reliability ([4d20428](https://github.com/Adedamola-Aina/AnchorOS/commit/4d204285f38738dc41f3f0e70281ccd223343a67))
+
+
+### Bug Fixes
+
+* **auth:** harden mfa recovery and auth/finance guards ([e265916](https://github.com/Adedamola-Aina/AnchorOS/commit/e2659163a97a552f053cd5b19bc1768d8aa0f8f2))
+* **build:** remove deprecated onFID, fix useRef initial value ([1c01c7e](https://github.com/Adedamola-Aina/AnchorOS/commit/1c01c7e28de49b4f875ae4240f816857bcb461af))
+* **email:** prefix unused recipient with underscore ([81dea0a](https://github.com/Adedamola-Aina/AnchorOS/commit/81dea0ac4c916c68768fd603db8a9a8da97ad46c))
+* **security:** harden auth, secrets, CSP, HSTS, and data exposure ([50d3451](https://github.com/Adedamola-Aina/AnchorOS/commit/50d345169d930850a9290fbc3efee0158c6b1807))
+* **security:** harden rate limits and immutable audit trail ([8e95d8f](https://github.com/Adedamola-Aina/AnchorOS/commit/8e95d8f158b51be3bb39bc6487100f02bdd482f4))
+* **security:** remediate advisories and trusted iframe sources ([eae3144](https://github.com/Adedamola-Aina/AnchorOS/commit/eae31445b2d4011ee3d524a9244017245e9e478c))
+* **settings:** remove ts-nocheck, verify external connection prop ([be7f4ae](https://github.com/Adedamola-Aina/AnchorOS/commit/be7f4ae7dfa05788ee7a0120672f37fc12353926))
+
 ## [1.9.0-rc.5](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.8.17...v1.9.0-rc.5) (2026-03-06)
 
 

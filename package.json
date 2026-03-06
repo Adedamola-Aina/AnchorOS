@@ -1,7 +1,7 @@
 {
   "name": "anchor-os",
   "private": true,
-  "version": "1.9.0-rc.5",
+  "version": "1.9.0",
   "type": "module",
   "scripts": {
     "dev": "vite --config config/vite.config.ts",
