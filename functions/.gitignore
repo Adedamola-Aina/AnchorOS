@@ -1,0 +1,10 @@
+# Environment files with secrets — use Firebase Secrets Manager instead
+.env
+.env.*
+!.env.example
+
+# Build output
+lib/
+
+# Node
+node_modules/

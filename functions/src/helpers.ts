@@ -8,12 +8,12 @@
 
 
 import { FieldValue } from 'firebase-admin/firestore';
-import { createHash } from 'node:crypto';
+import { createHash, randomInt } from 'node:crypto';
 import { db, APP_ID } from './config';
 import type { FamilyConnection } from './types';
 
 export function generateVerificationCode(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return randomInt(100000, 999999).toString();
 }
 
 export async function createAuditLog(

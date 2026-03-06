@@ -80,17 +80,10 @@ export const sendTemplatedEmail = onCall(
             throw new HttpsError('invalid-argument', `Unknown email template: ${template}`);
         }
 
-        console.log('Email to send:', {
-            to: recipient,
-            subject: emailTemplate.subject,
-            body: emailTemplate.body,
-        });
-
         return {
             success: true,
             message: 'Email queued for delivery',
             template,
-            recipient,
         };
     }
 );

@@ -51,3 +51,8 @@ export { deleteMyAccount } from './deleteAccount';
 
 // MFA recovery
 export { recoverMfaWithCode } from './mfaRecovery';
+
+// Bank integration (Mono)
+export { linkBankAccount, unlinkBankAccount } from './bankLink';
+export { syncBankTransactions, syncBankAccountNow } from './bankSync';
+export { monoWebhook } from './bankWebhook';

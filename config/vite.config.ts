@@ -110,7 +110,7 @@ export default defineConfig(({ mode }) => ({
     postcss: __dirname,
   },
   build: {
-    sourcemap: true, // Required for Sentry
+    sourcemap: 'hidden', // Source maps uploaded to Sentry but not publicly served
     rollupOptions: {
       input: path.resolve(rootDir, 'index.html'),
       output: {

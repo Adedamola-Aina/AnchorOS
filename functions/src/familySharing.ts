@@ -144,23 +144,24 @@ export const disconnectFamily = onCall(
             disconnectedBy: callerUid,
         });
 
-        if (isOwner) {
-            const accountsRef = db.collection('artifacts').doc(APP_ID)
-                .collection('users').doc(callerUid).collection('accounts');
-            const accountsSnapshot = await accountsRef.get();
-            const batch = db.batch();
+        // Always clean up shared accounts on the owner's side
+        const ownerUid = connection.ownerUid;
+        const memberUid = connection.memberUid;
+        const accountsRef = db.collection('artifacts').doc(APP_ID)
+            .collection('users').doc(ownerUid).collection('accounts');
+        const accountsSnapshot = await accountsRef.get();
+        const batch = db.batch();
 
-            accountsSnapshot.docs.forEach(doc => {
-                const docData = doc.data();
-                if (docData.sharedWith?.[otherUid]) {
-                    batch.update(doc.ref, {
-                        [`sharedWith.${otherUid}`]: FieldValue.delete(),
-                    });
-                }
-            });
+        accountsSnapshot.docs.forEach(doc => {
+            const docData = doc.data();
+            if (docData.sharedWith?.[memberUid]) {
+                batch.update(doc.ref, {
+                    [`sharedWith.${memberUid}`]: FieldValue.delete(),
+                });
+            }
+        });
 
-            await batch.commit();
-        }
+        await batch.commit();
 
         const callerName = isOwner ? connection.ownerDisplayName : connection.memberDisplayName;
         await createNotification(

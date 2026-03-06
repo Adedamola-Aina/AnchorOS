@@ -40,6 +40,9 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     auditLog:            { maxAttempts: 120, windowMs: HOUR,     blockDurationMs: 10 * MIN },
     familyMigration:     { maxAttempts: 1,   windowMs: DAY,      blockDurationMs: DAY },
     scopeMigration:      { maxAttempts: 3,   windowMs: DAY,      blockDurationMs: HOUR },
+    bankLink:            { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
+    bankUnlink:          { maxAttempts: 3,   windowMs: DAY,      blockDurationMs: DAY },
+    bankSync:            { maxAttempts: 10,  windowMs: DAY,      blockDurationMs: HOUR },
 };
 
 // ============================================================================
@@ -121,10 +124,18 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
 
 export const checkRateLimit = onCall(
     async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Authentication required');
+        }
+
         const { action, identifier } = request.data as { action: string; identifier: string };
 
         if (!action || !identifier) {
             throw new HttpsError('invalid-argument', 'Action and identifier are required');
+        }
+
+        if (identifier !== request.auth.uid) {
+            throw new HttpsError('permission-denied', 'You can only check your own rate limit');
         }
 
         const config = RATE_LIMITS[action];

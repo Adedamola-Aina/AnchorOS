@@ -137,6 +137,11 @@ service cloud.firestore {
           allow read, write: if request.auth.uid == userId;
         }
 
+        // Bank connections — readable by owner, writeable only by Cloud Functions (Admin SDK)
+        match /bankConnections/{connectionId} {
+          allow read: if request.auth.uid == userId;
+          allow write: if false;
+        }
 
         // ====================================================================
         // Accounts: Owner or shared member can read
@@ -152,13 +157,17 @@ service cloud.firestore {
           
           // Update: owner, manage permission, or connected family member (for balance updates)
           // sharedWith and shares can only be changed by owner
+          // Linked account balance/connection can only be changed by Cloud Functions (Admin SDK)
           allow update: if isValidAccount(request.resource.data)
                         && (request.auth.uid == userId 
                             || resource.data.get('shares', {})[request.auth.uid] == 'manage'
                             || isConnectedFamilyMember(userId))
                         && (request.auth.uid == userId || 
                             (request.resource.data.get('sharedWith', {}) == resource.data.get('sharedWith', {}) &&
-                             request.resource.data.get('shares', {}) == resource.data.get('shares', {})));
+                             request.resource.data.get('shares', {}) == resource.data.get('shares', {})))
+                        && (resource.data.get('source', 'manual') != 'linked'
+                            || !request.resource.data.diff(resource.data).affectedKeys()
+                                .hasAny(['balanceCents', 'externalConnection', 'source']));
           
           allow delete: if request.auth.uid == userId;
 
@@ -196,10 +205,9 @@ service cloud.firestore {
           function verifyDeletePermission() {
             let accountId = resource.data.accountId;
             let account = get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
-            // Allow if owner, legacy manage share, or in sharedWith (assumes transact capability if in sharedWith for now)
+            // Only owner or legacy manage share can delete — sharedWith members cannot
             return account.data.ownerId == request.auth.uid 
-                   || account.data.get('shares', {})[request.auth.uid] == 'manage'
-                   || request.auth.uid in account.data.get('sharedWith', {}).keys();
+                   || account.data.get('shares', {})[request.auth.uid] == 'manage';
           }
 
           // Read: owner, legacy shares, sharedWith, or family scope

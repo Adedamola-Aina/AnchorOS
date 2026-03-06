@@ -76,8 +76,8 @@ export const recoverMfaWithCode = onCall(async (request) => {
                 enrolledFactors: [],
             },
         });
-    } catch (error) {
-        throw new HttpsError('internal', `Failed to reset MFA: ${String(error)}`);
+    } catch {
+        throw new HttpsError('internal', 'Failed to reset MFA. Please try again or contact support.');
     }
 
     await recoveryRef.set({
