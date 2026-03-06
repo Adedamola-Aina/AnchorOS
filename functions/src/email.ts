@@ -31,7 +31,7 @@ export const sendTemplatedEmail = onCall(
 
         await enforceRateLimit('emailSend', request.auth.uid);
 
-        const { template, recipient, data: templateData } = request.data as EmailTemplateData;
+        const { template, recipient: _recipient, data: templateData } = request.data as EmailTemplateData;
 
         const templates: Record<string, { subject: string; body: string }> = {
             invitation: {
