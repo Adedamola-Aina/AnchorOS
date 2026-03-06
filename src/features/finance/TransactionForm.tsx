@@ -59,6 +59,9 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     );
     useUnsavedChanges(isDirty);
 
+    // Synced bank transactions: only category is editable
+    const isSyncedTx = initialData?.source === 'synced';
+
     // Context awareness: account is established when opened from account detail
     const hasAccountContext = !!lockedAccount && !!defaultAccountId && accounts.some(a => a.id === defaultAccountId);
     // Pay Bill = expense with Bills & Utilities prefill from account context
@@ -124,15 +127,22 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                     <AccountSelector accounts={accounts} selectedId={formState.selectedAccId} onSelect={formState.setSelectedAccId} label={getTransactionLabel(formState.type).accountLabel} />
                 )}
 
-                {/* Type selector: hidden for intentional actions (transfer, pay bill) */}
-                {!isIntentLocked && (
+                {/* Synced bank transaction notice */}
+                {isSyncedTx && (
+                    <div className="px-3 py-2 rounded-lg bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 text-xs font-medium">
+                        Bank-synced transaction — only category can be changed.
+                    </div>
+                )}
+
+                {/* Type selector: hidden for intentional actions (transfer, pay bill) or synced txns */}
+                {!isIntentLocked && !isSyncedTx && (
                     <TransactionTypeSelector type={formState.type} onChange={formState.setType} />
                 )}
 
                 {/* Core fields: description + amount always first */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <DescriptionField value={formState.title} onChange={formState.setTitle} error={errors.title} onClearError={() => setErrors({ ...errors, title: undefined })} />
-                    <AmountField value={amount} onChange={setAmount} error={errors.amount} onClearError={() => setErrors({ ...errors, amount: undefined })} currency={sourceAccount?.currency} />
+                    <DescriptionField value={formState.title} onChange={formState.setTitle} error={errors.title} onClearError={() => setErrors({ ...errors, title: undefined })} disabled={isSyncedTx} />
+                    <AmountField value={amount} onChange={setAmount} error={errors.amount} onClearError={() => setErrors({ ...errors, amount: undefined })} currency={sourceAccount?.currency} disabled={isSyncedTx} />
                 </div>
 
                 {/* Transfer: destination + exchange rate */}
@@ -148,7 +158,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                         <CategorySelector category={formState.category} onChange={(c) => { formState.setCategory(c); formState.setSuggestedCategory(null); }}
                             suggestedCategory={formState.suggestedCategory} onAcceptSuggestion={() => { formState.setCategory(formState.suggestedCategory!); formState.setSuggestedCategory(null); }} error={errors.category} />
                     )}
-                    <DateField value={transactionDate} onChange={setTransactionDate} />
+                    <DateField value={transactionDate} onChange={setTransactionDate} disabled={isSyncedTx} />
                 </div>
 
                 {/* Recurring Options - Hidden during updates */}

@@ -21,6 +21,8 @@ import { logTransactionAdded, logTransactionDeleted, logTransactionEdited } from
 import { createTracer } from '../services/telemetry';
 import { convertCurrencyAcrossAccounts, restoreSoftDeletedTransaction } from '../api/FinanceOperationsApi';
 import { enqueueTransaction } from '../utils/offlineQueue';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../config/firebase';
 
 const OPERATION_TIMEOUT = 10000;
 const financeTracer = createTracer('Finance');
@@ -51,6 +53,11 @@ export const useFinanceOperations = (
             throw new Error('Only the account owner can delete this account');
         }
         try {
+            // Revoke Mono OAuth token for linked bank accounts before archiving
+            if (account.source === 'linked') {
+                const unlinkCallable = httpsCallable<{ accountId: string }, { success: boolean }>(functions, 'unlinkBankAccount');
+                await unlinkCallable({ accountId: id });
+            }
             await withTimeout(financeService.deleteAccount(user.uid, userName, account), OPERATION_TIMEOUT, 'deleteAccount');
         } catch (err) {
             throw handleError(err);

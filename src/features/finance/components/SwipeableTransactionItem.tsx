@@ -34,18 +34,20 @@ export const SwipeableTransactionItem: React.FC<SwipeableTransactionItemProps> =
 }) => {
     const { isMobile } = useResponsive();
 
+    const isSynced = transaction.source === 'synced';
+
     // On mobile, wrap with SwipeableRow for gesture support
     if (isMobile) {
         return (
             <SwipeableRow
-                onSwipeLeft={() => onDelete(transaction)}
+                onSwipeLeft={isSynced ? undefined : () => onDelete(transaction)}
                 onSwipeRight={() => onEdit(transaction)}
                 leftAction={{
                     label: 'Edit',
                     color: 'blue',
                     icon: <Pencil className="w-4 h-4 mr-1" />,
                 }}
-                rightAction={{
+                rightAction={isSynced ? undefined : {
                     label: 'Delete',
                     color: 'red',
                     icon: <Trash2 className="w-4 h-4 mr-1" />,
@@ -55,7 +57,7 @@ export const SwipeableTransactionItem: React.FC<SwipeableTransactionItemProps> =
                     transaction={transaction}
                     accountName={accountName}
                     onEdit={onEdit}
-                    onDelete={onDelete}
+                    onDelete={isSynced ? undefined : onDelete}
                     currentUserId={currentUserId}
                 />
             </SwipeableRow>
@@ -68,7 +70,7 @@ export const SwipeableTransactionItem: React.FC<SwipeableTransactionItemProps> =
             transaction={transaction}
             accountName={accountName}
             onEdit={onEdit}
-            onDelete={onDelete}
+            onDelete={isSynced ? undefined : onDelete}
             currentUserId={currentUserId}
         />
     );

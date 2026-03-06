@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { DollarSign, Banknote, Users } from 'lucide-react';
+import { DollarSign, Banknote, Users, Link2, AlertTriangle } from 'lucide-react';
 import { Badge } from '../../../components/shared';
 import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
@@ -13,6 +13,7 @@ interface AccountCardProps {
     familyMemberUid?: string; // The family member's UID (if connected)
     onEdit: (account: AnchorAccount) => void;
     onToggleShare?: (account: AnchorAccount, share: boolean) => void;
+    onReconnect?: (account: AnchorAccount) => void;
 }
 
 export const AccountCard: React.FC<AccountCardProps> = ({
@@ -22,6 +23,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
     familyMemberUid,
     onEdit,
     onToggleShare,
+    onReconnect,
 }) => {
 
     // Check if this account is shared with family member (v2)
@@ -83,11 +85,33 @@ export const AccountCard: React.FC<AccountCardProps> = ({
                 <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums truncate">
                     {formatCurrencyCompact(fromCents(account.balanceCents), account.currency)}
                 </p>
+                {account.source === 'linked' && account.externalConnection && (
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+                        {account.externalConnection.institutionName}
+                    </p>
+                )}
                 <div className="flex items-center gap-2 mt-2">
                     <Badge type={account.type} variant="outline">
                         {account.type}
                     </Badge>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{account.currency}</span>
+                    {account.source === 'linked' && account.externalConnection && (
+                        <>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                <Link2 className="w-3 h-3" />
+                                {account.externalConnection.maskedAccountNumber}
+                            </span>
+                            {account.externalConnection.syncStatus === 'reconnect_required' && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onReconnect?.(account); }}
+                                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+                                    title="Re-authenticate your bank connection"
+                                >
+                                    <AlertTriangle className="w-3 h-3" /> Reconnect
+                                </button>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
 

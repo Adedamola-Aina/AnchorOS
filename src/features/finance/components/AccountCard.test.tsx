@@ -68,4 +68,62 @@ describe('AccountCard', () => {
     const buttons = container.querySelectorAll('button');
     expect(buttons.length).toBeLessThanOrEqual(1); // only the card itself might be a button
   });
+
+  describe('linked bank accounts', () => {
+    const linkedAccount = buildAccount({
+      name: 'GTBank Spending',
+      source: 'linked',
+      externalConnection: {
+        provider: 'mono',
+        externalAccountId: 'mono-123',
+        institutionName: 'Guaranty Trust Bank',
+        institutionCode: 'gtb',
+        lastSyncedAt: '2026-03-06T10:00:00Z',
+        syncStatus: 'active',
+        maskedAccountNumber: '****5678',
+      },
+    });
+
+    it('shows institution name for linked accounts', () => {
+      render(<AccountCard account={linkedAccount} userId="u1" onEdit={vi.fn()} />);
+      expect(screen.getByText(/Guaranty Trust Bank/i)).toBeInTheDocument();
+    });
+
+    it('shows masked account number', () => {
+      render(<AccountCard account={linkedAccount} userId="u1" onEdit={vi.fn()} />);
+      expect(screen.getByText(/\*\*\*\*5678/)).toBeInTheDocument();
+    });
+
+    it('shows reconnect badge when status is reconnect_required', () => {
+      const reconnectAccount = buildAccount({
+        source: 'linked',
+        externalConnection: {
+          ...linkedAccount.externalConnection,
+          syncStatus: 'reconnect_required',
+        },
+      });
+      render(<AccountCard account={reconnectAccount} userId="u1" onEdit={vi.fn()} />);
+      expect(screen.getByText(/reconnect/i)).toBeInTheDocument();
+    });
+
+    it('calls onReconnect when reconnect badge is clicked', async () => {
+      const onReconnect = vi.fn();
+      const reconnectAccount = buildAccount({
+        source: 'linked',
+        externalConnection: {
+          ...linkedAccount.externalConnection,
+          syncStatus: 'reconnect_required',
+        },
+      });
+      render(<AccountCard account={reconnectAccount} userId="u1" onEdit={vi.fn()} onReconnect={onReconnect} />);
+      const badge = screen.getByRole('button', { name: /reconnect/i });
+      await badge.click();
+      expect(onReconnect).toHaveBeenCalledWith(reconnectAccount);
+    });
+
+    it('does not show bank info for manual accounts', () => {
+      render(<AccountCard account={baseAccount} userId="u1" onEdit={vi.fn()} />);
+      expect(screen.queryByText(/\*\*\*\*/)).not.toBeInTheDocument();
+    });
+  });
 });

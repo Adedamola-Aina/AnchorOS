@@ -66,4 +66,15 @@ describe('TransactionItem', () => {
         render(<TransactionItem {...defaultProps} accountName="Savings" />);
         expect(screen.getByText('Savings')).toBeInTheDocument();
     });
+
+    it('shows Bank pill for synced transactions', () => {
+        const syncedTx: AnchorTransaction = { ...baseTx, source: 'synced' };
+        render(<TransactionItem {...defaultProps} transaction={syncedTx} />);
+        expect(screen.getByText('Bank')).toBeInTheDocument();
+    });
+
+    it('does NOT show Bank pill for manual transactions', () => {
+        render(<TransactionItem {...defaultProps} />);
+        expect(screen.queryByText('Bank')).not.toBeInTheDocument();
+    });
 });

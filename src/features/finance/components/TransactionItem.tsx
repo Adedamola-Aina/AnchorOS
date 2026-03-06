@@ -116,6 +116,13 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
                                 Backdated
                             </span>
                         )}
+
+                        {/* Bank-synced Pill */}
+                        {transaction.source === 'synced' && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 border border-sky-100 dark:border-sky-800/50">
+                                Bank
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

@@ -148,3 +148,41 @@ export function getSpendingTrend(txns: AnchorTransaction[]): SpendingTrend {
         previousMonthCents: previous,
     };
 }
+
+interface SourceBreakdown {
+    manualCents: number;
+    syncedCents: number;
+    totalCents: number;
+    syncedPercent: number;
+    hasBankData: boolean;
+}
+
+/**
+ * Splits expense spending by source: manual (cash) vs synced (bank).
+ * Transactions without a source are treated as manual.
+ */
+export function getSourceBreakdown(txns: AnchorTransaction[]): SourceBreakdown {
+    const empty: SourceBreakdown = { manualCents: 0, syncedCents: 0, totalCents: 0, syncedPercent: 0, hasBankData: false };
+    const expenses = txns.filter(isExpense);
+    if (expenses.length === 0) return empty;
+
+    let manualCents = 0;
+    let syncedCents = 0;
+
+    for (const tx of expenses) {
+        if (tx.source === 'synced') {
+            syncedCents += tx.amountCents;
+        } else {
+            manualCents += tx.amountCents;
+        }
+    }
+
+    const totalCents = manualCents + syncedCents;
+    return {
+        manualCents,
+        syncedCents,
+        totalCents,
+        syncedPercent: totalCents > 0 ? Math.round((syncedCents / totalCents) * 10000) / 100 : 0,
+        hasBankData: syncedCents > 0,
+    };
+}

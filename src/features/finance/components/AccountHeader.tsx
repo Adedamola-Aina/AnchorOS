@@ -8,7 +8,7 @@
 // @ts-nocheck
 
 
-import { ArrowLeft, Trash2, Users, Pencil, Sparkles } from 'lucide-react';
+import { ArrowLeft, Trash2, Users, Pencil, Sparkles, Link2, RefreshCw } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
 import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
@@ -40,6 +40,8 @@ interface AccountHeaderProps {
     onNameChange: (name: string) => void;
     monthlyBalance?: MonthlyBalance;
     onExportCsv?: () => void;
+    onSyncNow?: () => void;
+    isSyncing?: boolean;
 }
 
 const getAccountStyle = (account: AnchorAccount) => {
@@ -64,7 +66,7 @@ export const AccountHeader = ({
     isEditingName, newName, isRenaming,
     onBack, onDelete, onShare, onAddTransaction,
     onStartRename, onCancelRename, onConfirmRename, onNameChange,
-    monthlyBalance, onExportCsv,
+    monthlyBalance, onExportCsv, onSyncNow, isSyncing,
 }: AccountHeaderProps) => {
     const style = getAccountStyle(account);
     const isShared = account.sharedWith && Object.keys(account.sharedWith).length > 0;
@@ -164,6 +166,22 @@ export const AccountHeader = ({
                         </div>
                     )}
                 </div>
+
+                {/* Bank sync status bar */}
+                {account.source === 'linked' && account.externalConnection && (
+                    <div className="flex items-center gap-2 mb-4 bg-white/10 backdrop-blur-xl rounded-xl px-4 py-2.5 border border-white/10">
+                        <Link2 className="w-3.5 h-3.5 shrink-0" />
+                        <span className="text-xs font-semibold truncate">{account.externalConnection.institutionName}</span>
+                        <span className="text-[10px] opacity-60 shrink-0">{account.externalConnection.maskedAccountNumber}</span>
+                        <span className="flex-1" />
+                        {onSyncNow && (
+                            <button onClick={onSyncNow} disabled={isSyncing} className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider opacity-80 hover:opacity-100 transition-opacity disabled:opacity-40">
+                                <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
+                                {isSyncing ? 'Syncing...' : 'Sync'}
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {/* Action Buttons */}
                 <AccountActionButtons account={account} onAddTransaction={onAddTransaction} onExportCsv={onExportCsv} />

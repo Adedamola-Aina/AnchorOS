@@ -200,4 +200,30 @@ describe('TransactionForm', () => {
             expect(screen.getByRole('button', { name: /Record Expense/i })).toBeInTheDocument();
         });
     });
+
+    describe('synced transaction guard', () => {
+        const syncedTx = {
+            id: 'tx-1', accountId: 'acc1', title: 'POS Purchase', amountCents: 5000,
+            type: 'expense', category: 'Shopping', date: '2025-01-15',
+            source: 'synced', externalTransactionId: 'mono_tx_1',
+        };
+
+        it('disables amount, description, and date fields for synced transactions', () => {
+            renderForm({ initialData: syncedTx });
+            expect(screen.getByLabelText(/Amount/i)).toBeDisabled();
+            expect(screen.getByLabelText(/Description/i)).toBeDisabled();
+            expect(screen.getByDisplayValue('2025-01-15')).toBeDisabled();
+        });
+
+        it('shows notice banner for synced transactions', () => {
+            renderForm({ initialData: syncedTx });
+            expect(screen.getByText(/only category can be changed/i)).toBeInTheDocument();
+        });
+
+        it('hides type selector for synced transactions', () => {
+            renderForm({ initialData: syncedTx });
+            expect(screen.queryByRole('button', { name: /^Expense$/i })).not.toBeInTheDocument();
+            expect(screen.queryByRole('button', { name: /^Income$/i })).not.toBeInTheDocument();
+        });
+    });
 });

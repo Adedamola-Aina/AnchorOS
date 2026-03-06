@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getMonthlyAverages, detectAnomalies, getSpendingTrend } from './transactionInsights';
+import { getMonthlyAverages, detectAnomalies, getSpendingTrend, getSourceBreakdown } from './transactionInsights';
 import type { AnchorTransaction } from '../../types';
 
 function makeTx(overrides: Partial<AnchorTransaction> = {}): AnchorTransaction {
@@ -131,6 +131,64 @@ describe('transactionInsights', () => {
 
             const single = [makeTx({ amountCents: 50000, date: '2026-02-15' })];
             expect(getSpendingTrend(single).direction).toBe('flat');
+        });
+    });
+
+    describe('getSourceBreakdown', () => {
+        it('splits expenses by source (manual vs synced)', () => {
+            const txns = [
+                makeTx({ amountCents: 20000, source: 'manual' }),
+                makeTx({ amountCents: 30000, source: 'synced' }),
+                makeTx({ amountCents: 10000, source: 'synced' }),
+                makeTx({ amountCents: 15000 }), // undefined source treated as manual
+            ];
+
+            const breakdown = getSourceBreakdown(txns);
+            expect(breakdown.manualCents).toBe(35000); // 20000 + 15000
+            expect(breakdown.syncedCents).toBe(40000); // 30000 + 10000
+            expect(breakdown.totalCents).toBe(75000);
+            expect(breakdown.syncedPercent).toBeCloseTo(53.33, 0);
+        });
+
+        it('returns zeros for empty transactions', () => {
+            const breakdown = getSourceBreakdown([]);
+            expect(breakdown.manualCents).toBe(0);
+            expect(breakdown.syncedCents).toBe(0);
+            expect(breakdown.totalCents).toBe(0);
+            expect(breakdown.syncedPercent).toBe(0);
+        });
+
+        it('excludes income and transfers', () => {
+            const txns = [
+                makeTx({ amountCents: 50000, type: 'income', source: 'synced' }),
+                makeTx({ amountCents: 10000, source: 'synced' }),
+                makeTx({ amountCents: 10000, linkId: 'link-1', source: 'manual' }),
+            ];
+
+            const breakdown = getSourceBreakdown(txns);
+            expect(breakdown.syncedCents).toBe(10000);
+            expect(breakdown.manualCents).toBe(0);
+        });
+
+        it('handles all-manual transactions', () => {
+            const txns = [
+                makeTx({ amountCents: 10000 }),
+                makeTx({ amountCents: 20000, source: 'manual' }),
+            ];
+
+            const breakdown = getSourceBreakdown(txns);
+            expect(breakdown.syncedPercent).toBe(0);
+            expect(breakdown.manualCents).toBe(30000);
+        });
+
+        it('reports hasBankData correctly', () => {
+            expect(getSourceBreakdown([]).hasBankData).toBe(false);
+
+            const manual = [makeTx({ amountCents: 10000 })];
+            expect(getSourceBreakdown(manual).hasBankData).toBe(false);
+
+            const synced = [makeTx({ amountCents: 10000, source: 'synced' })];
+            expect(getSourceBreakdown(synced).hasBankData).toBe(true);
         });
     });
 });

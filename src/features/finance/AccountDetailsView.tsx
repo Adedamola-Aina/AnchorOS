@@ -13,9 +13,11 @@ import { captureError } from '../../utils/error';
 import { getWeeklySpending } from '../../utils/financeInsights';
 import { exportAccountCsv } from '../../utils/accountExport';
 import { NotificationBanner } from './NotificationBanner';
+import { useNotifications } from '../../context/NotificationContext';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { useAccountActivity } from '../../hooks/useAccountActivity';
 import { useFilterPersistence } from '../../hooks/useFilterPersistence';
+import { useBankConnection } from '../../hooks/useBankConnection';
 import { AccountHeader, SpendingTrendsChart } from './components';
 import { SharedActivitySection } from './components/SharedActivitySection';
 import { SharePermissionPicker } from './components/SharePermissionPicker';
@@ -32,6 +34,7 @@ interface AccountDetailsViewProps { account: AnchorAccount; onBack: () => void; 
 export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onAddTransaction, onEdit, familyMemberId }: AccountDetailsViewProps) => {
     const { transactions, deleteTransaction, renameAccount, currentMonth } = useFinance();
     const { user } = useAuth();
+    const { showToast } = useNotifications();
 
     const { searchQuery, setSearchQuery, filterType, setFilterType } = useFilterPersistence(`account-${account.id}`);
     const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
@@ -39,6 +42,17 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onAddTr
     const [newName, setNewName] = useState(account.name);
     const [isRenaming, setIsRenaming] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState<AnchorTransaction | null>(null);
+
+    const { syncNow, isSyncing } = useBankConnection();
+
+    const handleSyncNow = async () => {
+        try {
+            const result = await syncNow(account.id);
+            showToast(`Synced ${result.transactionsAdded} transaction${result.transactionsAdded !== 1 ? 's' : ''}`, 'success');
+        } catch {
+            showToast('Bank sync failed — try again later', 'error');
+        }
+    };
 
     const isOwner = !account.ownerId || account.ownerId === user?.uid;
     const isSharedAccount = Boolean((account.sharedWith && Object.keys(account.sharedWith).length > 0) || (account.ownerId && account.ownerId !== user?.uid));
@@ -118,7 +132,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onAddTr
                 {/* Only show notification banner for owned accounts — shared account notifications are in Recent Activity */}
                 {isOwner && <NotificationBanner accountId={account.id} />}
                 {isSharedAccount && <FamilyNotificationBanner accountId={account.id} />}
-                <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onAddTransaction={onAddTransaction} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} onExportCsv={() => exportAccountCsv(account.name, filteredList, account.currency)} />
+                <AccountHeader account={account} isOwner={isOwner} familyMemberId={familyMemberId} isEditingName={isEditingName} newName={newName} isRenaming={isRenaming} onBack={onBack} onDelete={onDelete} onShare={onShare} onAddTransaction={onAddTransaction} onStartRename={() => setIsEditingName(true)} onCancelRename={() => { setIsEditingName(false); setNewName(account.name); }} onConfirmRename={handleRename} onNameChange={setNewName} monthlyBalance={monthlyBalance} onExportCsv={() => exportAccountCsv(account.name, filteredList, account.currency)} onSyncNow={account.source === 'linked' ? handleSyncNow : undefined} isSyncing={isSyncing} />
                 <div className="grid grid-cols-1 gap-5">
                     {accountTransactions.length > 0 && <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />}
                 </div>
@@ -130,7 +144,7 @@ export const AccountDetailsView = ({ account, onBack, onDelete, onShare, onAddTr
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
                     <TransactionFilterHeader searchQuery={searchQuery} filterType={filterType} hasWeekFilter={!!selectedWeekStart} onSearchChange={setSearchQuery} onFilterChange={setFilterType} />
                     <div className="pt-0">
-                        <VirtualTransactionList transactions={filteredList} onEdit={onEdit || (() => { })} onDelete={setTransactionToDelete} loading={loadingActivities} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} className="min-h-[200px] max-h-[calc(100vh-250px)]" carryoverStartIndex={carryoverDividerIndex} />
+                        <VirtualTransactionList transactions={filteredList} onEdit={onEdit || (() => { })} onDelete={(tx) => tx.source === 'synced' ? undefined : setTransactionToDelete(tx)} loading={loadingActivities} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} className="min-h-[200px] max-h-[calc(100vh-250px)]" carryoverStartIndex={carryoverDividerIndex} />
                     </div>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useMemo } from 'react';
-import { Landmark } from 'lucide-react';
+import { Landmark, Link2 } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 import type { AnchorAccount, Currency } from '../../types';
 import { toCents } from '../../utils/moneyUtils';
@@ -8,6 +8,9 @@ import { validateAccount, formatValidationErrors } from '../../utils/validation'
 import { useNotifications } from '../../context/NotificationContext';
 import { captureError } from '../../utils/error';
 import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
+import { LinkBankAccount } from './components/LinkBankAccount';
+
+type AccountMode = 'manual' | 'link';
 
 interface AccountFormProps {
     onClose: () => void;
@@ -18,6 +21,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
     const { showToast } = useNotifications();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [mode, setMode] = useState<AccountMode>('manual');
 
     const [newAccName, setNewAccName] = useState('');
     const [newAccType, setNewAccType] = useState<AnchorAccount['type']>('checking');
@@ -78,6 +82,17 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
             <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                 <Landmark className="w-5 h-5" /> Setup New Account
             </h3>
+            <div className="flex gap-1 mb-4 bg-slate-200/50 dark:bg-slate-700/50 rounded-lg p-1">
+                <button type="button" onClick={() => setMode('manual')} className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${mode === 'manual' ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>
+                    <Landmark className="w-3.5 h-3.5" /> Manual
+                </button>
+                <button type="button" onClick={() => setMode('link')} className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${mode === 'link' ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>
+                    <Link2 className="w-3.5 h-3.5" /> Link Bank
+                </button>
+            </div>
+            {mode === 'link' ? (
+                <LinkBankAccount onSuccess={onClose} onClose={onClose} />
+            ) : (
             <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
                 {error && (
                     <div className="text-rose-500 text-sm bg-rose-50 dark:bg-rose-900/20 p-2 rounded-lg">
@@ -146,6 +161,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                     </button>
                 </div>
             </form>
+            )}
         </div>
     );
 };

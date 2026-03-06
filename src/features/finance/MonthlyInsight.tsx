@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { TrendingDown, TrendingUp, Target, PieChart } from 'lucide-react';
 import { formatCurrencyCompact } from '../../utils/format';
 import { fromCents } from '../../utils/moneyUtils';
-import { getSpendingTrend, detectAnomalies } from '../../utils/insights/transactionInsights';
+import { getSpendingTrend, detectAnomalies, getSourceBreakdown } from '../../utils/insights/transactionInsights';
 import { InsightCards } from './components/InsightCards';
 import type { AnchorTransaction, Currency } from '../../types';
 
@@ -51,6 +51,7 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
 
     const trend = useMemo(() => getSpendingTrend(transactions), [transactions]);
     const anomalies = useMemo(() => detectAnomalies(transactions), [transactions]);
+    const sourceBreakdown = useMemo(() => getSourceBreakdown(transactions), [transactions]);
 
     if (transactions.length === 0) return null;
 
@@ -116,7 +117,7 @@ export const MonthlyInsight: React.FC<MonthlyInsightProps> = ({ transactions, cu
                 </div>
             )}
         </div>
-        <InsightCards trend={trend} anomalies={anomalies} currency={currency} />
+        <InsightCards trend={trend} anomalies={anomalies} currency={currency} sourceBreakdown={sourceBreakdown} />
         </>
     );
 };

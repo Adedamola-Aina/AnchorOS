@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, Landmark } from 'lucide-react';
 import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { Currency } from '../../../types';
@@ -16,10 +16,19 @@ interface Anomaly {
     averageCents: number;
 }
 
+interface SourceBreakdown {
+    manualCents: number;
+    syncedCents: number;
+    totalCents: number;
+    syncedPercent: number;
+    hasBankData: boolean;
+}
+
 interface InsightCardsProps {
     trend: SpendingTrend;
     anomalies: Anomaly[];
     currency: Currency;
+    sourceBreakdown?: SourceBreakdown;
 }
 
 const trendConfig = {
@@ -28,7 +37,7 @@ const trendConfig = {
     flat: { icon: Minus, color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800', label: 'Spending Steady' },
 };
 
-export const InsightCards: React.FC<InsightCardsProps> = ({ trend, anomalies, currency }) => {
+export const InsightCards: React.FC<InsightCardsProps> = ({ trend, anomalies, currency, sourceBreakdown }) => {
     const cfg = trendConfig[trend.direction];
     const TrendIcon = cfg.icon;
     const topAnomaly = anomalies[0];
@@ -59,6 +68,27 @@ export const InsightCards: React.FC<InsightCardsProps> = ({ trend, anomalies, cu
                         {formatCurrencyCompact(fromCents(topAnomaly.amountCents), currency)} on {topAnomaly.category}
                         {' '}(avg {formatCurrencyCompact(fromCents(topAnomaly.averageCents), currency)})
                     </p>
+                </div>
+            )}
+
+            {/* Source Breakdown — only shown when bank data exists */}
+            {sourceBreakdown?.hasBankData && (
+                <div className="glass-card p-3 flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-sky-100 dark:bg-sky-900/20 text-sky-600">
+                        <Landmark className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm text-slate-700 dark:text-slate-300">
+                            <span className="font-semibold">Bank vs Cash:</span>{' '}
+                            {formatCurrencyCompact(fromCents(sourceBreakdown.syncedCents), currency)} bank
+                            {' · '}
+                            {formatCurrencyCompact(fromCents(sourceBreakdown.manualCents), currency)} cash
+                        </p>
+                        <div className="flex h-1.5 rounded-full overflow-hidden mt-1.5 bg-slate-200 dark:bg-slate-700">
+                            <div className="bg-sky-500 rounded-l-full transition-all" style={{ width: `${sourceBreakdown.syncedPercent}%` }} />
+                            <div className="bg-amber-400 flex-1 rounded-r-full" />
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

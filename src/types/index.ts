@@ -23,6 +23,17 @@ export interface AnchorTask {
   longestStreak?: number;
 }
 
+export interface ExternalConnection {
+  provider: 'mono';
+  externalAccountId: string;
+  institutionName: string;
+  institutionCode: string;
+  institutionLogo?: string;
+  lastSyncedAt: string;
+  syncStatus: 'active' | 'reconnect_required' | 'error';
+  maskedAccountNumber?: string; // Last 4 only: "****1234"
+}
+
 export interface AnchorAccount {
   id: string;
   name: string;
@@ -42,6 +53,9 @@ export interface AnchorAccount {
     actorId: string;
     actorName: string;
   }>;
+  // Bank integration (Mono)
+  source?: 'manual' | 'linked';
+  externalConnection?: ExternalConnection;
 }
 
 export interface AnchorTransaction {
@@ -72,6 +86,10 @@ export interface AnchorTransaction {
   createdBy?: string;
   createdByName?: string;
   accountOwnerId?: string;
+  // Bank integration (Mono)
+  source?: 'manual' | 'synced';
+  externalTransactionId?: string;
+  narration?: string; // Raw bank narration
 }
 
 export interface OnboardingProgress {
