@@ -16,8 +16,11 @@ import { buildSeedPatterns } from './seedPatterns';
 
 export class BehavioralEngine {
   private state: BehaviorState = initialBehaviorState(new Date().toISOString());
+  private readonly nowProvider: () => Date;
 
-  constructor(private readonly nowProvider: () => Date = () => new Date()) {}
+  constructor(nowProvider: () => Date = () => new Date()) {
+    this.nowProvider = nowProvider;
+  }
 
   recordAction(trigger: PatternTrigger, action: PatternAction): void {
     const nowIso = this.nowProvider().toISOString();
@@ -110,7 +113,7 @@ export class BehavioralEngine {
 
   async saveBehavior(userId: string): Promise<void> {
     this.state.updatedAt = this.nowProvider().toISOString();
-    await secureDb.setDocument(userId, ['fabric_behavior', 'state'], this.state);
+    await secureDb.setDocument(userId, ['fabric_behavior', 'state'], this.state as unknown as Record<string, unknown>);
   }
 
   seedFromHistory(transactions: AnchorTransaction[], commitments: AnchorTask[]): void {

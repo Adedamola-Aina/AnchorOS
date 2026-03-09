@@ -57,11 +57,13 @@ export async function appendFabricConversation(userId: string, userMessage: stri
   const dateKey = new Date().toISOString().slice(0, 10);
   const existing = await secureDb.getDocument<{ messages?: FabricMessage[]; startedAt?: string }>(userId, ['fabric_conversations', dateKey]);
   const nowIso = new Date().toISOString();
+  const userEntry: FabricMessage = { id: `u-${Date.now()}`, role: 'user', content: userMessage, timestamp: nowIso };
+  const fabricEntry: FabricMessage = { id: `f-${Date.now() + 1}`, role: 'fabric', content: assistantMessage, timestamp: nowIso };
 
   const messages: FabricMessage[] = [
     ...(existing?.messages ?? []),
-    { id: `u-${Date.now()}`, role: 'user', content: userMessage, timestamp: nowIso },
-    { id: `f-${Date.now() + 1}`, role: 'fabric', content: assistantMessage, timestamp: nowIso },
+    userEntry,
+    fabricEntry,
   ].slice(-50);
 
   await secureDb.setDocument(userId, ['fabric_conversations', dateKey], {

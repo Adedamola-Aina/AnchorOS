@@ -57,7 +57,7 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
 
     const persistSettings = useCallback(async (next: FabricSettings) => {
         if (!userId) return;
-        await secureDb.setDocument(userId, ['fabric_settings', 'state'], next);
+        await secureDb.setDocument(userId, ['fabric_settings', 'state'], { ...next } as Record<string, unknown>);
         setSettings(next);
     }, [userId]);
 
@@ -103,7 +103,7 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
                 secureDb.setDocument(userId, ['fabric_settings', 'state'], {
                     ...settings,
                     lastCleared: now,
-                }),
+                } as Record<string, unknown>),
             ]);
 
             setSettings(prev => ({ ...prev, lastCleared: now }));

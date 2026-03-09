@@ -79,12 +79,16 @@ export function buildPredictions(input: PredictionInput): Prediction[] {
   const recurringPattern = input.patterns.find((pattern) =>
     pattern.followUpAction.type === 'review_budget' && pattern.confidence >= 0.6
   );
+  const recurringCategory =
+    recurringPattern?.followUpAction.type === 'review_budget'
+      ? recurringPattern.followUpAction.category
+      : undefined;
   if (recurringPattern && input.now.getDate() <= 5) {
     predictions.push({
       id: 'pred-recurring-due',
       type: 'recurring_due',
       message: 'A recurring spending pattern may be due soon.',
-      detail: `Pattern suggests checking ${recurringPattern.followUpAction.category || 'your regular'} spend.`,
+      detail: `Pattern suggests checking ${recurringCategory || 'your regular'} spend.`,
       severity: 'info',
       confidence: recurringPattern.confidence,
       actionable: true,

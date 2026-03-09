@@ -76,4 +76,28 @@ describe('buildPredictions', () => {
 
     expect(predictions.some((item) => item.type === 'streak_at_risk')).toBe(true);
   });
+
+  it('does not throw when high-confidence pattern action has no category field', () => {
+    const predictions = buildPredictions({
+      patterns: [
+        {
+          id: 'p-no-category',
+          trigger: { type: 'app_opened' },
+          followUpAction: { type: 'view_page', page: 'finance' },
+          frequency: 4,
+          confidence: 0.8,
+          lastOccurred: '2026-03-02T00:00:00.000Z',
+          averageDelayMs: 0,
+          dismissed: 0,
+          createdAt: '2026-03-01T00:00:00.000Z',
+          updatedAt: '2026-03-02T00:00:00.000Z',
+        },
+      ],
+      transactions: [],
+      commitments: [],
+      now: new Date('2026-03-03T10:00:00.000Z'),
+    });
+
+    expect(Array.isArray(predictions)).toBe(true);
+  });
 });
