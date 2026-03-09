@@ -137,6 +137,27 @@ service cloud.firestore {
           allow read, write: if request.auth.uid == userId;
         }
 
+        // Anchor AI (Fabric 2.0) user-scoped documents
+        match /fabric_settings/{docId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+
+        match /fabric_behavior/{docId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+
+        match /fabric_predictions/{docId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+
+        match /fabric_conversations/{date} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+
+        match /fabric_reports/{reportId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+
         // Bank connections — readable by owner, writeable only by Cloud Functions (Admin SDK)
         match /bankConnections/{connectionId} {
           allow read: if request.auth.uid == userId;

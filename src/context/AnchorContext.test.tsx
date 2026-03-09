@@ -17,6 +17,7 @@ const TestConsumer = () => {
   return (
     <div>
       <span data-testid="tab">{activeTab}</span>
+      <button onClick={() => navigateTo('fabric')}>Go Fabric</button>
       <button onClick={() => navigateTo('finance')}>Go Finance</button>
       <button onClick={() => navigateTo('settings', { section: 'security' })}>Go Settings</button>
     </div>
@@ -53,6 +54,16 @@ describe('AnchorContext', () => {
     fireEvent.click(getByText('Go Finance'));
     expect(mockNavigate).toHaveBeenCalledWith('/finance');
     expect(localStorage.getItem('anchor_active_tab')).toBe('finance');
+  });
+
+  it('navigateTo supports fabric tab route', async () => {
+    const { getByText } = render(
+      <AppProvider><TestConsumer /></AppProvider>
+    );
+    const { fireEvent } = await import('@testing-library/react');
+    fireEvent.click(getByText('Go Fabric'));
+    expect(mockNavigate).toHaveBeenCalledWith('/fabric');
+    expect(localStorage.getItem('anchor_active_tab')).toBe('fabric');
   });
 
   it('navigateTo appends query params', async () => {

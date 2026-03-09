@@ -6,21 +6,18 @@ import { FinanceProvider } from '../../context/FinanceContext';
 import { TaskProvider } from '../../context/TaskContext';
 import MainLayout from '../../layouts/MainLayout';
 import { lazyWithRetry } from '../../utils/lazyWithRetry';
-import { useAuth } from '../../context/AuthContext';
-import { useFeatureFlag } from '../../features/flags/useFeatureFlag';
 import { APP_VERSION } from '../../version';
 
 const DashboardView = lazyWithRetry(() => import('../../features/dashboard/DashboardView'));
 const CommitmentsView = lazyWithRetry(() => import('../../features/commitments/CommitmentsView'));
+const FabricView = lazyWithRetry(() => import('../../features/fabric/FabricView'));
+const FabricTransparency = lazyWithRetry(() => import('../../features/fabric/FabricTransparency'));
 const FinanceView = lazyWithRetry(() => import('../../features/finance/FinanceView'));
 const SettingsView = lazyWithRetry(() => import('../../features/settings/SettingsView'));
 const NotFoundView = lazyWithRetry(() => import('../../features/errors/NotFoundView'));
 
 
 export default function AuthenticatedAppShell() {
-  const { user } = useAuth();
-
-
   return (
     <FinanceProvider>
       <TaskProvider>
@@ -35,6 +32,8 @@ export default function AuthenticatedAppShell() {
             <Routes>
               <Route path="dashboard" element={<DashboardView />} />
               <Route path="commitments" element={<CommitmentsView />} />
+              <Route path="fabric" element={<FabricView />} />
+              <Route path="fabric/transparency" element={<FabricTransparency />} />
               <Route path="finance" element={<FinanceView />} />
               <Route path="settings" element={<SettingsView />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

@@ -14,6 +14,7 @@ import { captureError } from '../../utils/error';
 import { useNotifications } from '../../context/NotificationContext';
 import { useApp } from '../../context/AnchorContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
+import { useFeatureFlag } from '../flags/useFeatureFlag';
 import { useMfaEnrollmentUI } from './hooks/useMfaEnrollmentUI';
 import ContactModal from '../../components/ContactModal';
 
@@ -21,6 +22,7 @@ import { ProfileSettings } from './components/ProfileSettings';
 import { AppearanceSettings } from './components/AppearanceSettings';
 import { SecuritySettings } from './components/SecuritySettings';
 import { NotificationSettings } from './components/NotificationSettings';
+import { AnchorAISettings } from './components/AnchorAISettings';
 import { FamilySettingsV2 } from './components/FamilySettingsV2';
 import { SupportSettings } from './components/SupportSettings';
 import { DeveloperTools } from './components/DeveloperTools';
@@ -43,6 +45,7 @@ const SettingsView = () => {
   } = useAuth();
   const { navigateTo } = useApp();
   const { connection: familyConnection, loading: familyLoading, disconnectFamily } = useFamilySharing(user?.uid);
+  const isAnchorAIFlagEnabled = useFeatureFlag('anchor_ai_enabled', user?.uid);
   const { showToast, pushPermissionStatus, requestPushPermission } = useNotifications();
 
   const [showContactModal, setShowContactModal] = useState(false);
@@ -97,7 +100,7 @@ const SettingsView = () => {
           <p className="text-slate-500 dark:text-slate-400">Manage your preferences and environment.</p>
         </div>
 
-        <SectionNav />
+        <SectionNav includeAnchorAI={isAnchorAIFlagEnabled} />
 
         <div id="settings-profile"><ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }} /></div>
         <div id="settings-appearance"><AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }}
@@ -111,6 +114,7 @@ const SettingsView = () => {
           categories={profile.notificationPreferences?.categories}
           onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || { email: '', frequency: 'instant' as const, enabled: false }), ...prefs } })}
           pushPermissionStatus={pushPermissionStatus} requestPushPermission={() => requestPushPermission()} /></div>
+        {isAnchorAIFlagEnabled && <div id="settings-anchor-ai"><AnchorAISettings userId={user?.uid} showToast={showToast} /></div>}
         <div id="settings-family"><FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} connection={familyConnection} connectionLoading={familyLoading} /></div>
         <div id="settings-support"><SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} /></div>
         {import.meta.env.VITE_APP_ENV !== 'production' && <DeveloperTools userUid={user?.uid || ''} />}

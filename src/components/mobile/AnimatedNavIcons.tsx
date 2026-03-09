@@ -165,3 +165,27 @@ export const AnimatedSettingsIcon: React.FC<AnimatedSettingsIconProps> = ({
         </svg>
     );
 };
+
+interface AnimatedAnchorAIIconProps {
+    className?: string;
+    isAnimating?: boolean;
+    isBreathing?: boolean;
+    isDisabled?: boolean;
+}
+
+export const AnimatedAnchorAIIcon: React.FC<AnimatedAnchorAIIconProps> = ({
+    className = '',
+    isAnimating = false,
+    isBreathing = false,
+    isDisabled = false,
+}) => {
+    const iconClass = `${className} ${isBreathing ? 'animate-[fabric-breathe_3s_ease-in-out_infinite]' : ''}`;
+    const color = isDisabled ? 'currentColor' : (isAnimating ? '#14b8a6' : 'currentColor');
+
+    return (
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2l2.7 5.5L21 10l-4.5 4.3L17.6 21 12 18l-5.6 3 1.1-6.7L3 10l6.3-2.5L12 2z" />
+            <circle cx="12" cy="12" r="2.5" fill={isDisabled ? 'none' : color} fillOpacity="0.2" />
+        </svg>
+    );
+};

@@ -1,7 +1,7 @@
 // @ts-nocheck
 type AppEnv = 'development' | 'staging' | 'production';
 
-export type FeatureFlagKey = 'fabric_suggestions';
+export type FeatureFlagKey = 'fabric_suggestions' | 'anchor_ai_enabled';
 
 type FeatureFlagDefinition = {
     enabledByDefault: Record<AppEnv, boolean>;
@@ -24,6 +24,20 @@ const FLAG_DEFINITIONS: Record<FeatureFlagKey, FeatureFlagDefinition> = {
         },
         forceVariable: 'VITE_FLAG_FABRIC_SUGGESTIONS',
         rolloutVariable: 'VITE_FLAG_FABRIC_SUGGESTIONS_ROLLOUT',
+    },
+    anchor_ai_enabled: {
+        enabledByDefault: {
+            development: true,
+            staging: true,
+            production: false,
+        },
+        rolloutPercentage: {
+            development: 100,
+            staging: 100,
+            production: 0,
+        },
+        forceVariable: 'VITE_FLAG_ANCHOR_AI_ENABLED',
+        rolloutVariable: 'VITE_FLAG_ANCHOR_AI_ROLLOUT',
     },
 };
 

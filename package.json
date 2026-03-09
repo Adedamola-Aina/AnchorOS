@@ -49,11 +49,11 @@
     "ui:capture": "npx tsx tools/ui-capture/index.ts"
   },
   "dependencies": {
-    "@capacitor/android": "^8.1.0",
+    "@capacitor/android": "^8.2.0",
     "@capacitor/app": "^8.0.1",
-    "@capacitor/core": "^8.1.0",
+    "@capacitor/core": "^8.2.0",
     "@capacitor/haptics": "^8.0.1",
-    "@capacitor/ios": "^8.1.0",
+    "@capacitor/ios": "^8.2.0",
     "@capacitor/keyboard": "^8.0.1",
     "@capacitor/network": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",

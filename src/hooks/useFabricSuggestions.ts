@@ -3,6 +3,8 @@
  * 
  * Fabric v1.5: Intelligent suggestion system that bridges commitments to transactions.
  * When a user completes a financial-related commitment, suggests recording it in Finance.
+ *
+ * @deprecated Replaced by Anchor AI (Fabric 2.0). Kept temporarily during migration.
  * 
  * @example
  * const { suggestions, onCommitmentCompleted, dismissSuggestion } = useFabricSuggestions();

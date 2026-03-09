@@ -39,6 +39,10 @@ vi.mock('../../hooks/useFamilySharing', () => ({
   useFamilySharing: () => ({ connection: null, loading: false, disconnectFamily: vi.fn() }),
 }));
 
+vi.mock('../flags/useFeatureFlag', () => ({
+  useFeatureFlag: () => true,
+}));
+
 vi.mock('./hooks/useMfaEnrollmentUI', () => ({
   useMfaEnrollmentUI: () => ({
     isEnrolling: false, show2FASetup: false, mfaQrUrl: '', mfaManualKey: '',
@@ -53,6 +57,7 @@ vi.mock('./components/ProfileSettings', () => ({ ProfileSettings: () => <div dat
 vi.mock('./components/AppearanceSettings', () => ({ AppearanceSettings: () => <div data-testid="appearance-settings">Appearance</div> }));
 vi.mock('./components/SecuritySettings', () => ({ SecuritySettings: () => <div data-testid="security-settings">Security</div> }));
 vi.mock('./components/NotificationSettings', () => ({ NotificationSettings: () => <div data-testid="notification-settings">Notifications</div> }));
+vi.mock('./components/AnchorAISettings', () => ({ AnchorAISettings: () => <div data-testid="anchor-ai-settings">Anchor AI</div> }));
 vi.mock('./components/FamilySettingsV2', () => ({ FamilySettingsV2: () => <div data-testid="family-settings">Family</div> }));
 vi.mock('./components/SupportSettings', () => ({ SupportSettings: ({ onOpenContact }: { onOpenContact: () => void }) => <button data-testid="support" onClick={onOpenContact}>Support</button> }));
 vi.mock('./components/DeveloperTools', () => ({ DeveloperTools: () => <div data-testid="dev-tools">DevTools</div> }));
@@ -88,6 +93,7 @@ describe('SettingsView', () => {
     expect(screen.getByTestId('appearance-settings')).toBeInTheDocument();
     expect(screen.getByTestId('security-settings')).toBeInTheDocument();
     expect(screen.getByTestId('notification-settings')).toBeInTheDocument();
+    expect(screen.getByTestId('anchor-ai-settings')).toBeInTheDocument();
     expect(screen.getByTestId('family-settings')).toBeInTheDocument();
     expect(screen.getByTestId('data-mgmt')).toBeInTheDocument();
     expect(screen.getByTestId('danger-zone')).toBeInTheDocument();

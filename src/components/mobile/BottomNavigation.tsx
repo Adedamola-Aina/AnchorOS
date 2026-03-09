@@ -1,12 +1,4 @@
-/**
- * BottomNavigation - Mobile bottom tab navigation with micro-animations
- * 
- * Per MOBILE_OPTIMIZATION_DIRECTIVE.md Article M3.1
- * Per DESIGN_PHILOSOPHY.md: "Remain visually stable and emotionally calm"
- * 
- * Features subtle tap animations on each icon that bring delight without being intrusive.
- * Home icon shows account colors, Tasks icon has celebration animation.
- */
+/** Mobile bottom tab navigation with optional center Anchor AI icon. */
 // @ts-nocheck
 
 
@@ -15,28 +7,29 @@ import { NavLink } from 'react-router-dom';
 import { useHaptic } from '../../hooks/useHaptic';
 import { useUnsavedChangesGuard } from '../../hooks/useUnsavedChanges';
 import { navAnimationStyles, getRandomColor, CELEBRATION_COLORS } from './NavIconAnimations';
-import { AnimatedHomeIcon, AnimatedTasksIcon, AnimatedFinanceIcon, AnimatedSettingsIcon } from './AnimatedNavIcons';
+import { AnimatedHomeIcon, AnimatedTasksIcon, AnimatedFinanceIcon, AnimatedSettingsIcon, AnimatedAnchorAIIcon } from './AnimatedNavIcons';
 
 interface BottomNavigationProps {
-    accountColors?: string[]; // Colors from user's accounts for Home animation
+    accountColors?: string[];
+    anchorAIEnabled?: boolean;
 }
 
-// Animation config per route
 const ANIMATIONS = {
     '/dashboard': 'animate-[nav-pulse_200ms_ease-out]',
     '/commitments': 'animate-[nav-bounce_200ms_ease-out]',
+    '/fabric': 'animate-[fabric-breathe_3s_ease-in-out_infinite]',
     '/finance': 'animate-[nav-swipe_200ms_ease-out]',
     '/settings': 'animate-[nav-rotate_200ms_ease-out]',
 } as const;
 
 export const BottomNavigation = ({
-    accountColors = []
+    accountColors = [],
+    anchorAIEnabled = false,
 }: BottomNavigationProps) => {
     const [animatingRoute, setAnimatingRoute] = useState<string | null>(null);
     const [celebrationColor, setCelebrationColor] = useState(CELEBRATION_COLORS[0]);
     const { trigger } = useHaptic();
 
-    // PERF-004: Reactive dark mode detection via MutationObserver
     const [isDarkMode, setIsDarkMode] = useState(() =>
         typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
     );
@@ -50,7 +43,6 @@ export const BottomNavigation = ({
         return () => observer.disconnect();
     }, []);
 
-    // Inject animation styles once
     useEffect(() => {
         const styleId = 'nav-animation-styles';
         if (!document.getElementById(styleId)) {
@@ -64,7 +56,6 @@ export const BottomNavigation = ({
     const { isDirty, confirmDiscard } = useUnsavedChangesGuard();
 
     const handleTap = useCallback((route: string, e: React.MouseEvent) => {
-        // Block navigation if form has unsaved changes
         if (isDirty && !confirmDiscard()) {
             e.preventDefault();
             return;
@@ -74,13 +65,11 @@ export const BottomNavigation = ({
             setCelebrationColor(getRandomColor());
         }
         setAnimatingRoute(route);
-        // Use rAF instead of setTimeout for snappier visual feedback
         requestAnimationFrame(() => {
             requestAnimationFrame(() => setAnimatingRoute(null));
         });
     }, [trigger, isDirty, confirmDiscard]);
 
-    // Get dynamic color class for icons during animation
     const getIconColorClass = useCallback((route: string, isActive: boolean) => {
         if (animatingRoute === route && route === '/commitments') {
             return `${celebrationColor.light} ${celebrationColor.dark}`;
@@ -90,51 +79,77 @@ export const BottomNavigation = ({
             : 'text-slate-400 dark:text-slate-500';
     }, [animatingRoute, celebrationColor]);
 
-    // Navigation items with custom icon renderers
-    const navItems = useMemo(() => [
-        {
-            to: '/dashboard',
-            label: 'Home',
-            renderIcon: (isAnimating: boolean, className: string) => (
-                <AnimatedHomeIcon
-                    className={className}
-                    accountColors={accountColors}
-                    isAnimating={isAnimating}
-                />
-            )
-        },
-        {
-            to: '/commitments',
-            label: 'Tasks',
-            renderIcon: (isAnimating: boolean, className: string) => (
-                <AnimatedTasksIcon
-                    className={className}
-                    isAnimating={isAnimating}
-                />
-            )
-        },
-        {
-            to: '/finance',
-            label: 'Finance',
-            renderIcon: (isAnimating: boolean, className: string) => (
-                <AnimatedFinanceIcon
-                    className={className}
-                    isAnimating={isAnimating}
-                />
-            )
-        },
-        {
-            to: '/settings',
-            label: 'Settings',
-            renderIcon: (isAnimating: boolean, className: string) => (
-                <AnimatedSettingsIcon
-                    className={className}
-                    isAnimating={isAnimating}
-                    isDarkMode={isDarkMode}
-                />
-            )
-        },
-    ], [accountColors, isDarkMode]);
+    const navItems = useMemo(() => {
+        const items = [
+            {
+                to: '/dashboard',
+                label: 'Home',
+                isIconOnly: false,
+                renderIcon: (isAnimating: boolean, className: string) => (
+                    <AnimatedHomeIcon
+                        className={className}
+                        accountColors={accountColors}
+                        isAnimating={isAnimating}
+                    />
+                )
+            },
+            {
+                to: '/commitments',
+                label: 'Tasks',
+                isIconOnly: false,
+                renderIcon: (isAnimating: boolean, className: string) => (
+                    <AnimatedTasksIcon
+                        className={className}
+                        isAnimating={isAnimating}
+                    />
+                )
+            },
+        ];
+
+        if (anchorAIEnabled) {
+            items.push({
+                to: '/fabric',
+                label: 'Anchor AI',
+                isIconOnly: true,
+                renderIcon: (isAnimating: boolean, className: string) => (
+                    <AnimatedAnchorAIIcon
+                        className={`${className} w-6 h-6`}
+                        isAnimating={isAnimating}
+                        isBreathing={true}
+                        isDisabled={false}
+                    />
+                )
+            });
+        }
+
+        items.push(
+            {
+                to: '/finance',
+                label: 'Finance',
+                isIconOnly: false,
+                renderIcon: (isAnimating: boolean, className: string) => (
+                    <AnimatedFinanceIcon
+                        className={className}
+                        isAnimating={isAnimating}
+                    />
+                )
+            },
+            {
+                to: '/settings',
+                label: 'Settings',
+                isIconOnly: false,
+                renderIcon: (isAnimating: boolean, className: string) => (
+                    <AnimatedSettingsIcon
+                        className={className}
+                        isAnimating={isAnimating}
+                        isDarkMode={isDarkMode}
+                    />
+                )
+            }
+        );
+
+        return items;
+    }, [accountColors, anchorAIEnabled, isDarkMode]);
 
     return (
         <nav
@@ -143,14 +158,15 @@ export const BottomNavigation = ({
             aria-label="Mobile navigation"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)', WebkitTapHighlightColor: 'transparent' }}
         >
-            <div className="grid grid-cols-4 h-16">
-                {navItems.map(({ to, label, renderIcon }) => (
+            <div className={`grid ${anchorAIEnabled ? 'grid-cols-5' : 'grid-cols-4'} h-16`}>
+                {navItems.map(({ to, label, isIconOnly, renderIcon }) => (
                     <NavLink
                         key={to}
                         to={to}
+                        aria-label={label}
                         onClick={(e) => handleTap(to, e)}
                         className={({ isActive }) =>
-                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 h-full min-h-[56px] will-change-transform ${getIconColorClass(to, isActive)}`
+                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 h-full min-h-[56px] will-change-transform ${isIconOnly ? '-mt-1' : ''} ${getIconColorClass(to, isActive)}`
                         }
                     >
                         {({ isActive }) => {
@@ -161,7 +177,11 @@ export const BottomNavigation = ({
                             return (
                                 <>
                                     {renderIcon(isAnimating, iconClass)}
-                                    <span className="text-[10px] font-medium">{label}</span>
+                                    {isIconOnly ? (
+                                        <span className="sr-only">{label}</span>
+                                    ) : (
+                                        <span className="text-[10px] font-medium">{label}</span>
+                                    )}
                                 </>
                             );
                         }}
@@ -171,7 +191,5 @@ export const BottomNavigation = ({
         </nav>
     );
 };
-
-// Backward compatibility exports
 export const BottomNav = BottomNavigation;
 export default BottomNavigation;

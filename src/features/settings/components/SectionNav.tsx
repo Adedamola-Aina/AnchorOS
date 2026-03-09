@@ -12,7 +12,7 @@ interface Section {
     label: string;
 }
 
-const sections: Section[] = [
+const baseSections: Section[] = [
     { id: 'profile', label: 'Profile' },
     { id: 'appearance', label: 'Theme' },
     { id: 'security', label: 'Security' },
@@ -23,7 +23,15 @@ const sections: Section[] = [
     { id: 'danger', label: 'Account' },
 ];
 
-export const SectionNav: React.FC = () => {
+interface SectionNavProps {
+    includeAnchorAI?: boolean;
+}
+
+export const SectionNav: React.FC<SectionNavProps> = ({ includeAnchorAI = false }) => {
+    const sections: Section[] = includeAnchorAI
+        ? [...baseSections.slice(0, 4), { id: 'anchor-ai', label: 'AI' }, ...baseSections.slice(4)]
+        : baseSections;
+
     const scrollToSection = (id: string) => {
         const element = document.getElementById(`settings-${id}`);
         if (element) {

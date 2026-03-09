@@ -1,5 +1,5 @@
 // @ts-nocheck
-export type TabView = 'dashboard' | 'commitments' | 'finance' | 'settings';
+export type TabView = 'dashboard' | 'commitments' | 'fabric' | 'finance' | 'settings';
 export type TaskType = 'daily' | 'weekly' | 'monthly' | 'todo';
 export type TransactionType = 'income' | 'expense' | 'transfer';
 export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'any';
@@ -184,3 +184,6 @@ export interface FamilyConnection {
   status: 'active' | 'disconnected';
   connectedAt: string;
 }
+
+export * from './fabric';
+export * from './fabricPrediction';

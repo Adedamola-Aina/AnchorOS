@@ -41,6 +41,11 @@ export const navAnimationStyles = `
     0% { box-shadow: 0 0 0 0 currentColor; opacity: 0.6; }
     100% { box-shadow: 0 0 0 8px transparent; opacity: 0; }
 }
+
+@keyframes fabric-breathe {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
 `;
 
 // Celebration colors for Tasks icon (design system colors)
@@ -67,6 +72,8 @@ export const getAnimationClass = (route: string): string => {
             return 'animate-[nav-bounce_200ms_ease-out]';
         case '/finance':
             return 'animate-[nav-swipe_200ms_ease-out]';
+        case '/fabric':
+            return 'animate-[fabric-breathe_3s_ease-in-out_infinite]';
         case '/settings':
             return 'animate-[nav-rotate_200ms_ease-out]';
         default:

@@ -76,4 +76,45 @@ describe('featureFlags', () => {
         expect(alwaysOn).toBe(true);
         expect(alwaysOff).toBe(false);
     });
+
+    it('defaults anchor_ai_enabled off in production', () => {
+        const enabled = evaluateFeatureFlag('anchor_ai_enabled', {
+            userId: 'user-1',
+            env: 'production',
+            envVars: {},
+        });
+
+        expect(enabled).toBe(false);
+    });
+
+    it('defaults anchor_ai_enabled on in development', () => {
+        const enabled = evaluateFeatureFlag('anchor_ai_enabled', {
+            userId: 'user-1',
+            env: 'development',
+            envVars: {},
+        });
+
+        expect(enabled).toBe(true);
+    });
+
+    it('honors explicit anchor_ai_enabled override', () => {
+        const forcedOn = evaluateFeatureFlag('anchor_ai_enabled', {
+            userId: 'user-1',
+            env: 'production',
+            envVars: {
+                VITE_FLAG_ANCHOR_AI_ENABLED: 'true',
+            },
+        });
+
+        const forcedOff = evaluateFeatureFlag('anchor_ai_enabled', {
+            userId: 'user-1',
+            env: 'development',
+            envVars: {
+                VITE_FLAG_ANCHOR_AI_ENABLED: 'false',
+            },
+        });
+
+        expect(forcedOn).toBe(true);
+        expect(forcedOff).toBe(false);
+    });
 });

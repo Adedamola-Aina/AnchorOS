@@ -344,6 +344,80 @@ describe('feedback (write-only)', () => {
   });
 });
 
+// ─── Fabric documents (owner-only) ─────────────────────────────────────────
+describe('fabric documents (owner-only)', () => {
+  const userRoot = (uid: string) => `${PREFIX}/users/${uid}`;
+
+  it('owner can read and write fabric_settings', async () => {
+    const db = authedDb('user1');
+    const settingsDoc = doc(db, `${userRoot('user1')}/fabric_settings`, 'state');
+
+    await assertSucceeds(
+      setDoc(settingsDoc, {
+        enabled: true,
+        dataCollectionEnabled: true,
+      })
+    );
+
+    await assertSucceeds(getDoc(settingsDoc));
+  });
+
+  it('non-owner cannot read another users fabric_settings', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${userRoot('user2')}/fabric_settings`, 'state'), {
+        enabled: true,
+        dataCollectionEnabled: true,
+      });
+    });
+
+    const db = authedDb('user1');
+    await assertFails(getDoc(doc(db, `${userRoot('user2')}/fabric_settings`, 'state')));
+  });
+
+  it('owner can write fabric_behavior', async () => {
+    const db = authedDb('user1');
+    await assertSucceeds(
+      setDoc(doc(db, `${userRoot('user1')}/fabric_behavior`, 'state'), {
+        patterns: [],
+        confirmedPatterns: [],
+        recentActions: [],
+        dismissedPatterns: [],
+      })
+    );
+  });
+
+  it('non-owner cannot write another users fabric_predictions', async () => {
+    const db = authedDb('user1');
+    await assertFails(
+      setDoc(doc(db, `${userRoot('user2')}/fabric_predictions`, 'state'), {
+        active: [],
+      })
+    );
+  });
+
+  it('owner can write and read fabric_conversations subcollection', async () => {
+    const db = authedDb('user1');
+    await assertSucceeds(
+      setDoc(doc(db, `${userRoot('user1')}/fabric_conversations`, '2026-03-09'), {
+        messages: [],
+      })
+    );
+
+    await assertSucceeds(getDoc(doc(db, `${userRoot('user1')}/fabric_conversations`, '2026-03-09')));
+  });
+
+  it('owner can write and read fabric_reports subcollection', async () => {
+    const db = authedDb('user1');
+    await assertSucceeds(
+      setDoc(doc(db, `${userRoot('user1')}/fabric_reports`, '2026-03-02'), {
+        report: { insights: [] },
+      })
+    );
+
+    await assertSucceeds(getDoc(doc(db, `${userRoot('user1')}/fabric_reports`, '2026-03-02')));
+  });
+});
+
 // ─── Default deny ───────────────────────────────────────────────────────────
 describe('default deny', () => {
   it('unmatched paths are denied', async () => {

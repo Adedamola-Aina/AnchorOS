@@ -3,6 +3,7 @@ import React from 'react';
 import { AnchorLoadingSpinner } from './components/shared/AnchorLoadingSpinner';
 import { AppProvider } from './context/AnchorContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { FabricProvider } from './context/FabricContext';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 
 const AuthenticatedAppShell = lazyWithRetry(() => import('./components/app/AuthenticatedAppShell'));
@@ -131,18 +132,20 @@ export default function App() {
         <NotificationProvider>
           <AuthProvider>
             <AppProvider>
-              <div
-                className="flex flex-col flex-1 w-full min-h-0"
-                style={{
-                  paddingTop: import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production'
-                    ? 'calc(24px + env(safe-area-inset-top, 0px))'
-                    : 'env(safe-area-inset-top, 0px)',
-                  paddingLeft: 'env(safe-area-inset-left, 0px)',
-                  paddingRight: 'env(safe-area-inset-right, 0px)'
-                }}
-              >
-                <AppContent />
-              </div>
+              <FabricProvider>
+                <div
+                  className="flex flex-col flex-1 w-full min-h-0"
+                  style={{
+                    paddingTop: import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production'
+                      ? 'calc(24px + env(safe-area-inset-top, 0px))'
+                      : 'env(safe-area-inset-top, 0px)',
+                    paddingLeft: 'env(safe-area-inset-left, 0px)',
+                    paddingRight: 'env(safe-area-inset-right, 0px)'
+                  }}
+                >
+                  <AppContent />
+                </div>
+              </FabricProvider>
             </AppProvider>
           </AuthProvider>
         </NotificationProvider>
