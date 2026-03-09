@@ -19,4 +19,12 @@ describe('FabricPromptChips', () => {
     expect(navigateTo).toHaveBeenCalledWith('finance', { filter: 'this_month' });
     expect(navigateTo).toHaveBeenCalledWith('commitments');
   });
+
+  it('uses onPrompt callback when provided', () => {
+    const onPrompt = vi.fn();
+    render(<FabricPromptChips onPrompt={onPrompt} />);
+
+    fireEvent.click(screen.getByText('Spending this month'));
+    expect(onPrompt).toHaveBeenCalledWith('how much did i spend this month');
+  });
 });

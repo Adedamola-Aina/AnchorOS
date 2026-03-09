@@ -4,31 +4,40 @@ import { useApp } from '../../context/AnchorContext';
 interface PromptChip {
   id: string;
   label: string;
+  prompt: string;
   onTap: () => void;
 }
 
-export const FabricPromptChips: React.FC = () => {
+interface FabricPromptChipsProps {
+  onPrompt?: (prompt: string) => void;
+}
+
+export const FabricPromptChips: React.FC<FabricPromptChipsProps> = ({ onPrompt }) => {
   const { navigateTo } = useApp();
 
   const chips: PromptChip[] = [
     {
       id: 'spending-month',
       label: 'Spending this month',
+      prompt: 'how much did i spend this month',
       onTap: () => navigateTo('finance', { filter: 'this_month' }),
     },
     {
       id: 'streaks',
       label: 'My streaks',
+      prompt: 'how are my commitments this week',
       onTap: () => navigateTo('commitments'),
     },
     {
       id: 'upcoming-bills',
       label: 'Upcoming bills',
+      prompt: 'what recurring spending is due soon',
       onTap: () => navigateTo('finance', { filter: 'upcoming' }),
     },
     {
       id: 'how-doing',
       label: 'How am I doing?',
+      prompt: 'how am i doing this week',
       onTap: () => navigateTo('dashboard'),
     },
   ];
@@ -40,7 +49,7 @@ export const FabricPromptChips: React.FC = () => {
           <button
             key={chip.id}
             type="button"
-            onClick={chip.onTap}
+            onClick={() => (onPrompt ? onPrompt(chip.prompt) : chip.onTap())}
             className="min-h-11 px-4 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             {chip.label}

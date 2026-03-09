@@ -158,6 +158,129 @@ describe('FabricService', () => {
     const intent = service.parseIntent('how much did i spend this month');
 
     expect(context.hour).toBeGreaterThanOrEqual(0);
-    expect(intent.action).toBe('unknown');
+    expect(intent.action).toBe('query_spending');
+  });
+
+  it('returns structured query results for spending question', async () => {
+    queryCollection.mockImplementation((_userId: string, collection: string) => {
+      if (collection === 'finance') {
+        return Promise.resolve([
+          {
+            id: 'tx-1',
+            title: 'Groceries',
+            amountCents: 3200,
+            type: 'expense',
+            category: 'Food',
+            accountId: 'acc-1',
+            currency: 'USD',
+            scope: 'personal',
+            date: '2026-03-03T00:00:00.000Z',
+          },
+        ]);
+      }
+      return Promise.resolve([]);
+    });
+
+    const service = FabricService.getInstance();
+    await service.initialize('user-1');
+
+    const result = await service.query('how much did i spend this month');
+    expect(result.summary.toLowerCase()).toContain('spent');
+    expect(result.visualizable).toBe(true);
+  });
+
+  it('builds predictions and weekly report', async () => {
+    queryCollection.mockImplementation((_userId: string, collection: string) => {
+      if (collection === 'finance') {
+        return Promise.resolve([
+          {
+            id: 'tx-1',
+            title: 'Salary',
+            amountCents: 150000,
+            type: 'income',
+            category: 'Salary',
+            accountId: 'acc-1',
+            currency: 'USD',
+            scope: 'personal',
+            date: '2026-03-03T00:00:00.000Z',
+          },
+          {
+            id: 'tx-2',
+            title: 'Food',
+            amountCents: 3000,
+            type: 'expense',
+            category: 'Food',
+            accountId: 'acc-1',
+            currency: 'USD',
+            scope: 'personal',
+            date: '2026-03-04T00:00:00.000Z',
+          },
+        ]);
+      }
+      if (collection === 'commitments') {
+        return Promise.resolve([
+          {
+            id: 'task-1',
+            title: 'Workout',
+            type: 'daily',
+            completed: true,
+            category: 'personal',
+            createdAt: new Date('2026-03-03T00:00:00.000Z'),
+            currentStreak: 2,
+          },
+        ]);
+      }
+      return Promise.resolve([]);
+    });
+
+    const service = FabricService.getInstance();
+    await service.initialize('user-1');
+
+    const predictions = service.getPredictions();
+    const report = await service.generateWeeklyReport();
+
+    expect(predictions.length).toBeGreaterThanOrEqual(0);
+    expect(report.financeSummary.totalIncome).toBe(1500);
+    expect(setDocument).toHaveBeenCalledWith(
+      'user-1',
+      expect.arrayContaining(['fabric_reports']),
+      expect.objectContaining({ generatedAt: expect.any(String) })
+    );
+  });
+
+  it('persists dismissed prediction ids', async () => {
+    const service = FabricService.getInstance();
+    await service.initialize('user-1');
+
+    service.dismissPrediction('pred-budget-overage');
+
+    expect(setDocument).toHaveBeenCalledWith(
+      'user-1',
+      ['fabric_predictions', 'state'],
+      expect.objectContaining({ dismissedIds: expect.arrayContaining(['pred-budget-overage']) })
+    );
+  });
+
+  it('persists conversation entries when query is executed', async () => {
+    getDocument.mockImplementation((_userId: string, path: string[]) => {
+      if (path[0] === 'fabric_settings') {
+        return Promise.resolve({ enabled: true, dataCollectionEnabled: true });
+      }
+      if (path[0] === 'fabric_conversations') {
+        return Promise.resolve({ messages: [] });
+      }
+      return Promise.resolve(null);
+    });
+
+    queryCollection.mockResolvedValue([]);
+    const service = FabricService.getInstance();
+    await service.initialize('user-1');
+    await service.query('how much did i spend this month');
+
+    expect(setDocument).toHaveBeenCalledWith(
+      'user-1',
+      expect.arrayContaining(['fabric_conversations']),
+      expect.objectContaining({ messages: expect.any(Array) })
+    );
   });
 });

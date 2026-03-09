@@ -9,9 +9,16 @@ export function useFabric() {
     context,
     patterns,
     confirmedPatterns,
+    predictions,
+    insights,
+    lastQueryResult,
+    weeklyReport,
     learnFrom,
     dismissPattern,
     deletePattern,
+    dismissPrediction,
+    runQuery,
+    generateWeeklyReport,
     clearAllData,
     refresh,
   } = useFabricContext();
@@ -31,6 +38,21 @@ export function useFabric() {
     deletePattern(patternId);
   }, [deletePattern, isEnabled]);
 
+  const safeDismissPrediction = useCallback((predictionId: string) => {
+    if (!isEnabled) return;
+    dismissPrediction(predictionId);
+  }, [dismissPrediction, isEnabled]);
+
+  const safeRunQuery = useCallback(async (input: string) => {
+    if (!isEnabled) return null;
+    return runQuery(input);
+  }, [isEnabled, runQuery]);
+
+  const safeGenerateWeeklyReport = useCallback(async () => {
+    if (!isEnabled) return null;
+    return generateWeeklyReport();
+  }, [generateWeeklyReport, isEnabled]);
+
   const safeClearAllData = useCallback(async () => {
     if (!isEnabled) return;
     await clearAllData();
@@ -42,9 +64,16 @@ export function useFabric() {
     context,
     patterns,
     confirmedPatterns,
+    predictions,
+    insights,
+    lastQueryResult,
+    weeklyReport,
     learnFrom: safeLearnFrom,
     dismissPattern: safeDismissPattern,
     deletePattern: safeDeletePattern,
+    dismissPrediction: safeDismissPrediction,
+    runQuery: safeRunQuery,
+    generateWeeklyReport: safeGenerateWeeklyReport,
     clearAllData: safeClearAllData,
     refresh,
   };

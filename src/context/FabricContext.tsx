@@ -1,5 +1,14 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type { FabricContext as FabricAmbientContext, PatternAction, PatternTrigger, UserPattern } from '../types';
+import type {
+  FabricContext as FabricAmbientContext,
+  FabricQueryResult,
+  Insight,
+  PatternAction,
+  PatternTrigger,
+  Prediction,
+  UserPattern,
+  WeeklyReport,
+} from '../types';
 import { useAuth } from './AuthContext';
 import { evaluateFeatureFlag } from '../features/flags/featureFlags';
 import { FabricService } from '../services/fabric/FabricService';
@@ -10,9 +19,16 @@ interface FabricContextValue {
   context: FabricAmbientContext;
   patterns: UserPattern[];
   confirmedPatterns: UserPattern[];
+  predictions: Prediction[];
+  insights: Insight[];
+  lastQueryResult: FabricQueryResult | null;
+  weeklyReport: WeeklyReport | null;
   learnFrom: (trigger: PatternTrigger, action: PatternAction) => void;
   dismissPattern: (patternId: string) => void;
   deletePattern: (patternId: string) => void;
+  dismissPrediction: (predictionId: string) => void;
+  runQuery: (input: string) => Promise<FabricQueryResult>;
+  generateWeeklyReport: () => Promise<WeeklyReport | null>;
   clearAllData: () => Promise<void>;
   refresh: () => void;
 }
@@ -39,11 +55,17 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [context, setContext] = useState<FabricAmbientContext>(EMPTY_CONTEXT);
   const [patterns, setPatterns] = useState<UserPattern[]>([]);
   const [confirmedPatterns, setConfirmedPatterns] = useState<UserPattern[]>([]);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [insights, setInsights] = useState<Insight[]>([]);
+  const [lastQueryResult, setLastQueryResult] = useState<FabricQueryResult | null>(null);
+  const [weeklyReport, setWeeklyReport] = useState<WeeklyReport | null>(null);
 
   const refresh = useCallback(() => {
     setContext(fabricService.getContext());
     setPatterns(fabricService.getPatterns());
     setConfirmedPatterns(fabricService.getConfirmedPatterns());
+    setPredictions(fabricService.getPredictions());
+    setInsights(fabricService.getInsightsFor('dashboard'));
     setIsEnabled(fabricService.isEnabled());
   }, [fabricService]);
 
@@ -58,6 +80,10 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsReady(false);
         setPatterns([]);
         setConfirmedPatterns([]);
+        setPredictions([]);
+        setInsights([]);
+        setLastQueryResult(null);
+        setWeeklyReport(null);
         setContext(EMPTY_CONTEXT);
         return;
       }
@@ -91,6 +117,24 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     refresh();
   }, [fabricService, refresh]);
 
+  const dismissPrediction = useCallback((predictionId: string) => {
+    fabricService.dismissPrediction(predictionId);
+    refresh();
+  }, [fabricService, refresh]);
+
+  const runQuery = useCallback(async (input: string) => {
+    const result = await fabricService.query(input);
+    setLastQueryResult(result);
+    return result;
+  }, [fabricService]);
+
+  const generateWeeklyReport = useCallback(async () => {
+    if (!fabricService.isEnabled()) return null;
+    const report = await fabricService.generateWeeklyReport();
+    setWeeklyReport(report);
+    return report;
+  }, [fabricService]);
+
   const clearAllData = useCallback(async () => {
     await fabricService.clearAllData();
     refresh();
@@ -102,12 +146,37 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     context,
     patterns,
     confirmedPatterns,
+    predictions,
+    insights,
+    lastQueryResult,
+    weeklyReport,
     learnFrom,
     dismissPattern,
     deletePattern,
+    dismissPrediction,
+    runQuery,
+    generateWeeklyReport,
     clearAllData,
     refresh,
-  }), [clearAllData, confirmedPatterns, context, deletePattern, dismissPattern, isEnabled, isReady, learnFrom, patterns, refresh]);
+  }), [
+    clearAllData,
+    confirmedPatterns,
+    context,
+    deletePattern,
+    dismissPattern,
+    dismissPrediction,
+    generateWeeklyReport,
+    insights,
+    isEnabled,
+    isReady,
+    lastQueryResult,
+    learnFrom,
+    patterns,
+    predictions,
+    refresh,
+    runQuery,
+    weeklyReport,
+  ]);
 
   return (
     <FabricContext.Provider value={value}>
