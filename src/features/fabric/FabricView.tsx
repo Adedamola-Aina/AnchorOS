@@ -16,13 +16,11 @@ const FabricView: React.FC = () => {
     patterns,
     insights,
     predictions,
-    lastQueryResult,
     weeklyReport,
     dismissPrediction,
     runQuery,
     generateWeeklyReport,
   } = useFabric();
-  const [input, setInput] = React.useState('');
 
   const submitPrompt = async (prompt: string) => {
     const trimmed = prompt.trim();
@@ -47,7 +45,9 @@ const FabricView: React.FC = () => {
         <header className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white">Anchor AI</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Built from your own commitments and finance history.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {`Good ${context.timeOfDay}. Tracking ${patterns.length} pattern${patterns.length === 1 ? '' : 's'} from your activity.`}
+            </p>
           </div>
           <button
             type="button"
@@ -58,13 +58,6 @@ const FabricView: React.FC = () => {
             <Settings className="w-4 h-4" />
           </button>
         </header>
-
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
-          <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Daily briefing</p>
-          <p className="text-sm text-slate-700 dark:text-slate-200 mt-2">
-            {`Good ${context.timeOfDay}. I currently know ${patterns.length} pattern${patterns.length === 1 ? '' : 's'} from your activity.`}
-          </p>
-        </section>
 
         {!isReady || patterns.length === 0 ? <FabricOnboarding /> : null}
 
@@ -99,44 +92,20 @@ const FabricView: React.FC = () => {
         )}
 
         <section className="space-y-2">
-          <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Try asking with one tap</p>
+          <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Quick actions</p>
           <FabricPromptChips onPrompt={submitPrompt} />
         </section>
 
-        <section className="space-y-2">
-          <label htmlFor="fabric-query" className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Ask Anchor AI</label>
-          <div className="flex gap-2">
-            <input
-              id="fabric-query"
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder="How much did I spend this month?"
-              className="flex-1 min-h-11 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm"
-            />
+        <section className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-between">
             <button
               type="button"
-              onClick={() => { void submitPrompt(input); setInput(''); }}
-              className="min-h-11 px-4 rounded-lg bg-primary-600 text-white text-sm font-medium"
+              onClick={() => { void generateWeeklyReport(); }}
+              className="min-h-11 px-4 rounded-lg border border-slate-300 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300"
             >
-              Ask
+              Generate weekly report
             </button>
           </div>
-          {lastQueryResult && (
-            <article className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-2">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">{lastQueryResult.summary}</p>
-              {lastQueryResult.detail ? <p className="text-sm text-slate-600 dark:text-slate-300">{lastQueryResult.detail}</p> : null}
-            </article>
-          )}
-        </section>
-
-        <section className="space-y-2">
-          <button
-            type="button"
-            onClick={() => { void generateWeeklyReport(); }}
-            className="min-h-11 px-4 rounded-lg border border-slate-300 dark:border-slate-700 text-sm font-medium"
-          >
-            Generate weekly report
-          </button>
           {weeklyReport && (
             <article className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-2">
               <p className="text-sm font-semibold text-slate-900 dark:text-white">Weekly Snapshot</p>

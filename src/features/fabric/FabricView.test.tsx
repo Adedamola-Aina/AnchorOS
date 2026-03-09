@@ -16,21 +16,23 @@ vi.mock('./FabricPromptChips', () => ({
   FabricPromptChips: () => <div data-testid="prompt-chips">chips</div>,
 }));
 
+const baseHook = {
+  isEnabled: true,
+  isReady: true,
+  context: { timeOfDay: 'morning' as const },
+  patterns: [{ id: 'p-1' }],
+  insights: [],
+  predictions: [],
+  lastQueryResult: null,
+  weeklyReport: null,
+  dismissPrediction: vi.fn(),
+  runQuery,
+  generateWeeklyReport,
+};
+
 describe('FabricView', () => {
   it('shows disabled state when Anchor AI is off', () => {
-    useFabricMock.mockReturnValue({
-      isEnabled: false,
-      isReady: false,
-      context: { timeOfDay: 'morning' },
-      patterns: [],
-      insights: [],
-      predictions: [],
-      lastQueryResult: null,
-      weeklyReport: null,
-      dismissPrediction: vi.fn(),
-      runQuery,
-      generateWeeklyReport,
-    });
+    useFabricMock.mockReturnValue({ ...baseHook, isEnabled: false, isReady: false, patterns: [] });
 
     render(
       <MemoryRouter>
@@ -41,20 +43,8 @@ describe('FabricView', () => {
     expect(screen.getByText('Anchor AI is disabled. Enable it in Settings to view your assistant tab.')).toBeInTheDocument();
   });
 
-  it('shows onboarding and prompt chips when there are no patterns', () => {
-    useFabricMock.mockReturnValue({
-      isEnabled: true,
-      isReady: true,
-      context: { timeOfDay: 'morning' },
-      patterns: [],
-      insights: [],
-      predictions: [],
-      lastQueryResult: null,
-      weeklyReport: null,
-      dismissPrediction: vi.fn(),
-      runQuery,
-      generateWeeklyReport,
-    });
+  it('shows onboarding when there are no patterns', () => {
+    useFabricMock.mockReturnValue({ ...baseHook, patterns: [] });
 
     render(
       <MemoryRouter>
@@ -63,22 +53,39 @@ describe('FabricView', () => {
     );
 
     expect(screen.getByText("Hey! I'm Anchor AI.")).toBeInTheDocument();
-    expect(screen.getByTestId('prompt-chips')).toBeInTheDocument();
   });
 
-  it('submits freeform query and can trigger weekly report generation', () => {
+  it('does not render free-text chat input', () => {
+    useFabricMock.mockReturnValue(baseHook);
+
+    render(
+      <MemoryRouter>
+        <FabricView />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByPlaceholderText('How much did I spend this month?')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ask' })).not.toBeInTheDocument();
+  });
+
+  it('merges briefing context into header subtitle', () => {
+    useFabricMock.mockReturnValue(baseHook);
+
+    render(
+      <MemoryRouter>
+        <FabricView />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/Good morning/)).toBeInTheDocument();
+    // No dedicated "Daily briefing" section card
+    expect(screen.queryByText('Daily briefing')).not.toBeInTheDocument();
+  });
+
+  it('renders predictions section when predictions exist', () => {
     useFabricMock.mockReturnValue({
-      isEnabled: true,
-      isReady: true,
-      context: { timeOfDay: 'morning' },
-      patterns: [{ id: 'p-1' }],
-      insights: [],
-      predictions: [],
-      lastQueryResult: null,
-      weeklyReport: null,
-      dismissPrediction: vi.fn(),
-      runQuery,
-      generateWeeklyReport,
+      ...baseHook,
+      predictions: [{ id: 'pred-1', message: 'Budget alert', detail: 'Spending is up', confidence: 0.8 }],
     });
 
     render(
@@ -87,11 +94,40 @@ describe('FabricView', () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByPlaceholderText('How much did I spend this month?'), { target: { value: 'how much did i spend this month' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Ask' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Generate weekly report' }));
+    expect(screen.getByText('Budget alert')).toBeInTheDocument();
+    expect(screen.getByText('Spending is up')).toBeInTheDocument();
+  });
 
-    expect(runQuery).toHaveBeenCalledWith('how much did i spend this month');
+  it('renders prompt chips as quick actions', () => {
+    useFabricMock.mockReturnValue(baseHook);
+
+    render(
+      <MemoryRouter>
+        <FabricView />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('prompt-chips')).toBeInTheDocument();
+    expect(screen.getByText('Quick actions')).toBeInTheDocument();
+  });
+
+  it('shows weekly report when generated', () => {
+    useFabricMock.mockReturnValue({
+      ...baseHook,
+      weeklyReport: {
+        financeSummary: { totalIncome: 1000, totalSpent: 500 },
+        commitmentSummary: { completionRate: 80 },
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <FabricView />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Weekly Snapshot')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Generate weekly report' }));
     expect(generateWeeklyReport).toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useCallback } from 'react';
-import { LayoutDashboard, CheckCircle2, CreditCard, Settings, LogOut, Sparkles } from 'lucide-react';
+import { LayoutDashboard, CheckCircle2, CreditCard, Settings, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnchorLogo } from '../components/shared';
@@ -12,6 +12,10 @@ import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { useFinanceService } from '../hooks/useFinanceService';
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChanges';
 import { useFabric } from '../hooks/useFabric';
+
+const AnchorAINavIcon = ({ className = '' }: { className?: string }) => (
+    <AnchorLogo className={className} strokeWidth={10} />
+);
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -79,7 +83,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2 min-h-0">
                     <NavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
                     <NavItem to="/commitments" label="Commitments" icon={CheckCircle2} />
-                    {anchorAIEnabled && <NavItem to="/fabric" label="Anchor AI" icon={Sparkles} />}
+                    {anchorAIEnabled && <NavItem to="/fabric" label="Anchor AI" icon={AnchorAINavIcon} />}
                     <NavItem to="/finance" label="Finance" icon={CreditCard} />
                     <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
                         <NavItem to="/settings" label="System" icon={Settings} />

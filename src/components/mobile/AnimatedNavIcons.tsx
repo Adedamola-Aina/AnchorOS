@@ -183,9 +183,12 @@ export const AnimatedAnchorAIIcon: React.FC<AnimatedAnchorAIIconProps> = ({
     const color = isDisabled ? 'currentColor' : (isAnimating ? '#14b8a6' : 'currentColor');
 
     return (
-        <svg className={iconClass} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2l2.7 5.5L21 10l-4.5 4.3L17.6 21 12 18l-5.6 3 1.1-6.7L3 10l6.3-2.5L12 2z" />
-            <circle cx="12" cy="12" r="2.5" fill={isDisabled ? 'none' : color} fillOpacity="0.2" />
+        <svg className={iconClass} viewBox="0 0 100 100" fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="50" cy="22" r="10" />
+            <line x1="50" y1="32" x2="50" y2="85" />
+            <path d="M20 58 C20 85 80 85 80 58" fill="none" />
+            <line x1="20" y1="58" x2="20" y2="48" />
+            <line x1="80" y1="58" x2="80" y2="48" />
         </svg>
     );
 };
