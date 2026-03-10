@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { collection, doc, getDoc, onSnapshot, orderBy, query, setDoc, where, limit } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, where, limit } from 'firebase/firestore';
 import type {
   AnchorAccount,
   AnchorTask,
@@ -19,6 +19,7 @@ import { useAuth } from './AuthContext';
 import { evaluateFeatureFlag } from '../features/flags/featureFlags';
 import { FabricService } from '../services/fabric/FabricService';
 import { db, APP_ID } from '../config/firebase';
+import { secureDb } from '../utils/secureDb';
 
 interface FabricContextValue {
   isEnabled: boolean;
@@ -246,10 +247,8 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (!user || !isEnabled) return;
     const today = new Date().toISOString().slice(0, 10);
-    void getDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'mood_entries', today))
-      .then((snap) => {
-        if (snap.exists()) setMoodToday(snap.data() as MoodEntry);
-      })
+    void secureDb.getDocument<MoodEntry>(user.uid, ['mood_entries', today])
+      .then((entry) => { if (entry) setMoodToday(entry); })
       .catch(() => { /* non-critical */ });
   }, [user, isEnabled]);
 
@@ -258,7 +257,7 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const today = new Date().toISOString().slice(0, 10);
     const entry: MoodEntry = { date: today, mood, ...(note ? { note } : {}), createdAt: new Date().toISOString() };
     setMoodToday(entry);
-    await setDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'mood_entries', today), entry);
+    await secureDb.setDocument(user.uid, ['mood_entries', today], entry as unknown as Record<string, unknown>);
   }, [user]);
 
   const value = useMemo<FabricContextValue>(() => ({
