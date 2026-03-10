@@ -83,28 +83,45 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] uppercase font-bold text-slate-400">Domain</label>
-                        <select
-                            value={editDomain}
-                            onChange={(e) => setEditDomain(e.target.value)}
-                            className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none"
-                        >
-                            {domains.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
+                        <div className="flex flex-wrap gap-1.5">
+                            {domains.map(d => (
+                                <button
+                                    key={d}
+                                    type="button"
+                                    onClick={() => setEditDomain(d)}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors min-h-[36px] ${
+                                        editDomain === d
+                                            ? 'bg-task-500 text-white'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                    }`}
+                                >
+                                    {d}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     {hasFamilyActive && (
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] uppercase font-bold text-slate-400">Scope</label>
-                            <select
-                                value={editScope}
-                                onChange={(e) => setEditScope(e.target.value as 'personal' | 'family')}
-                                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none"
-                            >
-                                <option value="personal">Personal</option>
-                                <option value="family">Family</option>
-                            </select>
+                            <div className="flex gap-2">
+                                {(['personal', 'family'] as const).map(s => (
+                                    <button
+                                        key={s}
+                                        type="button"
+                                        onClick={() => setEditScope(s)}
+                                        className={`flex-1 min-h-[40px] rounded-xl text-sm font-medium transition-colors capitalize ${
+                                            editScope === s
+                                                ? 'bg-task-500 text-white'
+                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                        }`}
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
