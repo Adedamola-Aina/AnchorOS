@@ -1,17 +1,24 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { collection, doc, getDoc, onSnapshot, orderBy, query, setDoc, where, limit } from 'firebase/firestore';
 import type {
+  AnchorAccount,
+  AnchorTask,
+  AnchorTransaction,
   FabricContext as FabricAmbientContext,
   FabricQueryResult,
   Insight,
   PatternAction,
   PatternTrigger,
   Prediction,
+  RecurringTransaction,
   UserPattern,
   WeeklyReport,
 } from '../types';
+import type { DailyBriefing, MoodEntry } from '../types/fabricBriefing';
 import { useAuth } from './AuthContext';
 import { evaluateFeatureFlag } from '../features/flags/featureFlags';
 import { FabricService } from '../services/fabric/FabricService';
+import { db, APP_ID } from '../config/firebase';
 
 interface FabricContextValue {
   isEnabled: boolean;
@@ -24,12 +31,15 @@ interface FabricContextValue {
   insights: Insight[];
   lastQueryResult: FabricQueryResult | null;
   weeklyReport: WeeklyReport | null;
+  briefing: DailyBriefing | null;
+  moodToday: MoodEntry | null;
   learnFrom: (trigger: PatternTrigger, action: PatternAction) => void;
   dismissPattern: (patternId: string) => void;
   deletePattern: (patternId: string) => void;
   dismissPrediction: (predictionId: string) => void;
   runQuery: (input: string) => Promise<FabricQueryResult>;
   generateWeeklyReport: () => Promise<WeeklyReport | null>;
+  saveMood: (mood: MoodEntry['mood'], note?: string) => Promise<void>;
   clearAllData: () => Promise<void>;
   refresh: () => void;
 }
@@ -61,14 +71,27 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [insights, setInsights] = useState<Insight[]>([]);
   const [lastQueryResult, setLastQueryResult] = useState<FabricQueryResult | null>(null);
   const [weeklyReport, setWeeklyReport] = useState<WeeklyReport | null>(null);
+  const [briefing, setBriefing] = useState<DailyBriefing | null>(null);
+  const [moodToday, setMoodToday] = useState<MoodEntry | null>(null);
+
+  // Live data refs — updated by Firestore subscriptions below
+  const liveTransactions = useRef<AnchorTransaction[]>([]);
+  const liveCommitments = useRef<AnchorTask[]>([]);
+  const liveAccounts = useRef<AnchorAccount[]>([]);
+  const liveRecurring = useRef<RecurringTransaction[]>([]);
 
   const refresh = useCallback(() => {
     setContext(fabricService.getContext());
     setPatterns(fabricService.getPatterns());
     setConfirmedPatterns(fabricService.getConfirmedPatterns());
     setPredictions(fabricService.getPredictions());
-    setInsights(fabricService.getInsightsFor('dashboard'));
+    // Merge dashboard + family insights; family is a no-op if no shared transactions exist
+    const dashboardInsights = fabricService.getInsightsFor('dashboard');
+    const familyInsights = fabricService.getInsightsFor('family');
+    const seenIds = new Set(dashboardInsights.map((i) => i.id));
+    setInsights([...dashboardInsights, ...familyInsights.filter((i) => !seenIds.has(i.id))]);
     setIsEnabled(fabricService.isEnabled());
+    setBriefing(fabricService.getBriefing());
   }, [fabricService]);
 
   useEffect(() => {
@@ -114,6 +137,73 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [fabricService, refresh, user]);
 
+  // Keep FabricService in sync with live Firestore data so queries reflect
+  // real-time changes without requiring a full re-initialization.
+  useEffect(() => {
+    if (!user || !isEnabled) return;
+    const uid = user.uid;
+
+    const push = () => {
+      fabricService.updateActivity(
+        liveTransactions.current,
+        liveCommitments.current,
+        liveAccounts.current,
+        liveRecurring.current,
+      );
+      refresh();
+    };
+
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    const unsubFinance = onSnapshot(
+      query(
+        collection(db, 'artifacts', APP_ID, 'users', uid, 'finance'),
+        where('date', '>=', oneYearAgo.toISOString()),
+        orderBy('date', 'desc'),
+        limit(500),
+      ),
+      (snap) => {
+        liveTransactions.current = snap.docs.map((d) => ({ id: d.id, ...d.data() } as AnchorTransaction));
+        push();
+      },
+    );
+
+    const unsubCommitments = onSnapshot(
+      collection(db, 'artifacts', APP_ID, 'users', uid, 'commitments'),
+      (snap) => {
+        liveCommitments.current = snap.docs.map((d) => ({ id: d.id, ...d.data() } as AnchorTask));
+        push();
+      },
+    );
+
+    const unsubAccounts = onSnapshot(
+      query(collection(db, 'artifacts', APP_ID, 'users', uid, 'accounts'), limit(50)),
+      (snap) => {
+        liveAccounts.current = snap.docs.map((d) => ({ id: d.id, ...d.data() } as AnchorAccount));
+        push();
+      },
+    );
+
+    const unsubRecurring = onSnapshot(
+      query(
+        collection(db, 'artifacts', APP_ID, 'recurring_transactions'),
+        where('userId', '==', uid),
+      ),
+      (snap) => {
+        liveRecurring.current = snap.docs.map((d) => ({ id: d.id, ...d.data() } as RecurringTransaction));
+        push();
+      },
+    );
+
+    return () => {
+      unsubFinance();
+      unsubCommitments();
+      unsubAccounts();
+      unsubRecurring();
+    };
+  }, [user, isEnabled, fabricService, refresh]);
+
   const learnFrom = useCallback((trigger: PatternTrigger, action: PatternAction) => {
     fabricService.learnFrom(trigger, action);
     refresh();
@@ -152,6 +242,25 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     refresh();
   }, [fabricService, refresh]);
 
+  // Load today's mood on mount (once user is known)
+  useEffect(() => {
+    if (!user || !isEnabled) return;
+    const today = new Date().toISOString().slice(0, 10);
+    void getDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'mood_entries', today))
+      .then((snap) => {
+        if (snap.exists()) setMoodToday(snap.data() as MoodEntry);
+      })
+      .catch(() => { /* non-critical */ });
+  }, [user, isEnabled]);
+
+  const saveMood = useCallback(async (mood: MoodEntry['mood'], note?: string) => {
+    if (!user) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const entry: MoodEntry = { date: today, mood, ...(note ? { note } : {}), createdAt: new Date().toISOString() };
+    setMoodToday(entry);
+    await setDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'mood_entries', today), entry);
+  }, [user]);
+
   const value = useMemo<FabricContextValue>(() => ({
     isEnabled,
     isReady,
@@ -163,15 +272,19 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     insights,
     lastQueryResult,
     weeklyReport,
+    briefing,
+    moodToday,
     learnFrom,
     dismissPattern,
     deletePattern,
     dismissPrediction,
     runQuery,
     generateWeeklyReport,
+    saveMood,
     clearAllData,
     refresh,
   }), [
+    briefing,
     clearAllData,
     confirmedPatterns,
     context,
@@ -185,10 +298,12 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     isReady,
     lastQueryResult,
     learnFrom,
+    moodToday,
     patterns,
     predictions,
     refresh,
     runQuery,
+    saveMood,
     weeklyReport,
   ]);
 

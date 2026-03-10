@@ -17,22 +17,28 @@ export const FabricPromptChips: React.FC<FabricPromptChipsProps> = ({ onPrompt }
 
   const chips: PromptChip[] = [
     {
+      id: 'today',
+      label: "What's today?",
+      prompt: 'what do i have today',
+      onTap: () => navigateTo('commitments'),
+    },
+    {
+      id: 'upcoming',
+      label: "What's coming up?",
+      prompt: "what's coming up",
+      onTap: () => navigateTo('finance'),
+    },
+    {
+      id: 'plan-week',
+      label: 'Plan my week',
+      prompt: 'plan my week',
+      onTap: () => navigateTo('commitments'),
+    },
+    {
       id: 'spending-month',
       label: 'Spending this month',
       prompt: 'how much did i spend this month',
       onTap: () => navigateTo('finance', { filter: 'this_month' }),
-    },
-    {
-      id: 'streaks',
-      label: 'My streaks',
-      prompt: 'how are my commitments this week',
-      onTap: () => navigateTo('commitments'),
-    },
-    {
-      id: 'upcoming-bills',
-      label: 'Upcoming bills',
-      prompt: 'what recurring spending is due soon',
-      onTap: () => navigateTo('finance', { filter: 'upcoming' }),
     },
     {
       id: 'how-doing',

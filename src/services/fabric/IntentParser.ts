@@ -33,13 +33,62 @@ function parseAmount(input: string): number | undefined {
 
 // ── Time period parsing ───────────────────────────────────────────────────────
 
-function parseTimePeriod(input: string): ParsedIntent['entities']['timePeriod'] | undefined {
+const MONTH_INDEX: Record<string, number> = {
+  jan: 1, january: 1, feb: 2, february: 2, mar: 3, march: 3,
+  apr: 4, april: 4, may: 5, jun: 6, june: 6, jul: 7, july: 7,
+  aug: 8, august: 8, sep: 9, september: 9, oct: 10, october: 10,
+  nov: 11, november: 11, dec: 12, december: 12,
+};
+const MONTH_PATTERN = '(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)';
+
+function parseTimePeriod(input: string): string | undefined {
+  // Named relative periods (highest priority — most specific first)
   if (/\byesterday\b/.test(input)) return 'yesterday';
   if (/\btoday\b/.test(input)) return 'today';
   if (/\blast\s+week\b/.test(input)) return 'last_week';
-  if (/\bthis\s+week\b|\bthis week\b/.test(input)) return 'this_week';
+  if (/\bthis\s+week\b/.test(input)) return 'this_week';
   if (/\blast\s+month\b/.test(input)) return 'last_month';
   if (/\bthis\s+month\b/.test(input)) return 'this_month';
+  if (/\bthis\s+year\b/.test(input)) return 'this_year';
+  if (/\blast\s+year\b/.test(input)) return 'last_year';
+
+  // Rolling N months: "last 3 months", "past 3 months", "3 months ago"
+  const nMonths = input.match(/\b(?:last|past|(?:in the last)|(?:over the last))\s+(\d+)\s+months?\b|\b(\d+)\s+months?\s+ago\b/i);
+  if (nMonths) return `last_${nMonths[1] ?? nMonths[2]}_months`;
+
+  // Rolling N weeks: "last 2 weeks", "past 4 weeks"
+  const nWeeks = input.match(/\b(?:last|past|(?:in the last)|(?:over the last))\s+(\d+)\s+weeks?\b|\b(\d+)\s+weeks?\s+ago\b/i);
+  if (nWeeks) return `last_${nWeeks[1] ?? nWeeks[2]}_weeks`;
+
+  // Rolling N days: "last 90 days", "past 30 days"
+  const nDays = input.match(/\b(?:last|past|(?:in the last)|(?:over the last))\s+(\d+)\s+days?\b|\b(\d+)\s+days?\s+ago\b/i);
+  if (nDays) return `last_${nDays[1] ?? nDays[2]}_days`;
+
+  // Specific month + year: "january 2026", "jan 2025"
+  const monthYear = new RegExp(`\\b(${MONTH_PATTERN})\\s+(20\\d{2})\\b`, 'i').exec(input);
+  if (monthYear) {
+    const key = monthYear[1].toLowerCase().slice(0, 3);
+    const idx = MONTH_INDEX[key] ?? MONTH_INDEX[monthYear[1].toLowerCase()];
+    if (idx) return `month_${monthYear[2]}_${String(idx).padStart(2, '0')}`;
+  }
+
+  // "in january" or "last january" (no year — nearest past occurrence)
+  const monthOnly = new RegExp(`\\b(?:in|last)\\s+(${MONTH_PATTERN})\\b`, 'i').exec(input);
+  if (monthOnly) {
+    const key = monthOnly[1].toLowerCase().slice(0, 3);
+    const idx = MONTH_INDEX[key] ?? MONTH_INDEX[monthOnly[1].toLowerCase()];
+    if (idx) {
+      const now = new Date();
+      let year = now.getFullYear();
+      if (idx > now.getMonth() + 1) year -= 1; // month hasn't occurred yet this year
+      return `month_${year}_${String(idx).padStart(2, '0')}`;
+    }
+  }
+
+  // Specific 4-digit year: "in 2025", "during 2024"
+  const yearMatch = input.match(/\b(?:in|during|for)?\s*(20\d{2})\b/);
+  if (yearMatch) return `year_${yearMatch[1]}`;
+
   return undefined;
 }
 
@@ -129,6 +178,54 @@ const INTENT_RULES: IntentRule[] = [
     test: (i) =>
       /\b(how\s+much|spent|spending|expense|expenses|cost|budget|what\s+did\s+i\s+(spend|pay))\b/.test(i),
   },
+  // Income queries
+  {
+    action: 'query_income',
+    priority: 60,
+    test: (i) => /\b(income|earned|earning|salary|how\s+much\s+(did\s+i\s+)?(earn|make|receive|get\s+paid))\b/.test(i),
+  },
+  // Account balance queries
+  {
+    action: 'query_accounts',
+    priority: 55,
+    test: (i) => /\b(account|accounts|balance|balances|how\s+much\s+(do\s+i\s+have|is\s+in))\b/.test(i),
+  },
+  // Recurring transaction queries
+  {
+    action: 'query_recurring',
+    priority: 55,
+    test: (i) => /\b(recurring|subscriptions?|subscription|automatic|auto.?pay|bills?\s+due|scheduled\s+payment)\b/.test(i),
+  },
+  // Family spending queries
+  {
+    action: 'query_family',
+    priority: 55,
+    test: (i) => /\b(family|shared|household|partner|spouse)\b/.test(i),
+  },
+  // Net worth queries
+  {
+    action: 'query_net_worth',
+    priority: 55,
+    test: (i) => /\b(net\s+worth|total\s+wealth|overall\s+balance|financial\s+position)\b/.test(i),
+  },
+  // Today's schedule
+  {
+    action: 'query_today',
+    priority: 75,
+    test: (i) => /\b(what\s+(do\s+i\s+have|is\s+on|should\s+i\s+do)\s+today|today's?\s+(schedule|plan|tasks?|agenda)|what's?\s+today)\b/.test(i),
+  },
+  // Upcoming / what's coming
+  {
+    action: 'query_upcoming',
+    priority: 65,
+    test: (i) => /\b(what's?\s+coming\s+up|upcoming\s+(bills?|payments?|expenses?)|due\s+soon|next\s+(bill|payment)|what\s+do\s+i\s+owe|remind\s+me)\b/.test(i),
+  },
+  // Week planning
+  {
+    action: 'plan_week',
+    priority: 78,
+    test: (i) => /\b(plan\s+(my\s+)?week|week\s+(ahead|plan|overview|preview)|help\s+me\s+plan|what's?\s+(this|next)\s+week)\b/.test(i),
+  },
 ];
 
 function detectAction(input: string): IntentAction {
@@ -146,7 +243,15 @@ function confidenceFor(action: IntentAction): number {
     case 'record_income': return 0.88;
     case 'summarize_week': return 0.85;
     case 'query_spending':
-    case 'query_commitments': return 0.80;
+    case 'query_income':
+    case 'query_commitments':
+    case 'query_accounts':
+    case 'query_recurring':
+    case 'query_family':
+    case 'query_net_worth':
+    case 'query_today':
+    case 'query_upcoming':
+    case 'plan_week': return 0.80;
     default: return 0.20;
   }
 }

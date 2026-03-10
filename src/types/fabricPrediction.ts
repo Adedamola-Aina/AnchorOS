@@ -39,7 +39,15 @@ export type IntentAction =
   | 'record_income'
   | 'create_commitment'
   | 'query_spending'
+  | 'query_income'
   | 'query_commitments'
+  | 'query_accounts'
+  | 'query_recurring'
+  | 'query_family'
+  | 'query_net_worth'
+  | 'query_today'
+  | 'query_upcoming'
+  | 'plan_week'
   | 'summarize_week'
   | 'navigate'
   | 'unknown';
@@ -50,7 +58,12 @@ export interface IntentEntities {
   category?: string;
   title?: string;
   frequency?: 'daily' | 'weekly' | 'monthly';
-  timePeriod?: 'today' | 'yesterday' | 'this_week' | 'this_month' | 'last_week' | 'last_month';
+  /**
+   * Named or dynamic time period.
+   * Named: today | yesterday | this_week | last_week | this_month | last_month | this_year | last_year
+   * Dynamic: month_YYYY_MM | last_N_months | last_N_days | last_N_weeks | year_YYYY
+   */
+  timePeriod?: string;
   page?: string;
 }
 

@@ -1,4 +1,5 @@
 import type {
+  AnchorAccount,
   AnchorTask,
   AnchorTransaction,
   FabricContext,
@@ -10,6 +11,7 @@ import type {
   PatternAction,
   PatternTrigger,
   Prediction,
+  RecurringTransaction,
   UserPattern,
   WeeklyReport,
 } from '../../types';
@@ -29,6 +31,7 @@ import {
   persistPredictionState,
   persistWeeklyReport,
 } from './fabricPersistence';
+import { buildDailyBriefing } from './DailyBriefingEngine';
 
 const SAVE_DEBOUNCE_MS = 500;
 
@@ -46,6 +49,8 @@ export class FabricService implements IFabricService {
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
   private transactions: AnchorTransaction[] = [];
   private commitments: AnchorTask[] = [];
+  private accounts: AnchorAccount[] = [];
+  private recurring: RecurringTransaction[] = [];
   private predictions: Prediction[] = [];
   private dismissedPredictionIds = new Set<string>();
   /** Dirty flag — predictions are only recomputed when state has changed */
@@ -67,9 +72,11 @@ export class FabricService implements IFabricService {
     }
 
     await this.engine.loadBehavior(userId);
-    const { transactions, commitments } = await loadFabricActivity(userId);
+    const { transactions, commitments, accounts, recurring } = await loadFabricActivity(userId);
     this.transactions = transactions;
     this.commitments = commitments;
+    this.accounts = accounts;
+    this.recurring = recurring;
     this.dismissedPredictionIds = await loadDismissedPredictionIds(userId);
 
     if (this.engine.getPatterns().length === 0) {
@@ -92,12 +99,19 @@ export class FabricService implements IFabricService {
   }
 
   /**
-   * Push updated transactions/commitments from real-time listeners into the
-   * service so insights and predictions always reflect the latest data.
+   * Push updated data from real-time listeners into the service so insights
+   * and predictions always reflect the latest state.
    */
-  updateActivity(transactions: AnchorTransaction[], commitments: AnchorTask[]): void {
+  updateActivity(
+    transactions: AnchorTransaction[],
+    commitments: AnchorTask[],
+    accounts: AnchorAccount[],
+    recurring: RecurringTransaction[],
+  ): void {
     this.transactions = transactions;
     this.commitments = commitments;
+    this.accounts = accounts;
+    this.recurring = recurring;
     this.predictionsDirty = true;
   }
 
@@ -147,8 +161,19 @@ export class FabricService implements IFabricService {
       feature,
       transactions: this.transactions,
       commitments: this.commitments,
+      recurring: this.recurring,
       now: new Date(),
     });
+  }
+
+  getBriefing() {
+    return buildDailyBriefing(
+      this.getContext().timeOfDay,
+      this.transactions,
+      this.commitments,
+      this.recurring,
+      new Date(),
+    );
   }
 
   async generateWeeklyReport(): Promise<WeeklyReport> {
@@ -176,6 +201,8 @@ export class FabricService implements IFabricService {
       input,
       transactions: this.transactions,
       commitments: this.commitments,
+      accounts: this.accounts,
+      recurring: this.recurring,
       now: new Date(),
     });
 

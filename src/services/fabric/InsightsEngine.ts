@@ -1,10 +1,11 @@
-import type { AnchorTask, AnchorTransaction, Insight } from '../../types';
+import type { AnchorTask, AnchorTransaction, Insight, RecurringTransaction } from '../../types';
 import { detectPrimaryCurrency, formatCents, getDateRange, sumByCategory, toDate, withinRange } from './fabricUtils';
 
 interface InsightInput {
   feature: 'dashboard' | 'commitments' | 'finance' | 'family';
   transactions: AnchorTransaction[];
   commitments: AnchorTask[];
+  recurring: RecurringTransaction[];
   now: Date;
 }
 
@@ -116,15 +117,117 @@ function buildFamilyInsight(transactions: AnchorTransaction[], now: Date): Insig
   };
 }
 
+/** Celebrate a commitment that has a streak of 5+ days. */
+function buildStreakInsight(commitments: AnchorTask[], now: Date): Insight | null {
+  const best = commitments.reduce<AnchorTask | null>((acc, t) => {
+    if ((t.currentStreak ?? 0) < 5) return acc;
+    return !acc || (t.currentStreak ?? 0) > (acc.currentStreak ?? 0) ? t : acc;
+  }, null);
+  if (!best) return null;
+
+  const days = best.currentStreak!;
+  return {
+    id: `insight-streak-${best.id}`,
+    category: 'commitments',
+    headline: `${days}-day streak on "${best.title}"`,
+    detail: days >= 30
+      ? `An incredible month-long habit — you've built something real.`
+      : days >= 14
+        ? `Two solid weeks in a row. Keep the momentum going.`
+        : `Great consistency — you're building a lasting habit.`,
+    trend: 'up',
+    severity: 'positive',
+    metric: { current: days, previous: 0, unit: 'days' },
+    actionLink: '/commitments',
+    createdAt: now.toISOString(),
+  };
+}
+
+/** How much is spent on active recurring subscriptions per month. */
+function buildSubscriptionInsight(
+  recurring: RecurringTransaction[],
+  currency: 'NGN' | 'USD',
+  now: Date,
+): Insight | null {
+  const subs = recurring.filter(
+    (r) => r.status === 'active' && r.frequency === 'monthly' && r.type === 'expense',
+  );
+  if (subs.length === 0) return null;
+
+  const totalCents = subs.reduce((sum, r) => sum + r.amountCents, 0);
+  const cur = currency;
+
+  return {
+    id: 'insight-subscriptions',
+    category: 'spending',
+    headline: `${subs.length} active subscription${subs.length === 1 ? '' : 's'} — ${formatCents(totalCents, cur)}/month`,
+    detail: subs.length <= 4
+      ? subs.map((s) => s.title).join(', ') + '.'
+      : `Including ${subs.slice(0, 3).map((s) => s.title).join(', ')} and ${subs.length - 3} more.`,
+    trend: 'stable',
+    severity: 'neutral',
+    metric: { current: Number((totalCents / 100).toFixed(2)), previous: 0, unit: cur },
+    actionLink: '/finance',
+    createdAt: now.toISOString(),
+  };
+}
+
+/** Savings rate: what % of income was kept this month. */
+function buildSavingsRateInsight(transactions: AnchorTransaction[], now: Date): Insight | null {
+  const currency = detectPrimaryCurrency(transactions);
+  const { start, end } = getDateRange('this_month', now);
+
+  const income = transactions
+    .filter((tx) => tx.type === 'income' && !tx.isSoftDeleted && withinRange(tx.date, start, end))
+    .reduce((sum, tx) => sum + tx.amountCents, 0);
+
+  if (income === 0) return null;
+
+  const expenses = transactions
+    .filter((tx) => tx.type === 'expense' && !tx.isSoftDeleted && withinRange(tx.date, start, end))
+    .reduce((sum, tx) => sum + tx.amountCents, 0);
+
+  const savingsRate = Math.round(((income - expenses) / income) * 100);
+  const savedCents = income - expenses;
+
+  const trend: Insight['trend'] = savingsRate >= 20 ? 'up' : savingsRate >= 0 ? 'stable' : 'down';
+
+  return {
+    id: 'insight-savings-rate',
+    category: 'spending',
+    headline: savingsRate >= 0
+      ? `Saving ${savingsRate}% of income this month`
+      : `Spending exceeds income by ${formatCents(Math.abs(savedCents), currency)}`,
+    detail: savingsRate >= 20
+      ? `You kept ${formatCents(savedCents, currency)} from ${formatCents(income, currency)} earned — solid month.`
+      : savingsRate >= 0
+        ? `You saved ${formatCents(savedCents, currency)} of ${formatCents(income, currency)} earned. Aim for 20% to build a buffer.`
+        : `Your expenses outpaced your income this month. Review discretionary spending.`,
+    trend,
+    severity: savingsRate >= 20 ? 'positive' : savingsRate >= 0 ? 'neutral' : 'attention',
+    metric: { current: savingsRate, previous: 0, unit: '%' },
+    actionLink: '/finance',
+    createdAt: now.toISOString(),
+  };
+}
+
 export function buildInsights(input: InsightInput): Insight[] {
   const spending = buildSpendingInsight(input.transactions, input.now);
-  const commitments = buildCommitmentInsight(input.commitments, input.now);
+  const commitment = buildCommitmentInsight(input.commitments, input.now);
   const family = buildFamilyInsight(input.transactions, input.now);
+  const streak = buildStreakInsight(input.commitments, input.now);
+  const currency = detectPrimaryCurrency(input.transactions);
+  const subscriptions = buildSubscriptionInsight(input.recurring, currency, input.now);
+  const savings = buildSavingsRateInsight(input.transactions, input.now);
 
-  if (input.feature === 'finance') return spending ? [spending] : [];
-  if (input.feature === 'commitments') return commitments ? [commitments] : [];
+  if (input.feature === 'finance') {
+    return [spending, subscriptions, savings].filter((i): i is Insight => !!i);
+  }
+  if (input.feature === 'commitments') {
+    return [commitment, streak].filter((i): i is Insight => !!i);
+  }
   if (input.feature === 'family') return family ? [family] : [];
 
-  // Dashboard: all non-null insights
-  return [spending, commitments].filter((item): item is Insight => !!item);
+  // Dashboard: spending + commitments + streak + savings
+  return [spending, commitment, streak, savings].filter((i): i is Insight => !!i);
 }

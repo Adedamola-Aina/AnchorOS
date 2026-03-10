@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import type { PatternAction, PatternTrigger } from '../types';
+import type { MoodEntry } from '../types/fabricBriefing';
 import { useFabricContext } from '../context/FabricContext';
 
 export function useFabric() {
@@ -13,12 +14,15 @@ export function useFabric() {
     insights,
     lastQueryResult,
     weeklyReport,
+    briefing,
+    moodToday,
     learnFrom,
     dismissPattern,
     deletePattern,
     dismissPrediction,
     runQuery,
     generateWeeklyReport,
+    saveMood,
     clearAllData,
     refresh,
   } = useFabricContext();
@@ -53,6 +57,11 @@ export function useFabric() {
     return generateWeeklyReport();
   }, [generateWeeklyReport, isEnabled]);
 
+  const safeSaveMood = useCallback(async (mood: MoodEntry['mood'], note?: string) => {
+    if (!isEnabled) return;
+    await saveMood(mood, note);
+  }, [isEnabled, saveMood]);
+
   const safeClearAllData = useCallback(async () => {
     if (!isEnabled) return;
     await clearAllData();
@@ -68,12 +77,15 @@ export function useFabric() {
     insights,
     lastQueryResult,
     weeklyReport,
+    briefing,
+    moodToday,
     learnFrom: safeLearnFrom,
     dismissPattern: safeDismissPattern,
     deletePattern: safeDeletePattern,
     dismissPrediction: safeDismissPrediction,
     runQuery: safeRunQuery,
     generateWeeklyReport: safeGenerateWeeklyReport,
+    saveMood: safeSaveMood,
     clearAllData: safeClearAllData,
     refresh,
   };

@@ -77,6 +77,9 @@ const firestoreMocks = vi.hoisted(() => {
 });
 
 // 2. Apply Mocks
+vi.mock('../context/FabricContext', () => ({
+  useFabricContext: () => ({ learnFrom: vi.fn(), isEnabled: false }),
+}));
 vi.mock('../config/firebase', () => ({
   db: {},
   functions: {},

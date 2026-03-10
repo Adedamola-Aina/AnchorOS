@@ -95,6 +95,7 @@ export function buildWeeklyReport(input: WeeklyReportInput): WeeklyReport {
       feature: 'dashboard',
       transactions: weekTransactions,
       commitments: weekCommitments,
+      recurring: [],
       now: input.now,
     }),
     commitmentSummary: {

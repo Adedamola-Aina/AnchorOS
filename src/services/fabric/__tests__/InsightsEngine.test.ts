@@ -52,6 +52,7 @@ describe('buildInsights', () => {
       feature: 'finance',
       transactions,
       commitments,
+      recurring: [],
       now: new Date('2026-03-09T10:00:00.000Z'),
     });
 
@@ -64,6 +65,7 @@ describe('buildInsights', () => {
       feature: 'commitments',
       transactions,
       commitments,
+      recurring: [],
       now: new Date('2026-03-09T10:00:00.000Z'),
     });
 

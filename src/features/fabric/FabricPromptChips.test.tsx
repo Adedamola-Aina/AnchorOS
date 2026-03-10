@@ -14,7 +14,7 @@ describe('FabricPromptChips', () => {
     render(<FabricPromptChips />);
 
     fireEvent.click(screen.getByText('Spending this month'));
-    fireEvent.click(screen.getByText('My streaks'));
+    fireEvent.click(screen.getByText("What's today?"));
 
     expect(navigateTo).toHaveBeenCalledWith('finance', { filter: 'this_month' });
     expect(navigateTo).toHaveBeenCalledWith('commitments');

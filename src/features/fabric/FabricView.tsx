@@ -1,32 +1,44 @@
-import React, { useState } from 'react';
-import { Settings } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Sparkles, Send } from 'lucide-react';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useFabric } from '../../hooks/useFabric';
 import { useApp } from '../../context/AnchorContext';
 import { FabricOnboarding } from './FabricOnboarding';
 import { FabricPromptChips } from './FabricPromptChips';
 import { FabricInsightCard } from './FabricInsightCard';
+import { FabricTodayCard } from './FabricTodayCard';
+import { FabricUpcomingCard } from './FabricUpcomingCard';
+import { FabricMoodCard } from './FabricMoodCard';
+import { formatCents } from '../../services/fabric/fabricUtils';
 import type { FabricQueryResult, TabView } from '../../types';
+import type { Currency } from '../../services/fabric/fabricUtils';
 
 const FabricView: React.FC = () => {
-  const navigate = useNavigate();
   const { navigateTo } = useApp();
   const [queryResult, setQueryResult] = useState<FabricQueryResult | null>(null);
   const [isQuerying, setIsQuerying] = useState(false);
+  const [freeText, setFreeText] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     isEnabled,
     isReady,
-    context,
     patterns,
     insights,
     predictions,
     weeklyReport,
+    briefing,
+    moodToday,
+    learnFrom,
     dismissPrediction,
     runQuery,
     generateWeeklyReport,
+    saveMood,
   } = useFabric();
+
+  useEffect(() => {
+    learnFrom({ type: 'page_visited', page: 'fabric' }, { type: 'view_page', page: 'fabric' });
+  }, [learnFrom]);
 
   const submitPrompt = async (prompt: string) => {
     const trimmed = prompt.trim();
@@ -55,49 +67,81 @@ const FabricView: React.FC = () => {
     );
   }
 
+  const currency = (briefing?.currency ?? 'USD') as Currency;
+
   return (
     <FeatureErrorBoundary featureName="Anchor AI">
       <div className="max-w-3xl mx-auto space-y-5 pb-20 animate-in fade-in duration-300">
-        <header className="flex items-center justify-between gap-3">
-          <div>
+
+        {/* ── Header ─────────────────────────────────────────────────────── */}
+        <header className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary-500" />
             <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white">Anchor AI</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {`Good ${context.timeOfDay}. Tracking ${patterns.length} pattern${patterns.length === 1 ? '' : 's'} from your activity.`}
-            </p>
           </div>
-          <button
-            type="button"
-            aria-label="Open Anchor AI transparency"
-            onClick={() => navigate('/fabric/transparency')}
-            className="min-h-11 min-w-[44px] rounded-lg border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+          {briefing?.subtitle && (
+            <p className="text-sm text-slate-500 dark:text-slate-400 pl-7">{briefing.subtitle}</p>
+          )}
         </header>
 
-        {!isReady || patterns.length === 0 ? <FabricOnboarding /> : null}
+        {/* ── Onboarding (first-time only) ────────────────────────────────── */}
+        {(!isReady || patterns.length === 0) && <FabricOnboarding />}
 
+        {/* ── Today's tasks ───────────────────────────────────────────────── */}
+        {briefing && (
+          <FabricTodayCard
+            todayStats={briefing.todayStats}
+            onOpenCommitments={() => navigateTo('commitments')}
+          />
+        )}
+
+        {/* ── Mood check-in ────────────────────────────────────────────────── */}
+        <FabricMoodCard moodToday={moodToday} onSave={saveMood} />
+
+        {/* ── Coming up (recurring bills in next 7 days) ──────────────────── */}
+        {briefing && briefing.upcoming.length > 0 && (
+          <FabricUpcomingCard items={briefing.upcoming} currency={currency} />
+        )}
+
+        {/* ── Predictions (time-sensitive alerts) ─────────────────────────── */}
         {predictions.length > 0 && (
           <section className="space-y-2">
-            <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Predictions</p>
+            <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Alerts</p>
             <div className="space-y-2">
               {predictions.map((prediction) => (
                 <article key={prediction.id} className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10 p-4 space-y-2">
                   <p className="text-sm font-semibold text-slate-900 dark:text-white">{prediction.message}</p>
-                  {prediction.detail ? <p className="text-sm text-slate-600 dark:text-slate-300">{prediction.detail}</p> : null}
-                  <button
-                    type="button"
-                    onClick={() => dismissPrediction(prediction.id)}
-                    className="min-h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200"
-                  >
-                    Dismiss prediction
-                  </button>
+                  {prediction.detail && (
+                    <p className="text-sm text-slate-600 dark:text-slate-300">{prediction.detail}</p>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {prediction.action?.navigateTo && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const page = prediction.action!.navigateTo!.replace('/', '') as TabView;
+                          navigateTo(page);
+                        }}
+                        className="min-h-11 px-4 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
+                      >
+                        {prediction.action.label}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => dismissPrediction(prediction.id)}
+                      className="min-h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>
           </section>
         )}
 
+        {/* ── Insights ────────────────────────────────────────────────────── */}
         {insights.length > 0 && (
           <section className="space-y-2">
             <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Insights</p>
@@ -107,11 +151,38 @@ const FabricView: React.FC = () => {
           </section>
         )}
 
-        <section className="space-y-2">
-          <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Quick actions</p>
+        {/* ── Ask Anchor AI ────────────────────────────────────────────────── */}
+        <section className="space-y-3">
+          <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Ask Anchor AI</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void submitPrompt(freeText);
+              setFreeText('');
+            }}
+            className="flex gap-2"
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              value={freeText}
+              onChange={(e) => setFreeText(e.target.value)}
+              placeholder="What do I have today? Plan my week…"
+              className="flex-1 min-h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <button
+              type="submit"
+              disabled={!freeText.trim() || isQuerying}
+              aria-label="Send"
+              className="min-h-11 min-w-[44px] flex items-center justify-center rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-40 transition-colors"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
           <FabricPromptChips onPrompt={submitPrompt} />
         </section>
 
+        {/* ── Query response ───────────────────────────────────────────────── */}
         {(isQuerying || queryResult) && (
           <section className="space-y-2">
             <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Response</p>
@@ -123,7 +194,7 @@ const FabricView: React.FC = () => {
               <article className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-3">
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">{queryResult.summary}</p>
                 {queryResult.detail && (
-                  <p className="text-sm text-slate-600 dark:text-slate-300">{queryResult.detail}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line">{queryResult.detail}</p>
                 )}
                 {queryResult.actions && queryResult.actions.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-1">
@@ -144,25 +215,30 @@ const FabricView: React.FC = () => {
           </section>
         )}
 
+        {/* ── Weekly snapshot ──────────────────────────────────────────────── */}
         <section className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => { void generateWeeklyReport(); }}
-              className="min-h-11 px-4 rounded-lg border border-slate-300 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300"
-            >
-              Generate weekly report
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => { void generateWeeklyReport(); }}
+            className="min-h-11 px-4 rounded-lg border border-slate-300 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300"
+          >
+            Generate weekly report
+          </button>
           {weeklyReport && (
             <article className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-2">
               <p className="text-sm font-semibold text-slate-900 dark:text-white">Weekly Snapshot</p>
               <p className="text-sm text-slate-600 dark:text-slate-300">
-                {`Income: $${weeklyReport.financeSummary.totalIncome.toFixed(2)} · Spent: $${weeklyReport.financeSummary.totalSpent.toFixed(2)} · Commitment completion: ${weeklyReport.commitmentSummary.completionRate}%`}
+                {(() => {
+                  const cur = (weeklyReport.currency ?? 'USD') as Currency;
+                  const income = formatCents(Math.round(weeklyReport.financeSummary.totalIncome * 100), cur);
+                  const spent = formatCents(Math.round(weeklyReport.financeSummary.totalSpent * 100), cur);
+                  return `Income: ${income} · Spent: ${spent} · Commitments: ${weeklyReport.commitmentSummary.completionRate}%`;
+                })()}
               </p>
             </article>
           )}
         </section>
+
       </div>
     </FeatureErrorBoundary>
   );

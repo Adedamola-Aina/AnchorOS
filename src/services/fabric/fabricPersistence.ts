@@ -1,12 +1,25 @@
-import type { AnchorTask, AnchorTransaction, FabricMessage, Prediction, WeeklyReport } from '../../types';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import type { AnchorAccount, AnchorTask, AnchorTransaction, FabricMessage, Prediction, RecurringTransaction, WeeklyReport } from '../../types';
+import { db, APP_ID } from '../../config/firebase';
 import { secureDb } from '../../utils/secureDb';
 
-export async function loadFabricActivity(userId: string): Promise<{ transactions: AnchorTransaction[]; commitments: AnchorTask[] }> {
-  const [transactions, commitments] = await Promise.all([
+export async function loadFabricActivity(userId: string): Promise<{
+  transactions: AnchorTransaction[];
+  commitments: AnchorTask[];
+  accounts: AnchorAccount[];
+  recurring: RecurringTransaction[];
+}> {
+  const [transactions, commitments, accounts, recurringSnap] = await Promise.all([
     secureDb.queryCollection<AnchorTransaction>(userId, 'finance', []),
     secureDb.queryCollection<AnchorTask>(userId, 'commitments', []),
+    secureDb.queryCollection<AnchorAccount>(userId, 'accounts', []),
+    getDocs(query(
+      collection(db, 'artifacts', APP_ID, 'recurring_transactions'),
+      where('userId', '==', userId),
+    )),
   ]);
-  return { transactions, commitments };
+  const recurring = recurringSnap.docs.map((d) => ({ id: d.id, ...d.data() } as RecurringTransaction));
+  return { transactions, commitments, accounts, recurring };
 }
 
 export async function loadDismissedPredictionIds(userId: string): Promise<Set<string>> {

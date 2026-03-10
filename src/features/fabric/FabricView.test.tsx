@@ -1,3 +1,4 @@
+/// <reference types="@testing-library/jest-dom/vitest" />
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -7,6 +8,7 @@ import FabricView from './FabricView';
 const useFabricMock = vi.fn();
 const runQuery = vi.fn(async () => ({ summary: 'ok', visualizable: false, data: null, actions: [] }));
 const generateWeeklyReport = vi.fn(async () => null);
+const saveMood = vi.fn(async () => undefined);
 
 vi.mock('../../hooks/useFabric', () => ({
   useFabric: () => useFabricMock(),
@@ -20,6 +22,18 @@ vi.mock('./FabricPromptChips', () => ({
   FabricPromptChips: () => <div data-testid="prompt-chips">chips</div>,
 }));
 
+vi.mock('./FabricTodayCard', () => ({
+  FabricTodayCard: () => <div data-testid="today-card">today</div>,
+}));
+
+vi.mock('./FabricMoodCard', () => ({
+  FabricMoodCard: () => <div data-testid="mood-card">mood</div>,
+}));
+
+vi.mock('./FabricUpcomingCard', () => ({
+  FabricUpcomingCard: () => <div data-testid="upcoming-card">upcoming</div>,
+}));
+
 const baseHook = {
   isEnabled: true,
   isReady: true,
@@ -29,14 +43,26 @@ const baseHook = {
   predictions: [],
   lastQueryResult: null,
   weeklyReport: null,
+  briefing: {
+    greeting: 'Good morning',
+    subtitle: '3 tasks remaining',
+    todayStats: { totalTasks: 3, completedTasks: 0, pendingTasks: 3 },
+    upcoming: [],
+    spendingThisWeek: 0,
+    currency: 'USD',
+    generatedAt: new Date().toISOString(),
+  },
+  moodToday: null,
+  learnFrom: vi.fn(),
   dismissPrediction: vi.fn(),
   runQuery,
   generateWeeklyReport,
+  saveMood,
 };
 
 describe('FabricView', () => {
   it('shows disabled state when Anchor AI is off', () => {
-    useFabricMock.mockReturnValue({ ...baseHook, isEnabled: false, isReady: false, patterns: [] });
+    useFabricMock.mockReturnValue({ ...baseHook, isEnabled: false, isReady: false, patterns: [], briefing: null });
 
     render(
       <MemoryRouter>
@@ -59,7 +85,7 @@ describe('FabricView', () => {
     expect(screen.getByText("Hey! I'm Anchor AI.")).toBeInTheDocument();
   });
 
-  it('does not render free-text chat input', () => {
+  it('renders free-text chat input', () => {
     useFabricMock.mockReturnValue(baseHook);
 
     render(
@@ -68,11 +94,11 @@ describe('FabricView', () => {
       </MemoryRouter>
     );
 
-    expect(screen.queryByPlaceholderText('How much did I spend this month?')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Ask' })).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText('What do I have today? Plan my week…')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument();
   });
 
-  it('merges briefing context into header subtitle', () => {
+  it('shows Anchor AI title and briefing subtitle in header', () => {
     useFabricMock.mockReturnValue(baseHook);
 
     render(
@@ -81,9 +107,21 @@ describe('FabricView', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Good morning/)).toBeInTheDocument();
-    // No dedicated "Daily briefing" section card
-    expect(screen.queryByText('Daily briefing')).not.toBeInTheDocument();
+    expect(screen.getByText('Anchor AI')).toBeInTheDocument();
+    expect(screen.getByText('3 tasks remaining')).toBeInTheDocument();
+  });
+
+  it('renders today card and mood card', () => {
+    useFabricMock.mockReturnValue(baseHook);
+
+    render(
+      <MemoryRouter>
+        <FabricView />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('today-card')).toBeInTheDocument();
+    expect(screen.getByTestId('mood-card')).toBeInTheDocument();
   });
 
   it('renders predictions section when predictions exist', () => {
@@ -112,7 +150,7 @@ describe('FabricView', () => {
     );
 
     expect(screen.getByTestId('prompt-chips')).toBeInTheDocument();
-    expect(screen.getByText('Quick actions')).toBeInTheDocument();
+    expect(screen.getByText('Ask Anchor AI')).toBeInTheDocument();
   });
 
   it('shows weekly report when generated', () => {
