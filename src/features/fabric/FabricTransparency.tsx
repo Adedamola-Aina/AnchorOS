@@ -2,8 +2,12 @@ import React from 'react';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useFabric } from '../../hooks/useFabric';
 
-function describePattern(pattern: { trigger: { type: string }; followUpAction: { type: string } }): string {
-  return `When ${pattern.trigger.type.replace(/_/g, ' ')}, Anchor AI tends to ${pattern.followUpAction.type.replace(/_/g, ' ')}.`;
+function describePattern(pattern: { trigger: { type: string; category?: string }; followUpAction: { type: string; category?: string } }): string {
+  const triggerLabel = pattern.trigger.type.replace(/_/g, ' ');
+  const actionLabel = pattern.followUpAction.type.replace(/_/g, ' ');
+  const triggerCategory = pattern.trigger.category ? ` in ${pattern.trigger.category}` : '';
+  const actionCategory = pattern.followUpAction.category ? ` for ${pattern.followUpAction.category}` : '';
+  return `When ${triggerLabel}${triggerCategory}, Anchor AI tends to ${actionLabel}${actionCategory}.`;
 }
 
 const FabricTransparency: React.FC = () => {
