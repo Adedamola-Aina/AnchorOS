@@ -12,6 +12,10 @@ vi.mock('../../hooks/useFabric', () => ({
   useFabric: () => useFabricMock(),
 }));
 
+vi.mock('../../context/AnchorContext', () => ({
+  useApp: () => ({ navigateTo: vi.fn() }),
+}));
+
 vi.mock('./FabricPromptChips', () => ({
   FabricPromptChips: () => <div data-testid="prompt-chips">chips</div>,
 }));

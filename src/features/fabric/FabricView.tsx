@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useFabric } from '../../hooks/useFabric';
+import { useApp } from '../../context/AnchorContext';
 import { FabricOnboarding } from './FabricOnboarding';
 import { FabricPromptChips } from './FabricPromptChips';
 import { FabricInsightCard } from './FabricInsightCard';
+import type { FabricQueryResult, TabView } from '../../types';
 
 const FabricView: React.FC = () => {
   const navigate = useNavigate();
+  const { navigateTo } = useApp();
+  const [queryResult, setQueryResult] = useState<FabricQueryResult | null>(null);
+  const [isQuerying, setIsQuerying] = useState(false);
+
   const {
     isEnabled,
     isReady,
@@ -25,7 +31,17 @@ const FabricView: React.FC = () => {
   const submitPrompt = async (prompt: string) => {
     const trimmed = prompt.trim();
     if (!trimmed) return;
-    await runQuery(trimmed);
+    setIsQuerying(true);
+    setQueryResult(null);
+    const result = await runQuery(trimmed);
+    setQueryResult(result ?? null);
+    setIsQuerying(false);
+  };
+
+  const handleAction = (type: string, payload: Record<string, unknown>) => {
+    if (type === 'navigate' && typeof payload.page === 'string') {
+      navigateTo(payload.page as TabView);
+    }
   };
 
   if (!isEnabled) {
@@ -95,6 +111,38 @@ const FabricView: React.FC = () => {
           <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Quick actions</p>
           <FabricPromptChips onPrompt={submitPrompt} />
         </section>
+
+        {(isQuerying || queryResult) && (
+          <section className="space-y-2">
+            <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Response</p>
+            {isQuerying ? (
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 animate-pulse">Thinking…</p>
+              </div>
+            ) : queryResult ? (
+              <article className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-3">
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">{queryResult.summary}</p>
+                {queryResult.detail && (
+                  <p className="text-sm text-slate-600 dark:text-slate-300">{queryResult.detail}</p>
+                )}
+                {queryResult.actions && queryResult.actions.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {queryResult.actions.map((action) => (
+                      <button
+                        key={action.label}
+                        type="button"
+                        onClick={() => handleAction(action.type, action.payload)}
+                        className="min-h-11 px-4 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </article>
+            ) : null}
+          </section>
+        )}
 
         <section className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between">
