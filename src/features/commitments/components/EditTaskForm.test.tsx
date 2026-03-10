@@ -60,13 +60,12 @@ describe('EditTaskForm', () => {
 
   it('shows scope selector when hasFamilyActive', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={true} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.getByRole('button', { name: 'personal' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'family' })).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Personal')).toBeInTheDocument();
   });
 
   it('hides scope selector when no family', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.queryByRole('button', { name: 'family' })).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue('Personal')).not.toBeInTheDocument();
   });
 
   it('calls onCancel', () => {

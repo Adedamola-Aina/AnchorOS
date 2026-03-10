@@ -10,6 +10,7 @@ import React, { useState, useMemo } from 'react';
 import type { TaskType, TimeOfDay, AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
 import { Card } from '@anchor-os/ui';
+import { ChevronDown } from 'lucide-react';
 import { FrequencyStep, DetailsHeader, DailyTimeField, WeeklyDaysField, MonthlyDatesField } from './TaskFormParts';
 import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
 
@@ -63,21 +64,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                             </div>
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-[10px] uppercase font-bold text-slate-400">Domain</label>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {domains.map(d => (
-                                        <button
-                                            key={d}
-                                            type="button"
-                                            onClick={() => setNewTaskDomain(d)}
-                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors min-h-[36px] ${
-                                                newTaskDomain === d
-                                                    ? 'bg-task-500 text-white'
-                                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                                            }`}
-                                        >
-                                            {d}
-                                        </button>
-                                    ))}
+                                <div className="relative">
+                                    <select value={newTaskDomain} onChange={(e) => setNewTaskDomain(e.target.value)} className="w-full px-3 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all min-h-[44px] text-base appearance-none">
+                                        {domains.map(d => <option key={d} value={d}>{d}</option>)}
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                                 </div>
                             </div>
                             {hasFamilyActive && (
