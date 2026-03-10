@@ -35,6 +35,7 @@ NC='\033[0m' # No Color
 ENV="production"
 DRY_RUN=false
 SKIP_E2E=false
+SKIP_TESTS=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -47,6 +48,11 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --skip-e2e)
+            SKIP_E2E=true
+            shift
+            ;;
+        --skip-tests)
+            SKIP_TESTS=true
             SKIP_E2E=true
             shift
             ;;
@@ -86,12 +92,16 @@ else
 fi
 
 # 2. Automated Unit Testing
-echo -e "\n${YELLOW}🧪 Stage 2: Automated Testing (Unit & Integration)${NC}"
-if npm run test:run; then
-    echo -e "${GREEN}✅ All unit tests passed.${NC}"
+if [[ "$SKIP_TESTS" == true ]]; then
+    echo -e "\n${YELLOW}⏭️  Stage 2: Unit Tests Skipped (--skip-tests)${NC}"
 else
-    echo -e "${RED}❌ Unit tests failed. Deployment prevented.${NC}"
-    exit 1
+    echo -e "\n${YELLOW}🧪 Stage 2: Automated Testing (Unit & Integration)${NC}"
+    if npm run test:run; then
+        echo -e "${GREEN}✅ All unit tests passed.${NC}"
+    else
+        echo -e "${RED}❌ Unit tests failed. Deployment prevented.${NC}"
+        exit 1
+    fi
 fi
 # 2b. Version Bump (automatic per environment)
 echo -e "\n${YELLOW}📦 Stage 2b: Version Bump (${ENV})${NC}"
@@ -143,7 +153,9 @@ else
 fi
 
 # 3d. Firestore Rules Testing (staging + production)
-if [[ "$ENV" != "development" ]]; then
+if [[ "$SKIP_TESTS" == true ]]; then
+    echo -e "\n${YELLOW}⏭️  Stage 3d: Rules Tests Skipped (--skip-tests)${NC}"
+elif [[ "$ENV" != "development" ]]; then
     echo -e "\n${YELLOW}🔒 Stage 3d: Firestore Rules Testing${NC}"
     if command -v firebase &> /dev/null; then
         if npm run test:rules; then
