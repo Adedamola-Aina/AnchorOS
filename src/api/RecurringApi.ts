@@ -1,26 +1,22 @@
 /**
  * Recurring Transactions API Client
- * 
- * Abstraction layer for Recurring Transaction Firestore operations.
- * 
+ *
+ * Mutations (create/update/delete/toggle) go through Cloud Function callables
+ * so they get server-side validation and audit logging.
+ * Subscriptions use Firestore directly for real-time updates.
+ *
  * @module api/RecurringApi
  */
-// @ts-nocheck
-
-
 import {
     collection,
-    doc,
-    addDoc,
-    updateDoc,
-    deleteDoc,
     onSnapshot,
     query,
     where,
     orderBy,
     type Unsubscribe
 } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions, APP_ID } from '../config/firebase';
 import type { RecurringTransaction } from '../types';
 
 export class RecurringApi {
@@ -34,7 +30,7 @@ export class RecurringApi {
     }
 
     /**
-     * Subscribe to user's recurring transactions
+     * Subscribe to user's recurring transactions (real-time)
      */
     subscribeToRecurring(
         userId: string,
@@ -65,30 +61,41 @@ export class RecurringApi {
      * Create a new recurring transaction rule
      */
     async createRecurring(data: Omit<RecurringTransaction, 'id'>): Promise<string> {
-        const docRef = await addDoc(
-            collection(db, 'artifacts', APP_ID, 'recurring_transactions'),
-            {
-                ...data,
-                createdAt: new Date().toISOString()
-            }
+        const fn = httpsCallable<Omit<RecurringTransaction, 'id'>, { id: string }>(
+            functions, 'createRecurringTransaction'
         );
-        return docRef.id;
+        const result = await fn(data);
+        return result.data.id;
     }
 
     /**
      * Update an existing recurring rule
      */
     async updateRecurring(id: string, updates: Partial<RecurringTransaction>): Promise<void> {
-        const docRef = doc(db, 'artifacts', APP_ID, 'recurring_transactions', id);
-        await updateDoc(docRef, updates);
+        const fn = httpsCallable<{ id: string } & Partial<RecurringTransaction>, { id: string }>(
+            functions, 'updateRecurringTransaction'
+        );
+        await fn({ id, ...updates });
     }
 
     /**
-     * Delete (or pause/archive) a recurring rule
+     * Delete a recurring rule
      */
     async deleteRecurring(id: string): Promise<void> {
-        const docRef = doc(db, 'artifacts', APP_ID, 'recurring_transactions', id);
-        await deleteDoc(docRef);
+        const fn = httpsCallable<{ id: string }, { success: boolean }>(
+            functions, 'deleteRecurringTransaction'
+        );
+        await fn({ id });
+    }
+
+    /**
+     * Pause or resume a recurring rule
+     */
+    async toggleRecurring(id: string, status: 'active' | 'paused'): Promise<void> {
+        const fn = httpsCallable<{ id: string; status: 'active' | 'paused' }, { id: string; status: string }>(
+            functions, 'toggleRecurringTransaction'
+        );
+        await fn({ id, status });
     }
 }
 

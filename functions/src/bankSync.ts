@@ -4,11 +4,9 @@
  * Pulls transaction history and balance updates from linked bank accounts.
  * Deduplicates against existing externalTransactionId values.
  */
-// @ts-nocheck
 
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
-import { FieldValue } from 'firebase-admin/firestore';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
 import { createFinanceAuditLog } from './helpers';

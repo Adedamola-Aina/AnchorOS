@@ -3,7 +3,6 @@
  *
  * Callable backend erasure flow for GDPR/right-to-erasure.
  */
-// @ts-nocheck
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { getAuth } from 'firebase-admin/auth';

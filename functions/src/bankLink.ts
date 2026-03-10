@@ -4,7 +4,6 @@
  * Exchanges the auth code from the Mono Connect widget,
  * fetches account details, and creates a linked AnchorAccount.
  */
-// @ts-nocheck
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db, APP_ID } from './config';

@@ -1,7 +1,6 @@
 /**
  * Shared type definitions for Cloud Functions
  */
-// @ts-nocheck
 
 
 // ============================================================================

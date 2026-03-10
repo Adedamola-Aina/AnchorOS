@@ -1,9 +1,27 @@
-// @ts-nocheck
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { FieldValue } from 'firebase-admin/firestore';
 import { addWeeks, addMonths, addYears, parseISO } from 'date-fns';
 import { db, APP_ID } from './config';
-import { RecurringTransaction } from './types';
+import type { RecurringTransaction } from './types';
+
+const VALID_FREQUENCIES = new Set(['weekly', 'monthly', 'yearly']);
+const VALID_TYPES = new Set(['income', 'expense']);
+
+/**
+ * Validate required fields on a recurring rule before processing.
+ * Returns an error string if invalid, null if valid.
+ */
+function validateRule(rule: RecurringTransaction): string | null {
+    if (!rule.userId || typeof rule.userId !== 'string') return 'missing userId';
+    if (!rule.accountId || typeof rule.accountId !== 'string') return 'missing accountId';
+    if (!rule.title || typeof rule.title !== 'string') return 'missing title';
+    if (typeof rule.amountCents !== 'number' || rule.amountCents <= 0) return 'invalid amountCents';
+    if (!VALID_TYPES.has(rule.type)) return `invalid type: ${rule.type}`;
+    if (!VALID_FREQUENCIES.has(rule.frequency)) return `invalid frequency: ${rule.frequency}`;
+    if (typeof rule.interval !== 'number' || rule.interval <= 0 || !Number.isInteger(rule.interval)) return 'invalid interval';
+    if (!rule.nextRunAt || typeof rule.nextRunAt !== 'string') return 'missing nextRunAt';
+    return null;
+}
 
 const calculateNextRun = (currentDate: Date, frequency: string, interval: number): Date => {
     switch (frequency) {
@@ -51,6 +69,14 @@ export const processRecurringTransactions = onSchedule(
         const rule = { id: doc.id, ...doc.data() } as RecurringTransaction;
 
         try {
+            const validationError = validateRule(rule);
+            if (validationError) {
+                console.error(`[Recurring] Rule ${rule.id} failed validation: ${validationError}. Pausing.`);
+                batch.update(doc.ref, { status: 'paused', failureReason: validationError });
+                batchCount++;
+                continue;
+            }
+
             // Get necessary account info to ensure validity and get ownerId
             // Note: We need the account to check currency and scope, but we might trust the rule snapshot for simplicity?
             // Better to fetch account to be safe and get current details.

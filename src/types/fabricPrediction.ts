@@ -40,6 +40,7 @@ export type IntentAction =
   | 'create_commitment'
   | 'query_spending'
   | 'query_commitments'
+  | 'summarize_week'
   | 'navigate'
   | 'unknown';
 
@@ -49,7 +50,7 @@ export interface IntentEntities {
   category?: string;
   title?: string;
   frequency?: 'daily' | 'weekly' | 'monthly';
-  timePeriod?: 'today' | 'this_week' | 'this_month' | 'last_week' | 'last_month';
+  timePeriod?: 'today' | 'yesterday' | 'this_week' | 'this_month' | 'last_week' | 'last_month';
   page?: string;
 }
 
@@ -96,6 +97,8 @@ export interface WeeklyReport {
     vsLastWeek: number;
   };
   generatedAt: string;
+  /** ISO 4217 currency code detected from the user's transactions */
+  currency?: string;
 }
 
 export interface HouseholdInsight extends Insight {

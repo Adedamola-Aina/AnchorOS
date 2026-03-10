@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
@@ -27,10 +26,6 @@ vi.mock('./AuthContext', () => ({
   useAuth: () => ({ user: { uid: 'user-1' } }),
 }));
 
-vi.mock('./AnchorContext', () => ({
-  useApp: () => ({ navigateTo: vi.fn() }),
-}));
-
 vi.mock('../hooks/useHaptic', () => ({
   useHaptic: () => ({ trigger: vi.fn() }),
 }));
@@ -39,13 +34,9 @@ vi.mock('../hooks/useTaskReminders', () => ({
   useTaskReminders: vi.fn(),
 }));
 
-const mockOnCommitmentCompleted = vi.fn();
-vi.mock('../hooks/useFabricSuggestions', () => ({
-  useFabricSuggestions: () => ({
-    suggestions: [],
-    onCommitmentCompleted: mockOnCommitmentCompleted,
-    dismissSuggestion: vi.fn(),
-  }),
+const mockLearnFrom = vi.fn();
+vi.mock('./FabricContext', () => ({
+  useFabricContext: () => ({ learnFrom: mockLearnFrom }),
 }));
 
 describe('TaskContext', () => {
@@ -53,7 +44,10 @@ describe('TaskContext', () => {
     <TaskProvider>{children}</TaskProvider>
   );
 
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockToggleTask.mockResolvedValue(undefined);
+  });
 
   it('provides tasks to children', () => {
     const { result } = renderHook(() => useTasks(), { wrapper });
@@ -67,28 +61,32 @@ describe('TaskContext', () => {
     expect(result.current.updateTask).toBeDefined();
   });
 
-  it('wraps toggleTask with suggestion logic', async () => {
+  it('wraps toggleTask with haptic feedback', async () => {
     const { result } = renderHook(() => useTasks(), { wrapper });
     await act(async () => {
-      await result.current.toggleTask('t1', false); // completing
+      await result.current.toggleTask('t1', false);
     });
     expect(mockToggleTask).toHaveBeenCalledWith('t1', false);
-    expect(mockOnCommitmentCompleted).toHaveBeenCalled();
   });
 
-  it('does not trigger suggestion when uncompleting', async () => {
+  it('calls learnFrom on commitment completion', async () => {
     const { result } = renderHook(() => useTasks(), { wrapper });
     await act(async () => {
-      await result.current.toggleTask('t2', true); // uncompleting
+      await result.current.toggleTask('t1', false);
     });
-    expect(mockToggleTask).toHaveBeenCalledWith('t2', true);
-    expect(mockOnCommitmentCompleted).not.toHaveBeenCalled();
+    expect(mockLearnFrom).toHaveBeenCalledWith(
+      { type: 'commitment_completed', commitmentId: 't1', category: undefined },
+      { type: 'check_commitment', commitmentId: 't1' }
+    );
   });
 
-  it('provides fabric suggestions', () => {
+  it('does not call learnFrom when uncompleting', async () => {
     const { result } = renderHook(() => useTasks(), { wrapper });
-    expect(result.current.fabricSuggestions).toEqual([]);
-    expect(result.current.dismissFabricSuggestion).toBeDefined();
+    await act(async () => {
+      await result.current.toggleTask('t2', true);
+    });
+    expect(mockToggleTask).toHaveBeenCalledWith('t2', true);
+    expect(mockLearnFrom).not.toHaveBeenCalled();
   });
 
   it('throws when used outside provider', () => {

@@ -17,6 +17,18 @@ service cloud.firestore {
           && data.date is string;
     }
 
+    function isValidRecurringTransaction(data) {
+      return data.userId is string && data.userId.size() > 0
+          && data.accountId is string && data.accountId.size() > 0
+          && data.title is string && data.title.size() > 0
+          && data.amountCents is int && data.amountCents > 0
+          && data.type in ['income', 'expense']
+          && data.frequency in ['weekly', 'monthly', 'yearly']
+          && data.interval is int && data.interval > 0
+          && data.status in ['active', 'paused']
+          && data.nextRunAt is string;
+    }
+
     function isValidTask(data) {
        return data.title is string && data.title.size() > 0
           && data.completed is bool;
@@ -35,12 +47,17 @@ service cloud.firestore {
       // Recurring Transactions Collection
       // ======================================================================
       match /recurring_transactions/{ruleId} {
-        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        allow create: if request.auth != null
+                      && request.resource.data.userId == request.auth.uid
+                      && isValidRecurringTransaction(request.resource.data);
         allow read: if request.auth != null && (
-          resource.data.userId == request.auth.uid || 
-          request.auth.uid in resource.data.sharedWith
+          resource.data.userId == request.auth.uid ||
+          request.auth.uid in resource.data.get('sharedWith', [])
         );
-        allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+        allow update: if request.auth != null
+                      && resource.data.userId == request.auth.uid
+                      && isValidRecurringTransaction(request.resource.data);
+        allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
       }
       
       // ======================================================================

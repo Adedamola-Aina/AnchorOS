@@ -48,6 +48,8 @@ export class FabricService implements IFabricService {
   private commitments: AnchorTask[] = [];
   private predictions: Prediction[] = [];
   private dismissedPredictionIds = new Set<string>();
+  /** Dirty flag — predictions are only recomputed when state has changed */
+  private predictionsDirty = false;
 
   private constructor() {}
 
@@ -85,8 +87,18 @@ export class FabricService implements IFabricService {
   learnFrom(trigger: PatternTrigger, action: PatternAction): void {
     if (!this.enabled || !this.activeUserId) return;
     this.engine.recordAction(trigger, action);
-    this.recomputePredictions();
+    this.predictionsDirty = true;
     this.scheduleSave();
+  }
+
+  /**
+   * Push updated transactions/commitments from real-time listeners into the
+   * service so insights and predictions always reflect the latest data.
+   */
+  updateActivity(transactions: AnchorTransaction[], commitments: AnchorTask[]): void {
+    this.transactions = transactions;
+    this.commitments = commitments;
+    this.predictionsDirty = true;
   }
 
   getPatterns(): UserPattern[] { return this.engine.getPatterns(); }
@@ -116,14 +128,17 @@ export class FabricService implements IFabricService {
   }
 
   getPredictions(): Prediction[] {
-    this.recomputePredictions();
+    if (this.predictionsDirty) {
+      this.recomputePredictions();
+      this.predictionsDirty = false;
+    }
     return [...this.predictions];
   }
 
   dismissPrediction(predictionId: string): void {
     if (!this.activeUserId) return;
     this.dismissedPredictionIds.add(predictionId);
-    this.predictions = this.predictions.filter((prediction) => prediction.id !== predictionId);
+    this.predictions = this.predictions.filter((p) => p.id !== predictionId);
     void persistPredictionState(this.activeUserId, this.predictions, this.dismissedPredictionIds);
   }
 
@@ -155,6 +170,7 @@ export class FabricService implements IFabricService {
 
   async query(input: string): Promise<FabricQueryResult> {
     const intent = this.parseIntent(input);
+
     const result = runFabricQuery({
       intent,
       input,
@@ -162,6 +178,7 @@ export class FabricService implements IFabricService {
       commitments: this.commitments,
       now: new Date(),
     });
+
     if (this.activeUserId && this.enabled) {
       await appendFabricConversation(this.activeUserId, input, result.summary);
     }
@@ -181,7 +198,7 @@ export class FabricService implements IFabricService {
     this.saveTimer = setTimeout(async () => {
       if (!this.activeUserId) return;
       await this.engine.saveBehavior(this.activeUserId);
-      this.recomputePredictions();
+      this.predictionsDirty = true;
       this.saveTimer = null;
     }, SAVE_DEBOUNCE_MS);
   }

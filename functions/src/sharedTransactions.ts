@@ -4,7 +4,6 @@
  * Allows family members to add transactions to shared accounts and
  * provides a one-time migration to fix account scope flags.
  */
-// @ts-nocheck
 
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';

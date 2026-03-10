@@ -1,11 +1,9 @@
-// @ts-nocheck
 import React from 'react';
 import { Sunrise, Sun, Moon } from 'lucide-react';
 import type { AnchorTask } from '../../types';
 export { ThemeToggle, type Theme } from './ThemeToggle';
 export { ToggleSwitch } from './ToggleSwitch';
 export { CategoryIcon } from './CategoryIcon';
-export { FabricSuggestionToast, FabricSuggestionContainer } from './FabricSuggestionToast';
 export { Skeleton, SkeletonCard, SkeletonListItem, SkeletonDashboard, SkeletonFinance, SkeletonCommitments, SkeletonSettings } from './Skeleton';
 export { EmptyState, type EmptyStatePreset } from './EmptyState';
 export { LoadingBoundary, InlineLoading, PageLoading } from './LoadingBoundary';

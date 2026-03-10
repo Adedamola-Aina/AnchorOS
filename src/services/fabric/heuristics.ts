@@ -21,7 +21,7 @@ const FINANCIAL_KEYWORDS = [
   'doctor',
 ];
 
-const CATEGORY_KEYWORDS: Record<string, string[]> = {
+export const CATEGORY_KEYWORDS: Record<string, string[]> = {
   Transportation: ['fuel', 'uber', 'lyft', 'transit', 'bus', 'train', 'car gas', 'gas for car', 'petrol', 'gasoline'],
   'Bills & Utilities': ['electric', 'water', 'gas bill', 'internet', 'phone', 'utility', 'bill'],
   Rent: ['rent', 'lease', 'housing', 'mortgage'],

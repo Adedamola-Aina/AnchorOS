@@ -15,7 +15,7 @@ describe('parseIntent', () => {
 
     expect(result.action).toBe('record_expense');
     expect(result.entities.amount).toBe(45);
-    expect(result.entities.category).toBe('groceries');
+    expect(result.entities.category).toBe('Groceries');
   });
 
   it('parses record income intent', () => {

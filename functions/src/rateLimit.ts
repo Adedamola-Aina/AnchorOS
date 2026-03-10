@@ -3,7 +3,6 @@
  * 
  * Protects all Cloud Functions from abuse with per-action rate limits.
  */
-// @ts-nocheck
 
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
@@ -43,6 +42,9 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     bankLink:            { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
     bankUnlink:          { maxAttempts: 3,   windowMs: DAY,      blockDurationMs: DAY },
     bankSync:            { maxAttempts: 10,  windowMs: DAY,      blockDurationMs: HOUR },
+    recurringCreate:     { maxAttempts: 30,  windowMs: DAY,      blockDurationMs: HOUR },
+    recurringUpdate:     { maxAttempts: 60,  windowMs: HOUR,     blockDurationMs: 15 * MIN },
+    recurringDelete:     { maxAttempts: 20,  windowMs: DAY,      blockDurationMs: HOUR },
 };
 
 // ============================================================================

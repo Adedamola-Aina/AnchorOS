@@ -40,7 +40,7 @@ export class BehavioralEngine {
       this.syncConfirmedPattern(pattern);
     } else {
       const created: UserPattern = {
-        id: `pattern-${this.state.patterns.length + 1}-${Date.now()}`,
+        id: crypto.randomUUID(),
         trigger,
         followUpAction: action,
         frequency: 1,

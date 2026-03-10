@@ -4,9 +4,6 @@
  * Common operations: audit logging, notifications, connection lookup,
  * and verification code generation.
  */
-// @ts-nocheck
-
-
 import { FieldValue } from 'firebase-admin/firestore';
 import { createHash, randomInt } from 'node:crypto';
 import { db, APP_ID } from './config';
@@ -51,12 +48,33 @@ export async function createFinanceAuditLog(
     await createAuditLog(action, actorUid, { domain: 'finance', ...metadata }, targetUid);
 }
 
+/** Keys containing PII that must never be stored in audit logs. */
+const PII_KEYS = new Set([
+    'email', 'inviteeEmail', 'senderEmail', 'recipientEmail', 'ownerEmail',
+    'phone', 'phoneNumber', 'password', 'secret', 'token', 'verificationCode',
+    'recoveryCode', 'apiKey', 'privateKey', 'name', 'displayName', 'address',
+]);
+
+const MAX_METADATA_KEYS = 10;
+const MAX_STRING_LENGTH = 500;
+
 function normalizeMetadata(input: Record<string, unknown>): Record<string, unknown> {
+    let serializable: Record<string, unknown>;
     try {
-        return JSON.parse(JSON.stringify(input)) as Record<string, unknown>;
+        serializable = JSON.parse(JSON.stringify(input)) as Record<string, unknown>;
     } catch {
         return { _warning: 'metadata_not_serializable' };
     }
+
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(serializable)) {
+        if (PII_KEYS.has(key)) continue;
+        if (Object.keys(result).length >= MAX_METADATA_KEYS) break;
+        result[key] = typeof value === 'string' && value.length > MAX_STRING_LENGTH
+            ? `${value.slice(0, MAX_STRING_LENGTH)}…`
+            : value;
+    }
+    return result;
 }
 
 function stableStringify(value: unknown): string {

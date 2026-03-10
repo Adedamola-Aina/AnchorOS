@@ -16,6 +16,7 @@ import { FabricService } from '../services/fabric/FabricService';
 interface FabricContextValue {
   isEnabled: boolean;
   isReady: boolean;
+  initError: string | null;
   context: FabricAmbientContext;
   patterns: UserPattern[];
   confirmedPatterns: UserPattern[];
@@ -52,6 +53,7 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const [isEnabled, setIsEnabled] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
   const [context, setContext] = useState<FabricAmbientContext>(EMPTY_CONTEXT);
   const [patterns, setPatterns] = useState<UserPattern[]>([]);
   const [confirmedPatterns, setConfirmedPatterns] = useState<UserPattern[]>([]);
@@ -88,10 +90,20 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return;
       }
 
-      await fabricService.initialize(user.uid);
-      if (!isMounted) return;
-      refresh();
-      setIsReady(true);
+      try {
+        await fabricService.initialize(user.uid);
+        if (!isMounted) return;
+        setInitError(null);
+        refresh();
+        setIsReady(true);
+      } catch (err) {
+        if (!isMounted) return;
+        const message = err instanceof Error ? err.message : 'Failed to initialize Anchor AI';
+        console.error('[Fabric] Initialization failed:', err);
+        setInitError(message);
+        setIsEnabled(false);
+        setIsReady(true);
+      }
     };
 
     initialize();
@@ -143,6 +155,7 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const value = useMemo<FabricContextValue>(() => ({
     isEnabled,
     isReady,
+    initError,
     context,
     patterns,
     confirmedPatterns,
@@ -167,6 +180,7 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     dismissPrediction,
     generateWeeklyReport,
     insights,
+    initError,
     isEnabled,
     isReady,
     lastQueryResult,

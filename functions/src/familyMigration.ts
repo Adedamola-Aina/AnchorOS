@@ -4,7 +4,6 @@
  * One-time migration callable that converts legacy spouseId-based
  * connections to the v2 family_connections document model.
  */
-// @ts-nocheck
 
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';

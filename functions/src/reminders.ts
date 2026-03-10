@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { randomUUID } from 'node:crypto';
 import { type DocumentReference } from 'firebase-admin/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';

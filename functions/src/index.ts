@@ -4,7 +4,6 @@
  * All implementation lives in dedicated modules. This file
  * re-exports every Cloud Function so Firebase can discover them.
  */
-// @ts-nocheck
 
 
 // Rate limiting
@@ -39,6 +38,7 @@ export { addTransactionToSharedAccount, fixSharedAccountScopes } from './sharedT
 
 // Finance automation
 export * from './recurring';
+export { createRecurringTransaction, updateRecurringTransaction, deleteRecurringTransaction, toggleRecurringTransaction } from './recurringApi';
 
 // Push notification reminders
 export * from './reminders';

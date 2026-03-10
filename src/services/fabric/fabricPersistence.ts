@@ -53,12 +53,19 @@ export async function clearFabricData(userId: string, enabled: boolean, nowIso: 
   ]);
 }
 
+export async function loadRecentConversationMessages(userId: string, maxMessages: number): Promise<FabricMessage[]> {
+  const dateKey = new Date().toISOString().slice(0, 10);
+  const existing = await secureDb.getDocument<{ messages?: FabricMessage[] }>(userId, ['fabric_conversations', dateKey]);
+  const messages = existing?.messages ?? [];
+  return messages.slice(-maxMessages);
+}
+
 export async function appendFabricConversation(userId: string, userMessage: string, assistantMessage: string): Promise<void> {
   const dateKey = new Date().toISOString().slice(0, 10);
   const existing = await secureDb.getDocument<{ messages?: FabricMessage[]; startedAt?: string }>(userId, ['fabric_conversations', dateKey]);
   const nowIso = new Date().toISOString();
-  const userEntry: FabricMessage = { id: `u-${Date.now()}`, role: 'user', content: userMessage, timestamp: nowIso };
-  const fabricEntry: FabricMessage = { id: `f-${Date.now() + 1}`, role: 'fabric', content: assistantMessage, timestamp: nowIso };
+  const userEntry: FabricMessage = { id: crypto.randomUUID(), role: 'user', content: userMessage, timestamp: nowIso };
+  const fabricEntry: FabricMessage = { id: crypto.randomUUID(), role: 'fabric', content: assistantMessage, timestamp: nowIso };
 
   const messages: FabricMessage[] = [
     ...(existing?.messages ?? []),

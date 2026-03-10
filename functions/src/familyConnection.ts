@@ -4,7 +4,6 @@
  * Handles the second half of the invitation lifecycle (verification +
  * connection establishment) and the disconnect flow.
  */
-// @ts-nocheck
 
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';

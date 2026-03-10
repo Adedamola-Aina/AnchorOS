@@ -1,14 +1,17 @@
 /**
  * Tests for RecurringApi.ts — CRUD + subscription
- * Target: 90%+ coverage
  */
-// @ts-nocheck
-
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { addDoc, updateDoc, deleteDoc, onSnapshot, doc } from 'firebase/firestore';
+import { onSnapshot } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { RecurringApi } from './RecurringApi';
-import { buildRecurring } from '../test/factories';
+
+const mockCallable = vi.fn();
+
+vi.mock('firebase/functions', () => ({
+    getFunctions: vi.fn(() => ({})),
+    httpsCallable: vi.fn(() => mockCallable),
+}));
 
 describe('RecurringApi', () => {
     let api: RecurringApi;
@@ -16,12 +19,12 @@ describe('RecurringApi', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (RecurringApi as any).instance = undefined;
+        (RecurringApi as { instance?: RecurringApi }).instance = undefined;
         api = RecurringApi.getInstance();
         vi.mocked(onSnapshot).mockReturnValue(mockUnsubscribe);
+        mockCallable.mockResolvedValue({ data: { id: 'new-rec-1', success: true, status: 'paused' } });
     });
 
-    // ── Singleton ────────────────────────────────────────────────────
     describe('getInstance', () => {
         it('returns the same instance', () => {
             expect(RecurringApi.getInstance()).toBe(api);
@@ -37,9 +40,9 @@ describe('RecurringApi', () => {
         });
 
         it('maps snapshot docs through onData', () => {
-            let snapshotCallback: any;
-            vi.mocked(onSnapshot).mockImplementation((_q: any, _options: any, onNext: any) => {
-                snapshotCallback = onNext;
+            let snapshotCallback: (snap: unknown) => void = () => {};
+            vi.mocked(onSnapshot).mockImplementation((_q, _options, onNext) => {
+                snapshotCallback = onNext as (snap: unknown) => void;
                 return mockUnsubscribe;
             });
 
@@ -58,9 +61,9 @@ describe('RecurringApi', () => {
         });
 
         it('calls onError on snapshot failure', () => {
-            let errorCallback: any;
-            vi.mocked(onSnapshot).mockImplementation((_q: any, _options: any, _: any, onErr: any) => {
-                errorCallback = onErr;
+            let errorCallback: (err: Error) => void = () => {};
+            vi.mocked(onSnapshot).mockImplementation((_q, _options, _onNext, onErr) => {
+                errorCallback = onErr as (err: Error) => void;
                 return mockUnsubscribe;
             });
 
@@ -74,37 +77,40 @@ describe('RecurringApi', () => {
 
     // ── createRecurring ─────────────────────────────────────────────
     describe('createRecurring', () => {
-        it('creates document and returns ID', async () => {
-            vi.mocked(addDoc).mockResolvedValueOnce({ id: 'new-rec-1' } as any);
-
-            const { id: _id, ...data } = buildRecurring();
+        it('calls createRecurringTransaction callable and returns ID', async () => {
+            const data = { title: 'Rent', amountCents: 5000, type: 'expense', category: 'Housing',
+                accountId: 'acc-1', frequency: 'monthly', interval: 1, nextRunAt: new Date().toISOString(),
+                status: 'active', userId: 'u1', createdAt: new Date().toISOString() } as const;
             const newId = await api.createRecurring(data);
+            expect(httpsCallable).toHaveBeenCalledWith(expect.anything(), 'createRecurringTransaction');
             expect(newId).toBe('new-rec-1');
-            expect(addDoc).toHaveBeenCalledWith(
-                expect.anything(),
-                expect.objectContaining({ title: 'Monthly Rent', createdAt: expect.any(String) })
-            );
         });
     });
 
     // ── updateRecurring ─────────────────────────────────────────────
     describe('updateRecurring', () => {
-        it('updates document with partial data', async () => {
+        it('calls updateRecurringTransaction callable with id + updates', async () => {
             await api.updateRecurring('rec-1', { status: 'paused' });
-            expect(doc).toHaveBeenCalled();
-            expect(updateDoc).toHaveBeenCalledWith(
-                expect.anything(),
-                { status: 'paused' }
-            );
+            expect(httpsCallable).toHaveBeenCalledWith(expect.anything(), 'updateRecurringTransaction');
+            expect(mockCallable).toHaveBeenCalledWith({ id: 'rec-1', status: 'paused' });
         });
     });
 
     // ── deleteRecurring ─────────────────────────────────────────────
     describe('deleteRecurring', () => {
-        it('deletes document', async () => {
+        it('calls deleteRecurringTransaction callable with id', async () => {
             await api.deleteRecurring('rec-1');
-            expect(doc).toHaveBeenCalled();
-            expect(deleteDoc).toHaveBeenCalled();
+            expect(httpsCallable).toHaveBeenCalledWith(expect.anything(), 'deleteRecurringTransaction');
+            expect(mockCallable).toHaveBeenCalledWith({ id: 'rec-1' });
+        });
+    });
+
+    // ── toggleRecurring ─────────────────────────────────────────────
+    describe('toggleRecurring', () => {
+        it('calls toggleRecurringTransaction callable with id and status', async () => {
+            await api.toggleRecurring('rec-1', 'paused');
+            expect(httpsCallable).toHaveBeenCalledWith(expect.anything(), 'toggleRecurringTransaction');
+            expect(mockCallable).toHaveBeenCalledWith({ id: 'rec-1', status: 'paused' });
         });
     });
 });
