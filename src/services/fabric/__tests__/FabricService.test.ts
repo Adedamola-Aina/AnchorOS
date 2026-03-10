@@ -190,6 +190,12 @@ describe('FabricService', () => {
   });
 
   it('builds predictions and weekly report', async () => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const twoDaysAgo = new Date(today);
+    twoDaysAgo.setDate(today.getDate() - 2);
+
     queryCollection.mockImplementation((_userId: string, collection: string) => {
       if (collection === 'finance') {
         return Promise.resolve([
@@ -202,7 +208,7 @@ describe('FabricService', () => {
             accountId: 'acc-1',
             currency: 'USD',
             scope: 'personal',
-            date: '2026-03-03T00:00:00.000Z',
+            date: twoDaysAgo.toISOString(),
           },
           {
             id: 'tx-2',
@@ -213,7 +219,7 @@ describe('FabricService', () => {
             accountId: 'acc-1',
             currency: 'USD',
             scope: 'personal',
-            date: '2026-03-04T00:00:00.000Z',
+            date: yesterday.toISOString(),
           },
         ]);
       }
@@ -225,7 +231,7 @@ describe('FabricService', () => {
             type: 'daily',
             completed: true,
             category: 'personal',
-            createdAt: new Date('2026-03-03T00:00:00.000Z'),
+            createdAt: twoDaysAgo,
             currentStreak: 2,
           },
         ]);
