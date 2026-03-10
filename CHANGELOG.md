@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.10.0-rc.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.9.1...v1.10.0-rc.1) (2026-03-10)
+
+
+### Features
+
+* **fabric:** fin-012 anchor ai fabric foundation rollout ([4e0cb7a](https://github.com/Adedamola-Aina/AnchorOS/commit/4e0cb7a0b8b6a212f7df9e48d4ab80223fa64b6e))
+* **fabric:** fin-013 complete anchor ai remaining phases ([84bed6d](https://github.com/Adedamola-Aina/AnchorOS/commit/84bed6d4641bf998102b3c2585232eed961e999b))
+
+
+### Bug Fixes
+
+* **deploy:** include functions in deploy pipeline targets ([6f29616](https://github.com/Adedamola-Aina/AnchorOS/commit/6f296168d6557086bb5ca23ac960629a43d9806a))
+* **fabric:** show category in AI pattern descriptions [BUG-106] ([798c7f7](https://github.com/Adedamola-Aina/AnchorOS/commit/798c7f7af2885f70148f02d95b34b0b665e844bc))
+* **fabric:** stabilize deploy type-safety gates ([5a10f15](https://github.com/Adedamola-Aina/AnchorOS/commit/5a10f158ee53acc70fc4fb20755cbcae63541e6e))
+* **types:** resolve toBeInTheDocument TS errors in test files ([77b33cc](https://github.com/Adedamola-Aina/AnchorOS/commit/77b33cc88684dac745a9d319d6f8a4b74148fb3e))
+
 ## [1.10.0-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.9.1...v1.10.0-rc.0) (2026-03-10)
 
 
