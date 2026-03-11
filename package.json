@@ -1,7 +1,7 @@
 {
   "name": "anchor-os",
   "private": true,
-  "version": "1.10.0-rc.3",
+  "version": "1.10.0",
   "type": "module",
   "scripts": {
     "dev": "vite --config config/vite.config.ts",
@@ -119,6 +119,7 @@
     "vitest": "^4.0.17"
   },
   "overrides": {
+    "@tootallnate/once": "3.0.1",
     "tmp": ">=0.2.4",
     "inquirer": ">=10.0.0"
   }
