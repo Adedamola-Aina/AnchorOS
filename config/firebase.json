@@ -6,7 +6,7 @@
   "functions": {
     "source": "functions",
     "codebase": "anchor-os-functions",
-    "runtime": "nodejs20",
+    "runtime": "nodejs22",
     "ignore": [
       "node_modules",
       ".git",
@@ -49,7 +49,7 @@
             },
             {
               "key": "Content-Security-Policy",
-              "value": "default-src 'self'; script-src 'self' https://apis.google.com https://*.firebaseio.com https://www.gstatic.com https://connect.mono.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasestorage.app https://*.cloudfunctions.net https://*.sentry.io https://*.mono.co wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://connect.mono.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'"
+              "value": "default-src 'self'; script-src 'self' https://apis.google.com https://*.firebaseio.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://connect.mono.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasestorage.app https://*.cloudfunctions.net https://*.sentry.io https://*.mono.co https://www.google.com https://www.gstatic.com wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://www.google.com https://recaptcha.google.com https://www.recaptcha.net https://connect.mono.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'"
             }
           ]
         },
@@ -113,7 +113,7 @@
             },
             {
               "key": "Content-Security-Policy",
-              "value": "default-src 'self'; script-src 'self' https://apis.google.com https://*.firebaseio.com https://www.gstatic.com https://connect.mono.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasestorage.app https://*.cloudfunctions.net https://*.sentry.io https://*.mono.co wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://connect.mono.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'"
+              "value": "default-src 'self'; script-src 'self' https://apis.google.com https://*.firebaseio.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://connect.mono.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasestorage.app https://*.cloudfunctions.net https://*.sentry.io https://*.mono.co https://www.google.com https://www.gstatic.com wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://www.google.com https://recaptcha.google.com https://www.recaptcha.net https://connect.mono.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'"
             }
           ]
         },
@@ -177,7 +177,7 @@
             },
             {
               "key": "Content-Security-Policy",
-              "value": "default-src 'self'; script-src 'self' https://apis.google.com https://*.firebaseio.com https://www.gstatic.com https://connect.mono.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasestorage.app https://*.cloudfunctions.net https://*.sentry.io https://*.mono.co wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://connect.mono.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'"
+              "value": "default-src 'self'; script-src 'self' https://apis.google.com https://*.firebaseio.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://connect.mono.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasestorage.app https://*.cloudfunctions.net https://*.sentry.io https://*.mono.co https://www.google.com https://www.gstatic.com wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://www.google.com https://recaptcha.google.com https://www.recaptcha.net https://connect.mono.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'"
             }
           ]
         },
