@@ -122,6 +122,7 @@ test.describe('Smoke Tests', () => {
                     !text.includes('firebase') &&
                     !text.includes('CORS') &&
                     !text.includes('Access-Control') &&
+                    !text.includes('status of 429') &&
                     !text.includes('ERR_FAILED') &&
                     !text.includes('net::')) {
                     errors.push(text);

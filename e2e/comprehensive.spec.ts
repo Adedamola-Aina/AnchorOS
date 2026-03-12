@@ -34,12 +34,12 @@ test.describe('Comprehensive Production Readiness Check', () => {
         }
 
         try {
-            await expect(page.getByRole('heading', { name: target })).toBeVisible({ timeout: 5000 });
+            await expect(page.getByRole('heading', { name: target, exact: true })).toBeVisible({ timeout: 5000 });
         } catch (e) {
             console.log(`[E2E] Heading not found, retrying goto`);
             const path = target === 'Dashboard' ? '/dashboard' : '/' + target.toLowerCase();
             await page.goto(path);
-            await expect(page.getByRole('heading', { name: target })).toBeVisible({ timeout: 10000 });
+            await expect(page.getByRole('heading', { name: target, exact: true })).toBeVisible({ timeout: 10000 });
         }
     };
 
