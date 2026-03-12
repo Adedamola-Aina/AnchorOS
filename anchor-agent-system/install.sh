@@ -168,42 +168,55 @@ else
   ok "src/.claude/settings.local.json already absent"
 fi
 
-# ─── Delete redundant/superseded agent files ──────────────────────────────────
-step "Deleting superseded agent files"
+# ─── Delete ALL superseded agent files — repo-wide purge ──────────────────────
+step "Purging all superseded agent files (repo-wide search)"
 
-# Files that are completely absorbed into .anchor/ — no unique content remaining
-REDUNDANT_FILES=(
-  "agent-config-v7.md"
-  "state.md"
-  "implementer.agent.md"
-  "planner.agent.md"
-  "reviewer.agent.md"
-  "devops.agent.md"
-  ".antigravity"
-)
+# Searches the ENTIRE repo for these filenames — root, .github/.agent/, anywhere.
+# Skips src/, functions/, e2e/ so no app code is ever touched.
 
-for target in "${REDUNDANT_FILES[@]}"; do
-  # Check root
-  if [[ -e "$REPO_ROOT/$target" ]]; then
-    rm -rf "$REPO_ROOT/$target"
-    deleted "$target"
-  fi
-  # Check .github/.agent/
-  if [[ -e "$REPO_ROOT/.github/.agent/$target" ]]; then
-    rm -rf "$REPO_ROOT/.github/.agent/$target"
-    deleted ".github/.agent/$target"
-  fi
+for name in \
+  "agent-config-v7.md" \
+  "agent-config-v6.md" \
+  "agent-config-v5.md" \
+  "agent-config.md" \
+  "state.md" \
+  "implementer.agent.md" \
+  "planner.agent.md" \
+  "reviewer.agent.md" \
+  "devops.agent.md" \
+  "REVIEW_BOARD.md"; do
+  find "$REPO_ROOT" -name "$name" \
+    -not -path "*/node_modules/*" \
+    -not -path "*/src/*" \
+    -not -path "*/functions/*" \
+    -not -path "*/e2e/*" | while read -r match; do
+    rm -f "$match"
+    deleted "$match"
+  done
 done
 
-# REVIEW_BOARD.md at root — its invocation prompts are preserved in each
-# .anchor/agents/ file. The sign-off table is in .anchor/WORKFLOW.md.
-# The root copy is now noise that confuses agents.
-if [[ -f "$REPO_ROOT/REVIEW_BOARD.md" ]]; then
-  rm "$REPO_ROOT/REVIEW_BOARD.md"
-  deleted "REVIEW_BOARD.md (content fully absorbed into .anchor/agents/ + .anchor/WORKFLOW.md)"
-fi
+# Nuke entire legacy folders wherever they live
+for dir in ".antigravity" ".gemini"; do
+  find "$REPO_ROOT" -type d -name "$dir" \
+    -not -path "*/node_modules/*" | while read -r match; do
+    rm -rf "$match"
+    deleted "folder: $match"
+  done
+done
 
-ok "Superseded files cleaned"
+# Catch any other *.agent.md outside .anchor/ (e.g. legacy gemini/antigravity skills)
+find "$REPO_ROOT" -name "*.agent.md" \
+  -not -path "*/node_modules/*" \
+  -not -path "*/.anchor/*" \
+  -not -path "*/src/*" \
+  -not -path "*/functions/*" \
+  -not -path "*/e2e/*" | while read -r match; do
+  rm -f "$match"
+  deleted "$match"
+done
+
+ok "All superseded agent files purged"
+
 
 # ─── Update AGENTS.md to v3 redirect ─────────────────────────────────────────
 step "Updating AGENTS.md to v3 navigation redirect"
