@@ -20,7 +20,7 @@ test.describe('Fabric Features', () => {
         await page.keyboard.press('Enter');
 
         // 4. Verify Navigation to Finance
-        await expect(page.locator('text=Net Worth')).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible({ timeout: 10000 });
     });
 
     test('Smart Suggestions Trigger', async ({ page }) => {

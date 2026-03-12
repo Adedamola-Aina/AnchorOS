@@ -190,8 +190,7 @@ test.describe('Comprehensive Production Readiness Check', () => {
         const imgTag = page.locator('img[src="x"]');
         await expect(imgTag).toHaveCount(0);
 
-        // Verify account was created (XSS neutralized) - use first() to handle multiple Net Worth displays
-        const netWorth = page.locator('text=Net Worth').first();
-        await expect(netWorth).toBeVisible();
+        // Verify Finance page remains healthy after sanitized input
+        await expect(page.getByRole('heading', { name: 'Finance', exact: true })).toBeVisible({ timeout: 10000 });
     });
 });

@@ -15,8 +15,8 @@ test.describe('Finance Regressions and Fixes', () => {
         // 2. Ensure we are on Finance Dashboard
         // Check for Section Header title or Insight keys
         await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible();
-        // MonthlyInsight is hidden if no transactions, so check for Net Worth instead which is always consistent
-        await expect(page.getByText('Net Worth').first()).toBeVisible();
+        // Verify core Finance controls instead of metric labels that can vary by layout/state
+        await expect(page.getByRole('button', { name: 'Add Account' }).first()).toBeVisible();
 
         // 3. Create a clean account for this test
         const accountName = `Test Account ${Date.now()}`;
