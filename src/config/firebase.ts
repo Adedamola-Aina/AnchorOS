@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { initializeAuth, browserLocalPersistence } from "firebase/auth";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 // Environment-based Firebase configuration
 // All values come from .env.development, .env.staging, or .env.production
@@ -20,6 +21,27 @@ if (import.meta.env.DEV) console.info(`[Firebase] Initializing for ${env} enviro
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+
+// Initialize App Check when a site key is configured.
+// This protects Firestore/Functions from scripted abuse in web environments.
+const appCheckSiteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY as string | undefined;
+if (appCheckSiteKey && typeof window !== 'undefined' && window.location.protocol !== 'capacitor:') {
+  const debugToken = import.meta.env.VITE_APP_CHECK_DEBUG_TOKEN as string | undefined;
+  if (import.meta.env.DEV && debugToken) {
+    (window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN =
+      debugToken === 'true' ? true : debugToken;
+  }
+
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(appCheckSiteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+    if (import.meta.env.DEV) console.info('[Firebase] App Check initialized');
+  } catch (_e) {
+    console.warn('[Firebase] App Check initialization failed');
+  }
+}
 
 // PLT-001: Always use browserLocalPersistence (localStorage-based).
 // getAuth() defaults to indexedDB persistence which hangs in Capacitor's

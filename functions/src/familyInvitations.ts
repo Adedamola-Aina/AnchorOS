@@ -6,7 +6,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import * as bcrypt from 'bcrypt';
 import { db, APP_ID, BCRYPT_SALT_ROUNDS, getResend, EMAIL_FROM, APP_URL } from './config';
 import { enforceRateLimit } from './rateLimit';
@@ -21,7 +22,7 @@ import type { FamilyInvitation } from './types';
 // Create Invitation
 // ============================================================================
 
-export const createFamilyInvitation = onCall(
+export const createFamilyInvitation = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');
@@ -110,7 +111,7 @@ function buildInvitationEmail(ownerName: string, inviteId: string, code: string)
 // Revoke Invitation
 // ============================================================================
 
-export const revokeInvitation = onCall(
+export const revokeInvitation = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');
@@ -149,7 +150,7 @@ export const revokeInvitation = onCall(
 // Validate Invitation Token
 // ============================================================================
 
-export const validateInvitationToken = onCall(
+export const validateInvitationToken = secureOnCall(
     async (request) => {
         const { token } = request.data as { token: string };
 

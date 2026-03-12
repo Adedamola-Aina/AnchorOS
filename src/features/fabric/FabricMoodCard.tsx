@@ -24,19 +24,31 @@ export const FabricMoodCard: React.FC<FabricMoodCardProps> = ({ moodToday, onSav
 
   useEffect(() => () => { if (animTimeout.current) clearTimeout(animTimeout.current); }, []);
 
+  const persistMood = async (mood: MoodEntry['mood'], moodNote?: string) => {
+    setSaving(true);
+    try {
+      await onSave(mood, moodNote || undefined);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSelect = async (mood: MoodEntry['mood']) => {
     setAnimating(mood);
     animTimeout.current = setTimeout(() => setAnimating(null), 350);
     setSelected(mood);
-    setSaving(true);
-    await onSave(mood, note || undefined);
-    setSaving(false);
+    await persistMood(mood, note);
   };
 
   const handleNoteBlur = async () => {
     if (selected && note !== (moodToday?.note ?? '')) {
-      await onSave(selected, note || undefined);
+      await persistMood(selected, note);
     }
+  };
+
+  const handleSaveClick = async () => {
+    if (!selected) return;
+    await persistMood(selected, note);
   };
 
   const alreadyLogged = !!moodToday;
@@ -94,6 +106,14 @@ export const FabricMoodCard: React.FC<FabricMoodCardProps> = ({ moodToday, onSav
               className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
             />
           )}
+          <button
+            type="button"
+            onClick={() => void handleSaveClick()}
+            disabled={!selected || saving}
+            className="min-h-11 px-4 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Save mood
+          </button>
         </div>
       )}
     </article>

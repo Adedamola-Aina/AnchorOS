@@ -5,7 +5,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { db } from './config';
 import { createAuditLog } from './helpers';
 import type { RateLimitConfig } from './types';
@@ -45,6 +46,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     recurringCreate:     { maxAttempts: 30,  windowMs: DAY,      blockDurationMs: HOUR },
     recurringUpdate:     { maxAttempts: 60,  windowMs: HOUR,     blockDurationMs: 15 * MIN },
     recurringDelete:     { maxAttempts: 20,  windowMs: DAY,      blockDurationMs: HOUR },
+    feedbackSubmit:      { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
 };
 
 // ============================================================================
@@ -124,7 +126,7 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
 // Public API — callable functions
 // ============================================================================
 
-export const checkRateLimit = onCall(
+export const checkRateLimit = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');
@@ -188,7 +190,7 @@ export const checkRateLimit = onCall(
     }
 );
 
-export const resetRateLimit = onCall(
+export const resetRateLimit = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');

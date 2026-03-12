@@ -5,7 +5,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { enforceRateLimit } from './rateLimit';
 
 // ============================================================================
@@ -22,7 +23,7 @@ interface EmailTemplateData {
 // Public API
 // ============================================================================
 
-export const sendTemplatedEmail = onCall(
+export const sendTemplatedEmail = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');

@@ -36,6 +36,7 @@ ENV="production"
 DRY_RUN=false
 SKIP_E2E=false
 SKIP_TESTS=false
+SKIP_LINT=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -56,6 +57,10 @@ while [[ $# -gt 0 ]]; do
             SKIP_E2E=true
             shift
             ;;
+        --skip-lint)
+            SKIP_LINT=true
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -63,12 +68,56 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+read_env_value() {
+    local env_file="$1"
+    local env_key="$2"
+
+    if [[ ! -f "$env_file" ]]; then
+        return 0
+    fi
+
+    grep -E "^${env_key}=" "$env_file" | tail -n 1 | cut -d '=' -f2- | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//"
+}
+
+# 0. Preflight: App Check guardrails for public environments
+if [[ "$ENV" != "development" ]]; then
+    echo -e "\n${YELLOW}🛡️  Stage 0: App Check Guardrails${NC}"
+
+    FRONTEND_ENV_FILE=".env.${ENV}"
+    if [[ ! -f "$FRONTEND_ENV_FILE" ]]; then
+        echo -e "${RED}❌ Missing ${FRONTEND_ENV_FILE}. Deployment blocked.${NC}"
+        exit 1
+    fi
+
+    APP_CHECK_SITE_KEY="${VITE_FIREBASE_APP_CHECK_SITE_KEY:-$(read_env_value "$FRONTEND_ENV_FILE" "VITE_FIREBASE_APP_CHECK_SITE_KEY")}"
+    if [[ -z "$APP_CHECK_SITE_KEY" || "$APP_CHECK_SITE_KEY" == "your-app-check-site-key" ]]; then
+        echo -e "${RED}❌ VITE_FIREBASE_APP_CHECK_SITE_KEY is not set for ${ENV}. Deployment blocked.${NC}"
+        exit 1
+    fi
+
+    FUNCTIONS_ENV_FILE="functions/.env.${ENV}"
+    if [[ ! -f "$FUNCTIONS_ENV_FILE" ]]; then
+        echo -e "${RED}❌ Missing ${FUNCTIONS_ENV_FILE}. Deployment blocked.${NC}"
+        exit 1
+    fi
+
+    ENFORCE_APP_CHECK_VALUE="${ENFORCE_APPCHECK:-$(read_env_value "$FUNCTIONS_ENV_FILE" "ENFORCE_APPCHECK")}"
+    if [[ "$ENFORCE_APP_CHECK_VALUE" != "true" ]]; then
+        echo -e "${RED}❌ ENFORCE_APPCHECK must be true in ${FUNCTIONS_ENV_FILE} for ${ENV}. Deployment blocked.${NC}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}✅ App Check guardrails verified.${NC}"
+fi
+
 echo -e "${YELLOW}🚀 Starting CI/CD Pipeline for ${BLUE}${ENV}${YELLOW} environment...${NC}"
 echo -e "Version: $(node -p "require('./package.json').version")"
 
 # 1. Quality Assurance (Linting)
 echo -e "\n${YELLOW}🔎 Stage 1: Quality Assurance (Linting)${NC}"
-if npm run lint; then
+if [[ "$SKIP_LINT" == true ]]; then
+    echo -e "${YELLOW}⏭️  Stage 1: Linting Skipped (--skip-lint)${NC}"
+elif npm run lint; then
     echo -e "${GREEN}✅ Linting passed.${NC}"
 else
     echo -e "${RED}❌ Linting failed. Fix potential errors/warnings.${NC}"

@@ -6,7 +6,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { db, APP_ID } from './config';
 import { createAuditLog } from './helpers';
 import { enforceRateLimit } from './rateLimit';
@@ -15,7 +16,7 @@ import { enforceRateLimit } from './rateLimit';
 // Migration: V1 → V2 Family Connections
 // ============================================================================
 
-export const migrateFamilyConnectionsV2 = onCall(
+export const migrateFamilyConnectionsV2 = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Must be authenticated to run migration');

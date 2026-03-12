@@ -34,6 +34,15 @@ service cloud.firestore {
           && data.completed is bool;
     }
 
+    function isValidMoodEntry(data, expectedDate) {
+      return data.keys().hasOnly(['date', 'mood', 'note', 'createdAt'])
+          && data.keys().hasAll(['date', 'mood', 'createdAt'])
+          && data.date is string && data.date == expectedDate
+          && data.mood is int && data.mood >= 1 && data.mood <= 5
+          && (!data.keys().hasAny(['note']) || (data.note is string && data.note.size() <= 280))
+          && data.createdAt is string && data.createdAt.size() > 0 && data.createdAt.size() <= 50;
+    }
+
     // Family Mode v2: Check if user is connected family member
     // Checks for existence of deterministic connection document (uid1_uid2 or uid2_uid1)
     function isConnectedFamilyMember(userId) {
@@ -152,6 +161,14 @@ service cloud.firestore {
 
         match /security/{docId} {
           allow read, write: if request.auth.uid == userId;
+        }
+
+        // Daily mood check-ins for Fabric
+        match /mood_entries/{entryDate} {
+          allow read: if request.auth.uid == userId;
+          allow create, update: if request.auth.uid == userId
+                                && isValidMoodEntry(request.resource.data, entryDate);
+          allow delete: if request.auth.uid == userId;
         }
 
         // Anchor AI (Fabric 2.0) user-scoped documents
@@ -293,7 +310,7 @@ service cloud.firestore {
       }
 
       match /feedback/{feedbackId} {
-        allow create: if request.auth != null;
+        allow create: if false;
         allow read: if false;
       }
     }

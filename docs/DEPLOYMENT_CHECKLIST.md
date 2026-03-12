@@ -24,6 +24,8 @@
 
 - [ ] All tests passing (`npm run test:run`)
 - [ ] No lint errors (`npm run lint`)
+- [ ] App Check site key set in environment file (`VITE_FIREBASE_APP_CHECK_SITE_KEY`)
+- [ ] Functions App Check enforcement enabled for non-dev (`functions/.env.staging` and `functions/.env.production` have `ENFORCE_APPCHECK=true`)
 - [ ] **Roadmap Updated**: `roadmap.json` reflects features being deployed
 - [ ] Git committed with descriptive message (e.g., `deploy(staging): v1.2.0`)
 - [ ] Version bumped in package.json (if applicable)

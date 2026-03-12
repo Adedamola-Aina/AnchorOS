@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run build:*)",
+      "Bash(curl -s http://localhost:3001/api/*)",
+      "Bash(npm run deploy:dev)",
+      "Bash(npm run deploy:staging)"
+    ],
+    "deny": [
+      "Bash(firebase deploy*)",
+      "Bash(npm run deploy:production)"
+    ]
+  }
+}

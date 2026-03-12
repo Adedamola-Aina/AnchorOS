@@ -22,5 +22,8 @@
     "@types/bcrypt": "^6.0.0",
     "typescript": "^5.9.3"
   },
+  "overrides": {
+    "@tootallnate/once": "3.0.1"
+  },
   "private": true
 }

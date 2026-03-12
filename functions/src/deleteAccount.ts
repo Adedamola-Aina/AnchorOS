@@ -4,7 +4,8 @@
  * Callable backend erasure flow for GDPR/right-to-erasure.
  */
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue } from 'firebase-admin/firestore';
 import { APP_ID, db } from './config';
@@ -105,7 +106,7 @@ function ensureRecentAuth(authTime?: number): void {
     }
 }
 
-export const deleteMyAccount = onCall(async (request) => {
+export const deleteMyAccount = secureOnCall(async (request) => {
     if (!request.auth) {
         throw new HttpsError('unauthenticated', 'Authentication required');
     }

@@ -1,4 +1,5 @@
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { createHash } from 'node:crypto';
 import * as bcrypt from 'bcrypt';
 import { getAuth } from 'firebase-admin/auth';
@@ -75,7 +76,7 @@ export function consumeRecoveryCodeHash(hashedCodes: string[], codeHash: string)
     return hashedCodes.filter((_, i) => i !== index);
 }
 
-export const recoverMfaWithCode = onCall(async (request) => {
+export const recoverMfaWithCode = secureOnCall(async (request) => {
     const { email, recoveryCode } = request.data as { email?: string; recoveryCode?: string };
     if (!email || !recoveryCode) {
         throw new HttpsError('invalid-argument', 'Email and recovery code are required');

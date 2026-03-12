@@ -6,7 +6,8 @@
  */
 
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
 import { createFinanceAuditLog } from './helpers';
@@ -144,7 +145,7 @@ export const syncBankTransactions = onSchedule(
 /**
  * On-demand sync — lets a user manually refresh their linked account.
  */
-export const syncBankAccountNow = onCall(
+export const syncBankAccountNow = secureOnCall(
     { secrets: ['MONO_SECRET_KEY'] },
     async (request) => {
         if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required.');

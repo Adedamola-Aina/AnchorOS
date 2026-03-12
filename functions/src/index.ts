@@ -33,6 +33,9 @@ export { migrateFamilyConnectionsV2 } from './familyMigration';
 // Email
 export { sendTemplatedEmail } from './email';
 
+// Feedback
+export { submitFeedback } from './feedback';
+
 // Shared transactions
 export { addTransactionToSharedAccount, fixSharedAccountScopes } from './sharedTransactions';
 

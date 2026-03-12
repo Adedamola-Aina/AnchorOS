@@ -6,7 +6,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { createAuditLog } from './helpers';
 import { enforceRateLimit } from './rateLimit';
 
@@ -46,7 +47,7 @@ const ALLOWED_AUDIT_EVENTS = new Set([
 // Public API
 // ============================================================================
 
-export const logAuditEvent = onCall(
+export const logAuditEvent = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');

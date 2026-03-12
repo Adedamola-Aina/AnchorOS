@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../config/firebase';
 
 type FeedbackPayload = {
   subject: string;
@@ -16,9 +16,6 @@ type FeedbackPayload = {
 };
 
 export async function createFeedbackBackup(payload: FeedbackPayload): Promise<void> {
-  await addDoc(collection(db, 'artifacts', APP_ID, 'feedback'), {
-    ...payload,
-    createdAt: serverTimestamp(),
-    status: 'new',
-  });
+  const submitFeedback = httpsCallable(functions, 'submitFeedback');
+  await submitFeedback(payload);
 }

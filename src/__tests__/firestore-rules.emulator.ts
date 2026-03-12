@@ -322,14 +322,47 @@ describe('users collection (owner-only)', () => {
   });
 });
 
-// ─── Core: feedback (write-only) ────────────────────────────────────────────
-describe('feedback (write-only)', () => {
+// ─── Core: feedback (Cloud Functions-only) ──────────────────────────────────
+describe('feedback (Cloud Functions-only)', () => {
   const collPath = `${PREFIX}/feedback`;
 
-  it('authenticated user can create feedback', async () => {
+  it('authenticated user cannot create feedback directly', async () => {
     const db = authedDb('user1');
-    await assertSucceeds(
-      setDoc(doc(db, collPath, 'fb1'), { message: 'Great app!' })
+    await assertFails(
+      setDoc(doc(db, collPath, 'fb1'), {
+        subject: 'Feedback',
+        message: 'Great app!',
+        name: 'Test User',
+        email: 'user1@test.com',
+        userId: 'user1',
+        appVersion: '1.10.0-rc.0',
+        deviceType: 'Mozilla/5.0',
+        platform: 'Linux x86_64',
+        currentPage: 'settings',
+        timestamp: '2026-03-10T20:00:00.000Z',
+        createdAt: new Date(),
+        status: 'new',
+      })
+    );
+  });
+
+  it('still rejects malformed or oversized direct writes', async () => {
+    const db = authedDb('user1');
+    await assertFails(
+      setDoc(doc(db, collPath, 'fb-bad'), {
+        subject: 'Feedback',
+        message: 'x'.repeat(5001),
+        name: 'Test User',
+        email: 'user1@test.com',
+        userId: 'user1',
+        appVersion: '1.10.0-rc.0',
+        deviceType: 'Mozilla/5.0',
+        platform: 'Linux x86_64',
+        currentPage: 'settings',
+        timestamp: '2026-03-10T20:00:00.000Z',
+        createdAt: new Date(),
+        status: 'new',
+      })
     );
   });
 
@@ -347,6 +380,33 @@ describe('feedback (write-only)', () => {
 // ─── Fabric documents (owner-only) ─────────────────────────────────────────
 describe('fabric documents (owner-only)', () => {
   const userRoot = (uid: string) => `${PREFIX}/users/${uid}`;
+
+  it('owner can write and read mood_entries for today', async () => {
+    const db = authedDb('user1');
+    const today = '2026-03-11';
+    const moodDoc = doc(db, `${userRoot('user1')}/mood_entries`, today);
+
+    await assertSucceeds(
+      setDoc(moodDoc, {
+        date: today,
+        mood: 4,
+        createdAt: new Date().toISOString(),
+      })
+    );
+
+    await assertSucceeds(getDoc(moodDoc));
+  });
+
+  it('non-owner cannot write another users mood_entries', async () => {
+    const db = authedDb('user1');
+    await assertFails(
+      setDoc(doc(db, `${userRoot('user2')}/mood_entries`, '2026-03-11'), {
+        date: '2026-03-11',
+        mood: 5,
+        createdAt: new Date().toISOString(),
+      })
+    );
+  });
 
   it('owner can read and write fabric_settings', async () => {
     const db = authedDb('user1');

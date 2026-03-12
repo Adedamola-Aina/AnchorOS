@@ -3,7 +3,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
 
@@ -11,7 +12,7 @@ import { enforceRateLimit } from './rateLimit';
 // Get Notifications
 // ============================================================================
 
-export const getNotifications = onCall(
+export const getNotifications = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');
@@ -44,7 +45,7 @@ export const getNotifications = onCall(
 // Dismiss Notification
 // ============================================================================
 
-export const dismissNotification = onCall(
+export const dismissNotification = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');

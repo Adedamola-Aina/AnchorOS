@@ -6,7 +6,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { FieldValue } from 'firebase-admin/firestore';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
@@ -16,7 +17,7 @@ import { createAuditLog, createNotification, getActiveConnection } from './helpe
 // Share / Unshare Account
 // ============================================================================
 
-export const shareAccount = onCall(
+export const shareAccount = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');
@@ -78,7 +79,7 @@ export const shareAccount = onCall(
 // Get Shared Accounts With Me
 // ============================================================================
 
-export const getSharedAccountsWithMe = onCall(
+export const getSharedAccountsWithMe = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');
@@ -117,7 +118,7 @@ export const getSharedAccountsWithMe = onCall(
 // Disconnect Family
 // ============================================================================
 
-export const disconnectFamily = onCall(
+export const disconnectFamily = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');

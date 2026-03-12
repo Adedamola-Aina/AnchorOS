@@ -9,16 +9,9 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ user: mockUser, profile: { name: 'Test User' } }),
 }));
 
-const mockAddDoc = vi.fn().mockResolvedValue({ id: 'doc-1' });
-vi.mock('firebase/firestore', () => ({
-  addDoc: (...args: unknown[]) => mockAddDoc(...args),
-  collection: vi.fn(),
-  serverTimestamp: vi.fn(),
-}));
-
-vi.mock('../config/firebase', () => ({
-  db: {},
-  APP_ID: 'test-app',
+const mockCreateFeedbackBackup = vi.fn().mockResolvedValue(undefined);
+vi.mock('../api/FeedbackApi', () => ({
+  createFeedbackBackup: (...args: unknown[]) => mockCreateFeedbackBackup(...args),
 }));
 
 // Mock fetch for Formspree
@@ -62,7 +55,7 @@ describe('ContactModal', () => {
   });
 
   it('submits form successfully', async () => {
-    mockAddDoc.mockResolvedValue({ id: 'doc-1' });
+    mockCreateFeedbackBackup.mockResolvedValue(undefined);
     render(<ContactModal onClose={vi.fn()} />);
     
     const textarea = screen.getByPlaceholderText(/what's on your mind/i);
@@ -72,12 +65,12 @@ describe('ContactModal', () => {
     if (form) fireEvent.submit(form);
     
     await waitFor(() => {
-      expect(mockAddDoc).toHaveBeenCalled();
+      expect(mockCreateFeedbackBackup).toHaveBeenCalled();
     });
   });
 
   it('shows error on submission failure', async () => {
-    mockAddDoc.mockRejectedValue(new Error('Network error'));
+    mockCreateFeedbackBackup.mockRejectedValue(new Error('Network error'));
     (global.fetch as any).mockRejectedValue(new Error('fail'));
     
     render(<ContactModal onClose={vi.fn()} />);

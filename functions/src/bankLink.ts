@@ -5,7 +5,8 @@
  * fetches account details, and creates a linked AnchorAccount.
  */
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
 import { createFinanceAuditLog } from './helpers';
@@ -34,7 +35,7 @@ function mapMonoAccountType(monoType: string): string {
 /**
  * Link a bank account via Mono Connect widget auth code.
  */
-export const linkBankAccount = onCall(
+export const linkBankAccount = secureOnCall(
     { secrets: ['MONO_SECRET_KEY'] },
     async (request) => {
         if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required.');
@@ -121,7 +122,7 @@ export const linkBankAccount = onCall(
 /**
  * Unlink a bank account — archives the account and revokes Mono access.
  */
-export const unlinkBankAccount = onCall(
+export const unlinkBankAccount = secureOnCall(
     { secrets: ['MONO_SECRET_KEY'] },
     async (request) => {
         if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required.');

@@ -6,7 +6,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import * as bcrypt from 'bcrypt';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
@@ -17,7 +18,7 @@ import type { FamilyInvitation, FamilyConnection } from './types';
 // Accept Invitation (invitee enters verification code)
 // ============================================================================
 
-export const acceptInvitation = onCall(
+export const acceptInvitation = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');
@@ -95,7 +96,7 @@ export const acceptInvitation = onCall(
 // Confirm Connection (owner confirms after invitee accepts)
 // ============================================================================
 
-export const confirmConnection = onCall(
+export const confirmConnection = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');

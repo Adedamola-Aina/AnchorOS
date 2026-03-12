@@ -6,7 +6,8 @@
  */
 
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { FieldValue } from 'firebase-admin/firestore';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
@@ -16,7 +17,7 @@ import { createFinanceAuditLog } from './helpers';
 // Add Transaction to Shared Account
 // ============================================================================
 
-export const addTransactionToSharedAccount = onCall(
+export const addTransactionToSharedAccount = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Must be authenticated');
@@ -117,7 +118,7 @@ export const addTransactionToSharedAccount = onCall(
 // One-Time Migration: Fix Shared Account Scopes
 // ============================================================================
 
-export const fixSharedAccountScopes = onCall(
+export const fixSharedAccountScopes = secureOnCall(
     async (request) => {
         if (!request.auth) {
             throw new HttpsError('unauthenticated', 'Authentication required');

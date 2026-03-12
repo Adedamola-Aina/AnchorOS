@@ -4,7 +4,8 @@
  * Server-side create / update / delete / toggle for recurring rules.
  * Validates input, enforces auth, applies rate limiting, and emits audit logs.
  */
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
+import { secureOnCall } from './callable';
 import { FieldValue } from 'firebase-admin/firestore';
 import { addWeeks, addMonths, addYears } from 'date-fns';
 import { db, APP_ID } from './config';
@@ -58,7 +59,7 @@ function calcNextRun(from: Date, frequency: string, interval: number): Date {
 // createRecurringTransaction
 // ============================================================================
 
-export const createRecurringTransaction = onCall(async (request) => {
+export const createRecurringTransaction = secureOnCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
     const uid = request.auth.uid;
 
@@ -101,7 +102,7 @@ export const createRecurringTransaction = onCall(async (request) => {
 // updateRecurringTransaction
 // ============================================================================
 
-export const updateRecurringTransaction = onCall(async (request) => {
+export const updateRecurringTransaction = secureOnCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
     const uid = request.auth.uid;
 
@@ -166,7 +167,7 @@ export const updateRecurringTransaction = onCall(async (request) => {
 // deleteRecurringTransaction
 // ============================================================================
 
-export const deleteRecurringTransaction = onCall(async (request) => {
+export const deleteRecurringTransaction = secureOnCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
     const uid = request.auth.uid;
 
@@ -196,7 +197,7 @@ export const deleteRecurringTransaction = onCall(async (request) => {
 // toggleRecurringTransaction — pause / resume
 // ============================================================================
 
-export const toggleRecurringTransaction = onCall(async (request) => {
+export const toggleRecurringTransaction = secureOnCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
     const uid = request.auth.uid;
 
