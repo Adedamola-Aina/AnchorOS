@@ -16,12 +16,12 @@ This standard establishes ARCH-003 (Service Layer Tests) as the **baseline quali
 
 ## 📌 Applicability
 
-This 7-Phase standard applies to **ARCH-XXX architecture items** and major cross-cutting initiatives. It extends (not replaces) the mandatory 4-Phase workflow defined in `.github/.agent/rules/00-WORKFLOW.md`.
+This 7-Phase standard applies to **ARCH-XXX architecture items** and major cross-cutting initiatives. It extends (not replaces) the mandatory 4-Phase workflow defined in `.anchor/WORKFLOW.md`.
 
 | Work Type | Process |
 |-----------|--------|
 | ARCH-XXX architecture items | 7-Phase (this document) |
-| Features, bug fixes, refactors | 4-Phase (`.github/.agent/rules/00-WORKFLOW.md`) |
+| Features, bug fixes, refactors | 4-Phase (`.anchor/WORKFLOW.md`) |
 | Docs, config, tooling | 4-Phase with stated TDD exception |
 
 The 4-Phase workflow (GATHER → PLAN → BUILD → CLOSE) is always the outer loop. This standard adds depth within Phase 3 (BUILD) for architecture work.
@@ -290,10 +290,10 @@ Same process, but:
 Follow all guidance from:
 
 1. **CLAUDE.md** — Agent instructions and mandatory 4-Phase workflow
-2. **`.github/.agent/rules/`** — Workflow, identity, technical mandates, anti-patterns
+2. **`.anchor/agents/` and `.anchor/skills/`** — Workflow, identity, technical mandates, anti-patterns
 3. **`docs/TESTING_STRATEGY.md`** — Test categories, coverage goals, AAA pattern, performance SLAs
 4. **`docs/ERROR_HANDLING.md`** — AnchorError usage, error boundaries, user-facing messages
-5. **`.github/.agent/workflows/deploy.md`** — Deployment checklist and verification
+5. **`docs/DEPLOYMENT_CHECKLIST.md`** — Deployment checklist and verification
 
 ---
 
@@ -327,7 +327,7 @@ Follow all guidance from:
 - ✅ Major cross-cutting refactors
 - ✅ New infrastructure or service patterns
 
-**4-Phase workflow only** (`.github/.agent/rules/00-WORKFLOW.md`):
+**4-Phase workflow only** (`.anchor/WORKFLOW.md`):
 - Features, bug fixes, refactors
 - Documentation-only changes
 - Configuration changes

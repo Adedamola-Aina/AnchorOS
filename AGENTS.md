@@ -1,57 +1,61 @@
-# Anchor OS
+# Anchor OS — Agent Entry Point
+# Version: 3.0 | All agent instructions have moved to .anchor/
 
-Personal finance and commitment tracking system. TypeScript · React 19 · Vite · Tailwind CSS · Firebase (Firestore, Auth, Functions, Hosting). Used daily by real people on mobile (75%) and desktop.
+---
 
-## Workflow (every task, no exceptions)
+## Read This First
 
-1. **GATHER** — Run `get_project_state` MCP tool or `curl -s http://localhost:3001/api/command-center | head -100`. Check duplicates with `get_bugs` + `get_features`. Read relevant docs from `docs/`. Report findings.
-2. **PLAN** — List files to modify, tests to write, risks from multiple perspectives. **Stop. Wait for user approval.**
-3. **BUILD** — TDD: write failing test → make it pass → refactor. If TDD doesn't apply (config/docs/tooling), state exception explicitly. Keep files under 200 lines (ARCH-001).
-4. **CLOSE** — Run `npm run test -- --run` + `npm run lint`. Commit with correct prefix. Verify dashboard detected it. Report completion.
+All AI agent instructions, workflows, role definitions, and skills
+now live in `.anchor/`. This file is a navigation redirect only.
 
-## Critical Rules
+**Start here**: `.anchor/INDEX.md`
 
-- All DB through `src/utils/secureDb.ts` — never raw Firestore
-- Mobile-first — touch targets ≥44px, test on 375px viewport
-- Never deploy production without explicit approval
-- Use `npm run deploy:{env}` — never raw `firebase deploy`
-- Session limit: 4–5 tasks then recommend fresh conversation
-- No `any` type, no `console.log` in production, no hardcoded secrets
+---
 
-## Commit Prefixes (dashboard auto-detects)
+## Quick Reference
 
-`fix(scope): BUG-XXX desc` · `feat(scope): FEAT-XXX desc` · `refactor(scope): desc` · `test(scope): desc` · `docs(scope): desc` · `chore(scope): desc` · `deploy(env): vX.X.X @ HASH`
+| Need | Go To |
+|------|-------|
+| Full workflow (GATHER→PLAN→BUILD→CLOSE) | `.anchor/WORKFLOW.md` |
+| Which roles activate for this task | `.anchor/WORKFLOW.md` → Phase 0 |
+| A specific agent persona | `.anchor/agents/XX-name.md` |
+| Dashboard query patterns | `.anchor/skills/dashboard-query.md` |
+| Risk classification | `.anchor/skills/risk-classification.md` |
+| TDD cycle | `.anchor/skills/tdd-cycle.md` |
+| Commit format | `.anchor/skills/commit-format.md` |
+| secureDb usage | `.anchor/skills/securedb-patterns.md` |
+| Firestore rules | `.anchor/skills/firestore-rules.md` |
+| Architecture reference | `docs/ARCHITECTURE_OVERVIEW.md` |
+| Schema reference | `docs/FIRESTORE_SCHEMA.md` |
+| Security reference | `docs/SECURITY.md` |
+
+---
+
+## Dashboard (Source of Truth for Project State)
+
+```
+localhost:3001
+MCP tools: get_project_state · get_bugs · get_features · get_roadmap
+           get_environment_parity · search_git · get_next_id
+           get_kanban · get_velocity · get_changelog
+```
+
+---
 
 ## Environments
 
-Dev: `npm run deploy:dev` → anchor-os-dev-1c6ec.web.app
-Staging: `npm run deploy:staging` → anchor-os-staging.web.app
-Production: `npm run deploy:production` → anchor-os.web.app (⚠️ requires approval)
+| Env | Command | URL |
+|-----|---------|-----|
+| Dev | `npm run deploy:dev` | anchor-os-dev-1c6ec.web.app |
+| Staging | `npm run deploy:staging` | anchor-os-staging.web.app |
+| Production | `npm run deploy:production` ⚠️ requires Tech Lead approval | anchor-os.web.app |
 
-## Key Directories
+---
 
-`src/features/{feature}/` — Feature modules · `src/services/` — AccountService, TransactionService · `src/utils/secureDb.ts` — ALL database ops · `packages/design-system/` — UI primitives · `functions/src/` — Cloud Functions · `tools/dashboard/` — Internal PM Dashboard · `tools/mcp-server/` — MCP server · `e2e/` — Playwright tests
+## Session Start Prompt (Copilot / Claude)
 
-## MCP Tools
-
-`get_project_state` · `get_bugs` · `get_features` · `get_roadmap` · `get_environment_parity` · `search_git` · `get_next_id` · `get_kanban` · `get_velocity` · `get_changelog`
-
-## Anti-Patterns (real failures — never repeat)
-
-1. Deploying without approval (rolled back 2026-01-29)
-2. Creating duplicate bugs without checking dashboard first
-3. Coding without reading relevant docs
-4. Shared account double-counting in net worth (each account has ONE owner)
-5. Breaking 200-line rule
-6. Writing implementation before tests
-7. Desktop-first UI (75% mobile users)
-8. Bypassing secureDb.ts
-9. Optimistic updates without rollback
-10. Updating deleted doc files (git commits are source of truth)
-11. Running raw `firebase deploy` instead of npm scripts
-12. Production deploy without full test suite (2026-02-09)
-13. Skipping GATHER phase
-
-## Docs Reference
-
-Architecture: `docs/ARCHITECTURE_OVERVIEW.md` · Schema: `docs/FIRESTORE_SCHEMA.md` · Security: `docs/SECURITY.md` · Testing: `docs/TESTING_STRATEGY.md` · Errors: `docs/ERROR_HANDLING.md` · Family Mode: `docs/adr/FAMILY_SHARING_V3_*.md` · Finance: `docs/ANCHOR_FINANCE_SPEC.md` · Design: `docs/DESIGN_PHILOSOPHY.md` · Tokens: `docs/DESIGN_TOKENS.md`
+```
+@workspace Starting work on [task/ID].
+Read .anchor/INDEX.md first, then .anchor/WORKFLOW.md.
+Dashboard: localhost:3001
+```
