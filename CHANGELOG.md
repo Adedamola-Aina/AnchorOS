@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.11.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.10.6...v1.11.0) (2026-03-13)
+
+
+### Features
+
+* **deploy:** add --skip-mutation flag to deploy pipeline ([8ae254a](https://github.com/Adedamola-Aina/AnchorOS/commit/8ae254ac4fdab5dc5bbe5e9f4100bb5e974ed43f))
+
 ## [1.10.6](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.10.5...v1.10.6) (2026-03-13)
 
 ## [1.10.5](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.10.4...v1.10.5) (2026-03-13)
