@@ -37,6 +37,7 @@ DRY_RUN=false
 SKIP_E2E=false
 SKIP_TESTS=false
 SKIP_LINT=false
+SKIP_MUTATION=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -50,6 +51,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-e2e)
             SKIP_E2E=true
+            shift
+            ;;
+        --skip-mutation)
+            SKIP_MUTATION=true
             shift
             ;;
         --skip-tests)
@@ -189,7 +194,9 @@ else
 fi
 
 # 3c. Mutation Testing (production only - catches weak tests)
-if [[ "$ENV" == "production" ]]; then
+if [[ "$SKIP_MUTATION" == true ]]; then
+    echo -e "\n${YELLOW}⏭️  Stage 3c: Mutation Tests Skipped (--skip-mutation)${NC}"
+elif [[ "$ENV" == "production" ]]; then
     echo -e "\n${YELLOW}🧬 Stage 3c: Mutation Testing${NC}"
     if npm run test:mutation; then
         echo -e "${GREEN}✅ Mutation tests passed (score above threshold).${NC}"
