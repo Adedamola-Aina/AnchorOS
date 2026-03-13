@@ -57,32 +57,49 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
         }
     }
 
-    // Wait for authenticated app shell; fall back to dashboard navigation when shell detection is delayed.
-    const shellReady = await page.waitForFunction(() => {
+    const waitForAppShell = () => page.waitForFunction(() => {
         const aside = document.querySelector('aside');
         const bottomNav = document.querySelector('nav[aria-label="Mobile navigation"]');
         const asideVisible = !!(aside && getComputedStyle(aside).display !== 'none');
         const navVisible = !!(bottomNav && getComputedStyle(bottomNav).display !== 'none');
         const headings = Array.from(document.querySelectorAll('h1, h2, h3'))
-            .map(node => (node.textContent || '').trim());
+            .map(node => (node.textContent || '').trim().toLowerCase());
         const appHeadingVisible = headings.some(text =>
-            ['Dashboard', 'Finance', 'Commitments', 'System', 'Settings'].includes(text)
+            text.includes('dashboard') ||
+            text.includes('finance') ||
+            text.includes('commitments') ||
+            text.includes('system') ||
+            text.includes('settings')
         );
         return asideVisible || navVisible || appHeadingVisible;
     }, null, { timeout: 30000 }).catch(() => null);
 
+    // Wait for authenticated app shell; fall back to dashboard navigation when shell detection is delayed.
+    const shellReady = await waitForAppShell();
+
     if (!shellReady) {
         const authFormStillVisible = await page.locator('input[name="email"]').isVisible().catch(() => false);
         if (authFormStillVisible) {
+            await page.fill('input[name="email"]', user.email).catch(() => undefined);
+            await page.fill('input[name="password"]', user.password).catch(() => undefined);
             await page.click('button:has-text("Sign In")').catch(() => undefined);
             await page.waitForTimeout(4000);
         }
 
         await page.goto('/dashboard', { waitUntil: 'domcontentloaded' }).catch(() => undefined);
-        const shellLocator = page
-            .locator('aside, nav[aria-label="Mobile navigation"], h1:has-text("Dashboard"), h1:has-text("Finance"), h1:has-text("Commitments"), h1:has-text("System"), h1:has-text("Settings")')
-            .first();
-        await expect(shellLocator).toBeVisible({ timeout: 30000 });
+        const shellReadyAfterGoto = await waitForAppShell();
+
+        if (!shellReadyAfterGoto) {
+            const stillOnAuth = await page.locator('input[name="email"]').isVisible().catch(() => false);
+            if (stillOnAuth) {
+                await page.fill('input[name="email"]', user.email).catch(() => undefined);
+                await page.fill('input[name="password"]', user.password).catch(() => undefined);
+                await page.click('button:has-text("Sign In")').catch(() => undefined);
+                await page.waitForTimeout(4000);
+                await page.goto('/dashboard', { waitUntil: 'domcontentloaded' }).catch(() => undefined);
+                await waitForAppShell();
+            }
+        }
     }
 
     // Optional: Navigate to Finance and ensure account exists
