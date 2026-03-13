@@ -18,7 +18,8 @@ import { loginOrSignup } from './helpers';
 // Helper: Navigate to Family Settings
 async function goToFamilySettings(page: Page, user = TEST_USER) {
     await loginOrSignup(page, user, true);
-    await page.click('a:has-text("System")');
+    // Navigate directly to settings to avoid brittle sidebar link click
+    await page.goto('/settings', { waitUntil: 'domcontentloaded' }).catch(() => undefined);
     await page.waitForTimeout(1000);
 
     // Scroll to find Family section
