@@ -11,6 +11,9 @@ import type {
   PatternAction,
   PatternTrigger,
   Prediction,
+  PredictionType,
+  ProactiveQuestionState,
+  ProactiveQuestionType,
   RecurringTransaction,
   UserPattern,
   WeeklyReport,
@@ -32,8 +35,23 @@ import {
   persistWeeklyReport,
 } from './fabricPersistence';
 import { buildDailyBriefing } from './DailyBriefingEngine';
+import { generateProactiveQuestion } from './ProactiveQuestionEngine';
 
 const SAVE_DEBOUNCE_MS = 500;
+
+const PREDICTION_ID_TYPE_MAP: Array<[string, PredictionType]> = [
+  ['pred-budget-overage', 'budget_overage'],
+  ['pred-burn-rate', 'budget_overage'],
+  ['pred-streak-risk', 'streak_at_risk'],
+  ['pred-recurring-due', 'recurring_due'],
+];
+
+function inferPredictionType(predictionId: string): PredictionType | null {
+  for (const [prefix, type] of PREDICTION_ID_TYPE_MAP) {
+    if (predictionId.startsWith(prefix)) return type;
+  }
+  return null;
+}
 
 export class FabricService implements IFabricService {
   private static instance: FabricService | undefined;
@@ -46,6 +64,7 @@ export class FabricService implements IFabricService {
   private engine = new BehavioralEngine();
   private activeUserId: string | null = null;
   private enabled = false;
+  private userTimezone: string | undefined;
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
   private transactions: AnchorTransaction[] = [];
   private commitments: AnchorTask[] = [];
@@ -55,6 +74,7 @@ export class FabricService implements IFabricService {
   private dismissedPredictionIds = new Set<string>();
   /** Dirty flag — predictions are only recomputed when state has changed */
   private predictionsDirty = false;
+  private lastQuestionState: ProactiveQuestionState | null = null;
 
   private constructor() {}
 
@@ -65,6 +85,9 @@ export class FabricService implements IFabricService {
 
     const settings = await secureDb.getDocument<FabricSettings>(userId, ['fabric_settings', 'state']);
     this.enabled = settings?.enabled === true;
+
+    const profile = await secureDb.getDocument<{ timezone?: string }>(userId, []);
+    this.userTimezone = profile?.timezone;
 
     if (!this.enabled) {
       this.engine.reset();
@@ -89,7 +112,7 @@ export class FabricService implements IFabricService {
     this.recomputePredictions();
   }
 
-  getContext(): FabricContext { return getAmbientContext(); }
+  getContext(): FabricContext { return getAmbientContext(new Date(), this.userTimezone); }
 
   learnFrom(trigger: PatternTrigger, action: PatternAction): void {
     if (!this.enabled || !this.activeUserId) return;
@@ -151,6 +174,26 @@ export class FabricService implements IFabricService {
 
   dismissPrediction(predictionId: string): void {
     if (!this.activeUserId) return;
+
+    const prediction = this.predictions.find((p) => p.id === predictionId);
+    const predType = prediction?.type ?? inferPredictionType(predictionId);
+
+    if (predType) {
+      const patterns = this.engine.getConfirmedPatterns();
+      let matchedPattern: UserPattern | undefined;
+
+      if (predType === 'budget_overage' || predType === 'recurring_due') {
+        matchedPattern = patterns.find((p) => p.followUpAction.type === 'review_budget');
+      } else if (predType === 'streak_at_risk') {
+        matchedPattern = patterns.find((p) => p.trigger.type === 'commitment_completed');
+      }
+
+      if (matchedPattern) {
+        this.engine.dismissPattern(matchedPattern.id);
+        this.scheduleSave();
+      }
+    }
+
     this.dismissedPredictionIds.add(predictionId);
     this.predictions = this.predictions.filter((p) => p.id !== predictionId);
     void persistPredictionState(this.activeUserId, this.predictions, this.dismissedPredictionIds);
@@ -174,6 +217,39 @@ export class FabricService implements IFabricService {
       this.recurring,
       new Date(),
     );
+  }
+
+  getProactiveQuestion(): string | null {
+    if (!this.enabled) return null;
+    const result = generateProactiveQuestion(
+      {
+        patterns: this.engine.getPatterns(),
+        transactions: this.transactions,
+        commitments: this.commitments,
+        accounts: this.accounts,
+        now: new Date(),
+      },
+      this.lastQuestionState,
+    );
+    return result?.question ?? null;
+  }
+
+  markQuestionShown(questionType: ProactiveQuestionType): void {
+    const result = generateProactiveQuestion(
+      {
+        patterns: this.engine.getPatterns(),
+        transactions: this.transactions,
+        commitments: this.commitments,
+        accounts: this.accounts,
+        now: new Date(),
+      },
+      null, // bypass dedup to get the actual question text
+    );
+    this.lastQuestionState = {
+      question: result?.question ?? '',
+      questionType,
+      shownAt: new Date().toISOString(),
+    };
   }
 
   async generateWeeklyReport(): Promise<WeeklyReport> {

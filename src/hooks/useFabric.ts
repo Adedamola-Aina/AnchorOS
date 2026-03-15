@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { PatternAction, PatternTrigger } from '../types';
+import type { PatternAction, PatternTrigger, ProactiveQuestionType } from '../types';
 import type { MoodEntry } from '../types/fabricBriefing';
 import { useFabricContext } from '../context/FabricContext';
 
@@ -24,6 +24,8 @@ export function useFabric() {
     generateWeeklyReport,
     saveMood,
     clearAllData,
+    proactiveQuestion,
+    markQuestionShown,
     refresh,
   } = useFabricContext();
 
@@ -67,6 +69,11 @@ export function useFabric() {
     await clearAllData();
   }, [clearAllData, isEnabled]);
 
+  const safeMarkQuestionShown = useCallback((questionType: ProactiveQuestionType) => {
+    if (!isEnabled) return;
+    markQuestionShown(questionType);
+  }, [isEnabled, markQuestionShown]);
+
   return {
     isEnabled,
     isReady,
@@ -87,6 +94,8 @@ export function useFabric() {
     generateWeeklyReport: safeGenerateWeeklyReport,
     saveMood: safeSaveMood,
     clearAllData: safeClearAllData,
+    proactiveQuestion,
+    markQuestionShown: safeMarkQuestionShown,
     refresh,
   };
 }

@@ -113,6 +113,7 @@ export interface UserProfile {
   name: string;
   familyMode: boolean;
   theme: 'light' | 'dark' | 'system';
+  timezone?: string;
   mfaEnabled?: boolean;
   onboardingComplete?: boolean;
   onboardingProgress?: OnboardingProgress;

@@ -108,6 +108,18 @@ export interface FabricSettings {
 
 export type AnchorAIIconState = 'resting' | 'breathing' | 'learning' | 'disabled';
 
+export type ProactiveQuestionType =
+  | 'missed_habit'
+  | 'completion_drop'
+  | 'category_spike'
+  | 'surplus_idle';
+
+export interface ProactiveQuestionState {
+  question: string;
+  questionType: ProactiveQuestionType;
+  shownAt: string;
+}
+
 export interface IFabricService {
   initialize(userId: string): Promise<void>;
   getContext(): FabricContext;
@@ -123,4 +135,6 @@ export interface IFabricService {
   generateWeeklyReport(): Promise<WeeklyReport>;
   parseIntent(input: string): ParsedIntent;
   query(input: string): Promise<FabricQueryResult>;
+  getProactiveQuestion(): string | null;
+  markQuestionShown(questionType: ProactiveQuestionType): void;
 }

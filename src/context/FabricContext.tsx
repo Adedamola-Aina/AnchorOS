@@ -10,6 +10,7 @@ import type {
   PatternAction,
   PatternTrigger,
   Prediction,
+  ProactiveQuestionType,
   RecurringTransaction,
   UserPattern,
   WeeklyReport,
@@ -42,6 +43,8 @@ interface FabricContextValue {
   generateWeeklyReport: () => Promise<WeeklyReport | null>;
   saveMood: (mood: MoodEntry['mood'], note?: string) => Promise<void>;
   clearAllData: () => Promise<void>;
+  proactiveQuestion: string | null;
+  markQuestionShown: (questionType: ProactiveQuestionType) => void;
   refresh: () => void;
 }
 
@@ -74,6 +77,7 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [weeklyReport, setWeeklyReport] = useState<WeeklyReport | null>(null);
   const [briefing, setBriefing] = useState<DailyBriefing | null>(null);
   const [moodToday, setMoodToday] = useState<MoodEntry | null>(null);
+  const [proactiveQuestion, setProactiveQuestion] = useState<string | null>(null);
 
   // Live data refs — updated by Firestore subscriptions below
   const liveTransactions = useRef<AnchorTransaction[]>([]);
@@ -93,6 +97,7 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setInsights([...dashboardInsights, ...familyInsights.filter((i) => !seenIds.has(i.id))]);
     setIsEnabled(fabricService.isEnabled());
     setBriefing(fabricService.getBriefing());
+    setProactiveQuestion(fabricService.getProactiveQuestion());
   }, [fabricService]);
 
   useEffect(() => {
@@ -243,6 +248,11 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     refresh();
   }, [fabricService, refresh]);
 
+  const markQuestionShown = useCallback((questionType: ProactiveQuestionType) => {
+    fabricService.markQuestionShown(questionType);
+    setProactiveQuestion(null);
+  }, [fabricService]);
+
   // Load today's mood on mount (once user is known)
   useEffect(() => {
     if (!user || !isEnabled) return;
@@ -281,6 +291,8 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     generateWeeklyReport,
     saveMood,
     clearAllData,
+    proactiveQuestion,
+    markQuestionShown,
     refresh,
   }), [
     briefing,
@@ -297,9 +309,11 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     isReady,
     lastQueryResult,
     learnFrom,
+    markQuestionShown,
     moodToday,
     patterns,
     predictions,
+    proactiveQuestion,
     refresh,
     runQuery,
     saveMood,
