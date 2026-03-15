@@ -21,6 +21,7 @@ import { evaluateFeatureFlag } from '../features/flags/featureFlags';
 import { FabricService } from '../services/fabric/FabricService';
 import { db, APP_ID } from '../config/firebase';
 import { secureDb } from '../utils/secureDb';
+import { logEvent } from '../services/telemetry';
 
 interface FabricContextValue {
   isEnabled: boolean;
@@ -125,9 +126,11 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setInitError(null);
         refresh();
         setIsReady(true);
+        try { logEvent('fabric.init_succeeded', { level: 'info', attributes: { userId: user.uid } }); } catch { /* telemetry must never break init */ }
       } catch (err) {
         if (!isMounted) return;
         const message = err instanceof Error ? err.message : 'Failed to initialize Anchor AI';
+        try { logEvent('fabric.init_failed', { level: 'error', attributes: { userId: user.uid, error: message, timestamp: new Date().toISOString() } }); } catch { /* telemetry must never break init */ }
         console.error('[Fabric] Initialization failed:', err);
         setInitError(message);
         setIsEnabled(false);

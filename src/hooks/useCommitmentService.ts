@@ -12,6 +12,15 @@ import {
   toggleCommitmentCompletion,
   updateCommitment,
 } from '../api/CommitmentApi';
+import { enqueueTaskToggle } from '../utils/offlineQueue';
+
+function isNetworkError(error: unknown): boolean {
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase();
+    return msg.includes('network') || msg.includes('failed to fetch') || msg.includes('offline') || msg.includes('unavailable');
+  }
+  return false;
+}
 
 export const useCommitmentService = (user: User | null) => {
   const queryClient = useQueryClient();
@@ -107,6 +116,11 @@ export const useCommitmentService = (user: User | null) => {
       // ❌ ROLLBACK: If Firestore fails, invalidate cache to trigger onSnapshot refetch
       console.error('[toggleTask] Firestore transaction failed, rolling back optimistic update:', error);
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
+
+      if (isNetworkError(error)) {
+        await enqueueTaskToggle(user.uid, id, currentStatus);
+        return; // Queued for retry — don't throw
+      }
       throw error;
     }
 

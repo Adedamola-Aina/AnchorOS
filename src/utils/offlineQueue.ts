@@ -61,3 +61,63 @@ export async function processQueue(
 export async function clearQueue(): Promise<void> {
     await del(IDB_KEY);
 }
+
+// --- Task Toggle Offline Queue ---
+
+const TASK_QUEUE_KEY = 'anchor_task_offline_queue';
+
+export interface TaskQueueEntry {
+    id: string;
+    userId: string;
+    taskId: string;
+    currentStatus: boolean;
+    createdAt: string;
+}
+
+async function readTaskQueue(): Promise<TaskQueueEntry[]> {
+    const data = await get<TaskQueueEntry[]>(TASK_QUEUE_KEY);
+    return Array.isArray(data) ? data : [];
+}
+
+export async function enqueueTaskToggle(userId: string, taskId: string, currentStatus: boolean): Promise<void> {
+    const queue = await readTaskQueue();
+    const entry: TaskQueueEntry = {
+        id: crypto.randomUUID(),
+        userId,
+        taskId,
+        currentStatus,
+        createdAt: new Date().toISOString(),
+    };
+    queue.push(entry);
+    await set(TASK_QUEUE_KEY, queue);
+}
+
+export async function getTaskQueueLength(): Promise<number> {
+    return (await readTaskQueue()).length;
+}
+
+export async function processTaskQueue(
+    processor: (entry: TaskQueueEntry) => Promise<void>,
+): Promise<ProcessResult> {
+    const queue = await readTaskQueue();
+    if (queue.length === 0) return { succeeded: 0, failed: 0 };
+
+    const failed: TaskQueueEntry[] = [];
+    let succeeded = 0;
+
+    for (const entry of queue) {
+        try {
+            await processor(entry);
+            succeeded++;
+        } catch {
+            failed.push(entry);
+        }
+    }
+
+    await set(TASK_QUEUE_KEY, failed);
+    return { succeeded, failed: failed.length };
+}
+
+export async function clearTaskQueue(): Promise<void> {
+    await del(TASK_QUEUE_KEY);
+}

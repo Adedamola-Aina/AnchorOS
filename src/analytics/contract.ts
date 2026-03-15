@@ -53,6 +53,55 @@ const analyticsEventSchema = z.discriminatedUnion('name', [
       enabled: z.boolean(),
     }),
   }),
+  z.object({
+    name: z.literal('fabric_insight_viewed'),
+    payload: z.object({
+      insightId: z.string().min(1),
+      category: z.string().min(1),
+      severity: z.enum(['positive', 'neutral', 'attention']),
+    }),
+  }),
+  z.object({
+    name: z.literal('fabric_insight_dismissed'),
+    payload: z.object({
+      insightId: z.string().min(1),
+      category: z.string().min(1),
+    }),
+  }),
+  z.object({
+    name: z.literal('fabric_prediction_dismissed'),
+    payload: z.object({
+      predictionId: z.string().min(1),
+      predictionType: z.string().min(1),
+    }),
+  }),
+  z.object({
+    name: z.literal('fabric_prediction_actioned'),
+    payload: z.object({
+      predictionId: z.string().min(1),
+      predictionType: z.string().min(1),
+    }),
+  }),
+  z.object({
+    name: z.literal('fabric_query_submitted'),
+    payload: z.object({
+      intentAction: z.string().min(1),
+      confidence: z.number(),
+      hasResult: z.boolean(),
+    }),
+  }),
+  z.object({
+    name: z.literal('fabric_nudge_received'),
+    payload: z.object({
+      nudgeType: z.enum(['streak_risk', 'budget_warning', 'surplus', 'weekly_report']),
+    }),
+  }),
+  z.object({
+    name: z.literal('fabric_proactive_question_dismissed'),
+    payload: z.object({
+      questionType: z.string().min(1),
+    }),
+  }),
 ]);
 
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>;

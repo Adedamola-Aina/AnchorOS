@@ -98,6 +98,12 @@ vi.mock('firebase/firestore', () => ({
   runTransaction: firestoreMocks.runTransaction,
 }));
 
+// Mock offlineQueue
+const mockEnqueueTaskToggle = vi.fn();
+vi.mock('../utils/offlineQueue', () => ({
+  enqueueTaskToggle: (...args: unknown[]) => mockEnqueueTaskToggle(...args),
+}));
+
 // 3. Test Data
 const mockUser: User = {
   uid: 'test-user-123',
@@ -393,6 +399,56 @@ describe('useCommitmentService', () => {
       // Should update immediately
       expect(result.current.tasks[0].completed).toBe(false);
       expect(result.current.tasks[0].currentStreak).toBe(4); // Decremented
+    });
+  });
+
+  describe('Offline Toggle Resilience', () => {
+    beforeEach(() => {
+      mockEnqueueTaskToggle.mockClear();
+    });
+
+    it('should enqueue toggle when network error occurs', async () => {
+      firestoreMocks.runTransaction.mockRejectedValueOnce(new Error('Failed to fetch'));
+      mockEnqueueTaskToggle.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useCommitmentService(mockUser), { wrapper: createWrapper() });
+      await waitFor(() => expect(result.current.tasks).toBeDefined());
+
+      // Should NOT throw — network error gets queued
+      await act(async () => {
+        await result.current.toggleTask('task-123', false);
+      });
+
+      expect(mockEnqueueTaskToggle).toHaveBeenCalledWith('test-user-123', 'task-123', false);
+    });
+
+    it('should throw non-network errors after rollback', async () => {
+      firestoreMocks.runTransaction.mockRejectedValueOnce(new Error('Permission denied'));
+
+      const { result } = renderHook(() => useCommitmentService(mockUser), { wrapper: createWrapper() });
+      await waitFor(() => expect(result.current.tasks).toBeDefined());
+
+      await expect(
+        act(async () => {
+          await result.current.toggleTask('task-123', false);
+        })
+      ).rejects.toThrow('Permission denied');
+
+      expect(mockEnqueueTaskToggle).not.toHaveBeenCalled();
+    });
+
+    it('should enqueue on "unavailable" error message', async () => {
+      firestoreMocks.runTransaction.mockRejectedValueOnce(new Error('service unavailable'));
+      mockEnqueueTaskToggle.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useCommitmentService(mockUser), { wrapper: createWrapper() });
+      await waitFor(() => expect(result.current.tasks).toBeDefined());
+
+      await act(async () => {
+        await result.current.toggleTask('task-123', true);
+      });
+
+      expect(mockEnqueueTaskToggle).toHaveBeenCalledWith('test-user-123', 'task-123', true);
     });
   });
 });

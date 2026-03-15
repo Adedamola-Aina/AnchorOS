@@ -10,6 +10,7 @@ import { FabricTodayCard } from './FabricTodayCard';
 import { FabricUpcomingCard } from './FabricUpcomingCard';
 import { FabricMoodCard } from './FabricMoodCard';
 import { formatCents } from '../../services/fabric/fabricUtils';
+import { logProductEvent } from '../../services/telemetry';
 import type { FabricQueryResult, TabView } from '../../types';
 import type { Currency } from '../../services/fabric/fabricUtils';
 
@@ -48,6 +49,13 @@ const FabricView: React.FC = () => {
     const result = await runQuery(trimmed);
     setQueryResult(result ?? null);
     setIsQuerying(false);
+    try {
+      logProductEvent('fabric_query_submitted', {
+        intentAction: 'unknown',
+        confidence: 0,
+        hasResult: !!result?.summary,
+      });
+    } catch { /* telemetry must never break the UI */ }
   };
 
   const handleAction = (type: string, payload: Record<string, unknown>) => {
@@ -119,6 +127,12 @@ const FabricView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => {
+                          try {
+                            logProductEvent('fabric_prediction_actioned', {
+                              predictionId: prediction.id,
+                              predictionType: prediction.type,
+                            });
+                          } catch { /* telemetry must never break the UI */ }
                           const page = prediction.action!.navigateTo!.replace('/', '') as TabView;
                           navigateTo(page);
                         }}
@@ -129,7 +143,15 @@ const FabricView: React.FC = () => {
                     )}
                     <button
                       type="button"
-                      onClick={() => dismissPrediction(prediction.id)}
+                      onClick={() => {
+                        try {
+                          logProductEvent('fabric_prediction_dismissed', {
+                            predictionId: prediction.id,
+                            predictionType: prediction.type,
+                          });
+                        } catch { /* telemetry must never break the UI */ }
+                        dismissPrediction(prediction.id);
+                      }}
                       className="min-h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200"
                     >
                       Dismiss

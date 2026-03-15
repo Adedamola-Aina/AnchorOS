@@ -59,3 +59,6 @@ export { recoverMfaWithCode } from './mfaRecovery';
 export { linkBankAccount, unlinkBankAccount } from './bankLink';
 export { syncBankTransactions, syncBankAccountNow } from './bankSync';
 export { monoWebhook } from './bankWebhook';
+
+// Weekly Fabric report
+export { generateWeeklyReport } from './weeklyReport';
