@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.13.0-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.12.0...v1.13.0-dev.0) (2026-03-15)
+
+
+### Features
+
+* **fabric:** session 0a foundation fixes ([09658e6](https://github.com/Adedamola-Aina/AnchorOS/commit/09658e6379ca411932b01fff8d84891a001eddc9))
+* **fabric:** session 0b analytics + observability ([191c88a](https://github.com/Adedamola-Aina/AnchorOS/commit/191c88a6f01b41dab901a24f0c90560aa3e51635))
+
 ## [1.12.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.11.2...v1.12.0) (2026-03-15)
 
 
