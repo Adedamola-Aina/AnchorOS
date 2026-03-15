@@ -1,10 +1,13 @@
 import { FieldValue } from 'firebase-admin/firestore';
-import { format } from 'date-fns';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db, APP_ID } from './config';
 import { shouldSendReminderForCategory, type NotificationPreferences } from './reminderPreferences';
 import { sendReminderNotification } from './reminderSender';
 import { getReminderLinkPath, type ReminderCategory } from './reminderRouting';
+
+const LAGOS_TZ = 'Africa/Lagos';
+const lagosDateFmt = new Intl.DateTimeFormat('en-CA', { timeZone: LAGOS_TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+const lagosTimeFmt = new Intl.DateTimeFormat('en-GB', { timeZone: LAGOS_TZ, hour: '2-digit', minute: '2-digit', hour12: false });
 
 type NudgeType = 'streak' | 'budget' | 'surplus';
 type TaskLike = { title?: unknown; type?: unknown; completed?: unknown; currentStreak?: unknown };
@@ -27,10 +30,14 @@ export function formatCurrency(cents: number): string {
   return `₦${(cents / 100).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 }
 
+function getLagosClock(now: Date): { currentTime: string; todayKey: string; monthKey: string } {
+  const todayKey = lagosDateFmt.format(now);
+  return { currentTime: lagosTimeFmt.format(now), todayKey, monthKey: todayKey.slice(0, 7) };
+}
+
 export function isLastDayOfMonth(now: Date): boolean {
-  const tomorrow = new Date(now);
-  tomorrow.setDate(now.getDate() + 1);
-  return tomorrow.getMonth() !== now.getMonth();
+  const todayMonth = getLagosClock(now).monthKey;
+  return getLagosClock(new Date(now.getTime() + (24 * 60 * 60 * 1000))).monthKey !== todayMonth;
 }
 
 export function pickTopStreakTask(tasks: TaskLike[]): { title: string; currentStreak: number } | null {
@@ -104,11 +111,8 @@ async function sendNudge(input: SendNudgeInput): Promise<void> {
 export const fabricStreakNudge = onSchedule(
   { schedule: 'every day 20:00', timeZone: 'Africa/Lagos' },
   async () => {
-    const now = new Date();
-    const nowIso = now.toISOString();
-    const currentTime = format(now, 'HH:mm');
-    const todayKey = format(now, 'yyyy-MM-dd');
-    const monthKey = format(now, 'yyyy-MM');
+    const now = new Date(); const nowIso = now.toISOString();
+    const { currentTime, todayKey, monthKey } = getLagosClock(now);
 
     for (const userRef of await getFabricEnabledUsers()) {
       const cmtSnap = await userRef.collection('commitments').where('type', '==', 'daily').get();
@@ -133,10 +137,8 @@ export const fabricStreakNudge = onSchedule(
 export const fabricBudgetNudge = onSchedule(
   { schedule: '0 10 14 * *', timeZone: 'Africa/Lagos' },
   async () => {
-    const now = new Date();
-    const nowIso = now.toISOString();
-    const currentTime = format(now, 'HH:mm');
-    const monthKey = format(now, 'yyyy-MM');
+    const now = new Date(); const nowIso = now.toISOString();
+    const { currentTime, monthKey } = getLagosClock(now);
     const currentStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const nextStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -169,8 +171,7 @@ export const fabricSurplusNudge = onSchedule(
     const now = new Date();
     if (!isLastDayOfMonth(now)) return;
     const nowIso = now.toISOString();
-    const currentTime = format(now, 'HH:mm');
-    const monthKey = format(now, 'yyyy-MM');
+    const { currentTime, monthKey } = getLagosClock(now);
     const currentStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const nextStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 

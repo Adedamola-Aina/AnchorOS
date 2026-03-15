@@ -476,6 +476,50 @@ describe('fabric documents (owner-only)', () => {
 
     await assertSucceeds(getDoc(doc(db, `${userRoot('user1')}/fabric_reports`, '2026-03-02')));
   });
+
+  it('owner can read fabric_analytics but cannot write it directly', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${userRoot('user1')}/fabric_analytics`, '2026-03'), {
+        fabric_nudge_received: [{ nudge_type: 'streak' }],
+      });
+    });
+
+    const db = authedDb('user1');
+    await assertSucceeds(getDoc(doc(db, `${userRoot('user1')}/fabric_analytics`, '2026-03')));
+    await assertFails(setDoc(doc(db, `${userRoot('user1')}/fabric_analytics`, '2026-03'), {
+      fabric_nudge_received: [{ nudge_type: 'budget' }],
+    }));
+  });
+
+  it('owner can read fabric_nudge_log but cannot write it directly', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${userRoot('user1')}/fabric_nudge_log`, '2026-03-15'), {
+        streak: true,
+      });
+    });
+
+    const db = authedDb('user1');
+    await assertSucceeds(getDoc(doc(db, `${userRoot('user1')}/fabric_nudge_log`, '2026-03-15')));
+    await assertFails(setDoc(doc(db, `${userRoot('user1')}/fabric_nudge_log`, '2026-03-15'), {
+      streak: true,
+      budget_mid_month: true,
+    }));
+  });
+
+  it('non-owner cannot read another users fabric_analytics or fabric_nudge_log', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${userRoot('user2')}/fabric_analytics`, '2026-03'), {
+        fabric_nudge_received: [{ nudge_type: 'surplus' }],
+      });
+      await setDoc(doc(ctx.firestore(), `${userRoot('user2')}/fabric_nudge_log`, '2026-03-15'), {
+        surplus: true,
+      });
+    });
+
+    const db = authedDb('user1');
+    await assertFails(getDoc(doc(db, `${userRoot('user2')}/fabric_analytics`, '2026-03')));
+    await assertFails(getDoc(doc(db, `${userRoot('user2')}/fabric_nudge_log`, '2026-03-15')));
+  });
 });
 
 // ─── Default deny ───────────────────────────────────────────────────────────

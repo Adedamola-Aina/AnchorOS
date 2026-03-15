@@ -209,6 +209,26 @@ describe('fabricNudges helpers', () => {
     expect(mocks.sendReminderNotification).toHaveBeenCalledWith(expect.objectContaining({ title: 'Streak alert' }));
   });
 
+  it('fabricStreakNudge checks preferences using Africa/Lagos clock time', async () => {
+    vi.setSystemTime(new Date('2026-03-15T19:00:00.000Z')); // 20:00 in Lagos
+    state.setUsers([
+      {
+        id: 'u1',
+        fabricEnabled: true,
+        commitments: [{ title: 'Read', type: 'daily', completed: false, currentStreak: 4 }],
+        fcmTokens: ['tok-1'],
+      },
+    ]);
+
+    await (fabricStreakNudge as unknown as () => Promise<void>)();
+
+    expect(mocks.shouldSendReminderForCategory).toHaveBeenCalledWith(
+      expect.anything(),
+      'commitments',
+      '20:00',
+    );
+  });
+
   it('fabricStreakNudge skips duplicate when already sent today', async () => {
     vi.setSystemTime(new Date('2026-03-15T20:00:00.000Z'));
     const todayKey = format(new Date(), 'yyyy-MM-dd');
