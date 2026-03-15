@@ -62,3 +62,6 @@ export { monoWebhook } from './bankWebhook';
 
 // Weekly Fabric report
 export { generateWeeklyReport } from './weeklyReport';
+
+// Fabric nudges
+export { fabricStreakNudge, fabricBudgetNudge, fabricSurplusNudge } from './fabricNudges';
