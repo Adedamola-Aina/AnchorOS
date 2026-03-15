@@ -169,7 +169,29 @@ const INTENT_RULES: IntentRule[] = [
   {
     action: 'query_commitments',
     priority: 70,
-    test: (i) => /\b(commitment|commitments|streak|task|tasks|habit|habits|daily|todo)\b/.test(i),
+    test: (i) =>
+      /\b(commitment|commitments|streak|task|tasks|habit|habits|daily|todo)\b/.test(i) &&
+      !/\b(spend|spending|money|finance|connection\s+between|correlation)\b/.test(i),
+  },
+  {
+    action: 'query_correlation',
+    priority: 65,
+    test: (i) => /\b(habits?\s+and\s+(spend|money|finance)|spend\s+.*\s+habits?|connection\s+between|correlation|when\s+i\s+(do|complete|follow)\s+.*\s+(spend|money))\b/.test(i),
+  },
+  {
+    action: 'query_savings_rate',
+    priority: 62,
+    test: (i) => /\b(savings?\s+rate|how\s+much\s+(am\s+i\s+saving|did\s+i\s+save)|saving\s+percentage|am\s+i\s+saving\s+enough|what\s+percentage\s+(am|did)\s+i\s+save)\b/.test(i),
+  },
+  {
+    action: 'query_momentum',
+    priority: 62,
+    test: (i) => /\b(momentum|trending|how\s+am\s+i\s+trending|better\s+or\s+worse|improving|getting\s+better|this\s+week\s+vs|compared\s+to\s+last\s+week)\b/.test(i),
+  },
+  {
+    action: 'query_day_of_week',
+    priority: 60,
+    test: (i) => /\b(which\s+day|what\s+day|best\s+day|worst\s+day|when\s+do\s+i\s+spend\s+most|most\s+expensive\s+day|highest\s+spend\s+day)\b/.test(i),
   },
   // Spending queries — spending keyword or explicit "how much"
   {
@@ -245,6 +267,10 @@ function confidenceFor(action: IntentAction): number {
     case 'query_spending':
     case 'query_income':
     case 'query_commitments':
+    case 'query_savings_rate':
+    case 'query_day_of_week':
+    case 'query_correlation':
+    case 'query_momentum':
     case 'query_accounts':
     case 'query_recurring':
     case 'query_family':
@@ -261,12 +287,13 @@ function confidenceFor(action: IntentAction): number {
 export function parseIntent(rawInput: string): ParsedIntent {
   const input = rawInput.toLowerCase().trim();
   const action = detectAction(input);
+  const confidence = action === 'unknown' ? 0.15 : confidenceFor(action);
 
   const page = NAV_PAGES.find((candidate) => input.includes(candidate));
 
   return {
     action,
-    confidence: confidenceFor(action),
+    confidence,
     entities: {
       amount: parseAmount(input),
       category: parseCategory(input),

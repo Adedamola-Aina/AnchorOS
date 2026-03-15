@@ -1,5 +1,16 @@
 import type { AnchorAccount, AnchorTask, AnchorTransaction, FabricQueryResult, ParsedIntent, RecurringTransaction } from '../../types';
-import { detectPrimaryCurrency, formatCents, formatPeriodLabel, getDateRange, sumByCategory, toDate } from './fabricUtils';
+import {
+  buildWeekBuckets,
+  detectPrimaryCurrency,
+  formatCents,
+  formatPeriodLabel,
+  getBestCompletionDay,
+  getDateRange,
+  getHighSpendDay,
+  sumByCategory,
+  toDate,
+  withinRange,
+} from './fabricUtils';
 import { buildDailyBriefing, getUpcomingItems } from './DailyBriefingEngine';
 
 interface RunFabricQueryInput {
@@ -334,12 +345,208 @@ function planWeek(input: RunFabricQueryInput): FabricQueryResult {
   };
 }
 
+function savingsRateQuery(input: RunFabricQueryInput): FabricQueryResult {
+  const currency = detectPrimaryCurrency(input.transactions);
+  const { start, end } = getDateRange('this_month', input.now);
+
+  const income = input.transactions
+    .filter((tx) => tx.type === 'income' && !tx.isSoftDeleted && withinRange(tx.date, start, end))
+    .reduce((sum, tx) => sum + tx.amountCents, 0);
+
+  if (income === 0) {
+    return {
+      data: { incomeCents: 0, expenseCents: 0, savingsRate: 0 },
+      summary: 'No income recorded this month yet',
+      visualizable: false,
+      actions: [{ label: 'Open Finance', type: 'navigate', payload: { page: 'finance' } }],
+    };
+  }
+
+  const expenses = input.transactions
+    .filter((tx) => tx.type === 'expense' && !tx.isSoftDeleted && withinRange(tx.date, start, end))
+    .reduce((sum, tx) => sum + tx.amountCents, 0);
+
+  const rate = ((income - expenses) / income) * 100;
+  const roundedRate = Math.round(rate);
+
+  let detail: string;
+  if (roundedRate >= 20) {
+    detail = "Solid — you're above the 20% savings benchmark";
+  } else if (roundedRate >= 10) {
+    detail = 'Decent — aim for 20% to build a meaningful buffer';
+  } else if (roundedRate >= 0) {
+    detail = "You're saving something, but below the 20% benchmark";
+  } else {
+    detail = `Expenses exceed income this month by ${formatCents(Math.abs(income - expenses), currency)}`;
+  }
+
+  return {
+    data: { incomeCents: income, expenseCents: expenses, savingsRate: roundedRate },
+    summary: `You're saving ${roundedRate}% of your income this month`,
+    detail,
+    visualizable: true,
+    actions: [{ label: 'Open Finance', type: 'navigate', payload: { page: 'finance' } }],
+  };
+}
+
+function dayOfWeekQuery(input: RunFabricQueryInput): FabricQueryResult {
+  const highSpend = getHighSpendDay(input.transactions, input.now);
+  const bestCompletion = getBestCompletionDay(input.commitments, input.now);
+
+  if (!highSpend && !bestCompletion) {
+    return {
+      data: null,
+      summary: 'Not enough data yet — check back after a few months',
+      visualizable: false,
+      actions: [],
+    };
+  }
+
+  const lines: string[] = [];
+  if (highSpend) {
+    lines.push(`${highSpend.dayName} is your highest-spend day`);
+  }
+  if (bestCompletion) {
+    lines.push(`${bestCompletion.dayName} is your strongest completion day`);
+  }
+
+  return {
+    data: { highSpend, bestCompletion },
+    summary: lines.join('; '),
+    detail: highSpend && bestCompletion
+      ? `You spend most on ${highSpend.dayName}s, while commitment follow-through is strongest on ${bestCompletion.dayName}s.`
+      : undefined,
+    visualizable: true,
+    actions: [{ label: 'Open Dashboard', type: 'navigate', payload: { page: 'dashboard' } }],
+  };
+}
+
+function correlationQuery(input: RunFabricQueryInput): FabricQueryResult {
+  const buckets = buildWeekBuckets(input.transactions, input.commitments, input.now, 12);
+  if (buckets.length < 8) {
+    return {
+      data: null,
+      summary: 'Need at least 8 weeks of data to find patterns',
+      visualizable: false,
+      actions: [],
+    };
+  }
+
+  const highCompletion = buckets.filter((b) => b.completionRate >= 0.70);
+  const lowCompletion = buckets.filter((b) => b.completionRate < 0.50);
+
+  const mean = (arr: number[]): number => arr.reduce((s, v) => s + v, 0) / arr.length;
+
+  if (highCompletion.length >= 3 && lowCompletion.length >= 3) {
+    const avgHighSpend = mean(highCompletion.map((b) => b.discretionaryCents));
+    const avgLowSpend = mean(lowCompletion.map((b) => b.discretionaryCents));
+
+    if (avgLowSpend > 0) {
+      const diff = (avgLowSpend - avgHighSpend) / avgLowSpend;
+      const overallMean = mean(buckets.map((b) => b.discretionaryCents));
+      const recent8 = buckets.slice(-8);
+      const patternHeld = recent8.filter((b) =>
+        (b.completionRate >= 0.70 && b.discretionaryCents <= overallMean) ||
+        (b.completionRate < 0.50 && b.discretionaryCents >= overallMean),
+      ).length;
+
+      if (diff >= 0.15 && patternHeld >= 5) {
+        const currency = detectPrimaryCurrency(input.transactions);
+        const pct = Math.round(diff * 100);
+        return {
+          data: {
+            buckets: buckets.length,
+            avgHighSpend,
+            avgLowSpend,
+            diffPct: pct,
+            patternHeld,
+          },
+          summary: `In high-completion weeks, discretionary spending is about ${pct}% lower.`,
+          detail: `High-completion weeks average ${formatCents(avgHighSpend, currency)} vs ${formatCents(avgLowSpend, currency)} in low-completion weeks. Pattern held in ${patternHeld} of the last 8 weeks.`,
+          visualizable: true,
+          actions: [{ label: 'Open Dashboard', type: 'navigate', payload: { page: 'dashboard' } }],
+        };
+      }
+    }
+  }
+
+  return {
+    data: { buckets: buckets.length },
+    summary: 'No consistent pattern found yet between your habits and spending — check back in a few weeks',
+    visualizable: false,
+    actions: [],
+  };
+}
+
+function momentumQuery(input: RunFabricQueryInput): FabricQueryResult {
+  const currency = detectPrimaryCurrency(input.transactions);
+  const thisWeek = getDateRange('this_week', input.now);
+  const lastWeek = getDateRange('last_week', input.now);
+
+  const completionRateForRange = (start: Date, end: Date): number => {
+    const completedCount = input.commitments.filter((task) => {
+      const completedAt = ('completedAt' in task ? (task as { completedAt?: Date | string }).completedAt : undefined)
+        ?? task.lastCompletedAt;
+      if (!completedAt) return false;
+      return withinRange(completedAt, start, end);
+    }).length;
+
+    const eligibleCount = input.commitments.filter((task) => {
+      const created = toDate(task.createdAt ?? null);
+      return !created || created <= end;
+    }).length;
+
+    if (eligibleCount === 0) return 0;
+    return (completedCount / eligibleCount) * 100;
+  };
+
+  const sumByType = (type: 'income' | 'expense', start: Date, end: Date): number =>
+    input.transactions
+      .filter((tx) => tx.type === type && !tx.isSoftDeleted && withinRange(tx.date, start, end))
+      .reduce((sum, tx) => sum + tx.amountCents, 0);
+
+  const thisWeekCompletion = completionRateForRange(thisWeek.start, thisWeek.end);
+  const lastWeekCompletion = completionRateForRange(lastWeek.start, lastWeek.end);
+  const completionDelta = thisWeekCompletion - lastWeekCompletion;
+
+  const thisWeekExpenses = sumByType('expense', thisWeek.start, thisWeek.end);
+  const lastWeekExpenses = sumByType('expense', lastWeek.start, lastWeek.end);
+  const expenseDeltaPct = lastWeekExpenses === 0
+    ? (thisWeekExpenses > 0 ? 100 : 0)
+    : ((thisWeekExpenses - lastWeekExpenses) / lastWeekExpenses) * 100;
+
+  const thisWeekIncome = sumByType('income', thisWeek.start, thisWeek.end);
+  const thisWeekNet = thisWeekIncome - thisWeekExpenses;
+
+  const habitsDirection = completionDelta >= 0 ? 'up' : 'down';
+  const spendingDirection = expenseDeltaPct >= 0 ? 'up' : 'down';
+  const cashFlowDirection = thisWeekNet >= 0 ? 'positive' : 'negative';
+
+  return {
+    data: {
+      completionDelta,
+      expenseDeltaPct,
+      thisWeekNetCents: thisWeekNet,
+      thisWeekExpenses,
+      lastWeekExpenses,
+    },
+    summary: `This week vs last week: habits ${habitsDirection} ${Math.abs(Math.round(completionDelta))} pp, spending ${spendingDirection} ${Math.abs(Math.round(expenseDeltaPct))}%, net cash flow ${cashFlowDirection}`,
+    detail: `This week net cash flow is ${formatCents(thisWeekNet, currency)}.`,
+    visualizable: true,
+    actions: [{ label: 'Open Dashboard', type: 'navigate', payload: { page: 'dashboard' } }],
+  };
+}
+
 export function runFabricQuery(input: RunFabricQueryInput): FabricQueryResult {
   const { action } = input.intent;
 
   if (action === 'query_spending') return spendingSummary(input);
   if (action === 'query_income') return incomeSummary(input);
   if (action === 'query_commitments') return commitmentsSummary(input);
+  if (action === 'query_savings_rate') return savingsRateQuery(input);
+  if (action === 'query_day_of_week') return dayOfWeekQuery(input);
+  if (action === 'query_correlation') return correlationQuery(input);
+  if (action === 'query_momentum') return momentumQuery(input);
   if (action === 'query_accounts') return accountsSummary(input);
   if (action === 'query_recurring') return recurringSummary(input);
   if (action === 'query_family') return familySummary(input);
@@ -373,7 +580,8 @@ export function runFabricQuery(input: RunFabricQueryInput): FabricQueryResult {
 
   return {
     data: null,
-    summary: "I couldn't map that request. Try: 'how much did I spend this week?', 'show my commitments', or 'go to finance'.",
+    summary: "I didn't quite catch that.",
+    detail: "Try asking:\n• 'How much did I spend on food this month?'\n• 'What's my savings rate?'\n• 'Which day do I spend the most?'\n• 'How do my habits connect to my spending?'\n• 'How am I trending this week?'",
     visualizable: false,
     actions: [],
   };

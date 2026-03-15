@@ -41,6 +41,18 @@ export const FabricPromptChips: React.FC<FabricPromptChipsProps> = ({ onPrompt }
       onTap: () => navigateTo('finance', { filter: 'this_month' }),
     },
     {
+      id: 'savings-rate',
+      label: 'Am I saving enough?',
+      prompt: 'what is my savings rate this month',
+      onTap: () => navigateTo('finance'),
+    },
+    {
+      id: 'habits-spending',
+      label: 'Habits vs spending',
+      prompt: 'how do my habits connect to my spending',
+      onTap: () => navigateTo('fabric'),
+    },
+    {
       id: 'how-doing',
       label: 'How am I doing?',
       prompt: 'how am i doing this week',

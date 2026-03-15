@@ -22,14 +22,14 @@ const FINANCIAL_KEYWORDS = [
 ];
 
 export const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  Transportation: ['fuel', 'uber', 'lyft', 'transit', 'bus', 'train', 'car gas', 'gas for car', 'petrol', 'gasoline'],
-  'Bills & Utilities': ['electric', 'water', 'gas bill', 'internet', 'phone', 'utility', 'bill'],
+  Transportation: ['fuel', 'uber', 'lyft', 'transit', 'bus', 'train', 'car gas', 'gas for car', 'petrol', 'gasoline', 'bolt', 'okada', 'keke', 'brt', 'danfo', 'ride', 'cab', 'taxi'],
+  'Bills & Utilities': ['electric', 'water', 'gas bill', 'internet', 'phone', 'utility', 'bill', 'dstv', 'gotv', 'startimes', 'nepa', 'phcn', 'lawma', 'waste'],
   Rent: ['rent', 'lease', 'housing', 'mortgage'],
   Insurance: ['insurance', 'premium', 'policy'],
-  Groceries: ['grocery', 'groceries', 'food', 'supermarket', 'market'],
-  Subscriptions: ['subscription', 'netflix', 'spotify', 'membership', 'premium'],
-  Health: ['medicine', 'doctor', 'pharmacy', 'hospital', 'clinic', 'health'],
-  Shopping: ['buy', 'purchase', 'shop', 'store'],
+  Groceries: ['grocery', 'groceries', 'food', 'supermarket', 'market', 'shoprite', 'priceless', 'justrite', 'prince ebeano', 'spar', 'chicken republic', 'tastee', 'cold stone', 'kilimanjaro'],
+  Subscriptions: ['subscription', 'netflix', 'spotify', 'membership', 'premium', 'showmax', 'apple', 'google play', 'canva', 'chatgpt', 'youtube', 'amazon prime', 'deezer', 'boomplay', 'audiomack'],
+  Health: ['medicine', 'doctor', 'pharmacy', 'hospital', 'clinic', 'health', 'chemist', 'lab', 'test', 'scan', 'physiotherapy', 'dental', 'optician'],
+  Shopping: ['buy', 'purchase', 'shop', 'store', 'jumia', 'konga', 'jiji', 'aliexpress', 'marketplace', 'fashion'],
 };
 
 export function parseAmountFromText(text: string): number | null {
