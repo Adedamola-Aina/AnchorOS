@@ -2020,6 +2020,90 @@
       "completedDate": "2026-03-04",
       "cycleTime": null,
       "recordedAt": "2026-03-06T15:00:00.017Z"
+    },
+    {
+      "itemId": "09a2085",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.411Z"
+    },
+    {
+      "itemId": "8ae254a",
+      "completedDate": "2026-03-13",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.412Z"
+    },
+    {
+      "itemId": "BUG-108",
+      "completedDate": "2026-03-13",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.413Z"
+    },
+    {
+      "itemId": "df7d975",
+      "completedDate": "2026-03-11",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.414Z"
+    },
+    {
+      "itemId": "BUG-107",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.414Z"
+    },
+    {
+      "itemId": "5ba26da",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.414Z"
+    },
+    {
+      "itemId": "c819c89",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.415Z"
+    },
+    {
+      "itemId": "9dded3f",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.415Z"
+    },
+    {
+      "itemId": "be57860",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.415Z"
+    },
+    {
+      "itemId": "77b33cc",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.416Z"
+    },
+    {
+      "itemId": "6f29616",
+      "completedDate": "2026-03-09",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.416Z"
+    },
+    {
+      "itemId": "5a10f15",
+      "completedDate": "2026-03-09",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.416Z"
+    },
+    {
+      "itemId": "FIN-013",
+      "completedDate": "2026-03-09",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.416Z"
+    },
+    {
+      "itemId": "FIN-012",
+      "completedDate": "2026-03-09",
+      "cycleTime": null,
+      "recordedAt": "2026-03-15T16:00:00.417Z"
     }
   ],
   "weeklyStats": [
@@ -2057,6 +2141,11 @@
       "week": "2026-W10",
       "completed": 35,
       "velocity": 33.25
+    },
+    {
+      "week": "2026-W11",
+      "completed": 14,
+      "velocity": 28
     }
   ]
 }
