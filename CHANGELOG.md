@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.12.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.11.2...v1.12.0) (2026-03-15)
+
+
+### Features
+
+* **fabric:** enable Anchor AI feature flag in production (100% rollout) ([09a2085](https://github.com/Adedamola-Aina/AnchorOS/commit/09a208549a421283f1800417f9f91427086ff5b2))
+
 ## [1.11.3-rc.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.11.2...v1.11.3-rc.1) (2026-03-15)
 
 ## [1.11.3-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.11.2...v1.11.3-rc.0) (2026-03-15)
