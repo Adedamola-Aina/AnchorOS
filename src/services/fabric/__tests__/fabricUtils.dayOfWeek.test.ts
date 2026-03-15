@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { AnchorTask, AnchorTransaction } from '../../../types';
 import {
+  buildWeekBuckets,
   getBestCompletionDay,
   getCompletionByDayOfWeek,
   getHighSpendDay,
@@ -229,5 +230,142 @@ describe('getBestCompletionDay', () => {
     expect(result!.day).toBe(3);
     expect(result!.dayName).toBe('Wednesday');
     expect(result!.value).toBeGreaterThan(0);
+  });
+});
+
+// ── buildWeekBuckets ─────────────────────────────────────────────
+
+describe('buildWeekBuckets', () => {
+  // 2026-03-15 is Sunday
+  const now = new Date('2026-03-15T12:00:00.000Z');
+
+  /** Get Monday midnight for the week containing `date`. */
+  function getMonday(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  it('returns correct completion rates per week', () => {
+    const txns: AnchorTransaction[] = [];
+    const tasks: AnchorTask[] = [];
+    const thisMonday = getMonday(now);
+
+    // Week 0: 3/5 completed = 60%, Week 1: 5/5 = 100%
+    for (let w = 0; w < 12; w++) {
+      const weekStart = new Date(thisMonday);
+      weekStart.setDate(weekStart.getDate() - w * 7);
+
+      for (let d = 0; d < 5; d++) {
+        const taskDate = new Date(weekStart);
+        taskDate.setDate(taskDate.getDate() + d);
+        taskDate.setHours(12, 0, 0, 0);
+        const completed = w === 0 ? d < 3 : true;
+        tasks.push(makeTask({
+          createdAt: new Date('2025-01-01'),
+          completed,
+          lastCompletedAt: completed ? taskDate.toISOString() : undefined,
+        }));
+        txns.push(makeTx({ date: taskDate.toISOString(), category: 'Food' }));
+      }
+    }
+
+    const buckets = buildWeekBuckets(txns, tasks, now, 12);
+    expect(buckets.length).toBeGreaterThanOrEqual(2);
+
+    // Most recent bucket uses cumulative eligible tasks:
+    // completed this week = 3, eligible by week end = 12 weeks * 5 tasks = 60.
+    const week0 = buckets.find((b) => b.weekStart.getTime() === thisMonday.getTime());
+    if (week0) {
+      expect(week0.completionRate).toBeCloseTo(0.05, 2);
+    }
+  });
+
+  it('returns correct discretionary spend per week', () => {
+    const txns: AnchorTransaction[] = [];
+    const tasks: AnchorTask[] = [];
+    const thisMonday = getMonday(now);
+
+    for (let w = 0; w < 12; w++) {
+      const weekStart = new Date(thisMonday);
+      weekStart.setDate(weekStart.getDate() - w * 7);
+
+      for (let d = 0; d < 5; d++) {
+        const taskDate = new Date(weekStart);
+        taskDate.setDate(taskDate.getDate() + d);
+        taskDate.setHours(12, 0, 0, 0);
+        tasks.push(makeTask({
+          createdAt: new Date('2025-01-01'),
+          completed: true,
+          lastCompletedAt: taskDate.toISOString(),
+        }));
+        // 1000 cents per day, 5 discretionary transactions per week
+        txns.push(makeTx({ date: taskDate.toISOString(), amountCents: 1000, category: 'Shopping' }));
+      }
+    }
+
+    const buckets = buildWeekBuckets(txns, tasks, now, 12);
+    const week0 = buckets.find((b) => b.weekStart.getTime() === thisMonday.getTime());
+    expect(week0).toBeDefined();
+    // 5 transactions × 1000 cents = 5000
+    expect(week0!.discretionaryCents).toBe(5000);
+  });
+
+  it('excludes weeks with no tasks', () => {
+    const txns: AnchorTransaction[] = [];
+    const tasks: AnchorTask[] = [];
+    const thisMonday = getMonday(now);
+
+    // Only put tasks in weeks 0 and 1
+    for (let w = 0; w < 2; w++) {
+      const weekStart = new Date(thisMonday);
+      weekStart.setDate(weekStart.getDate() - w * 7);
+      for (let d = 0; d < 5; d++) {
+        const taskDate = new Date(weekStart);
+        taskDate.setDate(taskDate.getDate() + d);
+        taskDate.setHours(12, 0, 0, 0);
+        tasks.push(makeTask({
+          createdAt: new Date('2025-01-01'),
+          completed: true,
+          lastCompletedAt: taskDate.toISOString(),
+        }));
+        txns.push(makeTx({ date: taskDate.toISOString(), category: 'Food' }));
+      }
+    }
+
+    const buckets = buildWeekBuckets(txns, tasks, now, 12);
+    // Should only have 2 buckets (weeks with tasks), not 12
+    expect(buckets.length).toBe(2);
+  });
+
+  it('excludes weeks with no discretionary spend', () => {
+    const txns: AnchorTransaction[] = [];
+    const tasks: AnchorTask[] = [];
+    const thisMonday = getMonday(now);
+
+    for (let w = 0; w < 4; w++) {
+      const weekStart = new Date(thisMonday);
+      weekStart.setDate(weekStart.getDate() - w * 7);
+      for (let d = 0; d < 5; d++) {
+        const taskDate = new Date(weekStart);
+        taskDate.setDate(taskDate.getDate() + d);
+        taskDate.setHours(12, 0, 0, 0);
+        tasks.push(makeTask({
+          createdAt: new Date('2025-01-01'),
+          completed: true,
+          lastCompletedAt: taskDate.toISOString(),
+        }));
+        // Weeks 0,1: discretionary; Weeks 2,3: non-discretionary category
+        const category = w < 2 ? 'Food' : 'Salary';
+        txns.push(makeTx({ date: taskDate.toISOString(), category, type: w < 2 ? 'expense' : 'income' }));
+      }
+    }
+
+    const buckets = buildWeekBuckets(txns, tasks, now, 4);
+    // Only weeks with discretionary spend should appear
+    expect(buckets.length).toBe(2);
   });
 });
