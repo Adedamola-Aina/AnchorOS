@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { PatternAction, PatternTrigger, ProactiveQuestionType } from '../types';
+import type { PatternAction, PatternTrigger } from '../types';
 import type { MoodEntry } from '../types/fabricBriefing';
 import { useFabricContext } from '../context/FabricContext';
 
@@ -69,9 +69,9 @@ export function useFabric() {
     await clearAllData();
   }, [clearAllData, isEnabled]);
 
-  const safeMarkQuestionShown = useCallback((questionType: ProactiveQuestionType) => {
+  const safeMarkQuestionShown = useCallback((question: string) => {
     if (!isEnabled) return;
-    markQuestionShown(questionType);
+    markQuestionShown(question);
   }, [isEnabled, markQuestionShown]);
 
   return {

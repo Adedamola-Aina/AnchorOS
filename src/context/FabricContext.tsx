@@ -10,7 +10,6 @@ import type {
   PatternAction,
   PatternTrigger,
   Prediction,
-  ProactiveQuestionType,
   RecurringTransaction,
   UserPattern,
   WeeklyReport,
@@ -45,7 +44,7 @@ interface FabricContextValue {
   saveMood: (mood: MoodEntry['mood'], note?: string) => Promise<void>;
   clearAllData: () => Promise<void>;
   proactiveQuestion: string | null;
-  markQuestionShown: (questionType: ProactiveQuestionType) => void;
+  markQuestionShown: (question: string) => void;
   refresh: () => void;
 }
 
@@ -251,8 +250,8 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     refresh();
   }, [fabricService, refresh]);
 
-  const markQuestionShown = useCallback((questionType: ProactiveQuestionType) => {
-    fabricService.markQuestionShown(questionType);
+  const markQuestionShown = useCallback((question: string) => {
+    fabricService.markQuestionShown(question);
     setProactiveQuestion(null);
   }, [fabricService]);
 

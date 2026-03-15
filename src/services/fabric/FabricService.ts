@@ -38,6 +38,12 @@ import { buildDailyBriefing } from './DailyBriefingEngine';
 import { generateProactiveQuestion } from './ProactiveQuestionEngine';
 
 const SAVE_DEBOUNCE_MS = 500;
+const PROACTIVE_QUESTION_TYPES: readonly ProactiveQuestionType[] = [
+  'missed_habit',
+  'completion_drop',
+  'category_spike',
+  'surplus_idle',
+];
 
 const PREDICTION_ID_TYPE_MAP: Array<[string, PredictionType]> = [
   ['pred-budget-overage', 'budget_overage'],
@@ -51,6 +57,10 @@ function inferPredictionType(predictionId: string): PredictionType | null {
     if (predictionId.startsWith(prefix)) return type;
   }
   return null;
+}
+
+function isProactiveQuestionType(value: string): value is ProactiveQuestionType {
+  return PROACTIVE_QUESTION_TYPES.includes(value as ProactiveQuestionType);
 }
 
 export class FabricService implements IFabricService {
@@ -234,7 +244,7 @@ export class FabricService implements IFabricService {
     return result?.question ?? null;
   }
 
-  markQuestionShown(questionType: ProactiveQuestionType): void {
+  markQuestionShown(question: ProactiveQuestionType | string): void {
     const result = generateProactiveQuestion(
       {
         patterns: this.engine.getPatterns(),
@@ -245,9 +255,16 @@ export class FabricService implements IFabricService {
       },
       null, // bypass dedup to get the actual question text
     );
+
+    const resolvedType = isProactiveQuestionType(question)
+      ? question
+      : (result?.question === question ? result.questionType : null);
+
+    if (!resolvedType) return;
+
     this.lastQuestionState = {
-      question: result?.question ?? '',
-      questionType,
+      question,
+      questionType: resolvedType,
       shownAt: new Date().toISOString(),
     };
   }

@@ -136,5 +136,5 @@ export interface IFabricService {
   parseIntent(input: string): ParsedIntent;
   query(input: string): Promise<FabricQueryResult>;
   getProactiveQuestion(): string | null;
-  markQuestionShown(questionType: ProactiveQuestionType): void;
+  markQuestionShown(question: ProactiveQuestionType | string): void;
 }

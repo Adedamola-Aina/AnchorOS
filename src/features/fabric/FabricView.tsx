@@ -6,6 +6,7 @@ import { useApp } from '../../context/AnchorContext';
 import { FabricOnboarding } from './FabricOnboarding';
 import { FabricPromptChips } from './FabricPromptChips';
 import { FabricInsightCard } from './FabricInsightCard';
+import { FabricProactiveQuestionCard } from './FabricProactiveQuestionCard';
 import { FabricTodayCard } from './FabricTodayCard';
 import { FabricUpcomingCard } from './FabricUpcomingCard';
 import { FabricMoodCard } from './FabricMoodCard';
@@ -19,6 +20,7 @@ const FabricView: React.FC = () => {
   const [queryResult, setQueryResult] = useState<FabricQueryResult | null>(null);
   const [isQuerying, setIsQuerying] = useState(false);
   const [freeText, setFreeText] = useState('');
+  const [questionDismissed, setQuestionDismissed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -35,11 +37,20 @@ const FabricView: React.FC = () => {
     runQuery,
     generateWeeklyReport,
     saveMood,
+    proactiveQuestion,
+    markQuestionShown,
   } = useFabric();
 
   useEffect(() => {
     learnFrom({ type: 'page_visited', page: 'fabric' }, { type: 'view_page', page: 'fabric' });
   }, [learnFrom]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQuestionDismissed(false);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [isReady]);
 
   const submitPrompt = async (prompt: string) => {
     const trimmed = prompt.trim();
@@ -105,6 +116,25 @@ const FabricView: React.FC = () => {
 
         {/* ── Mood check-in ────────────────────────────────────────────────── */}
         <FabricMoodCard moodToday={moodToday} onSave={saveMood} />
+
+        {proactiveQuestion && !questionDismissed && (
+          <FabricProactiveQuestionCard
+            question={proactiveQuestion}
+            onDismiss={() => {
+              setQuestionDismissed(true);
+              markQuestionShown(proactiveQuestion);
+              try {
+                logProductEvent('fabric_proactive_question_dismissed', {
+                  questionType: 'proactive',
+                });
+              } catch { /* telemetry never breaks UI */ }
+            }}
+            onTap={(q) => {
+              inputRef.current?.focus();
+              setFreeText(q);
+            }}
+          />
+        )}
 
         {/* ── Coming up (recurring bills in next 7 days) ──────────────────── */}
         {briefing && briefing.upcoming.length > 0 && (
