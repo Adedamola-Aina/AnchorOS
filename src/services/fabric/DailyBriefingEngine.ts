@@ -1,6 +1,6 @@
 import type { AnchorTask, AnchorTransaction, RecurringTransaction } from '../../types';
 import type { DailyBriefing, TodayStats, UpcomingItem } from '../../types/fabricBriefing';
-import { detectPrimaryCurrency, getDateRange, toDate, withinRange } from './fabricUtils';
+import { detectPrimaryCurrency, getBestCompletionDay, getDateRange, getHighSpendDay, toDate, withinRange } from './fabricUtils';
 
 /** Day-name letters matching AnchorTask.daysOfWeek (Sun=0…Sat=6). */
 const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
@@ -109,6 +109,20 @@ export function buildDailyBriefing(
   };
   const greeting = greetingMap[timeOfDay] ?? 'Hello';
 
+  // Day-of-week pattern insight
+  const highSpend = getHighSpendDay(transactions, now);
+  const bestCompletion = getBestCompletionDay(commitments, now);
+  const todayDow = now.getDay();
+
+  let dayInsight: string | undefined;
+  if (highSpend && highSpend.day === todayDow) {
+    const pct = Math.round(highSpend.vsAverage * 100);
+    dayInsight = `Historically your highest-spend day — ${pct}% above your daily average.`;
+  } else if (bestCompletion && bestCompletion.day === todayDow) {
+    const pct = Math.round(bestCompletion.value * 100);
+    dayInsight = `Your strongest day for follow-through — you typically complete ${pct}% of tasks.`;
+  }
+
   // Today's tasks
   const todayTasks = getTodayTasks(commitments, now);
   const completedTasks = todayTasks.filter((t) => t.completed).length;
@@ -148,6 +162,7 @@ export function buildDailyBriefing(
     upcoming,
     spendingThisWeek,
     currency,
+    dayInsight,
     generatedAt: now.toISOString(),
   };
 }

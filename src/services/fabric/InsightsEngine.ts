@@ -1,5 +1,5 @@
 import type { AnchorTask, AnchorTransaction, Insight, RecurringTransaction } from '../../types';
-import { detectPrimaryCurrency, formatCents, getDateRange, sumByCategory, toDate, withinRange } from './fabricUtils';
+import { detectPrimaryCurrency, formatCents, getDateRange, getHighSpendDay, getSpendingByDayOfWeek, sumByCategory, toDate, withinRange } from './fabricUtils';
 
 interface InsightInput {
   feature: 'dashboard' | 'commitments' | 'finance' | 'family';
@@ -211,6 +211,41 @@ function buildSavingsRateInsight(transactions: AnchorTransaction[], now: Date): 
   };
 }
 
+function buildDayOfWeekInsight(
+  transactions: AnchorTransaction[],
+  _tasks: AnchorTask[],
+  now: Date,
+): Insight | null {
+  const highSpend = getHighSpendDay(transactions, now);
+  if (!highSpend) return null;
+
+  const pct = Math.round(highSpend.vsAverage * 100);
+  const currency = detectPrimaryCurrency(transactions);
+
+  const byDay = getSpendingByDayOfWeek(transactions, now);
+  const entries = Object.values(byDay);
+  const overallAvg = entries.length > 0
+    ? Math.round(entries.reduce((s, v) => s + v, 0) / entries.length)
+    : 0;
+
+  return {
+    id: 'insight-high-spend-day',
+    category: 'patterns',
+    headline: `${highSpend.dayName}s are your highest-spend day`,
+    detail: `You spend an average of ${pct}% more on ${highSpend.dayName}s ` +
+            `(${formatCents(Math.round(highSpend.value), currency)} avg vs ` +
+            `${formatCents(overallAvg, currency)} daily average). ` +
+            (now.getDay() === highSpend.day
+              ? `Today is ${highSpend.dayName} — worth being intentional.`
+              : `Next ${highSpend.dayName}, consider tracking more closely.`),
+    trend: 'stable',
+    severity: 'attention',
+    metric: { current: highSpend.value, previous: overallAvg, unit: currency },
+    actionLink: '/finance',
+    createdAt: now.toISOString(),
+  };
+}
+
 export function buildInsights(input: InsightInput): Insight[] {
   const spending = buildSpendingInsight(input.transactions, input.now);
   const commitment = buildCommitmentInsight(input.commitments, input.now);
@@ -219,15 +254,16 @@ export function buildInsights(input: InsightInput): Insight[] {
   const currency = detectPrimaryCurrency(input.transactions);
   const subscriptions = buildSubscriptionInsight(input.recurring, currency, input.now);
   const savings = buildSavingsRateInsight(input.transactions, input.now);
+  const dayOfWeek = buildDayOfWeekInsight(input.transactions, input.commitments, input.now);
 
   if (input.feature === 'finance') {
-    return [spending, subscriptions, savings].filter((i): i is Insight => !!i);
+    return [spending, subscriptions, savings, dayOfWeek].filter((i): i is Insight => !!i);
   }
   if (input.feature === 'commitments') {
     return [commitment, streak].filter((i): i is Insight => !!i);
   }
   if (input.feature === 'family') return family ? [family] : [];
 
-  // Dashboard: spending + commitments + streak + savings
-  return [spending, commitment, streak, savings].filter((i): i is Insight => !!i);
+  // Dashboard: spending + commitments + streak + savings + day-of-week
+  return [spending, commitment, streak, savings, dayOfWeek].filter((i): i is Insight => !!i);
 }

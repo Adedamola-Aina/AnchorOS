@@ -29,6 +29,8 @@ export interface DailyBriefing {
   /** Total expenses for the current calendar week (cents). */
   spendingThisWeek: number;
   currency: string;
+  /** Day-of-week pattern insight (e.g. high-spend or best-completion day). */
+  dayInsight?: string;
   generatedAt: string;
 }
 
