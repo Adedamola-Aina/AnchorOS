@@ -29,12 +29,12 @@ const FLAG_DEFINITIONS: Record<FeatureFlagKey, FeatureFlagDefinition> = {
         enabledByDefault: {
             development: true,
             staging: true,
-            production: false,
+            production: true,
         },
         rolloutPercentage: {
             development: 100,
             staging: 100,
-            production: 0,
+            production: 100,
         },
         forceVariable: 'VITE_FLAG_ANCHOR_AI_ENABLED',
         rolloutVariable: 'VITE_FLAG_ANCHOR_AI_ROLLOUT',

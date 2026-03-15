@@ -77,14 +77,14 @@ describe('featureFlags', () => {
         expect(alwaysOff).toBe(false);
     });
 
-    it('defaults anchor_ai_enabled off in production', () => {
+    it('defaults anchor_ai_enabled on in production', () => {
         const enabled = evaluateFeatureFlag('anchor_ai_enabled', {
             userId: 'user-1',
             env: 'production',
             envVars: {},
         });
 
-        expect(enabled).toBe(false);
+        expect(enabled).toBe(true);
     });
 
     it('defaults anchor_ai_enabled on in development', () => {
