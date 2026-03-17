@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.14.3](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.14.2...v1.14.3) (2026-03-17)
+
+
+### Bug Fixes
+
+* **deploy:** add --yes flag for non-interactive CI deploys ([ab1b372](https://github.com/Adedamola-Aina/AnchorOS/commit/ab1b372d39d98af6bd01ff37c008dda80d8fb97e))
+
 ## [1.14.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.14.1...v1.14.2) (2026-03-17)
 
 ## [1.14.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.14.0...v1.14.1) (2026-03-17)
