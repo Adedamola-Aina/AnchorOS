@@ -15,7 +15,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Anchor" />
   <link rel="apple-touch-icon" href="/favicon.svg" />
-  <script src="/sw-register.js" defer></script>
+  <!-- Firebase connection hints: browser starts DNS/TCP before JS runs -->
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+  <link rel="preconnect" href="https://www.googleapis.com">
+  <link rel="dns-prefetch" href="https://fcmregistrations.googleapis.com">
 </head>
 
 <body>
