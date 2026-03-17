@@ -3,7 +3,6 @@ import { Sparkles } from 'lucide-react';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useApp } from '../../context/AnchorContext';
 import { FabricOnboarding } from './FabricOnboarding';
-import { FabricPromptChips } from './FabricPromptChips';
 import { FabricInsightCard } from './FabricInsightCard';
 import { FabricProactiveQuestionCard } from './FabricProactiveQuestionCard';
 import { FabricTodayCard } from './FabricTodayCard';

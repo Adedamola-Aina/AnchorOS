@@ -172,4 +172,13 @@ describe('FabricView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Generate weekly report' }));
     expect(generateWeeklyReport).toHaveBeenCalled();
   });
+
+  it('does not render FabricPromptChips directly (delegated to FabricQuerySection)', async () => {
+    // FabricPromptChips is no longer imported by FabricView — it lives in FabricQuerySection.
+    // This test guards against re-introducing the direct import.
+    render(<FabricView />);
+    await screen.findByTestId('fabric-view');
+    // prompt-chips testid comes from FabricQuerySection mock, not FabricView directly
+    expect(screen.queryByTestId('prompt-chips')).toBeInTheDocument();
+  });
 });

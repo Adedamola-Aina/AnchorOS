@@ -9,7 +9,7 @@ import type {
   WeeklyReport,
 } from '../types';
 import type { DailyBriefing, MoodEntry } from '../types/fabricBriefing';
-import type { FabricAmbientContext } from '../types';
+import type { FabricContext as FabricAmbientContext } from '../types';
 import { useAuth } from './AuthContext';
 import { FabricService } from '../services/fabric/FabricService';
 import { secureDb } from '../utils/secureDb';

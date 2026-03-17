@@ -33,7 +33,7 @@ export function buildServiceInsights(
 }
 
 export function buildServiceBriefing(
-  timeOfDay: 'morning' | 'afternoon' | 'evening',
+  timeOfDay: string,
   transactions: AnchorTransaction[],
   commitments: AnchorTask[],
   recurring: RecurringTransaction[],

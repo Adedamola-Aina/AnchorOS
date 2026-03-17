@@ -26,7 +26,7 @@ export interface UseFabricViewResult {
   setFreeText: (text: string) => void;
   questionDismissed: boolean;
   setQuestionDismissed: (dismissed: boolean) => void;
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   submitPrompt: (prompt: string) => Promise<void>;
   handleAction: (type: string, payload: Record<string, unknown>) => void;
   currency: Currency;
