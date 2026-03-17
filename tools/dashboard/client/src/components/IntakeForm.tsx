@@ -1,30 +1,12 @@
-// @ts-nocheck
 import { useState } from 'react';
 import axios from 'axios';
-import {
-    Plus, Bug, Lightbulb, Palette, Shield, Server, Smartphone,
-    CheckCircle, AlertCircle, Loader, X
-} from 'lucide-react';
+import { Plus, Bug, CheckCircle, AlertCircle, Loader, X } from 'lucide-react';
+import { INTAKE_PRIORITIES, INTAKE_TYPES } from './intakeForm.constants';
+import { getIntakeErrorMessage } from './intakeForm.utils';
 
 interface IntakeFormProps {
     onSubmit?: () => void;
 }
-
-const TYPES = [
-    { value: 'bug', label: 'Bug Report', icon: Bug, color: 'text-red-400' },
-    { value: 'feature', label: 'Feature Request', icon: Lightbulb, color: 'text-blue-400' },
-    { value: 'enhancement', label: 'UX Enhancement', icon: Palette, color: 'text-purple-400' },
-    { value: 'security', label: 'Security Issue', icon: Shield, color: 'text-amber-400' },
-    { value: 'architecture', label: 'Architecture', icon: Server, color: 'text-indigo-400' },
-    { value: 'mobile', label: 'Mobile/PWA', icon: Smartphone, color: 'text-cyan-400' },
-];
-
-const PRIORITIES = [
-    { value: 'P0', label: 'P0 - Critical', color: 'bg-red-500/20 text-red-400 border-red-500/50' },
-    { value: 'P1', label: 'P1 - High', color: 'bg-amber-500/20 text-amber-400 border-amber-500/50' },
-    { value: 'P2', label: 'P2 - Medium', color: 'bg-blue-500/20 text-blue-400 border-blue-500/50' },
-    { value: 'P3', label: 'P3 - Low', color: 'bg-slate-500/20 text-slate-400 border-slate-500/50' },
-];
 
 export function IntakeForm({ onSubmit }: IntakeFormProps) {
     const [isOpen, setIsOpen] = useState(false);
@@ -66,29 +48,13 @@ export function IntakeForm({ onSubmit }: IntakeFormProps) {
 
             onSubmit?.();
         } catch (err) {
-            if (axios.isAxiosError(err)) {
-                const status = err.response?.status;
-                const data = err.response?.data as {
-                    error?: string;
-                    duplicate?: { id?: string; title?: string; reason?: string };
-                } | undefined;
-
-                if (status === 409 && data?.duplicate?.id) {
-                    setError(
-                        `Duplicate detected: ${data.duplicate.id} — ${data.duplicate.title || 'Existing initiative'} (${data.duplicate.reason || 'overlap'}). Update that item instead of creating a new one.`
-                    );
-                } else {
-                    setError(data?.error || err.message || 'Failed to create ticket');
-                }
-            } else {
-                setError(err instanceof Error ? err.message : 'Failed to create ticket');
-            }
+            setError(getIntakeErrorMessage(err));
         } finally {
             setLoading(false);
         }
     };
 
-    const selectedType = TYPES.find(t => t.value === type);
+    const selectedType = INTAKE_TYPES.find((t) => t.value === type);
     const TypeIcon = selectedType?.icon || Bug;
 
     return (
@@ -134,7 +100,7 @@ export function IntakeForm({ onSubmit }: IntakeFormProps) {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-3 gap-2">
-                            {TYPES.map(t => {
+                            {INTAKE_TYPES.map(t => {
                                 const Icon = t.icon;
                                 return (
                                     <button
@@ -181,7 +147,7 @@ export function IntakeForm({ onSubmit }: IntakeFormProps) {
                         <div>
                             <label className="block text-sm text-slate-400 mb-1">Priority</label>
                             <div className="flex gap-2">
-                                {PRIORITIES.map(p => (
+                                {INTAKE_PRIORITIES.map(p => (
                                     <button
                                         key={p.value}
                                         type="button"

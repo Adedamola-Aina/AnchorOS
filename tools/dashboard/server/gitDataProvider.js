@@ -16,6 +16,8 @@ const simpleGit = require('simple-git');
 const path = require('path');
 const fs = require('fs');
 const deploymentTracker = require('./deploymentTracker');
+const { classifyCommit } = require('./gitAnalyzer');
+const { classifyWorkItem, deriveLifecycle } = require('./workIntelligence');
 
 const git = simpleGit(path.join(__dirname, '../../..'));
 
@@ -23,10 +25,28 @@ const git = simpleGit(path.join(__dirname, '../../..'));
 let itemsCache = null;
 let itemsCacheTime = 0;
 const ITEMS_CACHE_TTL = 120_000; // 2 minutes
+const commitFilesCache = new Map();
 
 function clearItemsCache() {
     itemsCache = null;
     itemsCacheTime = 0;
+    commitFilesCache.clear();
+}
+
+async function getChangedFilesForCommit(commitHash) {
+    if (commitFilesCache.has(commitHash)) {
+        return commitFilesCache.get(commitHash);
+    }
+
+    try {
+        const diff = await git.show([commitHash, '--name-only', '--format=']);
+        const files = diff.split('\n').map((line) => line.trim()).filter(Boolean);
+        commitFilesCache.set(commitHash, files);
+        return files;
+    } catch {
+        commitFilesCache.set(commitHash, []);
+        return [];
+    }
 }
 
 // Load roadmap for title lookup
@@ -188,9 +208,12 @@ async function getAllTrackedItems(limit = 200) {
 
         // First pass: collect all commits
         const commitsToCheck = [];
-        
+
         for (const commit of log.all) {
-            if (isDashboardCommit(commit.message)) continue;
+            const category = await classifyCommit(commit.hash);
+            if (category !== 'anchorOS') continue;
+
+            const changedFiles = await getChangedFilesForCommit(commit.hash);
 
             // Check both subject and body for IDs
             const fullMessage = commit.body
@@ -212,6 +235,13 @@ async function getAllTrackedItems(limit = 200) {
                     const roadmapTitle = getInitiativeTitle(idInfo.id);
                     const bodyTitle = idTitleMap[idInfo.id.toUpperCase()];
                     const commitTitle = commit.message.split('\n')[0].substring(0, 100);
+                    const intelligence = classifyWorkItem({
+                        id: idInfo.id,
+                        type: idInfo.type,
+                        message: fullMessage,
+                        files: changedFiles,
+                        category
+                    });
 
                     items.set(idInfo.id, {
                         id: idInfo.id,
@@ -222,10 +252,25 @@ async function getAllTrackedItems(limit = 200) {
                         fullHash: commit.hash,
                         date: commit.date,
                         author: commit.author_name,
+                        commitCount: 1,
+                        relatedCommits: [shortHash],
+                        workKind: intelligence.workKind,
+                        domains: intelligence.domains,
+                        confidence: intelligence.confidence,
+                        evidence: intelligence.evidence,
                         status: 'dev', // Will be updated after ancestry check
                         environments: { dev: true, staging: false, production: false }
                     });
                     commitsToCheck.push(commit.hash);
+                } else {
+                    const existing = items.get(idInfo.id);
+                    existing.commitCount = (existing.commitCount || 1) + 1;
+                    if (!existing.relatedCommits) {
+                        existing.relatedCommits = [];
+                    }
+                    if (existing.relatedCommits.length < 10) {
+                        existing.relatedCommits.push(shortHash);
+                    }
                 }
             }
 
@@ -234,6 +279,14 @@ async function getAllTrackedItems(limit = 200) {
                 const type = detectType(commit.message);
                 if (type !== 'docs' && type !== 'chore' && type !== 'refactor' && type !== 'other') {
                     if (!items.has(shortHash)) {
+                        const intelligence = classifyWorkItem({
+                            id: shortHash,
+                            type,
+                            message: fullMessage,
+                            files: changedFiles,
+                            category
+                        });
+
                         items.set(shortHash, {
                             id: shortHash,
                             type: type,
@@ -242,6 +295,12 @@ async function getAllTrackedItems(limit = 200) {
                             fullHash: commit.hash,
                             date: commit.date,
                             author: commit.author_name,
+                            commitCount: 1,
+                            relatedCommits: [shortHash],
+                            workKind: intelligence.workKind,
+                            domains: intelligence.domains,
+                            confidence: intelligence.confidence,
+                            evidence: intelligence.evidence,
                             status: 'dev',
                             environments: { dev: true, staging: false, production: false }
                         });
@@ -269,6 +328,7 @@ async function getAllTrackedItems(limit = 200) {
                 item.status = status.production ? 'deployed' : 
                               status.staging ? 'staging' : 
                               status.development ? 'dev' : 'pending';
+                item.lifecycle = deriveLifecycle(item.status);
             }
         }
 
@@ -309,6 +369,59 @@ async function getFeatures() {
     return items.filter(i => isInitiativeType(i.type));
 }
 
+function mapRoadmapInitiativeToType(initiative) {
+    const idPrefix = (initiative.id || '').split('-')[0].toLowerCase();
+    if (idPrefix === 'bug' || idPrefix === 'reg') return 'bug';
+    if (idPrefix === 'gap') return 'gap';
+    if (idPrefix === 'ux' || idPrefix === 'des' || idPrefix === 'brand') return 'ux';
+    if (idPrefix === 'sec') return 'sec';
+    if (idPrefix === 'arch') return 'architecture';
+    return 'feature';
+}
+
+function roadmapBacklogItems(roadmapData, activeItems, deferredIds) {
+    const activeIds = new Set(activeItems.map(item => item.id.toUpperCase()));
+
+    return (roadmapData.initiatives || [])
+        .filter((initiative) => initiative.status === 'planned')
+        .filter((initiative) => !deferredIds.has(initiative.id))
+        .filter((initiative) => !activeIds.has((initiative.id || '').toUpperCase()))
+        .map((initiative) => ({
+            id: initiative.id,
+            type: mapRoadmapInitiativeToType(initiative),
+            title: initiative.title,
+            commitMessage: initiative.title,
+            hash: 'roadmap',
+            fullHash: null,
+            date: initiative.createdAt || null,
+            author: initiative.team || 'Product',
+            priority: initiative.priority || 'P2',
+            assignee: initiative.team || 'Unassigned',
+            status: 'backlog',
+            lifecycle: 'backlog',
+            lifecycleReason: 'Planned in roadmap.json but not yet observed in git commits',
+            environments: { dev: false, staging: false, production: false },
+            confidence: 0.95,
+            source: 'roadmap'
+        }));
+}
+
+const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
+
+function sortKanbanLane(items) {
+    return [...items].sort((a, b) => {
+        const aPriority = PRIORITY_ORDER[a.priority] ?? PRIORITY_ORDER.P2;
+        const bPriority = PRIORITY_ORDER[b.priority] ?? PRIORITY_ORDER.P2;
+        if (aPriority !== bPriority) {
+            return aPriority - bPriority;
+        }
+
+        const aDate = a.date ? new Date(a.date).getTime() : 0;
+        const bDate = b.date ? new Date(b.date).getTime() : 0;
+        return bDate - aDate;
+    });
+}
+
 /**
  * Get Kanban board data from git
  * Filters out items marked as "deferred" in roadmap.json
@@ -327,17 +440,30 @@ async function getKanbanData() {
     // Filter out deferred items
     const activeItems = items.filter(i => !deferredIds.has(i.id));
 
+    const backlog = roadmapBacklogItems(roadmapData, activeItems, deferredIds);
+    const todo = sortKanbanLane(activeItems
+        .filter(i => i.status === 'dev')
+        .map((item) => ({ ...item, lifecycle: item.lifecycle || 'todo', lifecycleReason: 'Commit detected in development branch ancestry' })));
+    const inProgress = sortKanbanLane(activeItems
+        .filter(i => i.status === 'staging')
+        .map((item) => ({ ...item, lifecycle: item.lifecycle || 'inProgress', lifecycleReason: 'Commit reached staging deployment ancestry' })));
+    const done = sortKanbanLane(activeItems
+        .filter(i => i.status === 'deployed')
+        .map((item) => ({ ...item, lifecycle: item.lifecycle || 'done', lifecycleReason: 'Commit reached production deployment ancestry' })));
+
     return {
-        backlog: [], // Items not yet in commits are true backlog - we can't track these from git
-        inProgress: activeItems.filter(i => i.status === 'dev'),
-        staging: activeItems.filter(i => i.status === 'staging'),
-        done: activeItems.filter(i => i.status === 'deployed'),
-        deferred: items.filter(i => deferredIds.has(i.id)), // Separately track deferred
+        backlog: sortKanbanLane(backlog),
+        todo,
+        inProgress,
+        staging: inProgress, // Backward compatibility for older clients
+        done,
+        deferred: items.filter(i => deferredIds.has(i.id)),
         summary: {
-            total: activeItems.length,
-            devOnly: activeItems.filter(i => i.status === 'dev').length,
-            stagingOnly: activeItems.filter(i => i.status === 'staging').length,
-            deployed: activeItems.filter(i => i.status === 'deployed').length,
+            total: activeItems.length + backlog.length,
+            backlog: backlog.length,
+            devOnly: todo.length,
+            stagingOnly: inProgress.length,
+            deployed: done.length,
             deferred: items.filter(i => deferredIds.has(i.id)).length
         }
     };

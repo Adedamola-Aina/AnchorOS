@@ -6,6 +6,9 @@ import { CheckCircle, XCircle, RefreshCw, PartyPopper } from 'lucide-react';
 interface Feature {
     name: string;
     type: string;
+    workKind?: string;
+    domains?: string[];
+    confidence?: number;
     commitCount: number;
     latestCommit: string;
     dev: { deployed: boolean; hash: string | null };
@@ -127,6 +130,8 @@ export function EnvironmentParity() {
                             <tr>
                                 <th className="table-header">Feature</th>
                                 <th className="table-header text-center">Type</th>
+                                <th className="table-header text-center">Domain</th>
+                                <th className="table-header text-center">Confidence</th>
                                 <th className="table-header text-center">Commits</th>
                                 <th className="table-header text-center">Dev</th>
                                 <th className="table-header text-center">Staging</th>
@@ -142,13 +147,19 @@ export function EnvironmentParity() {
                                         </div>
                                     </td>
                                     <td className="table-cell text-center">
-                                        <span className={`badge ${feature.type === 'feature' ? 'badge-purple' :
-                                            feature.type === 'bugfix' ? 'badge-red' :
-                                                feature.type === 'docs' ? 'badge-blue' :
+                                        <span className={`badge ${(feature.workKind || feature.type) === 'feature' ? 'badge-purple' :
+                                            (feature.workKind || feature.type) === 'bugfix' ? 'badge-red' :
+                                                (feature.workKind || feature.type) === 'security' ? 'badge-blue' :
                                                     'badge-yellow'
                                             }`}>
-                                            {feature.type}
+                                            {feature.workKind || feature.type}
                                         </span>
+                                    </td>
+                                    <td className="table-cell text-center text-slate-400">
+                                        {(feature.domains || ['unknown']).slice(0, 2).join(', ')}
+                                    </td>
+                                    <td className="table-cell text-center text-slate-400">
+                                        {Math.round((feature.confidence || 0) * 100)}%
                                     </td>
                                     <td className="table-cell text-center text-slate-400">
                                         {feature.commitCount}

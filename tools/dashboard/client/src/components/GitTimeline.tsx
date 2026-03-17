@@ -1,89 +1,34 @@
 // @ts-nocheck
-import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { RefreshCw, GitCommit, GitBranch, Clock, Filter } from 'lucide-react';
+import type { FilterType } from './gitTimeline.types';
+import { filterLabels, formatDate, getTypeColor } from './gitTimeline.helpers';
+import { useGitTimeline } from './useGitTimeline';
 
-interface TimelineDay {
-    date: string;
-    features: string[];
-    commitCount: number;
-    commits: {
-        hash: string;
-        message: string;
-        date: string;
-        author: string;
-        type: string;
-        category?: string;
-    }[];
+function getCategoryBadgeClass(category?: string): string {
+    switch (category) {
+        case 'anchorOS':
+            return 'badge-green';
+        case 'dashboard':
+            return 'badge-blue';
+        case 'docs':
+            return 'badge-yellow';
+        case 'infra':
+            return 'badge';
+        default:
+            return 'badge';
+    }
 }
 
-type FilterType = 'all' | 'anchorOS' | 'dashboard' | 'docs' | 'infra';
-
 export function GitTimeline() {
-    const [timeline, setTimeline] = useState<TimelineDay[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [expandedDay, setExpandedDay] = useState<string | null>(null);
-    const [filter, setFilter] = useState<FilterType>('anchorOS'); // Default to Anchor OS
-    const [categoryStats, setCategoryStats] = useState<Record<string, number>>({});
-
-    useEffect(() => {
-        async function fetchTimeline() {
-            setLoading(true);
-            try {
-                const res = await axios.get('/api/git/timeline?days=14');
-                setTimeline(res.data);
-
-                // Classify each commit via server category (enriched in timeline)
-                // Also fetch category counts for the stats bar
-                const [anchorOS, dashboard, docs, infra] = await Promise.all([
-                    axios.get('/api/git/commits/anchorOS?limit=50'),
-                    axios.get('/api/git/commits/dashboard?limit=50'),
-                    axios.get('/api/git/commits/docs?limit=50'),
-                    axios.get('/api/git/commits/infra?limit=50'),
-                ]);
-                setCategoryStats({
-                    anchorOS: anchorOS.data.count,
-                    dashboard: dashboard.data.count,
-                    docs: docs.data.count,
-                    infra: infra.data.count,
-                });
-
-                // Build a hash→category lookup from the filtered endpoints
-                const categoryMap: Record<string, string> = {};
-                for (const c of anchorOS.data.commits) categoryMap[c.hash] = 'anchorOS';
-                for (const c of dashboard.data.commits) categoryMap[c.hash] = 'dashboard';
-                for (const c of docs.data.commits) categoryMap[c.hash] = 'docs';
-                for (const c of infra.data.commits) categoryMap[c.hash] = 'infra';
-
-                // Enrich timeline commits with server-side category
-                setTimeline(prev => prev.map(day => ({
-                    ...day,
-                    commits: day.commits.map(commit => ({
-                        ...commit,
-                        category: categoryMap[commit.hash] || commit.category || 'infra'
-                    }))
-                })));
-            } catch (error) {
-                console.error('Failed to fetch timeline:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchTimeline();
-    }, []);
-
-    // Filter commits based on server-side category
-    const filterCommit = (commit: { category?: string }) => {
-        if (filter === 'all') return true;
-        return commit.category === filter;
-    };
-
-    // Filter timeline data
-    const filteredTimeline = timeline.map(day => ({
-        ...day,
-        commits: day.commits.filter(filterCommit),
-        commitCount: day.commits.filter(filterCommit).length
-    })).filter(day => day.commitCount > 0);
+    const {
+        loading,
+        expandedDay,
+        filter,
+        categoryStats,
+        filteredTimeline,
+        setExpandedDay,
+        setFilter,
+    } = useGitTimeline();
 
     if (loading) {
         return (
@@ -92,35 +37,6 @@ export function GitTimeline() {
             </div>
         );
     }
-
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        if (dateStr === today.toISOString().split('T')[0]) return 'Today';
-        if (dateStr === yesterday.toISOString().split('T')[0]) return 'Yesterday';
-        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    };
-
-    const getTypeColor = (type: string) => {
-        switch (type) {
-            case 'feature': return 'badge-purple';
-            case 'bugfix': return 'badge-red';
-            case 'docs': return 'badge-blue';
-            case 'refactor': return 'badge-yellow';
-            default: return 'badge-green';
-        }
-    };
-
-    const filterLabels: Record<FilterType, string> = {
-        all: 'All',
-        anchorOS: '⚓ Product',
-        dashboard: '📊 Dashboard',
-        docs: '📝 Docs',
-        infra: '⚙️ Infra'
-    };
 
     return (
         <div className="space-y-6">
@@ -226,6 +142,22 @@ export function GitTimeline() {
                                             </span>
                                         </div>
 
+                                        {day.byType && (
+                                            <div className="text-xs text-slate-500 mb-2">
+                                                {day.byType.feature || 0} features • {day.byType.bugfix || 0} fixes • {day.byType.docs || 0} docs
+                                            </div>
+                                        )}
+
+                                        {day.byDomain && (
+                                            <div className="text-xs text-slate-500 mb-2">
+                                                Top domains: {Object.entries(day.byDomain)
+                                                    .sort((a, b) => b[1] - a[1])
+                                                    .slice(0, 2)
+                                                    .map(([domain]) => domain)
+                                                    .join(', ')}
+                                            </div>
+                                        )}
+
                                         {/* Features summary */}
                                         <div className="flex flex-wrap gap-1 mb-2">
                                             {day.features.slice(0, 3).map((feature, i) => (
@@ -246,8 +178,11 @@ export function GitTimeline() {
                                                 {day.commits.map((commit, i) => (
                                                     <div key={i} className="flex items-start gap-3 text-sm">
                                                         <span className="font-mono text-emerald-400 flex-shrink-0">{commit.hash}</span>
+                                                        <span className={`badge ${getCategoryBadgeClass(commit.category)} flex-shrink-0`}>
+                                                            {commit.category || 'unknown'}
+                                                        </span>
                                                         <span className={`badge ${getTypeColor(commit.type)} flex-shrink-0`}>
-                                                            {commit.type}
+                                                            {commit.workKind || commit.type}
                                                         </span>
                                                         <span className="text-slate-300 truncate" title={commit.message}>
                                                             {commit.message.split('\n')[0]}

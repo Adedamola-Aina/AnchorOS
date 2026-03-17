@@ -1,35 +1,7 @@
-// @ts-nocheck
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { RefreshCw, CheckCircle, Clock, AlertCircle, GitCommit } from 'lucide-react';
-
-interface Feature {
-    id: string;
-    type: string;
-    title: string;
-    hash: string;
-    date: string;
-    author?: string;
-    status: 'dev' | 'staging' | 'deployed';
-    environments: {
-        dev: boolean;
-        staging: boolean;
-        production: boolean;
-    };
-}
-
-interface BacklogData {
-    source: string;
-    completed: Feature[];
-    inProgress: Feature[];
-    pending: Feature[];
-    summary: {
-        total: number;
-        completed: number;
-        inProgress: number;
-        pending: number;
-    };
-}
+import type { BacklogData } from './featureBacklog.types';
 
 export function FeatureBacklog() {
     const [data, setData] = useState<BacklogData | null>(null);
@@ -39,7 +11,6 @@ export function FeatureBacklog() {
     useEffect(() => {
         async function fetchFeatures() {
             try {
-                // Use the new git-based API
                 const res = await axios.get('/api/git/backlog');
                 setData(res.data);
             } catch (error) {
@@ -59,11 +30,8 @@ export function FeatureBacklog() {
         );
     }
 
-    if (!data) {
-        return <div className="card">Failed to load feature backlog</div>;
-    }
+    if (!data) return <div className="card">Failed to load feature backlog</div>;
 
-    // Combine based on filter
     const allFeatures = statusFilter === 'completed'
         ? data.completed
         : statusFilter === 'inProgress'
@@ -97,7 +65,6 @@ export function FeatureBacklog() {
 
     return (
         <div className="space-y-6">
-            {/* Source Badge */}
             <div className="flex items-center gap-2">
                 <span className="px-2 py-1 text-xs rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     📊 Git-Automated
@@ -105,7 +72,6 @@ export function FeatureBacklog() {
                 <span className="text-xs text-slate-500">Features extracted from commit history</span>
             </div>
 
-            {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div
                     className={`card cursor-pointer transition-colors ${statusFilter === 'pending' ? 'ring-2 ring-amber-500' : 'hover:bg-slate-700/30'}`}
@@ -146,7 +112,6 @@ export function FeatureBacklog() {
                 </div>
             </div>
 
-            {/* Feature List */}
             <div className="card">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="card-header mb-0">Feature Backlog</h3>
@@ -187,12 +152,8 @@ export function FeatureBacklog() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <StatusIcon status={feature.status} />
-                                        <span className={`text-xs ${feature.status === 'deployed' ? 'text-emerald-400' :
-                                                feature.status === 'staging' ? 'text-blue-400' :
-                                                    'text-amber-400'
-                                            }`}>
-                                            {feature.status === 'deployed' ? 'Deployed' :
-                                                feature.status === 'staging' ? 'Staging' : 'Dev'}
+                                        <span className={`text-xs ${feature.status === 'deployed' ? 'text-emerald-400' : feature.status === 'staging' ? 'text-blue-400' : 'text-amber-400'}`}>
+                                            {feature.status === 'deployed' ? 'Deployed' : feature.status === 'staging' ? 'Staging' : 'Dev'}
                                         </span>
                                     </div>
                                 </div>
@@ -206,7 +167,6 @@ export function FeatureBacklog() {
                 </div>
             </div>
 
-            {/* Last Updated */}
             <div className="text-xs text-slate-500 text-right">
                 Source: {data.source} • Updated: {new Date().toLocaleString()}
             </div>

@@ -12,3 +12,4 @@ export { EnterpriseKanban } from './EnterpriseKanban';
 export { VelocityDashboard } from './VelocityDashboard';
 export { ArchiveViewer } from './ArchiveViewer';
 export { BugPrioritySuggestions } from './BugPrioritySuggestions';
+export { CommandCenterIntelligencePanel } from './CommandCenterIntelligencePanel';

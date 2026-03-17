@@ -21,6 +21,9 @@ const { getDependencyHealth } = require('./dependencyChecker');
 const { getHealthReport } = require('./fileHealthMonitor');
 const { getRecentCommits, getRecentCommitsFiltered, getDeploymentTimeline } = require('./gitAnalyzer');
 const { getVelocityStats } = require('./velocityTracker');
+const { getTrustReport } = require('./trustScorer');
+const { getIntegrationStatus } = require('./integrationBridge');
+const { getEventStats, getRecentEvents } = require('./eventIngestion');
 
 /**
  * Get proactive alerts - things that need attention NOW
@@ -64,9 +67,25 @@ async function getProactiveAlerts() {
             }
         }
 
-        // 3. Check for files approaching 200-line limit
+        // 3. Check for files approaching or exceeding 200-line limit
         const health = await getHealthReport();
-        const approachingFiles = health.fileHealth?.files?.filter(f => f.status === 'warning' || f.status === 'caution') || [];
+        const allFileHealth = health.fileHealth?.files || [];
+        const exceedingFiles = allFileHealth.filter(f => f.status === 'exceeding');
+        const approachingFiles = allFileHealth.filter(f => f.status === 'warning' || f.status === 'caution');
+
+        if (exceedingFiles.length > 0) {
+            alerts.push({
+                type: 'arch_violation_critical',
+                severity: 'critical',
+                title: `${exceedingFiles.length} Files Exceed 200-Line Limit`,
+                description: exceedingFiles.slice(0, 6).map(f => `${f.path.split('/').pop()} (${f.lines})`).join(', '),
+                details: exceedingFiles.map(f => ({ path: f.path, lines: f.lines, status: f.status })),
+                action: 'Refactor immediately to restore ARCH-001 compliance',
+                source: 'Code Health',
+                date: today
+            });
+        }
+
         if (approachingFiles.length > 0) {
             alerts.push({
                 type: 'arch_violation',
@@ -176,8 +195,11 @@ async function getWorkSummary() {
             }
         }
 
-        // Process in-progress items (dev only)
-        for (const item of kanbanData.inProgress || []) {
+        const todoItems = kanbanData.todo || kanbanData.inProgress || [];
+        const stagingItems = kanbanData.inProgress || kanbanData.staging || [];
+
+        // Process todo items (dev only)
+        for (const item of todoItems) {
             inProgress.push({
                 id: item.id,
                 title: item.title,
@@ -188,7 +210,7 @@ async function getWorkSummary() {
         }
 
         // Process staging items
-        for (const item of kanbanData.staging || []) {
+        for (const item of stagingItems) {
             inProgress.push({
                 id: item.id,
                 title: item.title,
@@ -254,7 +276,12 @@ async function getCommandCenterData() {
         dashboardCommits,
         docsCommits,
         infraCommits,
-        coverageData
+        coverageData,
+        healthReport,
+        trust,
+        integrations,
+        eventStats,
+        recentEvents
     ] = await Promise.all([
         getProactiveAlerts(),
         getWorkSummary(),
@@ -266,7 +293,12 @@ async function getCommandCenterData() {
         getRecentCommitsFiltered('dashboard', 20).catch(() => []),
         getRecentCommitsFiltered('docs', 20).catch(() => []),
         getRecentCommitsFiltered('infra', 20).catch(() => []),
-        getCoverageSummary()
+        getCoverageSummary(),
+        getHealthReport().catch(() => ({ fileHealth: { summary: { exceeding: 0, approaching: 0, healthy: 0 }, files: [] } })),
+        getTrustReport().catch(() => ({ score: 0, status: 'unknown', checks: [] })),
+        Promise.resolve(getIntegrationStatus()),
+        Promise.resolve(getEventStats(24)),
+        Promise.resolve(getRecentEvents({ limit: 10 }))
     ]);
 
     // Get velocity stats (sync function)
@@ -333,6 +365,13 @@ async function getCommandCenterData() {
             lastChecked: now.toISOString()
         },
 
+        codeHealth: {
+            exceeding: healthReport.fileHealth?.summary?.exceeding || 0,
+            approaching: healthReport.fileHealth?.summary?.approaching || 0,
+            healthy: healthReport.fileHealth?.summary?.healthy || 0,
+            topRiskFiles: (healthReport.fileHealth?.files || []).slice(0, 6)
+        },
+
         // Git activity - recent commits by date
         gitActivity: {
             last7Days: timeline.map(day => ({
@@ -340,6 +379,20 @@ async function getCommandCenterData() {
                 commits: day.commits?.length || 0,
                 features: day.features?.length || 0
             }))
+        },
+
+        intelligence: {
+            trust: {
+                score: trust.score,
+                status: trust.status,
+                anomalies: trust.anomalies || []
+            },
+            integrations,
+            ingestion: {
+                eventsLast24h: eventStats.total,
+                latestEventAt: eventStats.latestEventAt,
+                recentEvents
+            }
         },
 
         // Quick links
@@ -353,6 +406,11 @@ async function getCommandCenterData() {
             changelog: '/api/git/changelog',
             timeline: '/api/git/timeline',
             coverage: '/api/coverage',
+            intelligence: {
+                trust: '/api/intelligence/trust',
+                events: '/api/intelligence/events',
+                integrations: '/api/integrations/status'
+            },
             commitsByCategory: {
                 anchorOS: '/api/git/commits/anchorOS',
                 dashboard: '/api/git/commits/dashboard',

@@ -1,29 +1,8 @@
-// @ts-nocheck
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Sparkles, TrendingUp, AlertCircle, CheckCircle, Info } from 'lucide-react';
-
-interface PrioritySuggestion {
-    bugId: string;
-    bugText: string;
-    currentPriority: string | null;
-    suggestedPriority: string;
-    confidence: 'high' | 'medium' | 'low';
-    score: number;
-    reasoning: {
-        keywords: string[];
-        category: string;
-        environment: string;
-        envMultiplier: number;
-    };
-}
-
-interface SuggestionStats {
-    total: number;
-    byPriority: Record<string, number>;
-    byConfidence: Record<string, number>;
-    needsReview: number;
-}
+import { Sparkles, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
+import type { PrioritySuggestion, SuggestionStats } from './bugPrioritySuggestions.types';
+import { getConfidenceBadge, getConfidenceIcon, getPriorityBadge } from './bugPrioritySuggestions.helpers';
 
 export function BugPrioritySuggestions() {
     const [suggestions, setSuggestions] = useState<PrioritySuggestion[]>([]);
@@ -47,46 +26,6 @@ export function BugPrioritySuggestions() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const getConfidenceIcon = (confidence: string) => {
-        switch (confidence) {
-            case 'high':
-                return <CheckCircle className="w-4 h-4 text-emerald-400" />;
-            case 'medium':
-                return <Info className="w-4 h-4 text-blue-400" />;
-            case 'low':
-                return <AlertCircle className="w-4 h-4 text-amber-400" />;
-            default:
-                return null;
-        }
-    };
-
-    const getConfidenceBadge = (confidence: string) => {
-        const styles = {
-            high: 'bg-emerald-900/30 text-emerald-400 border-emerald-500/50',
-            medium: 'bg-blue-900/30 text-blue-400 border-blue-500/50',
-            low: 'bg-amber-900/30 text-amber-400 border-amber-500/50'
-        };
-        return (
-            <span className={`px-2 py-0.5 text-xs font-semibold rounded border ${styles[confidence as keyof typeof styles]}`}>
-                {confidence}
-            </span>
-        );
-    };
-
-    const getPriorityBadge = (priority: string) => {
-        const styles = {
-            P0: 'bg-red-900/30 text-red-400 border-red-500/50',
-            P1: 'bg-amber-900/30 text-amber-400 border-amber-500/50',
-            P2: 'bg-emerald-900/30 text-emerald-400 border-emerald-500/50',
-            P3: 'bg-slate-900/30 text-slate-400 border-slate-500/50'
-        };
-        return (
-            <span className={`px-2 py-0.5 text-xs font-semibold rounded border ${styles[priority as keyof typeof styles] || styles.P3}`}>
-                {priority}
-            </span>
-        );
     };
 
     if (loading) {
@@ -116,7 +55,6 @@ export function BugPrioritySuggestions() {
 
     return (
         <div className="space-y-6">
-            {/* Stats Cards */}
             {stats && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="card bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30">
@@ -162,7 +100,6 @@ export function BugPrioritySuggestions() {
                 </div>
             )}
 
-            {/* Priority Suggestions List */}
             <div className="card">
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-purple-400" />
@@ -180,7 +117,6 @@ export function BugPrioritySuggestions() {
                                 key={i}
                                 className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-slate-600 transition-colors"
                             >
-                                {/* Header */}
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
@@ -197,7 +133,6 @@ export function BugPrioritySuggestions() {
                                     </div>
                                 </div>
 
-                                {/* Reasoning */}
                                 <div className="flex items-center gap-4 text-xs text-slate-500">
                                     <div className="flex items-center gap-1">
                                         <span className="font-semibold">Score:</span>
@@ -215,7 +150,6 @@ export function BugPrioritySuggestions() {
                                     )}
                                 </div>
 
-                                {/* Mismatch Warning */}
                                 {suggestion.currentPriority && suggestion.currentPriority !== suggestion.suggestedPriority && (
                                     <div className="mt-3 p-2 bg-amber-900/20 border border-amber-500/30 rounded text-xs text-amber-400">
                                         ⚠️ Suggested priority differs from current. Consider reviewing this bug.

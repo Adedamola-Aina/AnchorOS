@@ -1,56 +1,11 @@
 // @ts-nocheck
-import { CheckCircle, XCircle, Clock, TrendingUp, Bug, GitCommit, Target, ExternalLink } from 'lucide-react';
+import { CheckCircle, Clock, TrendingUp, Bug, GitCommit, Target, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { PrioritySuggestions } from './PrioritySuggestions';
 import { DependencyHealth } from './DependencyHealth';
 import { ProactiveAlerts } from './ProactiveAlerts';
-
-interface BugItem {
-    id: string;
-    title: string;
-    content?: string;
-}
-
-interface SummaryProps {
-    summary: {
-        projectStatus?: {
-            currentFocus: string;
-            successCriteria: { text: string; status: string }[];
-            inProgress: { text: string; status: string }[];
-            completed: { text: string; status: string }[];
-            criticalBugs: { id: string; description: string }[];
-        };
-        criteriaProgress?: number;
-        bugs?: {
-            statistics: {
-                totalActive: string;
-                critical: string;
-                fixedThisMonth: string;
-            };
-            critical?: BugItem[];
-            recentlyFixed?: BugItem[];
-        };
-        kanban?: {
-            backlog: unknown[];
-            todo: unknown[];
-            inProgress: unknown[];
-            done: unknown[];
-        };
-        parity?: {
-            total: number;
-            devOnly: number;
-            stagingPending: number;
-            fullyDeployed: number;
-        };
-        git?: {
-            branch: string;
-            isClean: boolean;
-            lastCommit: { hash: string; message: string; date: string };
-        };
-        lastRefresh: string;
-    } | null;
-    onNavigateToTab?: (tab: string) => void;
-}
+import { BugDetailModal } from './BugDetailModal';
+import type { BugItem, SummaryProps } from './dashboardSummary.types';
 
 export function DashboardSummary({ summary, onNavigateToTab }: SummaryProps) {
     const [selectedBug, setSelectedBug] = useState<BugItem | null>(null);
@@ -231,41 +186,7 @@ export function DashboardSummary({ summary, onNavigateToTab }: SummaryProps) {
                 <ProactiveAlerts />
             </div>
 
-            {/* Bug Detail Modal */}
-            {selectedBug && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedBug(null)}>
-                    <div className="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <div className="p-6 border-b border-slate-700 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <span className={`badge ${selectedBug.id.startsWith('BUG') ? 'badge-red' : 'badge-green'}`}>
-                                    {selectedBug.id}
-                                </span>
-                                <h4 className="text-lg font-bold text-white">{selectedBug.title}</h4>
-                            </div>
-                            <button onClick={() => setSelectedBug(null)} className="text-slate-400 hover:text-white p-2">
-                                <XCircle className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <div className="p-6 overflow-y-auto max-h-[60vh]">
-                            {selectedBug.content ? (
-                                <pre className="text-sm text-slate-300 whitespace-pre-wrap font-mono bg-slate-900/50 p-4 rounded-lg">
-                                    {selectedBug.content}
-                                </pre>
-                            ) : (
-                                <p className="text-slate-400">No additional details available.</p>
-                            )}
-                        </div>
-                        <div className="p-4 border-t border-slate-700 flex justify-end">
-                            <button
-                                onClick={() => setSelectedBug(null)}
-                                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-colors"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {selectedBug && <BugDetailModal bug={selectedBug} onClose={() => setSelectedBug(null)} />}
         </div>
     );
 }

@@ -1,77 +1,19 @@
 // @ts-nocheck
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { TrendingUp, Clock, Target, Calendar, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-interface VelocityStats {
-    currentVelocity: number;
-    averageCycleTime: number | null;
-    totalCompletions: number;
-    weeklyStats: Array<{
-        week: string;
-        completed: number;
-        velocity: number;
-    }>;
-    recentCompletions: Array<{
-        itemId: string;
-        completedDate: string;
-        cycleTime: number | null;
-    }>;
-}
-
-interface CompletionPrediction {
-    weeksRemaining: number;
-    daysRemaining: number;
-    date: string;
-}
+import { useVelocityDashboard } from './useVelocityDashboard';
 
 export function VelocityDashboard() {
-    const [stats, setStats] = useState<VelocityStats | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [remainingItems, setRemainingItems] = useState(10);
-    const [prediction, setPrediction] = useState<CompletionPrediction | null>(null);
-
-    useEffect(() => {
-        fetchVelocityStats();
-    }, []);
-
-    const fetchVelocityStats = async () => {
-        try {
-            setLoading(true);
-            const res = await axios.get('/api/velocity/stats');
-            setStats(res.data);
-            setError(null);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to fetch velocity stats');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleAutoDetect = async () => {
-        try {
-            const res = await axios.post('/api/velocity/auto-detect');
-            if (res.data.newCompletions > 0) {
-                alert(`Auto-detected ${res.data.newCompletions} new completions!`);
-                fetchVelocityStats();
-            } else {
-                alert('No new completions detected.');
-            }
-        } catch {
-            alert('Failed to auto-detect completions');
-        }
-    };
-
-    const handlePredict = async () => {
-        try {
-            const res = await axios.post<CompletionPrediction>('/api/velocity/predict', { remainingItems });
-            setPrediction(res.data);
-        } catch {
-            alert('Failed to predict completion date');
-        }
-    };
+    const {
+        stats,
+        loading,
+        error,
+        remainingItems,
+        prediction,
+        setRemainingItems,
+        handleAutoDetect,
+        handlePredict,
+    } = useVelocityDashboard();
 
     if (loading) {
         return (

@@ -30,13 +30,20 @@ const { watchMarkerFiles, initializeDashboardDir } = require('./conversationProc
 const { getCommandCenterData, getProactiveAlerts } = require('./commandCenter');
 const { getDeduplicationStats, findDuplicates, getNextId } = require('./deduplicator');
 const gitData = require('./gitDataProvider');
+const { publishEvent, getRecentEvents, getEventStats, startHeartbeat, stopHeartbeat } = require('./eventIngestion');
+const { getIntegrationStatus, ingestWebhook, syncProvider } = require('./integrationBridge');
+const { getTrustReport } = require('./trustScorer');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({
+    verify: (req, _res, buffer) => {
+        req.rawBody = buffer.toString('utf8');
+    }
+}));
 
 // Rate limiting for mutation endpoints (POST/PUT/DELETE)
 const mutationLimiter = rateLimit({
@@ -323,7 +330,7 @@ app.get('/api/git/commits/anchorOS', async (req, res) => {
         const commits = await getRecentCommitsFiltered('anchorOS', limit);
         res.json({
             category: 'anchorOS',
-            description: 'Anchor OS product source changes (src/, e2e/, public/, index.html)',
+            description: 'Anchor OS product changes (src/, functions/, public/, native mobile, deploy/rules)',
             count: commits.length,
             commits
         });
@@ -1321,9 +1328,30 @@ app.get('/api/bugs/priority-suggestions', async (req, res) => {
  */
 app.post('/api/docs/sync', async (req, res) => {
     try {
+        publishEvent({
+            source: 'api',
+            type: 'docs:sync:start',
+            level: 'info',
+            message: 'Manual docs sync requested'
+        });
         const results = await runFullSync();
+        publishEvent({
+            source: 'api',
+            type: 'docs:sync:complete',
+            level: 'info',
+            status: 'completed',
+            message: 'Manual docs sync completed'
+        });
         res.json(results);
     } catch (error) {
+        publishEvent({
+            source: 'api',
+            type: 'docs:sync:failed',
+            level: 'warning',
+            status: 'failed',
+            message: 'Manual docs sync failed',
+            payload: { error: error.message }
+        });
         res.status(500).json({ error: error.message });
     }
 });
@@ -1380,6 +1408,12 @@ app.post('/api/refresh', (req, res) => {
         deploymentTracker.clearCache();
         // Clear git data provider items cache
         gitData.clearCache();
+        publishEvent({
+            source: 'api',
+            type: 'cache:refresh',
+            level: 'info',
+            message: 'Manual cache refresh requested'
+        });
         res.json({
             success: true,
             message: 'All caches cleared',
@@ -1388,6 +1422,86 @@ app.post('/api/refresh', (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/intelligence/events
+ * Returns recent ingestion/intelligence events
+ */
+app.get('/api/intelligence/events', (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 50;
+        const source = req.query.source;
+        const type = req.query.type;
+        const events = getRecentEvents({ limit, source, type });
+        const stats = getEventStats(24);
+        res.json({ count: events.length, events, stats });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/intelligence/trust
+ * Returns trust score and anomaly checks for dashboard truthfulness
+ */
+app.get('/api/intelligence/trust', async (req, res) => {
+    try {
+        const trust = await getTrustReport();
+        res.json(trust);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/integrations/status
+ * Returns Jira/Asana integration readiness and latest activity
+ */
+app.get('/api/integrations/status', (req, res) => {
+    try {
+        const status = getIntegrationStatus();
+        res.json(status);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/integrations/:provider/webhook
+ * Ingest external webhook payloads into normalized event stream
+ */
+app.post('/api/integrations/:provider/webhook', (req, res) => {
+    try {
+        const provider = String(req.params.provider || '').toLowerCase();
+        const result = ingestWebhook(provider, req.body, {
+            ip: req.ip,
+            headers: req.headers,
+            rawBody: req.rawBody
+        });
+        res.json(result);
+    } catch (error) {
+        const isUnauthorized = /unauthorized/i.test(error.message);
+        const isConfigError = /not configured/i.test(error.message);
+        const status = isUnauthorized ? 401 : (isConfigError ? 503 : 400);
+        res.status(status).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/integrations/:provider/sync
+ * Triggers provider sync in dry-run by default
+ */
+app.post('/api/integrations/:provider/sync', async (req, res) => {
+    try {
+        const provider = String(req.params.provider || '').toLowerCase();
+        const mode = req.body?.mode || 'dry-run';
+        const items = req.body?.items || [];
+        const result = await syncProvider(provider, { mode, items });
+        res.json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 });
 
@@ -1419,8 +1533,24 @@ cron.schedule('0 2 * * *', () => {
     try {
         const result = archiveOldItems(30, false);
         console.log(`[CRON] Archival complete: ${result.message}`);
+        publishEvent({
+            source: 'cron',
+            type: 'archive:daily',
+            level: 'info',
+            status: 'completed',
+            message: 'Daily archival completed',
+            payload: { archivedCount: result.archivedCount || 0 }
+        });
     } catch (error) {
         console.error('[CRON] Archival failed:', error.message);
+        publishEvent({
+            source: 'cron',
+            type: 'archive:daily',
+            level: 'warning',
+            status: 'failed',
+            message: 'Daily archival failed',
+            payload: { error: error.message }
+        });
     }
 });
 
@@ -1432,10 +1562,28 @@ cron.schedule('0 * * * *', async () => {
     try {
         const newCompletions = await autoDetectCompletions();
         console.log(`[CRON] Auto-detect complete: ${newCompletions} new completions recorded`);
+        publishEvent({
+            source: 'cron',
+            type: 'velocity:auto-detect',
+            level: 'info',
+            status: 'completed',
+            message: 'Velocity auto-detect completed',
+            payload: { newCompletions }
+        });
     } catch (error) {
         console.error('[CRON] Auto-detect failed:', error.message);
+        publishEvent({
+            source: 'cron',
+            type: 'velocity:auto-detect',
+            level: 'warning',
+            status: 'failed',
+            message: 'Velocity auto-detect failed',
+            payload: { error: error.message }
+        });
     }
 });
+
+let heartbeatHandle = null;
 
 // Start server with error handling
 const server = app.listen(PORT, () => {
@@ -1458,11 +1606,25 @@ const server = app.listen(PORT, () => {
 
     // Start file watchers for real-time updates
     startFileWatchers();
+    heartbeatHandle = startHeartbeat({ intervalMs: 60_000 });
+    publishEvent({
+        source: 'system',
+        type: 'server:started',
+        level: 'info',
+        message: 'Dashboard server started'
+    });
 
     // Start conversation processor for AI-detected bugs/features
     initializeDashboardDir();
     watchMarkerFiles((type, result) => {
         console.log(`[CONVERSATION AI] Auto-filed ${result.processed} ${type}, skipped ${result.skipped} duplicates`);
+        publishEvent({
+            source: 'conversation-ai',
+            type: `intake:${type}`,
+            level: 'info',
+            message: `Conversation AI processed ${type}`,
+            payload: { processed: result.processed, skipped: result.skipped }
+        });
         // Trigger full sync after filing
         runFullSync({ syncVelocity: false }).catch(err => console.error('[CONVERSATION AI] Sync failed:', err.message));
     });
@@ -1488,6 +1650,8 @@ server.on('error', (err) => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
     console.log('\n[SHUTDOWN] Received SIGTERM, shutting down gracefully...');
+    stopHeartbeat();
+    publishEvent({ source: 'system', type: 'server:shutdown', level: 'info', message: 'SIGTERM received' });
     stopFileWatchers();
     server.close(() => {
         console.log('[SHUTDOWN] Server closed');
@@ -1497,6 +1661,8 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
     console.log('\n[SHUTDOWN] Received SIGINT, shutting down gracefully...');
+    stopHeartbeat();
+    publishEvent({ source: 'system', type: 'server:shutdown', level: 'info', message: 'SIGINT received' });
     stopFileWatchers();
     server.close(() => {
         console.log('[SHUTDOWN] Server closed');

@@ -14,16 +14,48 @@ const util = require('util');
 const execAsync = util.promisify(exec);
 const ROOT_PATH = path.join(__dirname, '../../..');
 
+const FILE_HEALTH_EXCLUDES = [
+    './node_modules/*',
+    './.git/*',
+    './dist/*',
+    './build/*',
+    './coverage/*',
+    './playwright-report/*',
+    './test-results/*',
+    './tools/dashboard/*',
+    './tools/mcp-server/*',
+    './functions/node_modules/*',
+    './functions/lib/*',
+    './android/*',
+    './ios/*'
+];
+
+const FILE_HEALTH_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
+
+function buildFileHealthScanCommand() {
+    const excludes = FILE_HEALTH_EXCLUDES.map((entry) => `! -path "${entry}"`).join(' ');
+    return [
+        'find . -type f \\(',
+        '-name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx"',
+        '\\)',
+        excludes,
+        '! -path "*/__tests__/*"',
+        '! -path "./e2e/*"',
+        '! -name "*.test.*"',
+        '! -name "*.spec.*"',
+        '-exec wc -l {} + | sort -rn'
+    ].join(' ');
+}
+
 /**
  * Find files approaching or exceeding the 200-line limit
  */
 async function checkFileLineCount() {
     try {
-        // Find all TypeScript/JavaScript files and count lines (excluding test files)
-        const { stdout } = await execAsync(
-            `find src -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) ! -name "*.test.*" ! -name "*.spec.*" -exec wc -l {} + | sort -rn | head -50`,
-            { cwd: ROOT_PATH, timeout: 30000 }
-        );
+        const { stdout } = await execAsync(buildFileHealthScanCommand(), {
+            cwd: ROOT_PATH,
+            timeout: 45000
+        });
 
         const files = [];
         const lines = stdout.trim().split('\n');
@@ -34,7 +66,6 @@ async function checkFileLineCount() {
                 const lineCount = parseInt(match[1]);
                 const filePath = match[2];
 
-                // Skip node_modules and build artifacts
                 if (!filePath.includes('node_modules') && !filePath.includes('dist')) {
                     files.push({
                         path: filePath,
@@ -51,6 +82,12 @@ async function checkFileLineCount() {
                 exceeding: files.filter(f => f.lines > 200).length,
                 approaching: files.filter(f => f.lines >= 180 && f.lines <= 200).length,
                 healthy: files.filter(f => f.lines < 180).length
+            },
+            scope: {
+                scannedFrom: '.',
+                includeExtensions: FILE_HEALTH_EXTENSIONS,
+                excludes: FILE_HEALTH_EXCLUDES,
+                excludesTests: true
             }
         };
     } catch (error) {

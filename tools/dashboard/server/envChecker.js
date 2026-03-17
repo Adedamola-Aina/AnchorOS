@@ -17,12 +17,10 @@
 
 const path = require('path');
 const fs = require('fs');
-const simpleGit = require('simple-git');
 const deploymentTracker = require('./deploymentTracker');
-const { classifyCommit } = require('./gitAnalyzer');
+const gitDataProvider = require('./gitDataProvider');
 
 const REPO_PATH = path.join(__dirname, '../../..');
-const git = simpleGit(REPO_PATH);
 
 // Environment URLs (for health checks)
 const ENVIRONMENTS = {
@@ -84,63 +82,6 @@ async function getEnvironmentVersions() {
 }
 
 /**
- * Extract feature/bug ID from commit message
- */
-function extractId(message) {
-    const patterns = [
-        /\b(BUG-\d+)\b/i,
-        /\b(REG-\d+)\b/i,
-        /\b(GAP-\d+)\b/i,
-        /\b(UX-\d+)\b/i,
-        /\b(TASK-\d+)\b/i,
-        /\b(ARCH-\d+)\b/i,
-        /\b(FIN-\d+)\b/i,
-        /\b(FEAT-\d+)\b/i,
-        /\b(SEC-\d+)\b/i,
-        /\b(PLT-\d+)\b/i,
-        /\b(DES-\d+)\b/i,
-        /\b(WEB-\d+)\b/i,
-        /\b(ENG-\d+)\b/i,
-        /\b(PWA-\d+)\b/i
-    ];
-
-    for (const pattern of patterns) {
-        const match = message.match(pattern);
-        if (match) return match[1].toUpperCase();
-    }
-    return null;
-}
-
-/**
- * Detect item type from commit message
- */
-function detectType(message) {
-    const msg = message.toUpperCase();
-    if (msg.includes('BUG-')) return 'bug';
-    if (msg.includes('REG-')) return 'regression';
-    if (msg.includes('GAP-')) return 'gap';
-    if (msg.includes('UX-')) return 'enhancement';
-    if (msg.includes('TASK-')) return 'task';
-    if (msg.includes('ARCH-')) return 'architecture';
-    if (msg.includes('SEC-')) return 'security';
-    if (msg.includes('DES-')) return 'design';
-    if (msg.includes('WEB-')) return 'feature';
-    if (msg.includes('PLT-')) return 'platform';
-
-    const msgLower = message.toLowerCase();
-    if (msgLower.startsWith('feat')) return 'feature';
-    if (msgLower.startsWith('fix')) return 'bugfix';
-    if (msgLower.startsWith('docs')) return 'docs';
-    if (msgLower.startsWith('refactor')) return 'refactor';
-    if (msgLower.startsWith('chore')) return 'chore';
-
-    return 'other';
-}
-
-// isDashboardCommit() REMOVED — replaced by classifyCommit() from gitAnalyzer.js
-// which uses actual file paths instead of fragile message-keyword matching
-
-/**
  * Check environment parity using GIT ANCESTRY
  * 
  * This is the CORRECT approach:
@@ -150,70 +91,31 @@ function detectType(message) {
  */
 async function checkEnvParity() {
     try {
-        const deployments = await deploymentTracker.parseDeployMarkers();
         const versions = await getEnvironmentVersions();
-        const log = await git.log({ maxCount: 100 });
+        const trackedItems = await gitDataProvider.getAllTrackedItems(200);
+        const productItems = trackedItems
+            .filter((item) => item.workKind !== 'infra' && item.workKind !== 'docs')
+            .slice(0, 50);
 
-        // Skip deploy markers, then classify all remaining commits by file paths
-        const candidates = log.all.filter(c => !c.message.toLowerCase().includes('deploy('));
-
-        // Batch-classify commits using file-path analysis (not message parsing)
-        const classifications = await Promise.all(
-            candidates.map(async c => ({
-                commit: c,
-                category: await classifyCommit(c.hash)
-            }))
-        );
-
-        // ONLY anchorOS (product) commits belong in environment parity
-        const productCommits = [];
-        const seenIds = new Set();
-
-        for (const { commit, category } of classifications) {
-            if (category !== 'anchorOS') continue;
-
-            const fullMsg = commit.message;
-            const type = detectType(fullMsg);
-            const id = extractId(fullMsg) || commit.hash.substring(0, 7);
-            if (seenIds.has(id)) continue;
-            seenIds.add(id);
-
-            productCommits.push({
-                id,
-                hash: commit.hash.substring(0, 7),
-                fullHash: commit.hash,
-                message: fullMsg.split('\n')[0].substring(0, 80),
-                type,
-                date: commit.date
-            });
-
-            if (productCommits.length >= 50) break;
-        }
-
-        // Batch check deployment status using git ancestry
-        const commitHashes = productCommits.map(c => c.fullHash);
-        const deploymentStatus = await deploymentTracker.batchCheckDeploymentStatus(
-            commitHashes, 
-            deployments
-        );
-
-        // Build feature list with accurate deployment status
-        const features = productCommits.map(commit => {
-            const status = deploymentStatus.get(commit.fullHash) || {
+        const features = productItems.map((item) => {
+            const status = item.environments || {
                 production: false,
                 staging: false,
-                development: false
+                dev: false
             };
 
             return {
-                name: `**${commit.id}**: ${commit.message}`,
-                type: commit.type,
-                commitCount: 1,
-                latestCommit: commit.hash,
-                date: commit.date,
-                dev: { deployed: status.development, hash: status.development ? commit.hash : null },
-                staging: { deployed: status.staging, hash: status.staging ? commit.hash : null },
-                production: { deployed: status.production, hash: status.production ? commit.hash : null }
+                name: `**${item.id}**: ${item.title}`,
+                type: item.type,
+                workKind: item.workKind || item.type,
+                domains: item.domains || ['unknown'],
+                confidence: item.confidence || 0.5,
+                commitCount: item.commitCount || 1,
+                latestCommit: item.hash,
+                date: item.date,
+                dev: { deployed: Boolean(status.dev), hash: status.dev ? item.hash : null },
+                staging: { deployed: Boolean(status.staging), hash: status.staging ? item.hash : null },
+                production: { deployed: Boolean(status.production), hash: status.production ? item.hash : null }
             };
         });
 

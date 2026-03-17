@@ -1,23 +1,16 @@
-// @ts-nocheck
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Archive, Calendar, RotateCcw, Eye, Play, AlertCircle } from 'lucide-react';
-
-interface ArchivedItem {
-    text: string;
-    month: string | null;
-    week: string | null;
-}
-
-interface ArchivePreview {
-    success: boolean;
-    archivedCount: number;
-    items?: Array<{
-        text: string;
-        completionDate: string;
-    }>;
-    message: string;
-}
+import { Archive, Eye, Play, AlertCircle } from 'lucide-react';
+import { ArchivePreviewPanel } from './ArchivePreviewPanel';
+import { ArchivedItemsPanel } from './ArchivedItemsPanel';
+import {
+    fetchArchivedItemsApi,
+    fetchArchivePreview,
+    groupArchivedItemsByMonth,
+    restoreArchivedItem,
+    runArchivalNow,
+    type ArchivePreview,
+    type ArchivedItem,
+} from './archiveViewer.utils';
 
 export function ArchiveViewer() {
     const [archivedItems, setArchivedItems] = useState<ArchivedItem[]>([]);
@@ -34,8 +27,7 @@ export function ArchiveViewer() {
     const fetchArchivedItems = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('/api/archive/items');
-            setArchivedItems(res.data.items);
+            setArchivedItems(await fetchArchivedItemsApi());
             setError(null);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to fetch archived items');
@@ -46,8 +38,7 @@ export function ArchiveViewer() {
 
     const handlePreview = async () => {
         try {
-            const res = await axios.get(`/api/archive/preview?days=${daysThreshold}`);
-            setPreview(res.data);
+            setPreview(await fetchArchivePreview(daysThreshold));
             setShowPreview(true);
         } catch {
             alert('Failed to preview archival');
@@ -60,8 +51,7 @@ export function ArchiveViewer() {
         }
 
         try {
-            const res = await axios.post('/api/archive/run', { daysThreshold, dryRun: false });
-            alert(res.data.message);
+            alert(await runArchivalNow(daysThreshold));
             fetchArchivedItems();
             setShowPreview(false);
         } catch {
@@ -75,8 +65,7 @@ export function ArchiveViewer() {
         }
 
         try {
-            const res = await axios.post('/api/archive/restore', { itemText });
-            alert(res.data.message);
+            alert(await restoreArchivedItem(itemText));
             fetchArchivedItems();
         } catch {
             alert('Failed to restore item');
@@ -108,19 +97,10 @@ export function ArchiveViewer() {
         );
     }
 
-    // Group items by month
-    const groupedItems: Record<string, ArchivedItem[]> = {};
-    archivedItems.forEach(item => {
-        const month = item.month || 'Unknown';
-        if (!groupedItems[month]) {
-            groupedItems[month] = [];
-        }
-        groupedItems[month].push(item);
-    });
+    const groupedItems = groupArchivedItemsByMonth(archivedItems);
 
     return (
         <div className="space-y-6">
-            {/* Archive Controls */}
             <div className="card bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                     <Archive className="w-6 h-6 text-purple-400" />
@@ -168,72 +148,13 @@ export function ArchiveViewer() {
                 </div>
             </div>
 
-            {/* Preview Modal */}
-            {showPreview && preview && (
-                <div className="card border-blue-500/50">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-white">Archive Preview</h3>
-                        <button
-                            onClick={() => setShowPreview(false)}
-                            className="text-slate-400 hover:text-white"
-                        >
-                            ✕
-                        </button>
-                    </div>
-                    <p className="text-blue-400 mb-4">{preview.message}</p>
-                    {preview.items && preview.items.length > 0 && (
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {preview.items.map((item, i) => (
-                                <div key={i} className="p-3 bg-slate-800/50 rounded-lg">
-                                    <p className="text-sm text-slate-300">{item.text}</p>
-                                    <p className="text-xs text-slate-500 mt-1">Completed: {item.completionDate}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Archived Items */}
-            <div className="card">
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-emerald-400" />
-                    Archived Items ({archivedItems.length})
-                </h3>
-
-                {archivedItems.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-8">
-                        No archived items yet. Items will be automatically archived after {daysThreshold} days.
-                    </p>
-                ) : (
-                    <div className="space-y-6">
-                        {Object.keys(groupedItems).sort().reverse().map(month => (
-                            <div key={month}>
-                                <h4 className="text-md font-semibold text-emerald-400 mb-3">{month}</h4>
-                                <div className="space-y-2">
-                                    {groupedItems[month].map((item, i) => (
-                                        <div key={i} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors">
-                                            <div className="flex-1">
-                                                <p className="text-sm text-slate-300">{item.text}</p>
-                                                {item.week && (
-                                                    <p className="text-xs text-slate-500 mt-1">{item.week}</p>
-                                                )}
-                                            </div>
-                                            <button
-                                                onClick={() => handleRestore(item.text)}
-                                                className="ml-4 px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded text-xs text-white font-medium transition-colors flex items-center gap-1"
-                                            >
-                                                <RotateCcw className="w-3 h-3" />
-                                                Restore
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+            {showPreview && preview && <ArchivePreviewPanel preview={preview} onClose={() => setShowPreview(false)} />}
+            <ArchivedItemsPanel
+                archivedItems={archivedItems}
+                groupedItems={groupedItems}
+                daysThreshold={daysThreshold}
+                onRestore={handleRestore}
+            />
         </div>
     );
 }
