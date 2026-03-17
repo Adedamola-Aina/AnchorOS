@@ -104,10 +104,10 @@ describe('config', () => {
       expect(APP_ID).toBe('anchor-os');
     });
 
-    it('exports BCRYPT_SALT_ROUNDS as 10', async () => {
+    it('exports BCRYPT_SALT_ROUNDS as 12', async () => {
       vi.resetModules();
       const { BCRYPT_SALT_ROUNDS } = await import('./config');
-      expect(BCRYPT_SALT_ROUNDS).toBe(10);
+      expect(BCRYPT_SALT_ROUNDS).toBe(12);
     });
   });
 });
