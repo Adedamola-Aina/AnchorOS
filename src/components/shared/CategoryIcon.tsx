@@ -48,7 +48,7 @@ const CATEGORY_MAP: Record<string, { icon: LucideIcon; color: string }> = {
     general: { icon: Tag, color: 'text-slate-400 bg-slate-400/10' },
 };
 
-export const CategoryIcon: React.FC<CategoryIconProps> = ({ category, className = '', size = 16 }) => {
+export const CategoryIcon: React.FC<CategoryIconProps> = React.memo(({ category, className = '', size = 16 }) => {
     const normalized = category.toLowerCase();
     const config = CATEGORY_MAP[normalized] || CATEGORY_MAP.general;
     const Icon = config.icon;
@@ -58,4 +58,4 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({ category, className 
             <Icon size={size} strokeWidth={2.5} />
         </div>
     );
-};
+});
