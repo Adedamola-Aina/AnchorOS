@@ -52,8 +52,9 @@ export default {
   timeoutMS: 120000,
   timeoutFactor: 2.5,
   
-  // Disable incremental for now (can enable after first successful run)
-  incremental: false,
+  // Incremental mode — only re-mutates files changed since last run
+  incremental: true,
+  incrementalFile: '.stryker-tmp/stryker-incremental.json',
   
   // Temp directory
   tempDirName: '.stryker-tmp',

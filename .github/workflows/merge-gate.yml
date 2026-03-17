@@ -1,0 +1,57 @@
+name: Merge Gate
+on:
+  pull_request:
+    branches: [master, staging]
+
+jobs:
+  lint-types:
+    name: Lint & Types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit -p config/tsconfig.app.json
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npm run test -- --run
+
+  firestore-rules:
+    name: Firestore Rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npm install -g firebase-tools
+      - run: npm run test:rules
+
+  smoke-e2e:
+    name: Smoke E2E
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npx playwright install chromium --with-deps
+      - run: npx playwright test --project=smoke
+        env:
+          E2E_BASE_URL: http://localhost:5173
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: smoke-e2e-report
+          path: playwright-report/
+          retention-days: 7
