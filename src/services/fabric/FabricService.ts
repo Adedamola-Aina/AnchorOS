@@ -1,67 +1,14 @@
-import type {
-  AnchorAccount,
-  AnchorTask,
-  AnchorTransaction,
-  FabricContext,
-  FabricQueryResult,
-  FabricSettings,
-  IFabricService,
-  Insight,
-  ParsedIntent,
-  PatternAction,
-  PatternTrigger,
-  Prediction,
-  PredictionType,
-  ProactiveQuestionState,
-  ProactiveQuestionType,
-  RecurringTransaction,
-  UserPattern,
-  WeeklyReport,
-} from '../../types';
-import { secureDb } from '../../utils/secureDb';
+import type { AnchorAccount, AnchorTask, AnchorTransaction, FabricContext, FabricQueryResult, IFabricService, Insight, ParsedIntent, PatternAction, PatternTrigger, Prediction, ProactiveQuestionState, ProactiveQuestionType, RecurringTransaction, UserPattern, WeeklyReport } from '../../types';
 import { BehavioralEngine } from './BehavioralEngine';
 import { getAmbientContext } from './AmbientContext';
 import { parseIntent } from './IntentParser';
-import { runFabricQuery } from './QueryEngine';
-import { buildPredictions } from './PredictionsEngine';
-import { buildInsights } from './InsightsEngine';
-import { buildWeeklyReport } from './WeeklyReportEngine';
-import {
-  appendFabricConversation,
-  clearFabricData,
-  loadDismissedPredictionIds,
-  loadFabricActivity,
-  persistPredictionState,
-  persistWeeklyReport,
-} from './fabricPersistence';
-import { buildDailyBriefing } from './DailyBriefingEngine';
-import { generateProactiveQuestion } from './ProactiveQuestionEngine';
+import { clearFabricData, persistPredictionState } from './fabricPersistence';
+import { initializeFabricState } from './fabricServiceInitialization';
+import { applyPredictionDismissFeedback } from './fabricServicePredictionUtils';
+import { getProactiveQuestionText, resolveQuestionShownState } from './fabricServiceQuestionUtils';
+import { buildServiceBriefing, buildServiceInsights, generateWeeklyReportForUser, recomputeServicePredictions, runQueryAndPersistConversation } from './fabricServiceRuntime';
 
 const SAVE_DEBOUNCE_MS = 500;
-const PROACTIVE_QUESTION_TYPES: readonly ProactiveQuestionType[] = [
-  'missed_habit',
-  'completion_drop',
-  'category_spike',
-  'surplus_idle',
-];
-
-const PREDICTION_ID_TYPE_MAP: Array<[string, PredictionType]> = [
-  ['pred-budget-overage', 'budget_overage'],
-  ['pred-burn-rate', 'budget_overage'],
-  ['pred-streak-risk', 'streak_at_risk'],
-  ['pred-recurring-due', 'recurring_due'],
-];
-
-function inferPredictionType(predictionId: string): PredictionType | null {
-  for (const [prefix, type] of PREDICTION_ID_TYPE_MAP) {
-    if (predictionId.startsWith(prefix)) return type;
-  }
-  return null;
-}
-
-function isProactiveQuestionType(value: string): value is ProactiveQuestionType {
-  return PROACTIVE_QUESTION_TYPES.includes(value as ProactiveQuestionType);
-}
 
 export class FabricService implements IFabricService {
   private static instance: FabricService | undefined;
@@ -82,47 +29,30 @@ export class FabricService implements IFabricService {
   private recurring: RecurringTransaction[] = [];
   private predictions: Prediction[] = [];
   private dismissedPredictionIds = new Set<string>();
-  /** Dirty flag — predictions are only recomputed when state has changed */
   private predictionsDirty = false;
   private lastQuestionState: ProactiveQuestionState | null = null;
 
   private constructor() {}
 
   isEnabled(): boolean { return this.enabled; }
+  getContext(): FabricContext { return getAmbientContext(new Date(), this.userTimezone); }
+  getPatterns(): UserPattern[] { return this.engine.getPatterns(); }
+  getConfirmedPatterns(): UserPattern[] { return this.engine.getConfirmedPatterns(); }
+  parseIntent(input: string): ParsedIntent { return parseIntent(input); }
 
   async initialize(userId: string): Promise<void> {
     this.activeUserId = userId;
-
-    const settings = await secureDb.getDocument<FabricSettings>(userId, ['fabric_settings', 'state']);
-    this.enabled = settings?.enabled === true;
-
-    const profile = await secureDb.getDocument<{ timezone?: string }>(userId, []);
-    this.userTimezone = profile?.timezone;
-
-    if (!this.enabled) {
-      this.engine.reset();
-      return;
-    }
-
-    await this.engine.loadBehavior(userId);
-    const { transactions, commitments, accounts, recurring } = await loadFabricActivity(userId);
-    this.transactions = transactions;
-    this.commitments = commitments;
-    this.accounts = accounts;
-    this.recurring = recurring;
-    this.dismissedPredictionIds = await loadDismissedPredictionIds(userId);
-
-    if (this.engine.getPatterns().length === 0) {
-      this.engine.seedFromHistory(this.transactions, this.commitments);
-      if (this.engine.getPatterns().length > 0) {
-        await this.engine.saveBehavior(userId);
-      }
-    }
-
+    const initialized = await initializeFabricState(userId, this.engine);
+    this.enabled = initialized.enabled;
+    this.userTimezone = initialized.userTimezone;
+    this.transactions = initialized.transactions;
+    this.commitments = initialized.commitments;
+    this.accounts = initialized.accounts;
+    this.recurring = initialized.recurring;
+    this.dismissedPredictionIds = initialized.dismissedPredictionIds;
+    if (!this.enabled) return;
     this.recomputePredictions();
   }
-
-  getContext(): FabricContext { return getAmbientContext(new Date(), this.userTimezone); }
 
   learnFrom(trigger: PatternTrigger, action: PatternAction): void {
     if (!this.enabled || !this.activeUserId) return;
@@ -131,25 +61,13 @@ export class FabricService implements IFabricService {
     this.scheduleSave();
   }
 
-  /**
-   * Push updated data from real-time listeners into the service so insights
-   * and predictions always reflect the latest state.
-   */
-  updateActivity(
-    transactions: AnchorTransaction[],
-    commitments: AnchorTask[],
-    accounts: AnchorAccount[],
-    recurring: RecurringTransaction[],
-  ): void {
+  updateActivity(transactions: AnchorTransaction[], commitments: AnchorTask[], accounts: AnchorAccount[], recurring: RecurringTransaction[]): void {
     this.transactions = transactions;
     this.commitments = commitments;
     this.accounts = accounts;
     this.recurring = recurring;
     this.predictionsDirty = true;
   }
-
-  getPatterns(): UserPattern[] { return this.engine.getPatterns(); }
-  getConfirmedPatterns(): UserPattern[] { return this.engine.getConfirmedPatterns(); }
 
   dismissPattern(patternId: string): void {
     if (!this.enabled || !this.activeUserId) return;
@@ -165,10 +83,7 @@ export class FabricService implements IFabricService {
 
   async clearAllData(): Promise<void> {
     if (!this.activeUserId) return;
-
-    const now = new Date().toISOString();
-    await clearFabricData(this.activeUserId, this.enabled, now);
-
+    await clearFabricData(this.activeUserId, this.enabled, new Date().toISOString());
     this.engine.reset();
     this.predictions = [];
     this.dismissedPredictionIds.clear();
@@ -184,125 +99,45 @@ export class FabricService implements IFabricService {
 
   dismissPrediction(predictionId: string): void {
     if (!this.activeUserId) return;
-
-    const prediction = this.predictions.find((p) => p.id === predictionId);
-    const predType = prediction?.type ?? inferPredictionType(predictionId);
-
-    if (predType) {
-      const patterns = this.engine.getConfirmedPatterns();
-      let matchedPattern: UserPattern | undefined;
-
-      if (predType === 'budget_overage' || predType === 'recurring_due') {
-        matchedPattern = patterns.find((p) => p.followUpAction.type === 'review_budget');
-      } else if (predType === 'streak_at_risk') {
-        matchedPattern = patterns.find((p) => p.trigger.type === 'commitment_completed');
-      }
-
-      if (matchedPattern) {
-        this.engine.dismissPattern(matchedPattern.id);
-        this.scheduleSave();
-      }
-    }
-
+    if (applyPredictionDismissFeedback(this.engine, this.predictions, predictionId)) this.scheduleSave();
     this.dismissedPredictionIds.add(predictionId);
     this.predictions = this.predictions.filter((p) => p.id !== predictionId);
     void persistPredictionState(this.activeUserId, this.predictions, this.dismissedPredictionIds);
   }
 
   getInsightsFor(feature: 'dashboard' | 'commitments' | 'finance' | 'family'): Insight[] {
-    return buildInsights({
-      feature,
-      transactions: this.transactions,
-      commitments: this.commitments,
-      recurring: this.recurring,
-      now: new Date(),
-    });
+    return buildServiceInsights(feature, this.transactions, this.commitments, this.recurring);
   }
 
   getBriefing() {
-    return buildDailyBriefing(
-      this.getContext().timeOfDay,
-      this.transactions,
-      this.commitments,
-      this.recurring,
-      new Date(),
-    );
+    return buildServiceBriefing(this.getContext().timeOfDay, this.transactions, this.commitments, this.recurring);
   }
 
   getProactiveQuestion(): string | null {
     if (!this.enabled) return null;
-    const result = generateProactiveQuestion(
-      {
-        patterns: this.engine.getPatterns(),
-        transactions: this.transactions,
-        commitments: this.commitments,
-        accounts: this.accounts,
-        now: new Date(),
-      },
-      this.lastQuestionState,
-    );
-    return result?.question ?? null;
+    return getProactiveQuestionText(this.questionContext(), this.lastQuestionState);
   }
 
   markQuestionShown(question: ProactiveQuestionType | string): void {
-    const result = generateProactiveQuestion(
-      {
-        patterns: this.engine.getPatterns(),
-        transactions: this.transactions,
-        commitments: this.commitments,
-        accounts: this.accounts,
-        now: new Date(),
-      },
-      null, // bypass dedup to get the actual question text
-    );
-
-    const resolvedType = isProactiveQuestionType(question)
-      ? question
-      : (result?.question === question ? result.questionType : null);
-
-    if (!resolvedType) return;
-
-    this.lastQuestionState = {
-      question,
-      questionType: resolvedType,
-      shownAt: new Date().toISOString(),
-    };
+    this.lastQuestionState = resolveQuestionShownState(this.questionContext(), question);
   }
 
   async generateWeeklyReport(): Promise<WeeklyReport> {
-    if (!this.activeUserId) {
-      throw new Error('Fabric service is not initialized for a user.');
-    }
-
-    const now = new Date();
-    const report = buildWeeklyReport({
-      transactions: this.transactions,
-      commitments: this.commitments,
-      now,
-    });
-    await persistWeeklyReport(this.activeUserId, report);
-    return report;
+    if (!this.activeUserId) throw new Error('Fabric service is not initialized for a user.');
+    return generateWeeklyReportForUser(this.activeUserId, this.transactions, this.commitments);
   }
 
-  parseIntent(input: string): ParsedIntent { return parseIntent(input); }
-
   async query(input: string): Promise<FabricQueryResult> {
-    const intent = this.parseIntent(input);
-
-    const result = runFabricQuery({
-      intent,
-      input,
+    return runQueryAndPersistConversation({
+      rawInput: input,
+      intent: this.parseIntent(input),
+      userId: this.activeUserId,
+      enabled: this.enabled,
       transactions: this.transactions,
       commitments: this.commitments,
       accounts: this.accounts,
       recurring: this.recurring,
-      now: new Date(),
     });
-
-    if (this.activeUserId && this.enabled) {
-      await appendFabricConversation(this.activeUserId, input, result.summary);
-    }
-    return result;
   }
 
   dispose(): void {
@@ -311,10 +146,18 @@ export class FabricService implements IFabricService {
     this.saveTimer = null;
   }
 
+  private questionContext() {
+    return {
+      engine: this.engine,
+      transactions: this.transactions,
+      commitments: this.commitments,
+      accounts: this.accounts,
+    };
+  }
+
   private scheduleSave(): void {
     if (!this.activeUserId) return;
     if (this.saveTimer) clearTimeout(this.saveTimer);
-
     this.saveTimer = setTimeout(async () => {
       if (!this.activeUserId) return;
       await this.engine.saveBehavior(this.activeUserId);
@@ -324,13 +167,12 @@ export class FabricService implements IFabricService {
   }
 
   private recomputePredictions(): void {
-    if (!this.enabled) { this.predictions = []; return; }
-    const computed = buildPredictions({
-      patterns: this.engine.getPatterns(),
+    this.predictions = recomputeServicePredictions({
+      enabled: this.enabled,
+      engine: this.engine,
       transactions: this.transactions,
       commitments: this.commitments,
-      now: new Date(),
+      dismissedPredictionIds: this.dismissedPredictionIds,
     });
-    this.predictions = computed.filter((item) => !this.dismissedPredictionIds.has(item.id));
   }
 }

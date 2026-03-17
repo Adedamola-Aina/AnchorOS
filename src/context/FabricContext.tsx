@@ -1,74 +1,33 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { collection, onSnapshot, orderBy, query, where, limit } from 'firebase/firestore';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type {
-  AnchorAccount,
-  AnchorTask,
-  AnchorTransaction,
-  FabricContext as FabricAmbientContext,
   FabricQueryResult,
   Insight,
   PatternAction,
   PatternTrigger,
   Prediction,
-  RecurringTransaction,
   UserPattern,
   WeeklyReport,
 } from '../types';
 import type { DailyBriefing, MoodEntry } from '../types/fabricBriefing';
+import type { FabricAmbientContext } from '../types';
 import { useAuth } from './AuthContext';
-import { evaluateFeatureFlag } from '../features/flags/featureFlags';
 import { FabricService } from '../services/fabric/FabricService';
-import { db, APP_ID } from '../config/firebase';
 import { secureDb } from '../utils/secureDb';
-import { logEvent } from '../services/telemetry';
-
-interface FabricContextValue {
-  isEnabled: boolean;
-  isReady: boolean;
-  initError: string | null;
-  context: FabricAmbientContext;
-  patterns: UserPattern[];
-  confirmedPatterns: UserPattern[];
-  predictions: Prediction[];
-  insights: Insight[];
-  lastQueryResult: FabricQueryResult | null;
-  weeklyReport: WeeklyReport | null;
-  briefing: DailyBriefing | null;
-  moodToday: MoodEntry | null;
-  learnFrom: (trigger: PatternTrigger, action: PatternAction) => void;
-  dismissPattern: (patternId: string) => void;
-  deletePattern: (patternId: string) => void;
-  dismissPrediction: (predictionId: string) => void;
-  runQuery: (input: string) => Promise<FabricQueryResult>;
-  generateWeeklyReport: () => Promise<WeeklyReport | null>;
-  saveMood: (mood: MoodEntry['mood'], note?: string) => Promise<void>;
-  clearAllData: () => Promise<void>;
-  proactiveQuestion: string | null;
-  markQuestionShown: (question: string) => void;
-  refresh: () => void;
-}
+import { EMPTY_FABRIC_CONTEXT, type FabricContextValue } from './fabric/fabricContext.types';
+import { useFabricInitialization } from './fabric/useFabricInitialization';
+import { useFabricLiveSync } from './fabric/useFabricLiveSync';
 
 const FabricContext = createContext<FabricContextValue | undefined>(undefined);
 
-const EMPTY_CONTEXT: FabricAmbientContext = {
-  timeOfDay: 'morning',
-  dayOfWeek: 0,
-  isWeekend: false,
-  isFirstOfMonth: false,
-  isEndOfMonth: false,
-  dayOfMonth: 1,
-  hour: 0,
-  specialContext: null,
-};
-
 export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
+  const userId = user?.uid ?? null;
   const fabricService = useMemo(() => FabricService.getInstance(), []);
 
   const [isEnabled, setIsEnabled] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
-  const [context, setContext] = useState<FabricAmbientContext>(EMPTY_CONTEXT);
+  const [context, setContext] = useState<FabricAmbientContext>(EMPTY_FABRIC_CONTEXT);
   const [patterns, setPatterns] = useState<UserPattern[]>([]);
   const [confirmedPatterns, setConfirmedPatterns] = useState<UserPattern[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -78,12 +37,6 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [briefing, setBriefing] = useState<DailyBriefing | null>(null);
   const [moodToday, setMoodToday] = useState<MoodEntry | null>(null);
   const [proactiveQuestion, setProactiveQuestion] = useState<string | null>(null);
-
-  // Live data refs — updated by Firestore subscriptions below
-  const liveTransactions = useRef<AnchorTransaction[]>([]);
-  const liveCommitments = useRef<AnchorTask[]>([]);
-  const liveAccounts = useRef<AnchorAccount[]>([]);
-  const liveRecurring = useRef<RecurringTransaction[]>([]);
 
   const refresh = useCallback(() => {
     setContext(fabricService.getContext());
@@ -100,117 +53,34 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setProactiveQuestion(fabricService.getProactiveQuestion());
   }, [fabricService]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const resetDisabledState = useCallback(() => {
+    setIsEnabled(false);
+    setIsReady(false);
+    setPatterns([]);
+    setConfirmedPatterns([]);
+    setPredictions([]);
+    setInsights([]);
+    setLastQueryResult(null);
+    setWeeklyReport(null);
+    setContext(EMPTY_FABRIC_CONTEXT);
+  }, []);
 
-    const initialize = async () => {
-      const enabledByFlag = evaluateFeatureFlag('anchor_ai_enabled', { userId: user?.uid ?? null });
-      if (!user || !enabledByFlag) {
-        if (!isMounted) return;
-        setIsEnabled(false);
-        setIsReady(false);
-        setPatterns([]);
-        setConfirmedPatterns([]);
-        setPredictions([]);
-        setInsights([]);
-        setLastQueryResult(null);
-        setWeeklyReport(null);
-        setContext(EMPTY_CONTEXT);
-        return;
-      }
+  useFabricInitialization({
+    userId,
+    fabricService,
+    refresh,
+    resetDisabledState,
+    setInitError,
+    setIsEnabled,
+    setIsReady,
+  });
 
-      try {
-        await fabricService.initialize(user.uid);
-        if (!isMounted) return;
-        setInitError(null);
-        refresh();
-        setIsReady(true);
-        try { logEvent('fabric.init_succeeded', { level: 'info', attributes: { userId: user.uid } }); } catch { /* telemetry must never break init */ }
-      } catch (err) {
-        if (!isMounted) return;
-        const message = err instanceof Error ? err.message : 'Failed to initialize Anchor AI';
-        try { logEvent('fabric.init_failed', { level: 'error', attributes: { userId: user.uid, error: message, timestamp: new Date().toISOString() } }); } catch { /* telemetry must never break init */ }
-        console.error('[Fabric] Initialization failed:', err);
-        setInitError(message);
-        setIsEnabled(false);
-        setIsReady(true);
-      }
-    };
-
-    initialize();
-
-    return () => {
-      isMounted = false;
-      fabricService.dispose();
-    };
-  }, [fabricService, refresh, user]);
-
-  // Keep FabricService in sync with live Firestore data so queries reflect
-  // real-time changes without requiring a full re-initialization.
-  useEffect(() => {
-    if (!user || !isEnabled) return;
-    const uid = user.uid;
-
-    const push = () => {
-      fabricService.updateActivity(
-        liveTransactions.current,
-        liveCommitments.current,
-        liveAccounts.current,
-        liveRecurring.current,
-      );
-      refresh();
-    };
-
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-    const unsubFinance = onSnapshot(
-      query(
-        collection(db, 'artifacts', APP_ID, 'users', uid, 'finance'),
-        where('date', '>=', oneYearAgo.toISOString()),
-        orderBy('date', 'desc'),
-        limit(500),
-      ),
-      (snap) => {
-        liveTransactions.current = snap.docs.map((d) => ({ id: d.id, ...d.data() } as AnchorTransaction));
-        push();
-      },
-    );
-
-    const unsubCommitments = onSnapshot(
-      collection(db, 'artifacts', APP_ID, 'users', uid, 'commitments'),
-      (snap) => {
-        liveCommitments.current = snap.docs.map((d) => ({ id: d.id, ...d.data() } as AnchorTask));
-        push();
-      },
-    );
-
-    const unsubAccounts = onSnapshot(
-      query(collection(db, 'artifacts', APP_ID, 'users', uid, 'accounts'), limit(50)),
-      (snap) => {
-        liveAccounts.current = snap.docs.map((d) => ({ id: d.id, ...d.data() } as AnchorAccount));
-        push();
-      },
-    );
-
-    const unsubRecurring = onSnapshot(
-      query(
-        collection(db, 'artifacts', APP_ID, 'recurring_transactions'),
-        where('userId', '==', uid),
-      ),
-      (snap) => {
-        liveRecurring.current = snap.docs.map((d) => ({ id: d.id, ...d.data() } as RecurringTransaction));
-        push();
-      },
-    );
-
-    return () => {
-      unsubFinance();
-      unsubCommitments();
-      unsubAccounts();
-      unsubRecurring();
-    };
-  }, [user, isEnabled, fabricService, refresh]);
+  useFabricLiveSync({
+    userId,
+    isEnabled,
+    fabricService,
+    refresh,
+  });
 
   const learnFrom = useCallback((trigger: PatternTrigger, action: PatternAction) => {
     fabricService.learnFrom(trigger, action);
@@ -255,22 +125,21 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setProactiveQuestion(null);
   }, [fabricService]);
 
-  // Load today's mood on mount (once user is known)
   useEffect(() => {
-    if (!user || !isEnabled) return;
+    if (!userId || !isEnabled) return;
     const today = new Date().toISOString().slice(0, 10);
-    void secureDb.getDocument<MoodEntry>(user.uid, ['mood_entries', today])
+    void secureDb.getDocument<MoodEntry>(userId, ['mood_entries', today])
       .then((entry) => { if (entry) setMoodToday(entry); })
       .catch(() => { /* non-critical */ });
-  }, [user, isEnabled]);
+  }, [userId, isEnabled]);
 
   const saveMood = useCallback(async (mood: MoodEntry['mood'], note?: string) => {
-    if (!user) return;
+    if (!userId) return;
     const today = new Date().toISOString().slice(0, 10);
     const entry: MoodEntry = { date: today, mood, ...(note ? { note } : {}), createdAt: new Date().toISOString() };
     setMoodToday(entry);
-    await secureDb.setDocument(user.uid, ['mood_entries', today], entry as unknown as Record<string, unknown>);
-  }, [user]);
+    await secureDb.setDocument(userId, ['mood_entries', today], entry as unknown as Record<string, unknown>);
+  }, [userId]);
 
   const value = useMemo<FabricContextValue>(() => ({
     isEnabled,
@@ -296,37 +165,9 @@ export const FabricProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     proactiveQuestion,
     markQuestionShown,
     refresh,
-  }), [
-    briefing,
-    clearAllData,
-    confirmedPatterns,
-    context,
-    deletePattern,
-    dismissPattern,
-    dismissPrediction,
-    generateWeeklyReport,
-    insights,
-    initError,
-    isEnabled,
-    isReady,
-    lastQueryResult,
-    learnFrom,
-    markQuestionShown,
-    moodToday,
-    patterns,
-    predictions,
-    proactiveQuestion,
-    refresh,
-    runQuery,
-    saveMood,
-    weeklyReport,
-  ]);
+  }), [briefing, clearAllData, confirmedPatterns, context, deletePattern, dismissPattern, dismissPrediction, generateWeeklyReport, insights, initError, isEnabled, isReady, lastQueryResult, learnFrom, markQuestionShown, moodToday, patterns, predictions, proactiveQuestion, refresh, runQuery, saveMood, weeklyReport]);
 
-  return (
-    <FabricContext.Provider value={value}>
-      {children}
-    </FabricContext.Provider>
-  );
+  return <FabricContext.Provider value={value}>{children}</FabricContext.Provider>;
 };
 
 export const useFabricContext = (): FabricContextValue => {
