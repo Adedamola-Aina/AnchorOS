@@ -738,6 +738,77 @@ Anchor OS uses a policy-gated Checkmarx workflow in `.github/workflows/checkmarx
 
 ---
 
+## Rate Limiting Architecture
+
+Anchor OS uses **two distinct layers** of rate limiting that serve different purposes. Understanding the distinction is critical when reviewing security incidents or designing new features.
+
+### Layer 1: Client-Side Rate Limiting (`src/utils/rateLimit.ts`)
+
+**Purpose**: UX protection — prevents accidental double-submits and throttles expensive UI-triggered requests.
+
+**Mechanism**: In-memory `Map` keyed by operation name. Limits are enforced per browser tab per session.
+
+**Properties**:
+- ✅ Zero network overhead — runs entirely in the client
+- ✅ Immediate feedback to the user (no round-trip needed)
+- ❌ **Not a security control** — can be bypassed by any client that ignores it
+- ❌ Resets on page reload; does not persist across sessions or devices
+
+**When to use**: Wrap any user-initiated action that would fire multiple Firestore writes if clicked rapidly (e.g., submitting a transaction, sending a family invite).
+
+```typescript
+// src/utils/rateLimit.ts — client-side guard (UX only)
+import { checkRateLimit } from '@/utils/rateLimit';
+
+const allowed = checkRateLimit('add-transaction');
+if (!allowed) {
+  showToast('Please wait before submitting again.');
+  return;
+}
+```
+
+### Layer 2: Server-Side Rate Limiting (`functions/src/rateLimit.ts`)
+
+**Purpose**: Security enforcement — prevents brute force, credential stuffing, and abuse of Cloud Functions.
+
+**Mechanism**: Firestore-backed atomic counter with TTL window, enforced inside Cloud Functions using Admin SDK. Writes to the `rate_limits` collection under an audit trail.
+
+**Properties**:
+- ✅ Cannot be bypassed by clients — enforced server-side
+- ✅ Persists across sessions, devices, and IPs within a window
+- ✅ Audit log written on each blocked request
+- ❌ Requires a Firestore read/write on every checked operation (small latency cost)
+- ❌ Does not protect client-side SDK calls (use Firestore Rules for those)
+
+**When to use**: Any Cloud Function that handles authentication, family invitations, PIN verification, or any operation that should be limited to N attempts per time window.
+
+```typescript
+// functions/src/rateLimit.ts — server-side guard (security control)
+import { enforceRateLimit } from './rateLimit';
+
+// Inside a Cloud Function:
+await enforceRateLimit(uid, 'mfa-verify', { maxAttempts: 5, windowSeconds: 300 });
+// Throws HttpsError('resource-exhausted') if limit is exceeded
+```
+
+### Decision Matrix
+
+| Scenario | Use Client-Side | Use Server-Side | Use Both |
+|----------|---------------|-----------------|---------|
+| Double-submit prevention | ✅ | ❌ | ❌ |
+| Brute force / credential stuffing | ❌ | ✅ | ❌ |
+| MFA verification attempts | ❌ | ✅ | ❌ |
+| Family invite sends | ✅ (UX) | ✅ (security) | ✅ |
+| Expensive read-only queries | ✅ | ❌ | ❌ |
+| Financial write operations | ✅ (UX) | ✅ (abuse) | ✅ |
+
+### Key Rule
+
+> **Client-side rate limiting is a UX courtesy, not a security boundary.**  
+> Any operation with a security requirement MUST be rate-limited server-side regardless of whether the client also limits it.
+
+---
+
 ## Related Documentation
 
 - **FIRESTORE_SCHEMA.md** - Complete security rules
