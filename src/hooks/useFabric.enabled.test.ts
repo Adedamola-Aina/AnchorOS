@@ -7,15 +7,15 @@ const mockDismissPattern = vi.fn();
 const mockDeletePattern = vi.fn();
 const mockDismissPrediction = vi.fn();
 const mockRunQuery = vi.fn(async () => ({ summary: 'ok' }));
-const mockGenerateWeeklyReport = vi.fn(async () => ({ weekStart: 'x' }));
+const mockGenerateWeeklyReport = vi.fn(async () => ({ weekStart: 'a' }));
 const mockSaveMood = vi.fn(async () => undefined);
 const mockClearAllData = vi.fn(async () => undefined);
 const mockMarkQuestionShown = vi.fn();
 
 vi.mock('../context/FabricContext', () => ({
   useFabricContext: () => ({
-    isEnabled: false,
-    isReady: false,
+    isEnabled: true,
+    isReady: true,
     context: {
       timeOfDay: 'morning',
       dayOfWeek: 1,
@@ -48,30 +48,36 @@ vi.mock('../context/FabricContext', () => ({
   }),
 }));
 
-describe('useFabric', () => {
-  it('no-ops mutating operations when disabled', async () => {
+describe('useFabric enabled behavior', () => {
+  it('forwards mutating operations when enabled', () => {
     const { result } = renderHook(() => useFabric());
 
     result.current.learnFrom({ type: 'app_opened' }, { type: 'view_page', page: 'dashboard' });
     result.current.dismissPattern('p-1');
     result.current.deletePattern('p-1');
     result.current.dismissPrediction('pred-1');
-    result.current.markQuestionShown('Q');
-    const query = await result.current.runQuery('hello');
-    const report = await result.current.generateWeeklyReport();
-    await result.current.saveMood(4, 'note');
+    result.current.markQuestionShown('Question?');
+
+    expect(mockLearnFrom).toHaveBeenCalledTimes(1);
+    expect(mockDismissPattern).toHaveBeenCalledWith('p-1');
+    expect(mockDeletePattern).toHaveBeenCalledWith('p-1');
+    expect(mockDismissPrediction).toHaveBeenCalledWith('pred-1');
+    expect(mockMarkQuestionShown).toHaveBeenCalledWith('Question?');
+  });
+
+  it('forwards async operations when enabled', async () => {
+    const { result } = renderHook(() => useFabric());
+
+    const queryResult = await result.current.runQuery('hello');
+    const reportResult = await result.current.generateWeeklyReport();
+    await result.current.saveMood(5, 'Good day');
     await result.current.clearAllData();
 
-    expect(mockLearnFrom).not.toHaveBeenCalled();
-    expect(mockDismissPattern).not.toHaveBeenCalled();
-    expect(mockDeletePattern).not.toHaveBeenCalled();
-    expect(mockDismissPrediction).not.toHaveBeenCalled();
-    expect(mockMarkQuestionShown).not.toHaveBeenCalled();
-    expect(mockRunQuery).not.toHaveBeenCalled();
-    expect(mockGenerateWeeklyReport).not.toHaveBeenCalled();
-    expect(mockSaveMood).not.toHaveBeenCalled();
-    expect(mockClearAllData).not.toHaveBeenCalled();
-    expect(query).toBeNull();
-    expect(report).toBeNull();
+    expect(mockRunQuery).toHaveBeenCalledWith('hello');
+    expect(mockGenerateWeeklyReport).toHaveBeenCalledTimes(1);
+    expect(mockSaveMood).toHaveBeenCalledWith(5, 'Good day');
+    expect(mockClearAllData).toHaveBeenCalledTimes(1);
+    expect(queryResult).toEqual({ summary: 'ok' });
+    expect(reportResult).toEqual({ weekStart: 'a' });
   });
 });

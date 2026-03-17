@@ -142,6 +142,24 @@ describe('getCompletionByDayOfWeek', () => {
     const result = getCompletionByDayOfWeek(tasks, now);
     expect(result).toEqual({});
   });
+
+  it('caps completion rates at 1 when multiple completions happen on the same weekday', () => {
+    const tasks: AnchorTask[] = [];
+    for (let i = 1; i <= 42; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      d.setHours(12, 0, 0, 0);
+
+      if (d.getDay() === 1) {
+        tasks.push(makeTask({ lastCompletedAt: d.toISOString(), type: 'daily' }));
+        tasks.push(makeTask({ lastCompletedAt: d.toISOString(), type: 'daily' }));
+        tasks.push(makeTask({ lastCompletedAt: d.toISOString(), type: 'daily' }));
+      }
+    }
+
+    const result = getCompletionByDayOfWeek(tasks, now);
+    expect(result[1]).toBe(1);
+  });
 });
 
 // ── getHighSpendDay ──────────────────────────────────────────────
@@ -194,6 +212,16 @@ describe('getHighSpendDay', () => {
     const result = getHighSpendDay(txns, now);
     expect(result).toBeNull();
   });
+
+  it('returns null when all weekday averages are zero', () => {
+    const txns: AnchorTransaction[] = [];
+    for (let i = 1; i <= 60; i++) {
+      txns.push(makeTx({ date: daysAgo(i, now), amountCents: 0 }));
+    }
+
+    const result = getHighSpendDay(txns, now);
+    expect(result).toBeNull();
+  });
 });
 
 // ── getBestCompletionDay ─────────────────────────────────────────
@@ -230,6 +258,31 @@ describe('getBestCompletionDay', () => {
     expect(result!.day).toBe(3);
     expect(result!.dayName).toBe('Wednesday');
     expect(result!.value).toBeGreaterThan(0);
+  });
+
+  it('ignores non-daily task completions when computing best day', () => {
+    const tasks: AnchorTask[] = [];
+
+    for (let i = 1; i <= 70; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      d.setHours(12, 0, 0, 0);
+      const dow = d.getDay();
+
+      if (dow === 3) {
+        tasks.push(makeTask({ lastCompletedAt: d.toISOString(), type: 'daily' }));
+      }
+
+      if (dow === 5) {
+        tasks.push(makeTask({ lastCompletedAt: d.toISOString(), type: 'weekly' }));
+        tasks.push(makeTask({ lastCompletedAt: d.toISOString(), type: 'weekly' }));
+      }
+    }
+
+    const result = getBestCompletionDay(tasks, now);
+    expect(result).not.toBeNull();
+    expect(result!.day).toBe(3);
+    expect(result!.dayName).toBe('Wednesday');
   });
 });
 
