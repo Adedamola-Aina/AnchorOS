@@ -94,7 +94,7 @@ describe('FabricView', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByPlaceholderText('What do I have today? Plan my week…')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('What do I have today? Plan my week...')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument();
   });
 

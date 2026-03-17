@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
 
@@ -20,6 +20,17 @@ const ThrowingChild = ({ shouldThrow }: { shouldThrow: boolean }) => {
 };
 
 describe('ErrorBoundary', () => {
+    const originalConfirm = window.confirm;
+    const originalIndexedDb = window.indexedDB;
+
+    beforeEach(() => {
+        window.confirm = originalConfirm;
+        Object.defineProperty(window, 'indexedDB', {
+            value: originalIndexedDb,
+            configurable: true,
+        });
+    });
+
     it('renders children when no error', () => {
         render(
             <ErrorBoundary>
@@ -94,5 +105,66 @@ describe('ErrorBoundary', () => {
             </ErrorBoundary>
         );
         expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    });
+
+    it('reload button can be clicked from error UI', () => {
+        render(
+            <ErrorBoundary>
+                <ThrowingChild shouldThrow={true} />
+            </ErrorBoundary>
+        );
+
+        expect(() => fireEvent.click(screen.getByRole('button', { name: /reload application/i }))).not.toThrow();
+    });
+
+    it('does not clear data when reset is canceled', async () => {
+        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+        const clearLocalSpy = vi.spyOn(window.localStorage, 'clear');
+        const clearSessionSpy = vi.spyOn(window.sessionStorage, 'clear');
+
+        render(
+            <ErrorBoundary>
+                <ThrowingChild shouldThrow={true} />
+            </ErrorBoundary>
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: /reset app data/i }));
+
+        await waitFor(() => {
+            expect(confirmSpy).toHaveBeenCalledTimes(1);
+        });
+        expect(clearLocalSpy).not.toHaveBeenCalled();
+        expect(clearSessionSpy).not.toHaveBeenCalled();
+    });
+
+    it('clears storage and deletes indexed databases when reset is confirmed', async () => {
+        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+        const deleteDatabase = vi.fn();
+        const databases = vi.fn().mockResolvedValue([{ name: 'db1' }, { name: undefined }, { name: 'db2' }]);
+
+        window.localStorage.setItem('key', 'value');
+        window.sessionStorage.setItem('skey', 'svalue');
+
+        Object.defineProperty(window, 'indexedDB', {
+            value: { databases, deleteDatabase },
+            configurable: true,
+        });
+
+        render(
+            <ErrorBoundary>
+                <ThrowingChild shouldThrow={true} />
+            </ErrorBoundary>
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: /reset app data/i }));
+
+        await waitFor(() => {
+            expect(confirmSpy).toHaveBeenCalled();
+            expect(window.localStorage.getItem('key')).toBeNull();
+            expect(window.sessionStorage.getItem('skey')).toBeNull();
+            expect(databases).toHaveBeenCalledTimes(1);
+            expect(deleteDatabase).toHaveBeenCalledWith('db1');
+            expect(deleteDatabase).toHaveBeenCalledWith('db2');
+        });
     });
 });

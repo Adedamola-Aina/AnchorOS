@@ -126,4 +126,72 @@ describe('Modal - REG-003 Regression Test', () => {
         );
         expect(document.body.style.overflow).toBe('hidden');
     });
+
+    it('applies desktop modal classes when fullScreenMobile is false', () => {
+        render(
+            <Modal isOpen={true} onClose={vi.fn()} title="Desktop" fullScreenMobile={false} maxWidth="max-w-md">
+                <div>Desktop content</div>
+            </Modal>
+        );
+
+        const dialog = screen.getByRole('dialog');
+        const contentContainer = dialog.querySelector('.max-w-md');
+        expect(contentContainer).toBeTruthy();
+        expect(contentContainer?.className).toContain('rounded-2xl');
+        expect(contentContainer?.className).toContain('max-h-[90vh]');
+    });
+
+    it('traps focus when tabbing past first and last elements', () => {
+        render(
+            <Modal isOpen={true} onClose={vi.fn()} title="Trap">
+                <button data-testid="first">First</button>
+                <button data-testid="last">Last</button>
+            </Modal>
+        );
+
+        const closeButton = screen.getByRole('button', { name: /close modal/i });
+        const last = screen.getByTestId('last');
+
+        last.focus();
+        fireEvent.keyDown(document, { key: 'Tab' });
+        expect(closeButton).toHaveFocus();
+
+        closeButton.focus();
+        fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+        expect(last).toHaveFocus();
+    });
+
+    it('restores focus to previously active element when modal closes', () => {
+        const { rerender } = render(
+            <div>
+                <button data-testid="outside">Outside</button>
+                <Modal isOpen={false} onClose={vi.fn()} title="Closed">
+                    <div>Hidden</div>
+                </Modal>
+            </div>
+        );
+
+        const outside = screen.getByTestId('outside');
+        outside.focus();
+
+        rerender(
+            <div>
+                <button data-testid="outside">Outside</button>
+                <Modal isOpen={true} onClose={vi.fn()} title="Open">
+                    <button>Inside</button>
+                </Modal>
+            </div>
+        );
+
+        rerender(
+            <div>
+                <button data-testid="outside">Outside</button>
+                <Modal isOpen={false} onClose={vi.fn()} title="Closed">
+                    <div>Hidden</div>
+                </Modal>
+            </div>
+        );
+
+        expect(screen.getByTestId('outside')).toHaveFocus();
+    });
 });
