@@ -41,9 +41,10 @@ test.describe('Mobile Viewport - Auth Page', () => {
         expect(submitBox?.width).toBeGreaterThan(250); // Button should be wide on mobile
     });
 
-    test('should hide hero panel on mobile', async () => {
-        // Hero panel is typically hidden on mobile
-        expect(true).toBe(true); // Structure test - validates mobile layout loads
+    test('should hide hero panel on mobile', async ({ page }) => {
+        // Hero panel (AuthLeftPanel) uses `hidden lg:flex` — it is NOT visible at 375px
+        const heroPanel = page.locator('.hidden.lg\:flex').first();
+        await expect(heroPanel).not.toBeVisible();
     });
 
     test('should have touch-friendly input sizes', async ({ page }) => {
@@ -63,9 +64,6 @@ test.describe('Mobile Viewport - Auth Page', () => {
         if (await eyeIcon.isVisible()) {
             await eyeIcon.click();
         }
-
-        // Test passes if page loads correctly
-        expect(true).toBe(true);
     });
 
     test('should work in landscape orientation', async ({ page }) => {
@@ -92,8 +90,7 @@ test.describe('Mobile Viewport - Dashboard', () => {
             // Navigation should be accessible on mobile
             await expect(dashboardBtn).toBeVisible();
         } else {
-            // Not logged in - still passes (email verification)
-            expect(true).toBe(true);
+            test.skip();
         }
     });
 
@@ -105,7 +102,7 @@ test.describe('Mobile Viewport - Dashboard', () => {
             const pageHeight = await page.evaluate(() => document.body.scrollHeight);
             expect(pageHeight).toBeGreaterThan(0);
         } else {
-            expect(true).toBe(true);
+            test.skip();
         }
     });
 
@@ -116,9 +113,10 @@ test.describe('Mobile Viewport - Dashboard', () => {
             // Charts should resize for mobile
             const charts = page.locator('svg').first();
             const isChartVisible = await charts.isVisible().catch(() => false);
-            expect(isChartVisible || true).toBe(true);
+            // SVG charts render — verify at least one is present in the DOM
+            expect(isChartVisible).toBe(true);
         } else {
-            expect(true).toBe(true);
+            test.skip();
         }
     });
 });
@@ -143,7 +141,7 @@ test.describe('Mobile Viewport - Finance', () => {
             const cardCount = await cards.count();
             expect(cardCount).toBeGreaterThanOrEqual(0);
         } else {
-            expect(true).toBe(true);
+            test.skip();
         }
     });
 
@@ -161,7 +159,6 @@ test.describe('Mobile Viewport - Finance', () => {
                 expect(btnBox?.height).toBeGreaterThanOrEqual(36);
             }
         }
-        expect(true).toBe(true);
     });
 
     test('should allow horizontal scroll for transactions on mobile', async ({ page }) => {
@@ -178,7 +175,6 @@ test.describe('Mobile Viewport - Finance', () => {
             // Allow some tolerance for margins
             expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 50);
         }
-        expect(true).toBe(true);
     });
 });
 
@@ -207,8 +203,9 @@ test.describe('Dark Mode on Mobile', () => {
         await page.setViewportSize(MOBILE_PORTRAIT);
         await page.goto('/');
 
-        // Dark mode may or may not be auto-applied based on localStorage
-        expect(true).toBe(true); // Structure test
+        // Auth page should render correctly in dark mode
+        const emailInput = page.locator('input[type="email"]');
+        await expect(emailInput).toBeVisible();
     });
 
     test('should toggle theme correctly on mobile', async ({ page }) => {

@@ -6,21 +6,13 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useHaptic } from '../../hooks/useHaptic';
 import { useUnsavedChangesGuard } from '../../hooks/useUnsavedChanges';
-import { navAnimationStyles, getRandomColor, CELEBRATION_COLORS } from './NavIconAnimations';
-import { AnimatedHomeIcon, AnimatedTasksIcon, AnimatedFinanceIcon, AnimatedSettingsIcon, AnimatedAnchorAIIcon } from './AnimatedNavIcons';
+import { navAnimationStyles, getAnimationClass, getRandomColor, CELEBRATION_COLORS } from './NavIconAnimations';
+import { buildBottomNavItems } from './bottomNavigationItems';
 
 interface BottomNavigationProps {
     accountColors?: string[];
     anchorAIEnabled?: boolean;
 }
-
-const ANIMATIONS = {
-    '/dashboard': 'animate-[nav-pulse_200ms_ease-out]',
-    '/commitments': 'animate-[nav-bounce_200ms_ease-out]',
-    '/fabric': 'animate-[fabric-breathe_3s_ease-in-out_infinite]',
-    '/finance': 'animate-[nav-swipe_200ms_ease-out]',
-    '/settings': 'animate-[nav-rotate_200ms_ease-out]',
-} as const;
 
 export const BottomNavigation = ({
     accountColors = [],
@@ -79,77 +71,11 @@ export const BottomNavigation = ({
             : 'text-slate-400 dark:text-slate-500';
     }, [animatingRoute, celebrationColor]);
 
-    const navItems = useMemo(() => {
-        const items = [
-            {
-                to: '/dashboard',
-                label: 'Home',
-                isIconOnly: false,
-                renderIcon: (isAnimating: boolean, className: string) => (
-                    <AnimatedHomeIcon
-                        className={className}
-                        accountColors={accountColors}
-                        isAnimating={isAnimating}
-                    />
-                )
-            },
-            {
-                to: '/commitments',
-                label: 'Tasks',
-                isIconOnly: false,
-                renderIcon: (isAnimating: boolean, className: string) => (
-                    <AnimatedTasksIcon
-                        className={className}
-                        isAnimating={isAnimating}
-                    />
-                )
-            },
-        ];
-
-        if (anchorAIEnabled) {
-            items.push({
-                to: '/fabric',
-                label: 'Anchor AI',
-                isIconOnly: true,
-                renderIcon: (isAnimating: boolean, className: string) => (
-                    <AnimatedAnchorAIIcon
-                        className={`${className} w-6 h-6`}
-                        isAnimating={isAnimating}
-                        isBreathing={true}
-                        isDisabled={false}
-                    />
-                )
-            });
-        }
-
-        items.push(
-            {
-                to: '/finance',
-                label: 'Finance',
-                isIconOnly: false,
-                renderIcon: (isAnimating: boolean, className: string) => (
-                    <AnimatedFinanceIcon
-                        className={className}
-                        isAnimating={isAnimating}
-                    />
-                )
-            },
-            {
-                to: '/settings',
-                label: 'Settings',
-                isIconOnly: false,
-                renderIcon: (isAnimating: boolean, className: string) => (
-                    <AnimatedSettingsIcon
-                        className={className}
-                        isAnimating={isAnimating}
-                        isDarkMode={isDarkMode}
-                    />
-                )
-            }
-        );
-
-        return items;
-    }, [accountColors, anchorAIEnabled, isDarkMode]);
+    const navItems = useMemo(() => buildBottomNavItems({
+        accountColors,
+        anchorAIEnabled,
+        isDarkMode,
+    }), [accountColors, anchorAIEnabled, isDarkMode]);
 
     return (
         <nav
@@ -171,7 +97,7 @@ export const BottomNavigation = ({
                     >
                         {({ isActive }) => {
                             const isAnimating = animatingRoute === to;
-                            const animClass = isAnimating ? ANIMATIONS[to as keyof typeof ANIMATIONS] || '' : '';
+                            const animClass = isAnimating ? getAnimationClass(to) : '';
                             const iconClass = `w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''} ${animClass}`;
 
                             return (
