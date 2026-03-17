@@ -23,7 +23,7 @@ interface TransactionItemProps {
     currentUserId?: string;
 }
 
-export const TransactionItem: React.FC<TransactionItemProps> = ({
+export const TransactionItem: React.FC<TransactionItemProps> = React.memo(({
     transaction,
     accountName,
     currentUserId,
@@ -128,4 +128,4 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
             </div>
         </Card>
     );
-};
+});
