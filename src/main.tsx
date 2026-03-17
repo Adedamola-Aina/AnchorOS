@@ -23,7 +23,7 @@ const initSentryDeferred = async () => {
             Sentry.browserTracingIntegration(),
             Sentry.replayIntegration(),
         ],
-        tracesSampleRate: 1.0,
+        tracesSampleRate: __APP_ENV__ === 'production' ? 0.1 : 1.0,
         replaysSessionSampleRate: 0.1,
         replaysOnErrorSampleRate: 1.0,
         environment: __APP_ENV__,
