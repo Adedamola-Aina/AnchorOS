@@ -256,6 +256,28 @@ jobs:
       - name: Run unit tests
         run: npm run test -- --run
 
+      - name: Enforce query-layer coverage gate
+        run: npm run test:coverage:query-gate
+
+      - name: Generate module coverage report
+        run: npm run test:coverage:modules
+
+      - name: Publish module coverage summary
+        run: |
+          if [ -f coverage/module-coverage-summary.md ]; then
+            cat coverage/module-coverage-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            coverage/coverage-summary.json
+            coverage/module-coverage-summary.json
+            coverage/module-coverage-summary.md
+
   # Job 1.5: E2E Tests
   e2e-tests:
     name: 🎭 E2E Tests
@@ -293,7 +315,7 @@ jobs:
     name: 🧬 Mutation Tests
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
     
     steps:
       - name: Checkout code
@@ -325,7 +347,7 @@ jobs:
     name: 🔒 Rules Tests
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
     
     steps:
       - name: Checkout code
@@ -352,6 +374,38 @@ jobs:
 
       - name: Run Firestore rules tests
         run: npm run test:rules
+
+  # Job 1.8: Integration Tests (FinanceService + emulator)
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Java (for Firebase Emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Run integration tests with emulator
+        run: npm run test:integration
 
   # Job 2: Auto-bump version (only on main branch)
   version-bump:

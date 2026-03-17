@@ -44,7 +44,7 @@ export default {
   thresholds: {
     high: 80,
     low: 60,
-    break: 40,  // Temporary baseline alignment; raise after targeted mutation hardening.
+    break: 60,  // Raised from 40 — incremental hardening target; next step: 70.
   },
   
   // Performance settings
