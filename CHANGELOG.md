@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.13.0-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.12.0...v1.13.0-dev.0) (2026-03-17)
+
+
+### Features
+
+* **dashboard:** enterprise kanban, archive viewer, intelligence panels ([455724c](https://github.com/Adedamola-Aina/AnchorOS/commit/455724ce8cce0b052130da5b52ce5de7986818fd))
+* **fabric:** day-of-week intelligence (session 1) ([d9d2167](https://github.com/Adedamola-Aina/AnchorOS/commit/d9d21671cd987ad0c0dd0cfa703bcf787335996a))
+* **fabric:** session 0a foundation fixes ([09658e6](https://github.com/Adedamola-Aina/AnchorOS/commit/09658e6379ca411932b01fff8d84891a001eddc9))
+* **fabric:** session 0b analytics + observability ([191c88a](https://github.com/Adedamola-Aina/AnchorOS/commit/191c88a6f01b41dab901a24f0c90560aa3e51635))
+* **fabric:** session 2 finance x commitment correlation ([f805aa9](https://github.com/Adedamola-Aina/AnchorOS/commit/f805aa9fbb43624aa3222048824dc16f3ceb9319))
+* **fabric:** session 3 nlp improvements + new query handlers ([cdfb54d](https://github.com/Adedamola-Aina/AnchorOS/commit/cdfb54d110e85c08a919a036b73c2b3a90166d69))
+* **fabric:** session 4 behavioral engine informs predictions ([dbadf19](https://github.com/Adedamola-Aina/AnchorOS/commit/dbadf19645cfb1c83723cf7561d5835883052efe))
+* **fabric:** session 5 - ai asks questions back ([4f3a674](https://github.com/Adedamola-Aina/AnchorOS/commit/4f3a674e2c8c225ca8581f8ee22cf7b8062dd834))
+* **fabric:** session 6 - proactive push nudges ([1a4fe3f](https://github.com/Adedamola-Aina/AnchorOS/commit/1a4fe3f19d8b23023e9887291017b39eb8934ab2))
+
+
+### Bug Fixes
+
+* **functions:** harden fabric nudge timezone and rules coverage ([0c62bba](https://github.com/Adedamola-Aina/AnchorOS/commit/0c62bbacaf4c95860b8903d4f1ec7c1a01cc1733))
+
 ## [1.13.0-rc.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.12.0...v1.13.0-rc.2) (2026-03-15)
 
 
