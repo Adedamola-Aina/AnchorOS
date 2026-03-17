@@ -149,7 +149,7 @@ export default function App() {
             </AppProvider>
           </AuthProvider>
         </NotificationProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </PersistQueryClientProvider>
     </ErrorBoundary>
   );
