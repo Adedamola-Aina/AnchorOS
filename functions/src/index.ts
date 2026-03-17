@@ -7,7 +7,7 @@
 
 
 // Rate limiting
-export { checkRateLimit, resetRateLimit } from './rateLimit';
+export { checkRateLimit, resetRateLimit } from './rateLimitCallables';
 
 // Audit logging
 export { logAuditEvent } from './audit';
@@ -16,10 +16,12 @@ export { logAuditEvent } from './audit';
 export { createFamilyInvitation, revokeInvitation, validateInvitationToken } from './familyInvitations';
 
 // Family Mode — connection lifecycle
-export { acceptInvitation, confirmConnection } from './familyConnection';
+export { acceptInvitation } from './familyConnection';
+export { confirmConnection } from './familyConnectionConfirm';
 
 // Family Mode — sharing, notifications & disconnect
-export { shareAccount, getSharedAccountsWithMe, disconnectFamily } from './familySharing';
+export { shareAccount, getSharedAccountsWithMe } from './familySharing';
+export { disconnectFamily } from './familyDisconnect';
 
 // Notifications
 export { getNotifications, dismissNotification } from './notifications';
@@ -56,7 +58,8 @@ export { deleteMyAccount } from './deleteAccount';
 export { recoverMfaWithCode } from './mfaRecovery';
 
 // Bank integration (Mono)
-export { linkBankAccount, unlinkBankAccount } from './bankLink';
+export { linkBankAccount } from './bankLink';
+export { unlinkBankAccount } from './bankUnlink';
 export { syncBankTransactions, syncBankAccountNow } from './bankSync';
 export { monoWebhook } from './bankWebhook';
 

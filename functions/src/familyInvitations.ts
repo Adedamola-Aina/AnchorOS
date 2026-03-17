@@ -9,13 +9,14 @@
 import { HttpsError } from 'firebase-functions/v2/https';
 import { secureOnCall } from './callable';
 import * as bcrypt from 'bcrypt';
-import { db, APP_ID, BCRYPT_SALT_ROUNDS, getResend, EMAIL_FROM, APP_URL } from './config';
+import { db, APP_ID, BCRYPT_SALT_ROUNDS, getResend, EMAIL_FROM } from './config';
 import { enforceRateLimit } from './rateLimit';
 import {
     createAuditLog,
     getActiveConnection,
     generateVerificationCode,
 } from './helpers';
+import { buildInvitationEmail } from './invitationEmailBuilder';
 import type { FamilyInvitation } from './types';
 
 // ============================================================================
@@ -101,14 +102,6 @@ export const createFamilyInvitation = secureOnCall(
         return { success: true, inviteId: inviteRef.id };
     }
 );
-
-/** Build the HTML email body for a family invitation. */
-function buildInvitationEmail(ownerName: string, inviteId: string, code: string): string {
-    return `<!DOCTYPE html><html><body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#f8fafc;"><div style="max-width:600px;margin:40px auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);"><div style="background:#0f172a;padding:32px;text-align:center;"><h1 style="color:white;margin:0;font-size:24px;letter-spacing:-0.5px;">⚓ Anchor OS</h1></div><div style="padding:40px 32px;"><h2 style="color:#0f172a;font-size:24px;margin:0 0 16px;text-align:center;">Join ${ownerName}'s Family</h2><p style="color:#475569;font-size:16px;line-height:1.6;text-align:center;margin-bottom:32px;">You've been invited to connect directly in Anchor OS. This will allow you to share accounts, track shared expenses, and manage your household commitments together.</p><div style="text-align:center;margin-bottom:24px;"><a href="${APP_URL}/accept-invite?token=${inviteId}" style="display:inline-block;background:#2563eb;color:white;padding:16px 32px;border-radius:12px;text-decoration:none;font-weight:600;font-size:16px;box-shadow:0 4px 6px -1px rgba(37,99,235,0.2);">Accept Invitation</a></div><div style="background:#f1f5f9;border-radius:8px;padding:16px;text-align:center;margin-bottom:32px;"><p style="color:#475569;font-size:14px;margin:0 0 8px;">Your verification code:</p><p style="color:#0f172a;font-size:24px;font-weight:bold;letter-spacing:4px;margin:0;">${code}</p></div><div style="border-top:1px solid #e2e8f0;padding-top:32px;"><h3 style="color:#0f172a;font-size:16px;margin:0 0 16px;">What happens next?</h3><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="vertical-align:top;width:24px;padding-bottom:16px;"><div style="background:#eff6ff;color:#2563eb;width:24px;height:24px;border-radius:12px;text-align:center;line-height:24px;font-size:14px;font-weight:bold;">1</div></td><td style="padding-left:12px;padding-bottom:16px;"><div style="color:#334155;font-size:14px;font-weight:600;">Create your account</div><div style="color:#64748b;font-size:14px;">If you don't have one, you'll be asked to sign up first.</div></td></tr><tr><td style="vertical-align:top;width:24px;"><div style="background:#eff6ff;color:#2563eb;width:24px;height:24px;border-radius:12px;text-align:center;line-height:24px;font-size:14px;font-weight:bold;">2</div></td><td style="padding-left:12px;"><div style="color:#334155;font-size:14px;font-weight:600;">Confirm & Connect</div><div style="color:#64748b;font-size:14px;">Enter your verification code and confirm the connection.</div></td></tr></table></div></div><div style="background:#f8fafc;padding:24px;text-align:center;border-top:1px solid #e2e8f0;"><p style="color:#94a3b8;font-size:12px;margin:0;">This invitation expires in 7 days. If you didn't expect this, you can ignore this email.</p></div></div></body></html>`;
-}
-
-// ============================================================================
-// Revoke Invitation
 // ============================================================================
 
 export const revokeInvitation = secureOnCall(

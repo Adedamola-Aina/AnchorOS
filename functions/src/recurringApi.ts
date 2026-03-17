@@ -1,68 +1,19 @@
-/**
- * Recurring Transaction CRUD — Cloud Callable Functions
- *
- * Server-side create / update / delete / toggle for recurring rules.
- * Validates input, enforces auth, applies rate limiting, and emits audit logs.
- */
 import { HttpsError } from 'firebase-functions/v2/https';
 import { secureOnCall } from './callable';
 import { FieldValue } from 'firebase-admin/firestore';
-import { addWeeks, addMonths, addYears } from 'date-fns';
 import { db, APP_ID } from './config';
 import { enforceRateLimit } from './rateLimit';
 import { createFinanceAuditLog } from './helpers';
-import type { RecurringTransaction } from './types';
-
-const VALID_FREQUENCIES = new Set(['weekly', 'monthly', 'yearly']);
-const VALID_TYPES = new Set(['income', 'expense']);
-
-// ============================================================================
-// Shared validation
-// ============================================================================
-
-interface RecurringInput {
-    title?: unknown;
-    amountCents?: unknown;
-    type?: unknown;
-    category?: unknown;
-    accountId?: unknown;
-    frequency?: unknown;
-    interval?: unknown;
-    nextRunAt?: unknown;
-}
-
-function validateRecurringInput(data: RecurringInput): string | null {
-    if (!data.title || typeof data.title !== 'string' || (data.title as string).trim().length === 0)
-        return 'title is required';
-    if (typeof data.amountCents !== 'number' || data.amountCents <= 0 || !Number.isInteger(data.amountCents))
-        return 'amountCents must be a positive integer';
-    if (!VALID_TYPES.has(data.type as string))
-        return `type must be one of: ${[...VALID_TYPES].join(', ')}`;
-    if (!data.accountId || typeof data.accountId !== 'string')
-        return 'accountId is required';
-    if (!VALID_FREQUENCIES.has(data.frequency as string))
-        return `frequency must be one of: ${[...VALID_FREQUENCIES].join(', ')}`;
-    if (typeof data.interval !== 'number' || data.interval <= 0 || !Number.isInteger(data.interval))
-        return 'interval must be a positive integer';
-    if (!data.nextRunAt || typeof data.nextRunAt !== 'string')
-        return 'nextRunAt is required';
-    return null;
-}
-
-function calcNextRun(from: Date, frequency: string, interval: number): Date {
-    if (frequency === 'weekly') return addWeeks(from, interval);
-    if (frequency === 'yearly') return addYears(from, interval);
-    return addMonths(from, interval);
-}
-
-// ============================================================================
-// createRecurringTransaction
-// ============================================================================
+import {
+    validateRecurringInput,
+    calcNextRun,
+    type RecurringInput,
+    type RecurringTransaction,
+} from './recurringValidation';
 
 export const createRecurringTransaction = secureOnCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
     const uid = request.auth.uid;
-
     await enforceRateLimit('recurringCreate', uid);
 
     const data = request.data as RecurringInput & { status?: string };
@@ -98,14 +49,9 @@ export const createRecurringTransaction = secureOnCall(async (request) => {
     return { id: docRef.id };
 });
 
-// ============================================================================
-// updateRecurringTransaction
-// ============================================================================
-
 export const updateRecurringTransaction = secureOnCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
     const uid = request.auth.uid;
-
     await enforceRateLimit('recurringUpdate', uid);
 
     const { id, ...updates } = request.data as RecurringInput & { id?: unknown };
@@ -118,7 +64,6 @@ export const updateRecurringTransaction = secureOnCall(async (request) => {
     const existing = snap.data() as RecurringTransaction;
     if (existing.userId !== uid) throw new HttpsError('permission-denied', 'Not authorised');
 
-    // Merge with existing so partial updates still pass full validation
     const merged: RecurringInput = {
         title: updates.title ?? existing.title,
         amountCents: updates.amountCents ?? existing.amountCents,
@@ -143,7 +88,6 @@ export const updateRecurringTransaction = secureOnCall(async (request) => {
     if (updates.interval !== undefined) safeUpdates.interval = merged.interval as number;
     if (updates.nextRunAt !== undefined) safeUpdates.nextRunAt = merged.nextRunAt as string;
 
-    // If schedule changed, recalculate nextRunAt from now
     if (updates.frequency !== undefined || updates.interval !== undefined) {
         const base = new Date();
         safeUpdates.nextRunAt = calcNextRun(
@@ -163,14 +107,9 @@ export const updateRecurringTransaction = secureOnCall(async (request) => {
     return { id };
 });
 
-// ============================================================================
-// deleteRecurringTransaction
-// ============================================================================
-
 export const deleteRecurringTransaction = secureOnCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
     const uid = request.auth.uid;
-
     await enforceRateLimit('recurringDelete', uid);
 
     const { id } = request.data as { id?: unknown };
@@ -193,14 +132,9 @@ export const deleteRecurringTransaction = secureOnCall(async (request) => {
     return { success: true };
 });
 
-// ============================================================================
-// toggleRecurringTransaction — pause / resume
-// ============================================================================
-
 export const toggleRecurringTransaction = secureOnCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required');
     const uid = request.auth.uid;
-
     await enforceRateLimit('recurringUpdate', uid);
 
     const { id, status } = request.data as { id?: unknown; status?: unknown };
@@ -215,7 +149,6 @@ export const toggleRecurringTransaction = secureOnCall(async (request) => {
     const existing = snap.data() as RecurringTransaction;
     if (existing.userId !== uid) throw new HttpsError('permission-denied', 'Not authorised');
 
-    // When resuming, push nextRunAt forward so it doesn't fire immediately
     const updates: Record<string, unknown> = { status };
     if (status === 'active' && existing.status === 'paused') {
         updates.nextRunAt = calcNextRun(new Date(), existing.frequency, existing.interval).toISOString();

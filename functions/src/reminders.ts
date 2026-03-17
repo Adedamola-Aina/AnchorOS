@@ -1,25 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import { type DocumentReference } from 'firebase-admin/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { format } from 'date-fns';
 import { db, APP_ID } from './config';
 import { shouldSendReminderForCategory, type NotificationPreferences } from './reminderPreferences';
-import { buildReminderMessage } from './reminderBatching';
-import { buildReminderDeliveryKey, shouldSkipReminderDelivery } from './reminderDedupe';
-import { sendReminderNotification } from './reminderSender';
-import { getReminderLinkPath, type ReminderCategory } from './reminderRouting';
-import { claimReminderDeliverySlot, releaseReminderDeliverySlot } from './reminderClaim';
-
-interface PendingReminder {
-    title: string;
-    ref: DocumentReference;
-    category: ReminderCategory;
-}
-interface ReminderDeliveryState {
-    key?: string;
-    sentAt?: string;
-    userRef: DocumentReference;
-}
+import {
+    deliverUserReminders,
+    type PendingReminder,
+    type ReminderDeliveryState,
+} from './reminderDelivery';
 
 export const processReminders = onSchedule(
     { schedule: 'every 1 minutes', timeZone: 'Africa/Lagos' },
@@ -110,84 +98,12 @@ export const processReminders = onSchedule(
                 remindersByUser.set(userId, pending);
             }
 
-            let deliveryCount = 0;
-
-            for (const [userId, reminders] of remindersByUser.entries()) {
-                const tokenDocs = tokenCache.get(userId) || [];
-                const deliveryState = deliveryStateCache.get(userId);
-                if (tokenDocs.length === 0 || !deliveryState) {
-                    continue;
-                }
-
-                const dedupeKey = buildReminderDeliveryKey(
-                    todayDate,
-                    currentTime,
-                    reminders.map((reminder) => reminder.title),
-                );
-
-                if (shouldSkipReminderDelivery({
-                    previousKey: deliveryState.key,
-                    previousSentAt: deliveryState.sentAt,
-                    currentKey: dedupeKey,
-                    nowMs,
-                })) {
-                    console.log(`[Reminders] Skipping duplicate reminder batch for user ${userId}.`);
-                    continue;
-                }
-
-                const hasClaim = await claimReminderDeliverySlot({
-                    userId,
-                    dedupeKey,
-                    runId,
-                    nowMs,
-                });
-
-                if (!hasClaim) {
-                    console.log(`[Reminders] Another run already claimed batch for user ${userId}.`);
-                    continue;
-                }
-
-                try {
-                    const message = buildReminderMessage(reminders.map((reminder) => reminder.title));
-                    const linkPath = getReminderLinkPath(reminders.map((reminder) => reminder.category));
-
-                    const sendResults = await Promise.allSettled(
-                        tokenDocs.map((tokenDoc) =>
-                            sendReminderNotification({
-                                token: tokenDoc.id,
-                                title: message.title,
-                                body: message.body,
-                                tokenDocRef: tokenDoc.ref,
-                                linkPath,
-                            })
-                        )
-                    );
-
-                    const hasAnySuccess = sendResults.some(
-                        (result) => result.status === 'fulfilled' && result.value === true
-                    );
-                    if (!hasAnySuccess) {
-                        continue;
-                    }
-
-                    await deliveryState.userRef.set({
-                        lastReminderDeliveryKey: dedupeKey,
-                        lastReminderDeliveryAt: sentAt,
-                    }, { merge: true });
-
-                    deliveryStateCache.set(userId, { ...deliveryState, key: dedupeKey, sentAt });
-                    await Promise.all(reminders.map((reminder) => reminder.ref.update({ lastReminderSent: todayDate })));
-                    deliveryCount += tokenDocs.length;
-                } finally {
-                    await releaseReminderDeliverySlot({
-                        userId,
-                        dedupeKey,
-                        runId,
-                    }).catch((error) => {
-                        console.error(`[Reminders] Failed to release claim for user ${userId}:`, error);
-                    });
-                }
-            }
+            const deliveryCount = await deliverUserReminders(
+                remindersByUser,
+                tokenCache,
+                deliveryStateCache,
+                { todayDate, currentTime, nowMs, sentAt, runId },
+            );
 
             console.log(`[Reminders] Processed ${deliveryCount} notification delivery attempt(s).`);
             return;
