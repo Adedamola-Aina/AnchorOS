@@ -50,6 +50,18 @@ function generateFirebaseSwConfig() {
     };
     const content = `// Auto-generated — do not edit. Built from .env variables.\nself.__FIREBASE_CONFIG = ${JSON.stringify(config, null, 2)};\n`;
     fs.writeFileSync(path.resolve(rootDir, 'public/__firebase-config.js'), content, 'utf-8');
+
+    // Patch sw.js cache name to use current package version
+    // This ensures returning users always get fresh assets after a deploy
+    const swPath = path.resolve(rootDir, 'public/sw.js');
+    if (fs.existsSync(swPath)) {
+      const sw = fs.readFileSync(swPath, 'utf-8');
+      const patched = sw.replace(
+        /const CACHE_NAME = '[^']*'/,
+        `const CACHE_NAME = 'anchor-os-v${pkg.version}'`
+      );
+      fs.writeFileSync(swPath, patched, 'utf-8');
+    }
   }
 
   return {
