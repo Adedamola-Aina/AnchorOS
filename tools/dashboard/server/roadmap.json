@@ -78,13 +78,15 @@
             "priority": "P1",
             "title": "Validate Checkmarx workflow health and ownership",
             "description": "Verify Checkmarx secrets/configuration, operational usefulness, and keep/tune/remove decision with documented owner. [REM-012]",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "GAP-009"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-14"
+            "createdAt": "2026-02-14",
+            "completedAt": "2026-03-17",
+            "completionNote": "checkmarx-one.yml policy-gated workflow; decision documented in SECURITY.md (keep, policy-gated, owner: DevOps+Security)"
         },
         {
             "id": "GAP-008",
@@ -106,13 +108,15 @@
             "priority": "P1",
             "title": "Add dedicated 404 and 500 route-level error views",
             "description": "Introduce explicit NotFound and ServerError views to improve user recovery for invalid routes and failure states. [REM-009]",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "UX-035"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-14"
+            "createdAt": "2026-02-14",
+            "completedAt": "2026-03-17",
+            "completionNote": "src/features/errors/NotFoundView.tsx + ServerErrorView.tsx \u2014 both routed in App.tsx and AuthenticatedAppShell.tsx"
         },
         {
             "id": "FIN-011",
@@ -120,13 +124,15 @@
             "priority": "P1",
             "title": "Feature flag and progressive rollout framework",
             "description": "Implement runtime feature flags, kill switches, staged rollout policy, and rollback governance for high-risk changes. [REM-007]",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "FIN-011"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-14"
+            "createdAt": "2026-02-14",
+            "completedAt": "2026-03-17",
+            "completionNote": "src/features/flags/featureFlags.ts \u2014 runtime feature flags, kill switches, staged rollout"
         },
         {
             "id": "GAP-007",
@@ -204,13 +210,15 @@
             "priority": "P2",
             "title": "Shared account permission granularity - read-only vs read-write",
             "description": "useFamilySharing shareAccount is binary share:boolean. Add read-only vs read-write permission control. Allow per-account visibility settings.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "FIN-010"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-06"
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-03-17",
+            "completionNote": "useSharedAccounts.ts permission: read|transact|manage \u2014 full granular permission model beyond read-only/write"
         },
         {
             "id": "UX-032",
@@ -247,13 +255,15 @@
             "priority": "P2",
             "title": "Auto-submit at 6 digits for MFA and invite codes",
             "description": "MFA and invite code inputs should auto-submit when 6 characters entered. Saves a tap on mobile.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "UX-030"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-06"
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-03-17",
+            "completionNote": "InviteCodeEntry, MfaConfirmationCard, InviteMfaStep all auto-submit at 6 digits (confirmed by tests)"
         },
         {
             "id": "UX-029",
@@ -261,13 +271,15 @@
             "priority": "P2",
             "title": "Add inputMode=numeric on invite and MFA code inputs",
             "description": "Numeric code inputs should use inputMode=numeric to show number keyboard on mobile. Currently shows full keyboard.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "UX-029"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-06"
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-03-17",
+            "completionNote": "InviteCodeEntry.tsx, InviteMfaStep.tsx, SecuritySettingsParts.tsx all use inputMode=\"numeric\""
         },
         {
             "id": "FIN-009",
@@ -289,13 +301,15 @@
             "priority": "P2",
             "title": "Add CSV export option for data export",
             "description": "DataManagement only exports JSON. Add CSV export which mobile users can open in spreadsheet apps. More accessible format for 97% mobile users.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "FIN-008"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-06"
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-03-17",
+            "completionNote": "src/utils/csvExport + AccountHeaderParts.tsx + DataManagement \u2014 CSV export in both settings and account detail"
         },
         {
             "id": "FIN-007",
@@ -303,13 +317,15 @@
             "priority": "P1",
             "title": "Add password change flow in settings",
             "description": "SecuritySettings only has MFA. Add password change capability with current password verification and Firebase Auth reauthentication.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "FIN-007"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-06"
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-03-17",
+            "completionNote": "src/features/settings/components/PasswordChange.tsx \u2014 password change with reauthentication"
         },
         {
             "id": "FIN-006",
@@ -317,13 +333,15 @@
             "priority": "P1",
             "title": "Add MFA recovery codes",
             "description": "2FA enrollment should generate and display recovery codes. Store hashed codes in Firestore. Allow one-time use if user loses authenticator device.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "FIN-006"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-06"
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-03-17",
+            "completionNote": "src/services/mfaRecoveryService.ts + RecoveryCodesDisplay + AuthGate.tsx \u2014 generate/store/consume recovery codes"
         },
         {
             "id": "FIN-005",
@@ -331,13 +349,15 @@
             "priority": "P0",
             "title": "Implement actual account deletion Cloud Function",
             "description": "handleDeleteAccount needs backend implementation. Cloud Function to purge Firestore data, delete Firebase Auth user, comply with GDPR right to erasure.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "FIN-005"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-06"
+            "createdAt": "2026-02-06",
+            "completedAt": "2026-03-17",
+            "completionNote": "functions/src/deleteAccount.ts \u2014 deleteMyAccount Cloud Function with audit logging and rate limiting"
         },
         {
             "id": "BUG-060",
@@ -919,13 +939,15 @@
             "priority": "P1",
             "title": "PWA System Theme Detection",
             "description": "Implement auto-detection of iOS/Android system theme (dark/light) to respect user device settings.",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "PWA-007"
             ],
             "effort": "medium",
             "impact": "medium",
-            "createdAt": "2026-02-01"
+            "createdAt": "2026-02-01",
+            "completedAt": "2026-03-17",
+            "completionNote": "src/utils/systemTheme.ts \u2014 getSystemTheme(), subscribeToSystemTheme(), prefers-color-scheme media query"
         },
         {
             "id": "PWA-006",
@@ -1048,12 +1070,14 @@
             "priority": "P0",
             "title": "Push Notification Infrastructure",
             "description": "Firebase Cloud Messaging for task reminders, transaction alerts, family invites",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "PLT-002"
             ],
             "effort": "medium",
-            "impact": "high"
+            "impact": "high",
+            "completedAt": "2026-03-17",
+            "completionNote": "functions/src/reminders.ts + billReminderScheduler.ts + weeklyReport.ts + fabricNudges.ts \u2014 FCM push infra; client: fcmTokenService.ts"
         },
         {
             "id": "SEC-001",
@@ -1061,12 +1085,14 @@
             "priority": "P0",
             "title": "Rate Limiting Enhancement",
             "description": "Current rateLimits collection exists but Cloud Functions enforcement is incomplete",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "SEC-001"
             ],
             "effort": "small",
-            "impact": "high"
+            "impact": "high",
+            "completedAt": "2026-03-17",
+            "completionNote": "functions/src/rateLimit.ts \u2014 Firestore-backed rate limiting with per-operation limits, enforced in all Cloud Functions"
         },
         {
             "id": "SEC-002",
@@ -1074,12 +1100,14 @@
             "priority": "P0",
             "title": "Audit Logging Service",
             "description": "Financial apps require audit trails. Add immutable /audit collection for all money operations",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "SEC-002"
             ],
             "effort": "medium",
-            "impact": "high"
+            "impact": "high",
+            "completedAt": "2026-03-17",
+            "completionNote": "src/services/AuditService.ts \u2014 immutable audit trail for auth/finance/settings/commitments with secureDb"
         },
         {
             "id": "SRE-001",
@@ -1296,12 +1324,14 @@
             "priority": "P2",
             "title": "MFA Recovery Codes",
             "description": "Backup codes for MFA recovery",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "AUTH-004"
             ],
             "effort": "small",
-            "impact": "high"
+            "impact": "high",
+            "completedAt": "2026-03-17",
+            "completionNote": "Same implementation as FIN-006 \u2014 mfaRecoveryService.ts + AuthGate.tsx + RecoveryCodesDisplay"
         },
         {
             "id": "QA-001",
@@ -1309,12 +1339,14 @@
             "priority": "P2",
             "title": "Mutation Testing",
             "description": "Enable regular mutation testing with Stryker",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "QA-001"
             ],
             "effort": "small",
-            "impact": "medium"
+            "impact": "medium",
+            "completedAt": "2026-03-17",
+            "completionNote": "config/stryker.config.mjs \u2014 Stryker mutation testing fully configured with incremental mode"
         },
         {
             "id": "QA-002",
@@ -1322,12 +1354,14 @@
             "priority": "P2",
             "title": "Visual Regression Testing",
             "description": "Add Percy or Chromatic for visual diff detection",
-            "status": "planned",
+            "status": "completed",
             "detectionPatterns": [
                 "QA-002"
             ],
             "effort": "medium",
-            "impact": "medium"
+            "impact": "medium",
+            "completedAt": "2026-03-17",
+            "completionNote": "e2e/visual.spec.ts \u2014 full visual regression test suite with snapshot and dark-mode tests"
         },
         {
             "id": "QA-003",
