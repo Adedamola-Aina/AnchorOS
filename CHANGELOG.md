@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.14.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.12.0...v1.14.0) (2026-03-17)
+
+
+### Features
+
+* **dashboard:** enterprise kanban, archive viewer, intelligence panels ([455724c](https://github.com/Adedamola-Aina/AnchorOS/commit/455724ce8cce0b052130da5b52ce5de7986818fd))
+* **fabric:** day-of-week intelligence (session 1) ([d9d2167](https://github.com/Adedamola-Aina/AnchorOS/commit/d9d21671cd987ad0c0dd0cfa703bcf787335996a))
+* **fabric:** session 0a foundation fixes ([09658e6](https://github.com/Adedamola-Aina/AnchorOS/commit/09658e6379ca411932b01fff8d84891a001eddc9))
+* **fabric:** session 0b analytics + observability ([191c88a](https://github.com/Adedamola-Aina/AnchorOS/commit/191c88a6f01b41dab901a24f0c90560aa3e51635))
+* **fabric:** session 2 finance x commitment correlation ([f805aa9](https://github.com/Adedamola-Aina/AnchorOS/commit/f805aa9fbb43624aa3222048824dc16f3ceb9319))
+* **fabric:** session 3 nlp improvements + new query handlers ([cdfb54d](https://github.com/Adedamola-Aina/AnchorOS/commit/cdfb54d110e85c08a919a036b73c2b3a90166d69))
+* **fabric:** session 4 behavioral engine informs predictions ([dbadf19](https://github.com/Adedamola-Aina/AnchorOS/commit/dbadf19645cfb1c83723cf7561d5835883052efe))
+* **fabric:** session 5 - ai asks questions back ([4f3a674](https://github.com/Adedamola-Aina/AnchorOS/commit/4f3a674e2c8c225ca8581f8ee22cf7b8062dd834))
+* **fabric:** session 6 - proactive push nudges ([1a4fe3f](https://github.com/Adedamola-Aina/AnchorOS/commit/1a4fe3f19d8b23023e9887291017b39eb8934ab2))
+
+
+### Bug Fixes
+
+* **fabric:** add data-testid to FabricView root for test selector ([ef2eec0](https://github.com/Adedamola-Aina/AnchorOS/commit/ef2eec0d60ba3c3f4be27d144c2a4623ee072e24))
+* **fabric:** resolve typescript errors from arch-001 splits ([54e165c](https://github.com/Adedamola-Aina/AnchorOS/commit/54e165c3cecde267703bb64f446c47b173d2a94a))
+* **functions:** harden fabric nudge timezone and rules coverage ([0c62bba](https://github.com/Adedamola-Aina/AnchorOS/commit/0c62bbacaf4c95860b8903d4f1ec7c1a01cc1733))
+
+
+### Performance
+
+* **app:** gate ReactQueryDevtools behind import.meta.env.DEV ([3016a28](https://github.com/Adedamola-Aina/AnchorOS/commit/3016a2881b1e93c7c49d082fa2f24ec6722fee81))
+* **components:** React.memo on AccountCard — renders in account list ([5cdd5f6](https://github.com/Adedamola-Aina/AnchorOS/commit/5cdd5f6d694c0521962e9cdcb0580472f3356934))
+* **components:** React.memo on CategoryIcon — renders in every transaction row ([c4e589c](https://github.com/Adedamola-Aina/AnchorOS/commit/c4e589c26947fc325e488e318afe9f7b68ff313d))
+* **components:** React.memo on TransactionItem — renders in transaction lists ([fa47384](https://github.com/Adedamola-Aina/AnchorOS/commit/fa47384cdc03eb47f7603701d846d3670cadf173))
+* **html:** add preconnect and dns-prefetch hints for Firebase domains ([9d39a87](https://github.com/Adedamola-Aina/AnchorOS/commit/9d39a871dbc04d81cb559d5336b7f301eebaf330))
+* **sentry:** reduce production tracesSampleRate from 1.0 to 0.1 ([6e0b0c0](https://github.com/Adedamola-Aina/AnchorOS/commit/6e0b0c02b9e647eab4b0ddf8052b335a6567305d))
+* **sw:** auto-patch service worker cache version from package.json at build time ([59cc19d](https://github.com/Adedamola-Aina/AnchorOS/commit/59cc19d8f855cae1422a28353d97c71d66f6e611))
+
 ## [1.13.0-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.12.0...v1.13.0-rc.0) (2026-03-17)
 
 
