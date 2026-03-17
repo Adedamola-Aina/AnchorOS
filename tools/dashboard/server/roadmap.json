@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "lastUpdated": "2026-02-21",
+    "lastUpdated": "2026-03-17",
     "teams": [
         "Product",
         "Engineering",
@@ -30,6 +30,715 @@
         "deferred"
     ],
     "initiatives": [
+        {
+            "id": "FIN-012",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "Recurring transactions automation",
+            "description": "Automatically create transaction records at defined intervals (weekly/monthly). Users configure recurrence on any transaction; a Cloud Function writes new records on schedule. Eliminates manual re-entry for fixed expenses like rent and subscriptions.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-012",
+                "recurring",
+                "recurrence"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FIN-013",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Split transactions across categories",
+            "description": "Allow a single transaction to be split into multiple sub-line items with independent category assignments and amounts that sum to the parent total. Addresses grocery trips that span food, household, and health categories.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-013",
+                "split transaction"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FIN-014",
+            "team": "Product",
+            "priority": "P2",
+            "title": "Bill payment reminders with calendar integration",
+            "description": "Users tag transactions or manual entries as recurring bills with due dates. Push notifications fire 3 days and 1 day before due. Calendar view shows upcoming obligations. Reduces missed payments and overdraft risk.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-014",
+                "bill reminder",
+                "due date"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FIN-015",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Net worth history chart and sparkline",
+            "description": "Store a weekly net worth snapshot in a netWorthHistory subcollection via the weekly report Cloud Function. Render a sparkline on the dashboard and a full chart on the finance page. Makes financial progress visible over time.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-015",
+                "net worth history",
+                "sparkline"
+            ],
+            "effort": "small",
+            "impact": "high",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FIN-016",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Cursor-based Firestore pagination for transactions",
+            "description": "Replace the current limit-only query in useTransactionSearch with cursor-based pagination using Firestore startAfter(). Load 50 transactions per page with a 'load more' trigger. Current approach fails gracefully only up to ~1000 transactions.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FIN-016",
+                "pagination",
+                "startAfter",
+                "cursor"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "architecture",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "COMM-001",
+            "team": "Product",
+            "priority": "P2",
+            "title": "Commitment streak tracking with gentle nudges",
+            "description": "Track consecutive days/weeks a commitment is honored. Display streak count on commitment cards. Send a non-intrusive nudge push notification if a streak is at risk (24 hrs before the daily deadline). No gamification badges \u2014 just a counter and a calm reminder.",
+            "status": "planned",
+            "detectionPatterns": [
+                "COMM-001",
+                "streak",
+                "commitment streak"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "COMM-002",
+            "team": "Design",
+            "priority": "P2",
+            "title": "Commitment calendar view (month and week)",
+            "description": "Add a calendar view to the commitments tab showing completion status by day. Month view shows heat-map density; week view shows individual completion per commitment. Tap a day to see detail. Helps users see patterns at a glance.",
+            "status": "planned",
+            "detectionPatterns": [
+                "COMM-002",
+                "commitment calendar"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "COMM-003",
+            "team": "Product",
+            "priority": "P3",
+            "title": "Commitment templates library",
+            "description": "Offer a curated set of starter commitment templates (e.g., 'Save \u20a6X per week', 'Review budget every Sunday') so new users can quickly add meaningful commitments. Templates are non-editable starting points, not locked contracts.",
+            "status": "planned",
+            "detectionPatterns": [
+                "COMM-003",
+                "commitment template"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "COMM-004",
+            "team": "Engineering",
+            "priority": "P3",
+            "title": "Bulk commitment actions (complete and archive multiple)",
+            "description": "Long-press to enter multi-select mode on the commitments list. Allow bulk complete, bulk archive, or bulk delete with a single tap. Reduces friction for users with many commitments to manage end-of-week.",
+            "status": "planned",
+            "detectionPatterns": [
+                "COMM-004",
+                "bulk commitment"
+            ],
+            "effort": "small",
+            "impact": "low",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "COMM-005",
+            "team": "Product",
+            "priority": "P2",
+            "title": "Commitment sharing and family accountability",
+            "description": "Let users optionally share a commitment with their family partner. The partner sees commitment status on their dashboard and can send an encouragement react. No scores or pressure \u2014 just shared visibility.",
+            "status": "planned",
+            "detectionPatterns": [
+                "COMM-005",
+                "shared commitment",
+                "accountability"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FAM-001",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Multi-member household support (3+ members)",
+            "description": "Extend the current 1:1 family pairing model to support households with up to 6 members. Introduce a household document with a members array and role assignments (owner, manager, viewer). All shared finance queries must scope to householdId.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FAM-001",
+                "multi-member",
+                "household"
+            ],
+            "effort": "large",
+            "impact": "high",
+            "type": "architecture",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FAM-002",
+            "team": "Product",
+            "priority": "P2",
+            "title": "Shared family budget pools with individual limits",
+            "description": "Allow a household to define a shared budget pool for categories like groceries or utilities, with per-member spending tracked against that pool. Dashboard shows pool utilisation per category. Requires FAM-001 (multi-member households).",
+            "status": "planned",
+            "detectionPatterns": [
+                "FAM-002",
+                "family budget",
+                "shared pool"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FAM-003",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Family activity feed with real-time transaction notifications",
+            "description": "Show a chronological feed of family member financial activity (new transactions, budget changes, account additions). Real-time via Firestore onSnapshot. Members can mute categories. Keeps everyone informed without feeling surveilled.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FAM-003",
+                "family feed",
+                "activity feed"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FAM-004",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Household aggregate net worth calculation",
+            "description": "Sum account balances across all household members into a single household net worth figure. Display on family dashboard. Requires read access to member accounts per role. Basis for FAM-002 shared budget pools.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FAM-004",
+                "household net worth",
+                "aggregate net worth"
+            ],
+            "effort": "small",
+            "impact": "high",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FAB-001",
+            "team": "Innovation",
+            "priority": "P2",
+            "title": "LLM / Genkit integration for Anchor AI Fabric",
+            "description": "Replace the current rule-based Fabric engine with an LLM call (Google Genkit / Vertex AI) that receives summarised financial context (no raw PII). The Cloud Function fabricChat constructs a structured prompt from aggregated stats and returns insights, suggestions, and natural-language answers. Raw transaction data never leaves Firestore.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FAB-001",
+                "LLM",
+                "Genkit",
+                "fabricChat"
+            ],
+            "effort": "large",
+            "impact": "high",
+            "type": "research",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FAB-002",
+            "team": "Innovation",
+            "priority": "P2",
+            "title": "Fabric insight explainability \u2014 show reasoning",
+            "description": "For every Fabric suggestion or prediction, surface a one-sentence explanation of why it was generated (e.g., 'You spent 40% more on food this month vs last month'). Makes AI output trustworthy and non-magical. Pairs with FAB-001.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FAB-002",
+                "insight explainability",
+                "fabric reasoning"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FAB-003",
+            "team": "Innovation",
+            "priority": "P2",
+            "title": "Spending anomaly detection alerts",
+            "description": "Fabric Behavioral engine detects when category spending exceeds 2x the 3-month rolling average and fires a push notification. Uses existing rule-based engine; no LLM required. Immediate user value from current Fabric architecture.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FAB-003",
+                "anomaly detection",
+                "spending alert"
+            ],
+            "effort": "small",
+            "impact": "high",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "FAB-004",
+            "team": "Innovation",
+            "priority": "P2",
+            "title": "Personalised savings suggestions from Fabric",
+            "description": "Based on income vs spend patterns, Fabric Insights engine identifies the largest reducible category and proposes a specific savings amount per month. Surfaces as a card on the dashboard. Calculated server-side in the weekly report function.",
+            "status": "planned",
+            "detectionPatterns": [
+                "FAB-004",
+                "savings suggestion",
+                "fabric insights"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "SEC-003",
+            "team": "Security",
+            "priority": "P0",
+            "title": "Mono webhook HMAC-SHA512 signature verification",
+            "description": "The bankWebhook Cloud Function currently accepts all incoming Mono events without verifying the mono-webhook-secret HMAC-SHA512 header. An attacker can spoof balance updates or inject fraudulent transactions. Add signature verification before any event processing.",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-003",
+                "webhook signature",
+                "HMAC",
+                "mono-webhook-secret"
+            ],
+            "effort": "small",
+            "impact": "critical",
+            "type": "security",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "SEC-004",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Client-side rate limiting for auth forms",
+            "description": "Add exponential back-off and lockout UI on the sign-in and sign-up forms after 5 consecutive failures without relying solely on Firebase Auth server-side throttling. Prevents rapid-fire credential stuffing from being user-invisible.",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-004",
+                "rate limit",
+                "auth lockout"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "security",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "SEC-005",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Field-level encryption for sensitive Firestore data",
+            "description": "Encrypt account numbers, balances, and transaction amounts at the application layer before writing to Firestore. Use a per-user key derived from Firebase Auth UID + a server-side KMS secret. Firestore at-rest encryption is insufficient alone \u2014 field encryption prevents Google employees and DB breaches from reading raw financial data.",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-005",
+                "field-level encryption",
+                "FLE",
+                "encrypt"
+            ],
+            "effort": "large",
+            "impact": "high",
+            "type": "security",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "SEC-006",
+            "team": "Security",
+            "priority": "P2",
+            "title": "Android Play Integrity / iOS DeviceCheck app attestation",
+            "description": "Integrate Play Integrity API (Android) and DeviceCheck (iOS) via Capacitor plugins to verify the app is running on a trusted, unmodified device. Pass attestation token to Cloud Functions for high-risk operations (account linking, large transfers).",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-006",
+                "Play Integrity",
+                "DeviceCheck",
+                "attestation"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "security",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "SEC-007",
+            "team": "Security",
+            "priority": "P1",
+            "title": "Sensitive data masking in Sentry error reports",
+            "description": "Configure Sentry beforeSend hook to scrub account numbers, transaction amounts, and Firestore document IDs from error payloads before they leave the device. Currently, an unhandled exception in finance views could leak PII to Sentry.",
+            "status": "planned",
+            "detectionPatterns": [
+                "SEC-007",
+                "Sentry masking",
+                "PII scrub",
+                "beforeSend"
+            ],
+            "effort": "small",
+            "impact": "high",
+            "type": "security",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "PLT-003",
+            "team": "Mobile",
+            "priority": "P1",
+            "title": "Session idle lock with biometric re-auth",
+            "description": "After 15 minutes of inactivity, lock the app with a PIN or biometric prompt (extending PWA-005). Uses Capacitor App.addListener('appStateChange') and an inactivity timer. Prevents unauthorised access when a device is left unlocked. Distinct from session management UI (AUTH-003).",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-003",
+                "idle lock",
+                "session timeout",
+                "inactivity"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "security",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "PLT-004",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Android hardware back-gesture navigation",
+            "description": "Handle the Android back gesture and hardware back button via @capacitor/app App.addListener('backButton'). Current behaviour exits the app or navigates incorrectly on nested modal screens. Build a navigation stack aware handler integrated with React Router.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-004",
+                "back gesture",
+                "backButton",
+                "Android back"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "platform",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "PLT-005",
+            "team": "Mobile",
+            "priority": "P3",
+            "title": "iOS haptic feedback on key financial interactions",
+            "description": "Trigger light/medium haptic feedback on transaction creation, commitment completion, and destructive confirmations using @capacitor/haptics. Adds native feel on iOS without any visual change. Android uses platform vibration via the same API.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-005",
+                "haptic",
+                "vibration"
+            ],
+            "effort": "small",
+            "impact": "low",
+            "type": "platform",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "PLT-006",
+            "team": "Mobile",
+            "priority": "P2",
+            "title": "Push notification deep links with action routing",
+            "description": "Tapping a push notification (bill reminder, commitment nudge, anomaly alert) should open the relevant screen directly rather than the app home. Use FCM data payload with 'route' field and Capacitor PushNotifications.addListener('pushNotificationActionPerformed') to route on open.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-006",
+                "deep link",
+                "push notification route",
+                "FCM deep"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "platform",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "PLT-007",
+            "team": "Engineering",
+            "priority": "P1",
+            "title": "IndexedDB-backed persistent offline queue",
+            "description": "The current offline mutation queue is held in memory \u2014 closing the tab or crashing the app loses queued writes. Replace with an IndexedDB-backed queue (via idb-keyval or Dexie) so operations survive app restarts and are replayed on next connection. Supersedes PWA-003 which only addresses the indicator UI.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PLT-007",
+                "IndexedDB",
+                "offline queue",
+                "persistent queue"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "platform",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "ARCH-021",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Remote Config integration for dynamic feature flags",
+            "description": "The current feature flag system (src/utils/featureFlags.ts) is static \u2014 flags are baked at build time. Integrate Firebase Remote Config so flags can be toggled without a deploy. Critical for safe rollouts of FAM-001 and FAB-001.",
+            "status": "planned",
+            "detectionPatterns": [
+                "ARCH-021",
+                "Remote Config",
+                "dynamic feature flag"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "architecture",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "ARCH-022",
+            "team": "Architecture",
+            "priority": "P1",
+            "title": "Financial mutation audit log with event sourcing",
+            "description": "Write an immutable audit record to a /ledger subcollection on every create/update/delete of transactions and accounts. Each record includes userId, timestamp, operationType, before/after snapshot, and IP hash. Basis for dispute resolution and regulatory compliance.",
+            "status": "planned",
+            "detectionPatterns": [
+                "ARCH-022",
+                "audit log",
+                "ledger",
+                "event sourcing"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "architecture",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "ARCH-023",
+            "team": "Architecture",
+            "priority": "P2",
+            "title": "Background job queue for recurring tasks (Cloud Tasks)",
+            "description": "Replace direct Cloud Scheduler cron calls with a Cloud Tasks queue for recurring transaction creation, weekly reports, and bill reminders. Enables retries, rate limiting, fan-out per user, and avoids the current single-cron bottleneck for large user bases.",
+            "status": "planned",
+            "detectionPatterns": [
+                "ARCH-023",
+                "Cloud Tasks",
+                "job queue",
+                "background job"
+            ],
+            "effort": "large",
+            "impact": "medium",
+            "type": "architecture",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "PERF-005",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Virtual scrolling for large transaction lists",
+            "description": "Implement window virtualisation (react-virtual or @tanstack/virtual) on TransactionList so only visible rows are in the DOM. Current DOM-based rendering degradates at 200+ transactions. Prerequisite complementary to FIN-016 (cursor pagination).",
+            "status": "planned",
+            "detectionPatterns": [
+                "PERF-005",
+                "virtual scroll",
+                "virtualization",
+                "windowing"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "performance",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "PERF-006",
+            "team": "Engineering",
+            "priority": "P2",
+            "title": "Lazy-load heavy dependencies by route",
+            "description": "Split Sentry initialisation, analytics, and Fabric view into dynamic import() chunks. Only import when the relevant route is visited. Reduces cold-start bundle size and TTI on the auth and dashboard entry paths. Measurable via Lighthouse CI.",
+            "status": "planned",
+            "detectionPatterns": [
+                "PERF-006",
+                "lazy load",
+                "code split",
+                "dynamic import"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "performance",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "OBS-001",
+            "team": "DevOps",
+            "priority": "P2",
+            "title": "Real-time error rate alerting and SLO dashboard",
+            "description": "Configure Sentry alert rules to fire a Slack/email notification when the error rate exceeds 1% of sessions in a 10-minute window. Define SLOs: 99.5% availability, p95 transaction < 2s. Dashboard shows SLO burn rate. Currently there is no automated paging for production incidents.",
+            "status": "planned",
+            "detectionPatterns": [
+                "OBS-001",
+                "SLO",
+                "error rate alert",
+                "alerting"
+            ],
+            "effort": "small",
+            "impact": "high",
+            "type": "observability",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "OBS-002",
+            "team": "DevOps",
+            "priority": "P2",
+            "title": "Performance budget enforcement in CI",
+            "description": "Add a Lighthouse CI step to merge-gate.yml that fails the build if LCP > 2.5s, TBT > 300ms, or bundle size increases by more than 10 KB. Prevents performance regressions from shipping silently. Uses existing lighthouserc.cjs config.",
+            "status": "planned",
+            "detectionPatterns": [
+                "OBS-002",
+                "performance budget",
+                "Lighthouse CI"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "observability",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "OBS-003",
+            "team": "Data",
+            "priority": "P3",
+            "title": "User journey analytics funnels",
+            "description": "Instrument onboarding, account linking, and first transaction creation flows as conversion funnels in Firebase Analytics. Identify where users drop off. Data informs product roadmap prioritisation and is privacy-safe (no PII in events).",
+            "status": "planned",
+            "detectionPatterns": [
+                "OBS-003",
+                "analytics funnel",
+                "conversion funnel"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "analytics",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "DX-001",
+            "team": "Engineering",
+            "priority": "P3",
+            "title": "Storybook component playground and visual catalog",
+            "description": "Set up Storybook 8 with Vite. Add stories for Button, TransactionItem, AccountCard, CategoryIcon, and all form fields. Enables isolated component development and acts as a living design system reference. Pairs with DES-001 (component library extraction).",
+            "status": "planned",
+            "detectionPatterns": [
+                "DX-001",
+                "Storybook"
+            ],
+            "effort": "medium",
+            "impact": "low",
+            "type": "developer-experience",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "DX-002",
+            "team": "QA",
+            "priority": "P2",
+            "title": "API mock layer for offline dev and E2E tests",
+            "description": "Build a MSW (Mock Service Worker) layer that intercepts Firebase calls in local dev and E2E (Playwright). Enables fully offline development without Firebase emulators, faster CI, and deterministic test data. Reduces flake in E2E suite.",
+            "status": "planned",
+            "detectionPatterns": [
+                "DX-002",
+                "MSW",
+                "mock service worker",
+                "API mock"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "developer-experience",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "DX-003",
+            "team": "QA",
+            "priority": "P2",
+            "title": "Automated accessibility testing in CI",
+            "description": "Add axe-core / @axe-core/playwright assertions to the smoke E2E spec and a standalone a11y test suite. Fails CI on WCAG 2.1 AA violations. Pairs with UX-032 (accessibility controls) to ensure future changes don't regress keyboard/screen reader support.",
+            "status": "planned",
+            "detectionPatterns": [
+                "DX-003",
+                "axe",
+                "accessibility testing",
+                "a11y"
+            ],
+            "effort": "small",
+            "impact": "medium",
+            "type": "developer-experience",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "WEB-004",
+            "team": "Design",
+            "priority": "P2",
+            "title": "Spending trends and insights deep-dive page",
+            "description": "A dedicated page (or dashboard section) with month-over-month bar charts, category breakdowns, and top-5 merchant lists. Uses existing transaction data; charts rendered with chart.js or Recharts. Fabric FAB-004 savings suggestions surface here.",
+            "status": "planned",
+            "detectionPatterns": [
+                "WEB-004",
+                "spending trends",
+                "insights page"
+            ],
+            "effort": "medium",
+            "impact": "high",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
+        {
+            "id": "WEB-005",
+            "team": "Product",
+            "priority": "P2",
+            "title": "PDF / printable financial report export",
+            "description": "Generate a monthly financial summary PDF client-side using jsPDF or react-pdf. Includes net worth, income vs expenses, top categories, and commitment completion rate. Users can download or share. Complements existing CSV/JSON export (FIN-004).",
+            "status": "planned",
+            "detectionPatterns": [
+                "WEB-005",
+                "PDF export",
+                "financial report export"
+            ],
+            "effort": "medium",
+            "impact": "medium",
+            "type": "feature",
+            "createdAt": "2026-03-17"
+        },
         {
             "id": "BUG-105",
             "team": "Engineering",
