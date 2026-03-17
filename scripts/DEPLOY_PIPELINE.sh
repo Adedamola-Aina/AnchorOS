@@ -38,6 +38,7 @@ SKIP_E2E=false
 SKIP_TESTS=false
 SKIP_LINT=false
 SKIP_MUTATION=false
+YES=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -64,6 +65,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-lint)
             SKIP_LINT=true
+            shift
+            ;;
+        --yes|-y)
+            YES=true
             shift
             ;;
         *)
@@ -268,13 +273,17 @@ case $ENV in
 esac
 
 if [[ "$ENV" == "production" ]]; then
-    echo -e "${RED}⚠️  WARNING: You are about to deploy to PRODUCTION (${HOSTING_URL}).${NC}"
-    echo -e "This step will make your changes live to all users."
-    read -p "Are you sure you want to proceed? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${RED}🚫 Deployment cancelled by user.${NC}"
-        exit 0
+    if [[ "$YES" == true ]]; then
+        echo -e "${YELLOW}⚠️  Auto-confirming production deploy (--yes flag).${NC}"
+    else
+        echo -e "${RED}⚠️  WARNING: You are about to deploy to PRODUCTION (${HOSTING_URL}).${NC}"
+        echo -e "This step will make your changes live to all users."
+        read -p "Are you sure you want to proceed? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${RED}🚫 Deployment cancelled by user.${NC}"
+            exit 0
+        fi
     fi
 fi
 
