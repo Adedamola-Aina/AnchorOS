@@ -55,7 +55,7 @@ const FabricView: React.FC = () => {
 
   return (
     <FeatureErrorBoundary featureName="Anchor AI">
-      <div className="max-w-3xl mx-auto space-y-5 pb-20 animate-in fade-in duration-300">
+      <div data-testid="fabric-view" className="max-w-3xl mx-auto space-y-5 pb-20 animate-in fade-in duration-300">
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <header className="space-y-0.5">
