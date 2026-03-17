@@ -81,7 +81,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await expect(page.getByText('Regression Expense 2').first()).toBeVisible();
     });
 
-    test.skip('verifies transaction deletion does not revert (Zombie Transaction fix)', async ({ page }) => {
+    test('verifies transaction deletion does not revert (Zombie Transaction fix)', async ({ page }) => {
         // 1. Navigate to Finance
         await page.getByRole('link', { name: 'Finance' }).click();
 
@@ -92,7 +92,6 @@ test.describe('Finance Regressions and Fixes', () => {
         const createBtn = page.getByRole('button', { name: 'Create Account' });
         await expect(createBtn).toBeEnabled();
         await createBtn.click();
-        await page.waitForTimeout(1000);
         const accountLocator2 = page.getByText(accountName).first();
         try {
             await accountLocator2.waitFor({ state: 'visible', timeout: 30000 });
@@ -132,11 +131,9 @@ test.describe('Finance Regressions and Fixes', () => {
         await expect(confirmDelete).toBeVisible({ timeout: 5000 });
         await confirmDelete.click();
 
-        // 5. Verify it is gone AND stays gone
+        // 5. Verify it is gone AND stays gone (zombie check: wait for Firestore sync then recheck)
         await expect(page.getByText(txTitle).first()).not.toBeVisible();
-
-        // Wait 3 seconds to ensure no zombie return (optimistic UI revert)
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(2000);
         await expect(page.getByText(txTitle).first()).not.toBeVisible();
     });
 });
