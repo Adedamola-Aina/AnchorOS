@@ -14,7 +14,7 @@ initializeApp();
 
 export const db = getFirestore();
 export const APP_ID = 'anchor-os';
-export const BCRYPT_SALT_ROUNDS = 10;
+export const BCRYPT_SALT_ROUNDS = 12;
 
 // Resend client — lazy initialized to avoid module-load errors
 let resendClient: Resend | null = null;
