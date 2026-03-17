@@ -16,7 +16,7 @@ interface AccountCardProps {
     onReconnect?: (account: AnchorAccount) => void;
 }
 
-export const AccountCard: React.FC<AccountCardProps> = ({
+export const AccountCard: React.FC<AccountCardProps> = React.memo(({
     account,
     userId,
     isOwnerOfConnection = false,
@@ -119,4 +119,4 @@ export const AccountCard: React.FC<AccountCardProps> = ({
             <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-full pointer-events-none opacity-10 ${account.currency === 'USD' ? 'bg-primary-500' : 'bg-finance-500'}`} />
         </div>
     );
-};
+});

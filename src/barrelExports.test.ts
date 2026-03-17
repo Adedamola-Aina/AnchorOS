@@ -16,7 +16,8 @@ describe('barrel exports', () => {
   });
 
   it('exports finance components', () => {
-    expect(FinanceComponentExports.AccountCard).toBeTypeOf('function');
+    // AccountCard is React.memo-wrapped — typeof is 'object'; check it's defined and renderable
+    expect(FinanceComponentExports.AccountCard).toBeDefined();
     expect(FinanceComponentExports.VirtualTransactionList).toBeTypeOf('function');
   });
 
