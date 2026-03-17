@@ -41,16 +41,15 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
             // For now, we verify that if an error occurs, the boundary would catch it
             // This test validates the boundary is in place, not that errors occur
 
-            // Verify Finance view loaded (no error state)
+            // Verify Finance view loaded without entering an error state
             const financeHeading = page.getByRole('heading', { name: 'Finance' });
             const isVisible = await financeHeading.isVisible().catch(() => false);
 
-            // Either Finance loaded successfully, or error boundary would show
-            // We're testing the boundary exists, not forcing an error
-            expect(isVisible || true).toBe(true);
+            // Finance heading must be visible — error boundary in happy path is transparent
+            expect(isVisible).toBe(true);
         } else {
-            // Skip if Finance not available
-            expect(true).toBe(true);
+            // Finance nav not available — skip rather than soft-pass
+            test.skip();
         }
     });
 
@@ -80,7 +79,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
                 await expect(body).toBeVisible();
             }
         } else {
-            expect(true).toBe(true);
+            test.skip();
         }
     });
 
@@ -99,7 +98,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
             const body = page.locator('body');
             await expect(body).toBeVisible();
         } else {
-            expect(true).toBe(true);
+            test.skip();
         }
     });
 
@@ -121,7 +120,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
 
             await expect(body).toBeVisible();
         } else {
-            expect(true).toBe(true);
+            test.skip();
         }
     });
 });
@@ -150,8 +149,6 @@ test.describe('Feature Error Boundaries - Recovery UI', () => {
             const body = page.locator('body');
             await expect(body).toBeVisible();
         }
-
-        expect(true).toBe(true);
     });
 
     test('Error reporting link would contain correct mailto format', async ({ page }) => {
@@ -170,8 +167,6 @@ test.describe('Feature Error Boundaries - Recovery UI', () => {
             const body = page.locator('body');
             await expect(body).toBeVisible();
         }
-
-        expect(true).toBe(true);
     });
 });
 
@@ -202,8 +197,6 @@ test.describe('Feature Error Boundaries - Mobile Responsive', () => {
             // - 44px minimum height for touch
             // - Vertical stacking on mobile
         }
-
-        expect(true).toBe(true);
     });
 
     test('Mobile: 44px touch targets for error recovery buttons', async ({ page }) => {
@@ -226,8 +219,6 @@ test.describe('Feature Error Boundaries - Mobile Responsive', () => {
             const body = page.locator('body');
             await expect(body).toBeVisible();
         }
-
-        expect(true).toBe(true);
     });
 
     test('Mobile: error UI fits within viewport without horizontal scroll', async ({ page }) => {
@@ -260,8 +251,6 @@ test.describe('Feature Error Boundaries - Accessibility', () => {
             const body = page.locator('body');
             await expect(body).toBeVisible();
         }
-
-        expect(true).toBe(true);
     });
 
     test('Error UI would be keyboard navigable', async ({ page }) => {
@@ -278,8 +267,6 @@ test.describe('Feature Error Boundaries - Accessibility', () => {
             const body = page.locator('body');
             await expect(body).toBeVisible();
         }
-
-        expect(true).toBe(true);
     });
 });
 
@@ -306,8 +293,6 @@ test.describe('Feature Error Boundaries - Dark Mode', () => {
 
             // Error UI would adapt to dark mode via Tailwind classes
         }
-
-        expect(true).toBe(true);
     });
 });
 
@@ -339,8 +324,7 @@ test.describe('Feature Error Boundaries - Integration', () => {
             }
         }
 
-        // Complete journey successful
-        expect(true).toBe(true);
+        // Complete user journey navigated all features without crashing the app
     });
 
     test('Error boundaries do not interfere with normal operation', async ({ page }) => {
@@ -360,7 +344,5 @@ test.describe('Feature Error Boundaries - Integration', () => {
                 await expect(body).toBeVisible();
             }
         }
-
-        expect(true).toBe(true);
     });
 });

@@ -324,3 +324,26 @@ test.describe('Error Handling - Data Loading', () => {
         }
     });
 });
+
+test.describe('Error Handling - Static Error Pages', () => {
+    test('should render the 500 server error page at /500', async ({ page }) => {
+        await page.goto('/500');
+
+        await expect(page.getByText('Error 500')).toBeVisible();
+        await expect(page.getByText('Something went wrong')).toBeVisible();
+    });
+
+    test('should show Reload button on the /500 page', async ({ page }) => {
+        await page.goto('/500');
+
+        await expect(page.getByRole('button', { name: /Reload/i })).toBeVisible();
+    });
+
+    test('should show a dashboard link on the /500 page', async ({ page }) => {
+        await page.goto('/500');
+
+        const link = page.getByRole('link', { name: /Go to dashboard/i });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute('href', '/dashboard');
+    });
+});

@@ -5,6 +5,24 @@ import { TEST_USER } from './fixtures/test-data';
 
 test.describe('Fabric Features', () => {
 
+    test('renders Fabric view on direct /fabric route navigation', async ({ page }) => {
+        await loginOrSignup(page, TEST_USER);
+        await page.goto('/fabric');
+
+        // The view renders either the enabled Anchor AI UI or the disabled state message
+        const aiHeading = page.getByRole('heading', { name: 'Anchor AI' });
+        const disabledMsg = page.locator('text=Anchor AI is disabled');
+
+        await expect(aiHeading.or(disabledMsg).first()).toBeVisible({ timeout: 10000 });
+    });
+
+    test('renders Fabric transparency view on /fabric/transparency', async ({ page }) => {
+        await loginOrSignup(page, TEST_USER);
+        await page.goto('/fabric/transparency');
+
+        await expect(page.getByRole('heading', { name: 'What Anchor AI Knows' })).toBeVisible({ timeout: 10000 });
+    });
+
     test('Command Palette Navigation', async ({ page }) => {
         // 1. Setup User
         await loginOrSignup(page, TEST_USER);

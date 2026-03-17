@@ -31,17 +31,17 @@ test.describe('Security Settings', () => {
     });
 
     test('should display Identity & Security section', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
+        if (!(await isOnSettingsPage(page))) { test.skip(); return; }
         await expect(page.locator('text=Identity & Security')).toBeVisible();
     });
 
     test('should display Two-Factor Authentication subsection', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
+        if (!(await isOnSettingsPage(page))) { test.skip(); return; }
         await expect(page.locator('text=Two-Factor Authentication (2FA)')).toBeVisible();
     });
 
     test('should show Setup 2FA button when MFA is disabled', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
+        if (!(await isOnSettingsPage(page))) { test.skip(); return; }
         // Look for either enabled or disabled state
         const setupBtn = page.locator('button:has-text("Setup 2FA")');
         const disableBtn = page.locator('button:has-text("Disable")');
@@ -57,7 +57,7 @@ test.describe('MFA Setup Flow', () => {
     });
 
     test('should show QR code when Setup 2FA is clicked', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
+        if (!(await isOnSettingsPage(page))) { test.skip(); return; }
         const setupBtn = page.locator('button:has-text("Setup 2FA")');
 
         // Only run if MFA is not already enabled
@@ -72,7 +72,7 @@ test.describe('MFA Setup Flow', () => {
     });
 
     test('should display account-bound QR code with user email', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
+        if (!(await isOnSettingsPage(page))) { test.skip(); return; }
         const setupBtn = page.locator('button:has-text("Setup 2FA")');
 
         if (await setupBtn.isVisible()) {
@@ -86,7 +86,7 @@ test.describe('MFA Setup Flow', () => {
     });
 
     test('should show backup code after QR code', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
+        if (!(await isOnSettingsPage(page))) { test.skip(); return; }
         const setupBtn = page.locator('button:has-text("Setup 2FA")');
 
         if (await setupBtn.isVisible()) {
@@ -112,7 +112,7 @@ test.describe('MFA Setup Flow', () => {
     });
 
     test('should show Verify button in setup flow', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
+        if (!(await isOnSettingsPage(page))) { test.skip(); return; }
         const setupBtn = page.locator('button:has-text("Setup 2FA")');
 
         if (await setupBtn.isVisible()) {
@@ -141,7 +141,7 @@ test.describe('MFA Setup Access', () => {
     });
 
     test('should show Setup 2FA or Disable button in Security Settings', async ({ page }) => {
-        if (!(await isOnSettingsPage(page))) { expect(true).toBe(true); return; }
+        if (!(await isOnSettingsPage(page))) { test.skip(); return; }
         const setupBtn = page.locator('button:has-text("Setup 2FA")').first();
         const disableBtn = page.locator('button:has-text("Disable")').first();
 
@@ -159,7 +159,7 @@ test.describe('Security Navigation', () => {
         // Check if logged in
         const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
         if (!(await dashboardBtn.isVisible().catch(() => false))) {
-            expect(true).toBe(true); return;
+            test.skip(); return;
         }
 
         // Check for notification indicator (red asterisk or dot) on System nav
