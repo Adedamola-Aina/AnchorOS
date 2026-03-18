@@ -12,6 +12,12 @@ vi.mock('./SecuritySettingsParts', () => ({
 vi.mock('./PasswordChange', () => ({
   PasswordChange: () => <div data-testid="password-change">PasswordChange</div>,
 }));
+vi.mock('./PasskeySection', () => ({
+  PasskeySection: () => <div data-testid="passkey-section">PasskeySection</div>,
+}));
+vi.mock('./AuthEventHistory', () => ({
+  AuthEventHistory: () => <div data-testid="auth-event-history">AuthEventHistory</div>,
+}));
 vi.mock('../../../context/NotificationContext', () => ({
   useNotifications: () => ({ showToast: vi.fn(), confirm: vi.fn().mockResolvedValue(true) }),
 }));

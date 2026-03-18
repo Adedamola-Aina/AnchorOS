@@ -14,8 +14,13 @@ import { AnchorLogo, ThemeToggle, type Theme } from '../../components/shared';
 import { AuthLeftPanel } from './AuthLeftPanel';
 import { AuthFormFields } from './AuthFormFields';
 import { AuthSubmitButton } from './AuthSubmitButton';
+import { SocialSignInButtons } from './SocialSignInButtons';
 import { useKeyboardAvoidance } from '../../hooks/useKeyboardAvoidance';
 import { getEffectiveTheme } from '../../utils/systemTheme';
+import { useAuthRateLimit } from './useAuthRateLimit';
+import { useAuth } from '../../context/AuthContext';
+import { usePasskeyAuth } from './usePasskeyAuth';
+import { Fingerprint } from 'lucide-react';
 
 interface AuthViewProps {
     authMode: 'login' | 'signup' | 'mfa' | 'reset';
@@ -45,32 +50,30 @@ const AuthView: React.FC<AuthViewProps> = ({
     // KB-001: Ensure keyboard doesn't cover inputs on mobile
     useKeyboardAvoidance();
 
+    const { signInWithGoogle, signInWithApple } = useAuth();
+    const { isSupported: passkeySupported, authenticateWithPasskey, loading: passkeyLoading } = usePasskeyAuth();
+    const [socialLoading, setSocialLoading] = useState(false);
+    const [socialError, setSocialError] = useState<string | null>(null);
+
+    const handleSocial = async (fn: () => Promise<unknown>) => {
+        setSocialLoading(true);
+        setSocialError(null);
+        try { await fn(); }
+        catch (err) {
+            const e = err as { message?: string };
+            setSocialError(e.message ?? 'Sign-in failed. Please try again.');
+        }
+        finally { setSocialLoading(false); }
+    };
+
     const [showPassword, setShowPassword] = useState(false);
     const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
-    const [rateLimitError, setRateLimitError] = useState<string | null>(null);
-    const attemptsRef = React.useRef<{ count: number; firstAttempt: number }>({ count: 0, firstAttempt: 0 });
-
-    const handleRateLimitedSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const now = Date.now();
-        const windowMs = 60000;
-        const maxAttempts = 5;
-
-        if (now - attemptsRef.current.firstAttempt > windowMs) {
-            attemptsRef.current = { count: 0, firstAttempt: now };
-            setRateLimitError(null);
-        }
-        if (attemptsRef.current.count >= maxAttempts) {
-            const waitSeconds = Math.ceil((windowMs - (now - attemptsRef.current.firstAttempt)) / 1000);
-            setRateLimitError(`Too many attempts. Please wait ${waitSeconds}s.`);
-            return;
-        }
-        attemptsRef.current.count++;
-        onSubmit(e);
-    };
+    // SEC-004: Exponential backoff on auth submission attempts
+    const { recordFailure, isLocked, lockoutMessage } = useAuthRateLimit();
 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (isLocked) return;
         if (!email.trim()) { setValidationErrors({ email: 'Email is required' }); return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setValidationErrors({ email: 'Please enter a valid email' }); return; }
         if (authMode !== 'reset') {
@@ -78,7 +81,9 @@ const AuthView: React.FC<AuthViewProps> = ({
             if (authMode === 'signup' && password.length < 8) { setValidationErrors({ password: 'Password must be at least 8 characters' }); return; }
         }
         setValidationErrors({});
-        handleRateLimitedSubmit(e);
+        const allowed = recordFailure();
+        if (!allowed) return;
+        onSubmit(e);
     };
 
     return (
@@ -103,9 +108,9 @@ const AuthView: React.FC<AuthViewProps> = ({
                             {authError}
                         </div>
                     )}
-                    {rateLimitError && (
+                    {lockoutMessage && (
                         <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/50 rounded-2xl text-orange-600 dark:text-orange-400 text-xs font-medium leading-relaxed animate-in fade-in slide-in-from-top-2">
-                            {rateLimitError}
+                            {lockoutMessage}
                         </div>
                     )}
 
@@ -119,6 +124,30 @@ const AuthView: React.FC<AuthViewProps> = ({
                         />
                         <AuthSubmitButton authMode={authMode} isAuthenticating={isAuthenticating} />
                     </form>
+
+                    {/* Social sign-in — visible on login and signup screens */}
+                    {(authMode === 'login' || authMode === 'signup') && (
+                        <SocialSignInButtons
+                            onGoogle={() => handleSocial(signInWithGoogle)}
+                            onApple={() => handleSocial(signInWithApple)}
+                            loading={socialLoading}
+                            error={socialError}
+                        />
+                    )}
+
+                    {/* Passkey sign-in — login only, platform support required */}
+                    {authMode === 'login' && passkeySupported && (
+                        <button
+                            type="button"
+                            disabled={passkeyLoading}
+                            onClick={() => authenticateWithPasskey()}
+                            className="w-full min-h-[44px] mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="Sign in with passkey"
+                        >
+                            <Fingerprint className="w-4 h-4" />
+                            Sign in with passkey
+                        </button>
+                    )}
 
                     {/* Footer Links */}
                     <div className="mt-8 text-center flex flex-col items-center gap-4">

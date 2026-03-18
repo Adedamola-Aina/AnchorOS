@@ -43,6 +43,14 @@ vi.mock('./FamilyService', () => ({
     finalizeFamilyConnection: vi.fn(),
 }));
 
+// Mock new security sub-components that have external dependencies
+vi.mock('./components/PasskeySection', () => ({
+    PasskeySection: () => <div data-testid="passkey-section">PasskeySection</div>,
+}));
+vi.mock('./components/AuthEventHistory', () => ({
+    AuthEventHistory: () => <div data-testid="auth-event-history">AuthEventHistory</div>,
+}));
+
 const mockProfile: UserProfile = {
     name: 'Test User',
     familyMode: false,

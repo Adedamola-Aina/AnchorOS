@@ -7,13 +7,15 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Shield, Trash2, Check } from 'lucide-react';
+import { Shield, Trash2, Check, Fingerprint } from 'lucide-react';
 import { useNotifications } from '../../../context/NotificationContext';
 import { captureError } from '../../../utils/error';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { MfaStep1GetApp, MfaStep2ScanQR, MfaStep3Verify } from './SecuritySettingsParts';
 import { PasswordChange } from './PasswordChange';
+import { PasskeySection } from './PasskeySection';
+import { AuthEventHistory } from './AuthEventHistory';
 
 interface SecuritySettingsProps {
     mfaEnabled?: boolean; isEnrolling: boolean; show2FASetup: boolean; mfaQrUrl: string; mfaManualKey: string; mfaCode: string; mfaError: string;
@@ -53,6 +55,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
     };
 
     return (
+        <>
         <Card className="overflow-hidden">
             <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-blue-50/30 dark:bg-blue-900/10">
                 <CardTitle className="text-base font-bold text-blue-900 dark:text-blue-400 flex items-center gap-3">
@@ -89,7 +92,12 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
                     </div>
                 )}
                 <PasswordChange />
+                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                    <PasskeySection />
+                </div>
             </CardContent>
         </Card>
+        <AuthEventHistory />
+        </>
     );
 };
