@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
 import AuthView from './AuthView';
@@ -6,6 +6,15 @@ import AuthView from './AuthView';
 // Mock dependencies
 vi.mock('../../hooks/useKeyboardAvoidance', () => ({
     useKeyboardAvoidance: vi.fn(),
+}));
+vi.mock('../../context/AuthContext', () => ({
+    useAuth: () => ({ signInWithGoogle: vi.fn(), signInWithApple: vi.fn() }),
+}));
+vi.mock('./usePasskeyAuth', () => ({
+    usePasskeyAuth: () => ({ isSupported: false, authenticateWithPasskey: vi.fn(), loading: false, error: null, clearError: vi.fn() }),
+}));
+vi.mock('./SocialSignInButtons', () => ({
+    SocialSignInButtons: () => <div data-testid="social-sign-in-buttons" />,
 }));
 
 describe('AuthView', () => {
@@ -91,7 +100,7 @@ describe('AuthView', () => {
         expect(props.onSubmit).toHaveBeenCalled();
     });
 
-    it('enforces rate limiting after 5 attempts', () => {
+    it('enforces rate limiting after 5 attempts', async () => {
         const props = { ...defaultProps, email: 'test@example.com', password: 'validpassword123' };
         render(<AuthView {...props} />);
         const submitButton = screen.getByRole('button', { name: /sign in/i });
@@ -104,7 +113,7 @@ describe('AuthView', () => {
 
         // 6th time should be rate limited
         fireEvent.click(submitButton);
-        expect(screen.getByText(/Too many attempts/i)).toBeInTheDocument();
+        await waitFor(() => expect(screen.getByText(/Too many.*attempts/i)).toBeInTheDocument());
         expect(props.onSubmit).toHaveBeenCalledTimes(5); // Still 5
     });
 

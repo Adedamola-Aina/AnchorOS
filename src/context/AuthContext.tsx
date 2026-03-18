@@ -13,15 +13,18 @@ import { captureError } from '../utils/error';
 import { useNavigate } from 'react-router-dom';
 import {
     onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    signOut, sendEmailVerification, multiFactor, type User, type MultiFactorResolver
+    signOut, sendEmailVerification, multiFactor, getRedirectResult,
+    type User, type MultiFactorResolver, type UserCredential
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import { doSocialSignIn, makeGoogleProvider, makeAppleProvider } from './auth/socialAuth';
 import type { UserProfile } from '../types';
 import { subscribeToProfile, updateUserProfile, createUserProfile, queueWelcomeEmail } from '../api/AuthProfileApi';
 import { useMfaOperations, getWelcomeEmailHtml } from './auth';
 import { createTracer } from '../services/telemetry';
 import { getEffectiveTheme } from '../utils/systemTheme';
 import { auditAuth } from '../services/AuditService';
+import { recordAuthEvent } from '../services/authEventService';
 
 const authTracer = createTracer('Auth');
 
@@ -33,6 +36,8 @@ interface AuthContextType {
     updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
     signIn: (email: string, pass: string) => Promise<void>;
     signUp: (email: string, pass: string) => Promise<void>;
+    signInWithGoogle: () => Promise<UserCredential | null>;
+    signInWithApple: () => Promise<UserCredential | null>;
     logout: () => Promise<void>;
     sendVerificationEmail: () => Promise<void>;
     accountNotifications: string[];
@@ -124,6 +129,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await signInWithEmailAndPassword(auth, e, p);
             // AUDIT: Log successful login
             auditAuth.loginSuccess('password');
+            // SEC-009: Record sign-in event with device context
+            void recordAuthEvent(navigator.userAgent, 'password');
         });
     };
 
@@ -132,10 +139,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const cred = await createUserWithEmailAndPassword(auth, e, p);
             const name = e.split('@')[0];
             await createUserProfile(cred.user.uid, { name, theme: 'light', familyMode: false, onboardingComplete: false });
+            // SEC-009: Record first sign-in event
+            void recordAuthEvent(navigator.userAgent, 'password');
             try { await queueWelcomeEmail(e, getWelcomeEmailHtml(name)); }
             catch (err) { captureError(err, 'Auth.welcomeEmail'); }
         });
     };
+
+    const signInWithGoogle = (): Promise<UserCredential | null> =>
+        doSocialSignIn(makeGoogleProvider(), 'google');
+
+    const signInWithApple = (): Promise<UserCredential | null> =>
+        doSocialSignIn(makeAppleProvider(), 'apple');
 
     const logout = async () => {
         authTracer.logEvent('logout');
@@ -150,7 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return (
         <AuthContext.Provider value={{
-            user, profile, loading, profileLoaded, updateProfile, signIn, signUp, logout, sendVerificationEmail, accountNotifications,
+            user, profile, loading, profileLoaded, updateProfile, signIn, signUp, signInWithGoogle, signInWithApple, logout, sendVerificationEmail, accountNotifications,
             verifyMfa: mfaOps.verifyMfa, generateMfaSecret: mfaOps.generateMfaSecret, enrollMfa: mfaOps.enrollMfa,
             unenrollMfa: mfaOps.unenrollMfa, reauthenticate: mfaOps.reauthenticate, sendPasswordReset
         }}>
