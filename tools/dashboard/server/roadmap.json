@@ -1847,6 +1847,20 @@
       "createdAt": "2026-02-21"
     },
     {
+      "id": "GAP-011",
+      "team": "Security",
+      "priority": "P0",
+      "title": "Server-side WebAuthn assertion verification for passkey sign-in",
+      "description": "Current passkey flow stores credentialId in Firestore but performs no server-side assertion verification. A Cloud Function is required to verify the authenticatorData, clientDataJSON, and signature against the stored public key to prevent credential forgery. Risk class A/B — impacts authentication integrity.",
+      "status": "planned",
+      "detectionPatterns": [
+        "GAP-011"
+      ],
+      "effort": "high",
+      "impact": "critical",
+      "createdAt": "2026-03-19"
+    },
+    {
       "id": "GAP-010",
       "team": "Architecture",
       "priority": "P2",

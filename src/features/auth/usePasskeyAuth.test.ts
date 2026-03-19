@@ -97,4 +97,15 @@ describe('usePasskeyAuth', () => {
         expect(result.current.error).toBeTruthy();
         expect(result.current.loading).toBe(false);
     });
+
+    it('registerPasskey does NOT lock to platform authenticator (allows YubiKey/roaming keys)', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.registerPasskey('user-123', 'test@example.com', 'Test User');
+        });
+        const callArg = vi.mocked(navigator.credentials.create).mock.calls[0][0] as CredentialCreationOptions;
+        const selection = callArg.publicKey?.authenticatorSelection;
+        // Must NOT be 'platform' — that silently blocks YubiKey and all hardware FIDO2 keys
+        expect(selection?.authenticatorAttachment).not.toBe('platform');
+    });
 });

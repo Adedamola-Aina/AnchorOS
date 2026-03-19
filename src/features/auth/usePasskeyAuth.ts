@@ -76,7 +76,9 @@ export function usePasskeyAuth(): PasskeyAuthResult {
                         { type: 'public-key', alg: -257 }, // RS256
                     ],
                     authenticatorSelection: {
-                        authenticatorAttachment: 'platform',
+                        // No authenticatorAttachment restriction — allows platform
+                        // authenticators (Face ID, Touch ID, Windows Hello) AND
+                        // roaming hardware keys (YubiKey, FIDO2 USB/NFC keys).
                         residentKey: 'required',
                         userVerification: 'required',
                     },
