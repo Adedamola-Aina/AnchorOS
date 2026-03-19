@@ -116,12 +116,8 @@ interface VerifyAssertionData {
 
 // ── issuePasskeyChallenge ───────────────────────────────────────────────────
 
-export const issuePasskeyChallenge = secureOnCall(async (request: {
-    auth?: { uid: string };
-    data: IssueChallengeData;
-    rawRequest?: { ip?: string };
-}) => {
-    const { purpose } = request.data;
+export const issuePasskeyChallenge = secureOnCall(async (request) => {
+    const { purpose } = request.data as IssueChallengeData;
 
     if (!purpose || !['register', 'authenticate'].includes(purpose)) {
         throw new HttpsError('invalid-argument', 'purpose must be "register" or "authenticate"');
@@ -157,10 +153,8 @@ export const issuePasskeyChallenge = secureOnCall(async (request: {
 
 // ── verifyPasskeyAssertion ──────────────────────────────────────────────────
 
-export const verifyPasskeyAssertion = secureOnCall(async (request: {
-    data: VerifyAssertionData;
-}) => {
-    const { challengeId, credentialId, userId, response } = request.data;
+export const verifyPasskeyAssertion = secureOnCall(async (request) => {
+    const { challengeId, credentialId, userId, response } = request.data as VerifyAssertionData;
 
     if (
         !challengeId || !credentialId || !userId ||

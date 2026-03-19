@@ -41,7 +41,8 @@ const mockState = vi.hoisted(() => {
 
 // ── Module mocks ────────────────────────────────────────────────────────────
 vi.mock('./callable', () => ({
-    secureOnCall: (handler: unknown) => handler,
+    // Typed so TypeScript sees the exported functions as (req) => Promise<R>, not HttpsFunction
+    secureOnCall: <T, R>(handler: (req: T) => Promise<R>): ((req: T) => Promise<R>) => handler,
 }));
 
 vi.mock('./rateLimit', () => ({
@@ -110,7 +111,13 @@ vi.mock('@simplewebauthn/server', () => ({
 }));
 
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
-import { issuePasskeyChallenge, verifyPasskeyAssertion } from './passkeyAuth';
+import { issuePasskeyChallenge as _issuePasskeyChallenge, verifyPasskeyAssertion as _verifyPasskeyAssertion } from './passkeyAuth';
+
+// secureOnCall mock returns the raw handler (not a CallableFunction/HttpsFunction wrapper).
+// Cast to allow single-arg invocation without TypeScript errors; runtime is correct.
+type TestCallable = (req: Record<string, unknown>) => Promise<Record<string, string>>;
+const issuePasskeyChallenge = _issuePasskeyChallenge as unknown as TestCallable;
+const verifyPasskeyAssertion = _verifyPasskeyAssertion as unknown as TestCallable;
 
 // ── issuePasskeyChallenge ───────────────────────────────────────────────────
 describe('issuePasskeyChallenge', () => {

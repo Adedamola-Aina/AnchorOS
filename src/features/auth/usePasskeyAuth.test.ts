@@ -72,9 +72,9 @@ const mockVerifyAssertion = vi.fn().mockResolvedValue({
 });
 
 vi.mocked(httpsCallable).mockImplementation((_functions, name) => {
-    if (name === 'issuePasskeyChallenge') return mockIssueChallenge;
-    if (name === 'verifyPasskeyAssertion') return mockVerifyAssertion;
-    return vi.fn();
+    if (name === 'issuePasskeyChallenge') return mockIssueChallenge as never;
+    if (name === 'verifyPasskeyAssertion') return mockVerifyAssertion as never;
+    return vi.fn() as never;
 });
 
 describe('usePasskeyAuth', () => {
