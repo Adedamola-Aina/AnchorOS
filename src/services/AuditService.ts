@@ -70,7 +70,7 @@ export async function logAuditEvent(
 // Convenience functions for common operations
 
 export const auditAuth = {
-    loginSuccess: (method: 'password' | 'google' | 'mfa') =>
+    loginSuccess: (method: 'password' | 'google' | 'apple' | 'mfa') =>
         logAuditEvent('auth_login_success', { method }),
     loginFailed: (method: 'password' | 'google', reason: string) =>
         logAuditEvent('auth_login_failed', { method, reason }),

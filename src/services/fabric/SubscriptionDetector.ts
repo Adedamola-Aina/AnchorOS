@@ -104,16 +104,16 @@ export function detectSubscriptions(transactions: AnchorTransaction[]): Detected
     for (const [key, group] of groups) {
         if (group.length < MIN_OCCURRENCES) continue;
 
-        const sorted = [...group].sort((a, b) => a.date.localeCompare(b.date));
+        const sorted = [...group].sort((a, b) => String(a.date).localeCompare(String(b.date)));
         const intervals: number[] = [];
         for (let i = 1; i < sorted.length; i++) {
-            intervals.push(daysBetween(sorted[i - 1].date, sorted[i].date));
+            intervals.push(daysBetween(String(sorted[i - 1].date), String(sorted[i].date)));
         }
 
         const classification = classifyIntervals(intervals);
         if (!classification || classification.confidence < MIN_CONFIDENCE) continue;
 
-        const lastDate = sorted.at(-1)!.date;
+        const lastDate = String(sorted.at(-1)!.date);
         const nextExpectedDate = addDays(lastDate, classification.spec.nominalDays);
         const [normalizedTitle] = key.split('|');
 

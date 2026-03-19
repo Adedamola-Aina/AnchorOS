@@ -30,7 +30,7 @@ describe('useSocialSignIn', () => {
         vi.clearAllMocks();
         vi.mocked(isNative).mockReturnValue(false);
         vi.mocked(signInWithPopup).mockResolvedValue(mockCredential as never);
-        vi.mocked(signInWithRedirect).mockResolvedValue(undefined);
+        vi.mocked(signInWithRedirect).mockResolvedValue(undefined as never);
         vi.mocked(getRedirectResult).mockResolvedValue(null);
     });
 

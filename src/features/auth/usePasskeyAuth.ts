@@ -22,8 +22,10 @@ const RP_ID = typeof window !== 'undefined' ? window.location.hostname : 'anchor
 const RP_NAME = 'Anchor OS';
 const CHALLENGE_BYTES = 32;
 
-function randomChallenge(): Uint8Array {
-    return crypto.getRandomValues(new Uint8Array(CHALLENGE_BYTES));
+function randomChallenge(): ArrayBuffer {
+    const buf = new Uint8Array(CHALLENGE_BYTES);
+    crypto.getRandomValues(buf);
+    return buf.buffer as ArrayBuffer;
 }
 
 function bufferToBase64url(buf: ArrayBuffer): string {
@@ -38,6 +40,7 @@ interface PasskeyAuthResult {
     registerPasskey: (userId: string, email: string, displayName: string) => Promise<string | null>;
     authenticateWithPasskey: (credentialId?: string) => Promise<PublicKeyCredential | null>;
     clearError: () => void;
+    passkeySupported?: boolean;
 }
 
 export function usePasskeyAuth(): PasskeyAuthResult {

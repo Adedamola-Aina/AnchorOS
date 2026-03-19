@@ -39,7 +39,7 @@ describe('FieldEncryption', () => {
     it('decryptFields decrypts specified keys in an object', async () => {
         const enc = new FieldEncryption(KEY);
         const encrypted = await enc.encryptFields({ balanceCents: 10000 }, ['balanceCents']);
-        const decrypted = await enc.decryptFields(encrypted as Record<string, string>, ['balanceCents']);
+        const decrypted = await enc.decryptFields(encrypted as unknown as Record<string, string>, ['balanceCents']);
         expect(decrypted['balanceCents']).toBe('10000');
     });
 

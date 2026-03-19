@@ -57,9 +57,7 @@ export class FieldEncryption {
     }
 
     static fromEnv(): FieldEncryption {
-        const key = (typeof import.meta !== 'undefined'
-            ? (import.meta as { env?: Record<string, string> }).env?.VITE_FIELD_ENCRYPTION_KEY
-            : process.env.VITE_FIELD_ENCRYPTION_KEY) ?? '';
+        const key = (import.meta as { env?: Record<string, string> }).env?.VITE_FIELD_ENCRYPTION_KEY ?? '';
         return new FieldEncryption(key);
     }
 

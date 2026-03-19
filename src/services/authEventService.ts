@@ -20,6 +20,8 @@ export interface AuthEvent {
     deviceInfo: DeviceInfo;
     /** SHA-256 hash of client IP — computed server-side, never raw IP */
     ipHash: string;
+    /** True if user flagged this event as "Not me" (SEC-009) */
+    reported?: boolean;
 }
 
 interface DeviceInfo {
