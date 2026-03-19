@@ -8,8 +8,21 @@ const enforceAppCheck = process.env.ENFORCE_APPCHECK === 'true';
 
 type CallableHandler<T, R> = (request: CallableRequest<T>) => Promise<R> | R;
 
+/**
+ * Returns CORS allowed origins for the current environment.
+ * - Production / staging: strict list of known origins
+ * - Dev: true (allow any origin — safe for development only)
+ */
+function getAllowedCors(): string[] | true {
+    const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
+    if (projectId === 'anchor-os') return ['https://anchor-os.web.app'];
+    if (projectId === 'anchor-os-staging') return ['https://anchor-os-staging.web.app'];
+    return true; // Dev — allow all origins (localhost, Tailscale, etc.)
+}
+
 function withAppCheck<T>(options: CallableOptions<T>): CallableOptions<T> {
     return {
+        cors: getAllowedCors(),
         ...options,
         enforceAppCheck: options.enforceAppCheck ?? enforceAppCheck,
     };
