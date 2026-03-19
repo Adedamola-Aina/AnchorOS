@@ -63,4 +63,9 @@ describe('sentryBeforeSend — PII scrubber', () => {
         const event: Event = { message: 'simple error' };
         expect(() => sentryBeforeSend(event)).not.toThrow();
     });
+
+    // SEC-007: sentryBeforeSend is exported for use in main.tsx Sentry init
+    it('exports sentryBeforeSend as a named export', () => {
+        expect(typeof sentryBeforeSend).toBe('function');
+    });
 });

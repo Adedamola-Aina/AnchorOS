@@ -15,6 +15,8 @@ const initSentryDeferred = async () => {
     if (!import.meta.env.VITE_SENTRY_DSN) return;
     const Sentry = await import('@sentry/react');
     const { APP_VERSION } = await import('./version');
+    // SEC-007: scrub PII before events leave the device
+    const { sentryBeforeSend } = await import('./utils/sentryPiiScrubber');
 
     Sentry.init({
         dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -28,6 +30,8 @@ const initSentryDeferred = async () => {
         replaysOnErrorSampleRate: 1.0,
         environment: __APP_ENV__,
         debug: __APP_ENV__ === 'staging',
+        // SEC-007: Strip account numbers, balances, Firestore IDs, and emails
+        beforeSend: sentryBeforeSend,
     });
 };
 

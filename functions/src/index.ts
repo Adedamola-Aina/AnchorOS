@@ -63,6 +63,12 @@ export { unlinkBankAccount } from './bankUnlink';
 export { syncBankTransactions, syncBankAccountNow } from './bankSync';
 export { monoWebhook } from './bankWebhook';
 
+// Auth event history (SEC-009)
+export { recordAuthEvent, reportUnrecognisedSignIn } from './authEvents';
+
+// Health check (SRE-003)
+export { health } from './health';
+
 // Weekly Fabric report
 export { generateWeeklyReport } from './weeklyReport';
 
