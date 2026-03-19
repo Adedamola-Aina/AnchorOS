@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.0-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.14.3...v1.15.0-rc.0) (2026-03-19)
+
+
+### Features
+
+* **auth:** auth-001 auth-005 sec-004 social sign-in hook + exponential rate limiter ([7a55945](https://github.com/Adedamola-Aina/AnchorOS/commit/7a5594517f8be10c9dfff22984e33fa1b51de6d8))
+* **auth:** auth-002 sec-009 wire passkey ui into auth login + settings security screen ([5b62230](https://github.com/Adedamola-Aina/AnchorOS/commit/5b6223071b395e0ad70518ac3c6f67bb9b0f0404))
+* **auth:** GAP-011 server-side WebAuthn assertion verification ([225c1d5](https://github.com/Adedamola-Aina/AnchorOS/commit/225c1d5cd8c16471ad906a12b4b354857fbc6b01))
+* **ci:** ARCH-026 firestore rules coverage gate + dashboard detection fix ([f344695](https://github.com/Adedamola-Aina/AnchorOS/commit/f344695711ced0ce2bdc56969630d55f55cbb3fd))
+* **ci:** ARCH-026 firestore rules path coverage enforcement ([cedb38e](https://github.com/Adedamola-Aina/AnchorOS/commit/cedb38e7cfcc115b1fab3dfa7530f86d4e984783))
+* **finance:** inn-002 subscription pattern detection card in finance view ([d2f5b88](https://github.com/Adedamola-Aina/AnchorOS/commit/d2f5b885873ff9e639ec6f1d29fa4e742effcb48))
+* **finance:** INN-002 subscription pattern detection wired into finance view ([15e934d](https://github.com/Adedamola-Aina/AnchorOS/commit/15e934dd0d36c926872d962fbb475184a71263aa))
+* **security:** arch-022 sec-009 firestore rules for auth events + ledger audit types ([c79f989](https://github.com/Adedamola-Aina/AnchorOS/commit/c79f989b18928e140541600493c0f9edb1eaa53c))
+* **security:** sec-005 field-level aes-gcm encryption on finance write/read paths ([0885098](https://github.com/Adedamola-Aina/AnchorOS/commit/0885098884d4399bc3ed187283f24562d5a2de9d))
+* **security:** sec-007 sre-003 auth event service, ledger, sentry pii scrubber, health endpoint ([1946c00](https://github.com/Adedamola-Aina/AnchorOS/commit/1946c008f148cf3338a57fc41d02be00fe0e4fb9))
+* **security:** sec-007 wire sentry pii scrubber into main, export cloud functions, update config ([0ce7a30](https://github.com/Adedamola-Aina/AnchorOS/commit/0ce7a30da221c3b7ee8b84b5e0265a9ae31eb7f6))
+* **types:** ENG-005 shared typescript types package ([9de8cbd](https://github.com/Adedamola-Aina/AnchorOS/commit/9de8cbdf5d0523cb2df308c6e3d5d9e3c74a2f3b))
+
+
+### Bug Fixes
+
+* **auth:** allow all origins in dev CORS for callable functions ([093c5ca](https://github.com/Adedamola-Aina/AnchorOS/commit/093c5ca2f5fc54451b051b5124043f422c9ba564))
+* **auth:** auth-001 auth-005 arch-001 apple icon dark mode + split authcontext to 181 lines ([275ce43](https://github.com/Adedamola-Aina/AnchorOS/commit/275ce432dcaa17b0058536a42e232a9d9f0dd255))
+* **auth:** BUG-109 apple icon svg + passkey roaming authenticator support ([b677b08](https://github.com/Adedamola-Aina/AnchorOS/commit/b677b089648cc7dd0f8b14ac3ac2b1565e28523e))
+* **auth:** resolve typescript type errors in passkey test files ([c72913e](https://github.com/Adedamola-Aina/AnchorOS/commit/c72913efa66d5af45f882de773c182e3a0a9577a))
+* **finance:** cast AnchorTransaction to Record for decryptFields TS compatibility ([9e89bd1](https://github.com/Adedamola-Aina/AnchorOS/commit/9e89bd148695d6ac9a660b1136a7b0c427b74e28))
+* **finance:** double-cast via unknown for AnchorTransaction decrypt ([7c636db](https://github.com/Adedamola-Aina/AnchorOS/commit/7c636db456ea24566a912e00163611e1425d456d))
+* **finance:** remove duplicate FieldEncryption import in TransferOperations ([ead0064](https://github.com/Adedamola-Aina/AnchorOS/commit/ead006496a0d99584eef91cfb402660258126efc))
+* **functions:** add predeploy build hook and fix TS errors in functions ([4b60674](https://github.com/Adedamola-Aina/AnchorOS/commit/4b60674aae4e5475cc43c278238a5af48d87f978))
+* **security:** resolve 12 typescript errors in passkey, encryption, subscription detector, audit ([6546cca](https://github.com/Adedamola-Aina/AnchorOS/commit/6546ccad7eac4779387611444a80bc1673ce4980))
+
 ## [1.15.0-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.14.3...v1.15.0-dev.0) (2026-03-19)
 
 
