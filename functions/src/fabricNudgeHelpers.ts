@@ -5,8 +5,8 @@ import { sendReminderNotification } from './reminderSender';
 import { getReminderLinkPath, type ReminderCategory } from './reminderRouting';
 
 export const LAGOS_TZ = 'Africa/Lagos';
-const lagosDateFmt = new Intl.DateTimeFormat('en-CA', { timeZone: LAGOS_TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
-const lagosTimeFmt = new Intl.DateTimeFormat('en-GB', { timeZone: LAGOS_TZ, hour: '2-digit', minute: '2-digit', hour12: false });
+export const lagosDateFmt = new Intl.DateTimeFormat('en-CA', { timeZone: LAGOS_TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+export const lagosTimeFmt = new Intl.DateTimeFormat('en-GB', { timeZone: LAGOS_TZ, hour: '2-digit', minute: '2-digit', hour12: false });
 
 export type NudgeType = 'streak' | 'budget' | 'surplus';
 export type TaskLike = { title?: unknown; type?: unknown; completed?: unknown; currentStreak?: unknown };

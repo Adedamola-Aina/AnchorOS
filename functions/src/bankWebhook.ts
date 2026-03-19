@@ -4,7 +4,6 @@ import { db } from './config';
 import { handleAccountUpdated, handleReauthorisation } from './webhookHandlers';
 import type { MonoWebhookEvent } from './mono/monoTypes';
 
-const BATCH_CHUNK_SIZE = 400;
 const REPLAY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function verifySignature(rawBody: string, signature: string | undefined): boolean {
