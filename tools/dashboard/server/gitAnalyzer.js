@@ -73,7 +73,8 @@ const PRODUCT_SOURCE_PATHS = [
     'config/firestore.indexes.json',
     'capacitor.config.ts',
     'android/',
-    'ios/'
+    'ios/',
+    'packages/'
 ];
 
 // Paths that indicate documentation / process governance changes
