@@ -11,6 +11,7 @@ import { auditFinance } from './AuditService';
 import { canEditTransaction } from '../features/finance/utils/permissions';
 import type { AnchorTransaction, AnchorAccount } from '../types';
 import type { UpdateTransactionPayload } from './financeTypes';
+import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from './FieldEncryption';
 
 export async function updateTransaction(
     firestore: Firestore,
@@ -34,10 +35,16 @@ export async function updateTransaction(
             if (!txDoc.exists()) throw new AnchorError('Transaction does not exist', 'VALIDATION');
             const currentData = txDoc.data() as AnchorTransaction;
 
+            // SEC-005: Decrypt fields that may have been encrypted at write time
+            const enc = FieldEncryption.fromEnv();
+            const decrypted = enc.isEnabled()
+                ? await enc.decryptFields(currentData, ENCRYPTED_TRANSACTION_FIELDS)
+                : currentData;
+
             // BUG-036 Fix: Handle type change, amount change, or both
-            const oldType = currentData.type;
+            const oldType = decrypted.type;
             const newType = updates.type ?? oldType;
-            const oldAmount = currentData.amountCents;
+            const oldAmount = decrypted.amountCents;
             const newAmount = updates.amountCents ?? oldAmount;
 
             if (newType !== oldType || newAmount !== oldAmount) {

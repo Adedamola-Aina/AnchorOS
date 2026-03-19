@@ -13,6 +13,8 @@ import { AnchorError } from '../utils/error';
 import type { AnchorAccount } from '../types';
 import { canAddTransaction } from '../features/finance/utils/permissions';
 import type { CreateTransactionPayload } from './financeTypes';
+import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from './FieldEncryption';
+import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from './FieldEncryption';
 
 /**
  * Handles transfer transaction creation between two accounts
@@ -104,7 +106,7 @@ export function processTransferTransaction(
 /**
  * Handles standard (non-transfer) transaction creation
  */
-export function processStandardTransaction(
+export async function processStandardTransaction(
     firestore: Firestore,
     batch: WriteBatch,
     userId: string,
@@ -113,14 +115,22 @@ export function processStandardTransaction(
     transactionDate: string,
     createdAt: string,
     isBackdated: boolean
-): void {
+): Promise<void> {
     // Exclude destinationAccountId (only for transfers) - explicitly omit with rest
     const { destinationAccountId: _ignored, ...transactionData } = payload;
     void _ignored; // Explicitly discard to satisfy linter
+
+    // SEC-005: Encrypt sensitive fields before storage.
+    // Keep raw payload for balance increment (increment() requires a number).
+    const enc = FieldEncryption.fromEnv();
+    const dataToStore = enc.isEnabled()
+        ? await enc.encryptFields(transactionData, ENCRYPTED_TRANSACTION_FIELDS)
+        : transactionData;
+
     const txRef = doc(collection(firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'finance'));
 
     batch.set(txRef, {
-        ...transactionData,
+        ...dataToStore,
         id: txRef.id,
         date: transactionDate,
         createdAt,

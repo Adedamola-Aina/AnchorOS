@@ -48,7 +48,7 @@ describe('FinanceApi', () => {
             expect(unsub).toBe(mockUnsubscribe);
         });
 
-        it('maps snapshot docs through onData callback', () => {
+        it('maps snapshot docs through onData callback', async () => {
             let snapshotCallback: any;
             vi.mocked(onSnapshot).mockImplementation((_q: any, _options: any, onNext: any) => {
                 snapshotCallback = onNext;
@@ -66,10 +66,11 @@ describe('FinanceApi', () => {
                 ],
             });
 
-            expect(onData).toHaveBeenCalledWith([
+            // SEC-005: decrypt is async, wait for onData to be called
+            await vi.waitFor(() => expect(onData).toHaveBeenCalledWith([
                 { id: 'tx-1', title: 'Lunch', amountCents: 1500 },
                 { id: 'tx-2', title: 'Gas', amountCents: 5000 },
-            ]);
+            ]));
         });
 
         it('calls onError on snapshot error', () => {
@@ -96,7 +97,7 @@ describe('FinanceApi', () => {
             expect(onSnapshot).toHaveBeenCalled();
         });
 
-        it('adds default ownerId when missing', () => {
+        it('adds default ownerId when missing', async () => {
             let snapshotCallback: any;
             vi.mocked(onSnapshot).mockImplementation((_q: any, _options: any, onNext: any) => {
                 snapshotCallback = onNext;
@@ -110,12 +111,12 @@ describe('FinanceApi', () => {
                 docs: [{ id: 'a1', data: () => ({ name: 'Checking' }) }],
             });
 
-            expect(onData).toHaveBeenCalledWith([
+            await vi.waitFor(() => expect(onData).toHaveBeenCalledWith([
                 expect.objectContaining({ id: 'a1', name: 'Checking', ownerId: 'u1' }),
-            ]);
+            ]));
         });
 
-        it('preserves existing ownerId', () => {
+        it('preserves existing ownerId', async () => {
             let snapshotCallback: any;
             vi.mocked(onSnapshot).mockImplementation((_q: any, _options: any, onNext: any) => {
                 snapshotCallback = onNext;
@@ -129,9 +130,9 @@ describe('FinanceApi', () => {
                 docs: [{ id: 'a1', data: () => ({ name: 'Shared', ownerId: 'other-user' }) }],
             });
 
-            expect(onData).toHaveBeenCalledWith([
+            await vi.waitFor(() => expect(onData).toHaveBeenCalledWith([
                 expect.objectContaining({ ownerId: 'other-user' }),
-            ]);
+            ]));
         });
     });
 

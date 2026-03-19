@@ -17,6 +17,7 @@ import { auditFinance } from './AuditService';
 import type { AnchorAccount } from '../types';
 import { canManageAccount } from '../features/finance/utils/permissions';
 import type { CreateAccountPayload } from './financeTypes';
+import { FieldEncryption, ENCRYPTED_ACCOUNT_FIELDS } from './FieldEncryption';
 
 // Re-export types for backward compatibility
 export type { CreateAccountPayload } from './financeTypes';
@@ -43,9 +44,20 @@ export class AccountService {
         }
 
         try {
+            // SEC-005: Encrypt balanceCents before storage.
+            // Note: subsequent balance updates use Firestore increment() which requires
+            // a numeric field — so rebalancing ops bypass encryption by design.
+            const enc = FieldEncryption.fromEnv();
+            const dataToStore = enc.isEnabled()
+                ? await enc.encryptFields(
+                    { ...payload, ownerId: userId, isArchived: false, shares: {} },
+                    ENCRYPTED_ACCOUNT_FIELDS
+                  )
+                : { ...payload, ownerId: userId, isArchived: false, shares: {} };
+
             const docRef = await addDoc(
                 collection(this.firestore, 'artifacts', APP_ID, 'users', userId, 'accounts'),
-                { ...payload, ownerId: userId, isArchived: false, shares: {} }
+                dataToStore
             );
 
             // AUDIT: Log account creation

@@ -12,6 +12,7 @@ import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
 import { auditFinance } from './AuditService';
+import { LedgerService } from './LedgerService';
 import type { AnchorTransaction, AnchorAccount } from '../types';
 import { canAddTransaction, canDeleteTransaction } from '../features/finance/utils/permissions';
 import { processTransferTransaction, processStandardTransaction } from './TransferOperations';
@@ -58,7 +59,7 @@ export class TransactionService {
             if (payload.type === 'transfer') {
                 processTransferTransaction(this.firestore, batch, userId, payload, sourceAccount, accounts, transactionDate, createdAt, isBackdated);
             } else {
-                processStandardTransaction(this.firestore, batch, userId, payload, sourceAccount, transactionDate, createdAt, isBackdated);
+                await processStandardTransaction(this.firestore, batch, userId, payload, sourceAccount, transactionDate, createdAt, isBackdated);
             }
             await batch.commit();
 
@@ -69,6 +70,14 @@ export class TransactionService {
                 payload.amountCents,
                 payload.type
             );
+            // ARCH-022: Immutable ledger entry
+            void LedgerService.record(userId, {
+                action: 'transaction_created',
+                entityId: payload.accountId,
+                entityType: 'transaction',
+                amountCentsDelta: payload.type === 'income' ? payload.amountCents : -payload.amountCents,
+                snapshotAfter: { accountId: payload.accountId, amountCents: payload.amountCents, type: payload.type },
+            });
         } catch (error) {
             void auditFinance.operationFailed('transaction_create', {
                 accountId: payload.accountId,
@@ -126,6 +135,15 @@ export class TransactionService {
 
             // AUDIT: Log transaction deletion
             auditFinance.transactionDeleted(transactionId, accountId);
+            // ARCH-022: Immutable ledger entry
+            void LedgerService.record(userId, {
+                action: 'transaction_deleted',
+                entityId: transactionId,
+                entityType: 'transaction',
+                amountCentsDelta: txToDelete.type === 'income' ? -txToDelete.amountCents : txToDelete.amountCents,
+                snapshotBefore: { id: transactionId, accountId, amountCents: txToDelete.amountCents, type: txToDelete.type },
+                snapshotAfter: null,
+            });
         } catch (error) {
             void auditFinance.operationFailed('transaction_delete', {
                 transactionId,

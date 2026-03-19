@@ -20,6 +20,19 @@ import {
 } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 import type { AnchorTransaction, AnchorAccount } from '../types';
+import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS, ENCRYPTED_ACCOUNT_FIELDS } from '../services/FieldEncryption';
+
+const enc = FieldEncryption.fromEnv();
+
+async function decryptTransactions(raw: AnchorTransaction[]): Promise<AnchorTransaction[]> {
+    if (!enc.isEnabled()) return raw;
+    return Promise.all(raw.map(t => enc.decryptFields(t, ENCRYPTED_TRANSACTION_FIELDS)));
+}
+
+async function decryptAccounts(raw: AnchorAccount[]): Promise<AnchorAccount[]> {
+    if (!enc.isEnabled()) return raw;
+    return Promise.all(raw.map(a => enc.decryptFields(a, ENCRYPTED_ACCOUNT_FIELDS)));
+}
 
 export class FinanceApi {
     private static instance: FinanceApi;
@@ -54,19 +67,17 @@ export class FinanceApi {
             q,
             { includeMetadataChanges: true },
             (snapshot) => {
-                const data = snapshot.docs.map(doc => ({
+                const raw = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 } as AnchorTransaction));
-                onData(data);
+                // SEC-005: Decrypt sensitive fields
+                void decryptTransactions(raw).then(onData);
             },
             (error) => onError(error)
         );
     }
 
-    /**
-     * Subscribe to user's accounts
-     */
     subscribeToAccounts(
         userId: string,
         onData: (data: AnchorAccount[]) => void,
@@ -81,12 +92,13 @@ export class FinanceApi {
             q,
             { includeMetadataChanges: true },
             (snapshot) => {
-                const data = snapshot.docs.map(doc => ({
+                const raw = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data(),
                     ownerId: doc.data().ownerId || userId
                 } as AnchorAccount));
-                onData(data);
+                // SEC-005: Decrypt sensitive fields
+                void decryptAccounts(raw).then(onData);
             },
             (error) => onError(error)
         );
@@ -111,11 +123,12 @@ export class FinanceApi {
             q,
             { includeMetadataChanges: true },
             (snapshot) => {
-                const data = snapshot.docs.map(doc => ({
+                const raw = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 } as AnchorTransaction));
-                onData(data);
+                // SEC-005: Decrypt sensitive fields
+                void decryptTransactions(raw).then(onData);
             },
             (error) => onError(error)
         );
