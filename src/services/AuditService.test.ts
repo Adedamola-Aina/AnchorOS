@@ -238,4 +238,18 @@ describe('AuditService', () => {
             );
         });
     });
+
+    // SEC-009: Auth event audit types
+    describe('auth event types', () => {
+        it('AuditEventType includes auth_event_recorded', () => {
+            // Type-level check — if this compiles, the union includes the type
+            const action: import('./AuditService').AuditEventType = 'auth_event_recorded';
+            expect(action).toBe('auth_event_recorded');
+        });
+
+        it('AuditEventType includes auth_unrecognised_signin_reported', () => {
+            const action: import('./AuditService').AuditEventType = 'auth_unrecognised_signin_reported';
+            expect(action).toBe('auth_unrecognised_signin_reported');
+        });
+    });
 });

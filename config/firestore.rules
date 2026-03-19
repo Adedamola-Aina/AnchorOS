@@ -208,6 +208,19 @@ service cloud.firestore {
           allow write: if false;
         }
 
+        // Auth event history (SEC-009) — readable by owner, written only by Admin SDK
+        match /authEvents/{eventId} {
+          allow read: if request.auth.uid == userId;
+          allow write: if false;
+        }
+
+        // Financial mutation audit ledger (ARCH-022) — append-only, no update/delete
+        match /ledger/{entryId} {
+          allow read: if request.auth.uid == userId;
+          allow create: if request.auth.uid == userId;
+          allow update, delete: if false;
+        }
+
         // ====================================================================
         // Accounts: Owner or shared member can read
         // ====================================================================

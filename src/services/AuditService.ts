@@ -38,7 +38,10 @@ export type AuditEventType =
     | 'commitment_created'
     | 'commitment_completed'
     | 'commitment_deleted'
-    | 'commitment_edited';
+    | 'commitment_edited'
+    // Auth event history (SEC-009)
+    | 'auth_event_recorded'
+    | 'auth_unrecognised_signin_reported';
 
 interface AuditMetadata {
     [key: string]: unknown;

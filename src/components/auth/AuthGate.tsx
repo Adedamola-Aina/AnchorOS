@@ -11,7 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import AuthView from '../../features/auth/AuthView';
-import { getMultiFactorResolver, type MultiFactorResolver, type MultiFactorError } from 'firebase/auth';
+import { getMultiFactorResolver, getRedirectResult, type MultiFactorResolver, type MultiFactorError } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 import { mapFirebaseError } from '../../utils/errorUtils';
 import { AuthLoadingScreen, EmailVerificationGate, OnboardingGate } from './AuthGateParts';
@@ -56,6 +56,11 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
         if (sessionActive === 'true' && !user && !loading) { setAuthError('Session expired. Please sign in again.'); sessionStorage.removeItem('anchor_session_active'); }
         return () => window.removeEventListener('anchor:session_expired', handleExpiry);
     }, [user, loading]);
+
+    // AUTH-001/005: Handle redirect result from native Capacitor (Google/Apple)
+    React.useEffect(() => {
+        getRedirectResult(auth).catch(() => undefined);
+    }, []);
 
     React.useEffect(() => {
         if (!user && !loading) { setEmail(''); setPassword(''); setAuthError(''); setMfaResolver(null); setAuthMode('login'); if (location.pathname !== '/' && location.pathname !== '/accept-invite') navigate('/', { replace: true }); }
