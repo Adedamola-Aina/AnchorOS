@@ -1,10 +1,24 @@
 /**
- * usePasskeyAuth — AUTH-002
+ * usePasskeyAuth — AUTH-002, GAP-011
  * Tests: WebAuthn passkey registration and authentication
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+
+// Mock Firebase Cloud Functions SDK
+vi.mock('firebase/functions', () => ({
+    getFunctions: vi.fn(() => ({})),
+    httpsCallable: vi.fn(),
+}));
+
+// Mock Firebase Auth signInWithCustomToken
+vi.mock('firebase/auth', () => ({
+    signInWithCustomToken: vi.fn(),
+    getAuth: vi.fn(() => ({})),
+}));
+
+vi.mock('../../config/firebase', () => ({ auth: {}, app: {} }));
 
 // Mock Web Authentication API
 const mockCredential = {
@@ -46,13 +60,33 @@ vi.stubGlobal('navigator', {
     },
 });
 
+import { httpsCallable } from 'firebase/functions';
+import { signInWithCustomToken } from 'firebase/auth';
 import { usePasskeyAuth } from './usePasskeyAuth';
+
+const mockIssueChallenge = vi.fn().mockResolvedValue({
+    data: { challengeId: 'chal-server-1', challenge: 'server-challenge-base64url' },
+});
+const mockVerifyAssertion = vi.fn().mockResolvedValue({
+    data: { customToken: 'firebase-custom-token' },
+});
+
+vi.mocked(httpsCallable).mockImplementation((_functions, name) => {
+    if (name === 'issuePasskeyChallenge') return mockIssueChallenge;
+    if (name === 'verifyPasskeyAssertion') return mockVerifyAssertion;
+    return vi.fn();
+});
 
 describe('usePasskeyAuth', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(navigator.credentials.create).mockResolvedValue(mockCredential as never);
         vi.mocked(navigator.credentials.get).mockResolvedValue(mockAssertion as never);
+        mockIssueChallenge.mockResolvedValue({
+            data: { challengeId: 'chal-server-1', challenge: 'server-challenge-base64url' },
+        });
+        mockVerifyAssertion.mockResolvedValue({ data: { customToken: 'firebase-custom-token' } });
+        vi.mocked(signInWithCustomToken).mockResolvedValue({} as never);
     });
 
     it('isSupported returns true when credentials API exists', () => {
@@ -107,5 +141,67 @@ describe('usePasskeyAuth', () => {
         const selection = callArg.publicKey?.authenticatorSelection;
         // Must NOT be 'platform' — that silently blocks YubiKey and all hardware FIDO2 keys
         expect(selection?.authenticatorAttachment).not.toBe('platform');
+    });
+
+    // ── GAP-011: Server-side challenge + assertion verification ──────────────
+
+    it('registerPasskey fetches challenge from server before calling credentials.create', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.registerPasskey('user-123', 'test@example.com', 'Test User');
+        });
+        expect(mockIssueChallenge).toHaveBeenCalledWith({ purpose: 'register' });
+        expect(navigator.credentials.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('registerPasskey uses server-issued challenge in publicKey.challenge', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.registerPasskey('user-123', 'test@example.com', 'Test User');
+        });
+        const callArg = vi.mocked(navigator.credentials.create).mock.calls[0][0] as CredentialCreationOptions;
+        // challenge must NOT be a local random buffer — it must come from server response
+        expect(callArg.publicKey?.challenge).toBeDefined();
+    });
+
+    it('authenticateWithPasskey fetches challenge from server before credentials.get', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.authenticateWithPasskey();
+        });
+        expect(mockIssueChallenge).toHaveBeenCalledWith({ purpose: 'authenticate' });
+        expect(navigator.credentials.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('authenticateWithPasskey calls verifyPasskeyAssertion with assertion response', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.authenticateWithPasskey('cred-123');
+        });
+        expect(mockVerifyAssertion).toHaveBeenCalledWith(
+            expect.objectContaining({
+                challengeId: 'chal-server-1',
+                credentialId: 'cred-123',
+            })
+        );
+    });
+
+    it('authenticateWithPasskey calls signInWithCustomToken with returned token', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.authenticateWithPasskey();
+        });
+        expect(signInWithCustomToken).toHaveBeenCalledWith(expect.anything(), 'firebase-custom-token');
+    });
+
+    it('authenticateWithPasskey returns UserCredential from signInWithCustomToken', async () => {
+        const mockUserCred = { user: { uid: 'u-123' } };
+        vi.mocked(signInWithCustomToken).mockResolvedValueOnce(mockUserCred as never);
+        const { result } = renderHook(() => usePasskeyAuth());
+        let cred: unknown;
+        await act(async () => {
+            cred = await result.current.authenticateWithPasskey();
+        });
+        expect(cred).toEqual(mockUserCred);
     });
 });

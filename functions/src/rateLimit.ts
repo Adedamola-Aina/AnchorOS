@@ -35,6 +35,9 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     recurringUpdate:     { maxAttempts: 60,  windowMs: HOUR,     blockDurationMs: 15 * MIN },
     recurringDelete:     { maxAttempts: 20,  windowMs: DAY,      blockDurationMs: HOUR },
     feedbackSubmit:      { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
+    // Passkey (WebAuthn) — GAP-011
+    passkeyChallenge:    { maxAttempts: 10,  windowMs: 15 * MIN, blockDurationMs: HOUR },
+    passkeyVerify:       { maxAttempts: 5,   windowMs: 15 * MIN, blockDurationMs: HOUR },
 };
 
 export async function enforceRateLimit(action: string, identifier: string): Promise<void> {

@@ -164,6 +164,12 @@ service cloud.firestore {
           allow read, write: if request.auth.uid == userId;
         }
 
+        // Passkey credentials — owner read only; writes via Cloud Function only
+        match /passkeys/{credentialId} {
+          allow read: if request.auth.uid == userId;
+          allow write: if false; // written exclusively by verifyPasskeyAssertion Cloud Function
+        }
+
         // Daily mood check-ins for Fabric
         match /mood_entries/{entryDate} {
           allow read: if request.auth.uid == userId;
@@ -368,6 +374,11 @@ service cloud.firestore {
     // Rate limits (Cloud Functions only)
     match /rateLimits/{docId} {
       allow read, write: if false;
+    }
+
+    // Passkey challenges — server-issued, short TTL. No direct client access.
+    match /passkey_challenges/{challengeId} {
+      allow read, write: if false; // managed exclusively by issuePasskeyChallenge + verifyPasskeyAssertion
     }
 
     // Mail (Firebase Trigger Email extension)

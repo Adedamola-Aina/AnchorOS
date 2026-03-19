@@ -66,6 +66,9 @@ export { monoWebhook } from './bankWebhook';
 // Auth event history (SEC-009)
 export { recordAuthEvent, reportUnrecognisedSignIn } from './authEvents';
 
+// Passkey (WebAuthn) server-side challenge + assertion verification (GAP-011)
+export { issuePasskeyChallenge, verifyPasskeyAssertion } from './passkeyAuth';
+
 // Health check (SRE-003)
 export { health } from './health';
 

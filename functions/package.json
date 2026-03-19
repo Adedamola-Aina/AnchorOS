@@ -12,6 +12,7 @@
     "node": "22"
   },
   "dependencies": {
+    "@simplewebauthn/server": "^13.3.0",
     "bcrypt": "^6.0.0",
     "date-fns": "^4.1.0",
     "firebase-admin": "^13.6.1",

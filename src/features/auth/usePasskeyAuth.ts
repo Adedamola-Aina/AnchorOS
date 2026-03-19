@@ -1,36 +1,49 @@
 /**
- * usePasskeyAuth — AUTH-002
+ * usePasskeyAuth — AUTH-002, GAP-011
  *
  * WebAuthn passkey support: register a platform authenticator and
- * authenticate with it. The credential is stored client-side in the
- * browser's credential store; the Firestore record only stores the
- * credential ID (never private key material).
+ * authenticate with it using full server-side assertion verification.
  *
- * Flow:
- *   Register:     credential.create → store credentialId in Firestore
- *   Authenticate: credential.get → verify locally → Firebase Custom Token
+ * Flow (registration):
+ *   issuePasskeyChallenge(register) → credential.create → store credentialId
+ *
+ * Flow (authentication):
+ *   issuePasskeyChallenge(authenticate) → credential.get →
+ *   verifyPasskeyAssertion (Cloud Function) → signInWithCustomToken
  *
  * Security:
+ *   - Challenges are server-generated with 2-min TTL (no client-forged challenges)
+ *   - Assertion signature verified server-side (ECDSA P-256 / RS256)
+ *   - signCount enforced server-side — cloned authenticator protection
+ *   - Firebase Custom Token issued only after successful server verification
  *   - Private key never leaves the device (WebAuthn spec guarantee)
- *   - credentialId stored in Firestore is not secret (public identifier)
- *   - Full server-side verification requires a Cloud Function (future FEAT)
  */
 
 import { useState, useCallback } from 'react';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getAuth, signInWithCustomToken } from 'firebase/auth';
+import { app } from '../../config/firebase';
 
 const RP_ID = typeof window !== 'undefined' ? window.location.hostname : 'anchor-os.web.app';
 const RP_NAME = 'Anchor OS';
-const CHALLENGE_BYTES = 32;
-
-function randomChallenge(): ArrayBuffer {
-    const buf = new Uint8Array(CHALLENGE_BYTES);
-    crypto.getRandomValues(buf);
-    return buf.buffer as ArrayBuffer;
-}
 
 function bufferToBase64url(buf: ArrayBuffer): string {
     return btoa(String.fromCharCode(...new Uint8Array(buf)))
         .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function base64urlToBuffer(b64: string): Uint8Array<ArrayBuffer> {
+    const padded = b64.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = atob(padded);
+    const len = binary.length;
+    const buf = new Uint8Array(len);
+    for (let i = 0; i < len; i++) buf[i] = binary.charCodeAt(i);
+    return buf;
+}
+
+interface IssueChallengeResult {
+    challengeId: string;
+    challenge: string; // base64url
 }
 
 interface PasskeyAuthResult {
@@ -38,7 +51,7 @@ interface PasskeyAuthResult {
     loading: boolean;
     error: string | null;
     registerPasskey: (userId: string, email: string, displayName: string) => Promise<string | null>;
-    authenticateWithPasskey: (credentialId?: string) => Promise<PublicKeyCredential | null>;
+    authenticateWithPasskey: (credentialId?: string) => Promise<unknown>;
     clearError: () => void;
     passkeySupported?: boolean;
 }
@@ -51,9 +64,12 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         typeof window !== 'undefined' &&
         typeof navigator.credentials?.create === 'function';
 
+    const functions = getFunctions(app);
+
     /**
      * Register a new passkey for the given user.
-     * Returns the base64url-encoded credentialId on success (store in Firestore).
+     * Challenge comes from the server — prevents client-forged challenges.
+     * Returns the base64url-encoded credentialId on success.
      */
     const registerPasskey = useCallback(async (
         userId: string,
@@ -63,16 +79,22 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         setLoading(true);
         setError(null);
         try {
-            const challenge = randomChallenge();
+            // 1. Get server-issued challenge
+            const issueChallenge = httpsCallable<{ purpose: string }, IssueChallengeResult>(
+                functions, 'issuePasskeyChallenge'
+            );
+            const { data: { challenge } } = await issueChallenge({ purpose: 'register' });
+
             const userIdBytes = new TextEncoder().encode(userId);
 
+            // 2. Create credential using server challenge
             const credential = await navigator.credentials.create({
                 publicKey: {
                     rp: { id: RP_ID, name: RP_NAME },
                     user: { id: userIdBytes, name: email, displayName },
-                    challenge,
+                    challenge: base64urlToBuffer(challenge),
                     pubKeyCredParams: [
-                        { type: 'public-key', alg: -7 },  // ES256
+                        { type: 'public-key', alg: -7 },   // ES256
                         { type: 'public-key', alg: -257 }, // RS256
                     ],
                     authenticatorSelection: {
@@ -98,34 +120,67 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [functions]);
 
     /**
      * Authenticate using an existing passkey.
-     * Optionally pass a credentialId to restrict which credential to use.
+     * Challenge is server-issued. Assertion is verified server-side via Cloud Function.
+     * Returns UserCredential from signInWithCustomToken on success.
      */
     const authenticateWithPasskey = useCallback(async (
         credentialId?: string
-    ): Promise<PublicKeyCredential | null> => {
+    ): Promise<unknown> => {
         setLoading(true);
         setError(null);
         try {
-            const challenge = randomChallenge();
+            // 1. Get server-issued challenge
+            const issueChallenge = httpsCallable<{ purpose: string }, IssueChallengeResult>(
+                functions, 'issuePasskeyChallenge'
+            );
+            const { data: { challengeId, challenge } } = await issueChallenge({ purpose: 'authenticate' });
+
             const allowCredentials: PublicKeyCredentialDescriptor[] = credentialId
-                ? [{ type: 'public-key', id: Uint8Array.from(atob(credentialId.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)) }]
+                ? [{ type: 'public-key', id: base64urlToBuffer(credentialId) }]
                 : [];
 
+            // 2. Get assertion from authenticator
             const assertion = await navigator.credentials.get({
                 publicKey: {
                     rpId: RP_ID,
-                    challenge,
+                    challenge: base64urlToBuffer(challenge),
                     allowCredentials,
                     userVerification: 'required',
                     timeout: 60_000,
                 },
             }) as PublicKeyCredential | null;
 
-            return assertion;
+            if (!assertion) return null;
+
+            const assertionResponse = assertion.response as AuthenticatorAssertionResponse;
+
+            // 3. Send to server for cryptographic verification
+            const verifyAssertion = httpsCallable<Record<string, unknown>, { customToken: string }>(
+                functions, 'verifyPasskeyAssertion'
+            );
+            const { data: { customToken } } = await verifyAssertion({
+                challengeId,
+                credentialId: assertion.id,
+                userId: assertionResponse.userHandle
+                    ? new TextDecoder().decode(assertionResponse.userHandle)
+                    : (credentialId ?? assertion.id),
+                response: {
+                    authenticatorData: bufferToBase64url(assertionResponse.authenticatorData),
+                    clientDataJSON: bufferToBase64url(assertionResponse.clientDataJSON),
+                    signature: bufferToBase64url(assertionResponse.signature),
+                    userHandle: assertionResponse.userHandle
+                        ? bufferToBase64url(assertionResponse.userHandle)
+                        : undefined,
+                },
+            });
+
+            // 4. Sign in with the server-issued custom token
+            const auth = getAuth(app);
+            return await signInWithCustomToken(auth, customToken);
         } catch (err) {
             const e = err as { message?: string; name?: string };
             if (e.name !== 'NotAllowedError') {
@@ -135,7 +190,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [functions]);
 
     const clearError = useCallback(() => setError(null), []);
 
