@@ -29,6 +29,7 @@ import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { MonthlyInsight } from './MonthlyInsight';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
+import { SubscriptionDetectorCard } from './components/SubscriptionDetectorCard';
 
 
 const FinanceView = () => {
@@ -141,7 +142,9 @@ const FinanceView = () => {
           <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-6'}`}>
             {activeAccounts.map((acc) => (<AccountCard key={acc.id} account={acc} userId={user?.uid || ''} isOwnerOfConnection={isFamilyOwner} familyMemberUid={familyMemberUid || undefined} onEdit={(acc) => setSelectedAccountId(acc.id)} onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)} />))}
             {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
-          </div></>)}
+          </div>
+          {/* INN-002: Subscription pattern detection */}
+          <SubscriptionDetectorCard transactions={transactions} currency={primaryCurrency} /></>)}
 
         {!showModal && mode === 'addAcc' && !isSearching && <div className="animate-in fade-in zoom-in-95 duration-200"><AccountForm onClose={handleCloseForm} /></div>}
         {!showModal && (mode === 'addTx' || mode === 'editTx') && !isSearching && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
