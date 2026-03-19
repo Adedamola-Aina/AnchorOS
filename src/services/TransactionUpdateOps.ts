@@ -38,7 +38,7 @@ export async function updateTransaction(
             // SEC-005: Decrypt fields that may have been encrypted at write time
             const enc = FieldEncryption.fromEnv();
             const decrypted = enc.isEnabled()
-                ? await enc.decryptFields(currentData as unknown as Record<string, unknown>, ENCRYPTED_TRANSACTION_FIELDS) as AnchorTransaction
+                ? await enc.decryptFields(currentData as unknown as Record<string, unknown>, ENCRYPTED_TRANSACTION_FIELDS) as unknown as AnchorTransaction
                 : currentData;
 
             // BUG-036 Fix: Handle type change, amount change, or both
