@@ -1411,7 +1411,7 @@
       "priority": "P0",
       "title": "Mono webhook HMAC-SHA512 signature verification",
       "description": "The bankWebhook Cloud Function currently accepts all incoming Mono events without verifying the mono-webhook-secret HMAC-SHA512 header. An attacker can spoof balance updates or inject fraudulent transactions. Add signature verification before any event processing.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "SEC-003",
         "webhook signature",
@@ -1421,7 +1421,9 @@
       "effort": "small",
       "impact": "critical",
       "type": "security",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-03-17",
+      "completionNote": "functions/src/bankWebhook.ts — verifySignature() validates mono-webhook-secret HMAC-SHA512 header before any event processing"
     },
     {
       "id": "SEC-004",
@@ -1852,13 +1854,15 @@
       "priority": "P0",
       "title": "Server-side WebAuthn assertion verification for passkey sign-in",
       "description": "Current passkey flow stores credentialId in Firestore but performs no server-side assertion verification. A Cloud Function is required to verify the authenticatorData, clientDataJSON, and signature against the stored public key to prevent credential forgery. Risk class A/B — impacts authentication integrity.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "GAP-011"
       ],
       "effort": "high",
       "impact": "critical",
-      "createdAt": "2026-03-19"
+      "createdAt": "2026-03-19",
+      "completedAt": "2026-03-19",
+      "completionNote": "functions/src/passkeyAuth.ts — issuePasskeyChallenge + verifyPasskeyAssertion Cloud Functions with @simplewebauthn/server ECDSA verification and custom token issuance"
     },
     {
       "id": "GAP-010",
@@ -2859,12 +2863,13 @@
       "priority": "P0",
       "title": "Native Mobile Apps",
       "description": "iOS/Android via Capacitor or React Native. PWA limitations blocking user engagement",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "PLT-001"
       ],
       "effort": "large",
-      "impact": "critical"
+      "impact": "critical",
+      "completionNote": "Capacitor native apps scaffolded — android/ and ios/ directories present with full Capacitor configuration"
     },
     {
       "id": "PLT-002",
@@ -3087,12 +3092,13 @@
       "priority": "P2",
       "title": "Social Sign-In",
       "description": "Google, Apple sign-in via Firebase Auth",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "AUTH-001"
       ],
       "effort": "medium",
-      "impact": "high"
+      "impact": "high",
+      "completionNote": "src/context/auth/socialAuth.ts + SocialSignInButtons.tsx — Google and Apple OAuth via signInWithPopup"
     },
     {
       "id": "AUTH-002",
@@ -3225,12 +3231,13 @@
       "priority": "P2",
       "title": "Biometric Auth",
       "description": "Web Authentication API for fingerprint/face unlock",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "PWA-005"
       ],
       "effort": "medium",
-      "impact": "high"
+      "impact": "high",
+      "completionNote": "src/features/auth/usePasskeyAuth.ts — WebAuthn passkey registration and authentication with platform authenticator (biometric) support"
     },
     {
       "id": "DB-001",
