@@ -14,7 +14,6 @@ import type { AnchorAccount } from '../types';
 import { canAddTransaction } from '../features/finance/utils/permissions';
 import type { CreateTransactionPayload } from './financeTypes';
 import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from './FieldEncryption';
-import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from './FieldEncryption';
 
 /**
  * Handles transfer transaction creation between two accounts
