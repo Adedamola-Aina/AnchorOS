@@ -70,10 +70,14 @@ const mockIssueChallenge = vi.fn().mockResolvedValue({
 const mockVerifyAssertion = vi.fn().mockResolvedValue({
     data: { customToken: 'firebase-custom-token' },
 });
+const mockCompleteRegistration = vi.fn().mockResolvedValue({
+    data: { credentialId: 'server-verified-cred-id' },
+});
 
 vi.mocked(httpsCallable).mockImplementation((_functions, name) => {
     if (name === 'issuePasskeyChallenge') return mockIssueChallenge as never;
     if (name === 'verifyPasskeyAssertion') return mockVerifyAssertion as never;
+    if (name === 'completePasskeyRegistration') return mockCompleteRegistration as never;
     return vi.fn() as never;
 });
 
@@ -86,6 +90,7 @@ describe('usePasskeyAuth', () => {
             data: { challengeId: 'chal-server-1', challenge: 'server-challenge-base64url' },
         });
         mockVerifyAssertion.mockResolvedValue({ data: { customToken: 'firebase-custom-token' } });
+        mockCompleteRegistration.mockResolvedValue({ data: { credentialId: 'server-verified-cred-id' } });
         vi.mocked(signInWithCustomToken).mockResolvedValue({} as never);
     });
 
@@ -162,6 +167,30 @@ describe('usePasskeyAuth', () => {
         const callArg = vi.mocked(navigator.credentials.create).mock.calls[0][0] as CredentialCreationOptions;
         // challenge must NOT be a local random buffer — it must come from server response
         expect(callArg.publicKey?.challenge).toBeDefined();
+    });
+
+    it('registerPasskey sends attestation to completePasskeyRegistration', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.registerPasskey('user-123', 'test@example.com', 'Test User');
+        });
+        expect(mockCompleteRegistration).toHaveBeenCalledWith(
+            expect.objectContaining({
+                challengeId: 'chal-server-1',
+                credential: expect.objectContaining({
+                    id: 'cred-123',
+                }),
+            })
+        );
+    });
+
+    it('registerPasskey returns server-verified credentialId', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        let credId: string | null = null;
+        await act(async () => {
+            credId = await result.current.registerPasskey('user-123', 'test@example.com', 'Test User');
+        });
+        expect(credId).toBe('server-verified-cred-id');
     });
 
     it('authenticateWithPasskey fetches challenge from server before credentials.get', async () => {

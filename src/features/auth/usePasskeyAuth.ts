@@ -4,42 +4,15 @@
  * WebAuthn passkey support: register a platform authenticator and
  * authenticate with it using full server-side assertion verification.
  *
- * Flow (registration):
- *   issuePasskeyChallenge(register) → credential.create → store credentialId
- *
- * Flow (authentication):
- *   issuePasskeyChallenge(authenticate) → credential.get →
- *   verifyPasskeyAssertion (Cloud Function) → signInWithCustomToken
- *
- * Security:
- *   - Challenges are server-generated with 2-min TTL (no client-forged challenges)
- *   - Assertion signature verified server-side (ECDSA P-256 / RS256)
- *   - signCount enforced server-side — cloned authenticator protection
- *   - Firebase Custom Token issued only after successful server verification
- *   - Private key never leaves the device (WebAuthn spec guarantee)
+ * Security: server-generated challenges, attestation verified server-side,
+ * signCount enforced, Firebase Custom Token issued after verification.
  */
 
 import { useState, useCallback } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
 import { app } from '../../config/firebase';
-
-const RP_ID = typeof window !== 'undefined' ? window.location.hostname : 'anchor-os.web.app';
-const RP_NAME = 'Anchor OS';
-
-function bufferToBase64url(buf: ArrayBuffer): string {
-    return btoa(String.fromCharCode(...new Uint8Array(buf)))
-        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-function base64urlToBuffer(b64: string): Uint8Array<ArrayBuffer> {
-    const padded = b64.replace(/-/g, '+').replace(/_/g, '/');
-    const binary = atob(padded);
-    const len = binary.length;
-    const buf = new Uint8Array(len);
-    for (let i = 0; i < len; i++) buf[i] = binary.charCodeAt(i);
-    return buf;
-}
+import { RP_ID, RP_NAME, bufferToBase64url, base64urlToBuffer } from './passkeyUtils';
 
 interface IssueChallengeResult {
     challengeId: string;
@@ -69,6 +42,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
     /**
      * Register a new passkey for the given user.
      * Challenge comes from the server — prevents client-forged challenges.
+     * Attestation verified server-side — public key stored in Firestore.
      * Returns the base64url-encoded credentialId on success.
      */
     const registerPasskey = useCallback(async (
@@ -83,7 +57,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
             const issueChallenge = httpsCallable<{ purpose: string }, IssueChallengeResult>(
                 functions, 'issuePasskeyChallenge'
             );
-            const { data: { challenge } } = await issueChallenge({ purpose: 'register' });
+            const { data: { challengeId, challenge } } = await issueChallenge({ purpose: 'register' });
 
             const userIdBytes = new TextEncoder().encode(userId);
 
@@ -110,7 +84,28 @@ export function usePasskeyAuth(): PasskeyAuthResult {
             }) as PublicKeyCredential | null;
 
             if (!credential) return null;
-            return bufferToBase64url(credential.rawId);
+
+            const attestationResponse = credential.response as AuthenticatorAttestationResponse;
+
+            // 3. Send attestation to server for verification + public key storage
+            const completeRegistration = httpsCallable<Record<string, unknown>, { credentialId: string }>(
+                functions, 'completePasskeyRegistration'
+            );
+            const { data: { credentialId } } = await completeRegistration({
+                challengeId,
+                credential: {
+                    id: credential.id,
+                    rawId: bufferToBase64url(credential.rawId),
+                    response: {
+                        clientDataJSON: bufferToBase64url(attestationResponse.clientDataJSON),
+                        attestationObject: bufferToBase64url(attestationResponse.attestationObject),
+                    },
+                    type: credential.type,
+                    authenticatorAttachment: credential.authenticatorAttachment ?? undefined,
+                },
+            });
+
+            return credentialId;
         } catch (err) {
             const e = err as { message?: string; name?: string };
             if (e.name !== 'NotAllowedError') {
