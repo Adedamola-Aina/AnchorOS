@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { initializeAuth, browserLocalPersistence } from "firebase/auth";
+import { initializeAuth, browserLocalPersistence, browserPopupRedirectResolver } from "firebase/auth";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 // Environment-based Firebase configuration
@@ -47,7 +47,10 @@ if (appCheckSiteKey && typeof window !== 'undefined' && window.location.protocol
 // getAuth() defaults to indexedDB persistence which hangs in Capacitor's
 // capacitor:// origin WebView. browserLocalPersistence works everywhere
 // and is sufficient for auth token storage.
-export const auth = initializeAuth(app, { persistence: browserLocalPersistence });
+export const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence,
+  popupRedirectResolver: browserPopupRedirectResolver,
+});
 
 // Initialize Firestore with modern persistence (replaces deprecated enableIndexedDbPersistence)
 import { initializeFirestore, memoryLocalCache } from 'firebase/firestore';

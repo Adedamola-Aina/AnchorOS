@@ -1,11 +1,6 @@
 /**
  * usePasskeyAuth — AUTH-002, GAP-011
- *
- * WebAuthn passkey support: register a platform authenticator and
- * authenticate with it using full server-side assertion verification.
- *
- * Security: server-generated challenges, attestation verified server-side,
- * signCount enforced, Firebase Custom Token issued after verification.
+ * WebAuthn passkey: register, authenticate, remove with server-side verification.
  */
 
 import { useState, useCallback } from 'react';
@@ -25,6 +20,7 @@ interface PasskeyAuthResult {
     error: string | null;
     registerPasskey: (userId: string, email: string, displayName: string) => Promise<string | null>;
     authenticateWithPasskey: (credentialId?: string) => Promise<unknown>;
+    removePasskey: (credentialId: string) => Promise<boolean>;
     clearError: () => void;
     passkeySupported?: boolean;
 }
@@ -39,12 +35,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
 
     const functions = getFunctions(app);
 
-    /**
-     * Register a new passkey for the given user.
-     * Challenge comes from the server — prevents client-forged challenges.
-     * Attestation verified server-side — public key stored in Firestore.
-     * Returns the base64url-encoded credentialId on success.
-     */
+    /** Register a new passkey. Server-issued challenge, server-verified attestation. */
     const registerPasskey = useCallback(async (
         userId: string,
         email: string,
@@ -88,9 +79,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
             const attestationResponse = credential.response as AuthenticatorAttestationResponse;
 
             // 3. Send attestation to server for verification + public key storage
-            const completeRegistration = httpsCallable<Record<string, unknown>, { credentialId: string }>(
-                functions, 'completePasskeyRegistration'
-            );
+            const completeRegistration = httpsCallable<Record<string, unknown>, { credentialId: string }>(functions, 'completePasskeyRegistration');
             const { data: { credentialId } } = await completeRegistration({
                 challengeId,
                 credential: {
@@ -117,11 +106,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         }
     }, [functions]);
 
-    /**
-     * Authenticate using an existing passkey.
-     * Challenge is server-issued. Assertion is verified server-side via Cloud Function.
-     * Returns UserCredential from signInWithCustomToken on success.
-     */
+    /** Authenticate using an existing passkey. Server-issued challenge, server-verified assertion. */
     const authenticateWithPasskey = useCallback(async (
         credentialId?: string
     ): Promise<unknown> => {
@@ -129,9 +114,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         setError(null);
         try {
             // 1. Get server-issued challenge
-            const issueChallenge = httpsCallable<{ purpose: string }, IssueChallengeResult>(
-                functions, 'issuePasskeyChallenge'
-            );
+            const issueChallenge = httpsCallable<{ purpose: string }, IssueChallengeResult>(functions, 'issuePasskeyChallenge');
             const { data: { challengeId, challenge } } = await issueChallenge({ purpose: 'authenticate' });
 
             const allowCredentials: PublicKeyCredentialDescriptor[] = credentialId
@@ -154,9 +137,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
             const assertionResponse = assertion.response as AuthenticatorAssertionResponse;
 
             // 3. Send to server for cryptographic verification
-            const verifyAssertion = httpsCallable<Record<string, unknown>, { customToken: string }>(
-                functions, 'verifyPasskeyAssertion'
-            );
+            const verifyAssertion = httpsCallable<Record<string, unknown>, { customToken: string }>(functions, 'verifyPasskeyAssertion');
             const { data: { customToken } } = await verifyAssertion({
                 challengeId,
                 credentialId: assertion.id,
@@ -189,5 +170,22 @@ export function usePasskeyAuth(): PasskeyAuthResult {
 
     const clearError = useCallback(() => setError(null), []);
 
-    return { isSupported, loading, error, registerPasskey, authenticateWithPasskey, clearError };
+    /** Remove an existing passkey via Cloud Function. */
+    const removePasskey = useCallback(async (credentialId: string): Promise<boolean> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const deleteFn = httpsCallable<{ credentialId: string }, { success: boolean }>(functions, 'deletePasskey');
+            await deleteFn({ credentialId });
+            return true;
+        } catch (err) {
+            const e = err as { message?: string };
+            setError(e.message ?? 'Failed to remove passkey');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    }, [functions]);
+
+    return { isSupported, loading, error, registerPasskey, authenticateWithPasskey, removePasskey, clearError };
 }

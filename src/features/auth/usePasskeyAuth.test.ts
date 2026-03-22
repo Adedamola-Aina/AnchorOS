@@ -73,11 +73,15 @@ const mockVerifyAssertion = vi.fn().mockResolvedValue({
 const mockCompleteRegistration = vi.fn().mockResolvedValue({
     data: { credentialId: 'server-verified-cred-id' },
 });
+const mockDeletePasskey = vi.fn().mockResolvedValue({
+    data: { success: true },
+});
 
 vi.mocked(httpsCallable).mockImplementation((_functions, name) => {
     if (name === 'issuePasskeyChallenge') return mockIssueChallenge as never;
     if (name === 'verifyPasskeyAssertion') return mockVerifyAssertion as never;
     if (name === 'completePasskeyRegistration') return mockCompleteRegistration as never;
+    if (name === 'deletePasskey') return mockDeletePasskey as never;
     return vi.fn() as never;
 });
 
@@ -91,6 +95,7 @@ describe('usePasskeyAuth', () => {
         });
         mockVerifyAssertion.mockResolvedValue({ data: { customToken: 'firebase-custom-token' } });
         mockCompleteRegistration.mockResolvedValue({ data: { credentialId: 'server-verified-cred-id' } });
+        mockDeletePasskey.mockResolvedValue({ data: { success: true } });
         vi.mocked(signInWithCustomToken).mockResolvedValue({} as never);
     });
 
@@ -232,5 +237,33 @@ describe('usePasskeyAuth', () => {
             cred = await result.current.authenticateWithPasskey();
         });
         expect(cred).toEqual(mockUserCred);
+    });
+
+    // ── removePasskey ────────────────────────────────────────────────────
+
+    it('removePasskey calls deletePasskey Cloud Function', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.removePasskey('cred-to-delete');
+        });
+        expect(mockDeletePasskey).toHaveBeenCalledWith({ credentialId: 'cred-to-delete' });
+    });
+
+    it('removePasskey returns true on success', async () => {
+        const { result } = renderHook(() => usePasskeyAuth());
+        let success = false;
+        await act(async () => {
+            success = await result.current.removePasskey('cred-to-delete');
+        });
+        expect(success).toBe(true);
+    });
+
+    it('removePasskey sets error on failure', async () => {
+        mockDeletePasskey.mockRejectedValueOnce(new Error('Server error'));
+        const { result } = renderHook(() => usePasskeyAuth());
+        await act(async () => {
+            await result.current.removePasskey('cred-to-delete');
+        });
+        expect(result.current.error).toBe('Server error');
     });
 });

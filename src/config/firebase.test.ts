@@ -19,6 +19,7 @@ vi.mock('firebase/app', () => ({
 vi.mock('firebase/auth', () => ({
     initializeAuth: (...args: unknown[]) => mockState.initializeAuth(...args),
     browserLocalPersistence: 'browser-local-persistence',
+    browserPopupRedirectResolver: 'browser-popup-redirect-resolver',
 }));
 
 vi.mock('firebase/app-check', () => ({
@@ -89,7 +90,7 @@ describe('firebase config module', () => {
         );
         expect(mockState.initializeAuth).toHaveBeenCalledWith(
             { app: 'firebase-app' },
-            { persistence: 'browser-local-persistence' },
+            { persistence: 'browser-local-persistence', popupRedirectResolver: 'browser-popup-redirect-resolver' },
         );
         expect(mockState.initializeFirestore).toHaveBeenCalledWith(
             { app: 'firebase-app' },

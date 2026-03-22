@@ -81,10 +81,11 @@ vi.mock('@simplewebauthn/server', () => ({
 }));
 
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
-import { completePasskeyRegistration as _completePasskeyRegistration } from './passkeyRegistration';
+import { completePasskeyRegistration as _completePasskeyRegistration, deletePasskey as _deletePasskey } from './passkeyRegistration';
 
 type TestCallable = (req: Record<string, unknown>) => Promise<Record<string, string>>;
 const completePasskeyRegistration = _completePasskeyRegistration as unknown as TestCallable;
+const deletePasskeyFn = _deletePasskey as unknown as TestCallable;
 
 const validCredential = {
     id: 'cred-new-123',
@@ -296,6 +297,60 @@ describe('completePasskeyRegistration', () => {
             'passkey_register_failure',
             'uid-abc',
             expect.objectContaining({ credentialId: 'cred-new-123' }),
+        );
+    });
+});
+
+describe('deletePasskey', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockState.clearDocs();
+    });
+
+    it('rejects unauthenticated callers', async () => {
+        await expect(
+            deletePasskeyFn({ data: { credentialId: 'cred-1' } }),
+        ).rejects.toMatchObject({ code: 'unauthenticated' });
+    });
+
+    it('rejects when credentialId is missing', async () => {
+        await expect(
+            deletePasskeyFn({ auth: { uid: 'uid-abc' }, data: {} }),
+        ).rejects.toMatchObject({ code: 'invalid-argument' });
+    });
+
+    it('rejects when passkey credential does not exist', async () => {
+        await expect(
+            deletePasskeyFn({ auth: { uid: 'uid-abc' }, data: { credentialId: 'nonexistent' } }),
+        ).rejects.toMatchObject({ code: 'not-found' });
+    });
+
+    it('deletes the passkey credential document on success', async () => {
+        const credPath = 'artifacts/anchor-os/users/uid-abc/passkeys/cred-del-1';
+        mockState.docs[credPath] = {
+            credentialId: 'cred-del-1',
+            publicKey: 'base64url-pub-key',
+            counter: 5,
+        };
+        await deletePasskeyFn({ auth: { uid: 'uid-abc' }, data: { credentialId: 'cred-del-1' } });
+        expect(mockState.docDelete).toHaveBeenCalledWith(credPath);
+    });
+
+    it('returns success: true', async () => {
+        const credPath = 'artifacts/anchor-os/users/uid-abc/passkeys/cred-del-1';
+        mockState.docs[credPath] = { credentialId: 'cred-del-1' };
+        const result = await deletePasskeyFn({ auth: { uid: 'uid-abc' }, data: { credentialId: 'cred-del-1' } });
+        expect(result).toHaveProperty('success', true);
+    });
+
+    it('writes an audit log on deletion', async () => {
+        const credPath = 'artifacts/anchor-os/users/uid-abc/passkeys/cred-del-1';
+        mockState.docs[credPath] = { credentialId: 'cred-del-1' };
+        await deletePasskeyFn({ auth: { uid: 'uid-abc' }, data: { credentialId: 'cred-del-1' } });
+        expect(mockState.createAuditLog).toHaveBeenCalledWith(
+            'passkey_deleted',
+            'uid-abc',
+            expect.objectContaining({ credentialId: 'cred-del-1' }),
         );
     });
 });

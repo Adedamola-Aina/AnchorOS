@@ -68,7 +68,7 @@ export { recordAuthEvent, reportUnrecognisedSignIn } from './authEvents';
 
 // Passkey (WebAuthn) server-side challenge + assertion verification (GAP-011)
 export { issuePasskeyChallenge, verifyPasskeyAssertion } from './passkeyAuth';
-export { completePasskeyRegistration } from './passkeyRegistration';
+export { completePasskeyRegistration, deletePasskey } from './passkeyRegistration';
 
 // Health check (SRE-003)
 export { health } from './health';

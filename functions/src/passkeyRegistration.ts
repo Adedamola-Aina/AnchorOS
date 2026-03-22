@@ -1,19 +1,4 @@
-/**
- * passkeyRegistration — GAP-011
- *
- * Cloud Function: completePasskeyRegistration
- *
- * After the client calls navigator.credentials.create() with a server-issued
- * challenge, it sends the full attestation response here for server-side
- * verification. On success, the credential's public key is stored in Firestore
- * so that future verifyPasskeyAssertion calls can validate sign-in assertions.
- *
- * Security:
- *   - Requires authenticated caller (only signed-in users can register passkeys)
- *   - Attestation cryptographically verified via @simplewebauthn/server
- *   - Challenge consumed (deleted) after use — prevents replay
- *   - Rate limited: shares passkeyChallenge bucket
- */
+/**\n * passkeyRegistration — GAP-011\n * Cloud Functions: completePasskeyRegistration, deletePasskey\n * Server-side WebAuthn attestation verification + passkey lifecycle management.\n */
 
 import { HttpsError } from 'firebase-functions/v2/https';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -170,4 +155,32 @@ export const completePasskeyRegistration = secureOnCall(async (request) => {
     });
 
     return { credentialId: webauthnCred.id };
+});
+
+/**
+ * Delete a passkey credential by ID.
+ * Only the owning user can remove their own passkey.
+ */
+export const deletePasskey = secureOnCall(async (request) => {
+    const uid = request.auth?.uid;
+    if (!uid) {
+        throw new HttpsError('unauthenticated', 'You must be signed in to delete a passkey');
+    }
+
+    const { credentialId } = request.data as { credentialId?: string };
+    if (!credentialId) {
+        throw new HttpsError('invalid-argument', 'credentialId is required');
+    }
+
+    const credRef = credentialRef(uid, credentialId);
+    const snap = await credRef.get();
+    if (!snap.exists) {
+        throw new HttpsError('not-found', 'Passkey credential not found');
+    }
+
+    await credRef.delete();
+
+    await createAuditLog('passkey_deleted', uid, { credentialId });
+
+    return { success: true };
 });

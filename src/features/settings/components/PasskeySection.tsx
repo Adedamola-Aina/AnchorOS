@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Fingerprint, CheckCircle } from 'lucide-react';
+import { Fingerprint, CheckCircle, Trash2 } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
 import { usePasskeyAuth } from '../../auth/usePasskeyAuth';
@@ -16,17 +16,19 @@ import { captureError } from '../../../utils/error';
 
 export const PasskeySection: React.FC = () => {
     const { user, profile } = useAuth();
-    const { isSupported, registerPasskey, loading, error, clearError } = usePasskeyAuth();
+    const { isSupported, registerPasskey, removePasskey, loading, error, clearError } = usePasskeyAuth();
     const { showToast } = useNotifications();
     const [hasPasskey, setHasPasskey] = useState(false);
+    const [credentialId, setCredentialId] = useState<string | null>(null);
 
     // Check if user already has a passkey credentialId stored
     useEffect(() => {
         if (!user) return;
         void secureDb.getDocument<{ passkeyCredentialId?: string }>(user.uid, [])
             .then(data => {
-                if (data) {
-                    setHasPasskey(typeof data.passkeyCredentialId === 'string');
+                if (data && typeof data.passkeyCredentialId === 'string') {
+                    setHasPasskey(true);
+                    setCredentialId(data.passkeyCredentialId);
                 }
             })
             .catch(() => undefined);
@@ -51,6 +53,22 @@ export const PasskeySection: React.FC = () => {
         }
     };
 
+    const handleRemove = async () => {
+        if (!user || !credentialId) return;
+        clearError();
+        const success = await removePasskey(credentialId);
+        if (!success) return;
+        try {
+            await secureDb.updateDocument(user.uid, [], { passkeyCredentialId: '' });
+            setHasPasskey(false);
+            setCredentialId(null);
+            showToast('Passkey removed.', 'success');
+        } catch (err) {
+            captureError(err, 'PasskeySection.remove');
+            showToast('Passkey removed from server but local state failed to update.', 'error');
+        }
+    };
+
     if (!isSupported) return null;
 
     return (
@@ -68,9 +86,20 @@ export const PasskeySection: React.FC = () => {
                 )}
             </div>
             {hasPasskey ? (
-                <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-medium shrink-0">
-                    <CheckCircle className="w-4 h-4" />
-                    Registered
+                <div className="flex items-center gap-3 shrink-0">
+                    <span className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                        <CheckCircle className="w-4 h-4" />
+                        Registered
+                    </span>
+                    <Button
+                        variant="secondary"
+                        isLoading={loading}
+                        onClick={handleRemove}
+                        className="gap-1.5 text-red-600 dark:text-red-400 min-h-[44px]"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Remove
+                    </Button>
                 </div>
             ) : (
                 <Button

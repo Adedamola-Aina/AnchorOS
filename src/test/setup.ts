@@ -19,6 +19,7 @@ vi.mock('firebase/auth', () => ({
     getAuth: vi.fn(() => ({ currentUser: null })),
     initializeAuth: vi.fn(() => ({ currentUser: null })),
     browserLocalPersistence: { type: 'LOCAL' },
+    browserPopupRedirectResolver: { type: 'POPUP_REDIRECT' },
     onAuthStateChanged: vi.fn(),
     signInWithEmailAndPassword: vi.fn(),
     signOut: vi.fn(),
