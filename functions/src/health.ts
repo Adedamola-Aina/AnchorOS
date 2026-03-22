@@ -15,6 +15,7 @@ export const health = onRequest(
             status: 'ok',
             service: 'anchor-os-functions',
             ts: Date.now(),
+            rev: 'rc11',
         });
     }
 );
