@@ -5,7 +5,7 @@ const mockState = vi.hoisted(() => ({
     initializeApp: vi.fn(),
     initializeAuth: vi.fn(),
     initializeAppCheck: vi.fn(),
-    ReCaptchaV3Provider: vi.fn(),
+    ReCaptchaEnterpriseProvider: vi.fn(),
     initializeFirestore: vi.fn(),
     memoryLocalCache: vi.fn(),
     getFunctions: vi.fn(),
@@ -24,8 +24,8 @@ vi.mock('firebase/auth', () => ({
 
 vi.mock('firebase/app-check', () => ({
     initializeAppCheck: (...args: unknown[]) => mockState.initializeAppCheck(...args),
-    ReCaptchaV3Provider: function ReCaptchaV3Provider(siteKey: string) {
-        return mockState.ReCaptchaV3Provider(siteKey);
+    ReCaptchaEnterpriseProvider: function ReCaptchaEnterpriseProvider(siteKey: string) {
+        return mockState.ReCaptchaEnterpriseProvider(siteKey);
     },
 }));
 
@@ -72,7 +72,7 @@ describe('firebase config module', () => {
         mockState.initializeFirestore.mockReturnValue({ db: 'firestore' });
         mockState.getFunctions.mockReturnValue({ functions: 'region' });
         mockState.getMessaging.mockReturnValue({ messaging: 'instance' });
-        mockState.ReCaptchaV3Provider.mockImplementation((siteKey: string) => ({ siteKey }));
+        mockState.ReCaptchaEnterpriseProvider.mockImplementation((siteKey: string) => ({ siteKey }));
         mockState.initializeAppCheck.mockReturnValue(undefined);
     });
 
@@ -119,7 +119,7 @@ describe('firebase config module', () => {
 
         await import('./firebase');
 
-        expect(mockState.ReCaptchaV3Provider).toHaveBeenCalledWith('site-key');
+        expect(mockState.ReCaptchaEnterpriseProvider).toHaveBeenCalledWith('site-key');
         expect(mockState.initializeAppCheck).toHaveBeenCalledWith(
             { app: 'firebase-app' },
             {

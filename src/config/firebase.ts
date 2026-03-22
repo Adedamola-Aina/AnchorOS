@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { initializeAuth, browserLocalPersistence, browserPopupRedirectResolver } from "firebase/auth";
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 
 // Environment-based Firebase configuration
 // All values come from .env.development, .env.staging, or .env.production
@@ -34,7 +34,7 @@ if (appCheckSiteKey && typeof window !== 'undefined' && window.location.protocol
 
   try {
     initializeAppCheck(app, {
-      provider: new ReCaptchaV3Provider(appCheckSiteKey),
+      provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
       isTokenAutoRefreshEnabled: true,
     });
     if (import.meta.env.DEV) console.info('[Firebase] App Check initialized');
