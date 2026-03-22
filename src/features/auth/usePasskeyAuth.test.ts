@@ -8,7 +8,6 @@ import { renderHook, act } from '@testing-library/react';
 
 // Mock Firebase Cloud Functions SDK
 vi.mock('firebase/functions', () => ({
-    getFunctions: vi.fn(() => ({})),
     httpsCallable: vi.fn(),
 }));
 
@@ -18,7 +17,7 @@ vi.mock('firebase/auth', () => ({
     getAuth: vi.fn(() => ({})),
 }));
 
-vi.mock('../../config/firebase', () => ({ auth: {}, app: {} }));
+vi.mock('../../config/firebase', () => ({ auth: {}, app: {}, functions: {} }));
 
 // Mock Web Authentication API
 const mockCredential = {

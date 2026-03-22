@@ -4,9 +4,9 @@
  */
 
 import { useState, useCallback } from 'react';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
-import { app } from '../../config/firebase';
+import { app, functions } from '../../config/firebase';
 import { RP_ID, RP_NAME, bufferToBase64url, base64urlToBuffer } from './passkeyUtils';
 
 interface IssueChallengeResult {
@@ -32,8 +32,6 @@ export function usePasskeyAuth(): PasskeyAuthResult {
     const isSupported =
         typeof window !== 'undefined' &&
         typeof navigator.credentials?.create === 'function';
-
-    const functions = getFunctions(app);
 
     /** Register a new passkey. Server-issued challenge, server-verified attestation. */
     const registerPasskey = useCallback(async (
@@ -166,7 +164,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         } finally {
             setLoading(false);
         }
-    }, [functions]);
+    }, []);
 
     const clearError = useCallback(() => setError(null), []);
 
@@ -185,7 +183,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         } finally {
             setLoading(false);
         }
-    }, [functions]);
+    }, []);
 
     return { isSupported, loading, error, registerPasskey, authenticateWithPasskey, removePasskey, clearError };
 }
