@@ -82,9 +82,16 @@ describe('secureDbCore', () => {
     // ── logOp ───────────────────────────────────────────────────────
     describe('logOp', () => {
         it('does not throw', () => {
-            // logOp only logs in dev mode; in test it should be silent or log
             expect(() => logOp('GET', 'users/123/accounts')).not.toThrow();
             expect(() => logOp('SET', 'users/123/profile', { name: 'Test' })).not.toThrow();
+        });
+
+        it('is silent — never calls console.log (BUG-113)', () => {
+            const spy = vi.spyOn(console, 'log');
+            logOp('GET', 'users/123/accounts');
+            logOp('SET', 'users/123/profile', { name: 'Test' });
+            expect(spy).not.toHaveBeenCalled();
+            spy.mockRestore();
         });
     });
 

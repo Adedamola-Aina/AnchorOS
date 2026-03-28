@@ -7,13 +7,12 @@ import { doc, collection, type DocumentReference } from 'firebase/firestore';
 import { db, APP_ID } from '../config/firebase';
 
 const DEFAULT_TIMEOUT_MS = 5000;
-const IS_DEV = import.meta.env.VITE_APP_ENV === 'development';
 
 /**
- * Log operation in development mode
+ * Log operation in development mode — no-op in production
  */
-export const logOp = (operation: string, path: string, data?: unknown) => {
-    if (IS_DEV) console.log(`[SecureDb] ${operation}: ${path}`, data ? data : '');
+export const logOp = (_operation: string, _path: string, _data?: unknown) => {
+    // Intentionally silent — console.log removed per CLAUDE.md privacy rule
 };
 
 /**
