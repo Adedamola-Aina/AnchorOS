@@ -1,6 +1,6 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, db } from '../../utils/secureDb';
 import type { AnchorAccount, AnchorTask, AnchorTransaction, FabricMessage, Prediction, RecurringTransaction, WeeklyReport } from '../../types';
-import { db, APP_ID } from '../../config/firebase';
+import { APP_ID } from '../../config/firebase';
 import { secureDb } from '../../utils/secureDb';
 
 export async function loadFabricActivity(userId: string): Promise<{

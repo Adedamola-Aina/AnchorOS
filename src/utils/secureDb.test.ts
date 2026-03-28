@@ -260,4 +260,27 @@ describe('secureDb', () => {
             );
         });
     });
+
+    // ── addDocument ─────────────────────────────────────────────────
+    describe('addDocument (BUG-111)', () => {
+        it('returns the new document id', async () => {
+            const { addDoc } = await import('firebase/firestore');
+            vi.mocked(addDoc).mockResolvedValueOnce({ id: 'new-id-123' } as never);
+            const id = await secureDb.addDocument('user-1', 'commitments', { title: 'Test' });
+            expect(id).toBe('new-id-123');
+            expect(addDoc).toHaveBeenCalled();
+        });
+
+        it('logs error on addDocument failure', async () => {
+            const { addDoc } = await import('firebase/firestore');
+            vi.mocked(addDoc).mockRejectedValueOnce(new Error('add-fail'));
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            await expect(secureDb.addDocument('user-1', 'commitments', {})).rejects.toThrow('add-fail');
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[SecureDb] Error adding document'),
+                expect.any(Error)
+            );
+        });
+    });
 });

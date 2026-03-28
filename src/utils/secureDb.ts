@@ -3,9 +3,18 @@
  * 
  * Centralized Firestore wrapper with timeout handling, error mapping, and type-safe operations.
  * Refactored per CLAUDE.md §3.2 - core helpers extracted to secureDbCore.ts
+ *
+ * ALL Firestore imports in production src/ must route through this file.
+ * Direct 'firebase/firestore' imports are a ARCH violation (BUG-111).
  */
 
-import { getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, type QueryConstraint } from 'firebase/firestore';
+import {
+    getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc,
+    writeBatch, runTransaction,
+    serverTimestamp, increment,
+    query, type QueryConstraint,
+} from 'firebase/firestore';
+import { db } from '../config/firebase';
 import { withTimeout, logOp, getUserDocRef, getUserCollectionPath } from './secureDbCore';
 
 interface SecureDbOptions { timeoutMs?: number; }
@@ -57,9 +66,23 @@ export const secureDb = {
             const docRef = getUserDocRef(userId, ...path);
             await withTimeout(deleteDoc(docRef), options.timeoutMs, `deleteDocument(${docPath})`);
         } catch (error) { console.error(`[SecureDb] Error deleting document: ${docPath}`, error); throw error; }
-    }
+    },
+
+    async addDocument(userId: string, collectionName: string, data: Record<string, unknown>, options: SecureDbOptions = {}): Promise<string> {
+        logOp('ADD', `users/${userId}/${collectionName}`, data);
+        try {
+            const collectionRef = getUserCollectionPath(userId, collectionName);
+            const docRef = await withTimeout(addDoc(collectionRef, data), options.timeoutMs, `addDocument(${collectionName})`);
+            return docRef.id;
+        } catch (error) { console.error(`[SecureDb] Error adding document: ${collectionName}`, error); throw error; }
+    },
 };
 
-// Re-exports
-export { where, query } from 'firebase/firestore';
+// ── Re-exports for files that need batch/transaction/raw ops ─────────────────
+// All production code must import Firestore primitives from HERE, not from 'firebase/firestore' directly.
+export { where, query, orderBy, limit, onSnapshot, writeBatch, runTransaction, serverTimestamp, increment } from 'firebase/firestore';
+export type { QueryConstraint, Unsubscribe, DocumentSnapshot, FieldValue } from 'firebase/firestore';
 export { withTimeout, mapSecureDbError, getUserDocRef, getUserCollectionPath } from './secureDbCore';
+export { db } from '../config/firebase';
+// addDoc / setDoc / updateDoc / deleteDoc / doc / collection — exported for batch/transaction callers
+export { addDoc, setDoc, updateDoc, deleteDoc, doc, collection, getDocs, getDoc } from 'firebase/firestore';

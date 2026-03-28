@@ -1,6 +1,7 @@
 // @ts-nocheck
-import { collection, doc, limit, onSnapshot, orderBy, query, updateDoc, where, writeBatch, type Unsubscribe } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
+import { collection, doc, limit, onSnapshot, orderBy, query, updateDoc, where, writeBatch, db } from '../utils/secureDb';
+import type { Unsubscribe } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 import type { AnchorNotification } from '../types';
 
 export function subscribeToAccountNotifications(

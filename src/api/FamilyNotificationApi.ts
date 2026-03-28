@@ -8,9 +8,10 @@ import {
   query,
   updateDoc,
   where,
-  type Unsubscribe,
-} from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
+  db,
+} from '../utils/secureDb';
+import type { Unsubscribe } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 
 export interface FamilyNotification {
   id: string;

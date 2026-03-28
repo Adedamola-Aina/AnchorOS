@@ -1,8 +1,7 @@
 // @ts-nocheck
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, db } from '../utils/secureDb';
 import { httpsCallable } from 'firebase/functions';
-import { APP_ID, db } from '../config/firebase';
-import { functions } from '../config/firebase';
+import { APP_ID, functions } from '../config/firebase';
 
 export interface MfaRecoveryPayload {
   hashedCodes: string[];

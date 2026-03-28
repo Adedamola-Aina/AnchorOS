@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { addDoc, collection, deleteDoc, doc, runTransaction, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
+import { addDoc, collection, deleteDoc, doc, runTransaction, serverTimestamp, updateDoc, db } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 import type { AnchorTask } from '../types';
 
 export async function createCommitment(userUid: string, task: Omit<AnchorTask, 'id' | 'createdAt'>) {

@@ -9,7 +9,7 @@
  * NOTE: This file is ~175 lines after type extraction.
  */
 
-import { collection, doc, addDoc, writeBatch, query, where, getDocs, type Firestore } from 'firebase/firestore';
+import { collection, doc, addDoc, writeBatch, query, where, getDocs, type Firestore } from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';

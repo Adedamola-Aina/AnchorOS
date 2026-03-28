@@ -7,7 +7,7 @@
  * @module services/TransactionService
  */
 
-import { doc, increment, writeBatch, runTransaction, type Firestore } from 'firebase/firestore';
+import { doc, increment, writeBatch, runTransaction, type Firestore } from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';

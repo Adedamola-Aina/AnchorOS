@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { addDoc, collection, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
-import type { DocumentSnapshot, Unsubscribe } from 'firebase/firestore';
-import { APP_ID, db } from '../config/firebase';
+import { addDoc, collection, doc, onSnapshot, setDoc, updateDoc, db } from '../utils/secureDb';
+import type { DocumentSnapshot, Unsubscribe } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 import type { UserProfile } from '../types';
 
 /**

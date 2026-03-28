@@ -4,7 +4,7 @@
  * Extracted from TransactionService to keep modules under 200 lines.
  */
 
-import { doc, increment, runTransaction, type Firestore } from 'firebase/firestore';
+import { doc, increment, runTransaction, type Firestore } from '../utils/secureDb';
 import { APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { auditFinance } from './AuditService';

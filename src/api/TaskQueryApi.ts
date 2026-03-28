@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
-import { APP_ID, db } from '../config/firebase';
+import { collection, getDocs, limit, orderBy, query, db } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 import type { AnchorTask } from '../types';
 
 export async function fetchTasksForUser(userId: string): Promise<AnchorTask[]> {

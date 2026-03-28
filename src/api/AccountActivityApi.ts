@@ -1,6 +1,7 @@
 // @ts-nocheck
-import { addDoc, collection, limit, onSnapshot, orderBy, query, type Unsubscribe } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
+import { addDoc, collection, limit, onSnapshot, orderBy, query, db } from '../utils/secureDb';
+import type { Unsubscribe } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 import type { AccountActivity } from '../types/activity';
 
 export function subscribeToAccountActivity(
