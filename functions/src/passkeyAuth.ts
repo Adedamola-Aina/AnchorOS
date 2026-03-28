@@ -22,97 +22,24 @@
 
 import { HttpsError } from 'firebase-functions/v2/https';
 import { getAuth } from 'firebase-admin/auth';
-import { FieldValue } from 'firebase-admin/firestore';
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
 import { secureOnCall } from './callable';
 import { enforceRateLimit } from './rateLimit';
 import { createAuditLog } from './helpers';
-import { APP_ID, db } from './config';
-
-// ── Constants ───────────────────────────────────────────────────────────────
-
-const CHALLENGE_TTL_MS = 2 * 60 * 1000; // 2 minutes
-
-/** Allowed origins per environment — derived from project ID at runtime */
-function getAllowedOrigins(): string[] {
-    const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
-    if (projectId === 'anchor-os') return ['https://anchor-os.web.app'];
-    if (projectId === 'anchor-os-staging') return ['https://anchor-os-staging.web.app'];
-    return [
-        'https://anchor-os-dev-1c6ec.web.app',
-        'http://localhost:5173',
-        'http://localhost:4173',
-    ];
-}
-
-function getRpId(): string {
-    const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
-    if (projectId === 'anchor-os') return 'anchor-os.web.app';
-    if (projectId === 'anchor-os-staging') return 'anchor-os-staging.web.app';
-    return 'localhost';
-}
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
-function generateBase64urlChallenge(bytes = 32): string {
-    // Use Web Crypto when available (Vitest environment), fall back to Node crypto
-    if (typeof globalThis.crypto?.getRandomValues === 'function') {
-        const buf = new Uint8Array(bytes);
-        globalThis.crypto.getRandomValues(buf);
-        return Buffer.from(buf).toString('base64url');
-    }
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { randomBytes } = require('node:crypto') as typeof import('node:crypto');
-    return randomBytes(bytes).toString('base64url');
-}
-
-function generateChallengeId(): string {
-    return generateBase64urlChallenge(16);
-}
-
-// ── Firestore references ────────────────────────────────────────────────────
-
-function challengeRef(challengeId: string) {
-    return db.collection('passkey_challenges').doc(challengeId);
-}
-
-function credentialRef(userId: string, credentialId: string) {
-    return db
-        .collection('artifacts').doc(APP_ID)
-        .collection('users').doc(userId)
-        .collection('passkeys').doc(credentialId);
-}
-
-// ── Types ───────────────────────────────────────────────────────────────────
-
-interface ChallengeDoc {
-    challenge: string;
-    expiresAt: { toMillis(): number };
-    purpose: 'register' | 'authenticate';
-    userId?: string;
-}
-
-interface CredentialDoc {
-    credentialId: string;
-    publicKey: string; // base64url-encoded COSE public key
-    counter: number;
-}
-
-interface IssueChallengeData {
-    purpose?: string;
-}
-
-interface VerifyAssertionData {
-    challengeId?: string;
-    credentialId?: string;
-    userId?: string;
-    response?: {
-        authenticatorData?: string;
-        clientDataJSON?: string;
-        signature?: string;
-        userHandle?: string;
-    };
-}
+import {
+    CHALLENGE_TTL_MS,
+    getAllowedOrigins,
+    getRpId,
+    generateBase64urlChallenge,
+    generateChallengeId,
+    challengeRef,
+    credentialRef,
+    FieldValue,
+    type ChallengeDoc,
+    type CredentialDoc,
+    type IssueChallengeData,
+    type VerifyAssertionData,
+} from './passkeyAuthHelpers';
 
 // ── issuePasskeyChallenge ───────────────────────────────────────────────────
 
@@ -123,12 +50,10 @@ export const issuePasskeyChallenge = secureOnCall(async (request) => {
         throw new HttpsError('invalid-argument', 'purpose must be "register" or "authenticate"');
     }
 
-    // register requires an authenticated user
     if (purpose === 'register' && !request.auth?.uid) {
         throw new HttpsError('unauthenticated', 'You must be signed in to register a passkey');
     }
 
-    // Identify the caller for rate limiting
     const rateLimitId = request.auth?.uid ?? request.rawRequest?.ip ?? 'anon';
     await enforceRateLimit('passkeyChallenge', rateLimitId);
 
@@ -168,7 +93,6 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
 
     await enforceRateLimit('passkeyVerify', userId);
 
-    // 1. Load and validate challenge
     const chalSnap = await challengeRef(challengeId).get();
     if (!chalSnap.exists) {
         throw new HttpsError('not-found', 'Challenge not found or already used');
@@ -181,7 +105,6 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
         throw new HttpsError('deadline-exceeded', 'Challenge has expired. Please try again.');
     }
 
-    // 2. Load stored credential (public key)
     const credSnap = await credentialRef(userId, credentialId).get();
     if (!credSnap.exists) {
         throw new HttpsError('not-found', 'No passkey credential found for this user');
@@ -189,7 +112,6 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
 
     const credData = credSnap.data() as CredentialDoc;
 
-    // 3. Verify assertion with @simplewebauthn/server
     let verification: { verified: boolean; authenticationInfo?: { newCounter: number } };
     try {
         verification = await verifyAuthenticationResponse({
@@ -223,7 +145,6 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
         throw new HttpsError('permission-denied', 'Passkey verification failed');
     }
 
-    // 4. Always delete the challenge — single-use (prevents replay even on failure)
     await challengeRef(challengeId).delete();
 
     if (!verification.verified) {
@@ -235,14 +156,12 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
         throw new HttpsError('permission-denied', 'Passkey assertion could not be verified');
     }
 
-    // 5. Update signCount (monotonic counter — prevents cloned authenticator replay)
     const newCounter = verification.authenticationInfo?.newCounter ?? credData.counter;
     await credentialRef(userId, credentialId).set(
         { ...credData, counter: newCounter, lastUsed: FieldValue.serverTimestamp() },
         { merge: true }
     );
 
-    // 6. Issue Firebase Custom Token
     const customToken = await getAuth().createCustomToken(userId, { passkey: true });
 
     await createAuditLog('passkey_verify_success', userId, {
