@@ -4,7 +4,7 @@ const gitData = require('./gitDataProvider');
 const { getEnvironmentStatus } = require('./envChecker');
 const { getHealthReport } = require('./fileHealthMonitor');
 const { getEventStats } = require('./eventIngestion');
-const { getIntegrationStatus } = require('./integrationBridge');
+const { getCoverageSummary } = require('./coverageReader');
 
 function evaluateTrustChecks(input) {
     const checks = [];
@@ -56,16 +56,19 @@ function evaluateTrustChecks(input) {
     });
     if (!ingestionHealthy) score -= 20;
 
-    const integrationCoverage = input.integrations.configured > 0;
+    const COVERAGE_FRESHNESS_MS = 24 * 60 * 60 * 1000;
+    const coverageFresh = input.coverage.available &&
+        input.coverage.generatedAt &&
+        (Date.now() - new Date(input.coverage.generatedAt).getTime()) < COVERAGE_FRESHNESS_MS;
     checks.push({
-        key: 'integration_readiness',
-        pass: integrationCoverage,
-        impact: integrationCoverage ? 0 : 5,
-        detail: integrationCoverage
-            ? `${input.integrations.configured} integrations configured`
-            : 'No external integrations configured (Jira/Asana in dry-run mode)'
+        key: 'coverage_freshness',
+        pass: coverageFresh,
+        impact: coverageFresh ? 0 : 5,
+        detail: coverageFresh
+            ? 'Coverage data is fresh (< 24h old)'
+            : 'Coverage data is stale or unavailable — run: npm run test:coverage'
     });
-    if (!integrationCoverage) score -= 5;
+    if (!coverageFresh) score -= 5;
 
     const finalScore = Math.max(0, Math.round(score));
     const status = finalScore >= 85 ? 'high' : finalScore >= 70 ? 'medium' : 'low';
@@ -79,12 +82,12 @@ function evaluateTrustChecks(input) {
 }
 
 async function getTrustReport() {
-    const [kanban, environment, health, events, integrations] = await Promise.all([
+    const [kanban, environment, health, events, coverageRaw] = await Promise.all([
         gitData.getKanbanData(),
         getEnvironmentStatus(),
         getHealthReport(),
         Promise.resolve(getEventStats(24)),
-        Promise.resolve(getIntegrationStatus())
+        getCoverageSummary()
     ]);
 
     const input = {
@@ -105,8 +108,9 @@ async function getTrustReport() {
             total: events.total || 0,
             hours: events.hours || 24
         },
-        integrations: {
-            configured: integrations.summary?.configured || 0
+        coverage: {
+            available: coverageRaw.available || false,
+            generatedAt: coverageRaw.generatedAt || null
         }
     };
 
@@ -120,7 +124,7 @@ async function getTrustReport() {
             parity: input.parity,
             fileHealth: input.fileHealth,
             events: events,
-            integrations: integrations.summary
+            coverage: input.coverage
         }
     };
 }
