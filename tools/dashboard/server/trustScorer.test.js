@@ -12,7 +12,7 @@ describe('trustScorer', () => {
             parity: { stagingPending: 1 },
             fileHealth: { exceeding: 0 },
             events: { total: 15, hours: 24 },
-            integrations: { configured: 1 }
+            coverage: { available: true, generatedAt: new Date().toISOString() }
         });
 
         expect(result.status).toBe('high');
@@ -26,7 +26,7 @@ describe('trustScorer', () => {
             parity: { stagingPending: 7 },
             fileHealth: { exceeding: 5 },
             events: { total: 0, hours: 24 },
-            integrations: { configured: 0 }
+            coverage: { available: false }
         });
 
         expect(result.status).toBe('low');

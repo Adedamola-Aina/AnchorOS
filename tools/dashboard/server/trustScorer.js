@@ -57,8 +57,8 @@ function evaluateTrustChecks(input) {
     if (!ingestionHealthy) score -= 20;
 
     const COVERAGE_FRESHNESS_MS = 24 * 60 * 60 * 1000;
-    const coverageFresh = input.coverage.available &&
-        input.coverage.generatedAt &&
+    const coverageFresh = input.coverage?.available &&
+        input.coverage?.generatedAt &&
         (Date.now() - new Date(input.coverage.generatedAt).getTime()) < COVERAGE_FRESHNESS_MS;
     checks.push({
         key: 'coverage_freshness',
