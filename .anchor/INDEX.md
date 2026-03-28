@@ -28,14 +28,38 @@ Never create a bug or feature without checking it first.
 
 ## How To Start Any Task
 
+Every session starts LOCKED. File writes are blocked until you complete these steps.
+
+```bash
+# 1. Read this file (you are doing this)
+
+# 2. Read the workflow
+#    Read: .anchor/WORKFLOW.md
+
+# 3. Query dashboard — source of truth for all project state
+curl -s http://localhost:3001/api/command-center | head -100
+# OR: get_project_state (MCP)
+
+# 4. Duplicate check — never create a bug or feature that already exists
+# get_bugs + get_features
+
+# 5. Read relevant docs for your task domain (see Reference Docs below)
+
+# 6. Classify risk class
+#    Read: .anchor/skills/risk-classification.md
+
+# 7. Unlock file writes — run ONLY after steps 1–6 are genuinely complete
+touch .claude/gather.lock
+
+# 8. Output Task Plan template (.anchor/WORKFLOW.md § PHASE 2)
+#    STOP. Wait for owner: APPROVED.
+
+# 9. Unlock src/ and functions/src/ writes
+touch .claude/plan.lock
 ```
-Step 1: Read this file (you are doing this)
-Step 2: Read .anchor/WORKFLOW.md
-Step 3: Query the dashboard — confirm no duplicate work exists
-Step 4: Identify risk class from .anchor/skills/risk-classification.md
-Step 5: Activate the roles required for that risk class
-Step 6: Execute GATHER → PLAN → [APPROVAL] → BUILD → CLOSE
-```
+
+⛔ The PreToolUse harness hook will BLOCK any Write or Edit to src/ before these locks exist.
+   Running `touch .claude/gather.lock` early (before genuinely gathering) violates the process.
 
 Copilot / Claude session starter:
 ```

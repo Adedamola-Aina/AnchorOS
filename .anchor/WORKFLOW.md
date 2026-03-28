@@ -63,7 +63,13 @@ Assign a Risk Class before any other phase begins:
 
 4. **Report findings**: What exists, what's relevant, what the risk class is.
 
-**Exit condition**: Duplicate check complete. Docs read. Risk class confirmed.
+5. **Unlock file writes**:
+   ```bash
+   touch .claude/gather.lock
+   ```
+   ⛔ Run this ONLY after steps 1–4 are genuinely complete. It is a promise, not a shortcut.
+
+**Exit condition**: Duplicate check complete. Docs read. Risk class confirmed. `gather.lock` created.
 
 ---
 
@@ -118,7 +124,13 @@ Assign a Risk Class before any other phase begins:
 **Roles reviewed**: [list of roles that signed off on plan]
 ```
 
-**⛔ STOP HERE. Do not write code until owner approves this plan. ⛔**
+**⛔ STOP HERE. Output the plan. Wait for owner response. Do not write a single line of code. ⛔**
+
+After owner responds **APPROVED**:
+```bash
+touch .claude/plan.lock
+```
+⛔ Run this ONLY after receiving explicit owner approval. The harness blocks src/ writes without it.
 
 ---
 
@@ -282,3 +294,19 @@ Scope examples: `finance`, `fabric`, `family`, `mobile`, `auth`, `functions`, `s
 - After 4–5 tasks in one session: start a fresh conversation
 - Always re-read `.anchor/INDEX.md` at the start of a new session
 - Dashboard state is real-time; agent memory is not — always query dashboard, don't assume
+
+## Workflow Lock System
+
+Every session starts with all file writes blocked. The harness enforces this automatically.
+
+| Lock file | Unblocks | Created by |
+|-----------|----------|------------|
+| `.claude/gather.lock` | All file writes | `touch .claude/gather.lock` after GATHER complete |
+| `.claude/plan.lock` | `src/` and `functions/src/` writes | `touch .claude/plan.lock` after owner approves PLAN |
+
+Both locks are cleared automatically at `SessionStart`. Manual reset (if needed):
+```bash
+rm -f .claude/gather.lock .claude/plan.lock
+```
+
+These files are git-ignored. They are session state, not project state.

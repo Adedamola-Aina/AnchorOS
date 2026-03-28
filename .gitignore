@@ -55,3 +55,7 @@ ios/
 android/
 .capacitor/
 Capacitor.asar
+
+# Claude Code workflow locks (session state — not project state)
+.claude/gather.lock
+.claude/plan.lock

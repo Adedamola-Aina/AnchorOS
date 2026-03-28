@@ -18,7 +18,9 @@ Verifying that the process was followed correctly and the work is truly done.
 
 ### Process Verification
 - [ ] GATHER phase was executed — dashboard was queried, no duplicates, docs read
-- [ ] PLAN phase was executed — plan approved by owner before BUILD started
+- [ ] `gather.lock` was set AFTER GATHER, not before
+- [ ] PLAN phase was executed — plan template output, owner responded APPROVED
+- [ ] `plan.lock` was set AFTER owner approval, not before
 - [ ] All required roles for the risk class have signed off (check risk class vs roster)
 - [ ] No role was skipped with a justification that doesn't hold up
 
