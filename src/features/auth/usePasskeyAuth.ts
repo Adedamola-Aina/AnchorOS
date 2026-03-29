@@ -8,6 +8,7 @@ import { httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
 import { app, functions } from '../../config/firebase';
 import { RP_ID, RP_NAME, bufferToBase64url, base64urlToBuffer } from './passkeyUtils';
+import { recordAuthEvent } from '../../services/authEventService';
 
 interface IssueChallengeResult {
     challengeId: string;
@@ -154,7 +155,9 @@ export function usePasskeyAuth(): PasskeyAuthResult {
 
             // 4. Sign in with the server-issued custom token
             const auth = getAuth(app);
-            return await signInWithCustomToken(auth, customToken);
+            const credential = await signInWithCustomToken(auth, customToken);
+            void recordAuthEvent(navigator.userAgent, 'passkey');
+            return credential;
         } catch (err) {
             const e = err as { message?: string; name?: string };
             if (e.name !== 'NotAllowedError') {

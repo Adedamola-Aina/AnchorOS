@@ -10,9 +10,10 @@ interface PromptChip {
 
 interface FabricPromptChipsProps {
   onPrompt?: (prompt: string) => void;
+  onGenerateWeeklyReport?: () => void;
 }
 
-export const FabricPromptChips: React.FC<FabricPromptChipsProps> = ({ onPrompt }) => {
+export const FabricPromptChips: React.FC<FabricPromptChipsProps> = ({ onPrompt, onGenerateWeeklyReport }) => {
   const { navigateTo } = useApp();
 
   const chips: PromptChip[] = [
@@ -57,6 +58,12 @@ export const FabricPromptChips: React.FC<FabricPromptChipsProps> = ({ onPrompt }
       label: 'How am I doing?',
       prompt: 'how am i doing this week',
       onTap: () => navigateTo('dashboard'),
+    },
+    {
+      id: 'weekly-report',
+      label: 'Generate weekly report',
+      prompt: 'generate weekly report',
+      onTap: () => onGenerateWeeklyReport?.(),
     },
   ];
 

@@ -1,7 +1,7 @@
 /// <reference types="@testing-library/jest-dom/vitest" />
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import FabricView from './FabricView';
 
@@ -169,8 +169,7 @@ describe('FabricView', () => {
     );
 
     expect(screen.getByText('Weekly Snapshot')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Generate weekly report' }));
-    expect(generateWeeklyReport).toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /Generate weekly report/i })).not.toBeInTheDocument();
   });
 
   it('does not render FabricPromptChips directly (delegated to FabricQuerySection)', async () => {

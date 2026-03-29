@@ -87,10 +87,10 @@ const AuthView: React.FC<AuthViewProps> = ({
     };
 
     return (
-        <div className="h-full w-full flex transition-colors duration-500">
+        <div className="min-h-[100dvh] w-full flex transition-colors duration-500 overflow-y-auto">
             <AuthLeftPanel />
 
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 z-10 relative">
+            <div className="w-full lg:w-1/2 flex items-start lg:items-center justify-center p-4 sm:p-6 lg:p-12 z-10 relative">
                 <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
                     {/* Header */}
                     <div className="mb-10 flex flex-col items-center lg:items-start">
@@ -150,7 +150,7 @@ const AuthView: React.FC<AuthViewProps> = ({
                     )}
 
                     {/* Footer Links */}
-                    <div className="mt-8 text-center flex flex-col items-center gap-4">
+                    <div className="mt-6 text-center flex flex-col items-center gap-3 pb-6">
                         {authMode !== 'mfa' ? (
                             <button onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')} className="min-h-11 px-4 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors group">
                                 {authMode === 'login' ? <>Don't have an account? <span className="text-slate-900 dark:text-white group-hover:underline underline-offset-4">Sign up</span></> :

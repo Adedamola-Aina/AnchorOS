@@ -33,7 +33,7 @@ function formatTimestamp(raw: string): string {
 }
 
 export const AuthEventHistory: React.FC = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const { showToast, confirm } = useNotifications();
     const [events, setEvents] = useState<AuthEvent[]>([]);
     const [loading, setLoading] = useState(true);
@@ -68,6 +68,7 @@ export const AuthEventHistory: React.FC = () => {
             setReporting(event.id);
             await reportUnrecognisedSignIn(event.id);
             showToast('All sessions have been signed out. Please sign in again.', 'info');
+            await logout();
         } catch (err) {
             captureError(err, 'AuthEventHistory.report');
             showToast('Failed to report — please try again.', 'error');
@@ -114,8 +115,9 @@ export const AuthEventHistory: React.FC = () => {
                                     <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
                                         {event.deviceInfo?.os ?? 'Unknown'} · {event.deviceInfo?.browser ?? 'Unknown'}
                                     </p>
-                                    <p className="text-xs text-slate-400 mt-0.5">
+                                    <p className="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-1">
                                         {formatTimestamp(event.timestamp)}
+                                        {event.method ? <span>· {event.method}</span> : null}
                                     </p>
                                 </div>
                                 {idx > 0 && !event.reported && (
@@ -125,10 +127,10 @@ export const AuthEventHistory: React.FC = () => {
                                         className="shrink-0 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 min-h-[44px] px-3"
                                         onClick={() => handleNotMe(event)}
                                         isLoading={reporting === event.id}
-                                        title="Not you? Report this sign-in"
+                                        title="Remove this device and revoke sessions"
                                     >
                                         <AlertTriangle className="w-4 h-4" />
-                                        <span className="ml-1.5 text-xs font-medium hidden sm:inline">Not me</span>
+                                        <span className="ml-1.5 text-xs font-medium hidden sm:inline">Remove device</span>
                                     </Button>
                                 )}
                                 {event.reported && (

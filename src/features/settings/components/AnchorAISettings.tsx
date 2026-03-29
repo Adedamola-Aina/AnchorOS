@@ -3,14 +3,13 @@ import { Sparkles, Database } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@anchor-os/ui';
 import { ToggleSwitch } from '../../../components/shared';
 import { secureDb } from '../../../utils/secureDb';
-import type { FabricSettings } from '../../../types';
+import type { FabricSettings, UserPattern } from '../../../types';
 
 type ToastType = 'success' | 'error' | 'info';
 
 interface AnchorAISettingsProps {
     userId?: string;
     showToast: (message: string, type: ToastType) => void;
-    onOpenTransparency?: () => void;
 }
 
 const DEFAULT_SETTINGS: FabricSettings = {
@@ -21,11 +20,13 @@ const DEFAULT_SETTINGS: FabricSettings = {
 export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
     userId,
     showToast,
-    onOpenTransparency,
 }) => {
     const [settings, setSettings] = useState<FabricSettings>(DEFAULT_SETTINGS);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [showKnowledge, setShowKnowledge] = useState(false);
+    const [patternCount, setPatternCount] = useState(0);
+    const [patternGroups, setPatternGroups] = useState(0);
 
     useEffect(() => {
         let isMounted = true;
@@ -115,6 +116,54 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
         }
     }, [isSaving, settings, showToast, userId]);
 
+    const loadKnowledge = useCallback(async () => {
+        if (!userId) return;
+        try {
+            const behavior = await secureDb.getDocument<{ confirmedPatterns?: UserPattern[]; patterns?: UserPattern[] }>(
+                userId,
+                ['fabric_behavior', 'state']
+            );
+            const confirmed = behavior?.confirmedPatterns ?? [];
+            const pending = behavior?.patterns ?? [];
+            const all = [...confirmed, ...pending];
+            const groups = new Set(
+                all.map((pattern) => {
+                    const triggerType = pattern.trigger?.type ?? 'unknown_trigger';
+                    const actionType = pattern.followUpAction?.type ?? 'unknown_action';
+                    const triggerCategory = 'category' in pattern.trigger ? pattern.trigger.category ?? '' : '';
+                    const actionCategory = 'category' in pattern.followUpAction ? pattern.followUpAction.category ?? '' : '';
+                    return `${triggerType}|${actionType}|${triggerCategory}|${actionCategory}`;
+                })
+            );
+            setPatternCount(all.length);
+            setPatternGroups(groups.size);
+        } catch (error) {
+            showToast(`Unable to load Anchor AI knowledge: ${(error as Error).message}`, 'error');
+        }
+    }, [showToast, userId]);
+
+    const clearLearnedPatterns = useCallback(async () => {
+        if (!userId || isSaving) return;
+        setIsSaving(true);
+        try {
+            const now = new Date().toISOString();
+            await secureDb.setDocument(userId, ['fabric_behavior', 'state'], {
+                patterns: [],
+                confirmedPatterns: [],
+                recentActions: [],
+                dismissedPatterns: [],
+                updatedAt: now,
+            });
+            setPatternCount(0);
+            setPatternGroups(0);
+            showToast('Learned Anchor AI patterns deleted.', 'success');
+        } catch (error) {
+            showToast(`Unable to delete learned patterns: ${(error as Error).message}`, 'error');
+        } finally {
+            setIsSaving(false);
+        }
+    }, [isSaving, showToast, userId]);
+
     return (
         <Card className="overflow-hidden">
             <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-primary-50/30 dark:bg-primary-900/10">
@@ -163,12 +212,39 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
                         variant="ghost"
                         size="sm"
                         className="min-h-11"
-                        onClick={() => (onOpenTransparency ? onOpenTransparency() : window.location.assign('/fabric/transparency'))}
+                        onClick={() => {
+                            const next = !showKnowledge;
+                            setShowKnowledge(next);
+                            if (next) void loadKnowledge();
+                        }}
                         disabled={!userId || isLoading}
                     >
-                        What Anchor AI Knows
+                        {showKnowledge ? 'Hide Anchor AI Knowledge' : 'What Anchor AI Knows'}
                     </Button>
                 </div>
+                {showKnowledge && (
+                    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 p-4 space-y-3">
+                        <p className="text-sm text-slate-700 dark:text-slate-200">
+                            Anchor AI uses your own account data to personalize insights:
+                            transactions, commitments, recurring items, app interactions, and optional mood check-ins.
+                        </p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">
+                            Learned patterns: <span className="font-semibold">{patternCount}</span> records across <span className="font-semibold">{patternGroups}</span> behavior groups.
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Privacy: your data stays in your account. We do not use your personal data to train public models.
+                        </p>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            className="min-h-11"
+                            onClick={clearLearnedPatterns}
+                            disabled={!userId || isSaving}
+                        >
+                            Delete Learned Patterns
+                        </Button>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

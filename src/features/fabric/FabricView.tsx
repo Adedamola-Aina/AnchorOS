@@ -133,12 +133,12 @@ const FabricView: React.FC = () => {
             setFreeText('');
           }}
           onPrompt={submitPrompt}
+          onGenerateWeeklyReport={() => { void generateWeeklyReport(); }}
           onAction={handleAction}
         />
 
         <FabricWeeklySnapshotSection
           weeklyReport={weeklyReport}
-          onGenerate={() => { void generateWeeklyReport(); }}
         />
 
       </div>

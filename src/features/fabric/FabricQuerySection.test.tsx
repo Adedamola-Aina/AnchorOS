@@ -26,6 +26,7 @@ describe('FabricQuerySection', () => {
         onChangeText={onChangeText}
         onSubmitText={onSubmitText}
         onPrompt={vi.fn(async () => undefined)}
+        onGenerateWeeklyReport={vi.fn()}
         onAction={vi.fn()}
       />,
     );
@@ -49,6 +50,7 @@ describe('FabricQuerySection', () => {
         onChangeText={vi.fn()}
         onSubmitText={vi.fn()}
         onPrompt={vi.fn(async () => undefined)}
+        onGenerateWeeklyReport={vi.fn()}
         onAction={vi.fn()}
       />,
     );
@@ -64,6 +66,7 @@ describe('FabricQuerySection', () => {
         onChangeText={vi.fn()}
         onSubmitText={vi.fn()}
         onPrompt={vi.fn(async () => undefined)}
+        onGenerateWeeklyReport={vi.fn()}
         onAction={vi.fn()}
       />,
     );
@@ -81,6 +84,7 @@ describe('FabricQuerySection', () => {
         onChangeText={vi.fn()}
         onSubmitText={vi.fn()}
         onPrompt={vi.fn(async () => undefined)}
+        onGenerateWeeklyReport={vi.fn()}
         onAction={vi.fn()}
       />,
     );
@@ -106,6 +110,7 @@ describe('FabricQuerySection', () => {
         onChangeText={vi.fn()}
         onSubmitText={vi.fn()}
         onPrompt={onPrompt}
+        onGenerateWeeklyReport={vi.fn()}
         onAction={onAction}
       />,
     );
@@ -135,6 +140,7 @@ describe('FabricQuerySection', () => {
         onChangeText={vi.fn()}
         onSubmitText={vi.fn()}
         onPrompt={vi.fn(async () => undefined)}
+        onGenerateWeeklyReport={vi.fn()}
         onAction={vi.fn()}
       />,
     );

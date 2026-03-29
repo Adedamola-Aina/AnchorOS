@@ -20,6 +20,7 @@ export interface AuthEvent {
     deviceInfo: DeviceInfo;
     /** SHA-256 hash of client IP — computed server-side, never raw IP */
     ipHash: string;
+    method?: 'password' | 'google' | 'apple' | 'passkey';
     /** True if user flagged this event as "Not me" (SEC-009) */
     reported?: boolean;
 }
@@ -76,14 +77,36 @@ export async function recordAuthEvent(
  * Fetch last 10 auth events for a user (client reads their own subcollection).
  */
 export async function getAuthEvents(userId: string): Promise<AuthEvent[]> {
-    const events = await secureDb.queryCollection<AuthEvent>(
+    const events = await secureDb.queryCollection<Record<string, unknown>>(
         userId,
         'authEvents',
         [],
     );
-    return events
-        .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-        .slice(0, 10);
+
+    const normalizeTimestamp = (value: unknown): string => {
+        if (typeof value === 'string') return value;
+        if (value && typeof value === 'object' && 'toDate' in value && typeof (value as { toDate?: () => Date }).toDate === 'function') {
+            return (value as { toDate: () => Date }).toDate().toISOString();
+        }
+        if (value && typeof value === 'object' && 'seconds' in value && typeof (value as { seconds?: number }).seconds === 'number') {
+            return new Date((value as { seconds: number }).seconds * 1000).toISOString();
+        }
+        return new Date(0).toISOString();
+    };
+
+    const mapped = events.map((event) => {
+        const ua = typeof event.userAgent === 'string' ? event.userAgent : '';
+        return {
+            id: typeof event.id === 'string' ? event.id : undefined,
+            timestamp: normalizeTimestamp(event.timestamp),
+            deviceInfo: parseUserAgent(ua),
+            ipHash: typeof event.ipHash === 'string' ? event.ipHash : 'unknown',
+            method: (event.method as AuthEvent['method']) ?? 'password',
+            reported: Boolean(event.reported),
+        } as AuthEvent;
+    });
+
+    return mapped.sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, 10);
 }
 
 /**

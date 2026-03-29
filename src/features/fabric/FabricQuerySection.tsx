@@ -11,6 +11,7 @@ interface FabricQuerySectionProps {
   onChangeText: (value: string) => void;
   onSubmitText: () => void;
   onPrompt: (prompt: string) => Promise<void>;
+  onGenerateWeeklyReport: () => void;
   onAction: (type: string, payload: Record<string, unknown>) => void;
 }
 
@@ -22,6 +23,7 @@ export function FabricQuerySection({
   onChangeText,
   onSubmitText,
   onPrompt,
+  onGenerateWeeklyReport,
   onAction,
 }: FabricQuerySectionProps) {
   return (
@@ -52,7 +54,7 @@ export function FabricQuerySection({
             <Send className="w-4 h-4" />
           </button>
         </form>
-        <FabricPromptChips onPrompt={onPrompt} />
+        <FabricPromptChips onPrompt={onPrompt} onGenerateWeeklyReport={onGenerateWeeklyReport} />
       </section>
 
       {(isQuerying || queryResult) && (

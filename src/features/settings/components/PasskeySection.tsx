@@ -5,7 +5,7 @@
  * (Touch ID, Face ID, Windows Hello) for future sign-ins.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Fingerprint, CheckCircle, Trash2 } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
@@ -14,25 +14,44 @@ import { useNotifications } from '../../../context/NotificationContext';
 import { secureDb } from '../../../utils/secureDb';
 import { captureError } from '../../../utils/error';
 
+interface PasskeyCredential {
+    id: string;
+    credentialId: string;
+    createdAt?: unknown;
+    lastUsed?: unknown;
+}
+
+const MAX_PASSKEYS = 2;
+
 export const PasskeySection: React.FC = () => {
     const { user, profile } = useAuth();
     const { isSupported, registerPasskey, removePasskey, loading, error, clearError } = usePasskeyAuth();
     const { showToast } = useNotifications();
-    const [hasPasskey, setHasPasskey] = useState(false);
-    const [credentialId, setCredentialId] = useState<string | null>(null);
+    const [passkeys, setPasskeys] = useState<PasskeyCredential[]>([]);
+    const [removingId, setRemovingId] = useState<string | null>(null);
 
-    // Check if user already has a passkey credentialId stored
+    const toTimestampLabel = (value: unknown): string => {
+        if (!value) return 'Unknown time';
+        if (typeof value === 'string') return new Date(value).toLocaleString();
+        if (value && typeof value === 'object' && 'toDate' in value && typeof (value as { toDate?: () => Date }).toDate === 'function') {
+            return (value as { toDate: () => Date }).toDate().toLocaleString();
+        }
+        if (value && typeof value === 'object' && 'seconds' in value && typeof (value as { seconds?: number }).seconds === 'number') {
+            return new Date((value as { seconds: number }).seconds * 1000).toLocaleString();
+        }
+        return 'Unknown time';
+    };
+
+    const loadPasskeys = useCallback(async () => {
+        if (!user) return;
+        const rows = await secureDb.queryCollection<PasskeyCredential>(user.uid, 'passkeys', []);
+        setPasskeys(rows);
+    }, [user]);
+
     useEffect(() => {
         if (!user) return;
-        void secureDb.getDocument<{ passkeyCredentialId?: string }>(user.uid, [])
-            .then(data => {
-                if (data && typeof data.passkeyCredentialId === 'string') {
-                    setHasPasskey(true);
-                    setCredentialId(data.passkeyCredentialId);
-                }
-            })
-            .catch(() => undefined);
-    }, [user]);
+        void loadPasskeys().catch(() => undefined);
+    }, [loadPasskeys, user]);
 
     const handleRegister = async () => {
         if (!user) return;
@@ -44,34 +63,35 @@ export const PasskeySection: React.FC = () => {
         );
         if (!credentialId) return;
         try {
-            await secureDb.updateDocument(user.uid, [], { passkeyCredentialId: credentialId });
-            setHasPasskey(true);
+            await loadPasskeys();
             showToast('Passkey registered successfully.', 'success');
         } catch (err) {
             captureError(err, 'PasskeySection.save');
-            showToast('Passkey created but could not be saved. Please try again.', 'error');
+            showToast('Passkey created, but the list could not refresh. Pull to refresh and try again.', 'error');
         }
     };
 
-    const handleRemove = async () => {
-        if (!user || !credentialId) return;
+    const handleRemove = async (credentialId: string) => {
+        if (!user) return;
         clearError();
-        const success = await removePasskey(credentialId);
-        if (!success) return;
         try {
-            await secureDb.updateDocument(user.uid, [], { passkeyCredentialId: '' });
-            setHasPasskey(false);
-            setCredentialId(null);
+            setRemovingId(credentialId);
+            const success = await removePasskey(credentialId);
+            if (!success) return;
+            await loadPasskeys();
             showToast('Passkey removed.', 'success');
         } catch (err) {
             captureError(err, 'PasskeySection.remove');
-            showToast('Passkey removed from server but local state failed to update.', 'error');
+            showToast('Passkey removed on server, but the list could not refresh.', 'error');
+        } finally {
+            setRemovingId(null);
         }
     };
 
     if (!isSupported) return null;
 
     return (
+        <>
         <div className="flex flex-col sm:flex-row items-start gap-4 sm:justify-between">
             <div>
                 <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs flex items-center gap-2">
@@ -85,33 +105,50 @@ export const PasskeySection: React.FC = () => {
                     <p className="text-xs text-red-500 mt-1">{error}</p>
                 )}
             </div>
-            {hasPasskey ? (
-                <div className="flex items-center gap-3 shrink-0">
-                    <span className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
-                        <CheckCircle className="w-4 h-4" />
-                        Registered
-                    </span>
-                    <Button
-                        variant="secondary"
-                        isLoading={loading}
-                        onClick={handleRemove}
-                        className="gap-1.5 text-red-600 dark:text-red-400 min-h-[44px]"
-                    >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        Remove
-                    </Button>
-                </div>
-            ) : (
+            <div className="w-full sm:w-auto shrink-0 space-y-2">
                 <Button
                     variant="secondary"
                     isLoading={loading}
                     onClick={handleRegister}
-                    className="gap-2 w-full sm:w-auto shrink-0"
+                    disabled={passkeys.length >= MAX_PASSKEYS}
+                    className="gap-2 w-full sm:w-auto"
                 >
                     <Fingerprint className="w-4 h-4" />
-                    Register Passkey
+                    {passkeys.length >= MAX_PASSKEYS ? 'Passkey limit reached' : 'Register Passkey'}
                 </Button>
+            </div>
+        </div>
+        <div className="mt-3 space-y-2">
+            {passkeys.length === 0 ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                    No passkeys registered yet. You can register up to {MAX_PASSKEYS}.
+                </p>
+            ) : (
+                passkeys.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 px-3 py-2">
+                        <div className="min-w-0">
+                            <p className="text-sm text-slate-800 dark:text-slate-200 font-medium flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                Passkey ending {item.credentialId.slice(-6)}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                Added {toTimestampLabel(item.createdAt)}
+                                {item.lastUsed ? ` · Last used ${toTimestampLabel(item.lastUsed)}` : ''}
+                            </p>
+                        </div>
+                        <Button
+                            variant="secondary"
+                            isLoading={removingId === item.credentialId}
+                            onClick={() => handleRemove(item.credentialId)}
+                            className="gap-1.5 text-red-600 dark:text-red-400 min-h-[44px] px-3"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Remove
+                        </Button>
+                    </div>
+                ))
             )}
         </div>
+        </>
     );
 };
