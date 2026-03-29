@@ -52,7 +52,11 @@ export const shareAccount = secureOnCall(
 
         if (share) {
             await accountRef.update({
-                [`sharedWith.${memberUid}`]: { grantedAt: new Date().toISOString(), grantedBy: ownerUid },
+                [`sharedWith.${memberUid}`]: {
+                    grantedAt: new Date().toISOString(),
+                    grantedBy: ownerUid,
+                    permission: 'transact',
+                },
                 scope: 'family',
             });
             await createNotification(
@@ -109,6 +113,7 @@ export const getSharedAccountsWithMe = secureOnCall(
                 color: data.color,
                 scope: data.scope || 'family',
                 sharedAt: data.sharedWith?.[memberUid]?.grantedAt,
+                permission: data.sharedWith?.[memberUid]?.permission || 'read',
             };
         });
 

@@ -4,7 +4,11 @@
 
 import { onCall, type CallableOptions, type CallableRequest } from 'firebase-functions/v2/https';
 
-const enforceAppCheck = process.env.ENFORCE_APPCHECK === 'true';
+const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
+const shouldEnforceByDefault = projectId === 'anchor-os' || projectId === 'anchor-os-staging';
+const enforceAppCheck = process.env.ENFORCE_APPCHECK
+    ? process.env.ENFORCE_APPCHECK === 'true'
+    : shouldEnforceByDefault;
 
 type CallableHandler<T, R> = (request: CallableRequest<T>) => Promise<R> | R;
 
