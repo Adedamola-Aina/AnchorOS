@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { shouldSendBillReminder, buildBillReminderMessage, getBillsDueSoon } from './billReminders';
 import type { RecurringTransaction } from './types';
 

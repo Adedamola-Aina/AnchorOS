@@ -22,9 +22,7 @@ describe('SocialSignInButtons', () => {
     });
 
     it('Apple button contains an SVG element (not a generic icon)', () => {
-        const { container } = render(
-            <SocialSignInButtons onGoogle={noop} onApple={noop} loading={false} error={null} />
-        );
+        render(<SocialSignInButtons onGoogle={noop} onApple={noop} loading={false} error={null} />);
         const appleBtn = screen.getByRole('button', { name: /sign in with apple/i });
         const svg = appleBtn.querySelector('svg');
         expect(svg).not.toBeNull();

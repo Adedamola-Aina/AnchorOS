@@ -13,7 +13,7 @@ import { captureError } from '../utils/error';
 import { useNavigate } from 'react-router-dom';
 import {
     onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    signOut, sendEmailVerification, multiFactor, getRedirectResult,
+    signOut, sendEmailVerification, multiFactor,
     type User, type MultiFactorResolver, type UserCredential
 } from 'firebase/auth';
 import { auth } from '../config/firebase';

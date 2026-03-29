@@ -102,7 +102,7 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         } finally {
             setLoading(false);
         }
-    }, [functions]);
+    }, []);
 
     /** Authenticate using an existing passkey. Server-issued challenge, server-verified assertion. */
     const authenticateWithPasskey = useCallback(async (

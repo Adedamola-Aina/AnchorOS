@@ -7,7 +7,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Shield, Trash2, Check, Fingerprint } from 'lucide-react';
+import { Shield, Trash2, Check } from 'lucide-react';
 import { useNotifications } from '../../../context/NotificationContext';
 import { captureError } from '../../../utils/error';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';

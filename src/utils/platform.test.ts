@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { getPlatform, isNative, isIOS, isAndroid, isPluginAvailable } from './platform';
 
 describe('platform utilities', () => {

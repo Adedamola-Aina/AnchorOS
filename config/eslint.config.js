@@ -7,7 +7,17 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'e2e', 'coverage', '.stryker-tmp', 'tools', 'functions/lib', '.vite', 'node_modules']),
+  globalIgnores([
+    'dist',
+    'e2e',
+    'coverage',
+    '**/coverage/**',
+    '.stryker-tmp',
+    'tools',
+    'functions/lib',
+    '.vite',
+    'node_modules',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -27,30 +37,11 @@ export default defineConfig([
       '@typescript-eslint/no-unsafe-function-type': 'off',
       'react-refresh/only-export-components': 'off',
 
-      // Rule 1: Function length
-      // 30 lines is the ceiling. Forces single-responsibility functions.
-      // skipBlankLines and skipComments so formatting doesn't penalise well-documented code.
-      'max-lines-per-function': ['warn', {
-        max: 30,
-        skipBlankLines: true,
-        skipComments: true,
-        IIFEs: true,
-      }],
-
-      // Rule 2: No magic numbers
-      // All numeric thresholds must be named constants.
-      // ignore list covers unavoidable cases: array indices, binary flags, common divisors.
-      'no-magic-numbers': ['warn', {
-        ignore: [0, 1, -1, 2, 100, 1000],
-        ignoreArrayIndexes: true,
-        enforceConst: true,
-        detectObjects: false,
-      }],
-
-      // Rule 3: No console.log in production code
-      // console.warn and console.error allowed for error boundaries and infrastructure.
-      // console.log is banned everywhere — use TelemetryService instead.
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // Large legacy warning debt made lint non-actionable.
+      // Keep strict type safety while we retire style debt incrementally.
+      'max-lines-per-function': 'off',
+      'no-magic-numbers': 'off',
+      'no-console': 'off',
 
       // Rule 4: Prefer const
       // Any variable declared with let that is never reassigned must be const.
@@ -61,6 +52,23 @@ export default defineConfig([
     files: ['**/*.test.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      'max-lines-per-function': 'off',
+      'no-magic-numbers': 'off',
+      'no-console': 'off',
+    },
+  },
+  {
+    files: [
+      '**/*.config.{js,ts,mjs,cjs}',
+      'config/**/*.{js,ts,mjs,cjs}',
+      'scripts/**/*.{js,ts,mjs,cjs}',
+      'functions/scripts/**/*.{js,ts,mjs,cjs}',
+      'tools/**/*.{js,ts,mjs,cjs}',
+    ],
+    rules: {
+      'max-lines-per-function': 'off',
+      'no-magic-numbers': 'off',
+      'no-console': 'off',
     },
   },
   {

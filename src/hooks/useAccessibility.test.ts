@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { useAccessibility } from './useAccessibility';
 
 describe('useAccessibility', () => {

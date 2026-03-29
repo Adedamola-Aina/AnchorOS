@@ -1,7 +1,7 @@
 /**
  * authEventService tests — SEC-009
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { parseUserAgent } from './authEventService';
 
 describe('parseUserAgent', () => {

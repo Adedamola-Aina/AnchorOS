@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Mock firebase-admin before config.ts is imported
 vi.mock('firebase-admin/app', () => ({ initializeApp: vi.fn() }));
