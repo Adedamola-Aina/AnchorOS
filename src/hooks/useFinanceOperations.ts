@@ -9,7 +9,7 @@
 // @ts-nocheck
 
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type { User } from 'firebase/auth';
 import type { AnchorTransaction, AnchorAccount, TransactionType } from '../types';
 import { financeService } from '../services/FinanceService';
@@ -20,7 +20,7 @@ import { canDeleteTransaction } from '../features/finance/utils/permissions';
 import { logTransactionAdded, logTransactionDeleted, logTransactionEdited } from './financeActivityLogging';
 import { createTracer } from '../services/telemetry';
 import { convertCurrencyAcrossAccounts, restoreSoftDeletedTransaction } from '../api/FinanceOperationsApi';
-import { enqueueTransaction } from '../utils/offlineQueue';
+import { enqueueTransaction, processQueueForUser } from '../utils/offlineQueue';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../config/firebase';
 
@@ -33,6 +33,44 @@ export const useFinanceOperations = (
     accounts: AnchorAccount[],
     transactions: AnchorTransaction[]
 ) => {
+    const flushOfflineQueue = useCallback(async () => {
+        if (!user || !navigator.onLine) return;
+
+        await processQueueForUser(user.uid, async (entry) => {
+            await withTimeout(financeService.addTransaction(user.uid, entry.payload, accounts), OPERATION_TIMEOUT, 'syncOfflineTransaction');
+            const account = accounts.find(a => a.id === entry.payload.accountId);
+            if (account) {
+                logTransactionAdded(user, userName, account, entry.payload);
+            }
+        });
+    }, [user, userName, accounts]);
+
+    useEffect(() => {
+        if (!user) return;
+
+        const handleOnline = () => {
+            void flushOfflineQueue();
+        };
+
+        const handleServiceWorkerMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'PROCESS_OFFLINE_QUEUE') {
+                void flushOfflineQueue();
+            }
+        };
+
+        window.addEventListener('online', handleOnline);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+        }
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+            }
+        };
+    }, [user, flushOfflineQueue]);
+
     // Account operations
     const addAccount = useCallback(async (acc: CreateAccountPayload) => {
         if (!user) return;

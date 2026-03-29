@@ -1,5 +1,5 @@
 // @ts-nocheck
-const CACHE_NAME = 'anchor-os-v1.15.0-rc.11';
+const CACHE_NAME = 'anchor-os-v1.15.0-rc.12';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -12,7 +12,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
 // Initialize Firebase in SW (Dynamic Config)
-// This ensures correct keys are used for Dev, Staging, and Prop
+// This ensures correct keys are used for Dev, Staging, and Production.
 const firebaseConfig = {
     // Development (localhost, anchor.tail2fa2e.ts.net)
     development: {
@@ -100,6 +100,12 @@ self.addEventListener('activate', (event) => {
         })
     );
     self.clients.claim();
+});
+
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 // Background Sync: Process offline transaction queue when connectivity returns

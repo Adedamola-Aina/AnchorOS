@@ -8,6 +8,7 @@ import App from './App'
 import { UnsavedChangesProvider } from './hooks/useUnsavedChanges'
 import { getPlatformClasses } from './utils/platform'
 import { initStagingConsoleCapture } from './utils/stagingConsoleCapture'
+import { APP_VERSION } from './version'
 
 initStagingConsoleCapture();
 
@@ -64,6 +65,14 @@ if (import.meta.env.VITE_APP_ENV === 'production') {
 // Add platform classes to body for native styling
 if (document.body) {
     document.body.className = getPlatformClasses();
+}
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register(`/sw.js?v=${APP_VERSION}`).catch((error) => {
+            console.warn('SW registration failed:', error);
+        });
+    });
 }
 
 createRoot(document.getElementById('root')!).render(

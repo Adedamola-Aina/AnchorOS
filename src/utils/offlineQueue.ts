@@ -58,6 +58,36 @@ export async function processQueue(
     return { succeeded, failed: failed.length };
 }
 
+export async function processQueueForUser(
+    userId: string,
+    processor: (entry: QueueEntry) => Promise<void>,
+): Promise<ProcessResult> {
+    const queue = await readQueue();
+    if (queue.length === 0) return { succeeded: 0, failed: 0 };
+
+    const remaining: QueueEntry[] = [];
+    let succeeded = 0;
+    let failed = 0;
+
+    for (const entry of queue) {
+        if (entry.userId !== userId) {
+            remaining.push(entry);
+            continue;
+        }
+
+        try {
+            await processor(entry);
+            succeeded++;
+        } catch {
+            failed++;
+            remaining.push(entry);
+        }
+    }
+
+    await set(IDB_KEY, remaining);
+    return { succeeded, failed };
+}
+
 export async function clearQueue(): Promise<void> {
     await del(IDB_KEY);
 }

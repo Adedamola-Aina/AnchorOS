@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { enqueueTransaction, processQueue, getQueueLength, clearQueue, enqueueTaskToggle, processTaskQueue, getTaskQueueLength, clearTaskQueue } from './offlineQueue';
+import { enqueueTransaction, processQueue, processQueueForUser, getQueueLength, clearQueue, enqueueTaskToggle, processTaskQueue, getTaskQueueLength, clearTaskQueue } from './offlineQueue';
 
 // Mock idb-keyval
 vi.mock('idb-keyval', () => ({
@@ -128,6 +128,24 @@ describe('offlineQueue', () => {
             expect(result.succeeded).toBe(0);
             expect(result.failed).toBe(0);
             expect(processor).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('processQueueForUser', () => {
+        it('processes only matching user entries and preserves others', async () => {
+            const entries = [
+                { id: '1', userId: 'user-1', payload: samplePayload, createdAt: '2026-01-01' },
+                { id: '2', userId: 'user-2', payload: { ...samplePayload, title: 'Other User Tx' }, createdAt: '2026-01-02' },
+            ];
+            mockGet.mockResolvedValue(entries);
+
+            const processor = vi.fn().mockResolvedValue(undefined);
+            const result = await processQueueForUser('user-1', processor);
+
+            expect(processor).toHaveBeenCalledTimes(1);
+            expect(result.succeeded).toBe(1);
+            expect(result.failed).toBe(0);
+            expect(mockSet).toHaveBeenCalledWith('anchor_offline_queue', [entries[1]]);
         });
     });
 
