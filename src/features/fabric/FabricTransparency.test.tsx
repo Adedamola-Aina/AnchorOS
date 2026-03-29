@@ -33,7 +33,7 @@ describe('FabricTransparency', () => {
 
     render(<FabricTransparency />);
 
-    fireEvent.click(screen.getByText('Delete pattern'));
+    fireEvent.click(screen.getByText('Delete group'));
     expect(deletePattern).toHaveBeenCalledWith('pattern-1');
   });
 
