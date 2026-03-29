@@ -118,7 +118,7 @@
     "eslint-plugin-react-refresh": "^0.4.26",
     "firebase-admin": "^13.7.0",
     "globals": "^17.4.0",
-    "happy-dom": "20.5.3",
+    "happy-dom": "20.8.9",
     "husky": "^9.1.7",
     "jsdom": "^27.4.0",
     "rollup-plugin-visualizer": "^6.0.11",
