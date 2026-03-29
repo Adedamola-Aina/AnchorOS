@@ -7,7 +7,7 @@ import { useState, useCallback } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
 import { app, functions } from '../../config/firebase';
-import { RP_ID, RP_NAME, bufferToBase64url, base64urlToBuffer } from './passkeyUtils';
+import { bufferToBase64url, base64urlToBuffer, performPasskeyRegistration, RP_ID } from './passkeyUtils';
 import { recordAuthEvent } from '../../services/authEventService';
 
 interface IssueChallengeResult {
@@ -43,62 +43,10 @@ export function usePasskeyAuth(): PasskeyAuthResult {
         setLoading(true);
         setError(null);
         try {
-            // 1. Get server-issued challenge
-            const issueChallenge = httpsCallable<{ purpose: string }, IssueChallengeResult>(
-                functions, 'issuePasskeyChallenge'
-            );
-            const { data: { challengeId, challenge } } = await issueChallenge({ purpose: 'register' });
-
-            const userIdBytes = new TextEncoder().encode(userId);
-
-            // 2. Create credential using server challenge
-            const credential = await navigator.credentials.create({
-                publicKey: {
-                    rp: { id: RP_ID, name: RP_NAME },
-                    user: { id: userIdBytes, name: email, displayName },
-                    challenge: base64urlToBuffer(challenge),
-                    pubKeyCredParams: [
-                        { type: 'public-key', alg: -7 },   // ES256
-                        { type: 'public-key', alg: -257 }, // RS256
-                    ],
-                    authenticatorSelection: {
-                        // No authenticatorAttachment restriction — allows platform
-                        // authenticators (Face ID, Touch ID, Windows Hello) AND
-                        // roaming hardware keys (YubiKey, FIDO2 USB/NFC keys).
-                        residentKey: 'required',
-                        userVerification: 'required',
-                    },
-                    timeout: 60_000,
-                    attestation: 'none',
-                },
-            }) as PublicKeyCredential | null;
-
-            if (!credential) return null;
-
-            const attestationResponse = credential.response as AuthenticatorAttestationResponse;
-
-            // 3. Send attestation to server for verification + public key storage
-            const completeRegistration = httpsCallable<Record<string, unknown>, { credentialId: string }>(functions, 'completePasskeyRegistration');
-            const { data: { credentialId } } = await completeRegistration({
-                challengeId,
-                credential: {
-                    id: credential.id,
-                    rawId: bufferToBase64url(credential.rawId),
-                    response: {
-                        clientDataJSON: bufferToBase64url(attestationResponse.clientDataJSON),
-                        attestationObject: bufferToBase64url(attestationResponse.attestationObject),
-                    },
-                    type: credential.type,
-                    authenticatorAttachment: credential.authenticatorAttachment ?? undefined,
-                },
-            });
-
-            return credentialId;
+            return await performPasskeyRegistration(userId, email, displayName);
         } catch (err) {
             const e = err as { message?: string; name?: string };
-            if (e.name !== 'NotAllowedError') {
-                setError(e.message ?? 'Passkey registration failed');
-            }
+            if (e.name !== 'NotAllowedError') setError(e.message ?? 'Passkey registration failed');
             return null;
         } finally {
             setLoading(false);

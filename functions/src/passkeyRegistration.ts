@@ -1,41 +1,16 @@
 /**\n * passkeyRegistration — GAP-011\n * Cloud Functions: completePasskeyRegistration, deletePasskey\n * Server-side WebAuthn attestation verification + passkey lifecycle management.\n */
 
 import { HttpsError } from 'firebase-functions/v2/https';
-import { FieldValue } from 'firebase-admin/firestore';
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import { secureOnCall } from './callable';
 import { createAuditLog } from './helpers';
 import { APP_ID, db } from './config';
-
-/** Allowed origins per environment — derived from project ID at runtime */
-function getAllowedOrigins(): string[] {
-    const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
-    if (projectId === 'anchor-os') return ['https://anchor-os.web.app'];
-    if (projectId === 'anchor-os-staging') return ['https://anchor-os-staging.web.app'];
-    return [
-        'https://anchor-os-dev-1c6ec.web.app',
-        'http://localhost:5173',
-        'http://localhost:4173',
-    ];
-}
-
-function getRpId(): string {
-    const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
-    if (projectId === 'anchor-os') return 'anchor-os.web.app';
-    if (projectId === 'anchor-os-staging') return 'anchor-os-staging.web.app';
-    return 'anchor-os-dev-1c6ec.web.app';
-}
-
-function challengeRef(challengeId: string) {
-    return db.collection('passkey_challenges').doc(challengeId);
-}
-
-function credentialRef(userId: string, credentialId: string) {
-    return db
-        .collection('artifacts').doc(APP_ID)
-        .collection('users').doc(userId)
-        .collection('passkeys').doc(credentialId);
-}
+import {
+    getAllowedOrigins, getRpId,
+    challengeRef, credentialRef,
+    FieldValue,
+    type ChallengeDoc,
+} from './passkeyAuthHelpers';
 
 interface CompleteRegistrationData {
     challengeId?: string;
@@ -49,13 +24,6 @@ interface CompleteRegistrationData {
         type?: string;
         authenticatorAttachment?: string;
     };
-}
-
-interface ChallengeDoc {
-    challenge: string;
-    expiresAt: { toMillis(): number };
-    purpose: 'register' | 'authenticate';
-    userId?: string;
 }
 
 export const completePasskeyRegistration = secureOnCall(async (request) => {
