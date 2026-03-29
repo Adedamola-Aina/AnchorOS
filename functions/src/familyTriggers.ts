@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 /**
  * Family Triggers — Firestore write trigger, scheduled cleanup, migration
  *
@@ -115,7 +116,7 @@ export const cleanupExpiredInvitations = onSchedule(
                 const batch = db.batch();
                 expiredSnap.docs.forEach(doc => batch.update(doc.ref, { status: 'expired' }));
                 await batch.commit();
-                console.log(`Marked ${expiredSnap.size} invitations as expired`);
+                logger.info(`Marked ${expiredSnap.size} invitations as expired`);
             }
 
             const oldQuery = invitationsRef.where('createdAt', '<', thirtyDaysAgo.toISOString());
@@ -125,7 +126,7 @@ export const cleanupExpiredInvitations = onSchedule(
                 const batch = db.batch();
                 oldSnap.docs.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
-                console.log(`Deleted ${oldSnap.size} old invitations`);
+                logger.info(`Deleted ${oldSnap.size} old invitations`);
             }
 
             return;

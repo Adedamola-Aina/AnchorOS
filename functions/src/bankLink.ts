@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 /**
  * Bank Link — link / unlink a bank account via Mono
  *
@@ -116,7 +117,7 @@ export const linkBankAccount = secureOnCall(
             provider: 'mono',
         });
 
-        console.log(`[BankLink] Linked ${acct.institution.name} for user ${uid}`);
+        logger.info(`[BankLink] Linked ${acct.institution.name} for user ${uid}`);
         return { accountId: accountRef.id, institutionName: acct.institution.name };
     },
 );

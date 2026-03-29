@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { db, APP_ID } from './config';
 import { getAccountDetails, getTransactions } from './mono/monoClient';
 import { mapAndDeduplicate } from './mono/transactionMapper';
@@ -87,7 +88,7 @@ export async function syncConnection(
     await connectionRef.update({ lastSyncAt: new Date().toISOString(), status: 'active' });
 
     if (newTransactions.length > 0) {
-        console.log(`[BankSync] Synced ${newTransactions.length} new txns for ${anchorAccountId}`);
+        logger.info(`[BankSync] Synced ${newTransactions.length} new txns for ${anchorAccountId}`);
     }
 
     return newTransactions.length;

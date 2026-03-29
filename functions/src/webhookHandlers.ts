@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { db, APP_ID } from './config';
 import { getAccountDetails, getTransactions } from './mono/monoClient';
 import { mapAndDeduplicate } from './mono/transactionMapper';
@@ -69,7 +70,7 @@ export async function handleAccountUpdated(monoAccountId: string): Promise<void>
     await connDoc.ref.update({ lastSyncAt: new Date().toISOString() });
 
     if (newTxns.length > 0) {
-        console.log(`[Webhook] Synced ${newTxns.length} txns for ${anchorAccountId}`);
+        logger.info(`[Webhook] Synced ${newTxns.length} txns for ${anchorAccountId}`);
     }
 }
 
@@ -90,7 +91,7 @@ export async function handleReauthorisation(monoAccountId: string): Promise<void
     await accountRef.update({ 'externalConnection.syncStatus': 'reconnect_required' });
     await connDoc.ref.update({ status: 'reconnect_required' });
 
-    console.log(`[Webhook] Reauth required for account ${connection.anchorAccountId}`);
+    logger.info(`[Webhook] Reauth required for account ${connection.anchorAccountId}`);
 }
 
 // Re-export the type narrowly so bankWebhook.ts can import it

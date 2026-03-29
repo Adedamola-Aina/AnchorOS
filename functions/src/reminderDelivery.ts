@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import type { DocumentReference } from 'firebase-admin/firestore';
 import { buildReminderDeliveryKey, shouldSkipReminderDelivery } from './reminderDedupe';
 import { claimReminderDeliverySlot, releaseReminderDeliverySlot } from './reminderClaim';
@@ -45,7 +46,7 @@ export async function deliverUserReminders(
             currentKey: dedupeKey,
             nowMs,
         })) {
-            console.log(`[Reminders] Skipping duplicate reminder batch for user ${userId}.`);
+            logger.info(`[Reminders] Skipping duplicate reminder batch for user ${userId}.`);
             continue;
         }
 
@@ -57,7 +58,7 @@ export async function deliverUserReminders(
         });
 
         if (!hasClaim) {
-            console.log(`[Reminders] Another run already claimed batch for user ${userId}.`);
+            logger.info(`[Reminders] Another run already claimed batch for user ${userId}.`);
             continue;
         }
 

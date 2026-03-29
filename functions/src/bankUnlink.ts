@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { secureOnCall } from './callable';
 import { db, APP_ID } from './config';
@@ -58,7 +59,7 @@ export const unlinkBankAccount = secureOnCall(
             accountId, institution: account.externalConnection.institutionName,
         });
 
-        console.log(`[BankLink] Unlinked account ${accountId} for user ${uid}`);
+        logger.info(`[BankLink] Unlinked account ${accountId} for user ${uid}`);
         return { success: true };
     },
 );

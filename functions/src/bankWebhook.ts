@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/v2/https';
 import { createHash, createHmac } from 'node:crypto';
 import { db } from './config';
@@ -71,7 +72,7 @@ export const monoWebhook = onRequest(
             return;
         }
 
-        console.log(`[Webhook] Received event: ${event} for ${monoAccountId}`);
+        logger.info(`[Webhook] Received event: ${event} for ${monoAccountId}`);
 
         try {
             if (event === 'account_updated' || event === 'mono.events.account_updated') {

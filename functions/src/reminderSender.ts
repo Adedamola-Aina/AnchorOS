@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { type DocumentReference } from 'firebase-admin/firestore';
 import { getMessaging, type Message } from 'firebase-admin/messaging';
 import { removeTokenIfStale } from './reminderTokenCleanup';
@@ -48,7 +49,7 @@ export async function sendReminderNotification({
 
     try {
         await getMessaging().send(message);
-        console.log(`[Reminders] Sent notification to token: ${token.substring(0, 10)}...`);
+        logger.info(`[Reminders] Sent notification to token: ${token.substring(0, 10)}...`);
         return true;
     } catch (error: unknown) {
         const err = error as { code?: string; message?: string };

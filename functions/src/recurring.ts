@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { FieldValue } from 'firebase-admin/firestore';
 import { db, APP_ID } from './config';
@@ -11,7 +12,7 @@ import { validateRule, calculateNextRun, parseISO } from './recurringHelpers';
 export const processRecurringTransactions = onSchedule(
     { schedule: 'every day 00:00', timeZone: 'UTC' },
     async () => {
-    console.log('Processing recurring transactions...');
+    logger.info('Processing recurring transactions...');
     const now = new Date();
     const nowIso = now.toISOString();
 
@@ -24,11 +25,11 @@ export const processRecurringTransactions = onSchedule(
         .get();
 
     if (snapshot.empty) {
-        console.log('No recurring transactions to process.');
+        logger.info('No recurring transactions to process.');
         return;
     }
 
-    console.log(`Found ${snapshot.size} recurring transactions to process.`);
+    logger.info(`Found ${snapshot.size} recurring transactions to process.`);
 
     const batch = db.batch();
     let batchCount = 0;
@@ -145,7 +146,7 @@ export const processRecurringTransactions = onSchedule(
 
     if (batchCount > 0) {
         await batch.commit();
-        console.log(`Successfully committed batch of ${batchCount} transaction sets.`);
+        logger.info(`Successfully committed batch of ${batchCount} transaction sets.`);
     }
 
     return;

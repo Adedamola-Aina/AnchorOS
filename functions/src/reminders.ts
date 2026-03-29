@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import { randomUUID } from 'node:crypto';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { format } from 'date-fns';
@@ -19,7 +20,7 @@ export const processReminders = onSchedule(
         const currentTime = format(now, 'HH:mm');
         const todayDate = format(now, 'yyyy-MM-dd');
 
-        console.log(`[Reminders] Processing reminders for ${currentTime} on ${todayDate}`);
+        logger.info(`[Reminders] Processing reminders for ${currentTime} on ${todayDate}`);
 
         try {
             const snapshot = await db.collectionGroup('commitments')
@@ -28,11 +29,11 @@ export const processReminders = onSchedule(
                 .get();
 
             if (snapshot.empty) {
-                console.log('[Reminders] No reminders due at this time.');
+                logger.info('[Reminders] No reminders due at this time.');
                 return;
             }
 
-            console.log(`[Reminders] Found ${snapshot.size} commitments with reminders.`);
+            logger.info(`[Reminders] Found ${snapshot.size} commitments with reminders.`);
 
             const remindersByUser = new Map<string, PendingReminder[]>();
             const preferenceCache = new Map<string, boolean>();
@@ -49,7 +50,7 @@ export const processReminders = onSchedule(
                 }
 
                 if (commitment.lastReminderSent === todayDate) {
-                    console.log(`[Reminders] Already notified for ${doc.id} today, skipping.`);
+                    logger.info(`[Reminders] Already notified for ${doc.id} today, skipping.`);
                     continue;
                 }
 
@@ -89,7 +90,7 @@ export const processReminders = onSchedule(
                 }
 
                 if (tokenDocs.length === 0) {
-                    console.log(`[Reminders] No FCM tokens for user ${userId}, skipping.`);
+                    logger.info(`[Reminders] No FCM tokens for user ${userId}, skipping.`);
                     continue;
                 }
 
@@ -105,7 +106,7 @@ export const processReminders = onSchedule(
                 { todayDate, currentTime, nowMs, sentAt, runId },
             );
 
-            console.log(`[Reminders] Processed ${deliveryCount} notification delivery attempt(s).`);
+            logger.info(`[Reminders] Processed ${deliveryCount} notification delivery attempt(s).`);
             return;
         } catch (error) {
             console.error('[Reminders] Error processing reminders:', error);

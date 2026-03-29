@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 /**
  * Bank Sync — scheduled and on-demand transaction sync via Mono
  *
@@ -20,7 +21,7 @@ import { syncConnection } from './bankSyncConnection';
 export const syncBankTransactions = onSchedule(
     { schedule: 'every 6 hours', timeZone: 'UTC', secrets: ['MONO_SECRET_KEY'] },
     async () => {
-        console.log('[BankSync] Starting scheduled sync...');
+        logger.info('[BankSync] Starting scheduled sync...');
 
         // Query all active connections across all users
         const connectionsSnap = await db.collectionGroup('bankConnections')
@@ -28,11 +29,11 @@ export const syncBankTransactions = onSchedule(
             .get();
 
         if (connectionsSnap.empty) {
-            console.log('[BankSync] No active connections to sync.');
+            logger.info('[BankSync] No active connections to sync.');
             return;
         }
 
-        console.log(`[BankSync] Found ${connectionsSnap.size} active connection(s).`);
+        logger.info(`[BankSync] Found ${connectionsSnap.size} active connection(s).`);
         let totalSynced = 0;
 
         for (const doc of connectionsSnap.docs) {
@@ -45,7 +46,7 @@ export const syncBankTransactions = onSchedule(
             }
         }
 
-        console.log(`[BankSync] Completed. Total new transactions: ${totalSynced}`);
+        logger.info(`[BankSync] Completed. Total new transactions: ${totalSynced}`);
     },
 );
 
