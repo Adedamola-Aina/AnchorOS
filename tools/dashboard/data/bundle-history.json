@@ -2,16 +2,6 @@
   {
     "totalKb": 1939.3,
     "fileCount": 23,
-    "measuredAt": "2026-03-29T20:26:40.919Z"
-  },
-  {
-    "totalKb": 1939.3,
-    "fileCount": 23,
-    "measuredAt": "2026-03-29T20:26:43.722Z"
-  },
-  {
-    "totalKb": 1939.3,
-    "fileCount": 23,
     "measuredAt": "2026-03-29T20:27:40.942Z"
   },
   {
@@ -448,5 +438,15 @@
     "totalKb": 1939.3,
     "fileCount": 23,
     "measuredAt": "2026-03-29T20:46:51.109Z"
+  },
+  {
+    "totalKb": 1939.3,
+    "fileCount": 23,
+    "measuredAt": "2026-03-29T20:47:11.971Z"
+  },
+  {
+    "totalKb": 1939.3,
+    "fileCount": 23,
+    "measuredAt": "2026-03-29T20:47:16.444Z"
   }
 ]
