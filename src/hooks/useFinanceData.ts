@@ -117,15 +117,11 @@ export const useFinanceData = (user: User | null) => {
 
     // Navigation helpers
     const nextMonth = () => setCurrentMonth(prev => {
-        const d = new Date(prev);
-        d.setMonth(d.getMonth() + 1);
-        return d;
+        return new Date(prev.getFullYear(), prev.getMonth() + 1, 1);
     });
 
     const prevMonth = () => setCurrentMonth(prev => {
-        const d = new Date(prev);
-        d.setMonth(d.getMonth() - 1);
-        return d;
+        return new Date(prev.getFullYear(), prev.getMonth() - 1, 1);
     });
 
     const jumpToMonth = (date: Date) => setCurrentMonth(date);

@@ -65,17 +65,12 @@ export const TaskContextBadge = ({ task }: { task: AnchorTask }) => {
     }
     if (task.type === 'monthly' && (task.daysOfMonth?.length || task.dayOfMonth)) {
       const allDates = task.daysOfMonth?.length ? [...task.daysOfMonth] : (task.dayOfMonth ? [task.dayOfMonth] : []);
-      // Filter out past days (current month only)
-      const today = new Date().getDate();
-      const upcomingDates = allDates.filter(d => d >= today).sort((a, b) => a - b);
+      const scheduledDates = [...allDates].sort((a, b) => a - b);
       // Show max 5 upcoming days
       const maxShow = 5;
-      if (upcomingDates.length === 0) {
-        return null; // All days passed
-      }
-      const display = upcomingDates.length <= maxShow
-        ? upcomingDates.join(', ')
-        : `${upcomingDates.slice(0, maxShow).join(', ')} +${upcomingDates.length - maxShow}`;
+      const display = scheduledDates.length <= maxShow
+        ? scheduledDates.join(', ')
+        : `${scheduledDates.slice(0, maxShow).join(', ')} +${scheduledDates.length - maxShow}`;
       return <span className={`${commonStyles} text-task-600 dark:text-task-400 bg-task-50 dark:bg-task-900/20`}>{display}</span>;
     }
     return null;

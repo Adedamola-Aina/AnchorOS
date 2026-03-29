@@ -296,6 +296,24 @@ describe('useFinanceData', () => {
     expect(result.current.currentMonth.getMonth()).toBe((before - 1 + 12) % 12);
   });
 
+  it('nextMonth and prevMonth avoid day rollover drift at month end', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 31, 12, 0, 0)); // Jan 31, 2026
+
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useFinanceData(FAKE_USER), { wrapper });
+
+    act(() => result.current.nextMonth());
+    expect(result.current.currentMonth.getFullYear()).toBe(2026);
+    expect(result.current.currentMonth.getMonth()).toBe(1); // February
+
+    act(() => result.current.prevMonth());
+    expect(result.current.currentMonth.getFullYear()).toBe(2026);
+    expect(result.current.currentMonth.getMonth()).toBe(0); // January
+
+    vi.useRealTimers();
+  });
+
   it('jumpToMonth sets currentMonth to specified date', () => {
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useFinanceData(FAKE_USER), { wrapper });
