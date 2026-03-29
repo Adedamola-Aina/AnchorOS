@@ -101,8 +101,8 @@ describe('permissions', () => {
       expect(canDeleteTransaction(ownerAccount, 'user-1')).toBe(true);
     });
 
-    it('returns true for transact user', () => {
-      expect(canDeleteTransaction(ownerAccount, 'user-3')).toBe(true);
+    it('returns false for transact user', () => {
+      expect(canDeleteTransaction(ownerAccount, 'user-3')).toBe(false);
     });
 
     it('returns true for manage user', () => {

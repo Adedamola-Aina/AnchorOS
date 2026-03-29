@@ -80,17 +80,8 @@ service cloud.firestore {
                     && (resource.data.ownerUid == request.auth.uid
                         || resource.data.inviteeEmail == request.auth.token.email
                         || resource.data.get('inviteeUid', '') == request.auth.uid);
-        // Create: only the owner (ownerUid must match auth uid)
-        allow create: if request.auth != null
-                      && request.resource.data.ownerUid == request.auth.uid;
-        // Update: owner can revoke; invitee can accept/reject
-        allow update: if request.auth != null
-                      && (resource.data.ownerUid == request.auth.uid
-                          || resource.data.inviteeEmail == request.auth.token.email
-                          || resource.data.get('inviteeUid', '') == request.auth.uid);
-        // Delete: owner only
-        allow delete: if request.auth != null
-                      && resource.data.ownerUid == request.auth.uid;
+        // Writes are Cloud Functions/Admin SDK only to prevent client-side tampering.
+        allow create, update, delete: if false;
       }
 
       // ======================================================================
@@ -102,18 +93,8 @@ service cloud.firestore {
         allow read: if request.auth != null
                     && (resource.data.ownerUid == request.auth.uid
                         || resource.data.memberUid == request.auth.uid);
-        // Create: one of the two parties must be the authenticated user
-        allow create: if request.auth != null
-                      && (request.resource.data.ownerUid == request.auth.uid
-                          || request.resource.data.memberUid == request.auth.uid);
-        // Update: only connected parties (e.g. disconnect)
-        allow update: if request.auth != null
-                      && (resource.data.ownerUid == request.auth.uid
-                          || resource.data.memberUid == request.auth.uid);
-        // Delete: only connected parties
-        allow delete: if request.auth != null
-                      && (resource.data.ownerUid == request.auth.uid
-                          || resource.data.memberUid == request.auth.uid);
+        // Writes are Cloud Functions/Admin SDK only to prevent client-side tampering.
+        allow create, update, delete: if false;
       }
 
       // ======================================================================
@@ -140,6 +121,42 @@ service cloud.firestore {
       // Users Collection
       // ======================================================================
       match /users/{userId} {
+        function getAccountById(accountId) {
+          return get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
+        }
+
+        function accountExists(accountId) {
+          return exists(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
+        }
+
+        function accountOwnerUid(accountId) {
+          return getAccountById(accountId).data.get('ownerId', userId);
+        }
+
+        function sharedPermission(accountId) {
+          return getAccountById(accountId).data.get('sharedWith', {})[request.auth.uid].permission;
+        }
+
+        function hasLegacyPermission(accountId, perm) {
+          return getAccountById(accountId).data.get('shares', {})[request.auth.uid] == perm;
+        }
+
+        function hasManagePermission(accountId) {
+          return accountExists(accountId)
+                 && (accountOwnerUid(accountId) == request.auth.uid
+                     || hasLegacyPermission(accountId, 'manage')
+                     || sharedPermission(accountId) == 'manage');
+        }
+
+        function hasTransactPermission(accountId) {
+          return accountExists(accountId)
+                 && (accountOwnerUid(accountId) == request.auth.uid
+                     || hasLegacyPermission(accountId, 'manage')
+                     || hasLegacyPermission(accountId, 'transact')
+                     || sharedPermission(accountId) == 'manage'
+                     || sharedPermission(accountId) == 'transact');
+        }
+
         allow read: if request.auth.uid == userId;
         allow create: if request.auth != null && request.auth.uid == userId;
         allow update, delete: if request.auth.uid == userId;
@@ -244,12 +261,20 @@ service cloud.firestore {
           // sharedWith and shares can only be changed by owner
           // Linked account balance/connection can only be changed by Cloud Functions (Admin SDK)
           allow update: if isValidAccount(request.resource.data)
-                        && (request.auth.uid == userId 
-                            || resource.data.get('shares', {})[request.auth.uid] == 'manage'
-                            || isConnectedFamilyMember(userId))
-                        && (request.auth.uid == userId || 
-                            (request.resource.data.get('sharedWith', {}) == resource.data.get('sharedWith', {}) &&
-                             request.resource.data.get('shares', {}) == resource.data.get('shares', {})))
+                        && (
+                            request.auth.uid == userId
+                            || (
+                              hasManagePermission(accountId)
+                              && request.resource.data.get('sharedWith', {}) == resource.data.get('sharedWith', {})
+                              && request.resource.data.get('shares', {}) == resource.data.get('shares', {})
+                            )
+                            || (
+                              hasTransactPermission(accountId)
+                              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['balanceCents', 'updatedAt'])
+                              && request.resource.data.get('sharedWith', {}) == resource.data.get('sharedWith', {})
+                              && request.resource.data.get('shares', {}) == resource.data.get('shares', {})
+                            )
+                           )
                         && (resource.data.get('source', 'manual') != 'linked'
                             || !request.resource.data.diff(resource.data).affectedKeys()
                                 .hasAny(['balanceCents', 'externalConnection', 'source']));
@@ -275,24 +300,10 @@ service cloud.firestore {
         // Transactions: Owner or shared account member can read/create
         // ====================================================================
         match /finance/{txId} {
-          function verifyUpdatePermission() {
-            let accountId = resource.data.accountId;
-            let account = get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
-            return account.data.ownerId == request.auth.uid || account.data.get('shares', {})[request.auth.uid] == 'manage';
-          }
-
           function isSharedAccountMember() {
             let accountId = resource.data.accountId;
             let account = get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
             return request.auth.uid in account.data.get('sharedWith', {}).keys();
-          }
-
-          function verifyDeletePermission() {
-            let accountId = resource.data.accountId;
-            let account = get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
-            // Only owner or legacy manage share can delete — sharedWith members cannot
-            return account.data.ownerId == request.auth.uid 
-                   || account.data.get('shares', {})[request.auth.uid] == 'manage';
           }
 
           // Read: owner, legacy shares, sharedWith, or family scope
@@ -304,14 +315,14 @@ service cloud.firestore {
           // Create: owner, or connected family member (simplified for dev/staging)
           allow create: if request.auth != null
                         && isValidTransaction(request.resource.data)
-                        && (request.auth.uid == userId || isConnectedFamilyMember(userId));
+                        && hasTransactPermission(request.resource.data.accountId);
                         
           // Update: owner or manage permission, sharedWith members cannot update
-          allow update: if (request.auth.uid == userId || verifyUpdatePermission())
+          allow update: if hasManagePermission(resource.data.accountId)
                         && isValidTransaction(request.resource.data);
                         
           // Delete: owner only or sharedWith members with permission
-          allow delete: if request.auth.uid == userId || verifyDeletePermission();
+          allow delete: if hasManagePermission(resource.data.accountId);
         }
 
         // ====================================================================

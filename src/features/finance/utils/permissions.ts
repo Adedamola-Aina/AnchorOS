@@ -53,10 +53,7 @@ export const canEditTransaction = (account: AnchorAccount, userId: string): bool
  */
 export const canDeleteTransaction = (account: AnchorAccount, userId: string): boolean => {
     const perm = getAccountPermission(account, userId);
-    // Allow deleting if user has rights to transact or manage
-    // This assumes if you can Add, you can Delete (e.g., if you made a mistake)
-    // Validated against rules which allow delete if in sharedWith keys (mapped to transact usually)
-    return perm === 'owner' || perm === 'manage' || perm === 'transact';
+    return perm === 'owner' || perm === 'manage';
 };
 
 /**

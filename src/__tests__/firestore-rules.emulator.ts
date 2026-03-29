@@ -102,9 +102,9 @@ describe('family_invitations (SEC-1)', () => {
     await assertFails(getDoc(doc(db, collPath, 'inv3')));
   });
 
-  it('owner can create invitation with their uid', async () => {
+  it('owner cannot create invitation directly (server-only write path)', async () => {
     const db = authedDb('owner1');
-    await assertSucceeds(
+    await assertFails(
       setDoc(doc(db, collPath, 'inv4'), {
         ownerUid: 'owner1',
         inviteeEmail: 'bob@test.com',
@@ -124,7 +124,7 @@ describe('family_invitations (SEC-1)', () => {
     );
   });
 
-  it('owner can delete their invitation', async () => {
+  it('owner cannot delete invitation directly (server-only write path)', async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(doc(ctx.firestore(), collPath, 'inv6'), {
         ownerUid: 'owner1',
@@ -133,7 +133,7 @@ describe('family_invitations (SEC-1)', () => {
       });
     });
     const db = authedDb('owner1');
-    await assertSucceeds(deleteDoc(doc(db, collPath, 'inv6')));
+    await assertFails(deleteDoc(doc(db, collPath, 'inv6')));
   });
 
   it('invitee cannot delete the invitation', async () => {
@@ -207,9 +207,9 @@ describe('family_connections (SEC-2)', () => {
     );
   });
 
-  it('party can create connection where they are owner', async () => {
+  it('party cannot create connection directly (server-only write path)', async () => {
     const db = authedDb('owner1');
-    await assertSucceeds(
+    await assertFails(
       setDoc(doc(db, collPath, 'owner1_member1'), {
         ownerUid: 'owner1',
         memberUid: 'member1',
@@ -229,7 +229,7 @@ describe('family_connections (SEC-2)', () => {
     );
   });
 
-  it('party can update their connection (disconnect)', async () => {
+  it('party cannot update connection directly (server-only write path)', async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(doc(ctx.firestore(), collPath, 'owner1_member1'), {
         ownerUid: 'owner1',
@@ -238,7 +238,7 @@ describe('family_connections (SEC-2)', () => {
       });
     });
     const db = authedDb('member1');
-    await assertSucceeds(
+    await assertFails(
       updateDoc(doc(db, collPath, 'owner1_member1'), {
         status: 'disconnected',
       })
