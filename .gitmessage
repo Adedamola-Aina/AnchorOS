@@ -1,0 +1,13 @@
+# Anchor OS commit message template
+# Format: type(scope): TICKET-ID short description
+#
+# Examples:
+#   feat(finance): FEAT-042 add recurring transaction auto-detection
+#   fix(auth): BUG-117 resolve passkey assertion timeout on iOS
+#   refactor(fabric): ARCH-001 split BehavioralEngine under 200 lines
+#   chore(deps): bump firebase to 12.11.0
+#
+# Types: feat fix docs style refactor perf test build ci chore revert deploy
+# Ticket IDs: BUG-XXX FEAT-XXX ARCH-XXX AUTH-XXX ENG-XXX SEC-XXX GAP-XXX
+#   (chore/style/docs commits may omit ticket ID)
+#
