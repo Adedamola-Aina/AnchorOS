@@ -4,15 +4,19 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
 const mockShowToast = vi.fn();
+const mockState = vi.hoisted(() => {
+  const mockGetDocs = vi.fn();
+  const mockWriteBatch = vi.fn(() => ({
+    update: vi.fn(),
+    set: vi.fn(),
+    commit: vi.fn().mockResolvedValue(undefined),
+  }));
+
+  return { mockGetDocs, mockWriteBatch };
+});
+
 vi.mock('../../../../context/NotificationContext', () => ({
   useNotifications: () => ({ showToast: mockShowToast }),
-}));
-
-const mockGetDocs = vi.fn();
-const mockWriteBatch = vi.fn(() => ({
-  update: vi.fn(),
-  set: vi.fn(),
-  commit: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../../../../config/firebase', () => ({
@@ -21,13 +25,14 @@ vi.mock('../../../../config/firebase', () => ({
   auth: { currentUser: { email: 'test@test.com' } },
 }));
 
-vi.mock('firebase/firestore', () => ({
+vi.mock('../../../../utils/secureDb', () => ({
+  db: {},
   collection: vi.fn(),
   query: vi.fn(),
   where: vi.fn(),
-  getDocs: (...args: unknown[]) => mockGetDocs(...args),
+  getDocs: (...args: unknown[]) => mockState.mockGetDocs(...args),
   doc: vi.fn(),
-  writeBatch: mockWriteBatch,
+  writeBatch: (...args: unknown[]) => mockState.mockWriteBatch(...args),
 }));
 
 import { AutoAcceptInvitationAction } from './AutoAcceptAction';
@@ -43,7 +48,7 @@ describe('AutoAcceptInvitationAction', () => {
   });
 
   it('shows warning when no pending invitations found', async () => {
-    mockGetDocs.mockResolvedValueOnce({ empty: true, docs: [] })
+    mockState.mockGetDocs.mockResolvedValueOnce({ empty: true, docs: [] })
                .mockResolvedValueOnce({ empty: true, docs: [] });
 
     render(<AutoAcceptInvitationAction userUid="uid1" />);
@@ -55,7 +60,7 @@ describe('AutoAcceptInvitationAction', () => {
 
   it('auto-accepts invitation where user is invitee', async () => {
     const inviteRef = { id: 'inv-1' };
-    mockGetDocs.mockResolvedValueOnce({
+    mockState.mockGetDocs.mockResolvedValueOnce({
       empty: false,
       docs: [{
         ref: inviteRef,
@@ -79,7 +84,7 @@ describe('AutoAcceptInvitationAction', () => {
 
   it('auto-accepts invitation sent by current user', async () => {
     // First query (invitee) returns empty, second query (owner) returns match
-    mockGetDocs.mockResolvedValueOnce({ empty: true, docs: [] })
+    mockState.mockGetDocs.mockResolvedValueOnce({ empty: true, docs: [] })
                .mockResolvedValueOnce({
       empty: false,
       docs: [{
@@ -104,7 +109,7 @@ describe('AutoAcceptInvitationAction', () => {
   });
 
   it('shows error toast on failure', async () => {
-    mockGetDocs.mockRejectedValueOnce(new Error('Firestore error'));
+    mockState.mockGetDocs.mockRejectedValueOnce(new Error('Firestore error'));
 
     render(<AutoAcceptInvitationAction userUid="uid1" />);
     fireEvent.click(screen.getByText('Auto-Accept'));
