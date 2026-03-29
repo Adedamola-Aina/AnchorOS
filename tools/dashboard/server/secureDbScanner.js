@@ -50,38 +50,49 @@ function isLegitimateException(relPath) {
     return LEGITIMATE_EXCEPTIONS.has(relPath);
 }
 
-/**
- * Returns true if the file imports from 'firebase/firestore' or '@firebase/firestore'
- * but ONLY uses onSnapshot (real-time listener — documented exception).
- */
-function isOnlyOnSnapshot(content) {
-    // Detect which identifiers are imported
-    const importMatch = content.match(
-        /import\s*\{([^}]+)\}\s*from\s*['"](?:firebase|@firebase)\/firestore['"]/
+function extractFirestoreImports(content) {
+    const importMatches = content.matchAll(
+        /import\s+([\s\S]*?)\s+from\s+['"](?:firebase|@firebase)\/firestore['"]/g
     );
-    if (!importMatch) return false;
 
-    const imported = importMatch[1]
-        .split(',')
-        .map((s) => s.trim().replace(/\s+as\s+\w+/, '').trim())
-        .filter(Boolean);
+    const imports = [];
 
-    // If the only non-type identifier is onSnapshot (+ getFirestore/collection/doc for refs), allow it
+    for (const match of importMatches) {
+        const clause = (match[1] || '').trim();
+        const isTypeOnly = /^type\s+/.test(clause);
+        const namedMatch = clause.match(/\{([\s\S]*?)\}/);
+        const names = namedMatch
+            ? namedMatch[1]
+                .split(',')
+                .map((s) => s.trim().replace(/\s+as\s+\w+/, '').trim())
+                .filter(Boolean)
+            : [];
+
+        imports.push({
+            clause,
+            isTypeOnly,
+            names,
+            isNamespaceOrDefault: !namedMatch,
+        });
+    }
+
+    return imports;
+}
+
+/**
+ * Returns true if runtime firestore imports are listener-only.
+ * We only allow this exception when `onSnapshot` is present and all runtime
+ * identifiers are in the safe listener allow-list.
+ */
+function isOnlyOnSnapshot(runtimeIdentifiers) {
+    if (!runtimeIdentifiers.includes('onSnapshot')) return false;
+
     const LISTENER_ONLY = new Set([
         'onSnapshot', 'getFirestore', 'collection', 'doc', 'query',
-        'where', 'orderBy', 'limit', 'DocumentSnapshot', 'QuerySnapshot',
-        'Unsubscribe', 'DocumentData', 'Query', 'CollectionReference',
-        'DocumentReference', 'Firestore', 'FieldValue', 'Timestamp',
-        'serverTimestamp', 'WhereFilterOp', 'OrderByDirection', 'SnapshotMetadata',
+        'where', 'orderBy', 'limit',
     ]);
 
-    const WRITE_READ_OPS = new Set([
-        'getDoc', 'getDocs', 'setDoc', 'updateDoc', 'addDoc', 'deleteDoc',
-        'writeBatch', 'runTransaction',
-    ]);
-
-    const hasWriteRead = imported.some((id) => WRITE_READ_OPS.has(id));
-    return !hasWriteRead;
+    return runtimeIdentifiers.every((id) => LISTENER_ONLY.has(id));
 }
 
 /**
@@ -122,7 +133,7 @@ function scanSecureDbCompliance() {
     }
 
     const IMPORT_RE = /from\s+['"](?:firebase|@firebase)\/firestore['"]/;
-    const TYPE_ONLY_RE = /^\s*import\s+type\s+/;
+    const DYNAMIC_IMPORT_RE = /import\s*\(\s*['"](?:firebase|@firebase)\/firestore['"]\s*\)/;
 
     for (const fullPath of files) {
         const relPath = path.relative(ROOT, fullPath).replace(/\\/g, '/');
@@ -139,19 +150,38 @@ function scanSecureDbCompliance() {
             continue;
         }
 
-        if (!IMPORT_RE.test(content)) continue;
+        const hasStaticImport = IMPORT_RE.test(content);
+        const hasDynamicImport = DYNAMIC_IMPORT_RE.test(content);
+        if (!hasStaticImport && !hasDynamicImport) continue;
 
-        // Allow files where ALL firebase/firestore imports are type-only
-        const lines = content.split('\n');
-        const hasRuntimeImport = lines.some(
-            (line) => IMPORT_RE.test(line) && !TYPE_ONLY_RE.test(line)
-        );
-        if (!hasRuntimeImport) {
+        if (hasDynamicImport) {
+            violations.push({
+                path: fullPath,
+                relPath,
+                reason: 'Dynamic firebase/firestore import bypasses secureDb.ts',
+            });
+            continue;
+        }
+
+        const imports = extractFirestoreImports(content);
+        const runtimeImports = imports.filter((entry) => !entry.isTypeOnly);
+        if (runtimeImports.length === 0) {
             exempted++;
             continue;
         }
 
-        if (isOnlyOnSnapshot(content)) {
+        // Namespace/default runtime imports are too broad to guarantee listener-only safety.
+        if (runtimeImports.some((entry) => entry.isNamespaceOrDefault)) {
+            violations.push({
+                path: fullPath,
+                relPath,
+                reason: 'Broad runtime firebase/firestore import (use secureDb.ts exports instead)',
+            });
+            continue;
+        }
+
+        const runtimeIdentifiers = runtimeImports.flatMap((entry) => entry.names);
+        if (isOnlyOnSnapshot(runtimeIdentifiers)) {
             exempted++;
             continue;
         }
