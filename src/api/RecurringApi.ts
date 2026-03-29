@@ -14,7 +14,7 @@ import {
     where,
     orderBy,
     type Unsubscribe
-} from 'firebase/firestore';
+} from '../utils/secureDb';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions, APP_ID } from '../config/firebase';
 import type { RecurringTransaction } from '../types';

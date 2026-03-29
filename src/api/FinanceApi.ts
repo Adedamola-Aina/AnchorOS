@@ -17,7 +17,7 @@ import {
     orderBy,
     limit,
     type Unsubscribe
-} from 'firebase/firestore';
+} from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 import type { AnchorTransaction, AnchorAccount } from '../types';
 import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS, ENCRYPTED_ACCOUNT_FIELDS } from '../services/FieldEncryption';

@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { Button } from '@anchor-os/ui';
 import { useNotifications } from '../../../../context/NotificationContext';
 import { seedData } from '../../../../utils/seeder';
+import { doc, collection, writeBatch, db } from '../../../../utils/secureDb';
+import { APP_ID } from '../../../../config/firebase';
 
 interface ActionProps {
     userUid: string;
@@ -66,8 +68,6 @@ export const SimulateFamilyAction: React.FC<ActionProps> = ({ userUid }) => {
 
     const handleSimulate = async () => {
         try {
-            const { db, APP_ID } = await import('../../../../config/firebase');
-            const { doc, collection, writeBatch } = await import('firebase/firestore');
             const batch = writeBatch(db);
             const timestamp = new Date().toISOString();
 

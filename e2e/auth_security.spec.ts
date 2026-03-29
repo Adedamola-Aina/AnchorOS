@@ -11,7 +11,7 @@ test.describe('Auth Security Features', () => {
         for (let i = 0; i < 4; i++) {
             await page.getByPlaceholder('you@example.com').fill('security_test@anchor-os.com');
             await page.getByPlaceholder('••••••••').fill('wrongpassword123');
-            await page.getByRole('button', { name: 'Sign In' }).click();
+            await page.getByRole('button', { name: 'Sign In', exact: true }).click();
 
             // Wait for standard error (or firebase rate limit)
             const errorLocator = page.locator('text=Incorrect email or password').or(page.locator('text=Too many attempts'));
@@ -21,7 +21,7 @@ test.describe('Auth Security Features', () => {
         // 3. 5th attempt should be locked out
         await page.getByPlaceholder('you@example.com').fill('security_test@anchor-os.com');
         await page.getByPlaceholder('••••••••').fill('wrongpassword123');
-        await page.getByRole('button', { name: 'Sign In' }).click();
+        await page.getByRole('button', { name: 'Sign In', exact: true }).click();
 
         // 4. Verify Lockout Message
         const lockoutLocator = page.locator('text=Too many failed attempts').or(page.locator('text=Too many attempts'));

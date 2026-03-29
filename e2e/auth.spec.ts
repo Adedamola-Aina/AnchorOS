@@ -167,8 +167,8 @@ test.describe('Login', () => {
         await page.getByText('Sign up').click();
         await expect(page.getByRole('button', { name: 'Create Account' })).toBeVisible();
 
-        await page.getByText('Sign in').click();
-        await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
+        await page.getByRole('button', { name: /already have an account/i }).click();
+        await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
     });
 });
 

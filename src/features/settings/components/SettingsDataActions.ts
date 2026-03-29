@@ -7,7 +7,8 @@
 
 import { captureError } from '../../../utils/error';
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../../config/firebase';
+import { functions, APP_ID } from '../../../config/firebase';
+import { getDocs, collection, writeBatch, doc, db } from '../../../utils/secureDb';
 
 import type { User } from 'firebase/auth';
 
@@ -18,8 +19,6 @@ const COLLECTIONS = ['accounts', 'finance', 'commitments', 'notifications', 'rec
 
 export async function handleWipeData(userId: string, showToast: ShowToast): Promise<void> {
     try {
-        const { getDocs, collection, writeBatch, doc } = await import('firebase/firestore');
-        const { db, APP_ID } = await import('../../../config/firebase');
         let totalOpCount = 0;
 
         const docsToDelete: { collection: string; id: string }[] = [];

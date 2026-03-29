@@ -2,10 +2,10 @@ import type { AnchorAccount, AnchorTask, AnchorTransaction, FabricMessage, Predi
 import { APP_ID } from '../../config/firebase';
 import { secureDb } from '../../utils/secureDb';
 import { db } from '../../config/firebase';
+import { collection, getDocs, query, where } from '../../utils/secureDb';
 
 async function loadRecurringRules(userId: string): Promise<RecurringTransaction[]> {
   try {
-    const { collection, getDocs, query, where } = await import('firebase/firestore');
     const recurringSnap = await getDocs(query(
       collection(db, 'artifacts', APP_ID, 'recurring_transactions'),
       where('userId', '==', userId),

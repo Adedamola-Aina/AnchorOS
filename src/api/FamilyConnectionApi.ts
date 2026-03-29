@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { collection, onSnapshot, query, where, type Unsubscribe } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, type Unsubscribe } from '../utils/secureDb';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db, APP_ID } from '../config/firebase';
 import type { FamilyConnection } from '../types';

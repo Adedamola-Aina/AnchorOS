@@ -27,6 +27,7 @@ const SRC_DIR = path.join(ROOT, 'src');
 // Files legitimately allowed to import firebase/firestore directly
 const LEGITIMATE_EXCEPTIONS = new Set([
     'src/utils/secureDb.ts',
+    'src/utils/secureDbCore.ts',
     'src/config/firebase.ts',
     'src/utils/activityLogger.ts',  // audit logging primitive — intentional
     'src/utils/seeder.ts',          // dev-only data seeder — not shipped to production
@@ -64,7 +65,7 @@ function extractFirestoreImports(content) {
         const names = namedMatch
             ? namedMatch[1]
                 .split(',')
-                .map((s) => s.trim().replace(/\s+as\s+\w+/, '').trim())
+                .map((s) => s.trim().replace(/^type\s+/, '').replace(/\s+as\s+\w+/, '').trim())
                 .filter(Boolean)
             : [];
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { collection, limit, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { collection, limit, onSnapshot, orderBy, query, where } from '../../utils/secureDb';
 import type { AnchorAccount, AnchorTask, AnchorTransaction, RecurringTransaction } from '../../types';
 import { db, APP_ID } from '../../config/firebase';
 import type { FabricService } from '../../services/fabric/FabricService';

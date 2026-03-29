@@ -5,6 +5,8 @@ import { useNotifications } from '../../../context/NotificationContext';
 import { downloadCsv } from '../../../utils/csvExport';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
+import { collection, getDocs, db } from '../../../utils/secureDb';
+import { APP_ID } from '../../../config/firebase';
 
 import type { UserProfile } from '../../../types';
 
@@ -22,8 +24,6 @@ export const DataManagement: React.FC<DataManagementProps> = ({
     const { showToast } = useNotifications();
 
     const fetchAllData = async () => {
-        const { getDocs, collection } = await import('firebase/firestore');
-        const { db, APP_ID } = await import('../../../config/firebase');
         const [accSnap, txSnap, tasksSnap] = await Promise.all([
             getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'accounts')),
             getDocs(collection(db, 'artifacts', APP_ID, 'users', userUid, 'finance')),

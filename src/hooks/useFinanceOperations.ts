@@ -1,13 +1,5 @@
-/**
- * useFinanceOperations Hook
- * 
- * Handles all finance CRUD operations (accounts and transactions)
- * with activity logging for shared accounts.
- * 
- * @module hooks/useFinanceOperations
- */
+/** useFinanceOperations: finance CRUD + activity logging. */
 // @ts-nocheck
-
 
 import { useCallback, useEffect, useMemo } from 'react';
 import type { User } from 'firebase/auth';
@@ -71,7 +63,6 @@ export const useFinanceOperations = (
         };
     }, [user, flushOfflineQueue]);
 
-    // Account operations
     const addAccount = useCallback(async (acc: CreateAccountPayload) => {
         if (!user) return;
         return financeTracer.trace('addAccount', async () => {
@@ -116,7 +107,6 @@ export const useFinanceOperations = (
         }
     }, [user, userName, accounts]);
 
-    // Transaction operations
     const addTransaction = useCallback(async (tx: CreateTransactionPayload) => {
         if (!user) return;
 

@@ -8,6 +8,8 @@
 import React from 'react';
 import { Button } from '@anchor-os/ui';
 import { useNotifications } from '../../../../context/NotificationContext';
+import { collection, query, where, getDocs, doc, writeBatch, db } from '../../../../utils/secureDb';
+import { APP_ID, auth } from '../../../../config/firebase';
 
 interface AutoAcceptActionProps {
     userUid: string;
@@ -18,9 +20,6 @@ export const AutoAcceptInvitationAction: React.FC<AutoAcceptActionProps> = ({ us
 
     const handleAutoAccept = async () => {
         try {
-            const { db, APP_ID, auth } = await import('../../../../config/firebase');
-            const { collection, query, where, getDocs, doc, writeBatch } = await import('firebase/firestore');
-
             const currentUserEmail = auth.currentUser?.email;
             if (!currentUserEmail) {
                 showToast('Not logged in', 'error');
