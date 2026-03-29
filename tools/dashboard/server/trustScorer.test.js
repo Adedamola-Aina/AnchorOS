@@ -12,7 +12,10 @@ describe('trustScorer', () => {
             parity: { stagingPending: 1 },
             fileHealth: { exceeding: 0 },
             events: { total: 15, hours: 24 },
-            coverage: { available: true, generatedAt: new Date().toISOString() }
+            coverage: { available: true, generatedAt: new Date().toISOString() },
+            secureDb: { violationCount: 0 },
+            commitQuality: { available: true, health: 'healthy', ticketRate: 96 },
+            functionsCoverage: { available: true, statements: 98 },
         });
 
         expect(result.status).toBe('high');
