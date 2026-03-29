@@ -28,7 +28,7 @@ export function getRpId(): string {
     const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
     if (projectId === 'anchor-os') return 'anchor-os.web.app';
     if (projectId === 'anchor-os-staging') return 'anchor-os-staging.web.app';
-    return 'localhost';
+    return 'anchor-os-dev-1c6ec.web.app';
 }
 
 // ── Pure helpers ─────────────────────────────────────────────────────────────

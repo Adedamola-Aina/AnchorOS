@@ -23,7 +23,7 @@ function getRpId(): string {
     const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
     if (projectId === 'anchor-os') return 'anchor-os.web.app';
     if (projectId === 'anchor-os-staging') return 'anchor-os-staging.web.app';
-    return 'localhost';
+    return 'anchor-os-dev-1c6ec.web.app';
 }
 
 function challengeRef(challengeId: string) {
@@ -143,6 +143,15 @@ export const completePasskeyRegistration = secureOnCall(async (request) => {
 
     // 4. Store the credential public key in Firestore
     const { credential: webauthnCred } = verification.registrationInfo;
+    const passkeysCol = db
+        .collection('artifacts').doc(APP_ID)
+        .collection('users').doc(uid)
+        .collection('passkeys');
+    const existing = await passkeysCol.limit(3).get();
+    if (existing.size >= 2) {
+        throw new HttpsError('failed-precondition', 'Maximum of 2 passkeys allowed');
+    }
+
     await credentialRef(uid, webauthnCred.id).set({
         credentialId: webauthnCred.id,
         publicKey: Buffer.from(webauthnCred.publicKey).toString('base64url'),
