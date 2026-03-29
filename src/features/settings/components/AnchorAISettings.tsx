@@ -3,8 +3,9 @@ import { Sparkles, Database } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@anchor-os/ui';
 import { ToggleSwitch } from '../../../components/shared';
 import { secureDb } from '../../../utils/secureDb';
-import type { FabricSettings, UserPattern } from '../../../types';
-
+import type { FabricSettings } from '../../../types';
+import { AnchorAIKnowledgePanel } from './AnchorAIKnowledgePanel';
+import { clearAllAnchorAIData, clearPatternKnowledge, loadPatternKnowledge } from './anchorAIKnowledgeUtils';
 type ToastType = 'success' | 'error' | 'info';
 
 interface AnchorAISettingsProps {
@@ -16,7 +17,6 @@ const DEFAULT_SETTINGS: FabricSettings = {
     enabled: false,
     dataCollectionEnabled: false,
 };
-
 export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
     userId,
     showToast,
@@ -89,23 +89,7 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
         setIsSaving(true);
         try {
             const now = new Date().toISOString();
-            await Promise.all([
-                secureDb.setDocument(userId, ['fabric_behavior', 'state'], {
-                    patterns: [],
-                    confirmedPatterns: [],
-                    recentActions: [],
-                    dismissedPatterns: [],
-                    updatedAt: now,
-                }),
-                secureDb.setDocument(userId, ['fabric_predictions', 'state'], {
-                    active: [],
-                    updatedAt: now,
-                }),
-                secureDb.setDocument(userId, ['fabric_settings', 'state'], {
-                    ...settings,
-                    lastCleared: now,
-                } as Record<string, unknown>),
-            ]);
+            await clearAllAnchorAIData(userId, now, settings.enabled);
 
             setSettings(prev => ({ ...prev, lastCleared: now }));
             showToast('Anchor AI data cleared.', 'success');
@@ -119,24 +103,9 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
     const loadKnowledge = useCallback(async () => {
         if (!userId) return;
         try {
-            const behavior = await secureDb.getDocument<{ confirmedPatterns?: UserPattern[]; patterns?: UserPattern[] }>(
-                userId,
-                ['fabric_behavior', 'state']
-            );
-            const confirmed = behavior?.confirmedPatterns ?? [];
-            const pending = behavior?.patterns ?? [];
-            const all = [...confirmed, ...pending];
-            const groups = new Set(
-                all.map((pattern) => {
-                    const triggerType = pattern.trigger?.type ?? 'unknown_trigger';
-                    const actionType = pattern.followUpAction?.type ?? 'unknown_action';
-                    const triggerCategory = 'category' in pattern.trigger ? pattern.trigger.category ?? '' : '';
-                    const actionCategory = 'category' in pattern.followUpAction ? pattern.followUpAction.category ?? '' : '';
-                    return `${triggerType}|${actionType}|${triggerCategory}|${actionCategory}`;
-                })
-            );
-            setPatternCount(all.length);
-            setPatternGroups(groups.size);
+            const summary = await loadPatternKnowledge(userId);
+            setPatternCount(summary.patternCount);
+            setPatternGroups(summary.patternGroups);
         } catch (error) {
             showToast(`Unable to load Anchor AI knowledge: ${(error as Error).message}`, 'error');
         }
@@ -147,13 +116,7 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
         setIsSaving(true);
         try {
             const now = new Date().toISOString();
-            await secureDb.setDocument(userId, ['fabric_behavior', 'state'], {
-                patterns: [],
-                confirmedPatterns: [],
-                recentActions: [],
-                dismissedPatterns: [],
-                updatedAt: now,
-            });
+            await clearPatternKnowledge(userId, now);
             setPatternCount(0);
             setPatternGroups(0);
             showToast('Learned Anchor AI patterns deleted.', 'success');
@@ -223,27 +186,13 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({
                     </Button>
                 </div>
                 {showKnowledge && (
-                    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 p-4 space-y-3">
-                        <p className="text-sm text-slate-700 dark:text-slate-200">
-                            Anchor AI uses your own account data to personalize insights:
-                            transactions, commitments, recurring items, app interactions, and optional mood check-ins.
-                        </p>
-                        <p className="text-sm text-slate-600 dark:text-slate-300">
-                            Learned patterns: <span className="font-semibold">{patternCount}</span> records across <span className="font-semibold">{patternGroups}</span> behavior groups.
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Privacy: your data stays in your account. We do not use your personal data to train public models.
-                        </p>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            className="min-h-11"
-                            onClick={clearLearnedPatterns}
-                            disabled={!userId || isSaving}
-                        >
-                            Delete Learned Patterns
-                        </Button>
-                    </div>
+                    <AnchorAIKnowledgePanel
+                        patternCount={patternCount}
+                        patternGroups={patternGroups}
+                        userId={userId}
+                        isSaving={isSaving}
+                        onClearLearnedPatterns={clearLearnedPatterns}
+                    />
                 )}
             </CardContent>
         </Card>

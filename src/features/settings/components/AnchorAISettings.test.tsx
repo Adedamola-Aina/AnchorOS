@@ -100,4 +100,25 @@ describe('AnchorAISettings', () => {
 
     expect(confirmSpy).toHaveBeenCalled();
   });
+
+  it('loads and shows inline Anchor AI knowledge panel', async () => {
+    getDocument
+      .mockResolvedValueOnce({
+        enabled: false,
+        dataCollectionEnabled: false,
+      })
+      .mockResolvedValueOnce({
+        confirmedPatterns: [{ id: 'p1', trigger: { type: 'app_opened' }, followUpAction: { type: 'view_page', page: 'finance' } }],
+        patterns: [{ id: 'p2', trigger: { type: 'app_opened' }, followUpAction: { type: 'view_page', page: 'finance' } }],
+      });
+
+    renderSettings();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'What Anchor AI Knows' }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Learned patterns:/i)).toBeInTheDocument();
+      expect(screen.getByText(/2/)).toBeInTheDocument();
+    });
+  });
 });
