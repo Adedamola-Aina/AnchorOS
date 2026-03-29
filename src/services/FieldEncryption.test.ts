@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { FieldEncryption } from './FieldEncryption';
+import { ENCRYPTED_ACCOUNT_FIELDS, ENCRYPTED_TRANSACTION_FIELDS, FieldEncryption } from './FieldEncryption';
 
 const KEY = 'test-encryption-key-32-chars-ok!';
 
@@ -53,5 +53,10 @@ describe('FieldEncryption', () => {
     it('isEnabled returns false when no key configured', () => {
         const enc = new FieldEncryption('');
         expect(enc.isEnabled()).toBe(false);
+    });
+
+    it('does not mark numeric finance fields for encryption by default', () => {
+        expect(ENCRYPTED_ACCOUNT_FIELDS).toEqual([]);
+        expect(ENCRYPTED_TRANSACTION_FIELDS).toEqual([]);
     });
 });

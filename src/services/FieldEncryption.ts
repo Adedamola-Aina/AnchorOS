@@ -20,11 +20,17 @@ const IV_BYTES = 12;
 const SALT = 'anchor-os-field-enc-v1'; // Stable application salt (not secret)
 const ITERATIONS = 100_000;
 
-/** Fields to encrypt on AnchorAccount documents */
-export const ENCRYPTED_ACCOUNT_FIELDS = ['balanceCents'] as const;
-
-/** Fields to encrypt on AnchorTransaction documents */
-export const ENCRYPTED_TRANSACTION_FIELDS = ['amountCents'] as const;
+/**
+ * Field-level encryption is currently disabled for numeric ledger fields.
+ * Reason: core operations rely on numeric Firestore semantics (range queries,
+ * orderBy/where filters, and increment transforms). Encrypting these values in
+ * the client breaks those guarantees and can corrupt financial flows.
+ *
+ * Keep the primitive available for future server-side/tokenization work, but do
+ * not apply it to live balance/amount fields in the current architecture.
+ */
+export const ENCRYPTED_ACCOUNT_FIELDS = [] as const;
+export const ENCRYPTED_TRANSACTION_FIELDS = [] as const;
 
 async function deriveKey(passphrase: string): Promise<CryptoKey> {
     const encoder = new TextEncoder();
