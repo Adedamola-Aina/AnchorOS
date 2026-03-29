@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { AccountRenameInput, AccountActionButtons } from './AccountHeaderParts';
+import { AccountRenameInput, AccountActionButtons, getAccountStyle } from './AccountHeaderParts';
 
 describe('AccountRenameInput', () => {
   const defaults = {
@@ -44,5 +44,17 @@ describe('AccountActionButtons', () => {
     render(<AccountActionButtons account={account} onAddTransaction={onAdd} />);
     fireEvent.click(screen.getByText('Record Transaction'));
     expect(onAdd).toHaveBeenCalled();
+  });
+});
+
+describe('getAccountStyle', () => {
+  it('returns slate gradient for USD', () => {
+    const style = getAccountStyle('USD');
+    expect(style.gradient).toContain('slate');
+  });
+
+  it('returns indigo gradient for NGN', () => {
+    const style = getAccountStyle('NGN');
+    expect(style.gradient).toContain('indigo');
   });
 });

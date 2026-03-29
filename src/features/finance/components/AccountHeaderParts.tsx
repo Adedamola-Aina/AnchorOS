@@ -91,3 +91,27 @@ export const AccountActionButtons: React.FC<ActionButtonsProps> = ({
         )}
     </div>
 );
+
+export interface AccountStyle {
+    gradient: string;
+    accent: string;
+    accentText: string;
+    glow: string;
+}
+
+export function getAccountStyle(currency: string): AccountStyle {
+    if (currency === 'USD') {
+        return {
+            gradient: 'from-slate-900 via-slate-800 to-slate-900',
+            accent: 'bg-finance-500',
+            accentText: 'text-finance-400',
+            glow: 'shadow-emerald-500/20',
+        };
+    }
+    return {
+        gradient: 'from-indigo-600 via-purple-600 to-pink-500',
+        accent: 'bg-white',
+        accentText: 'text-white',
+        glow: 'shadow-purple-500/30',
+    };
+}

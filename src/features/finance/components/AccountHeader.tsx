@@ -12,7 +12,7 @@ import { ArrowLeft, Trash2, Users, Pencil, Sparkles, Link2, RefreshCw } from 'lu
 import type { AnchorAccount } from '../../../types';
 import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
-import { AccountRenameInput, AccountActionButtons } from './AccountHeaderParts';
+import { AccountRenameInput, AccountActionButtons, getAccountStyle } from './AccountHeaderParts';
 
 interface MonthlyBalance {
     openingBalance?: number;
@@ -44,23 +44,6 @@ interface AccountHeaderProps {
     isSyncing?: boolean;
 }
 
-const getAccountStyle = (account: AnchorAccount) => {
-    if (account.currency === 'USD') {
-        return {
-            gradient: 'from-slate-900 via-slate-800 to-slate-900',
-            accent: 'bg-finance-500',
-            accentText: 'text-finance-400',
-            glow: 'shadow-emerald-500/20',
-        };
-    }
-    return {
-        gradient: 'from-indigo-600 via-purple-600 to-pink-500',
-        accent: 'bg-white',
-        accentText: 'text-white',
-        glow: 'shadow-purple-500/30',
-    };
-};
-
 export const AccountHeader = ({
     account, isOwner, familyMemberId,
     isEditingName, newName, isRenaming,
@@ -68,7 +51,7 @@ export const AccountHeader = ({
     onStartRename, onCancelRename, onConfirmRename, onNameChange,
     monthlyBalance, onExportCsv, onSyncNow, isSyncing,
 }: AccountHeaderProps) => {
-    const style = getAccountStyle(account);
+    const style = getAccountStyle(account.currency);
     const isShared = account.sharedWith && Object.keys(account.sharedWith).length > 0;
 
     return (
