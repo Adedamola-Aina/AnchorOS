@@ -1,7 +1,7 @@
 /** useFinanceOperations: finance CRUD + activity logging. */
 // @ts-nocheck
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { User } from 'firebase/auth';
 import type { AnchorTransaction, AnchorAccount, TransactionType } from '../types';
 import { financeService } from '../services/FinanceService';
@@ -12,7 +12,7 @@ import { canDeleteTransaction } from '../features/finance/utils/permissions';
 import { logTransactionAdded, logTransactionDeleted, logTransactionEdited } from './financeActivityLogging';
 import { createTracer } from '../services/telemetry';
 import { convertCurrencyAcrossAccounts, restoreSoftDeletedTransaction } from '../api/FinanceOperationsApi';
-import { enqueueTransaction, processQueueForUser } from '../utils/offlineQueue';
+import { useFinanceOfflineSync } from './useFinanceOfflineSync';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../config/firebase';
 
@@ -25,43 +25,7 @@ export const useFinanceOperations = (
     accounts: AnchorAccount[],
     transactions: AnchorTransaction[]
 ) => {
-    const flushOfflineQueue = useCallback(async () => {
-        if (!user || !navigator.onLine) return;
-
-        await processQueueForUser(user.uid, async (entry) => {
-            await withTimeout(financeService.addTransaction(user.uid, entry.payload, accounts), OPERATION_TIMEOUT, 'syncOfflineTransaction');
-            const account = accounts.find(a => a.id === entry.payload.accountId);
-            if (account) {
-                logTransactionAdded(user, userName, account, entry.payload);
-            }
-        });
-    }, [user, userName, accounts]);
-
-    useEffect(() => {
-        if (!user) return;
-
-        const handleOnline = () => {
-            void flushOfflineQueue();
-        };
-
-        const handleServiceWorkerMessage = (event: MessageEvent) => {
-            if (event.data?.type === 'PROCESS_OFFLINE_QUEUE') {
-                void flushOfflineQueue();
-            }
-        };
-
-        window.addEventListener('online', handleOnline);
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
-        }
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
-            }
-        };
-    }, [user, flushOfflineQueue]);
+    const { enqueueOffline } = useFinanceOfflineSync(user, userName, accounts);
 
     const addAccount = useCallback(async (acc: CreateAccountPayload) => {
         if (!user) return;
@@ -112,11 +76,7 @@ export const useFinanceOperations = (
 
         // ENG-002: Queue transaction offline, sync when connectivity returns
         if (!navigator.onLine) {
-            await enqueueTransaction(user.uid, tx);
-            if ('serviceWorker' in navigator && 'SyncManager' in window) {
-                const reg = await navigator.serviceWorker.ready;
-                await reg.sync.register('sync-transactions');
-            }
+            await enqueueOffline(tx);
             return;
         }
 
@@ -131,7 +91,7 @@ export const useFinanceOperations = (
                 throw handleError(err);
             }
         }, { attributes: { type: tx.type, category: tx.category } });
-    }, [user, userName, accounts]);
+    }, [user, userName, accounts, enqueueOffline]);
 
     const deleteTransaction = useCallback(async (id: string, accountId: string) => {
         if (!user) return;
