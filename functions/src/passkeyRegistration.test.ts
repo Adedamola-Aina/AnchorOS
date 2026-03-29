@@ -46,30 +46,32 @@ vi.mock('./config', () => ({
         collection: (col: string) => ({
             doc: (docId: string) => {
                 const path = `${col}/${docId}`;
-                return {
-                    get: () => mockState.docGet(path),
-                    set: (data: Record<string, unknown>, _opts?: unknown) => mockState.docSet(path, data),
-                    delete: () => mockState.docDelete(path),
-                    collection: (subCol: string) => ({
+                const buildCollection = (basePath: string, subCol: string) => {
+                    const collectionPath = `${basePath}/${subCol}`;
+                    return {
                         doc: (subDocId: string) => {
-                            const subPath = `${path}/${subCol}/${subDocId}`;
+                            const subPath = `${collectionPath}/${subDocId}`;
                             return {
                                 get: () => mockState.docGet(subPath),
                                 set: (data: Record<string, unknown>, _opts?: unknown) => mockState.docSet(subPath, data),
                                 delete: () => mockState.docDelete(subPath),
-                                collection: (subSubCol: string) => ({
-                                    doc: (subSubDocId: string) => {
-                                        const deepPath = `${subPath}/${subSubCol}/${subSubDocId}`;
-                                        return {
-                                            get: () => mockState.docGet(deepPath),
-                                            set: (data: Record<string, unknown>, _opts?: unknown) => mockState.docSet(deepPath, data),
-                                            delete: () => mockState.docDelete(deepPath),
-                                        };
-                                    },
-                                }),
+                                collection: (subSubCol: string) => buildCollection(subPath, subSubCol),
                             };
                         },
-                    }),
+                        limit: (_count: number) => ({
+                            get: async () => {
+                                const prefix = `${collectionPath}/`;
+                                const docs = Object.keys(mockState.docs).filter((docPath) => docPath.startsWith(prefix));
+                                return { size: docs.length };
+                            },
+                        }),
+                    };
+                };
+                return {
+                    get: () => mockState.docGet(path),
+                    set: (data: Record<string, unknown>, _opts?: unknown) => mockState.docSet(path, data),
+                    delete: () => mockState.docDelete(path),
+                    collection: (subCol: string) => buildCollection(path, subCol),
                 };
             },
         }),
