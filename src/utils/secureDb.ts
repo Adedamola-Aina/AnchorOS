@@ -10,11 +10,8 @@
 
 import {
     getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc,
-    writeBatch, runTransaction,
-    serverTimestamp, increment,
     query, type QueryConstraint,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
 import { withTimeout, logOp, getUserDocRef, getUserCollectionPath } from './secureDbCore';
 
 interface SecureDbOptions { timeoutMs?: number; }
