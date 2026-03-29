@@ -7,13 +7,28 @@
  * @module services/TransferOperations
  */
 
-import { collection, doc, increment, type WriteBatch, type Firestore } from 'firebase/firestore';
+import { collection, doc, increment, type WriteBatch, type Firestore } from '../utils/secureDb';
 import { APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import type { AnchorAccount } from '../types';
 import { canAddTransaction } from '../features/finance/utils/permissions';
 import type { CreateTransactionPayload } from './financeTypes';
 import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from './FieldEncryption';
+
+function buildAccountShareIndex(account: AnchorAccount): Record<string, true> {
+    const index: Record<string, true> = {};
+    if (account.shares) {
+        Object.keys(account.shares).forEach((uid) => {
+            index[uid] = true;
+        });
+    }
+    if (account.sharedWith) {
+        Object.keys(account.sharedWith).forEach((uid) => {
+            index[uid] = true;
+        });
+    }
+    return index;
+}
 
 /**
  * Handles transfer transaction creation between two accounts
@@ -51,6 +66,9 @@ export function processTransferTransaction(
 
     const destAmount = payload.destinationAmountCents ?? payload.amountCents;
 
+    const sourceAccountShares = buildAccountShareIndex(sourceAccount);
+    const destinationAccountShares = buildAccountShareIndex(destAccount);
+
     // Record 1: Source (expense - money leaving)
     batch.set(sourceTxRef, {
         ...payload,
@@ -66,7 +84,7 @@ export function processTransferTransaction(
         createdBy: userId,
         isSoftDeleted: false,
         accountOwnerId: sourceAccount.ownerId || userId,
-        accountShares: sourceAccount.shares || {},
+        accountShares: sourceAccountShares,
         linkId,
         linkedTransactionId: destTxRef.id,
         linkedUserId: destAccount.ownerId || userId
@@ -89,7 +107,7 @@ export function processTransferTransaction(
         createdBy: userId,
         isSoftDeleted: false,
         accountOwnerId: destAccount.ownerId || userId,
-        accountShares: destAccount.shares || {},
+        accountShares: destinationAccountShares,
         linkId,
         linkedTransactionId: sourceTxRef.id,
         linkedUserId: sourceAccount.ownerId || userId
@@ -139,7 +157,7 @@ export async function processStandardTransaction(
         createdBy: userId,
         isSoftDeleted: false,
         accountOwnerId: sourceAccount.ownerId || userId,
-        accountShares: sourceAccount.shares || {},
+        accountShares: buildAccountShareIndex(sourceAccount),
     });
 
     const accRef = doc(firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'accounts', sourceAccount.id);

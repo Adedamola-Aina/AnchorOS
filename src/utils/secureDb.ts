@@ -81,7 +81,7 @@ export const secureDb = {
 // ── Re-exports for files that need batch/transaction/raw ops ─────────────────
 // All production code must import Firestore primitives from HERE, not from 'firebase/firestore' directly.
 export { where, query, orderBy, limit, onSnapshot, writeBatch, runTransaction, serverTimestamp, increment } from 'firebase/firestore';
-export type { QueryConstraint, Unsubscribe, DocumentSnapshot, FieldValue } from 'firebase/firestore';
+export type { QueryConstraint, Unsubscribe, DocumentSnapshot, FieldValue, WriteBatch, Firestore } from 'firebase/firestore';
 export { withTimeout, mapSecureDbError, getUserDocRef, getUserCollectionPath } from './secureDbCore';
 export { db } from '../config/firebase';
 // addDoc / setDoc / updateDoc / deleteDoc / doc / collection — exported for batch/transaction callers

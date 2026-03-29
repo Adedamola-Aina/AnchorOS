@@ -716,7 +716,10 @@ describe('TransferOperations', () => {
             // Assert
             const txData = mockBatch.set.mock.calls[0][1];
             expect(txData.accountOwnerId).toBe(ownerId);
-            expect(txData.accountShares).toEqual(account.shares);
+            expect(txData.accountShares).toEqual({
+                'spouse-1': true,
+                'spouse-2': true,
+            });
         });
 
 
