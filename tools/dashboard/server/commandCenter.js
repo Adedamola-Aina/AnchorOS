@@ -15,6 +15,11 @@ const { getIntegrationStatus } = require('./integrationBridge');
 const { getEventStats, getRecentEvents } = require('./eventIngestion');
 const { getCoverageSummary } = require('./coverageReader');
 const { getHealthReport } = require('./fileHealthMonitor');
+const { scanSecureDbCompliance } = require('./secureDbScanner');
+const { getCommitQuality } = require('./commitQualityTracker');
+const { getBundleSizeReport } = require('./bundleSizeTracker');
+const { getE2EResults } = require('./e2eResultsReader');
+const { getFunctionsCoverageSummary } = require('./functionsCoverageReader');
 
 async function getCommandCenterData() {
     const now = new Date();
@@ -24,7 +29,8 @@ async function getCommandCenterData() {
         alerts, workSummary, environment, deployHistory,
         dependencies, timeline,
         anchorOSCommits, dashboardCommits, docsCommits, infraCommits,
-        coverageData, healthReport, trust, integrations, eventStats, recentEvents
+        coverageData, healthReport, trust, integrations, eventStats, recentEvents,
+        secureDbScan, commitQuality, bundleReport, e2eResults, funcCoverage
     ] = await Promise.all([
         getProactiveAlerts(),
         getWorkSummary(),
@@ -41,7 +47,12 @@ async function getCommandCenterData() {
         getTrustReport().catch(() => ({ score: 0, status: 'unknown', checks: [] })),
         Promise.resolve(getIntegrationStatus()),
         Promise.resolve(getEventStats(24)),
-        Promise.resolve(getRecentEvents({ limit: 10 }))
+        Promise.resolve(getRecentEvents({ limit: 10 })),
+        Promise.resolve(scanSecureDbCompliance()),
+        Promise.resolve(getCommitQuality(50)),
+        Promise.resolve(getBundleSizeReport()),
+        Promise.resolve(getE2EResults()),
+        Promise.resolve(getFunctionsCoverageSummary()),
     ]);
 
     let velocity = {};
@@ -103,6 +114,37 @@ async function getCommandCenterData() {
             topRiskFiles: (healthReport.fileHealth?.files || []).slice(0, 6)
         },
 
+        codeIntegrity: {
+            secureDb: {
+                compliant: secureDbScan.violationCount === 0,
+                violationCount: secureDbScan.violationCount || 0,
+                violations: (secureDbScan.violations || []).map(v => v.relPath),
+            },
+            commitQuality: {
+                ticketRate: commitQuality.ticketRate || 0,
+                health: commitQuality.health || 'unknown',
+                untracked: commitQuality.untracked || 0,
+                window: commitQuality.window || 0,
+            },
+            bundleSize: bundleReport.available ? {
+                totalKb: bundleReport.current.totalKb,
+                fileCount: bundleReport.current.fileCount,
+                trend: bundleReport.trend,
+            } : { available: false },
+            e2e: {
+                status: e2eResults.status || 'unknown',
+                summary: e2eResults.summary || {},
+                hasNewFailures: e2eResults.hasNewFailures || false,
+                newFailures: (e2eResults.newFailures || []).map(f => f.humanName),
+            },
+            functionsCoverage: {
+                available: funcCoverage.available || false,
+                statements: funcCoverage.statements || 0,
+                functions: funcCoverage.functions || 0,
+                passing: funcCoverage.passing || false,
+            },
+        },
+
         gitActivity: {
             last7Days: timeline.map(day => ({
                 date: day.date,
@@ -122,7 +164,16 @@ async function getCommandCenterData() {
             features: '/api/git/features', parity: '/api/parity', backlog: '/api/git/backlog',
             changelog: '/api/git/changelog', timeline: '/api/git/timeline', coverage: '/api/coverage',
             intelligence: { trust: '/api/intelligence/trust', events: '/api/intelligence/events', integrations: '/api/integrations/status' },
-            commitsByCategory: { anchorOS: '/api/git/commits/anchorOS', dashboard: '/api/git/commits/dashboard', docs: '/api/git/commits/docs', infra: '/api/git/commits/infra' }
+            commitsByCategory: { anchorOS: '/api/git/commits/anchorOS', dashboard: '/api/git/commits/dashboard', docs: '/api/git/commits/docs', infra: '/api/git/commits/infra' },
+            codeIntegrity: {
+                all: '/api/code-health',
+                secureDb: '/api/code-health/securedb',
+                quality: '/api/code-health/quality',
+                commits: '/api/code-health/commits',
+                bundle: '/api/code-health/bundle',
+                e2e: '/api/code-health/e2e',
+                functionsCoverage: '/api/code-health/functions-coverage',
+            }
         }
     };
 }

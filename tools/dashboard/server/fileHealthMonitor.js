@@ -20,6 +20,7 @@ const FILE_HEALTH_EXCLUDES = [
     './dist/*',
     './build/*',
     './coverage/*',
+    './functions/coverage/*',
     './playwright-report/*',
     './test-results/*',
     './tools/dashboard/*',

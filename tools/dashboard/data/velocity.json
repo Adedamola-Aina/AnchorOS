@@ -1,5 +1,101 @@
 {
-  "completions": [],
-  "weeklyStats": [],
+  "completions": [
+    {
+      "itemId": "ef2eec0",
+      "completedDate": "2026-03-17",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.007Z"
+    },
+    {
+      "itemId": "0c62bba",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.007Z"
+    },
+    {
+      "itemId": "1a4fe3f",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.008Z"
+    },
+    {
+      "itemId": "4f3a674",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.009Z"
+    },
+    {
+      "itemId": "dbadf19",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "cdfb54d",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "f805aa9",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "d9d2167",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "191c88a",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "09658e6",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "09a2085",
+      "completedDate": "2026-03-15",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "BUG-107",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "5ba26da",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "c819c89",
+      "completedDate": "2026-03-10",
+      "cycleTime": null,
+      "recordedAt": "2026-03-28T09:00:00.010Z"
+    }
+  ],
+  "weeklyStats": [
+    {
+      "week": "2026-W11",
+      "completed": 13,
+      "velocity": 13
+    },
+    {
+      "week": "2026-W12",
+      "completed": 1,
+      "velocity": 1
+    }
+  ],
   "_note": "Reset 2026-03-28. Previous data was bulk-hydrated at init and not real throughput. Rebuilds from git-deployed items going forward."
 }
