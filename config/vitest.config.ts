@@ -24,10 +24,12 @@ export default defineConfig({
     },
   },
   test: {
-    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '.stryker-tmp/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '.stryker-tmp/**', 'tools/**'],
     globals: true,
     environment: 'jsdom',
     setupFiles: path.resolve(rootDir, 'src/test/setup.ts'),
+    pool: 'forks',
+    forks: { maxForks: 2 },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'json-summary', 'html'],

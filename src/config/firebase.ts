@@ -27,7 +27,8 @@ export const app = initializeApp(firebaseConfig);
 const appCheckSiteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY as string | undefined;
 if (appCheckSiteKey && typeof window !== 'undefined' && window.location.protocol !== 'capacitor:') {
   const debugToken = import.meta.env.VITE_APP_CHECK_DEBUG_TOKEN as string | undefined;
-  if (import.meta.env.DEV && debugToken) {
+  // Allow debug token in dev and staging — never in production (VITE_APP_ENV=production)
+  if (debugToken && import.meta.env.VITE_APP_ENV !== 'production') {
     (window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN =
       debugToken === 'true' ? true : debugToken;
   }

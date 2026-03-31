@@ -130,6 +130,40 @@ describe('firebase config module', () => {
         expect(tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN).toBe(true);
     });
 
+    it('activates debug token in staging builds (DEV=false, APP_ENV=staging)', async () => {
+        setBaseEnv({
+            VITE_FIREBASE_APP_CHECK_SITE_KEY: 'site-key',
+            VITE_APP_CHECK_DEBUG_TOKEN: 'my-staging-token',
+            DEV: 'false',
+            VITE_APP_ENV: 'staging',
+        });
+
+        const tokenWindow = window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean };
+        delete tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN;
+
+        await import('./firebase');
+
+        expect(tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN).toBe('my-staging-token');
+        expect(mockState.initializeAppCheck).toHaveBeenCalled();
+    });
+
+    it('suppresses debug token in production builds', async () => {
+        setBaseEnv({
+            VITE_FIREBASE_APP_CHECK_SITE_KEY: 'site-key',
+            VITE_APP_CHECK_DEBUG_TOKEN: 'should-be-ignored',
+            DEV: 'false',
+            VITE_APP_ENV: 'production',
+        });
+
+        const tokenWindow = window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean };
+        delete tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN;
+
+        await import('./firebase');
+
+        expect(tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN).toBeUndefined();
+        expect(mockState.initializeAppCheck).toHaveBeenCalled();
+    });
+
     it('swallows App Check failures and falls back when messaging is unsupported', async () => {
         setBaseEnv({
             VITE_FIREBASE_APP_CHECK_SITE_KEY: 'site-key',
