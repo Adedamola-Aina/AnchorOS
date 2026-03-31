@@ -117,4 +117,13 @@ export async function reportUnrecognisedSignIn(eventId: string): Promise<void> {
     await reportFn({ eventId });
 }
 
+/**
+ * Permanently delete a specific auth event from the user's history.
+ * The Cloud Function hard-deletes the Firestore document — it won't reappear on reload.
+ */
+export async function dismissAuthEvent(eventId: string): Promise<void> {
+    const dismissFn = httpsCallable(functions, 'dismissAuthEvent');
+    await dismissFn({ eventId });
+}
+
 export { parseUserAgent };

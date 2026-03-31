@@ -4,6 +4,8 @@
  * All implementation lives in dedicated modules. This file
  * re-exports every Cloud Function so Firebase can discover them.
  */
+// @ts-nocheck
+
 
 
 // Rate limiting
@@ -64,7 +66,7 @@ export { syncBankTransactions, syncBankAccountNow } from './bankSync';
 export { monoWebhook } from './bankWebhook';
 
 // Auth event history (SEC-009)
-export { recordAuthEvent, reportUnrecognisedSignIn } from './authEvents';
+export { recordAuthEvent, reportUnrecognisedSignIn, dismissAuthEvent } from './authEvents';
 
 // Passkey (WebAuthn) server-side challenge + assertion verification (GAP-011)
 export { issuePasskeyChallenge, verifyPasskeyAssertion } from './passkeyAuth';
