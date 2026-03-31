@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.7-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.6...v1.15.7-rc.0) (2026-03-31)
+
 ## [1.15.6](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.5...v1.15.6) (2026-03-31)
 
 ## [1.15.5](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.4...v1.15.5) (2026-03-31)
