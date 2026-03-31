@@ -1,7 +1,7 @@
 {
   "name": "anchor-os",
   "private": true,
-  "version": "1.15.0-rc.0",
+  "version": "1.15.0-rc.1",
   "type": "module",
   "workspaces": [
     "packages/*"
