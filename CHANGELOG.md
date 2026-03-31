@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.5-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.4...v1.15.5-rc.0) (2026-03-31)
+
+
+### Bug Fixes
+
+* **appcheck:** allow App Check debug token in staging; fix test suite hang ([01ec80a](https://github.com/Adedamola-Aina/AnchorOS/commit/01ec80ab3a6c8604cc7ee597b72a155bab16f6a9))
+
 ## [1.15.4](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.3...v1.15.4) (2026-03-31)
 
 ## [1.15.3](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.2...v1.15.3) (2026-03-31)
