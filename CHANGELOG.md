@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.0-dev.3](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.14.3...v1.15.0-dev.3) (2026-03-31)
+
+
+### Features
+
+* **auth:** auth-001 auth-005 sec-004 social sign-in hook + exponential rate limiter ([7a55945](https://github.com/Adedamola-Aina/AnchorOS/commit/7a5594517f8be10c9dfff22984e33fa1b51de6d8))
+* **auth:** auth-002 sec-009 wire passkey ui into auth login + settings security screen ([5b62230](https://github.com/Adedamola-Aina/AnchorOS/commit/5b6223071b395e0ad70518ac3c6f67bb9b0f0404))
+* **auth:** complete passkey registration with server-side attestation verification ([eacb16f](https://github.com/Adedamola-Aina/AnchorOS/commit/eacb16f4f23ad872cfb7a6dfd76f45deb82974b2))
+* **auth:** GAP-011 server-side WebAuthn assertion verification ([225c1d5](https://github.com/Adedamola-Aina/AnchorOS/commit/225c1d5cd8c16471ad906a12b4b354857fbc6b01))
+* **ci:** ARCH-026 firestore rules coverage gate + dashboard detection fix ([f344695](https://github.com/Adedamola-Aina/AnchorOS/commit/f344695711ced0ce2bdc56969630d55f55cbb3fd))
+* **ci:** ARCH-026 firestore rules path coverage enforcement ([cedb38e](https://github.com/Adedamola-Aina/AnchorOS/commit/cedb38e7cfcc115b1fab3dfa7530f86d4e984783))
+* **dashboard:** add code health and delivery intelligence endpoints ([0e62b06](https://github.com/Adedamola-Aina/AnchorOS/commit/0e62b061b5cedd5ed6d2104f47113cf8e80ceba1))
+* **finance:** inn-002 subscription pattern detection card in finance view ([d2f5b88](https://github.com/Adedamola-Aina/AnchorOS/commit/d2f5b885873ff9e639ec6f1d29fa4e742effcb48))
+* **finance:** INN-002 subscription pattern detection wired into finance view ([15e934d](https://github.com/Adedamola-Aina/AnchorOS/commit/15e934dd0d36c926872d962fbb475184a71263aa))
+* **security:** arch-022 sec-009 firestore rules for auth events + ledger audit types ([c79f989](https://github.com/Adedamola-Aina/AnchorOS/commit/c79f989b18928e140541600493c0f9edb1eaa53c))
+* **security:** sec-005 field-level aes-gcm encryption on finance write/read paths ([0885098](https://github.com/Adedamola-Aina/AnchorOS/commit/0885098884d4399bc3ed187283f24562d5a2de9d))
+* **security:** sec-007 sre-003 auth event service, ledger, sentry pii scrubber, health endpoint ([1946c00](https://github.com/Adedamola-Aina/AnchorOS/commit/1946c008f148cf3338a57fc41d02be00fe0e4fb9))
+* **security:** sec-007 wire sentry pii scrubber into main, export cloud functions, update config ([0ce7a30](https://github.com/Adedamola-Aina/AnchorOS/commit/0ce7a30da221c3b7ee8b84b5e0265a9ae31eb7f6))
+* **types:** ENG-005 shared typescript types package ([9de8cbd](https://github.com/Adedamola-Aina/AnchorOS/commit/9de8cbdf5d0523cb2df308c6e3d5d9e3c74a2f3b))
+
+
+### Bug Fixes
+
+* **auth:** add popupRedirectResolver for Google/Apple sign-in + passkey delete ([9cc6a5e](https://github.com/Adedamola-Aina/AnchorOS/commit/9cc6a5eea9f2bfc3572503a621efd0d5d46180f5))
+* **auth:** allow all origins in dev CORS for callable functions ([093c5ca](https://github.com/Adedamola-Aina/AnchorOS/commit/093c5ca2f5fc54451b051b5124043f422c9ba564))
+* **auth:** auth-001 auth-005 arch-001 apple icon dark mode + split authcontext to 181 lines ([275ce43](https://github.com/Adedamola-Aina/AnchorOS/commit/275ce432dcaa17b0058536a42e232a9d9f0dd255))
+* **auth:** BUG-109 apple icon svg + passkey roaming authenticator support ([b677b08](https://github.com/Adedamola-Aina/AnchorOS/commit/b677b089648cc7dd0f8b14ac3ac2b1565e28523e))
+* **auth:** bump SW register version to bust stale cache (v1.15.0-rc.10) ([31a8013](https://github.com/Adedamola-Aina/AnchorOS/commit/31a8013a50b2cb6a662b10ebba984a2b65869a39))
+* **auth:** resolve typescript type errors in passkey test files ([c72913e](https://github.com/Adedamola-Aina/AnchorOS/commit/c72913efa66d5af45f882de773c182e3a0a9577a))
+* **auth:** use shared functions instance + fix SW cache version + env file naming ([e034e10](https://github.com/Adedamola-Aina/AnchorOS/commit/e034e10f95f2f46453d730feebfba323047863ed))
+* **build:** remove unused securedb imports causing ts build failure ([b0d66d4](https://github.com/Adedamola-Aina/AnchorOS/commit/b0d66d4fb4d016821c1240178c3bbe4d356ba32d))
+* **dashboard:** harden securedb scanner to avoid false negatives ([236d460](https://github.com/Adedamola-Aina/AnchorOS/commit/236d4601734129bc9e1de206faf22683aa9a62f7))
+* **dashboard:** normalize trust scorer inputs and update baseline test ([1b95c23](https://github.com/Adedamola-Aina/AnchorOS/commit/1b95c2375e36003756138099d122d05e8b4d430b))
+* **dashboard:** null-guard coverage input in trustScorer + fix tests ([d4a59ae](https://github.com/Adedamola-Aina/AnchorOS/commit/d4a59aedddb370734377979154ff658ae17b919c))
+* **fabric:** make persistence resilient to secureDb module mocks ([d3a3662](https://github.com/Adedamola-Aina/AnchorOS/commit/d3a366298aafa1eb64e714d40636756e3fcb5e8c))
+* **finance:** cast AnchorTransaction to Record for decryptFields TS compatibility ([9e89bd1](https://github.com/Adedamola-Aina/AnchorOS/commit/9e89bd148695d6ac9a660b1136a7b0c427b74e28))
+* **finance:** double-cast via unknown for AnchorTransaction decrypt ([7c636db](https://github.com/Adedamola-Aina/AnchorOS/commit/7c636db456ea24566a912e00163611e1425d456d))
+* **finance:** normalize account share index in transfer ops ([12530f9](https://github.com/Adedamola-Aina/AnchorOS/commit/12530f9f4a7ce36229ad9708144b036e091c1428))
+* **finance:** remove duplicate FieldEncryption import in TransferOperations ([ead0064](https://github.com/Adedamola-Aina/AnchorOS/commit/ead006496a0d99584eef91cfb402660258126efc))
+* **functions:** add predeploy build hook and fix TS errors in functions ([4b60674](https://github.com/Adedamola-Aina/AnchorOS/commit/4b60674aae4e5475cc43c278238a5af48d87f978))
+* **functions:** bug-121 align passkey rp id and enforce max keys ([2c7f344](https://github.com/Adedamola-Aina/AnchorOS/commit/2c7f344d07eb40f126c08662dad82fa8e32728e0))
+* **functions:** disable App Check enforcement on staging + force functions redeploy ([64ea36f](https://github.com/Adedamola-Aina/AnchorOS/commit/64ea36f6fd82d9c9ba7463cc3d50a801f0f82989))
+* **functions:** enforce appcheck defaults and sharing metadata ([20933ec](https://github.com/Adedamola-Aina/AnchorOS/commit/20933ec9353686ecb538862627a0a389fba02ec8))
+* **functions:** split passkeyAuth.ts per ARCH-001 (BUG-112) ([ae888d3](https://github.com/Adedamola-Aina/AnchorOS/commit/ae888d300c2e5652be7a58d1b99164071a847627))
+* **pwa:** wire offline queue sync through service worker and online events ([dd92a7e](https://github.com/Adedamola-Aina/AnchorOS/commit/dd92a7e82265d93d604db269a6f26e05aa0daba2))
+* **security:** bug-111 route firestore access through securedb ([0f2fa4a](https://github.com/Adedamola-Aina/AnchorOS/commit/0f2fa4ab7c2328279e94820fa172053067d9c099))
+* **security:** disable client-side encryption on numeric ledger fields ([be40cdc](https://github.com/Adedamola-Aina/AnchorOS/commit/be40cdcb8a3b9101c82c5eee4ed2f1e0e80fa917))
+* **security:** harden sharing rules and align permission tests ([0ecae46](https://github.com/Adedamola-Aina/AnchorOS/commit/0ecae46d9e6919b6ec74094a0ed5cd1986866a4d))
+* **security:** remove console.log from secureDbCore.ts (BUG-113) ([657f723](https://github.com/Adedamola-Aina/AnchorOS/commit/657f72355b06283f7a382f355a4bcf913fdcc145))
+* **security:** remove style-src-attr 'none' from CSP headers ([4eed7a0](https://github.com/Adedamola-Aina/AnchorOS/commit/4eed7a05fbf89207ba646182b7a0561ffbfec037))
+* **security:** resolve 12 typescript errors in passkey, encryption, subscription detector, audit ([6546cca](https://github.com/Adedamola-Aina/AnchorOS/commit/6546ccad7eac4779387611444a80bc1673ce4980))
+* **security:** route all firestore ops through secureDb.ts (BUG-111) ([d6541aa](https://github.com/Adedamola-Aina/AnchorOS/commit/d6541aa3fbfb278994b177f25d66a6d1bf7434a1))
+* **security:** switch App Check to ReCaptchaEnterpriseProvider + correct staging site key ([18c556e](https://github.com/Adedamola-Aina/AnchorOS/commit/18c556e9234768fc652b432d63d9bf86264ba34d))
+* **settings:** bug-122 split anchor ai knowledge panel helpers ([5c8b148](https://github.com/Adedamola-Aina/AnchorOS/commit/5c8b148e5a014747c69a769ee16dfce282c53876))
+* **settings:** sign-in list scroll, filter reported entries, passkey error display (BUG-123) ([6e2b9b2](https://github.com/Adedamola-Aina/AnchorOS/commit/6e2b9b26327e7bdcccecfd08922e7e91d3d704ea))
+* **ui:** bug-122 stabilize auth mobile passkeys and anchor-ai flows ([c636686](https://github.com/Adedamola-Aina/AnchorOS/commit/c6366864f65cfbe0d492dd54c910e98a71719a4b))
+* **ui:** correct month navigation and monthly badge rendering ([3956e86](https://github.com/Adedamola-Aina/AnchorOS/commit/3956e86f904f2d4c5c2e93f0fbb600d986644177))
+
 ## [1.15.0-dev.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.14.3...v1.15.0-dev.2) (2026-03-29)
 
 
