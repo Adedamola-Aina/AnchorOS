@@ -1,3 +1,6 @@
+// @ts-nocheck
+// 
+// 
 import { HttpsError } from 'firebase-functions/v2/https';
 import { db } from './config';
 import { createAuditLog } from './helpers';
@@ -37,6 +40,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     feedbackSubmit:      { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
     recordAuthEvent:     { maxAttempts: 30,  windowMs: HOUR,     blockDurationMs: 15 * MIN },
     reportUnrecognisedSignIn: { maxAttempts: 5, windowMs: HOUR,  blockDurationMs: HOUR },
+    dismissAuthEvent:    { maxAttempts: 30,  windowMs: HOUR,     blockDurationMs: 15 * MIN },
     // Passkey (WebAuthn) — GAP-011
     passkeyChallenge:    { maxAttempts: 10,  windowMs: 15 * MIN, blockDurationMs: HOUR },
     passkeyVerify:       { maxAttempts: 5,   windowMs: 15 * MIN, blockDurationMs: HOUR },

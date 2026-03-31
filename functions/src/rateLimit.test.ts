@@ -1,4 +1,7 @@
 // @ts-nocheck
+// 
+// 
+// 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockState = vi.hoisted(() => {
@@ -51,6 +54,10 @@ describe('rateLimit', () => {
     await expect(enforceRateLimit('unknown_action', 'user-1')).rejects.toMatchObject({
       code: 'invalid-argument',
     });
+  });
+
+  it('dismissAuthEvent is a recognised rate-limit action', () => {
+    expect(RATE_LIMITS['dismissAuthEvent']).toBeDefined();
   });
 
   it('blocks when existing blockedUntil is active', async () => {
