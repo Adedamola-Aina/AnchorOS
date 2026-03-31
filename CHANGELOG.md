@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.1...v1.15.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* **config:** exclude .stryker-tmp from vitest test discovery ([2ed8eb7](https://github.com/Adedamola-Aina/AnchorOS/commit/2ed8eb73e01d74c2a2425581160b840eec13edde))
+
 ## [1.15.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.0...v1.15.1) (2026-03-31)
 
 
