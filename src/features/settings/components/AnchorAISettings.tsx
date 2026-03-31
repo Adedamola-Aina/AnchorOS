@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Database } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@anchor-os/ui';
 import { ToggleSwitch } from '../../../components/shared';
 import { AnchorAIKnowledgePanel } from './AnchorAIKnowledgePanel';
@@ -17,7 +17,7 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({ userId, show
         settings, isLoading, isSaving,
         showKnowledge, setShowKnowledge,
         patternCount, patternGroups,
-        onToggle, clearData, loadKnowledge, clearLearnedPatterns,
+        onToggle, loadKnowledge, clearLearnedPatterns,
     } = useAnchorAISettings(userId, showToast);
 
     return (
@@ -53,10 +53,6 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({ userId, show
                 <div className="h-px bg-slate-100 dark:bg-slate-800" />
 
                 <div className="space-y-3">
-                    <Button variant="secondary" size="sm" className="min-h-11" onClick={clearData} disabled={!userId || isSaving}>
-                        <Database className="w-4 h-4 mr-2" />
-                        Clear Anchor AI Data
-                    </Button>
                     <Button
                         variant="ghost"
                         size="sm"

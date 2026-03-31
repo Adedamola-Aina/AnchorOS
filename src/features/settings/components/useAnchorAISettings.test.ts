@@ -20,7 +20,7 @@ vi.mock('./anchorAIKnowledgeUtils', () => ({
 }));
 
 import { secureDb } from '../../../utils/secureDb';
-import { loadPatternKnowledge, clearPatternKnowledge } from './anchorAIKnowledgeUtils';
+import { loadPatternKnowledge, clearAllAnchorAIData } from './anchorAIKnowledgeUtils';
 import { useAnchorAISettings } from './useAnchorAISettings';
 
 describe('useAnchorAISettings', () => {
@@ -80,13 +80,13 @@ describe('useAnchorAISettings', () => {
         expect(result.current.patternGroups).toBe(2);
     });
 
-    it('clearLearnedPatterns resets counts and calls clearPatternKnowledge', async () => {
+    it('clearLearnedPatterns resets counts and calls clearAllAnchorAIData', async () => {
         vi.mocked(loadPatternKnowledge).mockResolvedValue({ patternCount: 3, patternGroups: 1 });
         const { result } = renderHook(() => useAnchorAISettings(userId, showToast));
         await waitFor(() => expect(result.current.isLoading).toBe(false));
         await act(async () => { await result.current.loadKnowledge(); });
         await act(async () => { await result.current.clearLearnedPatterns(); });
-        expect(clearPatternKnowledge).toHaveBeenCalledWith(userId, expect.any(String));
+        expect(clearAllAnchorAIData).toHaveBeenCalledWith(userId, expect.any(String), false);
         expect(result.current.patternCount).toBe(0);
         expect(result.current.patternGroups).toBe(0);
     });

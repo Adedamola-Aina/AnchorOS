@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { secureDb } from '../../../utils/secureDb';
 import type { FabricSettings } from '../../../types';
-import { clearAllAnchorAIData, clearPatternKnowledge, loadPatternKnowledge } from './anchorAIKnowledgeUtils';
+import { clearAllAnchorAIData, loadPatternKnowledge } from './anchorAIKnowledgeUtils';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -56,20 +56,6 @@ export function useAnchorAISettings(userId: string | undefined, showToast: (msg:
         } finally { setIsSaving(false); }
     }, [isSaving, persistSettings, settings, showToast, userId]);
 
-    const clearData = useCallback(async () => {
-        if (!userId || isSaving) return;
-        if (!window.confirm('Clear all learned Anchor AI data and patterns?')) return;
-        setIsSaving(true);
-        try {
-            const now = new Date().toISOString();
-            await clearAllAnchorAIData(userId, now, settings.enabled);
-            setSettings(prev => ({ ...prev, lastCleared: now }));
-            showToast('Anchor AI data cleared.', 'success');
-        } catch (error) {
-            showToast(`Unable to clear Anchor AI data: ${(error as Error).message}`, 'error');
-        } finally { setIsSaving(false); }
-    }, [isSaving, settings, showToast, userId]);
-
     const loadKnowledge = useCallback(async () => {
         if (!userId) return;
         try {
@@ -86,19 +72,19 @@ export function useAnchorAISettings(userId: string | undefined, showToast: (msg:
         setIsSaving(true);
         try {
             const now = new Date().toISOString();
-            await clearPatternKnowledge(userId, now);
+            await clearAllAnchorAIData(userId, now, settings.enabled);
             setPatternCount(0);
             setPatternGroups(0);
             showToast('Learned Anchor AI patterns deleted.', 'success');
         } catch (error) {
             showToast(`Unable to delete learned patterns: ${(error as Error).message}`, 'error');
         } finally { setIsSaving(false); }
-    }, [isSaving, showToast, userId]);
+    }, [isSaving, settings.enabled, showToast, userId]);
 
     return {
         settings, isLoading, isSaving,
         showKnowledge, setShowKnowledge,
         patternCount, patternGroups,
-        onToggle, clearData, loadKnowledge, clearLearnedPatterns,
+        onToggle, loadKnowledge, clearLearnedPatterns,
     };
 }

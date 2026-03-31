@@ -78,27 +78,10 @@ describe('AnchorAISettings', () => {
     });
   });
 
-  it('clears fabric behavior data when requested', async () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-
+  it('does not render the Clear Anchor AI Data button', async () => {
     renderSettings();
-
-    fireEvent.click(await screen.findByRole('button', { name: 'Clear Anchor AI Data' }));
-
-    await waitFor(() => {
-      expect(setDocument).toHaveBeenCalledWith(
-        'user-1',
-        ['fabric_behavior', 'state'],
-        expect.objectContaining({
-          patterns: [],
-          confirmedPatterns: [],
-          recentActions: [],
-          dismissedPatterns: [],
-        })
-      );
-    });
-
-    expect(confirmSpy).toHaveBeenCalled();
+    await screen.findByText('Anchor AI');
+    expect(screen.queryByRole('button', { name: /clear anchor ai data/i })).not.toBeInTheDocument();
   });
 
   it('loads and shows inline Anchor AI knowledge panel', async () => {

@@ -10,8 +10,16 @@ vi.mock('../../hooks/useKeyboardAvoidance', () => ({
 vi.mock('../../context/AuthContext', () => ({
     useAuth: () => ({ signInWithGoogle: vi.fn(), signInWithApple: vi.fn() }),
 }));
+const mockPasskeyAuth = {
+    isSupported: false,
+    authenticateWithPasskey: vi.fn(),
+    loading: false,
+    error: null as string | null,
+    clearError: vi.fn(),
+};
+
 vi.mock('./usePasskeyAuth', () => ({
-    usePasskeyAuth: () => ({ isSupported: false, authenticateWithPasskey: vi.fn(), loading: false, error: null, clearError: vi.fn() }),
+    usePasskeyAuth: () => mockPasskeyAuth,
 }));
 vi.mock('./SocialSignInButtons', () => ({
     SocialSignInButtons: () => <div data-testid="social-sign-in-buttons" />,
@@ -34,6 +42,9 @@ describe('AuthView', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        mockPasskeyAuth.isSupported = false;
+        mockPasskeyAuth.error = null;
+        mockPasskeyAuth.loading = false;
     });
 
     it('renders login view correctly', () => {
@@ -122,6 +133,13 @@ describe('AuthView', () => {
         const signUpLink = screen.getByText('Sign up');
         fireEvent.click(signUpLink);
         expect(defaultProps.setAuthMode).toHaveBeenCalledWith('signup');
+    });
+
+    it('shows passkey error when passkey authentication fails', () => {
+        mockPasskeyAuth.isSupported = true;
+        mockPasskeyAuth.error = 'Passkey authentication failed';
+        render(<AuthView {...defaultProps} />);
+        expect(screen.getByText('Passkey authentication failed')).toBeInTheDocument();
     });
 
     it('does not mutate email value during render', () => {

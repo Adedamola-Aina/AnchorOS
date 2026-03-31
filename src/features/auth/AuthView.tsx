@@ -51,7 +51,7 @@ const AuthView: React.FC<AuthViewProps> = ({
     useKeyboardAvoidance();
 
     const { signInWithGoogle, signInWithApple } = useAuth();
-    const { isSupported: passkeySupported, authenticateWithPasskey, loading: passkeyLoading } = usePasskeyAuth();
+    const { isSupported: passkeySupported, authenticateWithPasskey, loading: passkeyLoading, error } = usePasskeyAuth();
     const [socialLoading, setSocialLoading] = useState(false);
     const [socialError, setSocialError] = useState<string | null>(null);
 
@@ -137,16 +137,21 @@ const AuthView: React.FC<AuthViewProps> = ({
 
                     {/* Passkey sign-in — login only, platform support required */}
                     {authMode === 'login' && passkeySupported && (
-                        <button
-                            type="button"
-                            disabled={passkeyLoading}
-                            onClick={() => authenticateWithPasskey()}
-                            className="w-full min-h-[44px] mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label="Sign in with passkey"
-                        >
-                            <Fingerprint className="w-4 h-4" />
-                            Sign in with passkey
-                        </button>
+                        <div className="space-y-1">
+                            <button
+                                type="button"
+                                disabled={passkeyLoading}
+                                onClick={() => authenticateWithPasskey()}
+                                className="w-full min-h-[44px] mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-label="Sign in with passkey"
+                            >
+                                <Fingerprint className="w-4 h-4" />
+                                {passkeyLoading ? 'Verifying…' : 'Sign in with passkey'}
+                            </button>
+                            {error && (
+                                <p className="text-xs text-red-500 text-center animate-in fade-in">{error}</p>
+                            )}
+                        </div>
                     )}
 
                     {/* Footer Links */}

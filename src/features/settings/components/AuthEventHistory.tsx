@@ -44,7 +44,7 @@ export const AuthEventHistory: React.FC = () => {
         try {
             setLoading(true);
             const data = await getAuthEvents(user.uid);
-            setEvents(data);
+            setEvents(data.filter(e => !e.reported));
         } catch (err) {
             captureError(err, 'AuthEventHistory.load');
         } finally {
@@ -67,6 +67,7 @@ export const AuthEventHistory: React.FC = () => {
         try {
             setReporting(event.id);
             await reportUnrecognisedSignIn(event.id);
+            setEvents(prev => prev.filter(e => e.id !== event.id));
             showToast('All sessions have been signed out. Please sign in again.', 'info');
             await logout();
         } catch (err) {
@@ -104,7 +105,7 @@ export const AuthEventHistory: React.FC = () => {
                     <p className="text-sm text-slate-400 text-center py-4">No recent sign-ins recorded.</p>
                 )}
                 {!loading && events.length > 0 && (
-                    <ul className="space-y-3">
+                    <ul className="space-y-3 max-h-72 overflow-y-auto pr-1">
                         {events.map((event, idx) => (
                             <li
                                 key={event.id ?? idx}
@@ -133,15 +134,12 @@ export const AuthEventHistory: React.FC = () => {
                                         <span className="ml-1.5 text-xs font-medium hidden sm:inline">Remove device</span>
                                     </Button>
                                 )}
-                                {event.reported && (
-                                    <span className="text-xs text-rose-500 font-medium shrink-0">Reported</span>
-                                )}
                             </li>
                         ))}
                     </ul>
                 )}
                 <p className="text-xs text-slate-400 mt-4 text-center">
-                    Showing last 10 sign-ins. Tap "Not me" for unrecognised activity.
+                    Last 10 sign-ins. Tap <AlertTriangle className="w-3 h-3 inline" /> for unrecognised activity.
                 </p>
             </CardContent>
         </Card>
