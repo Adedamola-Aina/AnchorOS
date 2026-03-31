@@ -8,11 +8,19 @@ import { DangerZone } from './DangerZone';
 const mockConfirm = vi.fn();
 const mockShowToast = vi.fn();
 const mockReauthenticate = vi.fn();
+const mockReauthenticateWithProvider = vi.fn();
 vi.mock('../../../context/NotificationContext', () => ({
   useNotifications: () => ({ confirm: mockConfirm, showToast: mockShowToast }),
 }));
+
+const mockUseAuth = {
+  reauthenticate: mockReauthenticate,
+  reauthenticateWithProvider: mockReauthenticateWithProvider,
+  profile: { name: 'User' },
+  user: { providerData: [{ providerId: 'password' }] },
+};
 vi.mock('../../../context/AuthContext', () => ({
-  useAuth: () => ({ reauthenticate: mockReauthenticate }),
+  useAuth: () => mockUseAuth,
 }));
 
 vi.mock('../../../utils/error', () => ({
@@ -26,6 +34,9 @@ describe('DangerZone', () => {
     vi.clearAllMocks();
     mockConfirm.mockResolvedValue(true);
     mockReauthenticate.mockResolvedValue(undefined);
+    mockReauthenticateWithProvider.mockResolvedValue(undefined);
+    mockUseAuth.user = { providerData: [{ providerId: 'password' }] };
+    mockUseAuth.profile = { name: 'User' };
   });
 
   it('renders delete account button', () => {
@@ -57,6 +68,22 @@ describe('DangerZone', () => {
     fireEvent.click(screen.getByRole('button', { name: /delete.*account/i }));
     await waitFor(() => expect(mockConfirm).toHaveBeenCalled());
     expect(screen.queryByPlaceholderText(/password/i)).not.toBeInTheDocument();
+  });
+
+  it('shows social verify step for Google users and calls reauthenticateWithProvider', async () => {
+    mockUseAuth.user = { providerData: [{ providerId: 'google.com' }] };
+    render(<DangerZone onDeleteAccount={mockDelete} />);
+    fireEvent.click(screen.getByRole('button', { name: /delete.*account/i }));
+    await waitFor(() => screen.getByPlaceholderText('User'));
+    fireEvent.change(screen.getByPlaceholderText('User'), { target: { value: 'User' } });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    await waitFor(() => expect(screen.getByText(/Verify.*Google/i)).toBeInTheDocument());
+    expect(screen.queryByPlaceholderText(/password/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /verify.*google.*delete/i }));
+    await waitFor(() => {
+      expect(mockReauthenticateWithProvider).toHaveBeenCalled();
+      expect(mockDelete).toHaveBeenCalled();
+    });
   });
 
   it('calls onDeleteAccount after password re-auth', async () => {

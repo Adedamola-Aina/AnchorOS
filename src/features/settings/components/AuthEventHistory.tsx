@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Monitor, Smartphone, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Monitor, Smartphone, AlertTriangle, RefreshCw, X } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
@@ -54,11 +54,15 @@ export const AuthEventHistory: React.FC = () => {
 
     useEffect(() => { void loadEvents(); }, [loadEvents]);
 
-    const handleNotMe = async (event: AuthEvent) => {
+    const handleDismiss = (event: AuthEvent) => {
+        setEvents(prev => prev.filter(e => e.id !== event.id));
+    };
+
+    const handleSignOutAll = async (event: AuthEvent) => {
         if (!event.id) return;
         const confirmed = await confirm({
-            title: 'Not You?',
-            message: 'This will immediately sign out ALL active sessions on every device. You will need to sign in again.',
+            title: 'Sign out all sessions?',
+            message: 'This will immediately sign out ALL active sessions on every device, including this one. You will need to sign in again.',
             type: 'danger',
             confirmText: 'Sign out all sessions',
             cancelText: 'Cancel',
@@ -122,24 +126,35 @@ export const AuthEventHistory: React.FC = () => {
                                     </p>
                                 </div>
                                 {idx > 0 && !event.reported && (
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="shrink-0 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 min-h-[44px] px-3"
-                                        onClick={() => handleNotMe(event)}
-                                        isLoading={reporting === event.id}
-                                        title="Remove this device and revoke sessions"
-                                    >
-                                        <AlertTriangle className="w-4 h-4" />
-                                        <span className="ml-1.5 text-xs font-medium hidden sm:inline">Remove device</span>
-                                    </Button>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[44px] px-2"
+                                            onClick={() => handleDismiss(event)}
+                                            title="Dismiss from list"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 min-h-[44px] px-3"
+                                            onClick={() => handleSignOutAll(event)}
+                                            isLoading={reporting === event.id}
+                                            title="Not you? Sign out all sessions"
+                                        >
+                                            <AlertTriangle className="w-4 h-4" />
+                                            <span className="ml-1.5 text-xs font-medium hidden sm:inline">Sign out all</span>
+                                        </Button>
+                                    </div>
                                 )}
                             </li>
                         ))}
                     </ul>
                 )}
                 <p className="text-xs text-slate-400 mt-4 text-center">
-                    Last 10 sign-ins. Tap <AlertTriangle className="w-3 h-3 inline" /> for unrecognised activity.
+                    Last 10 sign-ins. <X className="w-3 h-3 inline" /> dismisses from list · <AlertTriangle className="w-3 h-3 inline" /> signs out all sessions.
                 </p>
             </CardContent>
         </Card>

@@ -4,6 +4,10 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import { ProfileSettings } from './ProfileSettings';
 
+vi.mock('../../../context/AuthContext', () => ({
+    useAuth: () => ({ user: { providerData: [{ providerId: 'password' }] } }),
+}));
+
 describe('ProfileSettings', () => {
   beforeEach(() => { vi.useFakeTimers(); });
   afterEach(() => { vi.useRealTimers(); });
@@ -29,5 +33,10 @@ describe('ProfileSettings', () => {
     render(<ProfileSettings name="Alice" uid="u-1" onUpdateName={onUpdate} />);
     act(() => { vi.advanceTimersByTime(1000); });
     expect(onUpdate).not.toHaveBeenCalled();
+  });
+
+  it('shows Email & Password badge for password provider', () => {
+    render(<ProfileSettings name="Alice" uid="u-1" onUpdateName={vi.fn()} />);
+    expect(screen.getByText(/Email.*Password/i)).toBeInTheDocument();
   });
 });

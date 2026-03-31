@@ -13,11 +13,15 @@ interface DangerZoneProps {
 
 export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
     const { confirm, showToast } = useNotifications();
-    const { reauthenticate, profile } = useAuth();
+    const { reauthenticate, reauthenticateWithProvider, profile, user } = useAuth();
     const [password, setPassword] = useState('');
     const [nameConfirm, setNameConfirm] = useState('');
-    const [step, setStep] = useState<'idle' | 'name' | 'password'>('idle');
+    const [step, setStep] = useState<'idle' | 'name' | 'password' | 'social'>('idle');
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const providerId = user?.providerData?.[0]?.providerId ?? 'password';
+    const isSocialUser = providerId === 'google.com' || providerId === 'apple.com';
+    const providerLabel = providerId === 'google.com' ? 'Google' : providerId === 'apple.com' ? 'Apple' : '';
 
     const displayName = profile?.name || 'User';
     const nameMatches = nameConfirm.trim().toLowerCase() === displayName.trim().toLowerCase();
@@ -35,7 +39,7 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
 
     const handleNameConfirmed = () => {
         if (!nameMatches) { showToast('Name does not match.', 'error'); return; }
-        setStep('password');
+        setStep(isSocialUser ? 'social' : 'password');
     };
 
     const resetFlow = () => { setStep('idle'); setPassword(''); setNameConfirm(''); };
@@ -50,6 +54,21 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
             captureError(err, 'DangerZone.deleteAccount');
             const msg = err instanceof Error ? err.message : String(err);
             showToast(msg.includes('wrong-password') ? 'Incorrect password.' : 'Error: ' + msg, 'error');
+        } finally {
+            setIsDeleting(false);
+            resetFlow();
+        }
+    };
+
+    const handleSocialDelete = async () => {
+        setIsDeleting(true);
+        try {
+            await reauthenticateWithProvider();
+            await onDeleteAccount();
+        } catch (err: unknown) {
+            captureError(err, 'DangerZone.socialDelete');
+            const msg = err instanceof Error ? err.message : String(err);
+            showToast(msg.includes('popup-closed') ? 'Sign-in cancelled.' : 'Error: ' + msg, 'error');
         } finally {
             setIsDeleting(false);
             resetFlow();
@@ -112,6 +131,20 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
                             <Button variant="secondary" size="sm" onClick={resetFlow}>Cancel</Button>
                             <Button variant="primary" size="sm" isLoading={isDeleting} onClick={handleConfirmDelete}
                                 className="bg-rose-500 hover:bg-rose-600">Confirm Deletion</Button>
+                        </div>
+                    </div>
+                )}
+
+                {step === 'social' && (
+                    <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800 animate-in slide-in-from-top-2 duration-300">
+                        <p className="text-sm font-bold text-rose-900 dark:text-rose-300 mb-1">Verify your identity to proceed</p>
+                        <p className="text-xs text-rose-700 dark:text-rose-400 mb-4">
+                            Your account uses {providerLabel} sign-in. You'll be prompted to confirm your identity in a popup.
+                        </p>
+                        <div className="flex gap-2">
+                            <Button variant="secondary" size="sm" onClick={resetFlow}>Cancel</Button>
+                            <Button variant="primary" size="sm" isLoading={isDeleting} onClick={handleSocialDelete}
+                                className="bg-rose-500 hover:bg-rose-600">Verify with {providerLabel} &amp; Delete</Button>
                         </div>
                     </div>
                 )}

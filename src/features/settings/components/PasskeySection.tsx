@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Fingerprint, CheckCircle, Trash2 } from 'lucide-react';
+import { Fingerprint, Trash2 } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
 import { usePasskeyAuth } from '../../auth/usePasskeyAuth';
@@ -30,16 +30,33 @@ export const PasskeySection: React.FC = () => {
     const [passkeys, setPasskeys] = useState<PasskeyCredential[]>([]);
     const [removingId, setRemovingId] = useState<string | null>(null);
 
-    const toTimestampLabel = (value: unknown): string => {
-        if (!value) return 'Unknown time';
-        if (typeof value === 'string') return new Date(value).toLocaleString();
+    const toDate = (value: unknown): Date | null => {
+        if (!value) return null;
+        if (typeof value === 'string' || typeof value === 'number') return new Date(value);
         if (value && typeof value === 'object' && 'toDate' in value && typeof (value as { toDate?: () => Date }).toDate === 'function') {
-            return (value as { toDate: () => Date }).toDate().toLocaleString();
+            return (value as { toDate: () => Date }).toDate();
         }
         if (value && typeof value === 'object' && 'seconds' in value && typeof (value as { seconds?: number }).seconds === 'number') {
-            return new Date((value as { seconds: number }).seconds * 1000).toLocaleString();
+            return new Date((value as { seconds: number }).seconds * 1000);
         }
-        return 'Unknown time';
+        return null;
+    };
+
+    const toRelativeLabel = (value: unknown): string => {
+        const d = toDate(value);
+        if (!d) return 'Unknown';
+        const diffMs = Date.now() - d.getTime();
+        const diffDays = Math.floor(diffMs / 86400000);
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 30) return `${diffDays} days ago`;
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined });
+    };
+
+    const toAddedLabel = (value: unknown): string => {
+        const d = toDate(value);
+        if (!d) return 'Unknown';
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined });
     };
 
     const loadPasskeys = useCallback(async () => {
@@ -125,22 +142,26 @@ export const PasskeySection: React.FC = () => {
                 </p>
             ) : (
                 passkeys.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 px-3 py-2">
-                        <div className="min-w-0">
-                            <p className="text-sm text-slate-800 dark:text-slate-200 font-medium flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                                Passkey ending {item.credentialId.slice(-6)}
-                            </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Added {toTimestampLabel(item.createdAt)}
-                                {item.lastUsed ? ` · Last used ${toTimestampLabel(item.lastUsed)}` : ''}
-                            </p>
+                    <div key={item.id} className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 px-3 py-2.5">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="p-1.5 bg-emerald-500/10 rounded-lg shrink-0">
+                                <Fingerprint className="w-4 h-4 text-emerald-500" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-sm text-slate-800 dark:text-slate-200 font-medium">
+                                    Passkey ···{item.credentialId.slice(-4)}
+                                </p>
+                                <p className="text-xs text-slate-400 mt-0.5">
+                                    Added {toAddedLabel(item.createdAt)}
+                                    {item.lastUsed ? ` · Used ${toRelativeLabel(item.lastUsed)}` : ''}
+                                </p>
+                            </div>
                         </div>
                         <Button
                             variant="secondary"
                             isLoading={removingId === item.credentialId}
                             onClick={() => handleRemove(item.credentialId)}
-                            className="gap-1.5 text-red-600 dark:text-red-400 min-h-[44px] px-3"
+                            className="gap-1.5 text-red-600 dark:text-red-400 min-h-[44px] px-3 shrink-0"
                         >
                             <Trash2 className="w-3.5 h-3.5" />
                             Remove

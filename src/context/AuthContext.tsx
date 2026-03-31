@@ -46,6 +46,7 @@ interface AuthContextType {
     enrollMfa: (code: string) => Promise<void>;
     unenrollMfa: () => Promise<void>;
     reauthenticate: (password: string) => Promise<void>;
+    reauthenticateWithProvider: () => Promise<void>;
     sendPasswordReset: (email: string) => Promise<void>;
 }
 
@@ -167,7 +168,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider value={{
             user, profile, loading, profileLoaded, updateProfile, signIn, signUp, signInWithGoogle, signInWithApple, logout, sendVerificationEmail, accountNotifications,
             verifyMfa: mfaOps.verifyMfa, generateMfaSecret: mfaOps.generateMfaSecret, enrollMfa: mfaOps.enrollMfa,
-            unenrollMfa: mfaOps.unenrollMfa, reauthenticate: mfaOps.reauthenticate, sendPasswordReset
+            unenrollMfa: mfaOps.unenrollMfa, reauthenticate: mfaOps.reauthenticate,
+            reauthenticateWithProvider: mfaOps.reauthenticateWithProvider, sendPasswordReset
         }}>
             {children}
         </AuthContext.Provider>

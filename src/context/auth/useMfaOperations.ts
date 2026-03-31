@@ -114,6 +114,19 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
         await reauthenticateWithCredential(user, credential);
     }, [user]);
 
+    const reauthenticateWithProvider = useCallback(async () => {
+        if (!user) throw new Error('Not logged in');
+        const providerId = user.providerData?.[0]?.providerId;
+        const { reauthenticateWithPopup, GoogleAuthProvider, OAuthProvider } = await import('firebase/auth');
+        if (providerId === 'google.com') {
+            await reauthenticateWithPopup(user, new GoogleAuthProvider());
+        } else if (providerId === 'apple.com') {
+            await reauthenticateWithPopup(user, new OAuthProvider('apple.com'));
+        } else {
+            throw new Error('Use password re-authentication for this account.');
+        }
+    }, [user]);
+
     const clearPendingSecret = useCallback(() => {
         pendingMfaSecretRef.current = null;
     }, []);
@@ -124,6 +137,7 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
         enrollMfa,
         unenrollMfa,
         reauthenticate,
+        reauthenticateWithProvider,
         clearPendingSecret
-    }), [verifyMfa, generateMfaSecret, enrollMfa, unenrollMfa, reauthenticate, clearPendingSecret]);
+    }), [verifyMfa, generateMfaSecret, enrollMfa, unenrollMfa, reauthenticate, reauthenticateWithProvider, clearPendingSecret]);
 }
