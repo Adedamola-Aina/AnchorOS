@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Mail, Chrome } from 'lucide-react';
+import { User, Mail, Globe } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -16,7 +16,7 @@ function SignInMethodBadge({ providerId }: { providerId: string }) {
     if (providerId === 'google.com') {
         return (
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
-                <Chrome className="w-3 h-3" />
+                <Globe className="w-3 h-3" />
                 Signed in with Google
             </span>
         );

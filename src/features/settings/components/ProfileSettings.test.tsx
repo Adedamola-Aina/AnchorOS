@@ -8,6 +8,8 @@ vi.mock('../../../context/AuthContext', () => ({
     useAuth: () => ({ user: { providerData: [{ providerId: 'password' }] } }),
 }));
 
+// Google provider uses Globe icon (Chrome not available in this lucide-react version)
+
 describe('ProfileSettings', () => {
   beforeEach(() => { vi.useFakeTimers(); });
   afterEach(() => { vi.useRealTimers(); });
