@@ -51,6 +51,7 @@ export default {
   concurrency: 2,
   timeoutMS: 120000,
   timeoutFactor: 2.5,
+  dryRunTimeoutMinutes: 10,
   
   // Incremental mode — only re-mutates files changed since last run
   incremental: true,
