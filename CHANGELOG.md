@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.1-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.0...v1.15.1-rc.0) (2026-03-31)
+
+
+### Bug Fixes
+
+* **settings:** persistent auth event dismissal via dismissAuthEvent CF (BUG-125) ([25edcf1](https://github.com/Adedamola-Aina/AnchorOS/commit/25edcf1f34c806b09bc2a8c5402e22c743627c2f))
+
 ## [1.15.1-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.0...v1.15.1-dev.0) (2026-03-31)
 
 
