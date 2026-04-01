@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.7-rc.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.6...v1.15.7-rc.1) (2026-04-01)
+
+
+### Bug Fixes
+
+* **auth:** dismissAuthEvent missing from rate limit table ([af502b0](https://github.com/Adedamola-Aina/AnchorOS/commit/af502b03c1653216bea47a7944703e98adf0d9b7))
+
 ## [1.15.7-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.6...v1.15.7-rc.0) (2026-03-31)
 
 
