@@ -95,7 +95,7 @@
   }
 
   .glass-card {
-    @apply backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)] border border-[var(--glass-border)] transition-all duration-300 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300/50 dark:hover:border-white/10;
+    @apply backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] transition-all duration-300 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300/50 dark:hover:border-white/10;
     background-color: var(--surface-2);
   }
 
