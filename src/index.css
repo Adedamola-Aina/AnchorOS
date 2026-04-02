@@ -1,5 +1,7 @@
 @import 'tailwindcss';
+
 @config '../config/tailwind.config.js';
+
 @plugin "tailwindcss-animate";
 
 @layer base {
@@ -104,7 +106,7 @@
 
 @layer components {
   .glass {
-    @apply backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)] border border-[var(--glass-border)] transition-all duration-300;
+    @apply backdrop-blur-(--glass-blur) bg-(--glass-bg) border border-(--glass-border) transition-all duration-300;
   }
 
   /* BUG-128: Rewritten as plain CSS — no @apply — to eliminate Tailwind v4
@@ -134,15 +136,15 @@
   }
 
   .glass-interactive {
-    @apply backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)] border border-[var(--glass-border)] transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-800/80 active:scale-[0.98];
+    @apply backdrop-blur-(--glass-blur) bg-(--glass-bg) border border-(--glass-border) transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-800/80 active:scale-[0.98];
   }
 
   .premium-gradient {
-    @apply bg-gradient-to-br from-slate-900 via-slate-950 to-black;
+    @apply bg-linear-to-br from-slate-900 via-slate-950 to-black;
   }
 
   .vibrant-gradient {
-    @apply bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500;
+    @apply bg-linear-to-br from-indigo-500 via-purple-600 to-pink-500;
   }
 
   /* Monospace for financial figures - vertical alignment */

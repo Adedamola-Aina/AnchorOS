@@ -6,7 +6,7 @@
  * BUG-127 — glass-card @apply conflict guard.
  * In Tailwind v4, when @apply generates a CSS property AND an explicit
  * identical property exists in the same @layer rule, v4's optimizer drops
- * the explicit one. .glass-card must NOT have bg-[var(--glass-bg)] in @apply
+ * the explicit one. .glass-card must NOT have bg-(--glass-bg) in @apply
  * or it silently overwrites the background-color: var(--surface-2) solid fill,
  * making cards invisible against the page background in light mode.
  *
@@ -68,14 +68,14 @@ describe('tailwind.config ESM integrity (ENG-006)', () => {
 describe('index.css component layer integrity (BUG-127)', () => {
   const indexCss = readFileSync(resolve(__dirname, '../../src/index.css'), 'utf-8');
 
-  it('.glass-card @apply must not include bg-[var(--glass-bg)] — causes v4 optimizer to drop background-color:var(--surface-2)', () => {
+  it('.glass-card @apply must not include bg-(--glass-bg) — causes v4 optimizer to drop background-color:var(--surface-2)', () => {
     // Extract the .glass-card rule block from the CSS source
     const glasscardMatch = indexCss.match(/\.glass-card\s*\{([^}]*)\}/);
     expect(glasscardMatch).not.toBeNull();
     const glasscardRule = glasscardMatch![1];
-    // bg-[var(--glass-bg)] in @apply conflicts with the explicit background-color: var(--surface-2)
+    // bg-(--glass-bg) in @apply conflicts with the explicit background-color: var(--surface-2)
     // override and causes v4 to silently drop the surface-2 value, making cards invisible.
-    expect(glasscardRule).not.toContain('bg-[var(--glass-bg)]');
+    expect(glasscardRule).not.toContain('bg-(--glass-bg)');
   });
 
   it('.glass-card rule has explicit background-color: var(--surface-2)', () => {
