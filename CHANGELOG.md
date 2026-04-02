@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.8-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.7...v1.15.8-dev.0) (2026-04-02)
+
+
+### Bug Fixes
+
+* **deps:** restore @testing-library/dom removed by legacy-peer-deps install (SEC-010) ([5f7f23f](https://github.com/Adedamola-Aina/AnchorOS/commit/5f7f23f823a39409d814bea8ca8bb65ae415f36c))
+* **mobile:** native ios tab bar height — h-16 → h-[49px], drop min-h-[56px] (UX-039) ([b369ee9](https://github.com/Adedamola-Aina/AnchorOS/commit/b369ee97ce139bfebb416958ec794d382f2afbd5))
+* **security:** resolve high-severity devdependency vulnerabilities via overrides (SEC-010) ([3576c57](https://github.com/Adedamola-Aina/AnchorOS/commit/3576c5759721c5da091cf9e94b63c6e0454da9a0))
+* **ui:** glass-card background dropped by tailwind v4 [@apply](https://github.com/apply) dedup (BUG-127) ([7672c32](https://github.com/Adedamola-Aina/AnchorOS/commit/7672c32a85035b0340811c96568f0b9ba99c0cdf))
+* **ui:** restore tailwind v4 visual parity — border-color and glass-card ([3df793c](https://github.com/Adedamola-Aina/AnchorOS/commit/3df793cd319d796d4b9d1adc70ae6d8703334074))
+
 ## [1.15.8-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.7...v1.15.8-rc.0) (2026-04-02)
 
 
