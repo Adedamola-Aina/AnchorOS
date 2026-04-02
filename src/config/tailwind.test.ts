@@ -132,4 +132,16 @@ describe('BUG-127 / BUG-128 — Glass card regression guards', () => {
   it('restores Tailwind v3 border-color default (gray-200)', () => {
     expect(css).toContain('#e5e7eb');
   });
+
+  it('restores v3 default ring color (blue/50%) — v4 changed to currentColor', () => {
+    expect(css).toContain('--tw-ring-color: rgb(59 130 246 / 0.5)');
+  });
+
+  it('restores v3 form element backgrounds — v4 preflight sets all to transparent', () => {
+    expect(css).toContain('background-color: var(--color-white, #fff)');
+  });
+
+  it('restores v3 placeholder color (gray-400) — v4 uses 50% opacity currentColor', () => {
+    expect(css).toContain('color: var(--color-gray-400, #9ca3af)');
+  });
 });

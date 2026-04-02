@@ -172,6 +172,35 @@
     border-color: rgba(51, 65, 85, 1); /* slate-700 */
   }
 
+  /* Restore v3 default ring color — v4 changed from blue/50% to currentColor */
+  *, *::before, *::after {
+    --tw-ring-color: rgb(59 130 246 / 0.5);
+  }
+
+  /* Restore v3 form element defaults — v4 preflight resets all to transparent/square.
+   * Using low-specificity element selectors so explicit Tailwind utilities always win. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+  textarea,
+  select {
+    background-color: var(--color-white, #fff);
+    border-radius: var(--radius-md, 0.375rem);
+  }
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+  .dark textarea,
+  .dark select {
+    background-color: var(--color-slate-800, #1e293b);
+  }
+
+  /* Restore v3 placeholder color — v4 uses 50% opacity currentColor (too dark) */
+  ::placeholder {
+    color: var(--color-gray-400, #9ca3af);
+    opacity: 1;
+  }
+  .dark ::placeholder {
+    color: var(--color-slate-500, #64748b);
+    opacity: 1;
+  }
+
   html {
     font-size: 16px;
     height: 100%;
