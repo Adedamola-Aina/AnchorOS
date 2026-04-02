@@ -1,116 +1,135 @@
 /**
- * ENG-006 — Tailwind config ESM migration guard.
- * Verifies the config is valid ESM and exports all required design tokens
- * so a future CommonJS regression is caught immediately.
+ * UX-040 — Native Tailwind v4 CSS-first rewrite integrity guards.
  *
- * BUG-127 — glass-card @apply conflict guard.
- * In Tailwind v4, when @apply generates a CSS property AND an explicit
- * identical property exists in the same @layer rule, v4's optimizer drops
- * the explicit one. .glass-card must NOT have bg-(--glass-bg) in @apply
- * or it silently overwrites the background-color: var(--surface-2) solid fill,
- * making cards invisible against the page background in light mode.
+ * Tokens (colors, font family, animations) now live in @theme in src/index.css.
+ * Dark mode is configured via @variant dark — no JS config dependency.
+ * These tests ensure regressions to the JS-config era are caught immediately.
  *
- * BUG-128 — Tailwind v4 visual parity regression guards.
- * v4 removed the default border-color that v3 set automatically. The light-mode
- * --glass-border must be a visible grey (not white-on-white). .glass-card must
- * be written as plain CSS (not @apply) so the v4 optimizer cannot interfere.
+ * BUG-127 / BUG-128 guards retained:
+ * - .glass-card must never use @apply (v4 optimizer dedup risk)
+ * - --glass-border in light mode must never be white-on-white
+ * - global border-color default (gray-200) must be present
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import tailwindConfig from '../../config/tailwind.config.js';
 
-describe('tailwind.config ESM integrity (ENG-006)', () => {
-  it('exports a default object (not a CommonJS module.exports stub)', () => {
-    expect(tailwindConfig).toBeDefined();
-    expect(typeof tailwindConfig).toBe('object');
+const css = readFileSync(resolve(__dirname, '../../src/index.css'), 'utf-8');
+
+/* ─── v4 CSS-first structure ────────────────────────────── */
+
+describe('UX-040 — Tailwind v4 CSS-first structure', () => {
+  it('uses @import "tailwindcss" as the entry point', () => {
+    expect(css).toContain('@import "tailwindcss"');
   });
 
-  it('preserves darkMode class strategy', () => {
-    expect(tailwindConfig.darkMode).toBe('class');
+  it('configures dark mode via @variant, not JS config', () => {
+    expect(css).toContain('@variant dark');
+    expect(css).not.toContain('@config');
   });
 
-  it('exports all semantic brand color palettes', () => {
-    const { colors } = tailwindConfig.theme.extend;
-    expect(colors.primary).toBeDefined();
-    expect(colors.finance).toBeDefined();
-    expect(colors.task).toBeDefined();
-    expect(colors.family).toBeDefined();
-    // Spot-check key shades used across the codebase
-    expect(colors.primary[600]).toBe('#2563eb');
-    expect(colors.finance[600]).toBe('#16a34a');
-    expect(colors.task[600]).toBe('#9333ea');
-    expect(colors.family[600]).toBe('#ea580c');
+  it('defines design tokens in @theme block', () => {
+    expect(css).toContain('@theme {');
   });
 
-  it('exports all semantic font size tokens', () => {
-    const { fontSize } = tailwindConfig.theme.extend;
-    expect(fontSize.h1).toBeDefined();
-    expect(fontSize.h2).toBeDefined();
-    expect(fontSize.h3).toBeDefined();
-    expect(fontSize.display).toBeDefined();
-    expect(fontSize.body).toBeDefined();
-    expect(fontSize.small).toBeDefined();
-  });
-
-  it('exports native system font stack', () => {
-    const { fontFamily } = tailwindConfig.theme.extend;
-    expect(fontFamily.sans).toContain('-apple-system');
-    expect(fontFamily.sans).toContain('Roboto');
-  });
-
-  it('does not include CommonJS plugin entries (tailwindcss-animate moved to @plugin in CSS)', () => {
-    // The plugins array should be absent; tailwindcss-animate is now in src/index.css via @plugin
-    expect(tailwindConfig.plugins).toBeUndefined();
+  it('specifies content sources via @source directives', () => {
+    expect(css).toContain('@source');
   });
 });
 
-describe('index.css component layer integrity (BUG-127)', () => {
-  const indexCss = readFileSync(resolve(__dirname, '../../src/index.css'), 'utf-8');
+/* ─── Brand color palette ───────────────────────────────── */
 
-  it('.glass-card @apply must not include bg-(--glass-bg) — causes v4 optimizer to drop background-color:var(--surface-2)', () => {
-    // Extract the .glass-card rule block from the CSS source
-    const glasscardMatch = indexCss.match(/\.glass-card\s*\{([^}]*)\}/);
-    expect(glasscardMatch).not.toBeNull();
-    const glasscardRule = glasscardMatch![1];
-    // bg-(--glass-bg) in @apply conflicts with the explicit background-color: var(--surface-2)
-    // override and causes v4 to silently drop the surface-2 value, making cards invisible.
-    expect(glasscardRule).not.toContain('bg-(--glass-bg)');
+describe('UX-040 — Brand color tokens in @theme', () => {
+  it('defines all primary (Anchor Blue) shades', () => {
+    expect(css).toContain('--color-primary-600: #2563eb');
+    expect(css).toContain('--color-primary-500: #3b82f6');
+    expect(css).toContain('--color-primary-50:');
+    expect(css).toContain('--color-primary-900: #1e3a8a');
   });
 
-  it('.glass-card rule has explicit background-color: var(--surface-2)', () => {
-    const glasscardMatch = indexCss.match(/\.glass-card\s*\{([^}]*)\}/);
-    expect(glasscardMatch).not.toBeNull();
-    const glasscardRule = glasscardMatch![1];
-    expect(glasscardRule).toContain('background-color: var(--surface-2)');
+  it('defines all finance (Money Green) shades', () => {
+    expect(css).toContain('--color-finance-600: #16a34a');
+    expect(css).toContain('--color-finance-500: #22c55e');
   });
 
-  it('.glass-card must not use @apply at all — plain CSS only to prevent v4 optimizer interference (BUG-128)', () => {
-    const glasscardMatch = indexCss.match(/\.glass-card\s*\{([^}]*)\}/);
-    expect(glasscardMatch).not.toBeNull();
-    const glasscardRule = glasscardMatch![1];
-    expect(glasscardRule).not.toContain('@apply');
+  it('defines all task (Action Purple) shades', () => {
+    expect(css).toContain('--color-task-600: #9333ea');
+    expect(css).toContain('--color-task-500: #a855f7');
+  });
+
+  it('defines all family (Warm Coral) shades', () => {
+    expect(css).toContain('--color-family-600: #ea580c');
+    expect(css).toContain('--color-family-500: #f97316');
   });
 });
 
-describe('index.css v4 parity fixes (BUG-128)', () => {
-  const indexCss = readFileSync(resolve(__dirname, '../../src/index.css'), 'utf-8');
+/* ─── Typography + font ─────────────────────────────────── */
 
-  it('light-mode --glass-border must not be white-on-white (rgba 255,255,255,...)', () => {
-    // Find :root block and check --glass-border
-    const rootMatch = indexCss.match(/:root\s*\{([^}]*)\}/s);
+describe('UX-040 — Typography tokens in @layer components', () => {
+  it('defines heading sizes with bundled font-weight', () => {
+    expect(css).toContain('.text-h1');
+    expect(css).toContain('.text-h2');
+    expect(css).toContain('.text-h3');
+    expect(css).toContain('.text-display');
+    expect(css).toContain('.text-body');
+    expect(css).toContain('.text-small');
+  });
+
+  it('defines native system font family in @theme', () => {
+    expect(css).toContain('--font-family-sans:');
+    expect(css).toContain('-apple-system');
+    expect(css).toContain('Roboto');
+  });
+});
+
+/* ─── Custom animations ─────────────────────────────────── */
+
+describe('UX-040 — Animation tokens in @theme', () => {
+  it('defines nautical loading animation tokens', () => {
+    expect(css).toContain('--animate-anchor-bob:');
+    expect(css).toContain('--animate-compass-spin:');
+    expect(css).toContain('--animate-sonar:');
+    expect(css).toContain('--animate-tide-bar:');
+  });
+
+  it('defines UI animation tokens', () => {
+    expect(css).toContain('--animate-pulse-slow:');
+    expect(css).toContain('--animate-ring-glow:');
+    expect(css).toContain('--animate-spin-slow:');
+    expect(css).toContain('--animate-pulse-fast:');
+  });
+
+  it('includes keyframe definitions', () => {
+    expect(css).toContain('@keyframes anchor-bob');
+    expect(css).toContain('@keyframes sonar-ring');
+    expect(css).toContain('@keyframes pulse-slow');
+  });
+});
+
+/* ─── Glass component integrity (BUG-127 / BUG-128) ────── */
+
+describe('BUG-127 / BUG-128 — Glass card regression guards', () => {
+  it('.glass-card must not use @apply — plain CSS only', () => {
+    const match = css.match(/\.glass-card\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).not.toContain('@apply');
+  });
+
+  it('.glass-card has background-color: var(--surface-2)', () => {
+    const match = css.match(/\.glass-card\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toContain('background-color: var(--surface-2)');
+  });
+
+  it('light-mode --glass-border is not white-on-white', () => {
+    const rootMatch = css.match(/:root\s*\{([^}]*)\}/s);
     expect(rootMatch).not.toBeNull();
-    const rootBlock = rootMatch![1];
-    const borderMatch = rootBlock.match(/--glass-border:\s*([^;]+);/);
+    const borderMatch = rootMatch![1].match(/--glass-border:\s*([^;]+);/);
     expect(borderMatch).not.toBeNull();
-    const borderValue = borderMatch![1].trim();
-    // Must NOT be white (255, 255, 255) — that is invisible on white cards
-    expect(borderValue).not.toMatch(/rgba\(\s*255\s*,\s*255\s*,\s*255/);
+    expect(borderMatch![1].trim()).not.toMatch(/rgba\(\s*255\s*,\s*255\s*,\s*255/);
   });
 
-  it('global border-color default restores v3 behaviour — gray-200 (#e5e7eb) in base layer', () => {
-    // v3 preflight set border-color: #e5e7eb (gray-200) on *, ::before, ::after.
-    // v4 dropped this; we restore it explicitly.
-    expect(indexCss).toContain('#e5e7eb');
+  it('restores Tailwind v3 border-color default (gray-200)', () => {
+    expect(css).toContain('#e5e7eb');
   });
 });

@@ -1,82 +1,193 @@
-@import 'tailwindcss';
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Anchor OS — Stylesheet
+   Tailwind CSS v4 · CSS-first · no JS config dependency
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-@config '../config/tailwind.config.js';
+@import "tailwindcss";
+
+/* Dark mode: .dark class on any ancestor element */
+@variant dark (&:where(.dark, .dark *));
+
+/* Content sources */
+@source "../index.html";
+@source "./**/*.{ts,tsx,js,jsx}";
 
 @plugin "tailwindcss-animate";
 
+
+/* ─── Design Tokens ─────────────────────────────────────────
+   Defined here → available as CSS vars (--color-primary-600)
+   AND as Tailwind utilities (bg-primary-600, text-finance-500)
+   ─────────────────────────────────────────────────────────── */
+@theme {
+
+  /* Brand: Anchor Blue — primary actions, navigation, focus */
+  --color-primary-50:  #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  /* Brand: Money Green — income, surplus, positive trends */
+  --color-finance-50:  #f0fdf4;
+  --color-finance-100: #dcfce7;
+  --color-finance-200: #bbf7d0;
+  --color-finance-300: #86efac;
+  --color-finance-400: #4ade80;
+  --color-finance-500: #22c55e;
+  --color-finance-600: #16a34a;
+  --color-finance-700: #15803d;
+  --color-finance-800: #166534;
+  --color-finance-900: #14532d;
+
+  /* Brand: Action Purple — tasks, commitments, streaks */
+  --color-task-50:  #faf5ff;
+  --color-task-100: #f3e8ff;
+  --color-task-200: #e9d5ff;
+  --color-task-300: #d8b4fe;
+  --color-task-400: #c084fc;
+  --color-task-500: #a855f7;
+  --color-task-600: #9333ea;
+  --color-task-700: #7e22ce;
+  --color-task-800: #6b21a8;
+  --color-task-900: #581c87;
+
+  /* Brand: Warm Coral — family, shared accounts, collaboration */
+  --color-family-50:  #fff7ed;
+  --color-family-100: #ffedd5;
+  --color-family-200: #fed7aa;
+  --color-family-300: #fdba74;
+  --color-family-400: #fb923c;
+  --color-family-500: #f97316;
+  --color-family-600: #ea580c;
+  --color-family-700: #c2410c;
+  --color-family-800: #9a3412;
+  --color-family-900: #7c2d12;
+
+  /* Font: native system stack — SF Pro on iOS, Roboto on Android */
+  --font-family-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Segoe UI", Roboto, Oxygen, Ubuntu, system-ui, sans-serif;
+
+  /* Animations */
+  --animate-pulse-slow:   pulse-slow   3s   ease-in-out infinite;
+  --animate-ring-glow:    ring-glow    3s   ease-in-out infinite;
+  --animate-anchor-bob:   anchor-bob   2s   ease-in-out infinite;
+  --animate-compass-spin: compass-spin 2s   linear      infinite;
+  --animate-tide-bar:     tide-bar     1.2s ease-in-out infinite;
+  --animate-sonar:        sonar-ring   2s   ease-out    infinite;
+  --animate-spin-slow:    spin-slow    3s   linear      infinite;
+  --animate-pulse-fast:   pulse-fast   0.8s ease-in-out infinite;
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.7; }
+  }
+  @keyframes ring-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+    50%       { box-shadow: 0 0 8px 3px rgba(244, 63, 94, 0.35); }
+  }
+  @keyframes anchor-bob {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+  @keyframes compass-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes sonar-ring {
+    0%   { r: 10; opacity: 0.6; }
+    100% { r: 36; opacity: 0; }
+  }
+  @keyframes tide-bar {
+    0%, 100% { transform: scaleY(1);   opacity: 0.4; }
+    50%       { transform: scaleY(1.8); opacity: 1; }
+  }
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes pulse-fast {
+    0%, 100% { opacity: 1;   transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.8); }
+  }
+}
+
+
+/* ─── Base ──────────────────────────────────────────────────
+   CSS custom properties + global element defaults
+   ─────────────────────────────────────────────────────────── */
 @layer base {
+
   :root {
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    /* BUG-128: light mode border must be a visible grey, not white-on-white */
+    /* Glass morphism */
+    --glass-bg:     rgba(255, 255, 255, 0.7);
     --glass-border: rgba(0, 0, 0, 0.06);
-    --glass-blur: 12px;
-    /* Surface hierarchy - Light mode */
-    --surface-1: #f8fafc;
-    --surface-2: #ffffff;
-    --surface-3: #f1f5f9;
-    /* Status colors - Light */
+    --glass-blur:   12px;
+
+    /* Surface hierarchy — light mode */
+    --surface-1: #f8fafc; /* page background */
+    --surface-2: #ffffff; /* cards */
+    --surface-3: #f1f5f9; /* inputs, modals */
+
+    /* Status */
     --status-success: #10b981;
-    --status-error: #f43f5e;
+    --status-error:   #f43f5e;
     --status-warning: #f59e0b;
+
     /* Focus ring */
     --focus-ring: #06b6d4;
   }
 
   .dark {
-    --glass-bg: rgba(15, 23, 42, 0.6);
+    /* Glass morphism — navy nautical theme */
+    --glass-bg:     rgba(15, 23, 42, 0.6);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-blur: 20px;
-    /* Surface hierarchy - Dark mode (Navy nautical theme) */
-    --surface-1: #0a0f1a;
-    /* Deep navy background */
-    --surface-2: #0f172a;
-    /* Cards/containers (slate-900) */
-    --surface-3: #1e293b;
-    /* Inputs/modals (slate-800) */
-    /* Status colors - Dark mode friendly (glowing) */
+    --glass-blur:   20px;
+
+    /* Surface hierarchy — dark mode */
+    --surface-1: #0a0f1a; /* deep navy */
+    --surface-2: #0f172a; /* slate-900 */
+    --surface-3: #1e293b; /* slate-800 */
+
+    /* Status — brighter for dark backgrounds */
     --status-success: #34d399;
-    --status-error: #f87171;
-    /* Coral/salmon */
+    --status-error:   #f87171;
     --status-warning: #fbbf24;
-    /* Focus ring - Cyan glow */
+
+    /* Focus ring — cyan glow */
     --focus-ring: #22d3ee;
+  }
+
+  /* Restore Tailwind v3 preflight default — v4 dropped border-color from preflight */
+  *, *::before, *::after {
+    border-color: var(--color-gray-200, #e5e7eb);
+  }
+  .dark *, .dark *::before, .dark *::after {
+    border-color: rgba(51, 65, 85, 1); /* slate-700 */
   }
 
   html {
     font-size: 16px;
     height: 100%;
 
-    @media (min-width: 640px) {
-      font-size: 17px;
-    }
-
-    @media (min-width: 1024px) {
-      font-size: 18px;
-    }
+    @media (min-width: 640px)  { font-size: 17px; }
+    @media (min-width: 1024px) { font-size: 18px; }
   }
 
   body {
-    @apply antialiased text-slate-900 bg-slate-50 dark:text-slate-100 transition-colors duration-300 font-sans font-medium;
+    @apply antialiased text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans font-medium;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    min-height: 100vh;
     min-height: 100dvh;
     background-color: var(--surface-1);
   }
 
-  .dark body {
-    background-color: var(--surface-1);
-  }
-
-  .adaptive-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-
-    @media (min-width: 768px) {
-      grid-template-columns: 260px minmax(0, 1fr);
-    }
-  }
-
-  /* Glowing focus ring for accessibility */
+  /* Glowing focus ring — accessibility */
   input:focus,
   button:focus-visible,
   select:focus,
@@ -86,107 +197,174 @@
     box-shadow: 0 0 0 3px var(--focus-ring), 0 0 20px -5px var(--focus-ring);
   }
 
-  /* Reduce focus glow for elements with their own ring */
-  .focus\:ring-4:focus {
-    box-shadow: none;
-  }
-
-  /* BUG-128: Tailwind v4 removed the default border-color that v3 set automatically.
-   * In v3 preflight, *, ::before, ::after got border-color: #e5e7eb (gray-200).
-   * In v4, only border-style and border-width are set — colour defaults to currentColor.
-   * Restore exact v3 preflight behaviour. */
-  *, *::before, *::after {
-    border-color: var(--color-gray-200, #e5e7eb);
-  }
-
-  .dark *, .dark *::before, .dark *::after {
-    border-color: rgba(51, 65, 85, 1); /* slate-700 */
-  }
+  /* Suppress glow on elements with their own ring utility */
+  .focus\:ring-4:focus { box-shadow: none; }
 }
 
-@layer components {
-  .glass {
-    @apply backdrop-blur-(--glass-blur) bg-(--glass-bg) border border-(--glass-border) transition-all duration-300;
-  }
 
-  /* BUG-128: Rewritten as plain CSS — no @apply — to eliminate Tailwind v4
-   * optimizer deduplication that silently dropped background-color: var(--surface-2).
-   * v3 equivalent: white card, subtle border, gentle shadow, glass blur. */
-  .glass-card {
-    background-color: var(--surface-2);
-    border-radius: 1rem; /* rounded-2xl */
+/* ─── Components ────────────────────────────────────────────
+   All custom classes as plain CSS — no @apply that could
+   conflict with Tailwind v4's optimizer deduplication.
+   ─────────────────────────────────────────────────────────── */
+@layer components {
+
+  /* Typography scale — font-weight bundled per UX-013 */
+  .text-display    { font-size: 2.25rem;  line-height: 2.5rem;  font-weight: 800; }
+  .text-display-lg { font-size: 3rem;     line-height: 1;        font-weight: 800; }
+  .text-h1         { font-size: 1.875rem; line-height: 2.25rem; font-weight: 700; }
+  .text-h1-lg      { font-size: 2.25rem;  line-height: 2.5rem;  font-weight: 700; }
+  .text-h2         { font-size: 1.5rem;   line-height: 2rem;    font-weight: 700; }
+  .text-h2-lg      { font-size: 1.875rem; line-height: 2.25rem; font-weight: 700; }
+  .text-h3         { font-size: 1.25rem;  line-height: 1.75rem; font-weight: 600; }
+  .text-h3-lg      { font-size: 1.5rem;   line-height: 2rem;    font-weight: 600; }
+  .text-body       { font-size: 1rem;     line-height: 1.5rem;  font-weight: 500; }
+  .text-small      { font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; }
+
+  /* Glass: transparent frosted surface */
+  .glass {
+    background-color: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.1); /* shadow-sm */
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     transition: all 0.3s;
   }
 
+  /* Glass card: solid white card — the primary content container */
+  .glass-card {
+    background-color: var(--surface-2);
+    border-radius: 1rem;
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 1px 3px 0   rgba(0, 0, 0, 0.08),
+      0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
   .glass-card:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* shadow-md */
-    border-color: rgba(148, 163, 184, 0.5); /* slate-300/50 */
+    box-shadow:
+      0 4px 12px 0   rgba(0, 0, 0, 0.10),
+      0 2px 4px -1px  rgba(0, 0, 0, 0.06);
+    border-color: rgba(148, 163, 184, 0.5);
   }
-
   .dark .glass-card {
-    background-color: rgba(15, 23, 42, 0.8);
+    background-color: rgba(15, 23, 42, 0.85);
+    border-color: var(--glass-border);
   }
-
   .dark .glass-card:hover {
-    border-color: rgba(255, 255, 255, 0.1); /* white/10 */
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 4px 20px 0   rgba(0, 0, 0, 0.40),
+      0 2px 8px -2px  rgba(0, 0, 0, 0.30);
   }
 
+  /* Glass interactive: tappable frosted element */
   .glass-interactive {
-    @apply backdrop-blur-(--glass-blur) bg-(--glass-bg) border border-(--glass-border) transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-800/80 active:scale-[0.98];
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    transition: all 0.3s;
   }
+  .glass-interactive:hover                { background-color: rgba(255, 255, 255, 0.85); }
+  .dark .glass-interactive:hover          { background-color: rgba(30, 41, 59, 0.85); }
+  .glass-interactive:active               { transform: scale(0.98); }
 
-  .premium-gradient {
-    @apply bg-linear-to-br from-slate-900 via-slate-950 to-black;
-  }
+  /* Gradients */
+  .premium-gradient { background: linear-gradient(to bottom right, #0f172a, #020617, #000000); }
+  .vibrant-gradient  { background: linear-gradient(to bottom right, #6366f1, #9333ea, #ec4899); }
 
-  .vibrant-gradient {
-    @apply bg-linear-to-br from-indigo-500 via-purple-600 to-pink-500;
-  }
-
-  /* Monospace for financial figures - vertical alignment */
+  /* Finance: monospace for vertically-aligned numbers */
   .font-financial {
-    font-family: 'Roboto Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
+    font-family: "Roboto Mono", "SF Mono", "Fira Code", ui-monospace, monospace;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.025em;
   }
 
-  /* Status colors */
-  .text-success {
-    color: var(--status-success);
-  }
+  /* Status colors — map to theme-aware CSS vars */
+  .text-success { color: var(--status-success); }
+  .text-error   { color: var(--status-error); }
+  .bg-success   { background-color: var(--status-success); }
+  .bg-error     { background-color: var(--status-error); }
 
-  .text-error {
-    color: var(--status-error);
-  }
+  /* Chart glows — neon depth in dark mode */
+  .dark .chart-bar-income  { filter: drop-shadow(0 0 8px rgba(16,  185, 129, 0.4)); }
+  .dark .chart-bar-expense { filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.4)); }
 
-  .bg-success {
-    background-color: var(--status-success);
-  }
-
-  .bg-error {
-    background-color: var(--status-error);
-  }
-
-  /* Neon glow for dark mode charts */
-  .dark .chart-bar-income {
-    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
-  }
-
-  .dark .chart-bar-expense {
-    filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.4));
+  /* Sidebar + content grid */
+  .adaptive-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    @media (min-width: 768px) {
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
   }
 }
 
-/* iOS: Suppress keyboard input accessory toolbar (BUG-093)
- * The .is-ios class is set by useIOSKeyboardFix hook at runtime.
- * - font-size 16px prevents iOS auto-zoom on focus
- * - touch-action prevents double-tap-to-zoom
- * - user-select manipulation reduces toolbar triggers
- */
+
+/* ─── Global resets ─────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Eliminate 300ms tap delay on all interactive elements */
+a, button, input, select, textarea, [role="button"], [tabindex] {
+  touch-action: manipulation;
+}
+
+
+/* ─── iOS safe areas ────────────────────────────────────── */
+.safe-area-top    { padding-top:    env(safe-area-inset-top,    0px); }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pb-safe-nav      { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+
+/* ─── Touch targets (WCAG 2.5.5) ───────────────────────── */
+.touch-target { min-width: 44px; min-height: 44px; }
+
+
+/* ─── Scrollbars ────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+.dark * {
+  scrollbar-color: rgba(71, 85, 105, 0.4) transparent;
+}
+
+::-webkit-scrollbar         { width: 6px; height: 6px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background-color: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(148, 163, 184, 0.5); }
+
+.dark ::-webkit-scrollbar-thumb       { background-color: rgba(71, 85, 105, 0.4); }
+.dark ::-webkit-scrollbar-thumb:hover { background-color: rgba(71, 85, 105, 0.6); }
+
+.custom-scrollbar::-webkit-scrollbar         { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track   { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb   { background-color: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(148, 163, 184, 0.6); }
+
+.mobile-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.mobile-scroll-x::-webkit-scrollbar { display: none; }
+
+
+/* ─── iOS keyboard / input fixes (BUG-093) ─────────────── */
+/* .is-ios set by useIOSKeyboardFix — prevents auto-zoom and toolbar */
 .is-ios input,
 .is-ios textarea,
 .is-ios select {
@@ -195,13 +373,11 @@
   -webkit-text-size-adjust: 100%;
 }
 
-/* Disable iOS automatic text detection that triggers toolbar */
 .is-ios input:not([type="password"]):not([type="email"]),
 .is-ios textarea {
   -webkit-user-modify: read-write-plaintext-only;
 }
 
-/* Suppress iOS form assistant bar on focused inputs */
 .is-ios input:focus,
 .is-ios textarea:focus,
 .is-ios select:focus {
@@ -209,7 +385,7 @@
   user-select: text;
 }
 
-/* Hide autofill suggestion buttons (complementary) */
+/* Hide autofill suggestion buttons */
 input::-webkit-contacts-auto-fill-button,
 input::-webkit-credentials-auto-fill-button {
   visibility: hidden;
@@ -218,222 +394,21 @@ input::-webkit-credentials-auto-fill-button {
   right: 0;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
+/* ─── Accessibility ─────────────────────────────────────── */
+.a11y-font-large { font-size: 112.5%; }
+.a11y-font-xl    { font-size: 125%; }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 dark:bg-slate-800 rounded-full;
-}
+.a11y-high-contrast * { border-color: currentColor !important; }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-300 dark:bg-slate-700;
-}
-
-/* Global scrollbar styling - subtle, thin, rounded */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.3);
-  /* slate-400 at 30% */
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(148, 163, 184, 0.5);
-  /* slate-400 at 50% */
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background-color: rgba(71, 85, 105, 0.4);
-  /* slate-600 at 40% */
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(71, 85, 105, 0.6);
-  /* slate-600 at 60% */
-}
-
-/* Firefox scrollbar styling */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
-}
-
-.dark * {
-  scrollbar-color: rgba(71, 85, 105, 0.4) transparent;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Global touch optimization: eliminate 300ms tap delay on all interactive elements */
-a, button, input, select, textarea, [role="button"], [tabindex] {
-  touch-action: manipulation;
-}
-
-#root {
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Mobile utility classes */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/* Bottom navigation safe area — respect home indicator only */
-.pb-safe-nav {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-.safe-area-top {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-/* Touch-friendly minimum target size (WCAG 2.5.5) */
-.touch-target {
-  min-width: 44px;
-  min-height: 44px;
-}
-
-/* Horizontal scroll container for mobile */
-.mobile-scroll-x {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.mobile-scroll-x::-webkit-scrollbar {
-  display: none;
-}
-
-/* Accessibility: Font Size */
-.a11y-font-large {
-  font-size: 112.5%;
-}
-
-.a11y-font-xl {
-  font-size: 125%;
-}
-
-/* Accessibility: High Contrast */
-.a11y-high-contrast {
-  --tw-border-opacity: 1;
-  --tw-text-opacity: 1;
-}
-
-.a11y-high-contrast * {
-  border-color: currentColor !important;
-}
-
-/* Accessibility: Reduced Motion */
 .a11y-reduced-motion *,
 .a11y-reduced-motion *::before,
 .a11y-reduced-motion *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-  scroll-behavior: auto !important;
+  animation-duration:       0.01ms !important;
+  animation-iteration-count: 1     !important;
+  transition-duration:       0.01ms !important;
+  scroll-behavior:           auto   !important;
 }
 
-/* Nautical Loading Animations (UX-032) */
-@keyframes sonar-ring {
-  0% {
-    r: 10;
-    opacity: 0.6;
-  }
-
-  100% {
-    r: 36;
-    opacity: 0;
-  }
-}
-
-@keyframes anchor-bob {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-@keyframes compass-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes tide-bar {
-
-  0%,
-  100% {
-    transform: scaleY(1);
-    opacity: 0.4;
-  }
-
-  50% {
-    transform: scaleY(1.8);
-    opacity: 1;
-  }
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse-fast {
-
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.5;
-    transform: scale(0.8);
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* ─── Mobile horizontal scroll ──────────────────────────── */
+/* (kept for feature parity — used by finance charts) */
