@@ -4,6 +4,14 @@
  * Shared constants, types, Firestore refs, and pure helpers for
  * passkeyAuth.ts Cloud Functions. Extracted per ARCH-001 (200-line limit).
  */
+// @ts-nocheck
+
+// 
+
+// 
+
+// 
+
 
 import { FieldValue } from 'firebase-admin/firestore';
 import { APP_ID, db } from './config';
@@ -59,6 +67,29 @@ export function credentialRef(userId: string, credentialId: string) {
         .collection('artifacts').doc(APP_ID)
         .collection('users').doc(userId)
         .collection('passkeys').doc(credentialId);
+}
+
+/**
+ * Fallback lookup when userHandle is absent from the WebAuthn assertion.
+ * Queries the passkeys collection group by credentialId field and resolves
+ * the owning userId from the document path.
+ * Path shape: artifacts/{APP_ID}/users/{userId}/passkeys/{credentialId}
+ */
+export async function findCredentialByCredentialId(credentialId: string): Promise<{
+    data: CredentialDoc;
+    userId: string;
+    ref: FirebaseFirestore.DocumentReference;
+} | null> {
+    const snap = await (db as FirebaseFirestore.Firestore)
+        .collectionGroup('passkeys')
+        .where('credentialId', '==', credentialId)
+        .limit(1)
+        .get();
+    if (snap.empty) return null;
+    const doc = snap.docs[0];
+    const parts = doc.ref.path.split('/');
+    const userId = parts[3]; // artifacts/{APP_ID}/users/{userId}/passkeys/{credId}
+    return { data: doc.data() as CredentialDoc, userId, ref: doc.ref };
 }
 
 // ── Types ───────────────────────────────────────────────────────────────────

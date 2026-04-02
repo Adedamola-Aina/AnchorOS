@@ -4,6 +4,14 @@
  * Tests for server-side WebAuthn challenge issuance and assertion verification.
  * RED phase: all tests fail until passkeyAuth.ts is implemented.
  */
+// @ts-nocheck
+
+// 
+
+// 
+
+// 
+
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -101,6 +109,23 @@ vi.mock('./config', () => ({
                     }),
                 };
             },
+        }),
+        collectionGroup: (colName: string) => ({
+            where: (field: string, _op: string, value: string) => ({
+                limit: (_n: number) => ({
+                    get: async () => {
+                        const matching = Object.entries(mockState.docs)
+                            .filter(([p]) => p.includes(`/${colName}/`))
+                            .filter(([_, d]) => (d as Record<string, unknown>)[field] === value);
+                        if (matching.length === 0) return { empty: true, docs: [] };
+                        const [docPath, data] = matching[0];
+                        return {
+                            empty: false,
+                            docs: [{ data: () => data, ref: { path: docPath } }],
+                        };
+                    },
+                }),
+            }),
         }),
     },
 }));
@@ -428,5 +453,42 @@ describe('verifyPasskeyAssertion', () => {
         await verifyPasskeyAssertion(validRequest);
 
         expect(mockState.enforceRateLimit).toHaveBeenCalledWith('passkeyVerify', 'uid-xyz');
+    });
+
+    it('resolves userId via collection-group fallback when userHandle is absent (userId === credentialId)', async () => {
+        // Simulates the case where browser returns userHandle: null — client sends credentialId as userId
+        mockState.docs['passkey_challenges/chal-123'] = {
+            challenge: 'some-challenge',
+            expiresAt: { toMillis: () => Date.now() + 60_000 },
+            purpose: 'authenticate',
+        };
+        // Credential stored under the REAL uid, not 'cred-abc' (which is what the client sent as userId)
+        mockState.docs['artifacts/anchor-os/users/real-uid-999/passkeys/cred-abc'] = {
+            credentialId: 'cred-abc',
+            publicKey: 'base64url-public-key',
+            counter: 0,
+        };
+
+        vi.mocked(verifyAuthenticationResponse).mockResolvedValueOnce({
+            verified: true,
+            authenticationInfo: { newCounter: 1 },
+        } as never);
+
+        const requestWithWrongUserId = {
+            data: {
+                challengeId: 'chal-123',
+                credentialId: 'cred-abc',
+                userId: 'cred-abc', // wrong — sent when userHandle was null
+                response: {
+                    authenticatorData: 'base64url-auth-data',
+                    clientDataJSON: 'base64url-client-data',
+                    signature: 'base64url-sig',
+                },
+            },
+        };
+
+        const result = await verifyPasskeyAssertion(requestWithWrongUserId);
+        expect(result).toHaveProperty('customToken', 'custom-token-abc');
+        expect(mockState.createCustomToken).toHaveBeenCalledWith('real-uid-999', expect.any(Object));
     });
 });

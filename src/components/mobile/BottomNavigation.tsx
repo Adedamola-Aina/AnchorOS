@@ -1,6 +1,10 @@
 /** Mobile bottom tab navigation with optional center Anchor AI icon. */
 // @ts-nocheck
 
+// 
+
+// 
+
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -84,7 +88,7 @@ export const BottomNavigation = ({
             aria-label="Mobile navigation"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)', WebkitTapHighlightColor: 'transparent' }}
         >
-            <div className={`grid ${anchorAIEnabled ? 'grid-cols-5' : 'grid-cols-4'} h-16`}>
+            <div className={`grid ${anchorAIEnabled ? 'grid-cols-5' : 'grid-cols-4'} h-[49px]`}>
                 {navItems.map(({ to, label, isIconOnly, renderIcon }) => (
                     <NavLink
                         key={to}
@@ -92,7 +96,7 @@ export const BottomNavigation = ({
                         aria-label={label}
                         onClick={(e) => handleTap(to, e)}
                         className={({ isActive }) =>
-                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 h-full min-h-[56px] will-change-transform ${isIconOnly ? '-mt-1' : ''} ${getIconColorClass(to, isActive)}`
+                            `flex flex-col items-center justify-center gap-1 relative transition-colors duration-100 h-full will-change-transform ${isIconOnly ? '-mt-1' : ''} ${getIconColorClass(to, isActive)}`
                         }
                     >
                         {({ isActive }) => {

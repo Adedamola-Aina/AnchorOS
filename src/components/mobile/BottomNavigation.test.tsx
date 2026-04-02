@@ -5,6 +5,10 @@
  */
 // @ts-nocheck
 
+// 
+
+// 
+
 
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
@@ -66,13 +70,19 @@ describe('BottomNavigation', () => {
     });
 
     describe('touch targets', () => {
-        it('has minimum 56px height for touch targets to accommodate home indicator padding safely', () => {
-            renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
+        it('uses Apple HIG 49px tab bar height with safe-area padding on the nav container', () => {
+            const { container } = renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
 
+            // Grid row must be exactly 49px — the Apple HIG standard for tab bars
+            const grid = container.querySelector('.grid');
+            expect(grid?.className).toContain('h-[49px]');
+            expect(grid?.className).not.toContain('h-16');
+
+            // NavLinks fill the grid height only — no additional min-h override
             const links = screen.getAllByRole('link');
             links.forEach(link => {
-                expect(link.className).toContain('min-h-[56px]');
                 expect(link.className).toContain('h-full');
+                expect(link.className).not.toContain('min-h-[56px]');
             });
         });
     });

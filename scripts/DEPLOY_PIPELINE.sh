@@ -294,7 +294,7 @@ echo -e "${GREEN}✅ Rollback snapshot ready.${NC}"
 
 # 6a. Deployment
 echo -e "\n${YELLOW}🚀 Stage 6a: Deploying to ${ENV^}...${NC}"
-DEPLOY_TARGETS="hosting:${HOSTING_TARGET},firestore:rules,functions"
+DEPLOY_TARGETS="hosting:${HOSTING_TARGET},firestore:rules,firestore:indexes,functions"
 if firebase deploy --only "$DEPLOY_TARGETS" --project "$FIREBASE_PROJECT"; then
     echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL!${NC}"
     echo -e "🌍 Live at: https://${HOSTING_URL}"
