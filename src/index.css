@@ -1,6 +1,6 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import 'tailwindcss';
+@config '../config/tailwind.config.js';
+@plugin "tailwindcss-animate";
 
 @layer base {
   :root {
@@ -8,15 +8,15 @@
     --glass-border: rgba(255, 255, 255, 0.3);
     --glass-blur: 12px;
     /* Surface hierarchy - Light mode */
-    --surface-1: theme('colors.slate.50');
-    --surface-2: theme('colors.white');
-    --surface-3: theme('colors.slate.100');
+    --surface-1: #f8fafc;
+    --surface-2: #ffffff;
+    --surface-3: #f1f5f9;
     /* Status colors - Light */
-    --status-success: theme('colors.emerald.500');
-    --status-error: theme('colors.rose.500');
-    --status-warning: theme('colors.amber.500');
+    --status-success: #10b981;
+    --status-error: #f43f5e;
+    --status-warning: #f59e0b;
     /* Focus ring */
-    --focus-ring: theme('colors.cyan.500');
+    --focus-ring: #06b6d4;
   }
 
   .dark {
@@ -31,12 +31,12 @@
     --surface-3: #1e293b;
     /* Inputs/modals (slate-800) */
     /* Status colors - Dark mode friendly (glowing) */
-    --status-success: theme('colors.emerald.400');
+    --status-success: #34d399;
     --status-error: #f87171;
     /* Coral/salmon */
-    --status-warning: theme('colors.amber.400');
+    --status-warning: #fbbf24;
     /* Focus ring - Cyan glow */
-    --focus-ring: theme('colors.cyan.400');
+    --focus-ring: #22d3ee;
   }
 
   html {
@@ -95,7 +95,7 @@
   }
 
   .glass-card {
-    @apply glass rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300/50 dark:hover:border-white/10;
+    @apply backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)] border border-[var(--glass-border)] transition-all duration-300 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300/50 dark:hover:border-white/10;
     background-color: var(--surface-2);
   }
 
@@ -104,7 +104,7 @@
   }
 
   .glass-interactive {
-    @apply glass hover:bg-white/80 dark:hover:bg-slate-800/80 active:scale-[0.98];
+    @apply backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)] border border-[var(--glass-border)] transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-800/80 active:scale-[0.98];
   }
 
   .premium-gradient {

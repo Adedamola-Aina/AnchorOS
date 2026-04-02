@@ -1,9 +1,11 @@
-// @ts-nocheck
-const path = require('path')
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     path.join(rootDir, 'index.html'),
     path.join(rootDir, 'src/**/*.{js,ts,jsx,tsx}'),
@@ -139,7 +141,5 @@ module.exports = {
       },
     }
   },
-  plugins: [
-    require("tailwindcss-animate"),
-  ],
+  // tailwindcss-animate loaded via @plugin directive in src/index.css
 }
