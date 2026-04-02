@@ -9,6 +9,11 @@
  * the explicit one. .glass-card must NOT have bg-[var(--glass-bg)] in @apply
  * or it silently overwrites the background-color: var(--surface-2) solid fill,
  * making cards invisible against the page background in light mode.
+ *
+ * BUG-128 — Tailwind v4 visual parity regression guards.
+ * v4 removed the default border-color that v3 set automatically. The light-mode
+ * --glass-border must be a visible grey (not white-on-white). .glass-card must
+ * be written as plain CSS (not @apply) so the v4 optimizer cannot interfere.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
@@ -78,5 +83,34 @@ describe('index.css component layer integrity (BUG-127)', () => {
     expect(glasscardMatch).not.toBeNull();
     const glasscardRule = glasscardMatch![1];
     expect(glasscardRule).toContain('background-color: var(--surface-2)');
+  });
+
+  it('.glass-card must not use @apply at all — plain CSS only to prevent v4 optimizer interference (BUG-128)', () => {
+    const glasscardMatch = indexCss.match(/\.glass-card\s*\{([^}]*)\}/);
+    expect(glasscardMatch).not.toBeNull();
+    const glasscardRule = glasscardMatch![1];
+    expect(glasscardRule).not.toContain('@apply');
+  });
+});
+
+describe('index.css v4 parity fixes (BUG-128)', () => {
+  const indexCss = readFileSync(resolve(__dirname, '../../src/index.css'), 'utf-8');
+
+  it('light-mode --glass-border must not be white-on-white (rgba 255,255,255,...)', () => {
+    // Find :root block and check --glass-border
+    const rootMatch = indexCss.match(/:root\s*\{([^}]*)\}/s);
+    expect(rootMatch).not.toBeNull();
+    const rootBlock = rootMatch![1];
+    const borderMatch = rootBlock.match(/--glass-border:\s*([^;]+);/);
+    expect(borderMatch).not.toBeNull();
+    const borderValue = borderMatch![1].trim();
+    // Must NOT be white (255, 255, 255) — that is invisible on white cards
+    expect(borderValue).not.toMatch(/rgba\(\s*255\s*,\s*255\s*,\s*255/);
+  });
+
+  it('global border-color default restores v3 behaviour — slate-200 in base layer', () => {
+    // v4 removed the default border-color; we add it back in @layer base
+    // Check that the border-color reset exists somewhere in the file
+    expect(indexCss).toContain('border-color: rgba(226, 232, 240, 1)');
   });
 });

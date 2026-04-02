@@ -5,7 +5,8 @@
 @layer base {
   :root {
     --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.3);
+    /* BUG-128: light mode border must be a visible grey, not white-on-white */
+    --glass-border: rgba(0, 0, 0, 0.06);
     --glass-blur: 12px;
     /* Surface hierarchy - Light mode */
     --surface-1: #f8fafc;
@@ -21,7 +22,7 @@
 
   .dark {
     --glass-bg: rgba(15, 23, 42, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.08);
     --glass-blur: 20px;
     /* Surface hierarchy - Dark mode (Navy nautical theme) */
     --surface-1: #0a0f1a;
@@ -87,6 +88,18 @@
   .focus\:ring-4:focus {
     box-shadow: none;
   }
+
+  /* BUG-128: Tailwind v4 removed the default border-color that v3 set automatically.
+   * In v3, `border` implied a grey border colour. In v4, only border-style and
+   * border-width are set — colour defaults to currentColor (usually text colour).
+   * Restore v3 behaviour: all elements default to slate-200 border colour. */
+  *, *::before, *::after {
+    border-color: rgba(226, 232, 240, 1); /* slate-200 */
+  }
+
+  .dark *, .dark *::before, .dark *::after {
+    border-color: rgba(51, 65, 85, 1); /* slate-700 */
+  }
 }
 
 @layer components {
@@ -94,13 +107,30 @@
     @apply backdrop-blur-[var(--glass-blur)] bg-[var(--glass-bg)] border border-[var(--glass-border)] transition-all duration-300;
   }
 
+  /* BUG-128: Rewritten as plain CSS — no @apply — to eliminate Tailwind v4
+   * optimizer deduplication that silently dropped background-color: var(--surface-2).
+   * v3 equivalent: white card, subtle border, gentle shadow, glass blur. */
   .glass-card {
-    @apply backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] transition-all duration-300 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300/50 dark:hover:border-white/10;
     background-color: var(--surface-2);
+    border-radius: 1rem; /* rounded-2xl */
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.1); /* shadow-sm */
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    transition: all 0.3s;
+  }
+
+  .glass-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* shadow-md */
+    border-color: rgba(148, 163, 184, 0.5); /* slate-300/50 */
   }
 
   .dark .glass-card {
     background-color: rgba(15, 23, 42, 0.8);
+  }
+
+  .dark .glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.1); /* white/10 */
   }
 
   .glass-interactive {
