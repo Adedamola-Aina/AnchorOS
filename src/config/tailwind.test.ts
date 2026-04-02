@@ -108,9 +108,9 @@ describe('index.css v4 parity fixes (BUG-128)', () => {
     expect(borderValue).not.toMatch(/rgba\(\s*255\s*,\s*255\s*,\s*255/);
   });
 
-  it('global border-color default restores v3 behaviour — slate-200 in base layer', () => {
-    // v4 removed the default border-color; we add it back in @layer base
-    // Check that the border-color reset exists somewhere in the file
-    expect(indexCss).toContain('border-color: rgba(226, 232, 240, 1)');
+  it('global border-color default restores v3 behaviour — gray-200 (#e5e7eb) in base layer', () => {
+    // v3 preflight set border-color: #e5e7eb (gray-200) on *, ::before, ::after.
+    // v4 dropped this; we restore it explicitly.
+    expect(indexCss).toContain('#e5e7eb');
   });
 });
