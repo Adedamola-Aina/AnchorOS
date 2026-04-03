@@ -69,8 +69,9 @@
   --color-family-800: #9a3412;
   --color-family-900: #7c2d12;
 
-  /* Font: native system stack — SF Pro on iOS, Roboto on Android */
-  --font-family-sans:
+  /* Font: native system stack — SF Pro on iOS, Roboto on Android.
+     v4 resolves font-sans from --font-sans (not --font-family-sans) */
+  --font-sans:
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "Segoe UI", Roboto, Oxygen, Ubuntu, system-ui, sans-serif;
 
@@ -116,6 +117,43 @@
     0%, 100% { opacity: 1;   transform: scale(1); }
     50%       { opacity: 0.5; transform: scale(0.8); }
   }
+
+  /* Restore Tailwind v3 shadow scale — v4 shifted all named shadows one step heavier.
+     v3: shadow-sm=0.05 opacity · shadow=0.1 two-layer · shadow-md=mid · etc.
+     v4: shadow-sm=what v3 called shadow, shadow-md=what v3 called shadow-lg, etc.
+     These overrides make named classes produce the same visual weight as production. */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow:    0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* Pin default Tailwind palettes to v3 sRGB hex — v4 defaults to OKLCH
+     which renders subtly different in some browsers. Only overriding the
+     two palettes used most heavily in the codebase (slate + gray). */
+  --color-slate-50:  #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+  --color-gray-50:  #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  --color-gray-950: #030712;
 }
 
 
@@ -125,9 +163,9 @@
 @layer base {
 
   :root {
-    /* Glass morphism */
+    /* Glass morphism — border matches v3: near-invisible on white */
     --glass-bg:     rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.3);
     --glass-blur:   12px;
 
     /* Surface hierarchy — light mode */
@@ -147,7 +185,7 @@
   .dark {
     /* Glass morphism — navy nautical theme */
     --glass-bg:     rgba(15, 23, 42, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.05);
     --glass-blur:   20px;
 
     /* Surface hierarchy — dark mode */
@@ -231,23 +269,48 @@
 }
 
 
+/* ─── Typography Utilities ──────────────────────────────────
+   @utility so responsive / state variants work (lg:text-h1-lg).
+   In Tailwind v4, @layer components classes do NOT generate
+   responsive variants — only @utility blocks do.
+   ─────────────────────────────────────────────────────────── */
+@utility text-display {
+  font-size: 2.25rem;  line-height: 2.5rem;  font-weight: 800;
+}
+@utility text-display-lg {
+  font-size: 3rem;     line-height: 1;        font-weight: 800;
+}
+@utility text-h1 {
+  font-size: 1.875rem; line-height: 2.25rem; font-weight: 700;
+}
+@utility text-h1-lg {
+  font-size: 2.25rem;  line-height: 2.5rem;  font-weight: 700;
+}
+@utility text-h2 {
+  font-size: 1.5rem;   line-height: 2rem;    font-weight: 700;
+}
+@utility text-h2-lg {
+  font-size: 1.875rem; line-height: 2.25rem; font-weight: 700;
+}
+@utility text-h3 {
+  font-size: 1.25rem;  line-height: 1.75rem; font-weight: 600;
+}
+@utility text-h3-lg {
+  font-size: 1.5rem;   line-height: 2rem;    font-weight: 600;
+}
+@utility text-body {
+  font-size: 1rem;     line-height: 1.5rem;  font-weight: 500;
+}
+@utility text-small {
+  font-size: 0.875rem; line-height: 1.25rem; font-weight: 600;
+}
+
+
 /* ─── Components ────────────────────────────────────────────
    All custom classes as plain CSS — no @apply that could
    conflict with Tailwind v4's optimizer deduplication.
    ─────────────────────────────────────────────────────────── */
 @layer components {
-
-  /* Typography scale — font-weight bundled per UX-013 */
-  .text-display    { font-size: 2.25rem;  line-height: 2.5rem;  font-weight: 800; }
-  .text-display-lg { font-size: 3rem;     line-height: 1;        font-weight: 800; }
-  .text-h1         { font-size: 1.875rem; line-height: 2.25rem; font-weight: 700; }
-  .text-h1-lg      { font-size: 2.25rem;  line-height: 2.5rem;  font-weight: 700; }
-  .text-h2         { font-size: 1.5rem;   line-height: 2rem;    font-weight: 700; }
-  .text-h2-lg      { font-size: 1.875rem; line-height: 2.25rem; font-weight: 700; }
-  .text-h3         { font-size: 1.25rem;  line-height: 1.75rem; font-weight: 600; }
-  .text-h3-lg      { font-size: 1.5rem;   line-height: 2rem;    font-weight: 600; }
-  .text-body       { font-size: 1rem;     line-height: 1.5rem;  font-weight: 500; }
-  .text-small      { font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; }
 
   /* Glass: transparent frosted surface */
   .glass {
@@ -258,22 +321,21 @@
     transition: all 0.3s;
   }
 
-  /* Glass card: solid white card — the primary content container */
+  /* Glass card: solid white card — the primary content container.
+     Matches v3 glass-card: rounded-2xl shadow-sm + hover:shadow-md */
   .glass-card {
     background-color: var(--surface-2);
     border-radius: 1rem;
     border: 1px solid var(--glass-border);
-    box-shadow:
-      0 1px 3px 0   rgba(0, 0, 0, 0.08),
-      0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
-    transition: box-shadow 0.2s, border-color 0.2s;
+    transition: all 0.3s;
   }
   .glass-card:hover {
     box-shadow:
-      0 4px 12px 0   rgba(0, 0, 0, 0.10),
-      0 2px 4px -1px  rgba(0, 0, 0, 0.06);
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.1);
     border-color: rgba(148, 163, 184, 0.5);
   }
   .dark .glass-card {

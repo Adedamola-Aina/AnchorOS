@@ -65,18 +65,18 @@ describe('UX-040 — Brand color tokens in @theme', () => {
 
 /* ─── Typography + font ─────────────────────────────────── */
 
-describe('UX-040 — Typography tokens in @layer components', () => {
-  it('defines heading sizes with bundled font-weight', () => {
-    expect(css).toContain('.text-h1');
-    expect(css).toContain('.text-h2');
-    expect(css).toContain('.text-h3');
-    expect(css).toContain('.text-display');
-    expect(css).toContain('.text-body');
-    expect(css).toContain('.text-small');
+describe('UX-040 — Typography tokens as @utility blocks', () => {
+  it('defines heading sizes as @utility for responsive variant support', () => {
+    expect(css).toContain('@utility text-h1');
+    expect(css).toContain('@utility text-h2');
+    expect(css).toContain('@utility text-h3');
+    expect(css).toContain('@utility text-display');
+    expect(css).toContain('@utility text-body');
+    expect(css).toContain('@utility text-small');
   });
 
   it('defines native system font family in @theme', () => {
-    expect(css).toContain('--font-family-sans:');
+    expect(css).toContain('--font-sans:');
     expect(css).toContain('-apple-system');
     expect(css).toContain('Roboto');
   });
@@ -121,12 +121,12 @@ describe('BUG-127 / BUG-128 — Glass card regression guards', () => {
     expect(match![1]).toContain('background-color: var(--surface-2)');
   });
 
-  it('light-mode --glass-border is not white-on-white', () => {
+  it('light-mode --glass-border matches v3 prod value (near-invisible white)', () => {
     const rootMatch = css.match(/:root\s*\{([^}]*)\}/s);
     expect(rootMatch).not.toBeNull();
     const borderMatch = rootMatch![1].match(/--glass-border:\s*([^;]+);/);
     expect(borderMatch).not.toBeNull();
-    expect(borderMatch![1].trim()).not.toMatch(/rgba\(\s*255\s*,\s*255\s*,\s*255/);
+    expect(borderMatch![1].trim()).toBe('rgba(255, 255, 255, 0.3)');
   });
 
   it('restores Tailwind v3 border-color default (gray-200)', () => {
