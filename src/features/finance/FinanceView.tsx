@@ -22,6 +22,7 @@ import { TransactionForm } from './TransactionForm';
 import type { AnchorTransaction } from '../../types';
 import { Button } from '@anchor-os/ui';
 import { AccountCard, VirtualTransactionList } from './components';
+import { WalletStack } from './components/WalletStack';
 import { NetWorthCards } from './components/NetWorthCards';
 import { EmptyAccountsState } from './components/EmptyAccountsState';
 // FamilyNotificationBanner moved to AccountDetailsView for shared accounts only
@@ -139,10 +140,14 @@ const FinanceView = () => {
         <SectionHeader title="Finance" subtitle="Multi-account asset management and cashflow tracking." action={<Button variant="secondary" size="sm" onClick={() => setMode(mode === 'addAcc' ? 'view' : 'addAcc')} className="gap-2"><Landmark className="w-4 h-4" /> <span>Add Account</span></Button>} />
 
         {!isSearching && (<><NetWorthCards netWorth={netWorth} /><MonthlyInsight transactions={transactions} currency={primaryCurrency} />
-          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-6'}`}>
-            {activeAccounts.map((acc) => (<AccountCard key={acc.id} account={acc} userId={user?.uid || ''} isOwnerOfConnection={isFamilyOwner} familyMemberUid={familyMemberUid || undefined} onEdit={(acc) => setSelectedAccountId(acc.id)} onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)} />))}
-            {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
-          </div>
+          {activeAccounts.length > 0 && (isMobile ? (
+            <WalletStack accounts={activeAccounts} userId={user?.uid || ''} isOwnerOfConnection={isFamilyOwner} familyMemberUid={familyMemberUid || undefined} onSelect={(acc) => setSelectedAccountId(acc.id)} onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)} />
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeAccounts.map((acc) => (<AccountCard key={acc.id} account={acc} userId={user?.uid || ''} isOwnerOfConnection={isFamilyOwner} familyMemberUid={familyMemberUid || undefined} onEdit={(acc) => setSelectedAccountId(acc.id)} onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)} />))}
+            </div>
+          ))}
+          {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
           {/* INN-002: Subscription pattern detection */}
           <SubscriptionDetectorCard transactions={transactions} currency={primaryCurrency} /></>)}
 

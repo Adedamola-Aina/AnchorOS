@@ -10,6 +10,8 @@ export { AccountCard } from './AccountCard';
 export { AccountHeader } from './AccountHeader';
 export { AccountSelector } from './AccountSelector';
 export { ActivityFeed } from './ActivityFeed';
+export { WalletCard } from './WalletCard';
+export { WalletStack } from './WalletStack';
 export { CategorySelector, DEFAULT_CATEGORIES } from './CategorySelector';
 export { OverdraftWarning } from './OverdraftWarning';
 export { SpendingTrendsChart } from './SpendingTrendsChart';
