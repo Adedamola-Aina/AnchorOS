@@ -145,3 +145,25 @@ describe('BUG-127 / BUG-128 — Glass card regression guards', () => {
     expect(css).toContain('color: var(--color-gray-400, #9ca3af)');
   });
 });
+
+/* ─── Specificity safety — BUG-129 ──────────────────────── */
+
+describe('BUG-129 — Global * reset must not override :where() utilities', () => {
+  it('does NOT set margin:0 or padding:0 on the global * rule', () => {
+    // Tailwind v4 wraps space-y-*, divide-y in :where() (zero specificity).
+    // A late * { margin: 0 } at zero specificity would override them via
+    // source order, collapsing all vertical spacing.
+    // v4 preflight already resets margin/padding — our custom * must not.
+    const globalResetBlock = css.match(
+      /\/\*.*Global resets.*\*\/[\s\S]*?\*[\s\S]*?\{([^}]+)\}/
+    );
+    expect(globalResetBlock).toBeTruthy();
+    const props = globalResetBlock![1];
+    expect(props).not.toMatch(/\bmargin\s*:\s*0/);
+    expect(props).not.toMatch(/\bpadding\s*:\s*0/);
+  });
+
+  it('preserves -webkit-tap-highlight-color in global * rule', () => {
+    expect(css).toContain('-webkit-tap-highlight-color: transparent');
+  });
+});

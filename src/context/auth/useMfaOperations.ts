@@ -101,7 +101,7 @@ export function useMfaOperations(user: User | null, updateProfile: (updates: { m
         } catch (err: unknown) {
             const error = err as { code?: string; message?: string };
             if (error.code === 'auth/requires-recent-login') {
-                throw new Error('REQUIRES_RECENT_LOGIN');
+                throw new Error('REQUIRES_RECENT_LOGIN', { cause: err });
             }
             throw err;
         }
