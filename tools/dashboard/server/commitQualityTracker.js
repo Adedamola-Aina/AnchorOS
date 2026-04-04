@@ -27,6 +27,9 @@ const TICKET_ID_RE = /\b(BUG|FEAT|REG|GAP|UX|TASK|ARCH|FIN|SEC|PRD|SRE|PLT|DES|E
 // Conventional commits: type(scope): description  OR  type: description
 const CONVENTIONAL_RE = /^[\w-]+(\([\w/-]+\))?:\s+\S+/;
 
+// Automated commit types excluded from ticket-rate calculation
+const EXEMPT_TYPE_RE = /^(deploy|chore|ci|build|revert)\b/i;
+
 /**
  * Get commit quality metrics for the last `window` commits.
  */
@@ -48,13 +51,17 @@ function getCommitQuality(window = 50) {
     // Strip the short hash prefix (first 7–8 chars + space)
     const messages = lines.map((l) => l.replace(/^[0-9a-f]{7,8}\s+/, ''));
 
-    const withTicket = messages.filter((m) => TICKET_ID_RE.test(m));
-    const withConventional = messages.filter((m) => CONVENTIONAL_RE.test(m));
-    const untracked = messages.filter((m) => !TICKET_ID_RE.test(m));
+    // Separate automated commits from real work
+    const automated = messages.filter((m) => EXEMPT_TYPE_RE.test(m));
+    const workMessages = messages.filter((m) => !EXEMPT_TYPE_RE.test(m));
 
-    const total = messages.length;
-    const ticketRate = Math.round((withTicket.length / total) * 100);
-    const conventionalRate = Math.round((withConventional.length / total) * 100);
+    const withTicket = workMessages.filter((m) => TICKET_ID_RE.test(m));
+    const withConventional = messages.filter((m) => CONVENTIONAL_RE.test(m));
+    const untracked = workMessages.filter((m) => !TICKET_ID_RE.test(m));
+
+    const total = workMessages.length;
+    const ticketRate = total > 0 ? Math.round((withTicket.length / total) * 100) : 100;
+    const conventionalRate = Math.round((withConventional.length / messages.length) * 100);
 
     let health;
     if (ticketRate >= 50) health = 'good';
@@ -63,7 +70,9 @@ function getCommitQuality(window = 50) {
 
     return {
         available: true,
-        window: total,
+        window: messages.length,
+        automated: automated.length,
+        workCommits: total,
         withTicket: withTicket.length,
         withConventional: withConventional.length,
         untracked: untracked.length,

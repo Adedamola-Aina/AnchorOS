@@ -7,12 +7,16 @@ export default {
   plugins: [
     {
       rules: {
-        'anchor-ticket-ref': ({ subject, body, footer }) => {
+        'anchor-ticket-ref': ({ type, subject, body, footer }) => {
+          // Automated commits don't need ticket IDs
+          const exemptTypes = ['deploy', 'chore', 'ci', 'build', 'docs', 'style', 'revert'];
+          if (exemptTypes.includes(type)) return [true];
+
           const text = [subject, body, footer].filter(Boolean).join('\n');
           const hasTicket = TICKET_RE.test(text);
           return [
             hasTicket,
-            'No ticket ID found (e.g. BUG-123, FEAT-123). Add one or this is a deliberate un-ticketed commit.',
+            'Ticket ID required (e.g. BUG-123, FEAT-123). Exempt types: deploy, chore, ci, build, docs, style, revert.',
           ];
         },
       },
@@ -42,7 +46,7 @@ export default {
     'subject-max-length': [1, 'always', 100],
     // Allow body to be empty
     'body-max-line-length': [0, 'always', Infinity],
-    // Warn (level 1) if no ticket ID in subject/body/footer
-    'anchor-ticket-ref': [1, 'always'],
+    // Block (level 2) commits without ticket ID — exempt types bypass this
+    'anchor-ticket-ref': [2, 'always'],
   },
 };
