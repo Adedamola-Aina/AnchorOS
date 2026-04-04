@@ -43,7 +43,7 @@ test.describe('Mobile Viewport - Auth Page', () => {
 
     test('should hide hero panel on mobile', async ({ page }) => {
         // Hero panel (AuthLeftPanel) uses `hidden lg:flex` — it is NOT visible at 375px
-        const heroPanel = page.locator('.hidden.lg\:flex').first();
+        const heroPanel = page.locator('[class*="hidden"][class*="lg\\:flex"]').first();
         await expect(heroPanel).not.toBeVisible();
     });
 
@@ -110,11 +110,11 @@ test.describe('Mobile Viewport - Dashboard', () => {
         const dashboardBtn = page.getByRole('link', { name: /Dashboard|Home/ });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
-            // Charts should resize for mobile
-            const charts = page.locator('svg').first();
-            const isChartVisible = await charts.isVisible().catch(() => false);
-            // SVG charts render — verify at least one is present in the DOM
-            expect(isChartVisible).toBe(true);
+            await dashboardBtn.click();
+            await page.waitForLoadState('networkidle');
+            // Charts should resize for mobile — check SVGs are in the DOM
+            const chartCount = await page.locator('svg').count();
+            expect(chartCount).toBeGreaterThan(0);
         } else {
             test.skip();
         }

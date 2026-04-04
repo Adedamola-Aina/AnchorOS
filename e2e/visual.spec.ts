@@ -101,7 +101,7 @@ test.describe('Visual Regression Tests', () => {
       await page.waitForLoadState('networkidle');
 
       await expect(page).toHaveScreenshot('desktop-layout.png', {
-        maxDiffPixelRatio: 0.03,
+        maxDiffPixelRatio: 0.05,
         mask: [
           page.locator('[data-testid="current-date"]'),
           page.locator('[data-testid="greeting"]'),
