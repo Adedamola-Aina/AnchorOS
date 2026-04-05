@@ -85,11 +85,15 @@ export const CardStack: React.FC<CardStackProps> = ({
     const isExpanded = mode === 'expanded';
     const scale = isExpanded ? 1 : Math.max(1 - i * 0.015, 0.955);
     const shiftX = isExpanded ? 0 : i * 2;
+    const boxShadow = isExpanded
+      ? `0 ${20 + i * 3}px ${44 + i * 4}px rgba(15,23,42,0.16), 0 8px 18px rgba(15,23,42,0.10)`
+      : `0 ${10 + i * 2}px ${24 + i * 4}px rgba(15,23,42,${Math.max(0.18 - i * 0.02, 0.08)}), 0 4px 10px rgba(15,23,42,0.10)`;
     return {
       transform: `translateX(${shiftX}px) scale(${scale})`,
       transformOrigin: 'top center',
       transition: `transform 480ms ${STACK_SPRING_CURVE}`,
       transitionDelay: isExpanded ? `${i * STACK_STAGGER_MS}ms` : `${Math.max(visibleAccounts.length - 1 - i, 0) * 14}ms`,
+      boxShadow,
     };
   }, [mode, visibleAccounts.length]);
 

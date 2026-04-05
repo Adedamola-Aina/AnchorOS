@@ -45,14 +45,17 @@ describe('AccountCard — Apple Wallet layout', () => {
   });
 
   it('uses Wallet-style top bar typography for the visible header row', () => {
-    render(
+    const { container } = render(
       <AccountCard account={baseAccount} index={0} totalCards={3}
         mode="stack" isActive={true} isDragging={false} dragOffset={0}
         onTap={noop} onDragStart={noop} />
     );
 
-    expect(screen.getByText('Chase Bank')).toHaveStyle({ fontSize: '17px', letterSpacing: '-0.4px' });
-    expect(screen.getByText('$1500.00')).toHaveStyle({ fontSize: '17px', letterSpacing: '-0.4px' });
+    expect(screen.getByText('Chase Bank')).toHaveStyle({ fontSize: '18px', fontWeight: '600', letterSpacing: '-0.4px' });
+    expect(screen.getByText('$1500.00')).toHaveStyle({ fontSize: '18px', fontWeight: '500', letterSpacing: '-0.4px' });
+
+    const content = container.querySelector('.card-header')?.parentElement;
+    expect(content).toHaveClass('px-6');
   });
 
   it('shows sub-name when different from institution', () => {

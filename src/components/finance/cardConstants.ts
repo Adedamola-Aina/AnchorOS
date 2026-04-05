@@ -7,11 +7,13 @@
 /** ISO 7810 ID-1 credit card aspect ratio */
 export const CARD_ASPECT_RATIO = 1.586;
 export const CARD_CORNER_RADIUS = 28;
-export const CARD_HEADER_FONT_SIZE = 17;
+export const CARD_HEADER_FONT_SIZE = 18;
+export const CARD_BALANCE_FONT_SIZE = 18;
 export const CARD_HEADER_LETTER_SPACING = '-0.4px';
-export const CARD_HEADER_REVEAL = 68;
+export const CARD_HEADER_REVEAL = 72;
 export const STACK_SPRING_CURVE = 'cubic-bezier(0.22, 1, 0.36, 1)';
-export const STACK_STAGGER_MS = 42;
+export const STACK_STAGGER_MS = 40;
+export const CARD_NOISE_TEXTURE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.15' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E")`;
 
 /** Account-type-based gradient colors (checking→slate, savings→emerald, etc.) */
 export const TYPE_COLORS: Record<string, string> = {

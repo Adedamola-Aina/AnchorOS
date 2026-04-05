@@ -10,7 +10,8 @@ import { useDeviceShine } from '../../hooks/useDeviceShine';
 import { getFinanceViewTransitionName } from '../../features/finance/financeViewTransition';
 import { resolveAccountArtworkUrl, revokeAccountArtworkUrl } from '../../services/accountArtworkStorage';
 import {
-  CARD_ASPECT_RATIO, CARD_CORNER_RADIUS, CARD_HEADER_FONT_SIZE, CARD_HEADER_LETTER_SPACING,
+  CARD_ASPECT_RATIO, CARD_BALANCE_FONT_SIZE, CARD_CORNER_RADIUS, CARD_HEADER_FONT_SIZE, CARD_HEADER_LETTER_SPACING,
+  CARD_NOISE_TEXTURE,
   TYPE_COLORS, DEFAULT_CARD_COLORS, MESH_GRADIENTS,
   PATTERNS, PATTERN_SIZES, SHADOW_ACTIVE, SHADOW_DEFAULT, hashString, ARTWORK_PRESETS,
 } from './cardConstants';
@@ -114,7 +115,7 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
         aspectRatio: `${CARD_ASPECT_RATIO}`,
         backgroundColor: cardColor, borderRadius: CARD_CORNER_RADIUS,
         border: '1px solid rgba(255,255,255,0.16)',
-        boxShadow: isActive ? SHADOW_ACTIVE : SHADOW_DEFAULT,
+        boxShadow: style?.boxShadow ?? (isActive ? SHADOW_ACTIVE : SHADOW_DEFAULT),
         viewTransitionName: getFinanceViewTransitionName(account.id),
         transition: 'box-shadow 240ms ease, transform 240ms ease', ...style,
       }}
@@ -153,6 +154,17 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
         background: 'linear-gradient(135deg,rgba(255,255,255,0.12) 0%,rgba(0,0,0,0.08) 100%)',
         borderRadius: 'inherit',
       }} />
+      <div className="absolute inset-0 pointer-events-none" style={{
+        backgroundImage: CARD_NOISE_TEXTURE,
+        backgroundSize: '140px 140px',
+        borderRadius: 'inherit',
+        mixBlendMode: 'soft-light',
+        opacity: 0.06,
+      }} />
+      <div className="absolute inset-0 pointer-events-none" style={{
+        borderRadius: 'inherit',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22), inset 0 0 0 1px rgba(255,255,255,0.12)',
+      }} />
       {/* Custom artwork */}
       {artworkBg && (<>
         <div className="absolute inset-0" style={{
@@ -169,11 +181,11 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
         borderRadius: 'inherit', zIndex: 1,
       }} />
       {/* Card content */}
-      <div className="relative z-[2] flex h-full flex-col justify-between px-[22px] py-[18px] sm:px-6 sm:py-5">
+      <div className="relative z-[2] flex h-full flex-col justify-between px-6 py-5 sm:px-6 sm:py-5">
         {/* TOP ROW — name + balance (visible in peek strip) */}
         <div className="card-header flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate" style={{ fontFamily: 'SF Pro Display, SF Pro Text, ui-sans-serif, system-ui, sans-serif', fontSize: CARD_HEADER_FONT_SIZE, fontWeight: 700, letterSpacing: CARD_HEADER_LETTER_SPACING, color: '#fff', lineHeight: 1.12 }}>
+            <p className="truncate" style={{ fontFamily: 'SF Pro Display, SF Pro Text, ui-sans-serif, system-ui, sans-serif', fontSize: CARD_HEADER_FONT_SIZE, fontWeight: 600, letterSpacing: CARD_HEADER_LETTER_SPACING, color: '#fff', lineHeight: 1.12 }}>
               {instName}
             </p>
             {showSecondaryName && account.name !== instName && (
@@ -182,7 +194,7 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
               </p>
             )}
           </div>
-          <span className="whitespace-nowrap" style={{ fontFamily: 'SF Pro Display, SF Pro Text, ui-sans-serif, system-ui, sans-serif', fontSize: CARD_HEADER_FONT_SIZE, fontWeight: 500, letterSpacing: CARD_HEADER_LETTER_SPACING, color: '#fff', lineHeight: 1.12 }}>
+          <span className="whitespace-nowrap" style={{ fontFamily: 'SF Pro Display, SF Pro Text, ui-sans-serif, system-ui, sans-serif', fontSize: CARD_BALANCE_FONT_SIZE, fontWeight: 500, letterSpacing: CARD_HEADER_LETTER_SPACING, color: '#fff', lineHeight: 1.12 }}>
             {formatCurrency(balance, account.currency)}
           </span>
         </div>
