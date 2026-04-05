@@ -7,6 +7,14 @@
 /** ISO 7810 ID-1 credit card aspect ratio */
 export const CARD_ASPECT_RATIO = 1.586;
 
+/** Account-type-based gradient colors (checking→slate, savings→emerald, etc.) */
+export const TYPE_COLORS: Record<string, string> = {
+  checking: '#1E293B',
+  savings: '#047857',
+  salary: '#6D28D9',
+  investment: '#B45309',
+};
+
 export const DEFAULT_CARD_COLORS = [
   '#3D52D5', '#1A7F6E', '#8B1A4A', '#2D3A4A',
   '#B45309', '#6B21A8', '#0F766E',

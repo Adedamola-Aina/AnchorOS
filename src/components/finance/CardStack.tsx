@@ -7,8 +7,6 @@ import React, {
 } from 'react';
 import { AccountCard, CARD_ASPECT_RATIO } from './AccountCard';
 import { haptic } from '../../utils/haptic';
-import { formatCurrencyCompact } from '../../utils/format';
-import { fromCents } from '../../utils/moneyUtils';
 import { useCardDrag } from '../../hooks/useCardDrag';
 import type { AnchorAccount } from '../../types';
 
@@ -123,17 +121,6 @@ export const CardStack: React.FC<CardStackProps> = ({
     >
       {visibleAccounts.map((acc, i) => (
         <div key={acc.id} ref={el => { cardEls.current[i] = el; }} style={getCardStyle(i)}>
-          {mode === 'collapsed' && i > 0 && (
-            <div className="absolute inset-x-0 top-0 z-[3] flex items-center justify-between px-5"
-              style={{ height: PEEK_HEIGHT, pointerEvents: 'none' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,1)' }}>
-                {acc.externalConnection?.institutionName ?? acc.name}
-              </span>
-              <span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.9)' }}>
-                {formatCurrencyCompact(fromCents(acc.balanceCents), acc.currency, { forceCompact: true })}
-              </span>
-            </div>
-          )}
           <AccountCard account={acc} index={i} totalCards={visibleAccounts.length}
             mode={mode === 'collapsed' ? 'stack' : 'expanded'}
             isActive={i === 0 && mode === 'collapsed'}
