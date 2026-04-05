@@ -1,79 +1,65 @@
 /**
- * FinanceView - Main finance view with accounts and transactions
- * Refactored per CLAUDE.md §3.2 (200-line rule).
- * Account details section extracted to AccountDetailsContainer.tsx
+ * FinanceView — Apple Wallet-inspired finance page (UX-041 Phase 2)
+ * 3-zone layout: Header → Total Assets → Card Stack
+ * Account details via existing AccountDetailsContainer.
  */
 // @ts-nocheck
 
 
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Landmark, Search, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { Search, Layers, List } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
 import { useResponsive } from '../../hooks/useResponsive';
-import { useTransactionSearch } from '../../hooks/useTransactionSearch';
-import { useHaptic } from '../../hooks/useHaptic';
 import { SectionHeader } from '../../components/shared';
 import { Modal } from '../../components/shared/Modal';
 import { AccountForm } from './AccountForm';
 import { TransactionForm } from './TransactionForm';
 import type { AnchorTransaction } from '../../types';
-import { Button } from '@anchor-os/ui';
-import { AccountCard, VirtualTransactionList } from './components';
-import { WalletStack } from './components/WalletStack';
-import { NetWorthCards } from './components/NetWorthCards';
-import { EmptyAccountsState } from './components/EmptyAccountsState';
-// FamilyNotificationBanner moved to AccountDetailsView for shared accounts only
 import { AccountDetailsContainer } from './components/AccountDetailsContainer';
+import { EmptyAccountsState } from './components/EmptyAccountsState';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
-import { MonthlyInsight } from './MonthlyInsight';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
-import { SubscriptionDetectorCard } from './components/SubscriptionDetectorCard';
+import { CardStack } from '../../components/finance/CardStack';
+import { TotalAssetsSummaryBar } from '../../components/finance/TotalAssetsSummaryBar';
+import { SkeletonCards } from '../../components/finance/SkeletonCards';
+import { useReorderAccounts } from '../../hooks/useReorderAccounts';
 
+type ViewMode = 'collapsed' | 'expanded';
+const VIEW_MODE_KEY = 'anchor_finance_view_mode';
+
+function getStoredViewMode(): ViewMode {
+  try { const v = localStorage.getItem(VIEW_MODE_KEY); return v === 'expanded' ? 'expanded' : 'collapsed'; }
+  catch { return 'collapsed'; }
+}
 
 const FinanceView = () => {
-  const { transactions, accounts, deleteTransaction, deleteAccount, currentMonth, nextMonth, prevMonth, loadingFinance, netWorth } = useFinance();
+  const { accounts, deleteTransaction, deleteAccount, loadingFinance } = useFinance();
   const { user } = useAuth();
-  const { isOwner: isFamilyOwner, familyMemberUid, familyMemberName, shareAccount: toggleShareAccount } = useFamilySharing(user?.uid);
-  const { isMobile } = useResponsive();
-  const haptic = useHaptic();
+  const { familyMemberUid, familyMemberName, shareAccount: toggleShareAccount } = useFamilySharing(user?.uid);
+  useResponsive(); // triggers responsive re-renders
+  const { reorder } = useReorderAccounts();
 
   const [mode, setMode] = useState<'view' | 'addTx' | 'addAcc' | 'editTx'>('view');
-
+  const [viewMode, setViewMode] = useState<ViewMode>(getStoredViewMode);
   const [editingTransaction, setEditingTransaction] = useState<AnchorTransaction | undefined>(undefined);
   const [initialTransactionType, setInitialTransactionType] = useState<'expense' | 'income' | 'transfer'>('expense');
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [accountToDelete, setAccountToDelete] = useState<typeof accounts[0] | null>(null);
   const [accountToUnshare, setAccountToUnshare] = useState<typeof accounts[0] | null>(null);
   const [transactionToDelete, setTransactionToDelete] = useState<AnchorTransaction | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [prefillData, setPrefillData] = useState<{ amount?: number; category?: string; title?: string } | undefined>(undefined);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const transactionSectionRef = useRef<HTMLDivElement>(null);
 
-  const activeAccounts = useMemo(() => accounts.filter(a => !a.isArchived), [accounts]);
+  const activeAccounts = useMemo(() => {
+    const filtered = accounts.filter(a => !a.isArchived);
+    return filtered.sort((a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity));
+  }, [accounts]);
   const selectedAccount = useMemo(() => selectedAccountId ? accounts.find(a => a.id === selectedAccountId) || null : null, [selectedAccountId, accounts]);
-  // Identify shared accounts (owned by someone else) to exclude their txs from main list
-  const sharedAccountIds = useMemo(() => new Set(
-    accounts.filter(a => a.ownerId && a.ownerId !== user?.uid).map(a => a.id)
-  ), [accounts, user?.uid]);
-  // F-008: Calculate primary currency based on account count (not just first account)
-  const primaryCurrency = useMemo(() => {
-    const currencyCount: Record<string, number> = {};
-    activeAccounts.forEach(acc => { currencyCount[acc.currency] = (currencyCount[acc.currency] || 0) + 1; });
-    const sorted = Object.entries(currencyCount).sort((a, b) => b[1] - a[1]);
-    return (sorted[0]?.[0] as 'NGN' | 'USD') || 'NGN';
-  }, [activeAccounts]);
   const showModal = accounts.length >= 3;
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') { e.preventDefault(); searchInputRef.current?.focus(); } };
-    window.addEventListener('keydown', handleKeyDown); return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
+  // URL param handling (prefill)
   const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     const action = searchParams.get('action');
@@ -85,39 +71,24 @@ const FinanceView = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  useEffect(() => { const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300); return () => clearTimeout(timer); }, [searchQuery]);
-
-  // Use optimized search hook (BUG-001 fix: sub-500ms for 1000+ transactions)
-  const { filteredTransactions: allFilteredTransactions, isSearching } = useTransactionSearch(transactions, debouncedSearch);
-  // Exclude shared account transactions from main list — they show inside account detail only
-  const filteredTransactions = useMemo(() =>
-    allFilteredTransactions.filter(t => !sharedAccountIds.has(t.accountId)),
-    [allFilteredTransactions, sharedAccountIds]
-  );
+  const toggleView = useCallback(() => {
+    const next: ViewMode = viewMode === 'collapsed' ? 'expanded' : 'collapsed';
+    setViewMode(next);
+    try { localStorage.setItem(VIEW_MODE_KEY, next); } catch { /* noop */ }
+  }, [viewMode]);
 
   const handleCloseForm = () => { setMode('view'); setEditingTransaction(undefined); setPrefillData(undefined); };
   const handleEdit = (tx: AnchorTransaction) => { setEditingTransaction(tx); setMode('editTx'); };
-
-  /** Scroll back to transaction section after month navigation */
-  const scrollToTransactions = useCallback(() => {
-    requestAnimationFrame(() => {
-      transactionSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }, []);
-  const handlePrevMonth = () => { prevMonth(); scrollToTransactions(); };
-  const handleNextMonth = () => { nextMonth(); scrollToTransactions(); };
-
-
-
-  // Haptic feedback on delete confirmation
   const handleDeleteConfirm = () => {
-    if (transactionToDelete) {
-      haptic.trigger('medium');
-      deleteTransaction(transactionToDelete.id, transactionToDelete.accountId);
-      setTransactionToDelete(null);
-    }
+    if (transactionToDelete) { deleteTransaction(transactionToDelete.id, transactionToDelete.accountId); setTransactionToDelete(null); }
   };
 
+  const handleCardTap = useCallback((account: typeof accounts[0], _index: number, _el: HTMLElement) => {
+    // TODO: shared element expand — FLIP technique, see spec §6.2
+    setSelectedAccountId(account.id);
+  }, []);
+
+  // Detail view
   if (selectedAccount) {
     return (
       <FeatureErrorBoundary featureName="Finance">
@@ -136,40 +107,32 @@ const FinanceView = () => {
 
   return (
     <FeatureErrorBoundary featureName="Finance">
-      <div className={`relative ${isMobile ? 'space-y-5' : 'space-y-8'}`}>
-        <SectionHeader title="Finance" subtitle="Multi-account asset management and cashflow tracking." action={<Button variant="secondary" size="sm" onClick={() => setMode(mode === 'addAcc' ? 'view' : 'addAcc')} className="gap-2"><Landmark className="w-4 h-4" /> <span>Add Account</span></Button>} />
-
-        {!isSearching && (<><NetWorthCards netWorth={netWorth} /><MonthlyInsight transactions={transactions} currency={primaryCurrency} />
-          {activeAccounts.length > 0 && (isMobile ? (
-            <WalletStack accounts={activeAccounts} userId={user?.uid || ''} isOwnerOfConnection={isFamilyOwner} familyMemberUid={familyMemberUid || undefined} onSelect={(acc) => setSelectedAccountId(acc.id)} onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)} />
-          ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-              {activeAccounts.map((acc) => (<AccountCard key={acc.id} account={acc} userId={user?.uid || ''} isOwnerOfConnection={isFamilyOwner} familyMemberUid={familyMemberUid || undefined} onEdit={(acc) => setSelectedAccountId(acc.id)} onToggleShare={(acc, share) => share === false ? setAccountToUnshare(acc) : toggleShareAccount(acc.id, share)} />))}
-            </div>
-          ))}
-          {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
-          {/* INN-002: Subscription pattern detection */}
-          <SubscriptionDetectorCard transactions={transactions} currency={primaryCurrency} /></>)}
-
-        {!showModal && mode === 'addAcc' && !isSearching && <div className="animate-in fade-in zoom-in-95 duration-200"><AccountForm onClose={handleCloseForm} /></div>}
-        {!showModal && (mode === 'addTx' || mode === 'editTx') && !isSearching && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
-
-
-
-        {accounts.length > 0 && (
-          <div ref={transactionSectionRef} className="glass-card overflow-hidden scroll-mt-4">
-            <div className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/20 flex flex-col sm:flex-row items-center gap-4">
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-xl p-1 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
-                <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8" aria-label="Previous month"><ChevronLeft className="w-4 h-4" /></Button>
-                <div className="px-2 flex items-center gap-2 min-w-[160px] justify-center text-sm font-bold text-slate-700 dark:text-slate-200"><Calendar className="w-4 h-4 text-slate-400" /><span>{currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span></div>
-                <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8" aria-label="Next month"><ChevronRight className="w-4 h-4" /></Button>
-              </div>
-              <div className="relative flex-1 w-full"><Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" strokeWidth={2.5} /><input ref={searchInputRef} type="text" placeholder={`Search in ${currentMonth.toLocaleDateString('en-US', { month: 'long' })}...`} className="w-full bg-white dark:bg-slate-900 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/50 dark:border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-medium" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
-            </div>
-            {isSearching && <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/30"><p className="text-xs font-medium text-blue-600 dark:text-blue-400">Found {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''} matching "{debouncedSearch}"</p></div>}
-            <VirtualTransactionList transactions={filteredTransactions} currentUserId={user?.uid} onEdit={handleEdit} onDelete={(tx) => tx.source === 'synced' ? undefined : setTransactionToDelete(tx)} loading={loadingFinance} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} />
+      <div className="relative space-y-5">
+        {/* Zone 1: Page Header */}
+        <SectionHeader title="Finance" action={
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => { /* TODO: Finance search — query across all account transactions, display unified results list */ }} className="p-2.5 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Search transactions">
+              <Search className="w-5 h-5" />
+            </button>
+            <button type="button" onClick={toggleView} className="p-2.5 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label={viewMode === 'collapsed' ? 'Switch to list view' : 'Switch to stack view'}>
+              {viewMode === 'collapsed' ? <List className="w-5 h-5" /> : <Layers className="w-5 h-5" />}
+            </button>
           </div>
+        } />
+
+        {/* Zone 2: Total Assets Summary Bar */}
+        <TotalAssetsSummaryBar accounts={activeAccounts} />
+
+        {/* Zone 3: Card Stack */}
+        {loadingFinance && accounts.length === 0 && <SkeletonCards count={3} />}
+        {activeAccounts.length > 0 && (
+          <CardStack accounts={activeAccounts} mode={viewMode} onCardTap={handleCardTap} onReorder={reorder} />
         )}
+        {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
+
+        {/* Forms / Modals — preserved from existing */}
+        {!showModal && mode === 'addAcc' && <div className="animate-in fade-in zoom-in-95 duration-200"><AccountForm onClose={handleCloseForm} /></div>}
+        {!showModal && (mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
 
         <Modal isOpen={showModal && mode !== 'view'} onClose={handleCloseForm} title={mode === 'addAcc' ? 'Create Account' : mode === 'editTx' ? 'Edit Transaction' : 'New Transaction'} maxWidth="max-w-2xl">
           {mode === 'addAcc' && <AccountForm onClose={handleCloseForm} />}

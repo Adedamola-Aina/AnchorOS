@@ -102,6 +102,42 @@ const analyticsEventSchema = z.discriminatedUnion('name', [
       questionType: z.string().min(1),
     }),
   }),
+  // UX-041: Finance card interaction events
+  z.object({
+    name: z.literal('finance_card_tapped'),
+    payload: z.object({
+      accountId: z.string().min(1),
+      viewMode: z.enum(['collapsed', 'expanded']),
+    }),
+  }),
+  z.object({
+    name: z.literal('finance_card_reordered'),
+    payload: z.object({
+      accountId: z.string().min(1),
+      fromIndex: z.number().int().nonnegative(),
+      toIndex: z.number().int().nonnegative(),
+    }),
+  }),
+  z.object({
+    name: z.literal('finance_card_color_changed'),
+    payload: z.object({
+      accountId: z.string().min(1),
+      color: z.string().min(1),
+    }),
+  }),
+  z.object({
+    name: z.literal('finance_card_artwork_changed'),
+    payload: z.object({
+      accountId: z.string().min(1),
+      presetId: z.string(),
+    }),
+  }),
+  z.object({
+    name: z.literal('finance_view_mode_toggled'),
+    payload: z.object({
+      mode: z.enum(['collapsed', 'expanded']),
+    }),
+  }),
 ]);
 
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>;

@@ -33,6 +33,11 @@ export interface AnchorAccount {
   }>;
   source?: 'manual' | 'linked';
   externalConnection?: ExternalConnection;
+  /** Card personalization — UX-041 Phase 2 */
+  cardColor?: string;
+  cardArtwork?: string;
+  cardArtworkPreset?: string;
+  sortOrder?: number;
 }
 
 export interface AnchorTransaction {

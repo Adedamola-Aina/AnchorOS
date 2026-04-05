@@ -83,6 +83,114 @@
       "completedDate": "2026-03-10",
       "cycleTime": null,
       "recordedAt": "2026-03-28T09:00:00.010Z"
+    },
+    {
+      "itemId": "BUG-125",
+      "completedDate": "2026-03-31",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.015Z"
+    },
+    {
+      "itemId": "90a4c82",
+      "completedDate": "2026-03-31",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.021Z"
+    },
+    {
+      "itemId": "BUG-124",
+      "completedDate": "2026-03-31",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.021Z"
+    },
+    {
+      "itemId": "BUG-123",
+      "completedDate": "2026-03-31",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.021Z"
+    },
+    {
+      "itemId": "BUG-111",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.021Z"
+    },
+    {
+      "itemId": "BUG-122",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.021Z"
+    },
+    {
+      "itemId": "BUG-121",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.021Z"
+    },
+    {
+      "itemId": "b0d66d4",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "be40cdc",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "dd92a7e",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "d3a3662",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "3956e86",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "20933ec",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "12530f9",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "0ecae46",
+      "completedDate": "2026-03-29",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "BUG-113",
+      "completedDate": "2026-03-28",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "BUG-112",
+      "completedDate": "2026-03-28",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "ARCH-001",
+      "completedDate": "2026-03-28",
+      "cycleTime": null,
+      "recordedAt": "2026-04-04T07:00:00.022Z"
     }
   ],
   "weeklyStats": [
@@ -95,6 +203,16 @@
       "week": "2026-W12",
       "completed": 1,
       "velocity": 1
+    },
+    {
+      "week": "2026-W13",
+      "completed": 14,
+      "velocity": 9.33
+    },
+    {
+      "week": "2026-W14",
+      "completed": 4,
+      "velocity": 6
     }
   ],
   "_note": "Reset 2026-03-28. Previous data was bulk-hydrated at init and not real throughput. Rebuilds from git-deployed items going forward."

@@ -8,13 +8,13 @@ describe('EmptyAccountsState', () => {
   it('renders empty state message', () => {
     render(<EmptyAccountsState onCreateAccount={vi.fn()} />);
     expect(screen.getByText('No accounts yet')).toBeInTheDocument();
-    expect(screen.getByText(/start tracking your finances/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tap to add your first account/i)).toBeInTheDocument();
   });
 
-  it('calls onCreateAccount when button clicked', () => {
+  it('calls onCreateAccount when card is clicked', () => {
     const onCreate = vi.fn();
     render(<EmptyAccountsState onCreateAccount={onCreate} />);
-    fireEvent.click(screen.getByText('Create your first account'));
+    fireEvent.click(screen.getByRole('button', { name: /Create your first account/i }));
     expect(onCreate).toHaveBeenCalled();
   });
 });
