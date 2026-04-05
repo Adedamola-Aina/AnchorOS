@@ -11,9 +11,10 @@ import type { AnchorAccount, Currency } from '../../types';
 
 interface TotalAssetsSummaryBarProps {
   accounts: AnchorAccount[];
+  onShowDetails?: () => void;
 }
 
-export const TotalAssetsSummaryBar: React.FC<TotalAssetsSummaryBarProps> = ({ accounts }) => {
+export const TotalAssetsSummaryBar: React.FC<TotalAssetsSummaryBarProps> = ({ accounts, onShowDetails }) => {
   const totals = useMemo(() => {
     const byC: Partial<Record<Currency, number>> = {};
     for (const a of accounts) {
@@ -53,6 +54,7 @@ export const TotalAssetsSummaryBar: React.FC<TotalAssetsSummaryBarProps> = ({ ac
         className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors min-h-[44px]"
         onClick={() => {
           // TODO: wire Show Details navigation
+          onShowDetails?.();
         }}
       >
         Show Details

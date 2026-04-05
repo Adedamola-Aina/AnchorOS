@@ -9,6 +9,7 @@ export interface FinanceContextType {
     loadingFinance: boolean;
     addAccount: (acc: CreateAccountPayload) => Promise<void>;
     deleteAccount: (id: string) => Promise<void>;
+    updateAccountPersonalization: (id: string, updates: { cardColor?: string; cardArtwork?: string; cardArtworkPath?: string; cardArtworkPreset?: string }) => Promise<void>;
     addTransaction: (tx: CreateTransactionPayload) => Promise<void>;
     deleteTransaction: (id: string, accountId: string) => Promise<void>;
     restoreTransaction: (id: string, accountId: string, amountCents: number, type: TransactionType) => Promise<void>;

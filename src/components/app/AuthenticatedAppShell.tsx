@@ -34,7 +34,7 @@ export default function AuthenticatedAppShell() {
               <Route path="commitments" element={<CommitmentsView />} />
               <Route path="fabric" element={<FabricView />} />
               <Route path="fabric/transparency" element={<FabricTransparency />} />
-              <Route path="finance" element={<FinanceView />} />
+              <Route path="finance/*" element={<FinanceView />} />
               <Route path="settings" element={<SettingsView />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<NotFoundView />} />

@@ -57,6 +57,7 @@ export const useFinanceService = (
     addAccount,
     deleteAccount,
     renameAccount,
+    updateAccountPersonalization,
     addTransaction,
     deleteTransaction,
     updateTransaction,
@@ -82,6 +83,7 @@ export const useFinanceService = (
     addAccount,
     deleteAccount,
     renameAccount,
+    updateAccountPersonalization,
     // Transaction operations
     addTransaction,
     deleteTransaction,

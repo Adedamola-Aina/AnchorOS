@@ -36,6 +36,7 @@ export interface AnchorAccount {
   /** Card personalization — UX-041 Phase 2 */
   cardColor?: string;
   cardArtwork?: string;
+  cardArtworkPath?: string;
   cardArtworkPreset?: string;
   sortOrder?: number;
 }

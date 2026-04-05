@@ -16,6 +16,8 @@ describe('CardArtworkPicker', () => {
     cardColor: '#3D52D5',
     onSelect: vi.fn(),
     onClose: vi.fn(),
+    onUploadCustom: vi.fn(),
+    isUploading: false,
   };
 
   it('renders all artwork presets plus "None" option', () => {
@@ -71,5 +73,16 @@ describe('CardArtworkPicker', () => {
     expect(screen.getByText('Waves')).toBeInTheDocument();
     expect(screen.getByText('Topo')).toBeInTheDocument();
     expect(screen.getByText('Card Pattern')).toBeInTheDocument();
+  });
+
+  it('calls onUploadCustom when an image is selected', async () => {
+    const onUploadCustom = vi.fn();
+    render(<CardArtworkPicker {...defaultProps} onUploadCustom={onUploadCustom} />);
+    const user = userEvent.setup();
+    const file = new File(['image'], 'card.png', { type: 'image/png' });
+
+    await user.upload(screen.getByLabelText(/upload custom artwork/i), file);
+
+    expect(onUploadCustom).toHaveBeenCalledWith(file);
   });
 });

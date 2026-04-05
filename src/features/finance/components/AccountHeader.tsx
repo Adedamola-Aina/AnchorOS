@@ -8,7 +8,7 @@
 // @ts-nocheck
 
 
-import { ArrowLeft, Trash2, Users, Pencil, Sparkles, Link2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Trash2, Users, Pencil, Sparkles, Link2, RefreshCw, Ellipsis } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
 import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
@@ -42,6 +42,7 @@ interface AccountHeaderProps {
     onExportCsv?: () => void;
     onSyncNow?: () => void;
     isSyncing?: boolean;
+    onOpenOptions?: () => void;
 }
 
 export const AccountHeader = ({
@@ -50,6 +51,7 @@ export const AccountHeader = ({
     onBack, onDelete, onShare, onAddTransaction,
     onStartRename, onCancelRename, onConfirmRename, onNameChange,
     monthlyBalance, onExportCsv, onSyncNow, isSyncing,
+    onOpenOptions,
 }: AccountHeaderProps) => {
     const style = getAccountStyle(account.currency);
     const isShared = account.sharedWith && Object.keys(account.sharedWith).length > 0;
@@ -93,6 +95,11 @@ export const AccountHeader = ({
                         {onDelete && isOwner && (
                             <button onClick={onDelete} className="bg-white/10 hover:bg-red-500/80 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10" title="Delete account">
                                 <Trash2 className="w-4 h-4" />
+                            </button>
+                        )}
+                        {onOpenOptions && (
+                            <button onClick={onOpenOptions} className="bg-white/10 hover:bg-white/20 backdrop-blur-xl p-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-white/10" title="More options">
+                                <Ellipsis className="w-4 h-4" />
                             </button>
                         )}
                     </div>

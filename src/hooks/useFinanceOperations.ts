@@ -71,6 +71,20 @@ export const useFinanceOperations = (
         }
     }, [user, userName, accounts]);
 
+    const updateAccountPersonalization = useCallback(async (id: string, updates: { cardColor?: string; cardArtwork?: string; cardArtworkPath?: string; cardArtworkPreset?: string }) => {
+        if (!user) return;
+        const account = accounts.find(a => a.id === id);
+        if (!account) return;
+        if ((account.ownerId || user.uid) !== user.uid) {
+            throw new Error('Only the account owner can personalize this account');
+        }
+        try {
+            await withTimeout(financeService.updateAccountPersonalization(user.uid, account, updates), OPERATION_TIMEOUT, 'updateAccountPersonalization');
+        } catch (err) {
+            throw handleError(err);
+        }
+    }, [user, accounts]);
+
     const addTransaction = useCallback(async (tx: CreateTransactionPayload) => {
         if (!user) return;
 
@@ -149,10 +163,10 @@ export const useFinanceOperations = (
     }, [user, accounts]);
 
     return useMemo(() => ({
-        addAccount, deleteAccount, renameAccount,
+        addAccount, deleteAccount, renameAccount, updateAccountPersonalization,
         addTransaction, deleteTransaction, updateTransaction, restoreTransaction, convertCurrency
     }), [
-        addAccount, deleteAccount, renameAccount,
+        addAccount, deleteAccount, renameAccount, updateAccountPersonalization,
         addTransaction, deleteTransaction, updateTransaction, restoreTransaction, convertCurrency
     ]);
 };

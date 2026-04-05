@@ -6,6 +6,12 @@
 
 /** ISO 7810 ID-1 credit card aspect ratio */
 export const CARD_ASPECT_RATIO = 1.586;
+export const CARD_CORNER_RADIUS = 28;
+export const CARD_HEADER_FONT_SIZE = 17;
+export const CARD_HEADER_LETTER_SPACING = '-0.4px';
+export const CARD_HEADER_REVEAL = 68;
+export const STACK_SPRING_CURVE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+export const STACK_STAGGER_MS = 42;
 
 /** Account-type-based gradient colors (checking→slate, savings→emerald, etc.) */
 export const TYPE_COLORS: Record<string, string> = {
@@ -47,10 +53,17 @@ export const PATTERNS = [
 
 export const PATTERN_SIZES = ['auto', '12px 12px', '10px 10px', 'auto'];
 
+export const MESH_GRADIENTS = [
+  'radial-gradient(circle at 12% 18%, rgba(255,255,255,0.26) 0, rgba(255,255,255,0) 28%), radial-gradient(circle at 78% 20%, rgba(244,114,182,0.34) 0, rgba(244,114,182,0) 30%), radial-gradient(circle at 68% 78%, rgba(56,189,248,0.34) 0, rgba(56,189,248,0) 34%), radial-gradient(circle at 24% 86%, rgba(253,224,71,0.24) 0, rgba(253,224,71,0) 26%), linear-gradient(135deg, #1d4ed8 0%, #1e293b 100%)',
+  'radial-gradient(circle at 18% 18%, rgba(251,191,36,0.34) 0, rgba(251,191,36,0) 26%), radial-gradient(circle at 82% 22%, rgba(249,115,22,0.32) 0, rgba(249,115,22,0) 28%), radial-gradient(circle at 70% 76%, rgba(236,72,153,0.28) 0, rgba(236,72,153,0) 34%), radial-gradient(circle at 14% 74%, rgba(59,130,246,0.22) 0, rgba(59,130,246,0) 28%), linear-gradient(140deg, #0f172a 0%, #7c2d12 52%, #431407 100%)',
+  'radial-gradient(circle at 16% 20%, rgba(34,197,94,0.28) 0, rgba(34,197,94,0) 26%), radial-gradient(circle at 80% 18%, rgba(45,212,191,0.34) 0, rgba(45,212,191,0) 28%), radial-gradient(circle at 74% 82%, rgba(59,130,246,0.24) 0, rgba(59,130,246,0) 30%), radial-gradient(circle at 20% 82%, rgba(255,255,255,0.2) 0, rgba(255,255,255,0) 24%), linear-gradient(135deg, #052e2b 0%, #115e59 50%, #0f172a 100%)',
+  'radial-gradient(circle at 18% 18%, rgba(167,139,250,0.3) 0, rgba(167,139,250,0) 28%), radial-gradient(circle at 82% 24%, rgba(96,165,250,0.26) 0, rgba(96,165,250,0) 28%), radial-gradient(circle at 76% 78%, rgba(244,114,182,0.24) 0, rgba(244,114,182,0) 34%), radial-gradient(circle at 24% 86%, rgba(255,255,255,0.18) 0, rgba(255,255,255,0) 22%), linear-gradient(135deg, #312e81 0%, #111827 52%, #1d4ed8 100%)',
+];
+
 export const SHADOW_ACTIVE =
-  '0 2px 6px rgba(0,0,0,0.15),0 12px 32px rgba(0,0,0,0.25),0 32px 64px rgba(0,0,0,0.15)';
+  '0 4px 30px rgba(15,23,42,0.14), 0 18px 48px rgba(15,23,42,0.16)';
 export const SHADOW_DEFAULT =
-  '0 1px 3px rgba(0,0,0,0.12),0 8px 20px rgba(0,0,0,0.20),0 24px 48px rgba(0,0,0,0.12)';
+  '0 4px 30px rgba(15,23,42,0.10), 0 12px 36px rgba(15,23,42,0.10)';
 
 export interface ArtworkPreset {
   id: string;

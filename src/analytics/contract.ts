@@ -133,6 +133,19 @@ const analyticsEventSchema = z.discriminatedUnion('name', [
     }),
   }),
   z.object({
+    name: z.literal('finance_transaction_exported'),
+    payload: z.object({
+      accountId: z.string().min(1),
+      transactionCount: z.number().int().nonnegative(),
+    }),
+  }),
+  z.object({
+    name: z.literal('finance_account_deleted'),
+    payload: z.object({
+      accountId: z.string().min(1),
+    }),
+  }),
+  z.object({
     name: z.literal('finance_view_mode_toggled'),
     payload: z.object({
       mode: z.enum(['collapsed', 'expanded']),

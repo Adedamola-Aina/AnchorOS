@@ -29,6 +29,21 @@ vi.mock('lucide-react', async (importOriginal) => {
     };
 });
 
+vi.mock('../../components/shared/Modal', () => ({
+    Modal: ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title?: string; children: React.ReactNode }) => {
+        if (!isOpen) return null;
+        return (
+            <div data-testid="modal" role="dialog">
+                <div>
+                    <h3>{title}</h3>
+                    <button onClick={onClose}>Close</button>
+                </div>
+                <div>{children}</div>
+            </div>
+        );
+    }
+}));
+
 // Test Data
 const mockAccount: AnchorAccount = {
     id: 'acc-1',
@@ -81,6 +96,7 @@ const createMockContexts = (financeOverrides = {}) => {
         deleteAccount: vi.fn(),
         addTransaction: vi.fn(),
         deleteTransaction: vi.fn(),
+        updateAccountPersonalization: vi.fn(),
         shareAccount: vi.fn(),
         currentMonth: new Date(),
         nextMonth: vi.fn(),
@@ -136,7 +152,8 @@ describe('AccountDetailsView', () => {
         );
         // Account name appears in header + transaction bank tag pill
         expect(screen.getAllByText('Checking Account').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText(/\$5,000\.00/)).toBeInTheDocument();
+        expect(screen.getAllByText(/\$5,000\.00/).length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Account Overview')).toBeInTheDocument();
     });
 
     it('renders only transactions for selected account', () => {
@@ -197,5 +214,21 @@ describe('AccountDetailsView', () => {
         // Or check title
         const shareBtn = screen.getByTitle('Manage Sharing');
         expect(shareBtn).toBeInTheDocument();
+    });
+
+    it('shows a custom artwork upload input in the artwork picker flow', async () => {
+        renderWithContext(
+            <AccountDetailsView
+                account={mockAccount}
+                onBack={vi.fn()}
+            />
+        );
+        const user = userEvent.setup();
+
+        await user.click(screen.getByTitle('More options'));
+        await user.click(screen.getByText('Choose card artwork'));
+
+        expect(screen.getByTestId('card-artwork-picker')).toBeInTheDocument();
+        expect(screen.getByLabelText(/upload custom artwork/i)).toBeInTheDocument();
     });
 });

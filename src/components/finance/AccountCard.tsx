@@ -2,13 +2,17 @@
  * AccountCard — ISO credit card with name+balance at top (Apple Wallet peek).
  * UX-041 Phase 2 §4. Name left, balance right — visible in stacked peek strip.
  */
-import React, { useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { formatCurrency } from '../../utils/format';
 import { fromCents } from '../../utils/moneyUtils';
 import type { AnchorAccount } from '../../types';
+import { useDeviceShine } from '../../hooks/useDeviceShine';
+import { getFinanceViewTransitionName } from '../../features/finance/financeViewTransition';
+import { resolveAccountArtworkUrl, revokeAccountArtworkUrl } from '../../services/accountArtworkStorage';
 import {
-  CARD_ASPECT_RATIO, TYPE_COLORS, DEFAULT_CARD_COLORS,
-  PATTERNS, PATTERN_SIZES, SHADOW_ACTIVE, SHADOW_DEFAULT, hashString,
+  CARD_ASPECT_RATIO, CARD_CORNER_RADIUS, CARD_HEADER_FONT_SIZE, CARD_HEADER_LETTER_SPACING,
+  TYPE_COLORS, DEFAULT_CARD_COLORS, MESH_GRADIENTS,
+  PATTERNS, PATTERN_SIZES, SHADOW_ACTIVE, SHADOW_DEFAULT, hashString, ARTWORK_PRESETS,
 } from './cardConstants';
 
 export { CARD_ASPECT_RATIO } from './cardConstants';
@@ -27,36 +31,72 @@ export interface AccountCardProps {
 }
 
 export const AccountCard: React.FC<AccountCardProps> = React.memo(({
-  account, index, isActive, onTap, style,
+  account, index, mode, isActive, onTap, style,
 }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const isSharedAccount = account.scope === 'family' || Boolean(account.sharedWith && Object.keys(account.sharedWith).length > 0);
   const cardColor = account.cardColor
     ?? TYPE_COLORS[account.type]
     ?? DEFAULT_CARD_COLORS[index % DEFAULT_CARD_COLORS.length];
   const patternIdx = hashString(account.id) % PATTERNS.length;
+  const meshBackground = MESH_GRADIENTS[hashString(`${account.id}-${account.type}`) % MESH_GRADIENTS.length];
   const balance = fromCents(account.balanceCents);
   const last4 = account.externalConnection?.maskedAccountNumber?.slice(-4) ?? '';
   const instName = account.externalConnection?.institutionName ?? account.name;
-  const artworkBg = account.cardArtwork ? `url(${account.cardArtwork})` : undefined;
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isActive || !cardRef.current) return;
-    if (!window.matchMedia('(hover: hover)').matches) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    cardRef.current.style.setProperty('--shine-x', `${x}%`);
-    cardRef.current.style.setProperty('--shine-y', `${y}%`);
-  }, [isActive]);
-
-  const handlePointerLeave = useCallback(() => {
-    cardRef.current?.style.setProperty('--shine-x', '50%');
-    cardRef.current?.style.setProperty('--shine-y', '30%');
-  }, []);
+  const [artworkUrl, setArtworkUrl] = useState<string | undefined>(account.cardArtwork || undefined);
+  const artworkBg = artworkUrl ? `url(${artworkUrl})` : undefined;
+  const presetArtwork = ARTWORK_PRESETS.find((preset) => preset.id === account.cardArtworkPreset)?.css;
+  const surfaceMode = artworkBg
+    ? 'artwork'
+    : account.source === 'linked' || Boolean(account.cardColor && !account.cardArtworkPreset)
+      ? 'solid'
+      : isSharedAccount
+        ? 'glass'
+        : 'mesh';
+  const showSecondaryName = mode === 'expanded' || isActive;
+  const showFooter = mode === 'expanded' || isActive;
+  const {
+    ref: cardRef,
+    handlePointerMove,
+    handlePointerLeave,
+    requestOrientationPermission,
+  } = useDeviceShine<HTMLDivElement>({ enabled: isActive });
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap(); }
   }, [onTap]);
+
+  const handleClick = useCallback(async () => {
+    await requestOrientationPermission();
+    onTap();
+  }, [onTap, requestOrientationPermission]);
+
+  useEffect(() => {
+    let isActive = true;
+    let resolvedUrl: string | undefined;
+
+    void resolveAccountArtworkUrl({
+      cardArtwork: account.cardArtwork,
+      cardArtworkPath: account.cardArtworkPath,
+    })
+      .then((nextUrl) => {
+        if (!isActive) {
+          revokeAccountArtworkUrl(nextUrl);
+          return;
+        }
+        resolvedUrl = nextUrl;
+        setArtworkUrl(nextUrl);
+      })
+      .catch(() => {
+        if (isActive) {
+          setArtworkUrl(account.cardArtwork || undefined);
+        }
+      });
+
+    return () => {
+      isActive = false;
+      revokeAccountArtworkUrl(resolvedUrl);
+    };
+  }, [account.cardArtwork, account.cardArtworkPath]);
 
   return (
     <div
@@ -65,24 +105,48 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
       tabIndex={0}
       aria-label={`Open ${instName} account`}
       data-testid={`account-card-${account.id}`}
-      onClick={onTap}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       className="account-card relative w-full overflow-hidden select-none cursor-pointer"
       style={{
         aspectRatio: `${CARD_ASPECT_RATIO}`,
-        backgroundColor: cardColor, borderRadius: 16,
+        backgroundColor: cardColor, borderRadius: CARD_CORNER_RADIUS,
+        border: '1px solid rgba(255,255,255,0.16)',
         boxShadow: isActive ? SHADOW_ACTIVE : SHADOW_DEFAULT,
-        transition: 'box-shadow 200ms ease', ...style,
+        viewTransitionName: getFinanceViewTransitionName(account.id),
+        transition: 'box-shadow 240ms ease, transform 240ms ease', ...style,
       }}
     >
-      {/* Pattern overlay */}
-      {!artworkBg && (
+      <div
+        className="absolute inset-0"
+        style={{
+          background: surfaceMode === 'mesh' || surfaceMode === 'glass'
+            ? meshBackground
+            : `linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 38%), ${cardColor}`,
+          borderRadius: 'inherit',
+        }}
+      />
+      {(surfaceMode === 'solid' || presetArtwork) && !artworkBg && (
         <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: PATTERNS[patternIdx],
-          backgroundSize: PATTERN_SIZES[patternIdx], borderRadius: 'inherit',
+          backgroundImage: presetArtwork ?? PATTERNS[patternIdx],
+          backgroundSize: presetArtwork ? 'auto' : PATTERN_SIZES[patternIdx],
+          opacity: presetArtwork ? 0.9 : 0.7,
+          borderRadius: 'inherit',
         }} />
+      )}
+      {surfaceMode === 'glass' && (
+        <div
+          className="absolute inset-[10px] pointer-events-none"
+          style={{
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 100%)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.22)',
+            borderRadius: CARD_CORNER_RADIUS - 10,
+          }}
+        />
       )}
       {/* Gradient overlay */}
       <div className="absolute inset-0 pointer-events-none" style={{
@@ -105,25 +169,25 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
         borderRadius: 'inherit', zIndex: 1,
       }} />
       {/* Card content */}
-      <div className="relative z-[2] flex flex-col justify-between h-full p-4 sm:p-5">
+      <div className="relative z-[2] flex h-full flex-col justify-between px-[22px] py-[18px] sm:px-6 sm:py-5">
         {/* TOP ROW — name + balance (visible in peek strip) */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="card-header flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate" style={{ fontSize: 16, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
+            <p className="truncate" style={{ fontFamily: 'SF Pro Display, SF Pro Text, ui-sans-serif, system-ui, sans-serif', fontSize: CARD_HEADER_FONT_SIZE, fontWeight: 700, letterSpacing: CARD_HEADER_LETTER_SPACING, color: '#fff', lineHeight: 1.12 }}>
               {instName}
             </p>
-            {account.name !== instName && (
-              <p className="truncate" style={{ fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.7)', lineHeight: 1.3 }}>
+            {showSecondaryName && account.name !== instName && (
+              <p className="truncate" style={{ fontFamily: 'SF Pro Text, ui-sans-serif, system-ui, sans-serif', fontSize: 12, fontWeight: 500, letterSpacing: '-0.15px', color: 'rgba(255,255,255,0.72)', lineHeight: 1.3 }}>
                 {account.name}
               </p>
             )}
           </div>
-          <span className="whitespace-nowrap" style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>
+          <span className="whitespace-nowrap" style={{ fontFamily: 'SF Pro Display, SF Pro Text, ui-sans-serif, system-ui, sans-serif', fontSize: CARD_HEADER_FONT_SIZE, fontWeight: 500, letterSpacing: CARD_HEADER_LETTER_SPACING, color: '#fff', lineHeight: 1.12 }}>
             {formatCurrency(balance, account.currency)}
           </span>
         </div>
         {/* BOTTOM — chip, type badge, last4 */}
-        <div className="flex items-end justify-between gap-2">
+        <div className="flex items-end justify-between gap-2" style={{ opacity: showFooter ? 1 : 0, pointerEvents: showFooter ? 'auto' : 'none' }}>
           <div className="flex items-center gap-3">
             {/* Decorative credit card chip */}
             <div className="rounded-sm" style={{

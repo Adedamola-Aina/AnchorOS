@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useCardDrag } from './useCardDrag';
 
@@ -13,6 +13,14 @@ vi.mock('../utils/haptic', () => ({
 }));
 
 describe('useCardDrag', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   const makeOptions = (overrides = {}) => ({
     cardHeight: 200,
     commitThresholdRatio: 0.4,
@@ -21,6 +29,9 @@ describe('useCardDrag', () => {
     onCommit: vi.fn(),
     onSpringBack: vi.fn(),
     onDragUpdate: vi.fn(),
+    onReorderStart: vi.fn(),
+    onReorderMove: vi.fn(),
+    onReorderEnd: vi.fn(),
     ...overrides,
   });
 
@@ -38,6 +49,7 @@ describe('useCardDrag', () => {
     act(() => {
       result.current.onPointerDown({ clientY: 500 } as React.PointerEvent);
       result.current.onPointerUp({ clientY: 498 } as React.PointerEvent);
+      vi.runAllTimers();
     });
 
     expect(opts.onTap).toHaveBeenCalled();
@@ -50,6 +62,7 @@ describe('useCardDrag', () => {
     act(() => {
       result.current.onPointerDown({ clientY: 500 } as React.PointerEvent);
       result.current.onPointerUp({ clientY: 500 } as React.PointerEvent);
+      vi.runAllTimers();
     });
 
     expect(opts.onTap).not.toHaveBeenCalled();
@@ -64,6 +77,7 @@ describe('useCardDrag', () => {
       // Move up 30px (below threshold of 200*0.4=80)
       result.current.onPointerMove({ clientY: 470 } as React.PointerEvent);
       result.current.onPointerUp({ clientY: 470 } as React.PointerEvent);
+      vi.runAllTimers();
     });
 
     expect(opts.onSpringBack).toHaveBeenCalled();
@@ -79,9 +93,40 @@ describe('useCardDrag', () => {
       // Move up 100px (above threshold of 80)
       result.current.onPointerMove({ clientY: 400 } as React.PointerEvent);
       result.current.onPointerUp({ clientY: 400 } as React.PointerEvent);
+      vi.runAllTimers();
     });
 
     expect(opts.onCommit).toHaveBeenCalled();
     expect(opts.onSpringBack).not.toHaveBeenCalled();
+  });
+
+  it('starts reorder mode after a long press', () => {
+    const opts = makeOptions();
+    const { result } = renderHook(() => useCardDrag(opts));
+
+    act(() => {
+      result.current.onPointerDown({ clientY: 500 } as React.PointerEvent);
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(opts.onReorderStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits reorder movement and completion after long press', () => {
+    const opts = makeOptions();
+    const { result } = renderHook(() => useCardDrag(opts));
+
+    act(() => {
+      result.current.onPointerDown({ clientY: 500 } as React.PointerEvent);
+      vi.advanceTimersByTime(500);
+      result.current.onPointerMove({ clientY: 620 } as React.PointerEvent);
+      vi.advanceTimersByTime(16);
+      result.current.onPointerUp({ clientY: 620 } as React.PointerEvent);
+    });
+
+    expect(opts.onReorderMove).toHaveBeenCalledWith(120);
+    expect(opts.onReorderEnd).toHaveBeenCalledWith(120);
+    expect(opts.onCommit).not.toHaveBeenCalled();
+    expect(opts.onTap).not.toHaveBeenCalled();
   });
 });

@@ -16,7 +16,7 @@ const baseAccount: AnchorAccount = {
   currency: 'USD', balanceCents: 150000, color: '',
   scope: 'personal', isArchived: false,
   externalConnection: {
-    provider: 'plaid', externalAccountId: 'ext-1',
+    provider: 'mono', externalAccountId: 'ext-1',
     institutionName: 'Chase Bank', institutionCode: 'chase',
     lastSyncedAt: '2026-04-01', syncStatus: 'active',
     maskedAccountNumber: '****5678',
@@ -44,10 +44,21 @@ describe('AccountCard — Apple Wallet layout', () => {
     expect(screen.getByText('$1500.00')).toBeInTheDocument();
   });
 
-  it('shows sub-name when different from institution', () => {
+  it('uses Wallet-style top bar typography for the visible header row', () => {
     render(
       <AccountCard account={baseAccount} index={0} totalCards={3}
         mode="stack" isActive={true} isDragging={false} dragOffset={0}
+        onTap={noop} onDragStart={noop} />
+    );
+
+    expect(screen.getByText('Chase Bank')).toHaveStyle({ fontSize: '17px', letterSpacing: '-0.4px' });
+    expect(screen.getByText('$1500.00')).toHaveStyle({ fontSize: '17px', letterSpacing: '-0.4px' });
+  });
+
+  it('shows sub-name when different from institution', () => {
+    render(
+      <AccountCard account={baseAccount} index={0} totalCards={3}
+        mode="expanded" isActive={true} isDragging={false} dragOffset={0}
         onTap={noop} onDragStart={noop} />
     );
     expect(screen.getByText('Main Checking')).toBeInTheDocument();

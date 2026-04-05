@@ -35,6 +35,22 @@ describe('analytics contract — UX-041 finance card events', () => {
     expect(event.name).toBe('finance_card_artwork_changed');
   });
 
+  it('validates finance_transaction_exported', () => {
+    const event = validateAnalyticsEvent({
+      name: 'finance_transaction_exported',
+      payload: { accountId: 'acc-1', transactionCount: 12 },
+    });
+    expect(event.name).toBe('finance_transaction_exported');
+  });
+
+  it('validates finance_account_deleted', () => {
+    const event = validateAnalyticsEvent({
+      name: 'finance_account_deleted',
+      payload: { accountId: 'acc-1' },
+    });
+    expect(event.name).toBe('finance_account_deleted');
+  });
+
   it('validates finance_view_mode_toggled', () => {
     const event = validateAnalyticsEvent({
       name: 'finance_view_mode_toggled',

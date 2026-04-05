@@ -42,6 +42,14 @@ export class FinanceService {
         return this.accountService.renameAccount(userId, userName, account, newName);
     }
 
+    async updateAccountPersonalization(
+        userId: string,
+        account: AnchorAccount,
+        updates: { cardColor?: string; cardArtwork?: string; cardArtworkPath?: string; cardArtworkPreset?: string },
+    ): Promise<void> {
+        return this.accountService.updateAccountPersonalization(userId, account, updates);
+    }
+
     // Transaction Operations
     async addTransaction(userId: string, payload: CreateTransactionPayload, accounts: AnchorAccount[]): Promise<void> {
         return this.transactionService.addTransaction(userId, payload, accounts);

@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function accountDoc(userId, accountId) {
+      return firestore.get(/databases/(default)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(accountId));
+    }
+
+    function hasSharedWithAccess(account) {
+      return account.data.sharedWith is map
+        && request.auth.uid in account.data.sharedWith;
+    }
+
+    function hasLegacyShareAccess(account) {
+      return account.data.shares is map
+        && request.auth.uid in account.data.shares;
+    }
+
+    function isSharedViewer(userId, accountId) {
+      let account = accountDoc(userId, accountId);
+      return isSignedIn()
+        && (hasSharedWithAccess(account) || hasLegacyShareAccess(account));
+    }
+
+    function isValidImageUpload() {
+      return request.resource != null
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size <= 5 * 1024 * 1024;
+    }
+
+    match /artifacts/anchor-os/users/{userId}/accounts/{accountId}/artwork/{fileName} {
+      allow read: if isOwner(userId) || isSharedViewer(userId, accountId);
+      allow create, update: if isOwner(userId) && isValidImageUpload();
+      allow delete: if isOwner(userId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

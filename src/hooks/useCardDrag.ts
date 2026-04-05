@@ -15,11 +15,15 @@ interface UseCardDragOptions {
   onCommit: () => void;
   onSpringBack: () => void;
   onDragUpdate: (offset: number) => void;
+  onReorderStart?: () => void;
+  onReorderMove?: (offset: number) => void;
+  onReorderEnd?: (offset: number) => void;
 }
 
 export function useCardDrag({
   cardHeight, commitThresholdRatio, enabled,
   onTap, onCommit, onSpringBack, onDragUpdate,
+  onReorderStart, onReorderMove, onReorderEnd,
 }: UseCardDragOptions) {
   const pointerStartY = useRef(0);
   const dragOffsetRef = useRef(0);
@@ -40,16 +44,24 @@ export function useCardDrag({
     longPressTimer.current = setTimeout(() => {
       isLongPressRef.current = true;
       haptic.lift();
-      // TODO: enter reorder mode (long-press drag-to-reorder)
+      onReorderStart?.();
     }, LONG_PRESS_MS);
-  }, [enabled]);
+  }, [enabled, onReorderStart]);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (!enabled) return;
     const dy = pointerStartY.current - e.clientY;
+    const reorderOffset = Math.max(e.clientY - pointerStartY.current, 0);
 
     if (Math.abs(dy) > 10 && longPressTimer.current) {
       clearTimeout(longPressTimer.current);
+    }
+
+    if (isLongPressRef.current) {
+      dragOffsetRef.current = reorderOffset;
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => onReorderMove?.(reorderOffset));
+      return;
     }
 
     if (dy > 0 && !isLongPressRef.current) {
@@ -58,11 +70,21 @@ export function useCardDrag({
       cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => onDragUpdate(dy));
     }
-  }, [enabled, onDragUpdate]);
+  }, [enabled, onDragUpdate, onReorderMove]);
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
     if (!enabled) return;
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
+
+    if (isLongPressRef.current) {
+      haptic.selection();
+      onReorderEnd?.(dragOffsetRef.current);
+      isLongPressRef.current = false;
+      dragOffsetRef.current = 0;
+      isDraggingRef.current = false;
+      return;
+    }
+
     isLongPressRef.current = false;
 
     const dy = pointerStartY.current - e.clientY;
@@ -84,7 +106,7 @@ export function useCardDrag({
 
     isDraggingRef.current = false;
     dragOffsetRef.current = 0;
-  }, [enabled, commitThreshold, onTap, onCommit, onSpringBack]);
+  }, [enabled, commitThreshold, onTap, onCommit, onSpringBack, onReorderEnd]);
 
   return { onPointerDown, onPointerMove, onPointerUp };
 }

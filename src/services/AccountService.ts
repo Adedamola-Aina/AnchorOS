@@ -9,7 +9,7 @@
  * NOTE: This file is ~175 lines after type extraction.
  */
 
-import { collection, doc, addDoc, writeBatch, query, where, getDocs, type Firestore } from '../utils/secureDb';
+import { collection, doc, addDoc, writeBatch, query, where, getDocs, updateDoc, type Firestore } from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
@@ -183,6 +183,32 @@ export class AccountService {
             });
             if (error instanceof AnchorError) throw error;
             throw new AnchorError('Failed to rename account', 'DATABASE', error);
+        }
+    }
+
+    async updateAccountPersonalization(
+        userId: string,
+        account: AnchorAccount,
+        updates: { cardColor?: string; cardArtwork?: string; cardArtworkPath?: string; cardArtworkPreset?: string },
+    ): Promise<void> {
+        const ownerId = account.ownerId || userId;
+        if (ownerId !== userId) {
+            throw new AnchorError('Permission denied: Only the account owner can personalize this account.', 'PERMISSION');
+        }
+
+        const payload = Object.fromEntries(
+            Object.entries(updates).filter(([, value]) => value !== undefined),
+        );
+
+        if (Object.keys(payload).length === 0) {
+            return;
+        }
+
+        try {
+            const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', ownerId, 'accounts', account.id);
+            await updateDoc(accRef, payload);
+        } catch (error) {
+            throw new AnchorError('Failed to update account personalization', 'DATABASE', error);
         }
     }
 }

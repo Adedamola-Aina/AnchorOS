@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TotalAssetsSummaryBar } from './TotalAssetsSummaryBar';
 import type { AnchorAccount } from '../../types';
 
@@ -46,5 +47,14 @@ describe('TotalAssetsSummaryBar', () => {
   it('has a Show Details button', () => {
     render(<TotalAssetsSummaryBar accounts={[makeAccount('1', 'USD', 100000)]} />);
     expect(screen.getByText('Show Details')).toBeInTheDocument();
+  });
+
+  it('calls onShowDetails when the button is pressed', async () => {
+    const onShowDetails = vi.fn();
+    render(<TotalAssetsSummaryBar accounts={[makeAccount('1', 'USD', 100000)]} onShowDetails={onShowDetails} />);
+
+    await userEvent.setup().click(screen.getByRole('button', { name: /show details/i }));
+
+    expect(onShowDetails).toHaveBeenCalledTimes(1);
   });
 });

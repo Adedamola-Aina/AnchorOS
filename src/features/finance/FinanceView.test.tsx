@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import FinanceView from './FinanceView';
@@ -11,6 +11,26 @@ import { FinanceContext } from '../../context/FinanceContext';
 import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import type { AnchorAccount, AnchorTransaction, UserProfile } from '../../types';
+
+const mockLogProductEvent = vi.fn();
+const mockHapticSelection = vi.fn();
+
+vi.mock('../../services/telemetry', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../services/telemetry')>();
+  return {
+    ...actual,
+    logProductEvent: (...args: unknown[]) => mockLogProductEvent(...args),
+  };
+});
+
+vi.mock('../../utils/haptic', () => ({
+  haptic: {
+    selection: () => mockHapticSelection(),
+    lift: vi.fn(),
+    success: vi.fn(),
+    warning: vi.fn(),
+  },
+}));
 
 // Mock lucide-react icons
 vi.mock('lucide-react', async (importOriginal) => {
@@ -25,7 +45,7 @@ vi.mock('lucide-react', async (importOriginal) => {
 
 // Mock new wallet-style components
 vi.mock('../../components/finance/CardStack', () => ({
-  CardStack: ({ accounts, mode, onCardTap }: any) => (
+  CardStack: ({ accounts, mode, onCardTap, onReorder, onShowAll }: any) => (
     <div data-testid="card-stack" data-mode={mode}>
       {accounts.map((acc: any, i: number) => (
         <button key={acc.id} data-testid={`account-card-${acc.id}`} onClick={() => onCardTap(acc, i, document.createElement('div'))}>
@@ -34,19 +54,39 @@ vi.mock('../../components/finance/CardStack', () => ({
           <span>{acc.type}</span>
         </button>
       ))}
+      <button type="button" data-testid="trigger-reorder" onClick={() => onReorder?.([accounts[1], accounts[0], ...accounts.slice(2)])}>
+        Reorder
+      </button>
+      {onShowAll ? (
+        <button type="button" data-testid="trigger-show-all" onClick={() => onShowAll()}>
+          Show all
+        </button>
+      ) : null}
     </div>
   ),
 }));
 
 vi.mock('../../components/finance/TotalAssetsSummaryBar', () => ({
-  TotalAssetsSummaryBar: ({ accounts }: any) => (
-    <div data-testid="total-assets-bar">Total: {accounts.length} accounts</div>
+  TotalAssetsSummaryBar: ({ accounts, onShowDetails }: any) => (
+    <div data-testid="total-assets-bar">
+      <span>Total: {accounts.length} accounts</span>
+      <button type="button" onClick={() => onShowDetails?.()}>Show Details</button>
+    </div>
   ),
 }));
 
 vi.mock('../../components/finance/SkeletonCards', () => ({
   SkeletonCards: ({ count }: any) => (
     <div data-testid="skeleton-cards">Loading {count} cards...</div>
+  ),
+}));
+
+vi.mock('./components/AccountDetailsContainer', () => ({
+  AccountDetailsContainer: ({ account, onBack }: any) => (
+    <div data-testid="account-details-container">
+      <span>{account.name}</span>
+      <button type="button" onClick={onBack}>Back</button>
+    </div>
   ),
 }));
 
@@ -201,10 +241,25 @@ const createMockContexts = (financeOverrides = {}, appOverrides = {}, authOverri
   return { finance, app, auth, family, notifications };
 };
 
-const renderWithContext = (ui: React.ReactElement, { finance = {}, app = {}, auth = {}, family = {} } = {}) => {
+const renderWithContext = (
+  ui: React.ReactElement,
+  {
+    finance = {},
+    app = {},
+    auth = {},
+    family = {},
+    initialEntries = ['/finance'],
+  }: {
+    finance?: Record<string, unknown>;
+    app?: Record<string, unknown>;
+    auth?: Record<string, unknown>;
+    family?: Record<string, unknown>;
+    initialEntries?: string[];
+  } = {}
+) => {
   const { finance: mockFinance, app: mockApp, auth: mockAuth, family: mockFamily, notifications: mockNotifications } = createMockContexts(finance, app, auth, family);
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <AuthContext.Provider value={mockAuth as any}>
         <AppContext.Provider value={mockApp as any}>
           <FinanceContext.Provider value={mockFinance as any}>
@@ -222,6 +277,7 @@ describe('FinanceView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    delete (document as Document & { startViewTransition?: unknown }).startViewTransition;
   });
 
   describe('3-Zone Layout', () => {
@@ -234,6 +290,33 @@ describe('FinanceView', () => {
       renderWithContext(<FinanceView />);
       expect(screen.getByLabelText('Search transactions')).toBeInTheDocument();
       expect(screen.getByLabelText(/Switch to/)).toBeInTheDocument();
+    });
+
+    it('opens finance search and filters transactions across accounts', async () => {
+      renderWithContext(<FinanceView />);
+      const user = userEvent.setup();
+
+      await user.click(screen.getByLabelText('Search transactions'));
+      await user.type(screen.getByPlaceholderText(/search transactions, categories, or accounts/i), 'rent');
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByText('Finance Search')).toBeInTheDocument();
+      expect(screen.getByText('Rent Payment')).toBeInTheDocument();
+      expect(screen.queryByText('Salary')).not.toBeInTheDocument();
+    });
+
+    it('opens total assets details and shows contributing accounts', async () => {
+      renderWithContext(<FinanceView />);
+      const user = userEvent.setup();
+
+      await user.click(screen.getByRole('button', { name: /show details/i }));
+
+      const dialog = screen.getByRole('dialog');
+
+      expect(dialog).toBeInTheDocument();
+      expect(within(dialog).getByText('Total Assets')).toBeInTheDocument();
+      expect(within(dialog).getByText('Savings Account')).toBeInTheDocument();
+      expect(within(dialog).getByText('Checking Account')).toBeInTheDocument();
     });
 
     it('renders TotalAssetsSummaryBar with active accounts', () => {
@@ -282,10 +365,45 @@ describe('FinanceView', () => {
       expect(localStorage.getItem('anchor_finance_view_mode')).toBe('expanded');
     });
 
+    it('logs a finance view toggle analytics event', async () => {
+      renderWithContext(<FinanceView />);
+      const user = userEvent.setup();
+
+      await user.click(screen.getByLabelText(/Switch to list view/));
+
+      expect(mockLogProductEvent).toHaveBeenCalledWith('finance_view_mode_toggled', {
+        mode: 'expanded',
+      });
+    });
+
+    it('triggers selection haptics when the stack fans out', async () => {
+      renderWithContext(<FinanceView />);
+      const user = userEvent.setup();
+
+      await user.click(screen.getByLabelText(/Switch to list view/));
+
+      expect(mockHapticSelection).toHaveBeenCalledTimes(1);
+    });
+
     it('restores view mode from localStorage', () => {
       localStorage.setItem('anchor_finance_view_mode', 'expanded');
       renderWithContext(<FinanceView />);
       expect(screen.getByTestId('card-stack')).toHaveAttribute('data-mode', 'expanded');
+    });
+  });
+
+  describe('Reorder Analytics', () => {
+    it('logs a finance card reordered analytics event', async () => {
+      renderWithContext(<FinanceView />);
+      const user = userEvent.setup();
+
+      await user.click(screen.getByTestId('trigger-reorder'));
+
+      expect(mockLogProductEvent).toHaveBeenCalledWith('finance_card_reordered', {
+        accountId: 'acc-2',
+        fromIndex: 1,
+        toIndex: 0,
+      });
     });
   });
 
@@ -321,17 +439,120 @@ describe('FinanceView', () => {
       renderWithContext(<FinanceView />, { finance: { accounts: [], loadingFinance: true } });
       expect(screen.getByTestId('skeleton-cards')).toBeInTheDocument();
     });
+
+    it('navigates to the all accounts route when the overflow action is used', async () => {
+      const extraAccounts = Array.from({ length: 11 }, (_, index) => ({
+        ...mockAccounts[index % mockAccounts.length],
+        id: `acc-extra-${index}`,
+        name: `Extra Account ${index + 1}`,
+      }));
+      renderWithContext(<FinanceView />, { finance: { accounts: extraAccounts } });
+      const user = userEvent.setup();
+
+      await user.click(screen.getByTestId('trigger-show-all'));
+
+      expect(screen.getByText('All Accounts')).toBeInTheDocument();
+      expect(screen.getByText('Extra Account 1')).toBeInTheDocument();
+    });
+
+    it('opens account creation from the all accounts route', async () => {
+      const extraAccounts = Array.from({ length: 11 }, (_, index) => ({
+        ...mockAccounts[index % mockAccounts.length],
+        id: `acc-extra-${index}`,
+        name: `Extra Account ${index + 1}`,
+      }));
+      renderWithContext(<FinanceView />, { finance: { accounts: extraAccounts } });
+      const user = userEvent.setup();
+
+      await user.click(screen.getByTestId('trigger-show-all'));
+      await user.click(screen.getByRole('button', { name: /new account/i }));
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
+    });
   });
 
   describe('Account Selection', () => {
+    it('uses the browser view transition API when opening account details', async () => {
+      const startViewTransition = vi.fn((callback: () => void) => {
+        callback();
+        return {
+          finished: Promise.resolve(),
+          ready: Promise.resolve(),
+          updateCallbackDone: Promise.resolve(),
+          skipTransition: vi.fn(),
+        };
+      });
+      Object.defineProperty(document, 'startViewTransition', {
+        configurable: true,
+        value: startViewTransition,
+      });
+
+      renderWithContext(<FinanceView />);
+      const user = userEvent.setup();
+
+      await user.click(screen.getByTestId('account-card-acc-1'));
+
+      await waitFor(() => {
+        expect(startViewTransition).toHaveBeenCalled();
+      });
+    });
+
     it('navigates to account details when a card is tapped', async () => {
       renderWithContext(<FinanceView />);
       const user = userEvent.setup();
 
       await user.click(screen.getByTestId('account-card-acc-1'));
-      // AccountDetailsContainer should be rendered (it's mocked via the component)
       await waitFor(() => {
         expect(screen.queryByTestId('card-stack')).not.toBeInTheDocument();
+      });
+    });
+
+    it('logs a finance card tapped analytics event', async () => {
+      renderWithContext(<FinanceView />);
+      const user = userEvent.setup();
+
+      await user.click(screen.getByTestId('account-card-acc-1'));
+
+      await waitFor(() => {
+        expect(mockLogProductEvent).toHaveBeenCalledWith('finance_card_tapped', {
+          accountId: 'acc-1',
+          viewMode: 'collapsed',
+        });
+      });
+    });
+
+    it('renders account details when deep-linked to a finance account route', async () => {
+      renderWithContext(<FinanceView />, { initialEntries: ['/finance/account/acc-1'] });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('card-stack')).not.toBeInTheDocument();
+      });
+      expect(screen.getAllByText('Checking Account').length).toBeGreaterThan(0);
+    });
+
+    it('uses the browser view transition API when closing account details', async () => {
+      const startViewTransition = vi.fn((callback: () => void) => {
+        callback();
+        return {
+          finished: Promise.resolve(),
+          ready: Promise.resolve(),
+          updateCallbackDone: Promise.resolve(),
+          skipTransition: vi.fn(),
+        };
+      });
+      Object.defineProperty(document, 'startViewTransition', {
+        configurable: true,
+        value: startViewTransition,
+      });
+
+      renderWithContext(<FinanceView />, { initialEntries: ['/finance/account/acc-1'] });
+      const user = userEvent.setup();
+
+      await user.click(screen.getByRole('button', { name: /back/i }));
+
+      await waitFor(() => {
+        expect(startViewTransition).toHaveBeenCalled();
       });
     });
   });

@@ -62,11 +62,15 @@ export const db = initializeFirestore(app, {
 
 import { getMessaging } from "firebase/messaging";
 import { getFunctions } from "firebase/functions";
+import { getStorage } from 'firebase/storage';
 
 // APP_ID is always 'anchor-os' for consistent Firestore data paths
 // The actual Firebase project is determined by projectId
 export const APP_ID = 'anchor-os';
 export const functions = getFunctions(app, 'us-central1'); // Region must match function deployment
+export function getAppStorage() {
+  return getStorage(app);
+}
 // Initialize Messaging safely (failed in tests/node env)
 let messagingInstance;
 try {
