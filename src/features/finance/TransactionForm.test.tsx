@@ -8,6 +8,28 @@ import { FinanceContext } from '../../context/FinanceContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import { AuthContext } from '../../context/AuthContext';
 
+// Mock HIG components to render as native elements for test interaction
+vi.mock('../../components/shared', async (importOriginal) => {
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        PopoverMenu: ({ items, value, onChange, label, testId }: any) => (
+            <div data-testid={testId}>
+                {label && <label htmlFor={`mock-pm-${testId}`}>{label}</label>}
+                <select id={`mock-pm-${testId}`} value={value} onChange={(e: any) => onChange(e.target.value)}>
+                    {items.map((item: any) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                </select>
+            </div>
+        ),
+        InlineDatePicker: ({ value, onChange, label, disabled, testId }: any) => (
+            <div data-testid={testId}>
+                {label && <label htmlFor={`mock-dp-${testId}`}>{label}</label>}
+                <input id={`mock-dp-${testId}`} type="date" value={value} onChange={(e: any) => onChange(e.target.value)} disabled={disabled} />
+            </div>
+        ),
+    };
+});
+
 // Mock Dependencies
 const mockAddTransaction = vi.fn().mockResolvedValue(undefined);
 const mockUpdateTransaction = vi.fn().mockResolvedValue(undefined);

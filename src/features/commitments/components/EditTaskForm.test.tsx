@@ -15,6 +15,27 @@ vi.mock('./EditTaskFormFields', () => ({
   MonthlyFields: () => <div data-testid="monthly-fields" />,
 }));
 
+vi.mock('../../../components/shared', () => ({
+  PopoverMenu: ({ items, value, onChange, label, testId }: any) => (
+    <div data-testid={testId}>
+      {label && <span>{label}</span>}
+      <select value={value} onChange={(e: any) => onChange(e.target.value)}>
+        {items.map((item: any) => <option key={item.value} value={item.value}>{item.label}</option>)}
+      </select>
+    </div>
+  ),
+  SegmentedControl: ({ options, value, onChange, label, testId }: any) => (
+    <div data-testid={testId}>
+      {label && <span>{label}</span>}
+      {options.map((opt: any) => (
+        <button key={opt.value} onClick={() => onChange(opt.value)} data-selected={value === opt.value}>
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  ),
+}));
+
 import { EditTaskForm } from './EditTaskForm';
 
 const baseTask: any = {
@@ -60,12 +81,13 @@ describe('EditTaskForm', () => {
 
   it('shows scope selector when hasFamilyActive', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={true} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.getByDisplayValue('Personal')).toBeInTheDocument();
+    expect(screen.getByTestId('edit-scope-control')).toBeInTheDocument();
+    expect(screen.getByText('Personal')).toBeInTheDocument();
   });
 
   it('hides scope selector when no family', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.queryByDisplayValue('Personal')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('edit-scope-control')).not.toBeInTheDocument();
   });
 
   it('calls onCancel', () => {

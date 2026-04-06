@@ -31,8 +31,12 @@ export const useCommitmentService = (user: User | null) => {
 
   const tasks = useMemo(() => {
     const timeOrder: Record<string, number> = { 'morning': 1, 'afternoon': 2, 'evening': 3, 'any': 4 };
+    const priorityOrder: Record<string, number> = { 'high': 0, 'medium': 1, 'low': 2 };
     return [...rawTasks].sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      const pa = priorityOrder[a.priority || 'medium'] ?? 1;
+      const pb = priorityOrder[b.priority || 'medium'] ?? 1;
+      if (pa !== pb) return pa - pb;
       if (a.type === 'daily' && b.type === 'daily') {
         return (timeOrder[a.timeOfDay || 'any'] || 4) - (timeOrder[b.timeOfDay || 'any'] || 4);
       }

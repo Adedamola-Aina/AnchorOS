@@ -49,7 +49,7 @@ export const WeeklyFields: React.FC<WeeklyFieldsProps> = ({ editDays, setEditDay
                     type="button"
                     onClick={() => setEditDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day])}
                     variant={editDays.includes(day) ? 'primary' : 'secondary'}
-                    className={`h-8 px-3 text-[10px] ${editDays.includes(day) ? 'bg-purple-600' : ''}`}
+                    className={`h-11 px-3 text-[10px] ${editDays.includes(day) ? 'bg-purple-600' : ''}`}
                 >
                     {day.slice(0, 3)}
                 </Button>
@@ -76,7 +76,7 @@ export const MonthlyFields: React.FC<MonthlyFieldsProps> = ({ editDaysOfMonth, s
                             prev.includes(d) ? prev.filter(day => day !== d) : [...prev, d]
                         );
                     }}
-                    className={`w-8 h-8 rounded-lg text-[10px] font-bold border transition-all flex items-center justify-center ${editDaysOfMonth.includes(d)
+                    className={`w-11 h-11 rounded-lg text-[10px] font-bold border transition-all flex items-center justify-center ${editDaysOfMonth.includes(d)
                         ? 'bg-task-600 text-white border-transparent shadow-md'
                         : 'bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-task-300'
                         }`}

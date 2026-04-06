@@ -1,14 +1,15 @@
 /**
  * CategorySelector
  * 
- * Category input with datalist suggestions and smart category hints.
- * Extracted from TransactionForm for modularity.
+ * Category input with datalist suggestions, smart category hints,
+ * and custom user-defined categories (PRD-010).
  */
 // @ts-nocheck
 
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { CategoryIcon } from '../../../components/shared';
+import { PopoverMenu } from '../../../components/shared';
 
 const DEFAULT_CATEGORIES = [
     'General', 'Food', 'Groceries', 'Transport', 'Housing',
@@ -22,15 +23,32 @@ interface CategorySelectorProps {
     suggestedCategory: string | null;
     onAcceptSuggestion: () => void;
     error?: string;
+    customCategories?: string[];
+    onCreateCustom?: (name: string) => void;
 }
 
 export const CategorySelector: React.FC<CategorySelectorProps> = ({
-    category,
-    onChange,
-    suggestedCategory,
-    onAcceptSuggestion,
-    error
+    category, onChange, suggestedCategory, onAcceptSuggestion,
+    error, customCategories = [], onCreateCustom,
 }) => {
+    const [isCreating, setIsCreating] = useState(false);
+    const [newName, setNewName] = useState('');
+
+    const allCategories = useMemo(() => {
+        const merged = new Set([...DEFAULT_CATEGORIES, ...customCategories]);
+        return [...merged];
+    }, [customCategories]);
+
+    const handleCreate = () => {
+        const trimmed = newName.trim();
+        if (trimmed && onCreateCustom) {
+            onCreateCustom(trimmed);
+            onChange(trimmed);
+        }
+        setNewName('');
+        setIsCreating(false);
+    };
+
     return (
         <div>
             <label htmlFor="tx-category" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
@@ -40,35 +58,42 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             <div className="flex items-center gap-3 relative">
                 <CategoryIcon category={category} size={14} className="scale-110" />
                 <div className="flex-1 relative">
-                    <select
-                        id="tx-category"
+                    <PopoverMenu
+                        items={allCategories.map(cat => ({ value: cat, label: cat }))}
                         value={category}
-                        onChange={(e) => onChange(e.target.value)}
-                        className={`w-full p-3 rounded-lg border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white cursor-pointer appearance-none ${error ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-300 dark:border-slate-600'
-                            }`}
-                    >
-                        {DEFAULT_CATEGORIES.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
-                    {/* Custom dropdown arrow */}
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-
+                        onChange={onChange}
+                        testId="tx-category"
+                    />
                     {suggestedCategory && suggestedCategory !== category && (
-                        <button
-                            type="button"
-                            onClick={onAcceptSuggestion}
-                            className="absolute -bottom-6 left-0 text-[10px] text-blue-500 hover:text-blue-600 font-medium animate-in fade-in slide-in-from-top-1 duration-200"
-                        >
+                        <button type="button" onClick={onAcceptSuggestion}
+                            className="absolute -bottom-6 left-0 text-[10px] text-blue-500 hover:text-blue-600 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
                             💡 Use "{suggestedCategory}" like before?
                         </button>
                     )}
                 </div>
             </div>
+            {onCreateCustom && !isCreating && (
+                <button type="button" data-testid="create-custom-category-btn" onClick={() => setIsCreating(true)}
+                    className="mt-2 text-xs text-blue-500 hover:text-blue-600 font-medium">
+                    + Custom category
+                </button>
+            )}
+            {isCreating && (
+                <div className="mt-2 flex items-center gap-2" data-testid="custom-category-input">
+                    <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)}
+                        placeholder="Category name" maxLength={50} autoFocus
+                        className="flex-1 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-800 dark:text-white min-h-[44px]"
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreate(); } }} />
+                    <button type="button" onClick={handleCreate}
+                        className="px-3 py-1 text-xs font-medium bg-slate-800 dark:bg-slate-600 text-white rounded min-h-[44px]">
+                        Add
+                    </button>
+                    <button type="button" onClick={() => { setIsCreating(false); setNewName(''); }}
+                        className="px-2 py-1 text-xs text-slate-500 min-h-[44px]">
+                        Cancel
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

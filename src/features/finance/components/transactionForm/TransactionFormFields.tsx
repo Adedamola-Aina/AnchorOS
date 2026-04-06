@@ -6,8 +6,8 @@
 
 
 import React from 'react';
-import { Calendar } from 'lucide-react';
 import { toCents, fromCents } from '../../../../utils/moneyUtils';
+import { InlineDatePicker } from '../../../../components/shared';
 
 interface DescriptionFieldProps {
     value: string;
@@ -75,16 +75,12 @@ interface DateFieldProps {
 
 export const DateField: React.FC<DateFieldProps> = ({ value, onChange, disabled }) => (
     <div>
-        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Date</label>
-        <div className="flex items-center gap-3">
-            <Calendar className="w-4 h-4 text-slate-400" />
-            <input
-                type="date"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className={`flex-1 p-3 rounded-lg border border-slate-300 dark:border-slate-600 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark] ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-                disabled={disabled}
-            />
-        </div>
+        <InlineDatePicker
+            label="Date"
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            testId="tx-date"
+        />
     </div>
 );

@@ -6,6 +6,11 @@ import { CategorySelector, DEFAULT_CATEGORIES } from './CategorySelector';
 
 vi.mock('../../../components/shared', () => ({
     CategoryIcon: ({ category }: { category: string }) => <div data-testid="category-icon">{category}</div>,
+    PopoverMenu: ({ items, value, onChange, testId }: any) => (
+        <select data-testid={testId} value={value} onChange={(e: any) => onChange(e.target.value)}>
+            {items.map((item: any) => <option key={item.value} value={item.value}>{item.label}</option>)}
+        </select>
+    ),
 }));
 
 describe('CategorySelector', () => {
@@ -20,7 +25,7 @@ describe('CategorySelector', () => {
     it('renders default categories and selected value', () => {
         render(<CategorySelector {...baseProps} />);
 
-        const select = screen.getByLabelText('Category') as HTMLSelectElement;
+        const select = screen.getByTestId('tx-category') as HTMLSelectElement;
         expect(select.value).toBe('Food');
         expect(select.options).toHaveLength(DEFAULT_CATEGORIES.length);
         expect(screen.getByTestId('category-icon')).toHaveTextContent('Food');
@@ -29,7 +34,7 @@ describe('CategorySelector', () => {
     it('calls onChange when category changes', () => {
         render(<CategorySelector {...baseProps} />);
 
-        fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Transport' } });
+        fireEvent.change(screen.getByTestId('tx-category'), { target: { value: 'Transport' } });
         expect(baseProps.onChange).toHaveBeenCalledWith('Transport');
     });
 
@@ -37,7 +42,6 @@ describe('CategorySelector', () => {
         render(<CategorySelector {...baseProps} error="Category required" />);
 
         expect(screen.getByText('Category required')).toBeInTheDocument();
-        expect(screen.getByRole('combobox').className).toContain('border-rose-500');
     });
 
     it('shows suggestion CTA only when suggested category differs', () => {

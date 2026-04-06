@@ -1,9 +1,10 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { AnchorTask, TimeOfDay } from '../../../types';
+import type { AnchorTask, TimeOfDay, TaskPriority } from '../../../types';
 import { Button } from '@anchor-os/ui';
 import { Card } from '@anchor-os/ui';
+import { PopoverMenu, SegmentedControl } from '../../../components/shared';
 import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
 
 interface EditTaskFormProps {
@@ -26,6 +27,8 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     const [editTime, setEditTime] = useState<TimeOfDay>(task.timeOfDay || 'morning');
     const [editDays, setEditDays] = useState<string[]>(task.daysOfWeek || []);
     const [editDaysOfMonth, setEditDaysOfMonth] = useState<number[]>(task.daysOfMonth || (task.dayOfMonth ? [task.dayOfMonth] : []));
+    const [editNotes, setEditNotes] = useState(task.notes || '');
+    const [editPriority, setEditPriority] = useState<TaskPriority>(task.priority || 'medium');
     const [isSaving, setIsSaving] = useState(false);
 
     // EDIT-001: Scroll form into view when opened on mobile
@@ -45,6 +48,8 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                 title: editTitle,
                 domain: editDomain,
                 category: editScope,
+                notes: editNotes.trim() || undefined,
+                priority: editPriority,
             };
 
             if (task.type === 'daily') {
@@ -85,26 +90,26 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] uppercase font-bold text-slate-400">Domain</label>
-                        <select
+                        <PopoverMenu
+                            label="Domain"
+                            items={domains.map(d => ({ value: d, label: d }))}
                             value={editDomain}
-                            onChange={(e) => setEditDomain(e.target.value)}
-                            className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none"
-                        >
-                            {domains.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
+                            onChange={setEditDomain}
+                            testId="edit-domain-select"
+                        />
                     </div>
                     {hasFamilyActive && (
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] uppercase font-bold text-slate-400">Scope</label>
-                            <select
+                            <SegmentedControl
+                                label="Scope"
+                                options={[
+                                    { value: 'personal', label: 'Personal' },
+                                    { value: 'family', label: 'Family' },
+                                ]}
                                 value={editScope}
-                                onChange={(e) => setEditScope(e.target.value as 'personal' | 'family')}
-                                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-task-500/20 appearance-none"
-                            >
-                                <option value="personal">Personal</option>
-                                <option value="family">Family</option>
-                            </select>
+                                onChange={(v) => setEditScope(v as 'personal' | 'family')}
+                                testId="edit-scope-control"
+                            />
                         </div>
                     )}
                 </div>
@@ -121,6 +126,29 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                 {task.type === 'monthly' && (
                     <MonthlyFields editDaysOfMonth={editDaysOfMonth} setEditDaysOfMonth={setEditDaysOfMonth} />
                 )}
+
+                {/* Priority selector (COMM-007) */}
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-400">Priority</label>
+                    <div className="flex gap-2" data-testid="edit-priority-selector">
+                        {(['high', 'medium', 'low'] as const).map(p => (
+                            <Button key={p} type="button" onClick={() => setEditPriority(p)} variant={editPriority === p ? 'primary' : 'secondary'} size="sm" className="flex-1 capitalize text-xs">{p === 'high' ? '🔴 High' : p === 'medium' ? '🟡 Medium' : '🟢 Low'}</Button>
+                        ))}
+                    </div>
+                </div>
+                {/* Notes field (COMM-006) */}
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-400">Notes</label>
+                    <textarea
+                        placeholder="Add details, motivation, or context (optional)"
+                        maxLength={500}
+                        rows={2}
+                        value={editNotes}
+                        onChange={(e) => setEditNotes(e.target.value)}
+                        data-testid="edit-task-notes"
+                        className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
+                    />
+                </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">

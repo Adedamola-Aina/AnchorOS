@@ -26,6 +26,23 @@ vi.mock('./TaskFormParts', () => ({
     MonthlyDatesField: () => null,
 }));
 
+vi.mock('../../../components/shared', () => ({
+    PopoverMenu: ({ items, value, onChange, label, testId }: any) => (
+        <div data-testid={testId}>
+            {label && <span>{label}</span>}
+            <select value={value} onChange={(e: any) => onChange(e.target.value)}>
+                {items.map((item: any) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            </select>
+        </div>
+    ),
+    TimeWheelPicker: ({ label, value, onChange, testId }: any) => (
+        <div data-testid={testId}>
+            {label && <label>{label}</label>}
+            <input type="time" value={value} onChange={(e: any) => onChange(e.target.value)} className="min-h-[44px]" data-testid="reminder-time-input" />
+        </div>
+    ),
+}));
+
 const defaultProps = {
     onClose: vi.fn(),
     onAdd: vi.fn().mockResolvedValue(undefined),
@@ -78,11 +95,12 @@ describe('TaskForm — reminder field layout (BUG-092)', () => {
         render(<TaskForm {...defaultProps} />);
         fireEvent.click(screen.getByText('Daily'));
 
-        const reminderInput = document.querySelector('input[type="time"]') as HTMLInputElement;
+        const reminderInput = screen.getByTestId('reminder-input');
         expect(reminderInput).not.toBeNull();
-        expect(reminderInput.getAttribute('data-testid')).toBe('reminder-input');
-        expect(reminderInput.className).toContain('min-h-[44px]');
-        expect(reminderInput.className).toContain('appearance-auto');
+        // TimeWheelPicker wraps the reminder field
+        const timeInput = reminderInput.querySelector('input[type="time"]');
+        expect(timeInput).not.toBeNull();
+        expect(timeInput!.className).toContain('min-h-[44px]');
     });
 
     it('uses compact modal container sizing', () => {

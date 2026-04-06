@@ -20,6 +20,7 @@ vi.mock('lucide-react', () => ({
     Sparkles: () => <span data-testid="sparkles" />,
     Shield: () => <span data-testid="shield" />,
     Mail: () => <span data-testid="mail" />,
+    Target: () => <span data-testid="target" />,
 }));
 
 vi.mock('../../components/shared', () => ({
@@ -175,21 +176,25 @@ describe('OnboardingView', () => {
             }));
         });
 
-        // Should now be on Step 3
-        await waitFor(() => screen.getByText('One Small Habit'), { timeout: 2000 });
-        expect(screen.getByText('One Small Habit')).toBeInTheDocument();
+        // Should now be on Step 3 (Goal)
+        await waitFor(() => screen.getByText('Set a Goal'), { timeout: 2000 });
+        expect(screen.getByText('Set a Goal')).toBeInTheDocument();
     });
 
-    it('calls addTask and advances to Step 4 (Security)', async () => {
+    it('calls addTask and advances to Step 5 (Security)', async () => {
         const { mocks } = renderWithContexts();
 
         // Step 1 -> 2
         fireEvent.click(screen.getByText("Let's Begin"));
         await waitFor(() => screen.getByText('Add Primary Account'));
-        // Step 2 -> 3
+        // Step 2 -> 3 (Goal)
         fireEvent.change(screen.getByPlaceholderText('e.g. Chase Checking'), { target: { value: 'Bank' } });
         fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '100' } });
         fireEvent.click(screen.getByText('Continue'));
+
+        await waitFor(() => screen.getByText('Set a Goal'));
+        // Step 3 -> 4 (Habit) via Skip
+        fireEvent.click(screen.getByText('Skip for now →'));
 
         await waitFor(() => screen.getByText('One Small Habit'));
 
@@ -206,7 +211,7 @@ describe('OnboardingView', () => {
             }));
         });
 
-        // Should now be on Step 4
+        // Should now be on Step 5
         await waitFor(() => screen.getByText('Secure Your Account'));
         expect(screen.getByText('Secure Your Account')).toBeInTheDocument();
     });
@@ -246,32 +251,32 @@ describe('OnboardingView', () => {
     // NEW TESTS: Progress Indicator
     // ========================================
     describe('Progress Indicator', () => {
-        it('shows Step 1 of 4 on first step', () => {
+        it('shows Step 1 of 5 on first step', () => {
             renderWithContexts();
-            expect(screen.getByText(/step 1 of 4/i)).toBeInTheDocument();
+            expect(screen.getByText(/step 1 of 5/i)).toBeInTheDocument();
         });
 
-        it('shows Step 2 of 4 on account step', async () => {
+        it('shows Step 2 of 5 on account step', async () => {
             renderWithContexts();
             fireEvent.click(screen.getByText("Let's Begin"));
             await waitFor(() => screen.getByText('Add Primary Account'));
-            expect(screen.getByText(/step 2 of 4/i)).toBeInTheDocument();
+            expect(screen.getByText(/step 2 of 5/i)).toBeInTheDocument();
         });
 
-        it('shows Step 3 of 4 on habit step', async () => {
+        it('shows Step 3 of 5 on goal step', async () => {
             renderWithContexts();
 
             // Go to step 2
             fireEvent.click(screen.getByText("Let's Begin"));
             await waitFor(() => screen.getByText('Add Primary Account'));
 
-            // Fill and submit to go to step 3
+            // Fill and submit to go to step 3 (Goal)
             fireEvent.change(screen.getByPlaceholderText('e.g. Chase Checking'), { target: { value: 'Bank' } });
             fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '100' } });
             fireEvent.click(screen.getByText('Continue'));
 
-            await waitFor(() => screen.getByText('One Small Habit'));
-            expect(screen.getByText(/step 3 of 4/i)).toBeInTheDocument();
+            await waitFor(() => screen.getByText('Set a Goal'));
+            expect(screen.getByText(/step 3 of 5/i)).toBeInTheDocument();
         });
     });
 

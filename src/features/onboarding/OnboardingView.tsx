@@ -16,14 +16,17 @@ import { useTasks } from '../../context/TaskContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useKeyboardAvoidance } from '../../hooks/useKeyboardAvoidance';
 import { toCents } from '../../utils/moneyUtils';
+import { secureDb } from '../../utils/secureDb';
 import { GettingStartedWelcome } from './components/GettingStartedWelcome';
 import { OnboardingAccountStep } from './components/OnboardingAccountStep';
+import { OnboardingGoalStep } from './components/OnboardingGoalStep';
 import { OnboardingHabitStep } from './components/OnboardingHabitStep';
 import { GettingStartedSecurity } from './components/GettingStartedSecurity';
 import { OnboardingProgress } from './components/OnboardingProgress';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 type AccountType = 'checking' | 'savings' | 'salary' | 'investment';
+type GoalType = 'savings' | 'debt_payoff' | 'investment' | 'emergency_fund' | 'other';
 
 export const OnboardingView = () => {
   useKeyboardAvoidance();
@@ -41,6 +44,11 @@ export const OnboardingView = () => {
   const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD');
   const [accountType, setAccountType] = useState<AccountType>('checking');
 
+  // Goal form state (PRD-007)
+  const [goalTitle, setGoalTitle] = useState('');
+  const [goalAmount, setGoalAmount] = useState('');
+  const [goalType, setGoalType] = useState<GoalType>('savings');
+
   // Task form state
   const [taskTitle, setTaskTitle] = useState('Read for 15 mins');
 
@@ -52,12 +60,7 @@ export const OnboardingView = () => {
   const handleSkip = async () => {
     await updateProfile({
       onboardingComplete: true,
-      onboardingProgress: {
-        gettingStartedStep: step,
-        securityStepSeen: step >= 4,
-        beyondBasicsComplete: false,
-        completedItems: [],
-      },
+      onboardingProgress: { gettingStartedStep: step, securityStepSeen: step >= 5, beyondBasicsComplete: false, completedItems: [] },
     });
   };
 
@@ -81,6 +84,29 @@ export const OnboardingView = () => {
     }
   };
 
+  const handleCreateGoal = async () => {
+    setLoading(true);
+    try {
+      const uid = user?.uid;
+      if (!uid) throw new Error('User not authenticated');
+      await secureDb.addDocument(uid, 'goals', {
+        title: goalTitle,
+        targetAmountCents: toCents(goalAmount),
+        currentAmountCents: 0,
+        currency,
+        goalType,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      setStep(4);
+    } catch (e) {
+      captureError(e, 'Onboarding.createGoal');
+      showToast('Failed to save goal.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreateTask = async () => {
     setLoading(true);
     try {
@@ -91,7 +117,7 @@ export const OnboardingView = () => {
         category: 'personal',
         timeOfDay: 'morning',
       });
-      setStep(4);
+      setStep(5);
     } catch (e) {
       captureError(e, 'Onboarding.createTask');
       showToast('Failed to create task.', 'error');
@@ -100,27 +126,10 @@ export const OnboardingView = () => {
     }
   };
 
-  const handleSecurityFinish = async () => {
+  const handleSecurityComplete = async () => {
     await updateProfile({
       onboardingComplete: true,
-      onboardingProgress: {
-        gettingStartedStep: 4,
-        securityStepSeen: true,
-        beyondBasicsComplete: false,
-        completedItems: [],
-      },
-    });
-  };
-
-  const handleSecuritySkip = async () => {
-    await updateProfile({
-      onboardingComplete: true,
-      onboardingProgress: {
-        gettingStartedStep: 4,
-        securityStepSeen: true,
-        beyondBasicsComplete: false,
-        completedItems: [],
-      },
+      onboardingProgress: { gettingStartedStep: 5, securityStepSeen: true, beyondBasicsComplete: false, completedItems: [] },
     });
   };
 
@@ -149,22 +158,32 @@ export const OnboardingView = () => {
         )}
 
         {step === 3 && (
-          <OnboardingHabitStep
-            taskTitle={taskTitle} setTaskTitle={setTaskTitle}
-            loading={loading} onSubmit={handleCreateTask}
-            onSkip={handleSkip} onBack={() => setStep(2)}
+          <OnboardingGoalStep
+            goalTitle={goalTitle} setGoalTitle={setGoalTitle}
+            goalAmount={goalAmount} setGoalAmount={setGoalAmount}
+            goalType={goalType} setGoalType={setGoalType}
+            loading={loading} onSubmit={handleCreateGoal}
+            onSkip={() => setStep(4)} onBack={() => setStep(2)}
           />
         )}
 
         {step === 4 && (
+          <OnboardingHabitStep
+            taskTitle={taskTitle} setTaskTitle={setTaskTitle}
+            loading={loading} onSubmit={handleCreateTask}
+            onSkip={handleSkip} onBack={() => setStep(3)}
+          />
+        )}
+
+        {step === 5 && (
           <GettingStartedSecurity
             emailVerified={user?.emailVerified ?? false}
             mfaEnabled={profile.mfaEnabled ?? false}
             onVerifyEmail={sendVerificationEmail}
             onEnableMfa={() => showToast('MFA setup will open in Settings after onboarding.', 'info')}
-            onFinish={handleSecurityFinish}
-            onSkip={handleSecuritySkip}
-            onBack={() => setStep(3)}
+            onFinish={handleSecurityComplete}
+            onSkip={handleSecurityComplete}
+            onBack={() => setStep(4)}
           />
         )}
       </div>
