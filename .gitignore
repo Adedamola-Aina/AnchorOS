@@ -64,3 +64,4 @@ Capacitor.asar
 # Stryker mutation testing artifacts
 stryker-setup-*.js
 stryker-setup-*.js.map
+reports/
