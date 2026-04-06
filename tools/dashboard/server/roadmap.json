@@ -36,8 +36,8 @@
       "team": "Product",
       "priority": "P1",
       "title": "Financial goal-setting at onboarding (What are you saving for?)",
-      "description": "Add a goal-setting question at Step 1 of the Getting Started onboarding: 'What is your #1 financial goal right now?' with options like 'Build an emergency fund', 'Pay off debt', 'Save for a specific purchase', 'Grow net worth', 'Track daily spending'. The selected goal shapes the first commitment suggestion in Step 3 and personalises the first Fabric briefing. Stored in `profile.primaryGoal`. Zero engineering overhead \u2014 one field, enormous first-day personalisation.",
-      "status": "planned",
+      "description": "Add a goal-setting question at Step 1 of the Getting Started onboarding: 'What is your #1 financial goal right now?' with options like 'Build an emergency fund', 'Pay off debt', 'Save for a specific purchase', 'Grow net worth', 'Track daily spending'. The selected goal shapes the first commitment suggestion in Step 3 and personalises the first Fabric briefing. Stored in `profile.primaryGoal`. Zero engineering overhead — one field, enormous first-day personalisation.",
+      "status": "completed",
       "detectionPatterns": [
         "PRD-007",
         "financial goal",
@@ -46,13 +46,14 @@
       "effort": "small",
       "impact": "high",
       "type": "feature",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "PRD-008",
       "team": "Product",
       "priority": "P2",
-      "title": "Spending freeze \u2014 category self-discipline pause mode",
+      "title": "Spending freeze — category self-discipline pause mode",
       "description": "A user can voluntarily 'freeze' a category (e.g., 'Eating Out') for a user-defined number of days. While frozen, attempting to create a transaction in that category shows a pause screen: 'You decided to pause this for 3 more days. Still record it?' This is awareness-only, not blocking. Stored as `categoryFreezes: Record<category, expiresAt>` in UserProfile. Empowers self-discipline without imposing rules.",
       "status": "planned",
       "detectionPatterns": [
@@ -69,8 +70,8 @@
       "id": "PRD-009",
       "team": "Product",
       "priority": "P2",
-      "title": "Monthly financial review flow \u2014 guided self-reflection",
-      "description": "On the first day of each month, Anchor prompts the user for a 2-minute guided financial review: (1) 'Your top 3 categories last month were X, Y, Z \u2014 how does that feel?' (2) 'You completed N/M commitments \u2014 what helped/hindered you?' (3) 'One thing to improve this month?' Answers stored as `monthlyReflections/{YYYY-MM}` subcollection. Fabric can surface patterns from these reflections. Turns the app into a behaviour change tool, not just a tracker.",
+      "title": "Monthly financial review flow — guided self-reflection",
+      "description": "On the first day of each month, Anchor prompts the user for a 2-minute guided financial review: (1) 'Your top 3 categories last month were X, Y, Z — how does that feel?' (2) 'You completed N/M commitments — what helped/hindered you?' (3) 'One thing to improve this month?' Answers stored as `monthlyReflections/{YYYY-MM}` subcollection. Fabric can surface patterns from these reflections. Turns the app into a behaviour change tool, not just a tracker.",
       "status": "planned",
       "detectionPatterns": [
         "PRD-009",
@@ -88,7 +89,7 @@
       "priority": "P2",
       "title": "User-defined custom transaction categories",
       "description": "Currently all 20+ categories are predefined (Groceries, Transport, etc.). Allow users to create custom category names with a chosen emoji and colour. Custom categories are stored under `profiles/{uid}/customCategories` and appear in the CategorySelector alongside built-in ones. Custom category data never shared with family by default. Solves a common support request and cultural gap (Nigerian context has categories not in the default list).",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "PRD-010",
         "custom category",
@@ -97,14 +98,15 @@
       "effort": "medium",
       "impact": "high",
       "type": "feature",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "PRD-011",
       "team": "Product",
       "priority": "P3",
       "title": "Savings challenges (52-week, no-spend week, daily saving)",
-      "description": "A dedicated 'Challenges' section under Commitments. Pre-built challenge templates: 52-week savings challenge (\u20a6100 week 1, \u20a6200 week 2...), no-spend week (no discretionary purchases 7 days), daily micro-saving (save \u20a6X every day). Challenge creates a linked savings account + automatic weekly commitment. Progress shown as fill bar. Non-gamified \u2014 no leaderboards, no badges. Just calm progress.",
+      "description": "A dedicated 'Challenges' section under Commitments. Pre-built challenge templates: 52-week savings challenge (₦100 week 1, ₦200 week 2...), no-spend week (no discretionary purchases 7 days), daily micro-saving (save ₦X every day). Challenge creates a linked savings account + automatic weekly commitment. Progress shown as fill bar. Non-gamified — no leaderboards, no badges. Just calm progress.",
       "status": "planned",
       "detectionPatterns": [
         "PRD-011",
@@ -137,7 +139,7 @@
       "id": "QA-005",
       "team": "QA",
       "priority": "P1",
-      "title": "E2E seed fixture system \u2014 deterministic Firestore state per scenario",
+      "title": "E2E seed fixture system — deterministic Firestore state per scenario",
       "description": "Create a `e2e/fixtures/seed.ts` system that writes deterministic Firestore emulator state before each E2E suite runs. Each suite declares `seed: 'finance-heavy-user' | 'new-user' | 'family-connected'`. Eliminates test interdependency, flakiness from shared test user state, and slow sign-up flows at E2E start. Currently all E2E tests share TEST_USER which creates race conditions when running in parallel.",
       "status": "shipped",
       "detectionPatterns": [
@@ -174,7 +176,7 @@
       "id": "QA-007",
       "team": "QA",
       "priority": "P2",
-      "title": "Cloud Function contract testing \u2014 callable I/O schema validation",
+      "title": "Cloud Function contract testing — callable I/O schema validation",
       "description": "Add Zod schema validation for every callable Cloud Function input and output. Create `functions/src/schemas/` folder with Zod schemas matching the TypeScript interfaces. Tests validate that: (1) all required fields are enforced, (2) extra fields are stripped, (3) type coercion behaves correctly. Catches regressions where client sends a field the function no longer expects. Particularly critical for familyInvitations, shareAccount, and createRecurringTransaction.",
       "status": "planned",
       "detectionPatterns": [
@@ -192,8 +194,8 @@
       "id": "SEC-008",
       "team": "Security",
       "priority": "P2",
-      "title": "Privacy screen mode \u2014 blur sensitive balances on demand",
-      "description": "A persistent toggle (Settings \u2192 Privacy \u2192 'Hide balances') that replaces all balance amounts and net worth figures with '****' across the entire app. Tap a blurred figure to temporarily reveal it for 3 seconds then re-blur. Protects against shoulder surfing in public. Implementation: CSS class `privacy-mode` on root + `blurSensitive` utility class on Amount components. State in `localStorage` so it persists across sessions.",
+      "title": "Privacy screen mode — blur sensitive balances on demand",
+      "description": "A persistent toggle (Settings → Privacy → 'Hide balances') that replaces all balance amounts and net worth figures with '****' across the entire app. Tap a blurred figure to temporarily reveal it for 3 seconds then re-blur. Protects against shoulder surfing in public. Implementation: CSS class `privacy-mode` on root + `blurSensitive` utility class on Amount components. State in `localStorage` so it persists across sessions.",
       "status": "planned",
       "detectionPatterns": [
         "SEC-008",
@@ -210,8 +212,8 @@
       "id": "SEC-009",
       "team": "Security",
       "priority": "P1",
-      "title": "Auth event history \u2014 user-visible sign-in log with device and time",
-      "description": "Every successful sign-in writes a record to `users/{uid}/authEvents/{id}` with: `timestamp`, `deviceInfo` (user-agent parsed: OS, browser/app), `ipHash` (SHA-256 of IP, never raw IP stored). Settings \u2192 Security shows last 10 sign-in events. If a user sees an event they don't recognise, they can tap 'Not me' which triggers a forced sign-out of all sessions + email alert. Empowers users to self-detect account compromise.",
+      "title": "Auth event history — user-visible sign-in log with device and time",
+      "description": "Every successful sign-in writes a record to `users/{uid}/authEvents/{id}` with: `timestamp`, `deviceInfo` (user-agent parsed: OS, browser/app), `ipHash` (SHA-256 of IP, never raw IP stored). Settings → Security shows last 10 sign-in events. If a user sees an event they don't recognise, they can tap 'Not me' which triggers a forced sign-out of all sessions + email alert. Empowers users to self-detect account compromise.",
       "status": "shipped",
       "detectionPatterns": [
         "SEC-009",
@@ -248,8 +250,8 @@
       "id": "PLT-008",
       "team": "Mobile",
       "priority": "P2",
-      "title": "Home screen widgets \u2014 net worth and today's commitments",
-      "description": "Build iOS 14+ WidgetKit widget (via Capacitor plugin or native Swift bridging) and Android App Widget showing: (1) Small: Total net worth + change since yesterday. (2) Medium: Today's 3 commitments with completion toggles. Requires a separate Capacitor widget extension target. Data fetched from a lightweight Firestore endpoint keyed by uid stored in shared Keychain. High user retention impact \u2014 app visible even when not opened.",
+      "title": "Home screen widgets — net worth and today's commitments",
+      "description": "Build iOS 14+ WidgetKit widget (via Capacitor plugin or native Swift bridging) and Android App Widget showing: (1) Small: Total net worth + change since yesterday. (2) Medium: Today's 3 commitments with completion toggles. Requires a separate Capacitor widget extension target. Data fetched from a lightweight Firestore endpoint keyed by uid stored in shared Keychain. High user retention impact — app visible even when not opened.",
       "status": "planned",
       "detectionPatterns": [
         "PLT-008",
@@ -284,8 +286,8 @@
       "id": "PLT-010",
       "team": "Mobile",
       "priority": "P3",
-      "title": "Share sheet \u2014 styled transaction or monthly recap as image card",
-      "description": "A 'Share' action on any transaction or monthly summary generates a styled PNG card (Anchor OS branded, no sensitive account names) using an off-screen Canvas render. On iOS/Android, this opens the native share sheet. The card design shows: category icon, amount (blurred if privacy mode), category, date, and Anchor OS watermark. Organic word-of-mouth marketing vector \u2014 shareable financial wins without exposing private data.",
+      "title": "Share sheet — styled transaction or monthly recap as image card",
+      "description": "A 'Share' action on any transaction or monthly summary generates a styled PNG card (Anchor OS branded, no sensitive account names) using an off-screen Canvas render. On iOS/Android, this opens the native share sheet. The card design shows: category icon, amount (blurred if privacy mode), category, date, and Anchor OS watermark. Organic word-of-mouth marketing vector — shareable financial wins without exposing private data.",
       "status": "planned",
       "detectionPatterns": [
         "PLT-010",
@@ -303,7 +305,7 @@
       "team": "Marketing",
       "priority": "P2",
       "title": "Smart app store review prompt after positive milestone",
-      "description": "Trigger the native App Store / Google Play review prompt (Capacitor `@capacitor/rate-app`) after a user reaches a positive milestone: 7 consecutive days of commitment completions, net worth increases by 10%, or saves \u20a610,000+ in a single month. Never prompt after an error or failed action. Never prompt more than once every 60 days. Prompt timing is proven to increase review rate by 3-5x vs cold prompts.",
+      "description": "Trigger the native App Store / Google Play review prompt (Capacitor `@capacitor/rate-app`) after a user reaches a positive milestone: 7 consecutive days of commitment completions, net worth increases by 10%, or saves ₦10,000+ in a single month. Never prompt after an error or failed action. Never prompt more than once every 60 days. Prompt timing is proven to increase review rate by 3-5x vs cold prompts.",
       "status": "planned",
       "detectionPatterns": [
         "MKT-001",
@@ -320,8 +322,8 @@
       "id": "MKT-002",
       "team": "Marketing",
       "priority": "P2",
-      "title": "Achievement share cards \u2014 branded milestone moments for social sharing",
-      "description": "When a user crosses a meaningful personal milestone (first \u20a6100k saved, 30-day commitment streak, debt cleared), Anchor shows a calm celebration screen with a shareable, beautifully designed card image. The card shows the milestone, the user's first name, and the Anchor OS logo. No account names, no balances. Tapping 'Share' opens the native share sheet (PLT-010). Turns personal wins into organic marketing impressions.",
+      "title": "Achievement share cards — branded milestone moments for social sharing",
+      "description": "When a user crosses a meaningful personal milestone (first ₦100k saved, 30-day commitment streak, debt cleared), Anchor shows a calm celebration screen with a shareable, beautifully designed card image. The card shows the milestone, the user's first name, and the Anchor OS logo. No account names, no balances. Tapping 'Share' opens the native share sheet (PLT-010). Turns personal wins into organic marketing impressions.",
       "status": "planned",
       "detectionPatterns": [
         "MKT-002",
@@ -339,7 +341,7 @@
       "team": "Marketing",
       "priority": "P3",
       "title": "In-app NPS survey after 30 days of active use",
-      "description": "30 days after account creation (measured by `createdAt`), and only if the user has made \u22655 transactions and completed \u22653 commitments, show a one-question NPS survey: 'How likely are you to recommend Anchor to a friend or family member?' (0\u201310 scale). Detractors (0\u20136) see a feedback field. Results written to `analyticsEvents` collection for the data team. Never shown again after first response. Standard product health metric.",
+      "description": "30 days after account creation (measured by `createdAt`), and only if the user has made ≥5 transactions and completed ≥3 commitments, show a one-question NPS survey: 'How likely are you to recommend Anchor to a friend or family member?' (0–10 scale). Detractors (0–6) see a feedback field. Results written to `analyticsEvents` collection for the data team. Never shown again after first response. Standard product health metric.",
       "status": "planned",
       "detectionPatterns": [
         "MKT-003",
@@ -374,7 +376,7 @@
       "team": "Innovation",
       "priority": "P2",
       "title": "What-if financial scenario modelling in Fabric",
-      "description": "Users can ask Fabric hypothetical questions: 'What if I reduced Food spending from \u20a630k to \u20a620k per month?' Fabric's PredictionsEngine runs a forward projection: projected savings over 3/6/12 months, estimated months-to-goal improvement, and impact on net worth trend. Displayed as a simple card with a before/after table. Purely client-side calculation from existing data \u2014 no LLM required. Huge engagement impact: turns passive tracking into active planning.",
+      "description": "Users can ask Fabric hypothetical questions: 'What if I reduced Food spending from ₦30k to ₦20k per month?' Fabric's PredictionsEngine runs a forward projection: projected savings over 3/6/12 months, estimated months-to-goal improvement, and impact on net worth trend. Displayed as a simple card with a before/after table. Purely client-side calculation from existing data — no LLM required. Huge engagement impact: turns passive tracking into active planning.",
       "status": "planned",
       "detectionPatterns": [
         "INN-001",
@@ -392,7 +394,7 @@
       "team": "Innovation",
       "priority": "P1",
       "title": "Subscription pattern detection and auto-suggest recurring",
-      "description": "Fabric's BehavioralEngine analyses the last 3 months of manual transactions. When it detects \u22653 transactions to the same payee within \u00b13 days of recurring dates, at similar amounts (\u00b110%), it surfaces a suggestion card: 'It looks like you pay ~\u20a61,500 to Netflix every month. Would you like to record this as a recurring expense?' One tap creates a recurring template. Works entirely on manual data \u2014 no bank needed. Reduces manual entry friction and improves budget forecast accuracy.",
+      "description": "Fabric's BehavioralEngine analyses the last 3 months of manual transactions. When it detects ≥3 transactions to the same payee within ±3 days of recurring dates, at similar amounts (±10%), it surfaces a suggestion card: 'It looks like you pay ~₦1,500 to Netflix every month. Would you like to record this as a recurring expense?' One tap creates a recurring template. Works entirely on manual data — no bank needed. Reduces manual entry friction and improves budget forecast accuracy.",
       "status": "shipped",
       "detectionPatterns": [
         "INN-002",
@@ -412,7 +414,7 @@
       "team": "Innovation",
       "priority": "P3",
       "title": "Mood-finance correlation insights (spending behaviour vs emotional state)",
-      "description": "Fabric's mood check-in data (5-emoji daily mood log) exists but is not correlated with spending. InsightsEngine computes correlation between mood entries and discretionary spending (Food, Entertainment, Shopping categories) over a rolling 60-day window. Insight appears if correlation is statistically significant (Spearman \u03c1 > 0.4): 'On days you log a difficult mood, your discretionary spending is 35% higher than your average.' Pure client-side calculation. Emotional intelligence layer on the data.",
+      "description": "Fabric's mood check-in data (5-emoji daily mood log) exists but is not correlated with spending. InsightsEngine computes correlation between mood entries and discretionary spending (Food, Entertainment, Shopping categories) over a rolling 60-day window. Insight appears if correlation is statistically significant (Spearman ρ > 0.4): 'On days you log a difficult mood, your discretionary spending is 35% higher than your average.' Pure client-side calculation. Emotional intelligence layer on the data.",
       "status": "planned",
       "detectionPatterns": [
         "INN-003",
@@ -429,8 +431,8 @@
       "id": "INN-004",
       "team": "Innovation",
       "priority": "P2",
-      "title": "Time-to-savings-goal projection \u2014 at your current rate, you'll reach X in Y months",
-      "description": "Once a user has defined a Savings Goal (PRD-002 / PRD-007), Fabric Predictions computes a forward projection: take the last 3-month average monthly surplus (income - expenses), extrapolate against the goal amount, and surface: 'At your current saving rate you'll reach your \u20a6500k goal in approximately 4 months.' Updated weekly. Shown as a progress arc on the Dashboard alongside the Productivity Widget. Simple yet extremely motivating \u2014 makes the goal feel real.",
+      "title": "Time-to-savings-goal projection — at your current rate, you'll reach X in Y months",
+      "description": "Once a user has defined a Savings Goal (PRD-002 / PRD-007), Fabric Predictions computes a forward projection: take the last 3-month average monthly surplus (income - expenses), extrapolate against the goal amount, and surface: 'At your current saving rate you'll reach your ₦500k goal in approximately 4 months.' Updated weekly. Shown as a progress arc on the Dashboard alongside the Productivity Widget. Simple yet extremely motivating — makes the goal feel real.",
       "status": "planned",
       "detectionPatterns": [
         "INN-004",
@@ -447,8 +449,8 @@
       "id": "INN-005",
       "team": "Innovation",
       "priority": "P2",
-      "title": "Multi-turn conversation history in Fabric Query \u2014 persistent context",
-      "description": "Currently the Fabric free-text query input is stateless \u2014 each question is independent. Add persistence: conversation history stored in `users/{uid}/fabric/conversations/{date}` (max 20 messages per day, pruned). The QueryEngine receives the last 3 exchanges as context when parsing a new query, enabling follow-up questions like 'What about last month?' after 'How much did I spend on food?' A meaningful step toward conversational AI even before LLM integration (FAB-001).",
+      "title": "Multi-turn conversation history in Fabric Query — persistent context",
+      "description": "Currently the Fabric free-text query input is stateless — each question is independent. Add persistence: conversation history stored in `users/{uid}/fabric/conversations/{date}` (max 20 messages per day, pruned). The QueryEngine receives the last 3 exchanges as context when parsing a new query, enabling follow-up questions like 'What about last month?' after 'How much did I spend on food?' A meaningful step toward conversational AI even before LLM integration (FAB-001).",
       "status": "planned",
       "detectionPatterns": [
         "INN-005",
@@ -485,8 +487,8 @@
       "id": "ENG-006",
       "team": "Engineering",
       "priority": "P2",
-      "title": "Optimistic undo \u2014 30-second recovery window for delete operations",
-      "description": "For transaction delete and commitment delete, instead of permanent immediate removal: (1) Soft-delete with `isSoftDeleted: true` immediately (already supported in AnchorTransaction), (2) Show a bottom toast 'Transaction deleted \u2014 Undo (28s)' with countdown, (3) If user taps Undo, restore document by setting `isSoftDeleted: false`, (4) After 30s, a Cloud Function cleanup permanently removes soft-deleted documents. Uses existing `isSoftDeleted` field. Zero schema changes. Prevents 'I accidentally deleted 3 months of data' user distress.",
+      "title": "Optimistic undo — 30-second recovery window for delete operations",
+      "description": "For transaction delete and commitment delete, instead of permanent immediate removal: (1) Soft-delete with `isSoftDeleted: true` immediately (already supported in AnchorTransaction), (2) Show a bottom toast 'Transaction deleted — Undo (28s)' with countdown, (3) If user taps Undo, restore document by setting `isSoftDeleted: false`, (4) After 30s, a Cloud Function cleanup permanently removes soft-deleted documents. Uses existing `isSoftDeleted` field. Zero schema changes. Prevents 'I accidentally deleted 3 months of data' user distress.",
       "status": "planned",
       "detectionPatterns": [
         "ENG-006",
@@ -504,8 +506,8 @@
       "team": "Engineering",
       "priority": "P2",
       "title": "OpenTelemetry distributed tracing for Cloud Functions",
-      "description": "Instrument Cloud Functions with OpenTelemetry spans tracing the full request lifecycle: HTTP trigger \u2192 auth verification \u2192 Firestore write \u2192 response. Export to Google Cloud Trace (free in Firebase projects). Enables p95 latency tracking per callable, Firestore query timing, and cross-function trace correlation. Pairs with OBS-001 (SLO dashboard). Does not affect mobile bundle \u2014 server-side only. Critical for understanding where latency spikes occur in family invite and recurring transaction flows.",
-      "status": "planned",
+      "description": "Instrument Cloud Functions with OpenTelemetry spans tracing the full request lifecycle: HTTP trigger → auth verification → Firestore write → response. Export to Google Cloud Trace (free in Firebase projects). Enables p95 latency tracking per callable, Firestore query timing, and cross-function trace correlation. Pairs with OBS-001 (SLO dashboard). Does not affect mobile bundle — server-side only. Critical for understanding where latency spikes occur in family invite and recurring transaction flows.",
+      "status": "completed",
       "detectionPatterns": [
         "ENG-007",
         "OpenTelemetry",
@@ -515,7 +517,8 @@
       "effort": "medium",
       "impact": "medium",
       "type": "engineering",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "OBS-004",
@@ -576,7 +579,7 @@
       "team": "DevOps",
       "priority": "P1",
       "title": "External uptime monitoring with 5-minute probe interval",
-      "description": "Configure an external uptime monitor (Freshping free tier or UptimeRobot) that probes `anchor-os.web.app` every 5 minutes and sends a Slack/email alert within 10 minutes of downtime. Also probe `us-central1-anchor-os-production.cloudfunctions.net/getNotifications` for function availability. Currently there is no external probe \u2014 downtime is only detected by user reports. A 30-minute outage can go unnoticed. First item in an SRE practice.",
+      "description": "Configure an external uptime monitor (Freshping free tier or UptimeRobot) that probes `anchor-os.web.app` every 5 minutes and sends a Slack/email alert within 10 minutes of downtime. Also probe `us-central1-anchor-os-production.cloudfunctions.net/getNotifications` for function availability. Currently there is no external probe — downtime is only detected by user reports. A 30-minute outage can go unnoticed. First item in an SRE practice.",
       "status": "shipped",
       "detectionPatterns": [
         "SRE-003",
@@ -598,7 +601,7 @@
       "priority": "P2",
       "title": "Firebase Firestore quota monitoring and alert at 80% threshold",
       "description": "Firebase Free and Blaze plans have daily Firestore quotas. Set up Google Cloud Monitoring budget alerts + a daily Cloud Function that reads Firestore usage metrics from the Firebase Management API and writes to a `quotaHealth` document. Alert fires (email + Slack) when daily reads/writes reach 80% of the configured daily limit. Without this, production can hit quota limits silently and fail for all users until midnight UTC reset.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "SRE-004",
         "Firestore quota",
@@ -608,7 +611,8 @@
       "effort": "small",
       "impact": "high",
       "type": "sre",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "SRE-005",
@@ -616,7 +620,7 @@
       "priority": "P2",
       "title": "Cloud Function cold start profiling and keep-warm strategy",
       "description": "Cloud Functions (Node.js Gen2) cold start times impact first-open UX. Profile current cold start p95 for the 5 highest-traffic callables (getNotifications, createFamilyInvitation, logAuditEvent, processReminders, generateWeeklyReport). For callables that must be fast (<500ms), configure minimum instances in firebase.json. For scheduled functions, a pre-warm HTTP ping in the merge-gate pre-deploy step. Target: p95 cold start < 2s for all user-facing callables.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "SRE-005",
         "cold start",
@@ -626,14 +630,15 @@
       "effort": "medium",
       "impact": "medium",
       "type": "sre",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "DES-003",
       "team": "Design",
       "priority": "P2",
       "title": "Custom illustration library for empty states, onboarding, and error pages",
-      "description": "Replace generic placeholder empty states (no transactions yet, no commitments, no family connected) with bespoke Anchor OS illustrations \u2014 calm, abstract, African-design-influenced visual language. SVG-based, dark mode aware, colour-token-compliant. Illustrate: (1) Empty finance view, (2) Empty commitments, (3) Empty Fabric (no insights yet), (4) Onboarding Welcome, (5) Family not connected, (6) 404 and 500 error pages. A distinct visual identity that sets Anchor apart from generic fintech apps.",
+      "description": "Replace generic placeholder empty states (no transactions yet, no commitments, no family connected) with bespoke Anchor OS illustrations — calm, abstract, African-design-influenced visual language. SVG-based, dark mode aware, colour-token-compliant. Illustrate: (1) Empty finance view, (2) Empty commitments, (3) Empty Fabric (no insights yet), (4) Onboarding Welcome, (5) Family not connected, (6) 404 and 500 error pages. A distinct visual identity that sets Anchor apart from generic fintech apps.",
       "status": "planned",
       "detectionPatterns": [
         "DES-003",
@@ -650,8 +655,8 @@
       "id": "DES-004",
       "team": "Design",
       "priority": "P2",
-      "title": "Micro-interaction motion system \u2014 transaction save, commitment complete, account create",
-      "description": "Define and implement a set of purposeful micro-animations in a `src/animations/` module: (1) Transaction saved \u2192 brief green checkmark bloom on the form, (2) Commitment completed \u2192 gentle strike-through + fade, (3) Account created \u2192 card slides in from bottom with a soft spring, (4) Net worth increase \u2192 subtle upward particle burst (non-gamified, purely ambient). Built with CSS `@keyframes` in the design token system \u2014 respects `prefers-reduced-motion`. Makes interactions feel alive without being distracting.",
+      "title": "Micro-interaction motion system — transaction save, commitment complete, account create",
+      "description": "Define and implement a set of purposeful micro-animations in a `src/animations/` module: (1) Transaction saved → brief green checkmark bloom on the form, (2) Commitment completed → gentle strike-through + fade, (3) Account created → card slides in from bottom with a soft spring, (4) Net worth increase → subtle upward particle burst (non-gamified, purely ambient). Built with CSS `@keyframes` in the design token system — respects `prefers-reduced-motion`. Makes interactions feel alive without being distracting.",
       "status": "planned",
       "detectionPatterns": [
         "DES-004",
@@ -668,8 +673,8 @@
       "id": "DES-005",
       "team": "Design",
       "priority": "P3",
-      "title": "Compact density mode \u2014 comfortable vs compact information layout",
-      "description": "Add a 'Display density' setting (Settings \u2192 Appearance): 'Comfortable' (current default \u2014 more whitespace, larger touch targets) vs 'Compact' (tighter rows, smaller text, 20% more items visible). Compact mode uses Tailwind `data-density=compact` attribute on root element with overrides for padding, line height, and row height. Particularly valuable for power users who want to see 3 months of transactions without scrolling. Mobile-safe: minimum 44px touch targets maintained in both modes.",
+      "title": "Compact density mode — comfortable vs compact information layout",
+      "description": "Add a 'Display density' setting (Settings → Appearance): 'Comfortable' (current default — more whitespace, larger touch targets) vs 'Compact' (tighter rows, smaller text, 20% more items visible). Compact mode uses Tailwind `data-density=compact` attribute on root element with overrides for padding, line height, and row height. Particularly valuable for power users who want to see 3 months of transactions without scrolling. Mobile-safe: minimum 44px touch targets maintained in both modes.",
       "status": "planned",
       "detectionPatterns": [
         "DES-005",
@@ -686,8 +691,8 @@
       "id": "DATA-002",
       "team": "Data",
       "priority": "P2",
-      "title": "A/B testing infrastructure \u2014 experiment variants in analytics events",
-      "description": "Add an experiment assignment system: `getExperimentVariant(experimentId)` reads from Firebase Remote Config (ARCH-021) and returns 'control' or 'treatment'. Variant is attached to every analytics event as `experimentId` + `variant` fields. Enables product experiments: does PRD-007 (goal-setting onboarding) improve 30-day retention? Are users who see INN-004 (goal projection) more likely to stay 60 days? No external tool needed \u2014 built on existing Remote Config + analytics event contract.",
+      "title": "A/B testing infrastructure — experiment variants in analytics events",
+      "description": "Add an experiment assignment system: `getExperimentVariant(experimentId)` reads from Firebase Remote Config (ARCH-021) and returns 'control' or 'treatment'. Variant is attached to every analytics event as `experimentId` + `variant` fields. Enables product experiments: does PRD-007 (goal-setting onboarding) improve 30-day retention? Are users who see INN-004 (goal projection) more likely to stay 60 days? No external tool needed — built on existing Remote Config + analytics event contract.",
       "status": "planned",
       "detectionPatterns": [
         "DATA-002",
@@ -704,9 +709,9 @@
       "id": "DATA-003",
       "team": "Data",
       "priority": "P2",
-      "title": "Fabric insight effectiveness measurement \u2014 did users act on insights?",
+      "title": "Fabric insight effectiveness measurement — did users act on insights?",
       "description": "When a Fabric insight or prediction card is shown, log a `fabric_insight_shown` event. If the user takes a relevant action within 24 hours (creates a transaction in the flagged category, adjusts a recurring, completes a commitment), log `fabric_insight_acted`. Track the conversion rate per insight category (commitments, spending, predictions) via aggregation in Firestore. Enables Fabric team to measure which insight types actually change behaviour and which are ignored. Essential for FAB-001 (LLM) ROI measurement.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "DATA-003",
         "insight effectiveness",
@@ -716,14 +721,15 @@
       "effort": "small",
       "impact": "high",
       "type": "data",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "DATA-004",
       "team": "Data",
       "priority": "P3",
-      "title": "User retention cohort analysis \u2014 weekly survival curves by signup cohort",
-      "description": "A weekly scheduled Cloud Function aggregates anonymised retention data: for users who signed up in week W, how many were active (\u22651 transaction or \u22651 task) in weeks W+1, W+2, W+4, W+8, W+12? Results stored in `analytics/retention/cohorts/{week}`. Dashboard in the PM tools shows survival curves per cohort. Helps identify where users drop off (after onboarding? after first month?) and validates whether new features are improving retention. No PII \u2014 cohort IDs only.",
+      "title": "User retention cohort analysis — weekly survival curves by signup cohort",
+      "description": "A weekly scheduled Cloud Function aggregates anonymised retention data: for users who signed up in week W, how many were active (≥1 transaction or ≥1 task) in weeks W+1, W+2, W+4, W+8, W+12? Results stored in `analytics/retention/cohorts/{week}`. Dashboard in the PM tools shows survival curves per cohort. Helps identify where users drop off (after onboarding? after first month?) and validates whether new features are improving retention. No PII — cohort IDs only.",
       "status": "planned",
       "detectionPatterns": [
         "DATA-004",
@@ -740,9 +746,9 @@
       "id": "DB-004",
       "team": "Database",
       "priority": "P1",
-      "title": "Firestore composite index catalog \u2014 documented, versioned, enforced in CI",
+      "title": "Firestore composite index catalog — documented, versioned, enforced in CI",
       "description": "Create `docs/FIRESTORE_INDEXES.md` documenting all required composite indexes, their justification, and the queries they serve. Add a CI check that validates `config/firestore.indexes.json` matches the documented catalog. Include a test scenario in the Firestore emulator that executes every documented composite query to verify the index exists. Currently `firestore.indexes.json` exists but is undocumented and not validated. Index drift causes silent production failures when indexes are created manually and not committed.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "DB-004",
         "index catalog",
@@ -752,13 +758,14 @@
       "effort": "small",
       "impact": "medium",
       "type": "database",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "DB-005",
       "team": "Database",
       "priority": "P2",
-      "title": "Per-session Firestore read cost monitoring \u2014 outlier detection and alerting",
+      "title": "Per-session Firestore read cost monitoring — outlier detection and alerting",
       "description": "Instrument the `secureDb.ts` wrapper to count reads per session in-memory. On app close (visibilitychange to hidden), write a telemetry event with `sessionReadCount`, `sessionDuration`, `tabView` to a `diagnostics` collection. A daily Cloud Function aggregates p95 read counts per user and alerts if any user exceeds 5,000 reads/session (Firebase free tier: 50,000 reads/day). This identifies high-read code paths (e.g., a Firestore `onSnapshot` listener that re-triggers on every keystroke) before they appear on the billing dashboard.",
       "status": "planned",
       "detectionPatterns": [
@@ -777,7 +784,7 @@
       "team": "Database",
       "priority": "P2",
       "title": "Automated cold-tier archival of transactions older than 2 years",
-      "description": "Implement a monthly Cloud Function that moves transactions older than 2 years from the hot Firestore tier to a Cloud Storage JSON archive file (`gs://anchor-os-archive/users/{uid}/transactions/{year}.json`). Soft-delete record in Firestore to maintain referential integrity. Archive files are encrypted with Cloud KMS. Reduces Firestore document count, cutting storage costs as the user base grows. Users can request archive download via Settings \u2192 Data Management.",
+      "description": "Implement a monthly Cloud Function that moves transactions older than 2 years from the hot Firestore tier to a Cloud Storage JSON archive file (`gs://anchor-os-archive/users/{uid}/transactions/{year}.json`). Soft-delete record in Firestore to maintain referential integrity. Archive files are encrypted with Cloud KMS. Reduces Firestore document count, cutting storage costs as the user base grows. Users can request archive download via Settings → Data Management.",
       "status": "planned",
       "detectionPatterns": [
         "DB-006",
@@ -794,7 +801,7 @@
       "id": "AUTH-005",
       "team": "Auth",
       "priority": "P1",
-      "title": "Sign in with Apple \u2014 required for iOS App Store social auth compliance",
+      "title": "Sign in with Apple — required for iOS App Store social auth compliance",
       "description": "Apple App Store guidelines require apps offering third-party social sign-in (AUTH-001 covers Google) to also offer Sign in with Apple. Implement using Firebase Auth `OAuthProvider('apple.com')` + Capacitor `@capacitor-community/apple-sign-in` for native modal on iOS. Web fallback uses Firebase redirect flow. On Android, Sign in with Apple still works via web flow. Critical blocking item for App Store submission once AUTH-001 (Social Sign-In) is shipped.",
       "status": "shipped",
       "detectionPatterns": [
@@ -815,8 +822,8 @@
       "team": "Auth",
       "priority": "P2",
       "title": "Email address change flow with re-verification and Firestore sync",
-      "description": "Currently there is no UI to change email address. Flow: (1) User enters new email in Settings \u2192 Security, (2) Password re-auth required, (3) Firebase `updateEmail()` + `sendEmailVerification()` to new address, (4) Firestore `profiles/{uid}.email` updated atomically, (5) Family connection emails updated if relevant, (6) Pending invitations with old email invalidated. Must handle the race condition where the auth email and Firestore email diverge if step (4) fails. Needs a Firestore trigger to keep emails in sync.",
-      "status": "planned",
+      "description": "Currently there is no UI to change email address. Flow: (1) User enters new email in Settings → Security, (2) Password re-auth required, (3) Firebase `updateEmail()` + `sendEmailVerification()` to new address, (4) Firestore `profiles/{uid}.email` updated atomically, (5) Family connection emails updated if relevant, (6) Pending invitations with old email invalidated. Must handle the race condition where the auth email and Firestore email diverge if step (4) fails. Needs a Firestore trigger to keep emails in sync.",
+      "status": "completed",
       "detectionPatterns": [
         "AUTH-006",
         "email change",
@@ -826,14 +833,15 @@
       "effort": "medium",
       "impact": "medium",
       "type": "auth",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "AUTH-007",
       "team": "Auth",
       "priority": "P2",
-      "title": "Guest / anonymous mode \u2014 explore Anchor without signing up, then convert",
-      "description": "Allow unauthenticated users to explore the full app with pre-seeded demo data using Firebase Anonymous Auth. A persistent 'Save your progress \u2014 Create an account' banner shows throughout. On account creation, link the anonymous session to the new account (Firebase `linkWithCredential()`) and migrate the demo data to the new user's Firestore documents. Demo data is read from a static `demoData.ts` fixture \u2014 no Firestore reads for guests. Lowers signup barrier dramatically for app store acquisition.",
+      "title": "Guest / anonymous mode — explore Anchor without signing up, then convert",
+      "description": "Allow unauthenticated users to explore the full app with pre-seeded demo data using Firebase Anonymous Auth. A persistent 'Save your progress — Create an account' banner shows throughout. On account creation, link the anonymous session to the new account (Firebase `linkWithCredential()`) and migrate the demo data to the new user's Firestore documents. Demo data is read from a static `demoData.ts` fixture — no Firestore reads for guests. Lowers signup barrier dramatically for app store acquisition.",
       "status": "planned",
       "detectionPatterns": [
         "AUTH-007",
@@ -850,9 +858,9 @@
       "id": "AUTH-008",
       "team": "Auth",
       "priority": "P2",
-      "title": "Auth event security alerts \u2014 notify user of unrecognised sign-ins via email",
-      "description": "When a sign-in event is detected from a new device (different user-agent hash) or an unusual time (not seen before in last 30 days), send an automated email: 'A new sign-in to your Anchor account was detected from iPhone 15 Pro on Safari at 2:14 AM.' User can tap 'This wasn't me \u2192 Revoke access.' Email delivered via existing `sendTemplatedEmail` callable. Pairs with SEC-009 (auth event history). Provides proactive security alerting without requiring MFA.",
-      "status": "planned",
+      "title": "Auth event security alerts — notify user of unrecognised sign-ins via email",
+      "description": "When a sign-in event is detected from a new device (different user-agent hash) or an unusual time (not seen before in last 30 days), send an automated email: 'A new sign-in to your Anchor account was detected from iPhone 15 Pro on Safari at 2:14 AM.' User can tap 'This wasn't me → Revoke access.' Email delivered via existing `sendTemplatedEmail` callable. Pairs with SEC-009 (auth event history). Provides proactive security alerting without requiring MFA.",
+      "status": "completed",
       "detectionPatterns": [
         "AUTH-008",
         "sign-in alert",
@@ -862,15 +870,16 @@
       "effort": "medium",
       "impact": "high",
       "type": "auth",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "ARCH-024",
       "team": "Architecture",
       "priority": "P1",
-      "title": "ESLint module boundary rules \u2014 enforce no cross-feature direct imports",
-      "description": "Add `eslint-plugin-import` rules that prevent `src/features/finance/` from directly importing `src/features/commitments/` or `src/features/fabric/`. All cross-feature communication must go through `src/hooks/`, `src/context/`, or `src/services/`. Add a custom rule that fails if any `features/X` file imports from `features/Y` (where X \u2260 Y) without an intermediate service/hook. Currently the codebase is clean but without enforcement any PR could break module isolation. ADR documenting the boundary decision.",
-      "status": "planned",
+      "title": "ESLint module boundary rules — enforce no cross-feature direct imports",
+      "description": "Add `eslint-plugin-import` rules that prevent `src/features/finance/` from directly importing `src/features/commitments/` or `src/features/fabric/`. All cross-feature communication must go through `src/hooks/`, `src/context/`, or `src/services/`. Add a custom rule that fails if any `features/X` file imports from `features/Y` (where X ≠ Y) without an intermediate service/hook. Currently the codebase is clean but without enforcement any PR could break module isolation. ADR documenting the boundary decision.",
+      "status": "completed",
       "detectionPatterns": [
         "ARCH-024",
         "module boundary",
@@ -880,15 +889,16 @@
       "effort": "small",
       "impact": "medium",
       "type": "architecture",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "ARCH-025",
       "team": "Architecture",
       "priority": "P2",
-      "title": "Versioned Cloud Function callable APIs \u2014 v1/v2 naming with backward compatibility",
+      "title": "Versioned Cloud Function callable APIs — v1/v2 naming with backward compatibility",
       "description": "Introduce callable function versioning: `createFamilyInvitation_v2` runs alongside `createFamilyInvitation_v1` during migration windows. Client-side `callableApi.ts` resolves the correct version based on the deployed app version. Enables gradual rollout of breaking callable changes without requiring all clients to be on the latest version simultaneously. Critical for Capacitor native apps where app store review delays mean old versions remain live for weeks.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "ARCH-025",
         "callable versioning",
@@ -898,13 +908,14 @@
       "effort": "medium",
       "impact": "high",
       "type": "architecture",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "ARCH-026",
       "team": "Architecture",
       "priority": "P1",
-      "title": "Firestore rules test coverage enforcement \u2014 gate on uncovered rule paths",
+      "title": "Firestore rules test coverage enforcement — gate on uncovered rule paths",
       "description": "The Firestore rules emulator test suite (44 tests) is comprehensive but not coverage-enforced. Add a `@firebase/rules-unit-testing` coverage reporter that outputs which rule paths were exercised and which were not. Fail CI if any `allow read/write` rule has 0 test coverage. Requires parsing the coverage output from the Firebase emulator's coverage endpoint (`localhost:8080/emulator/v1/projects/{projectId}:ruleCoverage`). Prevents new rules from shipping without tests.",
       "status": "shipped",
       "detectionPatterns": [
@@ -924,9 +935,9 @@
       "id": "ARCH-027",
       "team": "Architecture",
       "priority": "P2",
-      "title": "Automated dead code detection \u2014 unused exports scanning in CI",
-      "description": "Add `ts-prune` or `knip` to the merge-gate CI pipeline to detect unused exported functions, types, and components. Report as warnings (not failures) initially; create a dedicated tracking issue for existing dead code. After the first clean sweep, promote to a hard failure gate. Prevents the codebase from accumulating stale exports as features are refactored. Currently files are \u2264200 lines (ARCH-001) but there is no protection against unused exports that silently bloat the bundle.",
-      "status": "planned",
+      "title": "Automated dead code detection — unused exports scanning in CI",
+      "description": "Add `ts-prune` or `knip` to the merge-gate CI pipeline to detect unused exported functions, types, and components. Report as warnings (not failures) initially; create a dedicated tracking issue for existing dead code. After the first clean sweep, promote to a hard failure gate. Prevents the codebase from accumulating stale exports as features are refactored. Currently files are ≤200 lines (ARCH-001) but there is no protection against unused exports that silently bloat the bundle.",
+      "status": "completed",
       "detectionPatterns": [
         "ARCH-027",
         "dead code",
@@ -937,14 +948,15 @@
       "effort": "small",
       "impact": "medium",
       "type": "architecture",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "PSE-001",
       "team": "Principal Engineering",
       "priority": "P2",
-      "title": "Engineering RFC process \u2014 lightweight ADR for every significant technical decision",
-      "description": "Establish a lightweight Request for Comments (RFC) process: any change to system architecture, data model, auth flow, or external service integration requires a `docs/adr/ADR-NNN-title.md` file before implementation begins. ADR template: Context \u2192 Decision \u2192 Alternatives Considered \u2192 Consequences \u2192 Owner \u2192 Date. Two existing ADRs in `docs/adr/` \u2014 make this a process with a policy gate: PRs that bypass the ADR requirement for architecture-level changes are blocked by a checklist review. Creates institutional memory and prevents future 'why did we do it this way?' questions.",
+      "title": "Engineering RFC process — lightweight ADR for every significant technical decision",
+      "description": "Establish a lightweight Request for Comments (RFC) process: any change to system architecture, data model, auth flow, or external service integration requires a `docs/adr/ADR-NNN-title.md` file before implementation begins. ADR template: Context → Decision → Alternatives Considered → Consequences → Owner → Date. Two existing ADRs in `docs/adr/` — make this a process with a policy gate: PRs that bypass the ADR requirement for architecture-level changes are blocked by a checklist review. Creates institutional memory and prevents future 'why did we do it this way?' questions.",
       "status": "planned",
       "detectionPatterns": [
         "PSE-001",
@@ -979,9 +991,9 @@
       "id": "PSE-003",
       "team": "Principal Engineering",
       "priority": "P2",
-      "title": "Per-route performance budgets \u2014 LCP and CLS targets enforced per screen",
+      "title": "Per-route performance budgets — LCP and CLS targets enforced per screen",
       "description": "Define explicit performance budgets per route in `lighthouserc.cjs`: Dashboard route LCP < 1.8s, Finance route (with transaction list) LCP < 2.5s, Auth route LCP < 1.2s. Fabric route FID < 100ms. Merge-gate Lighthouse CI enforces these per-route targets, not just overall scores. Forces engineers to measure the performance impact of every new widget, hook, or service on the routes that host them. Makes performance regressions route-attributable, not just app-wide averages.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "PSE-003",
         "performance budget",
@@ -991,15 +1003,16 @@
       "effort": "small",
       "impact": "medium",
       "type": "process",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "UX-036",
       "team": "Design",
       "priority": "P1",
-      "title": "Smart transaction quick-entry \u2014 natural language amount + title parsing",
-      "description": "A floating '+' button on the Finance tab opens a single-line quick-entry field. User types 'coffee 500' or 'salary 250000 income' or 'rent 150k expense'. A lightweight client-side parser (`parseQuickEntry()`) extracts: amount (handles 'k' suffix \u2192 *1000), title, and type hint ('income'/'expense'). The parsed values pre-fill the full TransactionForm which opens below. Reduces the most common interaction (manual expense entry) from 6 taps to 2. 75% of users are mobile \u2014 low-friction entry is the #1 retention driver for a manual ledger.",
-      "status": "planned",
+      "title": "Smart transaction quick-entry — natural language amount + title parsing",
+      "description": "A floating '+' button on the Finance tab opens a single-line quick-entry field. User types 'coffee 500' or 'salary 250000 income' or 'rent 150k expense'. A lightweight client-side parser (`parseQuickEntry()`) extracts: amount (handles 'k' suffix → *1000), title, and type hint ('income'/'expense'). The parsed values pre-fill the full TransactionForm which opens below. Reduces the most common interaction (manual expense entry) from 6 taps to 2. 75% of users are mobile — low-friction entry is the #1 retention driver for a manual ledger.",
+      "status": "completed",
       "detectionPatterns": [
         "UX-036",
         "quick entry",
@@ -1009,14 +1022,15 @@
       "effort": "medium",
       "impact": "high",
       "type": "ux",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "UX-037",
       "team": "Design",
       "priority": "P3",
-      "title": "Daily financial journal note \u2014 one optional note per day attached to the day's summary",
-      "description": "At the bottom of each day's transaction group in AccountDetailsView, a '+ Add a note for today' field lets users write a one-sentence financial journal entry (max 140 chars): 'Had to deal with a car repair this week', 'Great restraint at the mall today!'. Stored in `accounts/{id}/dayNotes/{YYYY-MM-DD}`. Notes visible only to the account owner. Fabric can optionally surface patterns from notes. Transforms Anchor from a number tracker into a personal finance journal \u2014 a differentiator no mainstream fintech has.",
+      "title": "Daily financial journal note — one optional note per day attached to the day's summary",
+      "description": "At the bottom of each day's transaction group in AccountDetailsView, a '+ Add a note for today' field lets users write a one-sentence financial journal entry (max 140 chars): 'Had to deal with a car repair this week', 'Great restraint at the mall today!'. Stored in `accounts/{id}/dayNotes/{YYYY-MM-DD}`. Notes visible only to the account owner. Fabric can optionally surface patterns from notes. Transforms Anchor from a number tracker into a personal finance journal — a differentiator no mainstream fintech has.",
       "status": "planned",
       "detectionPatterns": [
         "UX-037",
@@ -1033,8 +1047,8 @@
       "id": "UX-038",
       "team": "Design",
       "priority": "P2",
-      "title": "Net worth milestone momentss \u2014 calm, non-gamified recognition of financial progress",
-      "description": "When a user's total net worth crosses a round milestone (\u20a6100k, \u20a6500k, \u20a61M, etc.) for the first time, Anchor shows a calm, non-intrusive notification: a subtle shimmer on the Portfolio Widget and a soft toast: 'You've crossed \u20a61,000,000 in net worth. Well done.' No confetti, no badges, no scoreboards \u2014 just a moment of acknowledgement. Data driven by the existing NetWorth calculation in DashboardView. First milestone crossed: triggered via `previousNetWorth < milestone <= newNetWorth` comparison on each dashboard refresh.",
+      "title": "Net worth milestone momentss — calm, non-gamified recognition of financial progress",
+      "description": "When a user's total net worth crosses a round milestone (₦100k, ₦500k, ₦1M, etc.) for the first time, Anchor shows a calm, non-intrusive notification: a subtle shimmer on the Portfolio Widget and a soft toast: 'You've crossed ₦1,000,000 in net worth. Well done.' No confetti, no badges, no scoreboards — just a moment of acknowledgement. Data driven by the existing NetWorth calculation in DashboardView. First milestone crossed: triggered via `previousNetWorth < milestone <= newNetWorth` comparison on each dashboard refresh.",
       "status": "planned",
       "detectionPatterns": [
         "UX-038",
@@ -1051,9 +1065,9 @@
       "id": "COMM-006",
       "team": "Product",
       "priority": "P2",
-      "title": "Commitment notes and context field \u2014 add a why and a description",
-      "description": "Add an optional `notes` field (max 200 chars) to the AnchorTask model. In TaskForm, a collapsible 'Add context' section lets users write the why: 'I do this to stay grounded before work' or 'Saves \u20a63,000 per month'. Notes shown as secondary text on TaskItem. Fabric can reference the `notes` field when generating the Daily Briefing to personalise suggestions. Currently task records only have a `title`. The 'why' behind a commitment is proven to dramatically improve follow-through.",
-      "status": "planned",
+      "title": "Commitment notes and context field — add a why and a description",
+      "description": "Add an optional `notes` field (max 200 chars) to the AnchorTask model. In TaskForm, a collapsible 'Add context' section lets users write the why: 'I do this to stay grounded before work' or 'Saves ₦3,000 per month'. Notes shown as secondary text on TaskItem. Fabric can reference the `notes` field when generating the Daily Briefing to personalise suggestions. Currently task records only have a `title`. The 'why' behind a commitment is proven to dramatically improve follow-through.",
+      "status": "completed",
       "detectionPatterns": [
         "COMM-006",
         "commitment notes",
@@ -1063,15 +1077,16 @@
       "effort": "small",
       "impact": "medium",
       "type": "feature",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "COMM-007",
       "team": "Product",
       "priority": "P3",
-      "title": "Commitment priority levels \u2014 mark which commitments matter most today",
+      "title": "Commitment priority levels — mark which commitments matter most today",
       "description": "Add an optional `priority: 'high' | 'medium' | 'low'` field to AnchorTask. In TaskList, 'high' priority items always show first regardless of type. A priority indicator (solid dot, coloured dot, outline dot) appears on TaskItem. Today's Focus Widget on the Dashboard shows high-priority items first. Allows users to distinguish between 'must do today' and 'nice to do' without converting everything to type: 'daily'. Keeps the commitment system flexible without adding a full project management UI.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "COMM-007",
         "commitment priority",
@@ -1081,14 +1096,15 @@
       "effort": "small",
       "impact": "low",
       "type": "feature",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "FIN-017",
       "team": "Engineering",
       "priority": "P2",
-      "title": "Financial calendar view \u2014 month grid showing planned income and expenses",
-      "description": "A 'Calendar' tab or toggle in FinanceView renders a monthly grid calendar. Each day shows: coloured dots for transactions (green=income, red=expense). Tap a day \u2192 day detail drawer. Future dates show RecurringTransaction expected dates as ghost markers. This gives users the temporal context missing from the list view \u2014 'when are my big expenses hitting vs when is my paycheck?' Implemented client-side using existing transaction data. No new data model needed. CalendarView component + useCalendarEvents() hook.",
+      "title": "Financial calendar view — month grid showing planned income and expenses",
+      "description": "A 'Calendar' tab or toggle in FinanceView renders a monthly grid calendar. Each day shows: coloured dots for transactions (green=income, red=expense). Tap a day → day detail drawer. Future dates show RecurringTransaction expected dates as ghost markers. This gives users the temporal context missing from the list view — 'when are my big expenses hitting vs when is my paycheck?' Implemented client-side using existing transaction data. No new data model needed. CalendarView component + useCalendarEvents() hook.",
       "status": "planned",
       "detectionPatterns": [
         "FIN-017",
@@ -1140,7 +1156,7 @@
       "priority": "P2",
       "title": "Bill payment reminders with calendar integration",
       "description": "Users tag transactions or manual entries as recurring bills with due dates. Push notifications fire 3 days and 1 day before due. Calendar view shows upcoming obligations. Reduces missed payments and overdraft risk.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "FIN-014",
         "bill reminder",
@@ -1149,7 +1165,8 @@
       "effort": "medium",
       "impact": "high",
       "type": "feature",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "FIN-015",
@@ -1191,8 +1208,8 @@
       "team": "Product",
       "priority": "P2",
       "title": "Commitment streak tracking with gentle nudges",
-      "description": "Track consecutive days/weeks a commitment is honored. Display streak count on commitment cards. Send a non-intrusive nudge push notification if a streak is at risk (24 hrs before the daily deadline). No gamification badges \u2014 just a counter and a calm reminder.",
-      "status": "planned",
+      "description": "Track consecutive days/weeks a commitment is honored. Display streak count on commitment cards. Send a non-intrusive nudge push notification if a streak is at risk (24 hrs before the daily deadline). No gamification badges — just a counter and a calm reminder.",
+      "status": "completed",
       "detectionPatterns": [
         "COMM-001",
         "streak",
@@ -1201,7 +1218,8 @@
       "effort": "small",
       "impact": "medium",
       "type": "feature",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "COMM-002",
@@ -1209,7 +1227,7 @@
       "priority": "P2",
       "title": "Commitment calendar view (month and week)",
       "description": "Add a calendar view to the commitments tab showing completion status by day. Month view shows heat-map density; week view shows individual completion per commitment. Tap a day to see detail. Helps users see patterns at a glance.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "COMM-002",
         "commitment calendar"
@@ -1217,14 +1235,15 @@
       "effort": "medium",
       "impact": "medium",
       "type": "feature",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "COMM-003",
       "team": "Product",
       "priority": "P3",
       "title": "Commitment templates library",
-      "description": "Offer a curated set of starter commitment templates (e.g., 'Save \u20a6X per week', 'Review budget every Sunday') so new users can quickly add meaningful commitments. Templates are non-editable starting points, not locked contracts.",
+      "description": "Offer a curated set of starter commitment templates (e.g., 'Save ₦X per week', 'Review budget every Sunday') so new users can quickly add meaningful commitments. Templates are non-editable starting points, not locked contracts.",
       "status": "planned",
       "detectionPatterns": [
         "COMM-003",
@@ -1256,7 +1275,7 @@
       "team": "Product",
       "priority": "P2",
       "title": "Commitment sharing and family accountability",
-      "description": "Let users optionally share a commitment with their family partner. The partner sees commitment status on their dashboard and can send an encouragement react. No scores or pressure \u2014 just shared visibility.",
+      "description": "Let users optionally share a commitment with their family partner. The partner sees commitment status on their dashboard and can send an encouragement react. No scores or pressure — just shared visibility.",
       "status": "planned",
       "detectionPatterns": [
         "COMM-005",
@@ -1358,7 +1377,7 @@
       "id": "FAB-002",
       "team": "Innovation",
       "priority": "P2",
-      "title": "Fabric insight explainability \u2014 show reasoning",
+      "title": "Fabric insight explainability — show reasoning",
       "description": "For every Fabric suggestion or prediction, surface a one-sentence explanation of why it was generated (e.g., 'You spent 40% more on food this month vs last month'). Makes AI output trustworthy and non-magical. Pairs with FAB-001.",
       "status": "planned",
       "detectionPatterns": [
@@ -1449,7 +1468,7 @@
       "team": "Security",
       "priority": "P1",
       "title": "Field-level encryption for sensitive Firestore data",
-      "description": "Encrypt account numbers, balances, and transaction amounts at the application layer before writing to Firestore. Use a per-user key derived from Firebase Auth UID + a server-side KMS secret. Firestore at-rest encryption is insufficient alone \u2014 field encryption prevents Google employees and DB breaches from reading raw financial data.",
+      "description": "Encrypt account numbers, balances, and transaction amounts at the application layer before writing to Firestore. Use a per-user key derived from Firebase Auth UID + a server-side KMS secret. Firestore at-rest encryption is insufficient alone — field encryption prevents Google employees and DB breaches from reading raw financial data.",
       "status": "shipped",
       "detectionPatterns": [
         "SEC-005",
@@ -1470,7 +1489,7 @@
       "priority": "P2",
       "title": "Android Play Integrity / iOS DeviceCheck app attestation",
       "description": "Integrate Play Integrity API (Android) and DeviceCheck (iOS) via Capacitor plugins to verify the app is running on a trusted, unmodified device. Pass attestation token to Cloud Functions for high-risk operations (account linking, large transfers).",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "SEC-006",
         "Play Integrity",
@@ -1480,7 +1499,8 @@
       "effort": "medium",
       "impact": "medium",
       "type": "security",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "SEC-007",
@@ -1578,7 +1598,7 @@
       "team": "Engineering",
       "priority": "P1",
       "title": "IndexedDB-backed persistent offline queue",
-      "description": "The current offline mutation queue is held in memory \u2014 closing the tab or crashing the app loses queued writes. Replace with an IndexedDB-backed queue (via idb-keyval or Dexie) so operations survive app restarts and are replayed on next connection. Supersedes PWA-003 which only addresses the indicator UI.",
+      "description": "The current offline mutation queue is held in memory — closing the tab or crashing the app loses queued writes. Replace with an IndexedDB-backed queue (via idb-keyval or Dexie) so operations survive app restarts and are replayed on next connection. Supersedes PWA-003 which only addresses the indicator UI.",
       "status": "planned",
       "detectionPatterns": [
         "PLT-007",
@@ -1596,7 +1616,7 @@
       "team": "Architecture",
       "priority": "P2",
       "title": "Remote Config integration for dynamic feature flags",
-      "description": "The current feature flag system (src/utils/featureFlags.ts) is static \u2014 flags are baked at build time. Integrate Firebase Remote Config so flags can be toggled without a deploy. Critical for safe rollouts of FAM-001 and FAB-001.",
+      "description": "The current feature flag system (src/utils/featureFlags.ts) is static — flags are baked at build time. Integrate Firebase Remote Config so flags can be toggled without a deploy. Critical for safe rollouts of FAM-001 and FAB-001.",
       "status": "planned",
       "detectionPatterns": [
         "ARCH-021",
@@ -1670,7 +1690,7 @@
       "priority": "P2",
       "title": "Lazy-load heavy dependencies by route",
       "description": "Split Sentry initialisation, analytics, and Fabric view into dynamic import() chunks. Only import when the relevant route is visited. Reduces cold-start bundle size and TTI on the auth and dashboard entry paths. Measurable via Lighthouse CI.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "PERF-006",
         "lazy load",
@@ -1680,7 +1700,8 @@
       "effort": "small",
       "impact": "medium",
       "type": "performance",
-      "createdAt": "2026-03-17"
+      "createdAt": "2026-03-17",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "OBS-001",
@@ -1870,13 +1891,14 @@
       "priority": "P2",
       "title": "Reduce direct Firestore imports behind service boundaries",
       "description": "Refactor feature/hook Firestore SDK access into service/API boundaries for maintainability and testability. [REM-010]",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "GAP-010"
       ],
       "effort": "medium",
       "impact": "medium",
-      "createdAt": "2026-02-14"
+      "createdAt": "2026-02-14",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "GAP-009",
@@ -1900,13 +1922,14 @@
       "priority": "P2",
       "title": "Remove legacy anchor color token system",
       "description": "Migrate remaining legacy anchor.* token usage to semantic token system, then remove legacy token block. [REM-011]",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "GAP-008"
       ],
       "effort": "medium",
       "impact": "medium",
-      "createdAt": "2026-02-14"
+      "createdAt": "2026-02-14",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "UX-035",
@@ -1922,7 +1945,7 @@
       "impact": "medium",
       "createdAt": "2026-02-14",
       "completedAt": "2026-03-17",
-      "completionNote": "src/features/errors/NotFoundView.tsx + ServerErrorView.tsx \u2014 both routed in App.tsx and AuthenticatedAppShell.tsx"
+      "completionNote": "src/features/errors/NotFoundView.tsx + ServerErrorView.tsx — both routed in App.tsx and AuthenticatedAppShell.tsx"
     },
     {
       "id": "FIN-011",
@@ -1938,7 +1961,7 @@
       "impact": "medium",
       "createdAt": "2026-02-14",
       "completedAt": "2026-03-17",
-      "completionNote": "src/features/flags/featureFlags.ts \u2014 runtime feature flags, kill switches, staged rollout"
+      "completionNote": "src/features/flags/featureFlags.ts — runtime feature flags, kill switches, staged rollout"
     },
     {
       "id": "GAP-007",
@@ -1960,13 +1983,14 @@
       "priority": "P0",
       "title": "Raise automated test coverage thresholds to policy baseline",
       "description": "Increase Vitest coverage thresholds and close minimum required gaps, prioritizing branch coverage quality. [REM-002]",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "GAP-006"
       ],
       "effort": "medium",
       "impact": "medium",
-      "createdAt": "2026-02-14"
+      "createdAt": "2026-02-14",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "GAP-005",
@@ -2024,7 +2048,7 @@
       "impact": "medium",
       "createdAt": "2026-02-06",
       "completedAt": "2026-03-17",
-      "completionNote": "useSharedAccounts.ts permission: read|transact|manage \u2014 full granular permission model beyond read-only/write"
+      "completionNote": "useSharedAccounts.ts permission: read|transact|manage — full granular permission model beyond read-only/write"
     },
     {
       "id": "UX-032",
@@ -2115,7 +2139,7 @@
       "impact": "medium",
       "createdAt": "2026-02-06",
       "completedAt": "2026-03-17",
-      "completionNote": "src/utils/csvExport + AccountHeaderParts.tsx + DataManagement \u2014 CSV export in both settings and account detail"
+      "completionNote": "src/utils/csvExport + AccountHeaderParts.tsx + DataManagement — CSV export in both settings and account detail"
     },
     {
       "id": "FIN-007",
@@ -2131,7 +2155,7 @@
       "impact": "medium",
       "createdAt": "2026-02-06",
       "completedAt": "2026-03-17",
-      "completionNote": "src/features/settings/components/PasswordChange.tsx \u2014 password change with reauthentication"
+      "completionNote": "src/features/settings/components/PasswordChange.tsx — password change with reauthentication"
     },
     {
       "id": "FIN-006",
@@ -2147,7 +2171,7 @@
       "impact": "medium",
       "createdAt": "2026-02-06",
       "completedAt": "2026-03-17",
-      "completionNote": "src/services/mfaRecoveryService.ts + RecoveryCodesDisplay + AuthGate.tsx \u2014 generate/store/consume recovery codes"
+      "completionNote": "src/services/mfaRecoveryService.ts + RecoveryCodesDisplay + AuthGate.tsx — generate/store/consume recovery codes"
     },
     {
       "id": "FIN-005",
@@ -2163,7 +2187,7 @@
       "impact": "medium",
       "createdAt": "2026-02-06",
       "completedAt": "2026-03-17",
-      "completionNote": "functions/src/deleteAccount.ts \u2014 deleteMyAccount Cloud Function with audit logging and rate limiting"
+      "completionNote": "functions/src/deleteAccount.ts — deleteMyAccount Cloud Function with audit logging and rate limiting"
     },
     {
       "id": "BUG-060",
@@ -2365,7 +2389,7 @@
       "id": "BUG-058",
       "team": "Engineering",
       "priority": "P2",
-      "title": "O(n\u00b2) percentage calculation in AssetDistributionChart legend",
+      "title": "O(n²) percentage calculation in AssetDistributionChart legend",
       "description": "Each legend item recalculates total via accountData.reduce() inside map. Pre-compute percentages in useMemo for O(n) performance.",
       "status": "completed",
       "detectionPatterns": [
@@ -2753,7 +2777,7 @@
       "impact": "medium",
       "createdAt": "2026-02-01",
       "completedAt": "2026-03-17",
-      "completionNote": "src/utils/systemTheme.ts \u2014 getSystemTheme(), subscribeToSystemTheme(), prefers-color-scheme media query"
+      "completionNote": "src/utils/systemTheme.ts — getSystemTheme(), subscribeToSystemTheme(), prefers-color-scheme media query"
     },
     {
       "id": "PWA-006",
@@ -2821,13 +2845,14 @@
       "priority": "P1",
       "title": "API documentation update",
       "description": "Updating API docs for the new intake system.",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "BUG-025"
       ],
       "effort": "medium",
       "impact": "medium",
-      "createdAt": "2026-02-01"
+      "createdAt": "2026-02-01",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "FIN-004",
@@ -2884,7 +2909,7 @@
       "effort": "medium",
       "impact": "high",
       "completedAt": "2026-03-17",
-      "completionNote": "functions/src/reminders.ts + billReminderScheduler.ts + weeklyReport.ts + fabricNudges.ts \u2014 FCM push infra; client: fcmTokenService.ts"
+      "completionNote": "functions/src/reminders.ts + billReminderScheduler.ts + weeklyReport.ts + fabricNudges.ts — FCM push infra; client: fcmTokenService.ts"
     },
     {
       "id": "SEC-001",
@@ -2899,7 +2924,7 @@
       "effort": "small",
       "impact": "high",
       "completedAt": "2026-03-17",
-      "completionNote": "functions/src/rateLimit.ts \u2014 Firestore-backed rate limiting with per-operation limits, enforced in all Cloud Functions"
+      "completionNote": "functions/src/rateLimit.ts — Firestore-backed rate limiting with per-operation limits, enforced in all Cloud Functions"
     },
     {
       "id": "SEC-002",
@@ -2914,7 +2939,7 @@
       "effort": "medium",
       "impact": "high",
       "completedAt": "2026-03-17",
-      "completionNote": "src/services/AuditService.ts \u2014 immutable audit trail for auth/finance/settings/commitments with secureDb"
+      "completionNote": "src/services/AuditService.ts — immutable audit trail for auth/finance/settings/commitments with secureDb"
     },
     {
       "id": "SRE-001",
@@ -3026,12 +3051,13 @@
       "priority": "P1",
       "title": "Database Migrations",
       "description": "Versioned Firestore schema migrations",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "ENG-003"
       ],
       "effort": "medium",
-      "impact": "medium"
+      "impact": "medium",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "ENG-004",
@@ -3121,12 +3147,13 @@
       "priority": "P2",
       "title": "Session Management UI",
       "description": "Where you're logged in view with remote logout",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "AUTH-003"
       ],
       "effort": "small",
-      "impact": "medium"
+      "impact": "medium",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "AUTH-004",
@@ -3141,7 +3168,7 @@
       "effort": "small",
       "impact": "high",
       "completedAt": "2026-03-17",
-      "completionNote": "Same implementation as FIN-006 \u2014 mfaRecoveryService.ts + AuthGate.tsx + RecoveryCodesDisplay"
+      "completionNote": "Same implementation as FIN-006 — mfaRecoveryService.ts + AuthGate.tsx + RecoveryCodesDisplay"
     },
     {
       "id": "QA-001",
@@ -3156,7 +3183,7 @@
       "effort": "small",
       "impact": "medium",
       "completedAt": "2026-03-17",
-      "completionNote": "config/stryker.config.mjs \u2014 Stryker mutation testing fully configured with incremental mode"
+      "completionNote": "config/stryker.config.mjs — Stryker mutation testing fully configured with incremental mode"
     },
     {
       "id": "QA-002",
@@ -3171,7 +3198,7 @@
       "effort": "medium",
       "impact": "medium",
       "completedAt": "2026-03-17",
-      "completionNote": "e2e/visual.spec.ts \u2014 full visual regression test suite with snapshot and dark-mode tests"
+      "completionNote": "e2e/visual.spec.ts — full visual regression test suite with snapshot and dark-mode tests"
     },
     {
       "id": "QA-003",
@@ -3245,19 +3272,20 @@
       "priority": "P2",
       "title": "Firestore Index Optimization",
       "description": "Review firestore.indexes.json for unused compound indexes",
-      "status": "planned",
+      "status": "completed",
       "detectionPatterns": [
         "DB-001"
       ],
       "effort": "small",
-      "impact": "medium"
+      "impact": "medium",
+      "completedAt": "2026-04-06"
     },
     {
       "id": "DB-003",
       "team": "Database",
       "priority": "P2",
       "title": "Archival Strategy",
-      "description": "Move old transactions to cold storage (Firestore \u2192 BigQuery)",
+      "description": "Move old transactions to cold storage (Firestore → BigQuery)",
       "status": "planned",
       "detectionPatterns": [
         "DB-003"
@@ -3322,7 +3350,7 @@
       "team": "Data",
       "priority": "P3",
       "title": "Analytics Pipeline",
-      "description": "Firestore \u2192 BigQuery \u2192 Looker Studio for product analytics",
+      "description": "Firestore → BigQuery → Looker Studio for product analytics",
       "status": "planned",
       "detectionPatterns": [
         "DATA-001"

@@ -191,6 +191,30 @@
       "completedDate": "2026-03-28",
       "cycleTime": null,
       "recordedAt": "2026-04-04T07:00:00.022Z"
+    },
+    {
+      "itemId": "FEATURE-041",
+      "completedDate": "2026-04-05",
+      "cycleTime": null,
+      "recordedAt": "2026-04-06T11:00:00.006Z"
+    },
+    {
+      "itemId": "BUG-130",
+      "completedDate": "2026-04-05",
+      "cycleTime": null,
+      "recordedAt": "2026-04-06T11:00:00.007Z"
+    },
+    {
+      "itemId": "UX-041",
+      "completedDate": "2026-04-05",
+      "cycleTime": null,
+      "recordedAt": "2026-04-06T11:00:00.008Z"
+    },
+    {
+      "itemId": "BUG-129",
+      "completedDate": "2026-04-04",
+      "cycleTime": null,
+      "recordedAt": "2026-04-06T11:00:00.009Z"
     }
   ],
   "weeklyStats": [
@@ -211,8 +235,8 @@
     },
     {
       "week": "2026-W14",
-      "completed": 4,
-      "velocity": 6
+      "completed": 8,
+      "velocity": 9
     }
   ],
   "_note": "Reset 2026-03-28. Previous data was bulk-hydrated at init and not real throughput. Rebuilds from git-deployed items going forward."
