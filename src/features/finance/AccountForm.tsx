@@ -9,6 +9,7 @@ import { useNotifications } from '../../context/NotificationContext';
 import { captureError } from '../../utils/error';
 import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 import { LinkBankAccount } from './components/LinkBankAccount';
+import { PopoverMenu, SegmentedControl } from '../../components/shared';
 
 type AccountMode = 'manual' | 'link';
 
@@ -119,24 +120,30 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Type</label>
-                        <select value={newAccType} onChange={(e) => setNewAccType(e.target.value as AnchorAccount['type'])} className="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white">
-                            <option value="checking">Checking / Spending</option>
-                            <option value="savings">Savings</option>
-                            <option value="salary">Salary</option>
-                            <option value="investment">Investment</option>
-                        </select>
+                        <PopoverMenu
+                            label="Type"
+                            items={[
+                                { value: 'checking', label: 'Checking / Spending' },
+                                { value: 'savings', label: 'Savings' },
+                                { value: 'salary', label: 'Salary' },
+                                { value: 'investment', label: 'Investment' },
+                            ]}
+                            value={newAccType}
+                            onChange={(v) => setNewAccType(v as AnchorAccount['type'])}
+                            testId="account-type-select"
+                        />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Currency</label>
-                        <select
+                        <SegmentedControl
+                            label="Currency"
+                            options={[
+                                { value: 'NGN', label: 'NGN (₦)' },
+                                { value: 'USD', label: 'USD ($)' },
+                            ]}
                             value={newAccCurrency}
-                            onChange={(e) => setNewAccCurrency(e.target.value as Currency)}
-                            className="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                        >
-                            <option value="NGN">NGN (₦)</option>
-                            <option value="USD">USD ($)</option>
-                        </select>
+                            onChange={(v) => setNewAccCurrency(v as Currency)}
+                            testId="account-currency-control"
+                        />
                     </div>
                 </div>
                 <div>

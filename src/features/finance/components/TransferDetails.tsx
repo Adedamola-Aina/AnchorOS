@@ -11,6 +11,7 @@ import React from 'react';
 import { ArrowRightLeft } from 'lucide-react';
 import { formatCurrency } from '../../../utils/format';
 import type { AnchorAccount } from '../../../types';
+import { PopoverMenu } from '../../../components/shared';
 
 interface TransferDetailsProps {
     accounts: AnchorAccount[];
@@ -68,16 +69,12 @@ export const TransferDetails: React.FC<TransferDetailsProps> = ({
                 )}
                 <div className="flex items-center justify-between">
                     <span className="text-xs text-slate-500">To:</span>
-                    <select
-                        id="tx-destination"
+                    <PopoverMenu
+                        items={filteredAccounts.map(acc => ({ value: acc.id, label: acc.name }))}
                         value={destinationAccId}
-                        onChange={(e) => onDestinationChange(e.target.value)}
-                        className="p-1 rounded bg-transparent text-sm font-bold text-slate-900 dark:text-white border-none focus:ring-0 text-right cursor-pointer"
-                    >
-                        {filteredAccounts.map(acc => (
-                            <option key={acc.id} value={acc.id}>{acc.name}</option>
-                        ))}
-                    </select>
+                        onChange={onDestinationChange}
+                        testId="tx-destination"
+                    />
                 </div>
             </div>
 

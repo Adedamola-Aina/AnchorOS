@@ -66,7 +66,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
     }
 
     return (
-        <div className="space-y-1">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {displayActivities.map((activity, index) => {
                 const isCurrentUser = activity.actorId === currentUserId;
                 const colorClasses = getActivityColor(activity.action);

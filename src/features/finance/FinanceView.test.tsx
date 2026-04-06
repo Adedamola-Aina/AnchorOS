@@ -37,11 +37,20 @@ vi.mock('lucide-react', async (importOriginal) => {
   const actual = await importOriginal<typeof import('lucide-react')>();
   return {
     ...actual,
-    Search: () => <div data-testid="search-icon">Search</div>,
-    Layers: () => <div data-testid="layers-icon">Layers</div>,
-    List: () => <div data-testid="list-icon">List</div>,
+    Plus: () => <div data-testid="plus-icon">+</div>,
   };
 });
+
+// Mock useResponsive to simulate mobile viewport (wallet stack tests)
+vi.mock('../../hooks/useResponsive', () => ({
+  useResponsive: () => ({
+    breakpoint: 'mobile' as const,
+    isMobile: true,
+    isTablet: false,
+    isDesktop: false,
+    isTouchDevice: true,
+  }),
+}));
 
 // Mock new wallet-style components
 vi.mock('../../components/finance/CardStack', () => ({
@@ -88,6 +97,32 @@ vi.mock('./components/AccountDetailsContainer', () => ({
       <button type="button" onClick={onBack}>Back</button>
     </div>
   ),
+}));
+
+vi.mock('./components/VirtualTransactionList', () => ({
+  VirtualTransactionList: ({ transactions }: any) => (
+    <div data-testid="global-transaction-list">
+      {transactions.map((tx: any) => (
+        <div key={tx.id} data-testid={`tx-${tx.id}`}>{tx.title}</div>
+      ))}
+    </div>
+  ),
+}));
+
+vi.mock('./components/TransactionHistorySection', () => ({
+  TransactionHistorySection: ({ transactions, onEdit, onDelete }: any) => (
+    <div data-testid="transaction-history-section">
+      <div data-testid="global-transaction-list">
+        {transactions.map((tx: any) => (
+          <div key={tx.id} data-testid={`tx-${tx.id}`}>{tx.title}</div>
+        ))}
+      </div>
+    </div>
+  ),
+}));
+
+vi.mock('./components/FinanceBillsSection', () => ({
+  FinanceBillsSection: () => null,
 }));
 
 // Mock Modal to render without portal for testing
@@ -286,37 +321,9 @@ describe('FinanceView', () => {
       expect(screen.getByText('Finance')).toBeInTheDocument();
     });
 
-    it('renders search icon and view toggle buttons', () => {
+    it('renders create account button', () => {
       renderWithContext(<FinanceView />);
-      expect(screen.getByLabelText('Search transactions')).toBeInTheDocument();
-      expect(screen.getByLabelText(/Switch to/)).toBeInTheDocument();
-    });
-
-    it('opens finance search and filters transactions across accounts', async () => {
-      renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
-
-      await user.click(screen.getByLabelText('Search transactions'));
-      await user.type(screen.getByPlaceholderText(/search transactions, categories, or accounts/i), 'rent');
-
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(screen.getByText('Finance Search')).toBeInTheDocument();
-      expect(screen.getByText('Rent Payment')).toBeInTheDocument();
-      expect(screen.queryByText('Salary')).not.toBeInTheDocument();
-    });
-
-    it('opens total assets details and shows contributing accounts', async () => {
-      renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
-
-      await user.click(screen.getByRole('button', { name: /show details/i }));
-
-      const dialog = screen.getByRole('dialog');
-
-      expect(dialog).toBeInTheDocument();
-      expect(within(dialog).getByText('Total Assets')).toBeInTheDocument();
-      expect(within(dialog).getByText('Savings Account')).toBeInTheDocument();
-      expect(within(dialog).getByText('Checking Account')).toBeInTheDocument();
+      expect(screen.getByLabelText('Create account')).toBeInTheDocument();
     });
 
     it('renders TotalAssetsSummaryBar with active accounts', () => {
@@ -342,49 +349,7 @@ describe('FinanceView', () => {
     });
   });
 
-  describe('View Mode Toggle', () => {
-    it('toggles between collapsed and expanded mode', async () => {
-      renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
-
-      const stack = screen.getByTestId('card-stack');
-      expect(stack).toHaveAttribute('data-mode', 'collapsed');
-
-      await user.click(screen.getByLabelText(/Switch to list view/));
-      expect(screen.getByTestId('card-stack')).toHaveAttribute('data-mode', 'expanded');
-
-      await user.click(screen.getByLabelText(/Switch to stack view/));
-      expect(screen.getByTestId('card-stack')).toHaveAttribute('data-mode', 'collapsed');
-    });
-
-    it('persists view mode to localStorage', async () => {
-      renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
-
-      await user.click(screen.getByLabelText(/Switch to list view/));
-      expect(localStorage.getItem('anchor_finance_view_mode')).toBe('expanded');
-    });
-
-    it('logs a finance view toggle analytics event', async () => {
-      renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
-
-      await user.click(screen.getByLabelText(/Switch to list view/));
-
-      expect(mockLogProductEvent).toHaveBeenCalledWith('finance_view_mode_toggled', {
-        mode: 'expanded',
-      });
-    });
-
-    it('triggers selection haptics when the stack fans out', async () => {
-      renderWithContext(<FinanceView />);
-      const user = userEvent.setup();
-
-      await user.click(screen.getByLabelText(/Switch to list view/));
-
-      expect(mockHapticSelection).toHaveBeenCalledTimes(1);
-    });
-
+  describe('View Mode', () => {
     it('restores view mode from localStorage', () => {
       localStorage.setItem('anchor_finance_view_mode', 'expanded');
       renderWithContext(<FinanceView />);

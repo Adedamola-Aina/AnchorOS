@@ -1,4 +1,4 @@
-interface DocumentWithViewTransition extends Document {
+interface DocumentWithViewTransition {
   startViewTransition?: (callback: () => void | Promise<void>) => {
     finished?: Promise<void>;
   };

@@ -1,23 +1,18 @@
-/**
- * FinanceView — Apple Wallet-inspired finance page (UX-041 Phase 2)
- * 3-zone layout: Header → Total Assets → Card Stack
- * Account details via existing AccountDetailsContainer.
- */
+/** FinanceView — Apple Wallet-inspired finance page (UX-041 Phase 2) */
 // @ts-nocheck
-
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Layers, List } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
 import { useResponsive } from '../../hooks/useResponsive';
-import { SectionHeader } from '../../components/shared';
 import { Modal } from '../../components/shared/Modal';
 import { AccountForm } from './AccountForm';
 import { TransactionForm } from './TransactionForm';
-import type { AnchorTransaction } from '../../types';
+import { TransactionQuickEntry } from './components/TransactionQuickEntry';
+import type { AnchorTransaction, Currency } from '../../types';
 import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { EmptyAccountsState } from './components/EmptyAccountsState';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
@@ -27,57 +22,60 @@ import { TotalAssetsSummaryBar } from '../../components/finance/TotalAssetsSumma
 import { SkeletonCards } from '../../components/finance/SkeletonCards';
 import { useReorderAccounts } from '../../hooks/useReorderAccounts';
 import { logProductEvent } from '../../services/telemetry';
-import { haptic } from '../../utils/haptic';
-import { FinanceSearchSheet } from './components/FinanceSearchSheet';
+import type { ParsedTransaction } from '../../services/fabric/transactionParser';
 import { FinanceAccountsRoute } from './components/FinanceAccountsRoute';
-import { FinanceSummarySheet } from './components/FinanceSummarySheet';
+import { FinanceDesktopContent } from './components/FinanceDesktopContent';
+import { TransactionHistorySection } from './components/TransactionHistorySection';
+import { FinanceBillsSection } from './components/FinanceBillsSection';
 import { runFinanceViewTransition } from './financeViewTransition';
-
-type ViewMode = 'collapsed' | 'expanded';
-const VIEW_MODE_KEY = 'anchor_finance_view_mode';
-
-function getStoredViewMode(): ViewMode {
-  try { const v = localStorage.getItem(VIEW_MODE_KEY); return v === 'expanded' ? 'expanded' : 'collapsed'; }
-  catch { return 'collapsed'; }
-}
-
-function getAccountIdFromPath(pathname: string): string | null {
-  const match = pathname.match(/^\/finance\/account\/([^/]+)$/);
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
-function isAccountsListPath(pathname: string): boolean {
-  return pathname === '/finance/accounts';
-}
+import { getAccountIdFromPath, isAccountsListPath } from './financeViewHelpers';
+import { useFinanceCardInteraction } from './hooks/useFinanceCardInteraction';
 
 const FinanceView = () => {
-  const { accounts, transactions, deleteTransaction, deleteAccount, loadingFinance } = useFinance();
+  const { accounts, transactions, deleteTransaction, deleteAccount, loadingFinance, netWorth } = useFinance();
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { familyMemberUid, familyMemberName, shareAccount: toggleShareAccount } = useFamilySharing(user?.uid);
-  useResponsive(); // triggers responsive re-renders
+  const { isMobile } = useResponsive();
   const { reorder } = useReorderAccounts();
 
   const [mode, setMode] = useState<'view' | 'addTx' | 'addAcc' | 'editTx'>('view');
-  const [viewMode, setViewMode] = useState<ViewMode>(getStoredViewMode);
   const [editingTransaction, setEditingTransaction] = useState<AnchorTransaction | undefined>(undefined);
   const [initialTransactionType, setInitialTransactionType] = useState<'expense' | 'income' | 'transfer'>('expense');
   const [accountToDelete, setAccountToDelete] = useState<typeof accounts[0] | null>(null);
   const [accountToUnshare, setAccountToUnshare] = useState<typeof accounts[0] | null>(null);
   const [transactionToDelete, setTransactionToDelete] = useState<AnchorTransaction | null>(null);
   const [prefillData, setPrefillData] = useState<{ amount?: number; category?: string; title?: string } | undefined>(undefined);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
   const activeAccounts = useMemo(() => {
     const filtered = accounts.filter(a => !a.isArchived);
     return filtered.sort((a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity));
   }, [accounts]);
+  const primaryCurrency = useMemo<Currency>(() => {
+    const counts: Record<string, number> = {};
+    activeAccounts.forEach(a => { counts[a.currency] = (counts[a.currency] || 0) + 1; });
+    return (Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] as Currency) || 'NGN';
+  }, [activeAccounts]);
   const showAllAccountsRoute = useMemo(() => isAccountsListPath(location.pathname), [location.pathname]);
   const selectedAccountId = useMemo(() => getAccountIdFromPath(location.pathname), [location.pathname]);
   const selectedAccount = useMemo(() => selectedAccountId ? accounts.find(a => a.id === selectedAccountId) || null : null, [selectedAccountId, accounts]);
   const showModal = accounts.length >= 3;
+
+  const globalTransactions = useMemo(() => {
+    if (!transactions) return [];
+    return [...transactions]
+      .filter(tx => !tx.isSoftDeleted)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [transactions]);
+
+  const openAccountDetails = useCallback((accountId: string) => {
+    void runFinanceViewTransition(() => {
+      navigate(`/finance/account/${accountId}`, { state: { fromCard: true } });
+    });
+  }, [navigate]);
+
+  const { viewMode, handleReorder, handleCardTap } = useFinanceCardInteraction(activeAccounts, reorder, openAccountDetails);
 
   // URL param handling (prefill)
   const [searchParams, setSearchParams] = useSearchParams();
@@ -91,50 +89,16 @@ const FinanceView = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  const toggleView = useCallback(() => {
-    const next: ViewMode = viewMode === 'collapsed' ? 'expanded' : 'collapsed';
-    setViewMode(next);
-    if (next === 'expanded') {
-      haptic.selection();
-    }
-    try { localStorage.setItem(VIEW_MODE_KEY, next); } catch { /* noop */ }
-    logProductEvent('finance_view_mode_toggled', { mode: next });
-  }, [viewMode]);
-
-  const handleReorder = useCallback(async (reorderedAccounts: typeof accounts) => {
-    const movedAccount = reorderedAccounts.find((account, index) => activeAccounts[index]?.id !== account.id);
-    if (movedAccount) {
-      const fromIndex = activeAccounts.findIndex(account => account.id === movedAccount.id);
-      const toIndex = reorderedAccounts.findIndex(account => account.id === movedAccount.id);
-      if (fromIndex >= 0 && toIndex >= 0 && fromIndex !== toIndex) {
-        logProductEvent('finance_card_reordered', {
-          accountId: movedAccount.id,
-          fromIndex,
-          toIndex,
-        });
-      }
-    }
-    await reorder(reorderedAccounts);
-  }, [activeAccounts, reorder, accounts]);
-
   const handleCloseForm = () => { setMode('view'); setEditingTransaction(undefined); setPrefillData(undefined); };
   const handleEdit = (tx: AnchorTransaction) => { setEditingTransaction(tx); setMode('editTx'); };
   const handleDeleteConfirm = () => {
     if (transactionToDelete) { deleteTransaction(transactionToDelete.id, transactionToDelete.accountId); setTransactionToDelete(null); }
   };
-
-  const openAccountDetails = useCallback((accountId: string) => {
-    setIsSearchOpen(false);
-    setIsSummaryOpen(false);
-    void runFinanceViewTransition(() => {
-      navigate(`/finance/account/${accountId}`, { state: { fromCard: true } });
-    });
-  }, [navigate]);
-
-  const handleCardTap = useCallback((account: typeof accounts[0], _index: number, _cardEl: HTMLElement) => {
-    logProductEvent('finance_card_tapped', { accountId: account.id, viewMode });
-    openAccountDetails(account.id);
-  }, [openAccountDetails, viewMode]);
+  const handleQuickEntry = (parsed: ParsedTransaction) => {
+    setPrefillData({ amount: parsed.amount, category: parsed.category, title: parsed.title });
+    setInitialTransactionType('expense'); setMode('addTx');
+    logProductEvent('finance_quick_entry_used', { hasAmount: !!parsed.amount, hasCategory: !!parsed.category });
+  };
 
   useEffect(() => {
     if (selectedAccountId && !selectedAccount && !loadingFinance) {
@@ -180,40 +144,51 @@ const FinanceView = () => {
     <FeatureErrorBoundary featureName="Finance">
       <div className="relative space-y-5">
         {/* Zone 1: Page Header */}
-        <SectionHeader title="Finance" action={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { /* TODO: Finance search — query across all account transactions, display unified results list */ setIsSearchOpen(true); }} className="p-2.5 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Search transactions">
-              <Search className="w-5 h-5" />
-            </button>
-            <button type="button" onClick={toggleView} className="p-2.5 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label={viewMode === 'collapsed' ? 'Switch to list view' : 'Switch to stack view'}>
-              {viewMode === 'collapsed' ? <List className="w-5 h-5" /> : <Layers className="w-5 h-5" />}
-            </button>
+        <div className="flex items-start justify-between gap-4 mb-2 animate-in fade-in slide-in-from-left-4 duration-700">
+          <div className="min-w-0">
+            <h2 className="text-h2 lg:text-h2-lg tracking-tight text-slate-900 dark:text-white">Finance</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Multi-account asset management and cashflow tracking</p>
           </div>
-        } />
+          <button
+            type="button"
+            onClick={() => setMode('addAcc')}
+            className="h-8 w-8 shrink-0 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center shadow-sm transition-all hover:opacity-90 active:scale-95"
+            aria-label="Create account"
+          >
+            <Plus className="w-4 h-4 text-white dark:text-slate-900" strokeWidth={2.5} />
+          </button>
+        </div>
 
-        {/* Zone 2: Total Assets Summary Bar */}
-        <TotalAssetsSummaryBar accounts={activeAccounts} onShowDetails={() => setIsSummaryOpen(true)} />
+        {/* Quick Entry — NLP transaction input (UX-036) */}
+        {activeAccounts.length > 0 && mode === 'view' && <TransactionQuickEntry onParsed={handleQuickEntry} />}
 
-        {/* Zone 3: Card Stack */}
-        {loadingFinance && accounts.length === 0 && <SkeletonCards count={3} />}
-        {activeAccounts.length > 0 && (
-          <CardStack accounts={activeAccounts} mode={viewMode} onCardTap={handleCardTap} onReorder={handleReorder} onShowAll={activeAccounts.length > 10 ? () => navigate('/finance/accounts') : undefined} />
+        {/* Zone 2–3: Mobile = wallet stack, Desktop = production layout */}
+        {isMobile ? (
+          <>
+            <TotalAssetsSummaryBar accounts={activeAccounts} />
+            {loadingFinance && accounts.length === 0 && <SkeletonCards count={3} />}
+            {activeAccounts.length > 0 && (
+              <CardStack accounts={activeAccounts} mode={viewMode} onCardTap={handleCardTap} onReorder={handleReorder} onShowAll={activeAccounts.length > 10 ? () => navigate('/finance/accounts') : undefined} />
+            )}
+          </>
+        ) : (
+          <FinanceDesktopContent netWorth={netWorth} transactions={globalTransactions} currency={primaryCurrency} accounts={accounts} activeAccounts={activeAccounts} loading={loadingFinance} userId={user?.uid || ''} onOpenAccount={openAccountDetails} />
         )}
         {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
+        {/* FIN-014: Upcoming bill reminders */}
+        {activeAccounts.length > 0 && <FinanceBillsSection />}
+        {/* Zone 4: Global Transaction History */}
+        {activeAccounts.length > 0 && (
+          <TransactionHistorySection transactions={globalTransactions} onEdit={handleEdit} onDelete={setTransactionToDelete} />
+        )}
 
-        {/* Forms / Modals — preserved from existing */}
+        {/* Forms / Modals */}
         {!showModal && mode === 'addAcc' && <div className="animate-in fade-in zoom-in-95 duration-200"><AccountForm onClose={handleCloseForm} /></div>}
         {!showModal && (mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
 
         <Modal isOpen={showModal && mode !== 'view'} onClose={handleCloseForm} title={mode === 'addAcc' ? 'Create Account' : mode === 'editTx' ? 'Edit Transaction' : 'New Transaction'} maxWidth="max-w-2xl">
           {mode === 'addAcc' && <AccountForm onClose={handleCloseForm} />}
           {(mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
-        </Modal>
-        <Modal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} title="Finance Search" maxWidth="max-w-xl">
-          <FinanceSearchSheet accounts={activeAccounts} transactions={transactions || []} onOpenAccount={openAccountDetails} />
-        </Modal>
-        <Modal isOpen={isSummaryOpen} onClose={() => setIsSummaryOpen(false)} title="Total Assets" maxWidth="max-w-xl">
-          <FinanceSummarySheet accounts={activeAccounts} onOpenAccount={openAccountDetails} />
         </Modal>
         <ConfirmationModal isOpen={!!transactionToDelete} onClose={() => setTransactionToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Transaction" message={`Are you sure you want to delete "${transactionToDelete?.title}"? This action cannot be undone.`} confirmLabel="Delete Transaction" isDestructive />
       </div>

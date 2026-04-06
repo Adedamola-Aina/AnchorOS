@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
 import { ArrowLeft, Search } from 'lucide-react';
 import type { AnchorAccount } from '../../../types';
-import { formatCurrency } from '../../../utils/format';
-import { fromCents } from '../../../utils/moneyUtils';
-import { getAccountPermission } from '../utils/permissions';
+import { AccountListItem, getAccessBadge } from './AccountListItem';
+import { PopoverMenu } from '../../../components/shared';
 
 interface FinanceAccountsRouteProps {
   accounts: AnchorAccount[];
@@ -18,17 +17,6 @@ type SortMode = 'custom' | 'balance' | 'name';
 
 function normalizeValue(value: string): string {
   return value.trim().toLowerCase();
-}
-
-function getAccessBadge(account: AnchorAccount, currentUserId?: string): string {
-  const permission = currentUserId ? getAccountPermission(account, currentUserId) : null;
-  if (permission === 'owner') {
-    return 'Owner';
-  }
-  if (!permission) {
-    return 'Viewer';
-  }
-  return `${permission.charAt(0).toUpperCase()}${permission.slice(1)} access`;
 }
 
 export const FinanceAccountsRoute = ({
@@ -163,47 +151,22 @@ export const FinanceAccountsRoute = ({
 
         <label className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
           <span>Sort</span>
-          <select
-            aria-label="Sort accounts"
+          <PopoverMenu
+            items={[
+              { value: 'custom', label: 'Manual order' },
+              { value: 'balance', label: 'Highest balance' },
+              { value: 'name', label: 'Name' },
+            ]}
             value={sortMode}
-            onChange={(event) => setSortMode(event.target.value as SortMode)}
-            className="min-h-[44px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-          >
-            <option value="custom">Manual order</option>
-            <option value="balance">Highest balance</option>
-            <option value="name">Name</option>
-          </select>
+            onChange={(v) => setSortMode(v as SortMode)}
+            testId="sort-accounts"
+          />
         </label>
       </div>
 
       <div className="space-y-3">
         {filteredAccounts.map((account) => (
-          <button
-            key={account.id}
-            type="button"
-            onClick={() => onOpenAccount(account.id)}
-            className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-slate-800"
-          >
-            <div className="min-w-0 space-y-2">
-              <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">{account.name}</p>
-                <p className="mt-1 text-xs capitalize text-slate-500 dark:text-slate-400">
-                  {account.type} · {account.currency}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                  {getAccessBadge(account, currentUserId)}
-                </span>
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                  {account.source === 'linked' ? 'Linked' : 'Manual'}
-                </span>
-              </div>
-            </div>
-            <span className="pl-4 text-sm font-semibold text-slate-700 dark:text-slate-200">
-              {formatCurrency(fromCents(account.balanceCents), account.currency)}
-            </span>
-          </button>
+          <AccountListItem key={account.id} account={account} currentUserId={currentUserId} onOpenAccount={onOpenAccount} />
         ))}
         {filteredAccounts.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">

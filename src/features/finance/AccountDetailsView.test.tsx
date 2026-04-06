@@ -16,16 +16,17 @@ vi.mock('lucide-react', async (importOriginal) => {
     const actual = await importOriginal<typeof import('lucide-react')>();
     return {
         ...actual,
-        ArrowLeft: () => <div data-testid="arrow-left">ArrowLeft</div>,
+        X: () => <div data-testid="x-icon">X</div>,
+        MoreHorizontal: () => <div data-testid="more-icon">MoreHorizontal</div>,
         TrendingUp: () => <div data-testid="trending-up">TrendingUp</div>,
-        CategoryIcon: () => <div data-testid="category-icon">CategoryIcon</div>,
         Search: () => <div data-testid="search">Search</div>,
         Trash2: () => <div data-testid="trash">Trash</div>,
         ArrowUpRight: () => <div data-testid="arrow-up-right">ArrowUpRight</div>,
         ArrowDownLeft: () => <div data-testid="arrow-down-left">ArrowDownLeft</div>,
-        Calendar: () => <div data-testid="calendar">Calendar</div>,
-        User: () => <div data-testid="user">User</div>,
         Pencil: () => <div data-testid="pencil">Pencil</div>,
+        Palette: () => <div data-testid="palette">Palette</div>,
+        Download: () => <div data-testid="download">Download</div>,
+        RefreshCw: () => <div data-testid="refresh">RefreshCw</div>,
     };
 });
 
@@ -150,10 +151,12 @@ describe('AccountDetailsView', () => {
                 onBack={vi.fn()}
             />
         );
-        // Account name appears in header + transaction bank tag pill
+        // Account name appears in header + card
         expect(screen.getAllByText('Checking Account').length).toBeGreaterThanOrEqual(1);
+        // Balance strip shows formatted balance
         expect(screen.getAllByText(/\$5,000\.00/).length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText('Account Overview')).toBeInTheDocument();
+        // History section heading
+        expect(screen.getAllByText('History').length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders only transactions for selected account', () => {
@@ -185,7 +188,7 @@ describe('AccountDetailsView', () => {
         expect(screen.queryByText('Grocery Shopping')).not.toBeInTheDocument();
     });
 
-    it('calls onBack when back button is clicked', async () => {
+    it('calls onBack when close button is clicked', async () => {
         const onBack = vi.fn();
         renderWithContext(
             <AccountDetailsView
@@ -194,41 +197,39 @@ describe('AccountDetailsView', () => {
             />
         );
         const user = userEvent.setup();
-        const backButton = screen.getByTestId('arrow-left').closest('button');
-        await user.click(backButton!);
+        const closeButton = screen.getByLabelText('Close account details');
+        await user.click(closeButton);
         expect(onBack).toHaveBeenCalled();
     });
 
-    it('shows share button when spouseId is provided and user is owner', () => {
-        const onShare = vi.fn();
-        renderWithContext(
-            <AccountDetailsView
-                account={{ ...mockAccount, ownerId: undefined }} // Current user owns it (default)
-                onBack={vi.fn()}
-                onShare={onShare}
-                familyMemberId="spouse-1"
-            />
-        );
-        // It renders the User icon button
-        // We can't easily query by icon without testid, but we can check if onShare works
-        // Or check title
-        const shareBtn = screen.getByTitle('Manage Sharing');
-        expect(shareBtn).toBeInTheDocument();
-    });
-
-    it('shows a custom artwork upload input in the artwork picker flow', async () => {
+    it('shows Record Transaction button when onAddTransaction is provided', () => {
+        const onAdd = vi.fn();
         renderWithContext(
             <AccountDetailsView
                 account={mockAccount}
                 onBack={vi.fn()}
+                onAddTransaction={onAdd}
+            />
+        );
+        expect(screen.getByText('Record Transaction')).toBeInTheDocument();
+    });
+
+    it('opens action sheet when ellipsis is clicked', async () => {
+        renderWithContext(
+            <AccountDetailsView
+                account={mockAccount}
+                onBack={vi.fn()}
+                onDelete={vi.fn()}
             />
         );
         const user = userEvent.setup();
 
-        await user.click(screen.getByTitle('More options'));
-        await user.click(screen.getByText('Choose card artwork'));
+        await user.click(screen.getByLabelText('Account options'));
 
-        expect(screen.getByTestId('card-artwork-picker')).toBeInTheDocument();
-        expect(screen.getByLabelText(/upload custom artwork/i)).toBeInTheDocument();
+        // Action sheet shows Edit, Customize, Export, Delete
+        expect(screen.getByText('Edit Account')).toBeInTheDocument();
+        expect(screen.getByText('Customize Card')).toBeInTheDocument();
+        expect(screen.getByText('Export Transactions')).toBeInTheDocument();
+        expect(screen.getByText('Delete Account')).toBeInTheDocument();
     });
 });
