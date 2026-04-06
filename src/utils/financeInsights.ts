@@ -14,7 +14,6 @@ export type { WeeklySpendingData, RecurringTransactionGroup } from './financeIns
 
 export interface AssetClass { id: string; name: string; amount: number; percent: number; currency: string; type?: string; }
 export interface CashFlowAnalysis { income: number; expense: number; net: number; prevNet: number; trend: 'better' | 'worse' | 'neutral'; diffPercent: number; }
-export interface CheckpointCategory { category: string; amount: number; percent: number; }
 
 export const getCashFlowAnalysis = (transactions: AnchorTransaction[]): CashFlowAnalysis => {
     const today = new Date();
@@ -52,28 +51,4 @@ export const getAssetDistribution = (accounts: import('../types').AnchorAccount[
     const total = active.reduce((sum, a) => sum + fromCents(a.balanceCents), 0);
     if (total === 0) return [];
     return active.map(a => ({ id: a.id, name: a.name, amount: fromCents(a.balanceCents), percent: (fromCents(a.balanceCents) / total) * 100, currency: a.currency, type: a.type })).sort((a, b) => b.amount - a.amount);
-};
-
-export const getExpenseCategoryBreakdown = (transactions: AnchorTransaction[]): CheckpointCategory[] => {
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today); thirtyDaysAgo.setDate(today.getDate() - 30);
-    const categoryMap: Record<string, number> = {};
-    let totalExpense = 0;
-
-    transactions.forEach(t => {
-        if (!t || !t.date || t.isSoftDeleted || t.type !== 'expense') return;
-        const d = new Date(t.date);
-        if (d >= thirtyDaysAgo && d <= today) {
-            const amount = fromCents(t.amountCents || 0);
-            const cat = t.category || 'Uncategorized';
-            categoryMap[cat] = (categoryMap[cat] || 0) + amount;
-            totalExpense += amount;
-        }
-    });
-
-    if (totalExpense === 0) return [];
-    return Object.entries(categoryMap)
-        .map(([category, amount]) => ({ category, amount, percent: (amount / totalExpense) * 100 }))
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5);
 };

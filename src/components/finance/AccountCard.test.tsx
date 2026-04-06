@@ -25,115 +25,72 @@ const baseAccount: AnchorAccount = {
 
 const noop = vi.fn();
 
-describe('AccountCard — Apple Wallet layout', () => {
+const card = (overrides: Partial<React.ComponentProps<typeof AccountCard>> = {}) => (
+  <AccountCard account={baseAccount} index={0} totalCards={3}
+    mode="stack" isActive={true} onTap={noop} {...overrides} />
+);
+
+describe('AccountCard — Apple Wallet panel', () => {
   it('renders institution name at the top (peek-visible)', () => {
-    render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
+    render(card());
     expect(screen.getByText('Chase Bank')).toBeInTheDocument();
   });
 
   it('renders balance at the top alongside name', () => {
-    render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
+    render(card());
     expect(screen.getByText('$1500.00')).toBeInTheDocument();
   });
 
-  it('uses Wallet-style top bar typography for the visible header row', () => {
-    const { container } = render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
-
-    expect(screen.getByText('Chase Bank')).toHaveStyle({ fontSize: '18px', fontWeight: '600', letterSpacing: '-0.4px' });
-    expect(screen.getByText('$1500.00')).toHaveStyle({ fontSize: '18px', fontWeight: '500', letterSpacing: '-0.4px' });
-
-    const content = container.querySelector('.card-header')?.parentElement;
-    expect(content).toHaveClass('px-6');
+  it('uses clean panel typography for the header row', () => {
+    render(card());
+    expect(screen.getByText('Chase Bank')).toHaveStyle({ fontSize: '15px', fontWeight: '600', letterSpacing: '-0.3px' });
+    expect(screen.getByText('$1500.00')).toHaveStyle({ fontSize: '15px', fontWeight: '500', letterSpacing: '-0.3px' });
   });
 
   it('shows sub-name when different from institution', () => {
-    render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="expanded" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
+    render(card({ mode: 'expanded' }));
     expect(screen.getByText('Main Checking')).toBeInTheDocument();
   });
 
-  it('renders last 4 digits of linked account', () => {
-    render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
+  it('renders last 4 digits of linked account in footer', () => {
+    render(card());
     expect(screen.getByText(/5678/)).toBeInTheDocument();
   });
 
-  it('renders account type badge', () => {
-    render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
+  it('renders account type in footer', () => {
+    render(card());
     expect(screen.getByText('checking')).toBeInTheDocument();
   });
 
   it('uses type-based color for checking accounts', () => {
-    const { container } = render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
-    const card = container.querySelector('.account-card');
-    expect(card).toHaveStyle({ backgroundColor: '#1E293B' });
+    const { container } = render(card());
+    expect(container.querySelector('.account-card')).toHaveStyle({ backgroundColor: '#1E293B' });
   });
 
   it('uses custom cardColor when set (overrides type color)', () => {
-    const custom = { ...baseAccount, cardColor: '#FF0000' };
-    const { container } = render(
-      <AccountCard account={custom} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
-    const card = container.querySelector('.account-card');
-    expect(card).toHaveStyle({ backgroundColor: '#FF0000' });
+    const { container } = render(card({ account: { ...baseAccount, cardColor: '#FF0000' } }));
+    expect(container.querySelector('.account-card')).toHaveStyle({ backgroundColor: '#FF0000' });
   });
 
   it('calls onTap when clicked', async () => {
     const onTap = vi.fn();
-    render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={onTap} onDragStart={noop} />
-    );
+    render(card({ onTap }));
     await userEvent.click(screen.getByTestId('account-card-acc-1'));
     expect(onTap).toHaveBeenCalledOnce();
   });
 
   it('has accessible label with institution name', () => {
-    render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
+    render(card());
     expect(screen.getByRole('button', { name: /Chase Bank/ })).toBeInTheDocument();
   });
 
-  it('renders decorative chip element', () => {
-    const { container } = render(
-      <AccountCard account={baseAccount} index={0} totalCards={3}
-        mode="stack" isActive={true} isDragging={false} dragOffset={0}
-        onTap={noop} onDragStart={noop} />
-    );
-    const chip = container.querySelector('.rounded-sm');
-    expect(chip).toBeInTheDocument();
-    expect(chip).toHaveStyle({ width: '36px', height: '26px' });
+  it('has no decorative chip element (clean panel)', () => {
+    const { container } = render(card());
+    expect(container.querySelector('.rounded-sm')).not.toBeInTheDocument();
+  });
+
+  it('uses credit card aspect ratio', () => {
+    const { container } = render(card());
+    expect(container.querySelector('.account-card')).toHaveStyle({ aspectRatio: '1.586' });
   });
 });

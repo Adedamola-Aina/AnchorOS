@@ -12,17 +12,10 @@ import type {
     AnchorAccount,
     AnchorTransaction,
     AnchorTask,
-    UserProfile,
-    RecurringTransaction,
-    FamilyConnection,
-    AnchorNotification,
 } from '../types';
 
 let idCounter = 0;
 const nextId = (prefix = 'test') => `${prefix}-${++idCounter}`;
-
-/** Reset ID counter between test files */
-export const resetFactoryIds = () => { idCounter = 0; };
 
 // ─── Account ───────────────────────────────────────────────────────
 export function buildAccount(overrides: Partial<AnchorAccount> = {}): AnchorAccount {
@@ -70,18 +63,6 @@ export function buildTask(overrides: Partial<AnchorTask> = {}): AnchorTask {
     };
 }
 
-// ─── User Profile ──────────────────────────────────────────────────
-export function buildProfile(overrides: Partial<UserProfile> = {}): UserProfile {
-    return {
-        name: 'Test User',
-        familyMode: false,
-        theme: 'light',
-        mfaEnabled: false,
-        onboardingComplete: true,
-        ...overrides,
-    };
-}
-
 // ─── Firebase Auth User (mock shape) ────────────────────────────────
 export function buildAuthUser(overrides: Record<string, unknown> = {}) {
     return {
@@ -89,52 +70,6 @@ export function buildAuthUser(overrides: Record<string, unknown> = {}) {
         email: 'test@anchor.app',
         displayName: 'Test User',
         emailVerified: true,
-        ...overrides,
-    };
-}
-
-// ─── Recurring Transaction ─────────────────────────────────────────
-export function buildRecurring(overrides: Partial<RecurringTransaction> = {}): RecurringTransaction {
-    return {
-        id: nextId('rec'),
-        title: 'Monthly Rent',
-        amountCents: 15000000, // ₦150,000.00
-        type: 'expense',
-        category: 'Housing',
-        accountId: 'acc-1',
-        frequency: 'monthly',
-        interval: 1,
-        nextRunAt: new Date().toISOString(),
-        status: 'active',
-        userId: 'user-1',
-        createdAt: new Date().toISOString(),
-        ...overrides,
-    };
-}
-
-// ─── Family Connection ─────────────────────────────────────────────
-export function buildFamilyConnection(overrides: Partial<FamilyConnection> = {}): FamilyConnection {
-    return {
-        id: nextId('fam'),
-        ownerUid: 'user-1',
-        memberUid: 'user-2',
-        ownerDisplayName: 'Owner User',
-        memberDisplayName: 'Member User',
-        status: 'active',
-        connectedAt: new Date().toISOString(),
-        ...overrides,
-    };
-}
-
-// ─── Notification ──────────────────────────────────────────────────
-export function buildNotification(overrides: Partial<AnchorNotification> = {}): AnchorNotification {
-    return {
-        id: nextId('notif'),
-        type: 'finance',
-        date: new Date().toISOString(),
-        read: false,
-        message: 'Test notification body',
-        title: 'Test Notification',
         ...overrides,
     };
 }

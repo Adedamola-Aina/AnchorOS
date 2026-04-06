@@ -5,10 +5,11 @@
 // @ts-nocheck
 
 
-import React, { useEffect, useRef } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import React, { useEffect, useRef, lazy, Suspense } from 'react';
 import { Smartphone, QrCode, Key, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
+
+const QRCodeSVG = lazy(() => import('qrcode.react').then(m => ({ default: m.QRCodeSVG })));
 
 interface Step1Props { onNext: () => void; }
 export const MfaStep1GetApp: React.FC<Step1Props> = ({ onNext }) => (
@@ -36,7 +37,9 @@ export const MfaStep2ScanQR: React.FC<Step2Props> = ({ qrUrl, manualKey, isLoadi
             <div className="flex justify-center py-2">
                 <div className="p-4 bg-white rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800 min-h-48 min-w-48 flex items-center justify-center">
                     {hasRenderableQr ? (
-                        <QRCodeSVG value={qrUrl} size={160} level="H" />
+                        <Suspense fallback={<div className="w-40 h-40 flex items-center justify-center"><QrCode className="w-8 h-8 text-slate-400 animate-pulse" /></div>}>
+                            <QRCodeSVG value={qrUrl} size={160} level="H" />
+                        </Suspense>
                     ) : (
                         <div className="w-40 h-40 flex flex-col items-center justify-center gap-2 bg-slate-50 text-slate-400 rounded-lg">
                             <QrCode className={`w-8 h-8 ${isLoading ? 'animate-pulse' : ''}`} />

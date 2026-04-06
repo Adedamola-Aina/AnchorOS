@@ -189,7 +189,7 @@ describe('SettingsView - Security & MFA', () => {
 
         // Step 2: Scan the QR Code
         expect(await screen.findByText('Scan the QR Code')).toBeInTheDocument();
-        expect(screen.getByTestId('qr-code')).toBeInTheDocument();
+        expect(await screen.findByTestId('qr-code')).toBeInTheDocument();
         expect(screen.getByText("Can't scan?")).toBeInTheDocument();
     });
 

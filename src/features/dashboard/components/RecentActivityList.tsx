@@ -19,7 +19,7 @@ export function RecentActivityList({ recentActivity }: RecentActivityListProps) 
     return (
         <div className="glass-card p-6 overflow-hidden">
             <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Recent Activity</h4>
-            <div className="space-y-2">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {recentActivity.length > 0 ? (
                     recentActivity.map((tx, idx) => {
                         // Use transactionDate (actual date) if available, else entry date

@@ -8,29 +8,39 @@
 import { captureError } from '../../../utils/error';
 import { httpsCallable } from 'firebase/functions';
 import { functions, APP_ID } from '../../../config/firebase';
-import { getDocs, collection, writeBatch, doc, db } from '../../../utils/secureDb';
+import { getDocs, collection, writeBatch, doc, db, where, query } from '../../../utils/secureDb';
 
 import type { User } from 'firebase/auth';
 
 type ShowToast = (message: string, type: 'success' | 'error' | 'info') => void;
 
 const BATCH_LIMIT = 400; // Stay under Firestore's 500 limit with margin
-const COLLECTIONS = ['accounts', 'finance', 'commitments', 'notifications', 'recurring'];
+// finance MUST come before accounts — Firestore rules for finance deletes
+// check account existence via hasManagePermission(). If accounts are deleted
+// first in a prior batch, subsequent finance deletes fail with permission-denied.
+const USER_COLLECTIONS = ['finance', 'commitments', 'notifications', 'accounts'];
 
 export async function handleWipeData(userId: string, showToast: ShowToast): Promise<void> {
     try {
         let totalOpCount = 0;
 
-        const docsToDelete: { collection: string; id: string }[] = [];
-        for (const colName of COLLECTIONS) {
+        // Phase 1: Collect user subcollection docs
+        const docsToDelete: { path: string; id: string }[] = [];
+        for (const colName of USER_COLLECTIONS) {
             const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'users', userId, colName));
-            snap.docs.forEach(d => docsToDelete.push({ collection: colName, id: d.id }));
+            snap.docs.forEach(d => docsToDelete.push({ path: `artifacts/${APP_ID}/users/${userId}/${colName}`, id: d.id }));
         }
 
+        // Phase 2: Collect recurring_transactions (top-level collection, not a user subcollection)
+        const recurringRef = collection(db, 'artifacts', APP_ID, 'recurring_transactions');
+        const recurringSnap = await getDocs(query(recurringRef, where('userId', '==', userId)));
+        recurringSnap.docs.forEach(d => docsToDelete.push({ path: `artifacts/${APP_ID}/recurring_transactions`, id: d.id }));
+
+        // Phase 3: Batch delete
         for (let i = 0; i < docsToDelete.length; i += BATCH_LIMIT) {
             const chunk = docsToDelete.slice(i, i + BATCH_LIMIT);
             const batch = writeBatch(db);
-            chunk.forEach(d => batch.delete(doc(db, 'artifacts', APP_ID, 'users', userId, d.collection, d.id)));
+            chunk.forEach(d => batch.delete(doc(db, d.path, d.id)));
             await batch.commit();
             totalOpCount += chunk.length;
         }

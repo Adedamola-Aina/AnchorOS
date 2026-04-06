@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect } from 'vitest';
-import { getWeeklySpending, detectRecurring, getCashFlowAnalysis, getAssetDistribution, getExpenseCategoryBreakdown } from './financeInsights';
+import { getWeeklySpending, detectRecurring, getCashFlowAnalysis, getAssetDistribution } from './financeInsights';
 import type { AnchorTransaction } from '../types';
 import { buildAccount, buildTransaction } from '../test/factories';
 
@@ -389,63 +389,6 @@ describe('financeInsights', () => {
             expect(result).toHaveLength(1);
             expect(result[0].name).toBe('Active');
             expect(result[0].percent).toBe(100);
-        });
-    });
-
-    describe('getExpenseCategoryBreakdown', () => {
-        const daysAgo = (n: number) => {
-            const d = new Date();
-            d.setDate(d.getDate() - n);
-            return d.toISOString();
-        };
-
-        it('returns top 5 categories sorted by amount', () => {
-            const txs = [
-                buildTransaction({ type: 'expense', category: 'Food', amountCents: 50000, date: daysAgo(5) }),
-                buildTransaction({ type: 'expense', category: 'Transport', amountCents: 30000, date: daysAgo(5) }),
-                buildTransaction({ type: 'expense', category: 'Housing', amountCents: 20000, date: daysAgo(5) }),
-            ];
-            const result = getExpenseCategoryBreakdown(txs);
-            expect(result).toHaveLength(3);
-            expect(result[0].category).toBe('Food');
-            expect(result[0].percent).toBe(50);
-        });
-
-        it('returns empty when no expenses in 30-day window', () => {
-            const txs = [buildTransaction({ type: 'income', amountCents: 100000, date: daysAgo(5) })];
-            const result = getExpenseCategoryBreakdown(txs);
-            expect(result).toEqual([]);
-        });
-
-        it('groups transactions by category', () => {
-            const txs = [
-                buildTransaction({ type: 'expense', category: 'Food', amountCents: 10000, date: daysAgo(1) }),
-                buildTransaction({ type: 'expense', category: 'Food', amountCents: 20000, date: daysAgo(2) }),
-            ];
-            const result = getExpenseCategoryBreakdown(txs);
-            expect(result).toHaveLength(1);
-            expect(result[0].amount).toBe(300);
-        });
-
-        it('uses "Uncategorized" for transactions without category', () => {
-            const txs = [buildTransaction({ type: 'expense', amountCents: 10000, date: daysAgo(1), category: undefined as any })];
-            const result = getExpenseCategoryBreakdown(txs);
-            expect(result[0].category).toBe('Uncategorized');
-        });
-
-        it('excludes soft-deleted expenses', () => {
-            const txs = [buildTransaction({ type: 'expense', amountCents: 10000, date: daysAgo(1), isSoftDeleted: true })];
-            const result = getExpenseCategoryBreakdown(txs);
-            expect(result).toEqual([]);
-        });
-
-        it('limits to 5 categories', () => {
-            const categories = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-            const txs = categories.map((cat, i) =>
-                buildTransaction({ type: 'expense', category: cat, amountCents: (7 - i) * 10000, date: daysAgo(1) })
-            );
-            const result = getExpenseCategoryBreakdown(txs);
-            expect(result).toHaveLength(5);
         });
     });
 });

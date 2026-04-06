@@ -1,15 +1,9 @@
 /**
- * AccountService
- * 
- * Handles all account-related operations including creation, deletion (archival),
- * and renaming with history tracking.
- * 
- * @module services/AccountService
- * 
- * NOTE: This file is ~175 lines after type extraction.
+ * AccountService — account management operations (create, archive, rename).
+ * Personalization ops: see AccountPersonalizationService.ts
  */
 
-import { collection, doc, addDoc, writeBatch, query, where, getDocs, updateDoc, type Firestore } from '../utils/secureDb';
+import { collection, doc, addDoc, writeBatch, query, where, getDocs, type Firestore } from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
@@ -18,6 +12,7 @@ import type { AnchorAccount } from '../types';
 import { canManageAccount } from '../features/finance/utils/permissions';
 import type { CreateAccountPayload } from './financeTypes';
 import { FieldEncryption, ENCRYPTED_ACCOUNT_FIELDS } from './FieldEncryption';
+import { updateAccountPersonalization as updatePersonalization } from './AccountPersonalizationService';
 
 // Re-export types for backward compatibility
 export type { CreateAccountPayload } from './financeTypes';
@@ -191,25 +186,7 @@ export class AccountService {
         account: AnchorAccount,
         updates: { cardColor?: string; cardArtwork?: string; cardArtworkPath?: string; cardArtworkPreset?: string },
     ): Promise<void> {
-        const ownerId = account.ownerId || userId;
-        if (ownerId !== userId) {
-            throw new AnchorError('Permission denied: Only the account owner can personalize this account.', 'PERMISSION');
-        }
-
-        const payload = Object.fromEntries(
-            Object.entries(updates).filter(([, value]) => value !== undefined),
-        );
-
-        if (Object.keys(payload).length === 0) {
-            return;
-        }
-
-        try {
-            const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', ownerId, 'accounts', account.id);
-            await updateDoc(accRef, payload);
-        } catch (error) {
-            throw new AnchorError('Failed to update account personalization', 'DATABASE', error);
-        }
+        return updatePersonalization(this.firestore, userId, account, updates);
     }
 }
 

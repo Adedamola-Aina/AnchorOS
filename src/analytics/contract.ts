@@ -68,6 +68,16 @@ const analyticsEventSchema = z.discriminatedUnion('name', [
       category: z.string().min(1),
     }),
   }),
+  // DATA-003: Insight effectiveness — user acted on an insight
+  z.object({
+    name: z.literal('fabric_insight_actioned'),
+    payload: z.object({
+      insightId: z.string().min(1),
+      category: z.string().min(1),
+      actionType: z.enum(['transaction_created', 'commitment_created']),
+      timeToActionMs: z.number().int().nonnegative(),
+    }),
+  }),
   z.object({
     name: z.literal('fabric_prediction_dismissed'),
     payload: z.object({

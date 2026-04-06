@@ -2,6 +2,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AnchorLoadingSpinner } from '../shared/AnchorLoadingSpinner';
+import { FabricProvider } from '../../context/FabricContext';
 import { FinanceProvider } from '../../context/FinanceContext';
 import { TaskProvider } from '../../context/TaskContext';
 import MainLayout from '../../layouts/MainLayout';
@@ -19,8 +20,9 @@ const NotFoundView = lazyWithRetry(() => import('../../features/errors/NotFoundV
 
 export default function AuthenticatedAppShell() {
   return (
-    <FinanceProvider>
-      <TaskProvider>
+    <FabricProvider>
+      <FinanceProvider>
+        <TaskProvider>
         <MainLayout version={APP_VERSION}>
           <React.Suspense
             fallback={
@@ -42,7 +44,8 @@ export default function AuthenticatedAppShell() {
           </React.Suspense>
 
         </MainLayout>
-      </TaskProvider>
-    </FinanceProvider>
+        </TaskProvider>
+      </FinanceProvider>
+    </FabricProvider>
   );
 }

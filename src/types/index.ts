@@ -1,6 +1,7 @@
 export type TabView = 'dashboard' | 'commitments' | 'fabric' | 'finance' | 'settings';
 export type TaskType = 'daily' | 'weekly' | 'monthly' | 'todo';
 export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'any';
+export type TaskPriority = 'high' | 'medium' | 'low';
 
 export type {
   TransactionType,
@@ -29,6 +30,21 @@ export interface AnchorTask {
   lastCompletedAt?: string; // ISO date string for reset logic
   currentStreak?: number;
   longestStreak?: number;
+  notes?: string; // Optional context/notes (COMM-006), max 500 chars
+  priority?: TaskPriority; // COMM-007: task priority level
+}
+
+export interface AnchorGoal {
+  id: string;
+  title: string;
+  targetAmountCents: number;
+  currentAmountCents: number;
+  currency: 'USD' | 'NGN';
+  goalType: 'savings' | 'debt_payoff' | 'investment' | 'emergency_fund' | 'other';
+  accountId?: string; // linked finance account
+  targetDate?: string; // ISO date string
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface OnboardingProgress {

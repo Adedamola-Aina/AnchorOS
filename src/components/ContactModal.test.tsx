@@ -26,7 +26,7 @@ describe('ContactModal', () => {
 
   it('renders contact form', () => {
     render(<ContactModal onClose={vi.fn()} />);
-    expect(screen.getByRole('combobox') || screen.getByRole('listbox') || screen.getByText(/feedback/i)).toBeTruthy();
+    expect(screen.getByText(/what's this about/i)).toBeTruthy();
   });
 
   it('renders message textarea', () => {

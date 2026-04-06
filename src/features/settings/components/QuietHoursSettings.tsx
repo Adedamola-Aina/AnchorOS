@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Moon } from 'lucide-react';
-import { ToggleSwitch } from '../../../components/shared';
+import { ToggleSwitch, TimeWheelPicker } from '../../../components/shared';
 
 export interface QuietHoursPreferences {
   enabled: boolean;
@@ -42,25 +42,21 @@ export const QuietHoursSettings: React.FC<Props> = ({ preferences, onUpdate }) =
 
     {preferences.enabled && (
       <div className="animate-in fade-in slide-in-from-top-2 duration-300 flex flex-wrap items-center gap-3 pl-10">
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-slate-400 uppercase">From</label>
-          <input
-            type="time"
-            value={preferences.startTime}
-            onChange={(e) => onUpdate({ startTime: e.target.value })}
-            className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-          />
-        </div>
+        <TimeWheelPicker
+          label="From"
+          value={preferences.startTime}
+          onChange={(v) => onUpdate({ startTime: v })}
+          placeholder="Start"
+          testId="quiet-start-time"
+        />
         <span className="text-slate-400 text-sm">to</span>
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-slate-400 uppercase">Until</label>
-          <input
-            type="time"
-            value={preferences.endTime}
-            onChange={(e) => onUpdate({ endTime: e.target.value })}
-            className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-          />
-        </div>
+        <TimeWheelPicker
+          label="Until"
+          value={preferences.endTime}
+          onChange={(v) => onUpdate({ endTime: v })}
+          placeholder="End"
+          testId="quiet-end-time"
+        />
       </div>
     )}
   </div>

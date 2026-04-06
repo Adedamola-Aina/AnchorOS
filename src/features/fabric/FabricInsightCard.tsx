@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import type { Insight } from '../../types';
 import { logProductEvent } from '../../services/telemetry';
+import { trackInsightViewed, trackInsightDismissed } from '../../services/fabric/effectivenessTracker';
 
 interface FabricInsightCardProps {
   insight: Insight;
@@ -21,6 +22,7 @@ export const FabricInsightCard: React.FC<FabricInsightCardProps> = ({ insight, o
         category: insight.category,
         severity: insight.severity,
       });
+      trackInsightViewed(insight.id, insight.category);
     } catch { /* telemetry must never break the UI */ }
   }, [insight.id, insight.category, insight.severity]);
 
@@ -30,6 +32,7 @@ export const FabricInsightCard: React.FC<FabricInsightCardProps> = ({ insight, o
         insightId: insight.id,
         category: insight.category,
       });
+      trackInsightDismissed(insight.id);
     } catch { /* telemetry must never break the UI */ }
     onDismiss?.(insight.id);
   };

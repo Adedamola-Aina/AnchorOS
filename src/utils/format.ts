@@ -79,26 +79,3 @@ export const formatCurrencyCompact = (
 
     return `${symbol}${abbreviated}${suffix}`;
 };
-
-/**
- * Get appropriate font size class based on number magnitude.
- * 
- * UX-019 FIX: Dynamic font sizing prevents overflow.
- * - Small numbers (< 100K): text-lg
- * - Medium numbers (100K - 1M): text-base
- * - Large numbers (> 1M): text-sm
- * 
- * @param amount - The amount to check
- * @returns Tailwind font size class
- */
-export const getDynamicFontSize = (amount: number): string => {
-    const absAmount = Math.abs(amount);
-
-    if (absAmount >= 1_000_000) {
-        return 'text-sm'; // Large numbers
-    } else if (absAmount >= 100_000) {
-        return 'text-base'; // Medium numbers
-    } else {
-        return 'text-lg'; // Small numbers (default)
-    }
-};

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatCurrencyCompact, getDynamicFontSize } from './format';
+import { formatCurrency, formatCurrencyCompact } from './format';
 
 describe('formatCurrency', () => {
     describe('Basic formatting', () => {
@@ -179,29 +179,4 @@ describe('formatCurrencyCompact (UX-019)', () => {
     });
 });
 
-describe('getDynamicFontSize (UX-019)', () => {
-    it('should return text-lg for small numbers', () => {
-        expect(getDynamicFontSize(1000)).toBe('text-lg');
-        expect(getDynamicFontSize(99999)).toBe('text-lg');
-    });
 
-    it('should return text-base for medium numbers', () => {
-        expect(getDynamicFontSize(100000)).toBe('text-base');
-        expect(getDynamicFontSize(500000)).toBe('text-base');
-        expect(getDynamicFontSize(999999)).toBe('text-base');
-    });
-
-    it('should return text-sm for large numbers', () => {
-        expect(getDynamicFontSize(1000000)).toBe('text-sm');
-        expect(getDynamicFontSize(10000000)).toBe('text-sm');
-    });
-
-    it('should handle negative numbers', () => {
-        expect(getDynamicFontSize(-1000000)).toBe('text-sm');
-        expect(getDynamicFontSize(-100000)).toBe('text-base');
-    });
-
-    it('should handle zero', () => {
-        expect(getDynamicFontSize(0)).toBe('text-lg');
-    });
-});

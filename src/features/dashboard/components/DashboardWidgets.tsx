@@ -63,7 +63,7 @@ export const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ acti
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"><Activity className="w-3 h-3" /> Recent Activity</h3>
             <div className="text-primary-500 group-hover:text-primary-600 transition-colors"><ArrowRight className="w-4 h-4" /></div>
         </div>
-        <div className="space-y-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
             {activity.slice(0, 8).map(tx => {
                 const displayDate = tx.transactionDate || tx.date;
                 return (

@@ -35,6 +35,7 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
         const restoreToken = async () => {
             if (typeof Notification === 'undefined' || !messaging) return;
             if (pushDisabled) return;
+            if (!import.meta.env.VITE_FIREBASE_VAPID_KEY) return;
 
             if (Notification.permission === 'granted') {
                 try {
@@ -106,6 +107,11 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
 
                 if (!messaging) {
                     showToast('Messaging service not available', 'error');
+                    return null;
+                }
+
+                if (!import.meta.env.VITE_FIREBASE_VAPID_KEY) {
+                    showToast('Push notifications not configured for this environment', 'error');
                     return null;
                 }
 

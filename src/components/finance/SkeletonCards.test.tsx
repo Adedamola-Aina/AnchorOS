@@ -24,9 +24,9 @@ describe('SkeletonCards', () => {
     expect(cards[2].style.animationDelay).toBe('240ms');
   });
 
-  it('uses ISO credit card aspect ratio', () => {
+  it('uses credit card aspect ratio', () => {
     const { container } = render(<SkeletonCards count={1} />);
     const card = container.querySelector('.animate-pulse');
-    expect(card?.style.aspectRatio).toContain('1.586');
+    expect(card?.style.aspectRatio).toContain('2.2');
   });
 });

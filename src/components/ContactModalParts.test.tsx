@@ -45,14 +45,16 @@ describe('ContactModalParts', () => {
   describe('SubjectSelect', () => {
     it('renders a select element', () => {
       render(<SubjectSelect value="feedback" onChange={vi.fn()} />);
-      const select = screen.getByRole('combobox');
-      expect(select).toBeInTheDocument();
+      expect(screen.getByTestId('contact-subject')).toBeInTheDocument();
     });
 
     it('calls onChange on selection', () => {
       const onChange = vi.fn();
       render(<SubjectSelect value="feedback" onChange={onChange} />);
-      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'problem' } });
+      // PopoverMenu renders a button trigger; click to open, then select
+      fireEvent.click(screen.getByTestId('contact-subject'));
+      const problemOption = screen.getByRole('option', { name: /problem/i });
+      fireEvent.click(problemOption);
       expect(onChange).toHaveBeenCalled();
     });
   });

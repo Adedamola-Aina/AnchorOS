@@ -113,7 +113,8 @@ export class BehavioralEngine {
 
   async saveBehavior(userId: string): Promise<void> {
     this.state.updatedAt = this.nowProvider().toISOString();
-    await secureDb.setDocument(userId, ['fabric_behavior', 'state'], this.state as unknown as Record<string, unknown>);
+    const cleaned = JSON.parse(JSON.stringify(this.state));
+    await secureDb.setDocument(userId, ['fabric_behavior', 'state'], cleaned as Record<string, unknown>);
   }
 
   seedFromHistory(transactions: AnchorTransaction[], commitments: AnchorTask[]): void {

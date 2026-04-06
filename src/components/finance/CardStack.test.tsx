@@ -11,14 +11,6 @@ vi.mock('./AccountCard', () => ({
   ),
 }));
 
-vi.mock('../../hooks/useCardDrag', () => ({
-  useCardDrag: () => ({
-    onPointerDown: vi.fn(),
-    onPointerMove: vi.fn(),
-    onPointerUp: vi.fn(),
-  }),
-}));
-
 const accounts: AnchorAccount[] = [
   { id: 'acc-1', name: 'Primary Savings', type: 'savings', currency: 'USD', balanceCents: 120000, color: '', scope: 'personal' },
   { id: 'acc-2', name: 'Apple Cash', type: 'checking', currency: 'USD', balanceCents: 45000, color: '', scope: 'personal' },
@@ -50,7 +42,7 @@ beforeEach(() => {
 });
 
 describe('CardStack', () => {
-  it('keeps the collapsed stack tightly overlapped', () => {
+  it('keeps the collapsed stack tightly overlapped with last card in front', () => {
     render(
       <CardStack
         accounts={accounts}
@@ -59,11 +51,14 @@ describe('CardStack', () => {
       />,
     );
 
-    const firstWrapper = screen.getByTestId('account-card-acc-1').parentElement as HTMLDivElement;
-    const secondWrapper = screen.getByTestId('account-card-acc-2').parentElement as HTMLDivElement;
-    expect(firstWrapper.style.height).not.toBe(`${CARD_HEADER_REVEAL}px`);
-    expect(secondWrapper.style.height).toBe(`${CARD_HEADER_REVEAL}px`);
-    expect(secondWrapper.style.transform).toContain('translateY(');
+    const firstWrapper = screen.getByTestId('card-stack-item-acc-1');
+    const lastWrapper = screen.getByTestId('card-stack-item-acc-3');
+    /* All cards rendered at full height — overlap handled by ascending z-order */
+    expect(firstWrapper.style.top).toBe('0px');
+    expect(lastWrapper.style.top).not.toBe('0px');
+    /* Last card (front) is draggable, first card (back) is not */
+    expect(firstWrapper).toHaveAttribute('data-draggable', 'false');
+    expect(lastWrapper).toHaveAttribute('data-draggable', 'true');
   });
 
   it('uses staggered delayed transforms when the cards fan out', () => {
@@ -75,9 +70,11 @@ describe('CardStack', () => {
       />,
     );
 
-    const secondWrapper = screen.getByTestId('account-card-acc-2').parentElement as HTMLDivElement;
+    const firstWrapper = screen.getByTestId('card-stack-item-acc-1');
+    const secondWrapper = screen.getByTestId('card-stack-item-acc-2');
+    expect(firstWrapper).toHaveAttribute('data-draggable', 'false');
     expect(secondWrapper.style.transitionDelay).toBe(`${STACK_STAGGER_MS}ms`);
     expect(secondWrapper.style.height).not.toBe(`${CARD_HEADER_REVEAL}px`);
-    expect(secondWrapper.style.transform).not.toBe('');
+    expect(secondWrapper.style.top).not.toBe('');
   });
 });

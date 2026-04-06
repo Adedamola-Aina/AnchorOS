@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Check, X, MessageSquare, Send } from 'lucide-react';
+import { PopoverMenu } from './shared';
 
 type SubjectType = 'question' | 'problem' | 'feature' | 'testimonial' | 'feedback' | 'other';
 export const SUBJECTS: { value: SubjectType; label: string }[] = [
@@ -46,11 +47,13 @@ export const ContactHeader: React.FC<ContactHeaderProps> = ({ onClose }) => (
 interface SubjectSelectProps { value: SubjectType; onChange: (val: SubjectType) => void; }
 export const SubjectSelect: React.FC<SubjectSelectProps> = ({ value, onChange }) => (
     <div className="space-y-2">
-        <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">What's this about?</label>
-        <select value={value} onChange={e => onChange(e.target.value as SubjectType)}
-            className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all appearance-none cursor-pointer">
-            {SUBJECTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </select>
+        <PopoverMenu
+            label="What's this about?"
+            items={SUBJECTS.map(s => ({ value: s.value, label: s.label }))}
+            value={value}
+            onChange={(v) => onChange(v as SubjectType)}
+            testId="contact-subject"
+        />
     </div>
 );
 

@@ -71,12 +71,16 @@ export const functions = getFunctions(app, 'us-central1'); // Region must match 
 export function getAppStorage() {
   return getStorage(app);
 }
-// Initialize Messaging safely (failed in tests/node env)
+// Initialize Messaging only when VAPID key is configured.
+// Without a valid VAPID key, getToken() fails with 401 and also pollutes
+// httpsCallable context (Firebase SDK auto-fetches FCM token for callables).
 let messagingInstance;
-try {
-  messagingInstance = getMessaging(app);
-} catch (_e) {
-  console.warn('[Firebase] Messaging not initialized (environment may not support it)');
+if (import.meta.env.VITE_FIREBASE_VAPID_KEY) {
+  try {
+    messagingInstance = getMessaging(app);
+  } catch (_e) {
+    console.warn('[Firebase] Messaging not initialized (environment may not support it)');
+  }
 }
 export const messaging = messagingInstance;
 if (import.meta.env.DEV) console.info(`[Firebase] Connected to ${firebaseConfig.projectId}`);

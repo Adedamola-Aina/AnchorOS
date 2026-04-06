@@ -15,12 +15,16 @@ const mockCollection = vi.fn((..._a: any[]) => 'mock-col-ref');
 const mockDeleteUser = vi.fn();
 const mockHttpsCallable = vi.fn();
 const mockDeleteAccountCallable = vi.fn();
+const mockWhere = vi.fn((..._a: any[]) => 'mock-where');
+const mockQuery = vi.fn((..._a: any[]) => 'mock-query');
 
 vi.mock('firebase/firestore', () => ({
     getDocs: (...a: any[]) => mockGetDocs(...a),
     collection: (...a: any[]) => mockCollection(...a),
     writeBatch: (...a: any[]) => mockWriteBatch(...a),
     doc: (...a: any[]) => mockDoc(...a),
+    where: (...a: any[]) => mockWhere(...a),
+    query: (...a: any[]) => mockQuery(...a),
 }));
 
 vi.mock('firebase/auth', () => ({

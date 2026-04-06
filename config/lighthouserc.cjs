@@ -1,4 +1,5 @@
 // @ts-nocheck
+// PSE-003: Per-route performance budgets — LCP and CLS targets enforced per screen
 module.exports = {
   ci: {
     collect: {
@@ -6,6 +7,11 @@ module.exports = {
       numberOfRuns: 3,
       url: [
         'http://localhost:4173/',
+        'http://localhost:4173/dashboard',
+        'http://localhost:4173/finance',
+        'http://localhost:4173/commitments',
+        'http://localhost:4173/fabric',
+        'http://localhost:4173/settings',
       ],
       settings: {
         chromeFlags: '--no-sandbox',
@@ -24,21 +30,86 @@ module.exports = {
       },
     },
     assert: {
-      assertions: {
-        'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
-        'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
-        'interactive': ['error', { maxNumericValue: 5000 }],
-        'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
-        'total-blocking-time': ['error', { maxNumericValue: 300 }],
-        'categories:performance': ['error', { minScore: 0.7 }],
-        'categories:accessibility': ['error', { minScore: 0.9 }],
-        'categories:best-practices': ['warn', { minScore: 0.8 }],
-        'categories:seo': ['warn', { minScore: 0.8 }],
-        'categories:pwa': ['warn', { minScore: 0.6 }],
-        'resource-summary:script:size': ['warn', { maxNumericValue: 512000 }],
-        'resource-summary:stylesheet:size': ['warn', { maxNumericValue: 102400 }],
-        'resource-summary:total:size': ['warn', { maxNumericValue: 1048576 }],
-      },
+      assertMatrix: [
+        {
+          // Root / Auth gate — lightest route
+          matchingUrlPattern: 'http://localhost:4173/$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2000 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'interactive': ['error', { maxNumericValue: 4000 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 250 }],
+            'categories:performance': ['error', { minScore: 0.8 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Dashboard — charts, widgets
+          matchingUrlPattern: '.*/dashboard$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+            'interactive': ['error', { maxNumericValue: 5000 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 300 }],
+            'categories:performance': ['error', { minScore: 0.7 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Finance — transaction lists, account cards (heaviest route)
+          matchingUrlPattern: '.*/finance$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 3500 }],
+            'interactive': ['error', { maxNumericValue: 5500 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.15 }],
+            'total-blocking-time': ['error', { maxNumericValue: 350 }],
+            'categories:performance': ['error', { minScore: 0.65 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Commitments — task list
+          matchingUrlPattern: '.*/commitments$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+            'interactive': ['error', { maxNumericValue: 5000 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 300 }],
+            'categories:performance': ['error', { minScore: 0.7 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Fabric AI — insights, predictions
+          matchingUrlPattern: '.*/fabric$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+            'interactive': ['error', { maxNumericValue: 5000 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 300 }],
+            'categories:performance': ['error', { minScore: 0.7 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Settings — forms, toggles
+          matchingUrlPattern: '.*/settings$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 2800 }],
+            'interactive': ['error', { maxNumericValue: 4500 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 250 }],
+            'categories:performance': ['error', { minScore: 0.75 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+      ],
     },
     upload: {
       target: 'temporary-public-storage',

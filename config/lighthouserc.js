@@ -4,6 +4,7 @@
  * Run locally: npm run lighthouse
  * CI integration: lhci autorun
  * 
+ * PSE-003: Per-route performance budgets — LCP and CLS targets enforced per screen.
  * Performance budgets aligned with mobile-first requirements (75% mobile users).
  */
 // @ts-nocheck
@@ -11,24 +12,20 @@
 module.exports = {
   ci: {
     collect: {
-      // Start a static server to test the built app
       staticDistDir: 'dist',
-      
-      // Run 3 audits for more stable results
       numberOfRuns: 3,
-      
-      // URLs to audit (relative to static server)
       url: [
         'http://localhost/',
+        'http://localhost/dashboard',
+        'http://localhost/finance',
+        'http://localhost/commitments',
+        'http://localhost/fabric',
+        'http://localhost/settings',
       ],
-      
-      // Settings for consistent mobile testing
       settings: {
         chromeFlags: '--no-sandbox',
-        // Mobile device emulation (matches our 75% mobile user base)
         formFactor: 'mobile',
         throttling: {
-          // Simulate 4G mobile connection
           rttMs: 150,
           throughputKbps: 1638.4,
           cpuSlowdownMultiplier: 4,
@@ -41,35 +38,89 @@ module.exports = {
         },
       },
     },
-    
     assert: {
-      // Performance assertions - break build if these fail
-      assertions: {
-        // Core Web Vitals thresholds (must pass as errors)
-        'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
-        'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
-        'interactive': ['error', { maxNumericValue: 5000 }],
-        'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
-        'total-blocking-time': ['error', { maxNumericValue: 300 }],
-        
-        // Overall category scores (0-1 scale)
-        'categories:performance': ['error', { minScore: 0.7 }],
-        'categories:accessibility': ['error', { minScore: 0.9 }],
-        'categories:best-practices': ['warn', { minScore: 0.8 }],
-        'categories:seo': ['warn', { minScore: 0.8 }],
-        
-        // PWA checks
-        'categories:pwa': ['warn', { minScore: 0.6 }],
-        
-        // Resource budgets
-        'resource-summary:script:size': ['warn', { maxNumericValue: 512000 }],   // 500KB JS budget
-        'resource-summary:stylesheet:size': ['warn', { maxNumericValue: 102400 }], // 100KB CSS budget
-        'resource-summary:total:size': ['warn', { maxNumericValue: 1048576 }],   // 1MB total budget
-      },
+      assertMatrix: [
+        {
+          // Root / Auth gate — lightest route
+          matchingUrlPattern: 'http://localhost/$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2000 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'interactive': ['error', { maxNumericValue: 4000 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 250 }],
+            'categories:performance': ['error', { minScore: 0.8 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Dashboard — charts, widgets
+          matchingUrlPattern: '.*/dashboard$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+            'interactive': ['error', { maxNumericValue: 5000 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 300 }],
+            'categories:performance': ['error', { minScore: 0.7 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Finance — transaction lists, account cards (heaviest route)
+          matchingUrlPattern: '.*/finance$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 3500 }],
+            'interactive': ['error', { maxNumericValue: 5500 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.15 }],
+            'total-blocking-time': ['error', { maxNumericValue: 350 }],
+            'categories:performance': ['error', { minScore: 0.65 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Commitments — task list
+          matchingUrlPattern: '.*/commitments$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+            'interactive': ['error', { maxNumericValue: 5000 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 300 }],
+            'categories:performance': ['error', { minScore: 0.7 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Fabric AI — insights, predictions
+          matchingUrlPattern: '.*/fabric$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+            'interactive': ['error', { maxNumericValue: 5000 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 300 }],
+            'categories:performance': ['error', { minScore: 0.7 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+        {
+          // Settings — forms, toggles
+          matchingUrlPattern: '.*/settings$',
+          assertions: {
+            'first-contentful-paint': ['error', { maxNumericValue: 2500 }],
+            'largest-contentful-paint': ['error', { maxNumericValue: 2800 }],
+            'interactive': ['error', { maxNumericValue: 4500 }],
+            'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+            'total-blocking-time': ['error', { maxNumericValue: 250 }],
+            'categories:performance': ['error', { minScore: 0.75 }],
+            'categories:accessibility': ['error', { minScore: 0.9 }],
+          },
+        },
+      ],
     },
-    
     upload: {
-      // Don't upload results by default - enable in CI if using LHCI server
       target: 'temporary-public-storage',
     },
   },

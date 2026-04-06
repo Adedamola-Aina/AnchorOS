@@ -10,6 +10,12 @@ vi.mock('../../../components/shared', () => ({
       {enabled ? 'ON' : 'OFF'}
     </button>
   ),
+  TimeWheelPicker: ({ label, value, onChange, testId }: { label?: string; value: string; onChange: (v: string) => void; placeholder?: string; testId?: string }) => (
+    <div data-testid={testId}>
+      {label && <span>{label}</span>}
+      <input type="time" value={value} onChange={(e: any) => onChange(e.target.value)} />
+    </div>
+  ),
 }));
 
 describe('QuietHoursSettings', () => {

@@ -1,15 +1,21 @@
 /**
- * CardStack — Apple Wallet-style card stack with drag/swipe.
- * UX-041 Phase 2 §5. No framer-motion — native refs + rAF.
+ * CardStack — Apple Wallet-style card stack with spring swipe transitions.
+ * UX-041 Phase 2 §5. Motion-driven overlap with swipe-to-advance.
  */
 import React, {
   useState, useRef, useCallback, useEffect, useMemo,
 } from 'react';
+import { motion } from 'framer-motion';
 import { AccountCard, CARD_ASPECT_RATIO } from './AccountCard';
 import { haptic } from '../../utils/haptic';
-import { useCardDrag } from '../../hooks/useCardDrag';
 import type { AnchorAccount } from '../../types';
-import { CARD_HEADER_REVEAL, STACK_SPRING_CURVE, STACK_STAGGER_MS } from './cardConstants';
+import {
+  CARD_HEADER_REVEAL,
+  STACK_STAGGER_MS,
+  STACK_SPRING_STIFFNESS,
+  STACK_SPRING_DAMPING,
+} from './cardConstants';
+import { useCardCycle, SWIPE_EXIT_DISTANCE } from './useCardCycle';
 
 export const EXPANDED_STACK_GAP = 16;
 const MAX_RENDERED_CARDS = 10;
@@ -23,16 +29,18 @@ export interface CardStackProps {
 }
 
 export const CardStack: React.FC<CardStackProps> = ({
-  accounts, mode, onCardTap, onReorder, onShowAll,
+  accounts, mode, onCardTap, onShowAll,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [cardWidth, setCardWidth] = useState(343);
-  const [rotationOffset, setRotationOffset] = useState(0);
   const [orderedAccounts, setOrderedAccounts] = useState(accounts);
   const cardEls = useRef<(HTMLDivElement | null)[]>([]);
-  const reorderTargetIndexRef = useRef(0);
-  const isReorderingRef = useRef(false);
   const cardHeight = Math.round(cardWidth / CARD_ASPECT_RATIO);
+
+  const {
+    suppressTapRef, rotationOffset, dragPreviewOffset, cyclingDirection,
+    handleDrag, handleDragEnd, resetRotation,
+  } = useCardCycle(orderedAccounts.length, cardHeight);
 
   const visibleAccounts = useMemo(() => {
     if (orderedAccounts.length === 0) return [];
@@ -40,9 +48,8 @@ export const CardStack: React.FC<CardStackProps> = ({
     return [...orderedAccounts.slice(off), ...orderedAccounts.slice(0, off)].slice(0, MAX_RENDERED_CARDS);
   }, [orderedAccounts, rotationOffset]);
 
-  useEffect(() => {
-    setOrderedAccounts(accounts);
-  }, [accounts]);
+  useEffect(() => { setOrderedAccounts(accounts); }, [accounts]);
+  useEffect(() => { resetRotation(); }, [accounts.length, resetRotation]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -51,182 +58,92 @@ export const CardStack: React.FC<CardStackProps> = ({
     return () => ro.disconnect();
   }, []);
 
-  const collapsedTop = useCallback((index: number) => {
-    if (index === 0) {
-      return 0;
-    }
-
-    return cardHeight - CARD_HEADER_REVEAL + (index - 1) * CARD_HEADER_REVEAL;
-  }, [cardHeight]);
-
+  const isCollapsed = mode === 'collapsed';
   const expandedStep = cardHeight + EXPANDED_STACK_GAP;
-  const stackHeight = mode === 'collapsed'
-    ? cardHeight + (visibleAccounts.length - 1) * CARD_HEADER_REVEAL
+  /* Collapsed: each card adds one CARD_HEADER_REVEAL strip, last card shows full height.
+     Total = (N-1) * CARD_HEADER_REVEAL + cardHeight */
+  const stackHeight = isCollapsed
+    ? (visibleAccounts.length - 1) * CARD_HEADER_REVEAL + cardHeight
     : cardHeight + (visibleAccounts.length - 1) * expandedStep;
 
-  const getCardWrapperStyle = useCallback((i: number): React.CSSProperties => {
-    const isExpanded = mode === 'expanded';
-    const restY = isExpanded ? i * expandedStep : collapsedTop(i);
-    const isPeekCard = !isExpanded && i > 0;
-    return {
-      position: 'absolute', top: 0, left: 0, right: 0,
-      height: isPeekCard ? CARD_HEADER_REVEAL : cardHeight,
-      overflow: isPeekCard ? 'hidden' : 'visible',
-      transform: `translateY(${restY}px)`,
-      transformOrigin: 'top center',
-      zIndex: isExpanded ? visibleAccounts.length - i : i + 1,
-      transition: `transform 480ms ${STACK_SPRING_CURVE}, height 480ms ${STACK_SPRING_CURVE}`,
-      transitionDelay: isExpanded ? `${i * STACK_STAGGER_MS}ms` : `${Math.max(visibleAccounts.length - 1 - i, 0) * 14}ms`,
-      willChange: 'transform',
-    };
-  }, [cardHeight, collapsedTop, expandedStep, mode, visibleAccounts.length]);
+  /* Every card positioned at index * CARD_HEADER_REVEAL.
+     Each card lays ON TOP of the one above it (ascending z-index).
+     Only the peek strip (top 48px) of each card is visible —
+     the rest is covered by the card below it. Last card is fully visible. */
+  const getBaseTop = useCallback((index: number) => (
+    isCollapsed ? index * CARD_HEADER_REVEAL : index * expandedStep
+  ), [expandedStep, isCollapsed]);
 
-  const getCardSurfaceStyle = useCallback((i: number): React.CSSProperties => {
-    const isExpanded = mode === 'expanded';
-    const scale = isExpanded ? 1 : Math.max(1 - i * 0.015, 0.955);
-    const shiftX = isExpanded ? 0 : i * 2;
-    const boxShadow = isExpanded
-      ? `0 ${20 + i * 3}px ${44 + i * 4}px rgba(15,23,42,0.16), 0 8px 18px rgba(15,23,42,0.10)`
-      : `0 ${10 + i * 2}px ${24 + i * 4}px rgba(15,23,42,${Math.max(0.18 - i * 0.02, 0.08)}), 0 4px 10px rgba(15,23,42,0.10)`;
-    return {
-      transform: `translateX(${shiftX}px) scale(${scale})`,
-      transformOrigin: 'top center',
-      transition: `transform 480ms ${STACK_SPRING_CURVE}`,
-      transitionDelay: isExpanded ? `${i * STACK_STAGGER_MS}ms` : `${Math.max(visibleAccounts.length - 1 - i, 0) * 14}ms`,
-      boxShadow,
-    };
-  }, [mode, visibleAccounts.length]);
+  const getTransitionDelay = useCallback((index: number) => (
+    !isCollapsed ? `${index * STACK_STAGGER_MS}ms` : `${Math.max(visibleAccounts.length - 1 - index, 0) * 14}ms`
+  ), [isCollapsed, visibleAccounts.length]);
 
-  const springBack = useCallback(() => {
-    isReorderingRef.current = false;
-    visibleAccounts.forEach((_, i) => {
-      const el = cardEls.current[i]; if (!el) return;
-      const restY = collapsedTop(i);
-      el.style.transition = `transform 500ms ${STACK_SPRING_CURVE}`;
-      el.style.transform = `translateY(${restY}px)`;
-      setTimeout(() => { el.style.transition = ''; }, 520);
-    });
-  }, [collapsedTop, visibleAccounts]);
+  /* Minimal shadow — just enough depth to separate overlapping cards */
+  const getShadow = useCallback((_index: number) => (
+    isCollapsed ? '0 -1px 3px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.06)'
+  ), [isCollapsed]);
 
-  const updateReorderStyles = useCallback((offset: number) => {
-    if (mode !== 'collapsed') return;
-    const targetIndex = Math.min(
-      Math.max(Math.round(offset / CARD_HEADER_REVEAL), 0),
-      Math.max(visibleAccounts.length - 1, 0),
-    );
-    reorderTargetIndexRef.current = targetIndex;
+  /* No scale in collapsed — cards are full-width like Apple Wallet */
 
-    visibleAccounts.forEach((_, i) => {
-      const el = cardEls.current[i];
-      if (!el) return;
-      const restY = collapsedTop(i);
-      el.style.transition = `transform 220ms ${STACK_SPRING_CURVE}`;
-
-      if (i === 0) {
-        el.style.transform = `translateY(${offset}px)`;
-        el.style.zIndex = `${visibleAccounts.length + 1}`;
-        return;
-      }
-
-      const translateY = i <= targetIndex ? restY - CARD_HEADER_REVEAL : restY;
-      el.style.transform = `translateY(${translateY}px)`;
-    });
-  }, [collapsedTop, mode, visibleAccounts]);
-
-  const startReorder = useCallback(() => {
-    isReorderingRef.current = true;
-    reorderTargetIndexRef.current = 0;
-  }, []);
-
-  const finishReorder = useCallback((offset: number) => {
-    if (!isReorderingRef.current) return;
-    const targetIndex = Math.min(
-      Math.max(Math.round(offset / CARD_HEADER_REVEAL), 0),
-      Math.max(visibleAccounts.length - 1, 0),
-    );
-    isReorderingRef.current = false;
-
-    if (targetIndex <= 0 || orderedAccounts.length === 0) {
-      springBack();
-      return;
+  const frontIdx = visibleAccounts.length - 1;
+  const getRelativeY = useCallback((index: number) => {
+    if (!isCollapsed) return 0;
+    if (cyclingDirection && index === frontIdx) {
+      return cyclingDirection === 'next' ? -(cardHeight + SWIPE_EXIT_DISTANCE) : Math.round(cardHeight * 0.46);
     }
+    if (index === frontIdx) return 0;
+    const distFromFront = frontIdx - index;
+    return Math.round(dragPreviewOffset * Math.max(0.24 - (distFromFront - 1) * 0.05, 0.08));
+  }, [cardHeight, cyclingDirection, dragPreviewOffset, frontIdx, isCollapsed]);
 
-    const off = rotationOffset % orderedAccounts.length;
-    const displayOrder = [...orderedAccounts.slice(off), ...orderedAccounts.slice(0, off)];
-    const [movedAccount] = displayOrder.splice(0, 1);
-    if (!movedAccount) {
-      springBack();
-      return;
-    }
-    displayOrder.splice(targetIndex, 0, movedAccount);
+  const getCardWrapperStyle = useCallback((i: number): React.CSSProperties => ({
+    position: 'absolute', left: 0, right: 0,
+    top: `${getBaseTop(i)}px`,
+    height: cardHeight,
+    transformOrigin: 'top center',
+    /* Ascending z-index: each card lays ON TOP of the one above it.
+       The last card has highest z and is fully visible. */
+    zIndex: i,
+    transitionDelay: getTransitionDelay(i),
+  }), [cardHeight, getBaseTop, getTransitionDelay]);
 
-    setOrderedAccounts(displayOrder);
-    setRotationOffset(0);
-    onReorder?.(displayOrder);
-  }, [onReorder, orderedAccounts, rotationOffset, springBack, visibleAccounts.length]);
-
-  const commitDismiss = useCallback(() => {
-    const el = cardEls.current[0];
-    if (el) {
-      el.style.transition = 'transform 380ms cubic-bezier(0.32,0,0.67,0)';
-      el.style.transform = `translateY(${-(cardHeight + 100)}px) scale(1.0)`;
-    }
-    setTimeout(() => {
-      setRotationOffset(prev => prev + 1);
-      setTimeout(() => { cardEls.current.forEach(c => { if (c) c.style.transition = ''; }); }, 50);
-    }, 400);
-  }, [cardHeight]);
-
-  const onDragUpdate = useCallback((offset: number) => {
-    if (mode !== 'collapsed') return;
-    visibleAccounts.forEach((_, i) => {
-      const el = cardEls.current[i]; if (!el) return;
-      if (i === 0) { el.style.transform = `translateY(${-offset}px)`; return; }
-      const restY = collapsedTop(i);
-      const attenuation = Math.max(0, 0.7 - (i - 1) * 0.15);
-      el.style.transform = `translateY(${restY - offset * attenuation}px)`;
-    });
-  }, [collapsedTop, mode, visibleAccounts]);
-
-  const handleTap = useCallback(() => {
-    const topAcc = visibleAccounts[0]; const topEl = cardEls.current[0];
-    if (topAcc && topEl) onCardTap(topAcc, 0, topEl);
-  }, [visibleAccounts, onCardTap]);
-
-  const { onPointerDown, onPointerMove, onPointerUp } = useCardDrag({
-    cardHeight, commitThresholdRatio: 0.4, enabled: mode === 'collapsed',
-    onTap: handleTap,
-    onCommit: commitDismiss,
-    onSpringBack: springBack,
-    onDragUpdate,
-    onReorderStart: startReorder,
-    onReorderMove: updateReorderStyles,
-    onReorderEnd: finishReorder,
-  });
-
-  const handleExpandedTap = useCallback((acc: AnchorAccount, i: number) => {
+  const handleTap = useCallback((acc: AnchorAccount, i: number) => {
+    if (suppressTapRef.current) { suppressTapRef.current = false; return; }
     haptic.selection();
     const el = cardEls.current[i]; if (el) onCardTap(acc, i, el);
-  }, [onCardTap]);
+  }, [onCardTap, suppressTapRef]);
 
   if (accounts.length === 0) return null;
 
   return (
     <div className="wallet-stack space-y-4">
       <div ref={containerRef} data-testid="card-stack"
-        className="relative w-full touch-pan-y" style={{ height: stackHeight, perspective: 1600 }}
-        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
+        className="relative w-full touch-pan-y overflow-visible" style={{ height: stackHeight }}
       >
         {visibleAccounts.map((acc, i) => (
-          <div key={acc.id} ref={el => { cardEls.current[i] = el; }} style={getCardWrapperStyle(i)}>
+          <motion.div
+            key={acc.id}
+            ref={el => { cardEls.current[i] = el; }}
+            data-testid={`card-stack-item-${acc.id}`}
+            data-draggable={isCollapsed && i === frontIdx ? 'true' : 'false'}
+            style={getCardWrapperStyle(i)}
+            animate={{ y: getRelativeY(i), x: 0, scale: 1 }}
+            transition={{
+              type: 'spring', stiffness: STACK_SPRING_STIFFNESS, damping: STACK_SPRING_DAMPING,
+              mass: 1, bounce: 0, delay: isCollapsed ? 0 : i * (STACK_STAGGER_MS / 1000),
+            }}
+            drag={isCollapsed && i === frontIdx ? 'y' : false}
+            dragMomentum={false} dragElastic={0.06}
+            dragConstraints={{ top: -(cardHeight + SWIPE_EXIT_DISTANCE), bottom: Math.round(cardHeight * 0.5) }}
+            onDrag={isCollapsed && i === frontIdx ? handleDrag : undefined}
+            onDragEnd={isCollapsed && i === frontIdx ? handleDragEnd : undefined}
+          >
             <AccountCard account={acc} index={i} totalCards={visibleAccounts.length}
               mode={mode === 'collapsed' ? 'stack' : 'expanded'}
-              isActive={i === 0 && mode === 'collapsed'}
-              isDragging={false} dragOffset={0}
-              style={getCardSurfaceStyle(i)}
-              onTap={() => mode === 'expanded' ? handleExpandedTap(acc, i) : undefined}
-              onDragStart={() => {}} />
-          </div>
+              isActive={isCollapsed && i === frontIdx}
+              style={{ boxShadow: getShadow(i) }}
+              onTap={() => handleTap(acc, i)} />
+          </motion.div>
         ))}
       </div>
       {accounts.length > MAX_RENDERED_CARDS && (
