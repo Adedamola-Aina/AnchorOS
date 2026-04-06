@@ -21,6 +21,7 @@ import { TaskForm } from './components/TaskForm';
 import { EditTaskForm } from './components/EditTaskForm';
 import { Button } from '@anchor-os/ui';
 import { WeeklyView } from './components/WeeklyView';
+import { MonthCalendarView } from './components/MonthCalendarView';
 import { TimelineView } from './components/TimelineView';
 import { CommitmentsEmptyState, CommitmentsFilterBar } from './components/CommitmentsViewParts';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
@@ -36,6 +37,7 @@ const CommitmentsView = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState<'all' | 'daily' | 'weekly' | 'monthly' | 'todo'>('all');
   const [viewMode, setViewMode] = useState<'timeline' | 'list' | 'calendar'>('list');
+  const [calendarRange, setCalendarRange] = useState<'week' | 'month'>('week');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   const handleAdd = async (taskPayload: Omit<AnchorTask, 'id' | 'createdAt'>) => {
@@ -87,7 +89,14 @@ const CommitmentsView = () => {
         {showAdd && <TaskForm onClose={() => setShowAdd(false)} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} />}
         {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}
         <div className={loadingTasks ? 'opacity-50' : ''}>
-          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={toggleTask} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={toggleTask} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} onConfirmFinancial={handleConfirmFinancial} /> : <WeeklyView tasks={allFiltered} onToggle={toggleTask} />}
+          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={toggleTask} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={toggleTask} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} onConfirmFinancial={handleConfirmFinancial} /> : (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                {(['week', 'month'] as const).map(r => (<Button key={r} variant={calendarRange === r ? 'primary' : 'secondary'} size="sm" onClick={() => setCalendarRange(r)} className="capitalize text-xs">{r}</Button>))}
+              </div>
+              {calendarRange === 'week' ? <WeeklyView tasks={allFiltered} onToggle={toggleTask} /> : <MonthCalendarView tasks={allFiltered} onToggle={toggleTask} />}
+            </div>
+          )}
         </div>
         {totalFiltered === 0 && !showAdd && <CommitmentsEmptyState filter={filter} hasFamilyActive={hasFamilyActive} onCreateFirst={() => setShowAdd(true)} onLearnMore={() => showToast('Commitment exports will be available in the next update.', 'info')} />}
       </div>

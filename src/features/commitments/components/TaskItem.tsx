@@ -5,6 +5,7 @@ import { Badge, TaskContextBadge } from '../../../components/shared';
 import type { AnchorTask } from '../../../types';
 import { Card } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
+import { getStreakMilestone, getStreakNudge } from '../utils/streakUtils';
 
 interface TaskItemProps {
     task: AnchorTask;
@@ -121,11 +122,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                     {task.title}
                                 </h4>
                             )}
-                            {!task.completed && !isAnimating && (task.currentStreak || 0) > 0 && (
-                                <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                                    🔥{task.currentStreak}
-                                </span>
-                            )}
+                            {!task.completed && !isAnimating && (task.currentStreak || 0) > 0 && (() => {
+                                const milestone = getStreakMilestone(task.currentStreak || 0);
+                                return (
+                                    <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" data-testid="streak-badge">
+                                        {milestone ? `${milestone.emoji} ${task.currentStreak}` : `🔥${task.currentStreak}`}
+                                    </span>
+                                );
+                            })()}
                             {isAnimating && (
                                 <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
                                     ✓ Done!
@@ -136,12 +140,28 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                         {!task.completed && !isAnimating && (
                             <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
                                 <Badge type={task.type}>{task.type}</Badge>
+                                {task.priority && task.priority !== 'medium' && (
+                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${task.priority === 'high' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
+                                        {task.priority === 'high' ? '🔴 High' : '🟢 Low'}
+                                    </span>
+                                )}
                                 <TaskContextBadge task={task} />
                                 {hasFamilyActive && task.category === 'family' && (
                                     <Badge type="family">Family</Badge>
                                 )}
                             </div>
                         )}
+                        {/* Notes preview (COMM-006) */}
+                        {task.notes && !isAnimating && (
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 truncate" data-testid="task-notes-preview">
+                                {task.notes}
+                            </p>
+                        )}
+                        {/* Gentle nudge (COMM-001) */}
+                        {!task.completed && !isAnimating && (() => {
+                            const nudge = getStreakNudge(task.currentStreak || 0, task.longestStreak || 0);
+                            return nudge ? <p className="mt-0.5 text-[10px] text-slate-400 dark:text-slate-500 truncate" data-testid="streak-nudge">{nudge}</p> : null;
+                        })()}
                     </div>
                 </div>
                 {!hideActions && (

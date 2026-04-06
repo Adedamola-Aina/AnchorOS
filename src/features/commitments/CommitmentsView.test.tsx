@@ -43,6 +43,28 @@ vi.mock('../../hooks/useFamilySharing', () => ({
   })),
 }));
 
+// Mock HIG components to render as native elements for test interaction
+vi.mock('../../components/shared', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    PopoverMenu: ({ items, value, onChange, label, testId }: any) => (
+      <div data-testid={testId}>
+        {label && <label htmlFor={`mock-pm-${testId}`}>{label}</label>}
+        <select id={`mock-pm-${testId}`} value={value} onChange={(e: any) => onChange(e.target.value)}>
+          {items.map((item: any) => <option key={item.value} value={item.value}>{item.label}</option>)}
+        </select>
+      </div>
+    ),
+    TimeWheelPicker: ({ label, value, onChange, testId }: any) => (
+      <div data-testid={testId}>
+        {label && <label htmlFor={`mock-tw-${testId}`}>{label}</label>}
+        <input id={`mock-tw-${testId}`} type="time" value={value} onChange={(e: any) => onChange(e.target.value)} />
+      </div>
+    ),
+  };
+});
+
 import { useFamilySharing } from '../../hooks/useFamilySharing';
 
 const mockTasks: AnchorTask[] = [
@@ -484,7 +506,7 @@ describe('CommitmentsView', () => {
 
       // Select 1st, 15th, and 30th - find day buttons in form grid (not badge span)
       const dayButtons = screen.getAllByRole('button').filter(btn =>
-        btn.classList.contains('w-8') && btn.classList.contains('h-8')
+        btn.classList.contains('w-11') && btn.classList.contains('h-11')
       );
       const day1 = dayButtons.find(btn => btn.textContent === '1');
       const day15 = dayButtons.find(btn => btn.textContent === '15');

@@ -45,7 +45,9 @@ describe('RecurringOptions', () => {
 
   it('calls onFrequencyChange when frequency selected', () => {
     render(<RecurringOptions {...defaultProps} isRecurring={true} />);
-    fireEvent.change(screen.getByDisplayValue('Monthly'), { target: { value: 'weekly' } });
+    // SegmentedControl renders radio buttons — click "Weekly" to change frequency
+    const weeklyBtn = screen.getByRole('radio', { name: /weekly/i });
+    fireEvent.click(weeklyBtn);
     expect(defaultProps.onFrequencyChange).toHaveBeenCalledWith('weekly');
   });
 

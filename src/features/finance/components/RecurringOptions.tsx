@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import type { RecurringFrequency } from '../../../types';
+import { SegmentedControl } from '../../../components/shared';
 
 interface RecurringOptionsProps {
     isRecurring: boolean;
@@ -37,18 +38,17 @@ export const RecurringOptions: React.FC<RecurringOptionsProps> = ({
             {isRecurring && (
                 <div className="grid grid-cols-2 gap-3 mt-3 animate-in slide-in-from-top-2 fade-in duration-200">
                     <div>
-                        <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
-                            Frequency
-                        </label>
-                        <select
+                        <SegmentedControl
+                            label="Frequency"
+                            options={[
+                                { value: 'weekly', label: 'Weekly' },
+                                { value: 'monthly', label: 'Monthly' },
+                                { value: 'yearly', label: 'Yearly' },
+                            ]}
                             value={frequency}
-                            onChange={(e) => onFrequencyChange(e.target.value as RecurringFrequency)}
-                            className="w-full text-sm rounded-lg border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-                        >
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
-                        </select>
+                            onChange={(v) => onFrequencyChange(v as RecurringFrequency)}
+                            testId="recurring-frequency"
+                        />
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
