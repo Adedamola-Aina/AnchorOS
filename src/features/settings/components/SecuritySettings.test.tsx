@@ -18,6 +18,12 @@ vi.mock('./PasskeySection', () => ({
 vi.mock('./AuthEventHistory', () => ({
   AuthEventHistory: () => <div data-testid="auth-event-history">AuthEventHistory</div>,
 }));
+vi.mock('./EmailChangeForm', () => ({
+  EmailChangeForm: () => <div data-testid="email-change-form">EmailChangeForm</div>,
+}));
+vi.mock('./SessionManagement', () => ({
+  SessionManagement: () => <div data-testid="session-management">SessionManagement</div>,
+}));
 vi.mock('../../../context/NotificationContext', () => ({
   useNotifications: () => ({ showToast: vi.fn(), confirm: vi.fn().mockResolvedValue(true) }),
 }));

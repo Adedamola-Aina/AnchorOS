@@ -15,6 +15,7 @@ import { secureOnCall } from './callable';
 import { createAuditLog } from './helpers';
 import { enforceRateLimit } from './rateLimit';
 import { db, APP_ID } from './config';
+import { checkNewDeviceAlert } from './authAlertDetection';
 
 const MAX_AUTH_EVENTS = 20;
 
@@ -89,6 +90,9 @@ export const recordAuthEvent = secureOnCall(async (request) => {
 
     // Fire-and-forget prune; don't block the response
     void pruneOldEvents(request.auth.uid).catch(() => undefined);
+
+    // AUTH-008: Check for new device and send security alert
+    void checkNewDeviceAlert(request.auth.uid, userAgent, eventsCol).catch(() => undefined);
 
     await createAuditLog('auth_event_recorded', request.auth.uid, { method });
 

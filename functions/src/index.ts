@@ -31,8 +31,11 @@ export { getNotifications, dismissNotification } from './notifications';
 // Family Mode — triggers & maintenance
 export { onSharedTransactionWrite, cleanupExpiredInvitations } from './familyTriggers';
 
-// Family Mode — migration
+// Family Mode — migration (legacy callable, kept for backward compat)
 export { migrateFamilyConnectionsV2 } from './familyMigration';
+
+// Migration framework (ENG-003)
+export { listMigrations, getMigrationStatus, runMigration, rollbackMigration } from './migrations/callables';
 
 // Email
 export { sendTemplatedEmail } from './email';
@@ -68,12 +71,24 @@ export { monoWebhook } from './bankWebhook';
 // Auth event history (SEC-009)
 export { recordAuthEvent, reportUnrecognisedSignIn, dismissAuthEvent } from './authEvents';
 
+// Email change sync (AUTH-006)
+export { syncEmailToProfile } from './emailChangeSync';
+
+// Device attestation (SEC-006)
+export { verifyDeviceAttestation } from './deviceAttestation';
+
 // Passkey (WebAuthn) server-side challenge + assertion verification (GAP-011)
 export { issuePasskeyChallenge, verifyPasskeyAssertion } from './passkeyAuth';
 export { completePasskeyRegistration, deletePasskey } from './passkeyRegistration';
 
 // Health check (SRE-003)
 export { health } from './health';
+
+// Quota monitoring (SRE-004)
+export { checkFirestoreQuota } from './quotaMonitor';
+
+// Keep-warm scheduler (SRE-005)
+export { warmUpFunctions } from './warmUp';
 
 // Weekly Fabric report
 export { generateWeeklyReport } from './weeklyReport';
