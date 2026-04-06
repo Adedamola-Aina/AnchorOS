@@ -60,3 +60,7 @@ Capacitor.asar
 .claude/gather.lock
 .claude/plan.lock
 .codex
+
+# Stryker mutation testing artifacts
+stryker-setup-*.js
+stryker-setup-*.js.map

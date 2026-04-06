@@ -71,6 +71,23 @@ export default defineConfig([
       'no-console': 'off',
     },
   },
+  // ARCH-024: Module boundary rules — prevent cross-feature direct imports.
+  // Each feature may only import from itself and shared layers (hooks, utils, services, etc.).
+  ...['auth', 'commitments', 'dashboard', 'errors', 'fabric', 'finance', 'flags', 'onboarding', 'settings'].map(feature => {
+    const otherFeatures = ['auth', 'commitments', 'dashboard', 'errors', 'fabric', 'finance', 'flags', 'onboarding', 'settings']
+      .filter(f => f !== feature)
+    return {
+      files: [`src/features/${feature}/**/*.{ts,tsx}`],
+      rules: {
+        'no-restricted-imports': ['error', {
+          patterns: otherFeatures.flatMap(f => [
+            { group: [`@/features/${f}`, `@/features/${f}/*`], message: `ARCH-024: Feature "${feature}" must not import from feature "${f}". Use shared layers (hooks, utils, services, context, api) instead.` },
+            { group: [`../features/${f}`, `../features/${f}/*`, `../../features/${f}`, `../../features/${f}/*`, `../../../features/${f}`, `../../../features/${f}/*`], message: `ARCH-024: Feature "${feature}" must not import from feature "${f}" via relative path. Use shared layers instead.` },
+          ]),
+        }],
+      },
+    }
+  }),
   {
     // Infrastructure files that legitimately use console.error for Sentry breadcrumbs
     files: [
