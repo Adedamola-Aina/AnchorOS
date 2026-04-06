@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.16.0-dev.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.7...v1.16.0-dev.1) (2026-04-06)
+
+
+### Features
+
+* **finance:** apple wallet redesign phases 2-5 — pickers, reorder, analytics UX-041 ([b1f1ac2](https://github.com/Adedamola-Aina/AnchorOS/commit/b1f1ac21dec844b8b38063688a3bfdf621e62967))
+* **finance:** apple wallet-style stacked account cards on mobile UX-041 ([d4f2efe](https://github.com/Adedamola-Aina/AnchorOS/commit/d4f2efe5e47d2d5542ff0294c9104ef14f807b28))
+* **finance:** refine wallet card material ([df1daee](https://github.com/Adedamola-Aina/AnchorOS/commit/df1daeeeba19518a27727e972d592a7fa4fd1a39))
+* **finance:** wallet redesign checkpoint ([e8e381c](https://github.com/Adedamola-Aina/AnchorOS/commit/e8e381caec5f67e864e17edbf7544a82d0441c21))
+* **ui:** native tailwind v4 CSS-first rewrite (UX-040) ([723e2eb](https://github.com/Adedamola-Aina/AnchorOS/commit/723e2eb7d7992c2c971fe867b1ca6aa6e10c29c2))
+
+
+### Bug Fixes
+
+* **dashboard:** enforce ticket IDs in commits, exclude automated from metric (ARCH-001) ([371dd2a](https://github.com/Adedamola-Aina/AnchorOS/commit/371dd2acdbce2346443c68e374f239c64081a32d))
+* **deps:** restore @testing-library/dom removed by legacy-peer-deps install (SEC-010) ([5f7f23f](https://github.com/Adedamola-Aina/AnchorOS/commit/5f7f23f823a39409d814bea8ca8bb65ae415f36c))
+* **finance:** apple wallet peek layout — name+balance at top of each card (BUG-130) ([ab1bbd2](https://github.com/Adedamola-Aina/AnchorOS/commit/ab1bbd2014511e815457c5e05f2b6a0ec837ce75))
+* **mobile:** e2e test fixes, touch-target compliance, dep updates (BUG-129) ([c042423](https://github.com/Adedamola-Aina/AnchorOS/commit/c042423c754e28bdaf7a304bdad16f66a05cc725))
+* **mobile:** native ios tab bar height — h-16 → h-[49px], drop min-h-[56px] (UX-039) ([b369ee9](https://github.com/Adedamola-Aina/AnchorOS/commit/b369ee97ce139bfebb416958ec794d382f2afbd5))
+* **security:** resolve high-severity devdependency vulnerabilities via overrides (SEC-010) ([3576c57](https://github.com/Adedamola-Aina/AnchorOS/commit/3576c5759721c5da091cf9e94b63c6e0454da9a0))
+* **ui:** apply tailwindcss/upgrade v4 syntax migration to index.css ([c30ca56](https://github.com/Adedamola-Aina/AnchorOS/commit/c30ca5642995d815584f1a7eb8d44a9289891f61))
+* **ui:** correct border-color default to gray-200, matching v3 preflight exactly ([d6017f5](https://github.com/Adedamola-Aina/AnchorOS/commit/d6017f5752faa9574d48ad14072a9f8ca4b70206)), closes [#e2e8f0](https://github.com/Adedamola-Aina/AnchorOS/issues/e2e8f0) [#e5e7](https://github.com/Adedamola-Aina/AnchorOS/issues/e5e7) [#e5e7](https://github.com/Adedamola-Aina/AnchorOS/issues/e5e7)
+* **ui:** glass-card background dropped by tailwind v4 [@apply](https://github.com/apply) dedup (BUG-127) ([7672c32](https://github.com/Adedamola-Aina/AnchorOS/commit/7672c32a85035b0340811c96568f0b9ba99c0cdf))
+* **ui:** remove * margin/padding reset that overrode v4 space-y utilities (BUG-129) ([9debf9c](https://github.com/Adedamola-Aina/AnchorOS/commit/9debf9c03ca9145f07064110f86bcaf1b63dc58d))
+* **ui:** restore tailwind v4 visual parity — border-color and glass-card ([3df793c](https://github.com/Adedamola-Aina/AnchorOS/commit/3df793cd319d796d4b9d1adc70ae6d8703334074))
+* **ui:** restore v3 form/ring/placeholder defaults stripped by v4 preflight (BUG-129) ([74583b5](https://github.com/Adedamola-Aina/AnchorOS/commit/74583b5bf52cd99143ba91666818aa5e63df0e6d)), closes [#9ca3](https://github.com/Adedamola-Aina/AnchorOS/issues/9ca3)
+* **ui:** restore v3 visual parity — [@utility](https://github.com/utility) typography, sRGB palette, glass-border (BUG-129) ([97b2b1e](https://github.com/Adedamola-Aina/AnchorOS/commit/97b2b1e829bdb4786dfbc66cfe03f8a1cdd411f4))
+
 ## [1.16.0-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.15.7...v1.16.0-dev.0) (2026-04-06)
 
 
