@@ -342,6 +342,9 @@ src/
 
 ### Cloud Functions
 
+> **Full reference**: [CALLABLE_API_REFERENCE.md](CALLABLE_API_REFERENCE.md) — all 50 functions with auth, rate limits, and versioning.
+> **Registry**: `functions/src/callableRegistry.ts` — enforced by test.
+
 | Function | Purpose | Trigger | Auth Required |
 |----------|---------|---------|---------------|
 | `getSharedAccountTransactions` | Fetch transactions from shared accounts | Callable | Yes |

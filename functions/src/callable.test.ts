@@ -2,9 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Must be hoisted before module imports
 const mockOnCall = vi.hoisted(() => vi.fn((options, handler) => ({ options, handler })));
+const mockWithTracing = vi.hoisted(() => vi.fn((_name, handler) => handler));
 
 vi.mock('firebase-functions/v2/https', () => ({
   onCall: (...args: unknown[]) => mockOnCall(...args),
+}));
+
+vi.mock('./tracing', () => ({
+  withTracing: (...args: unknown[]) => mockWithTracing(...args),
 }));
 
 // Import after mocks are set up

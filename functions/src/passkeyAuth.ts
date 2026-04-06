@@ -129,6 +129,11 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
 
     const credData = credSnap.data() as CredentialDoc;
 
+    // Defensive: ensure publicKey is a proper base64url string before conversion
+    if (!credData.publicKey || typeof credData.publicKey !== 'string') {
+        throw new HttpsError('internal', 'Stored credential has an invalid public key format');
+    }
+
     let verification: { verified: boolean; authenticationInfo?: { newCounter: number } };
     try {
         verification = await verifyAuthenticationResponse({

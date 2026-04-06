@@ -427,6 +427,7 @@ interface Commitment {
   daysOfMonth?: number[];         // Multiple days for monthly
   domain?: string;                // Health, Work, Bible, etc.
   reminderTime?: string;          // HH:mm format
+  notes?: string;                 // Optional context/notes (COMM-006), max 500 chars
   lastCompletedAt?: string;       // ISO timestamp
   currentStreak?: number;         // Consecutive completions
   longestStreak?: number;         // Best streak
@@ -468,7 +469,59 @@ function isValidTask(data) {
 
 ---
 
-### 6. Notifications Collection
+### 6. Financial Goals Collection (PRD-007)
+
+**Path**: `artifacts/anchor-os/users/{userId}/goals/{goalId}`
+
+**Purpose**: Store user financial goals set during onboarding or later
+
+**Document Structure**:
+
+```typescript
+interface Goal {
+  id: string;                     // Auto-generated Firestore ID
+  title: string;                  // Goal name (e.g. "Emergency Fund")
+  targetAmountCents: number;      // Target amount in cents
+  currentAmountCents: number;     // Progress tracked in cents
+  currency: 'USD' | 'NGN';
+  goalType: 'savings' | 'debt_payoff' | 'investment' | 'emergency_fund' | 'other';
+  accountId?: string;             // Optional linked finance account
+  targetDate?: string;            // Optional target date (ISO)
+  createdAt: string;              // ISO timestamp
+  updatedAt: string;              // ISO timestamp
+}
+```
+
+**Security Rules**:
+- Read/Write: Owner only
+- No family sharing (personal goals)
+
+---
+
+### 7. Custom Categories Collection (PRD-010)
+
+**Path**: `artifacts/anchor-os/users/{userId}/categories/{categoryId}`
+
+**Purpose**: Store user-defined transaction categories
+
+**Document Structure**:
+
+```typescript
+interface CustomCategory {
+  id: string;                     // Auto-generated Firestore ID
+  name: string;                   // Category name (max 50 chars)
+  icon?: string;                  // Optional icon identifier
+  createdAt: string;              // ISO timestamp
+}
+```
+
+**Security Rules**:
+- Read/Write: Owner only
+- Merged with 14 default categories client-side
+
+---
+
+### 7. Notifications Collection
 
 **Path**: `artifacts/anchor-os/users/{userId}/notifications/{notificationId}`
 

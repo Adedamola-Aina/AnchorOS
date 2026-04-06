@@ -75,3 +75,60 @@ Configure at: `https://status.anchor-os.web.app`
 - SRE-003 (Roadmap)
 - Firebase Status: https://status.firebase.google.com
 - UptimeRobot docs: https://uptimerobot.com/help/
+
+---
+
+## Firestore Quota Monitoring (SRE-004)
+
+### Overview
+
+Scheduled Cloud Function (`checkFirestoreQuota`) runs every 6 hours to
+evaluate Firestore usage against configurable thresholds.
+
+### Alert Thresholds
+
+| Metric | Warning (80%) | Critical (95%) |
+|--------|--------------|----------------|
+| Daily reads | 40,000 | 47,500 |
+| Daily writes | 16,000 | 19,000 |
+| Daily deletes | 16,000 | 19,000 |
+| Storage | 858 MB | 1,020 MB |
+
+### Metrics Storage
+
+- Snapshots: `artifacts/anchor-os/quota_metrics/{timestamp}`
+- Alerts: `artifacts/anchor-os/quota_alerts/{timestamp}`
+
+### Runbook: Quota Alert Response
+
+1. **Warning fires** → Review usage patterns in Firebase Console
+2. **Critical fires** → Identify top-consuming queries, consider index optimization
+3. **Reads spike** → Check for missing composite indexes or unscoped queries
+4. **Writes spike** → Look for runaway batch operations or trigger loops
+5. Post root cause to #ops-alerts within 24 hours
+
+---
+
+## Cold Start Profiling & Keep-Warm (SRE-005)
+
+### Keep-Warm Scheduler
+
+`warmUpFunctions` runs every 5 minutes to prevent cold starts on critical
+paths. Cloud Functions v2 shares containers across the codebase, so warming
+one function warms all.
+
+### Warm Targets
+
+| Function | Reason |
+|----------|--------|
+| health | Public endpoint, used by uptime probes |
+| getNotifications | High-traffic user callable |
+| processReminders | Runs every 1 minute, must be warm |
+| logAuditEvent | Security-critical, low latency required |
+| getSharedAccountsWithMe | Family mode, frequent access |
+
+### Cold Start Metrics
+
+- Stored in structured logs with label `coldstart.profiling: true`
+- Query in Cloud Logging: `jsonPayload."coldstart.profiling" = true`
+- Warm-up log: `artifacts/anchor-os/warmup_log/{timestamp}`

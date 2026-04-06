@@ -23,8 +23,8 @@ export const CHALLENGE_TTL_MS = 2 * 60 * 1000; // 2 minutes
 /** Allowed origins per environment — derived from project ID at runtime */
 export function getAllowedOrigins(): string[] {
     const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
-    if (projectId === 'anchor-os') return ['https://anchor-os.web.app'];
-    if (projectId === 'anchor-os-staging') return ['https://anchor-os-staging.web.app'];
+    if (projectId === 'anchor-os') return ['https://anchor-os.web.app', 'https://anchor-os.firebaseapp.com'];
+    if (projectId === 'anchor-os-staging') return ['https://anchor-os-staging.web.app', 'https://anchor-os-staging.firebaseapp.com'];
     return [
         'https://anchor-os-dev-1c6ec.web.app',
         'http://localhost:5173',
