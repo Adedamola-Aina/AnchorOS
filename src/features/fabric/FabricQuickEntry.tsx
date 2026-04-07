@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { Zap } from 'lucide-react';
-import { parseTransaction } from '../../../services/fabric/transactionParser';
-import type { ParsedTransaction } from '../../../services/fabric/transactionParser';
+import { Sparkles } from 'lucide-react';
+import { parseTransaction } from '../../services/fabric/transactionParser';
+import type { ParsedTransaction } from '../../services/fabric/transactionParser';
 
-interface TransactionQuickEntryProps {
+interface FabricQuickEntryProps {
   onParsed: (data: ParsedTransaction) => void;
 }
 
-export const TransactionQuickEntry: React.FC<TransactionQuickEntryProps> = ({ onParsed }) => {
+export const FabricQuickEntry: React.FC<FabricQuickEntryProps> = ({ onParsed }) => {
   const [input, setInput] = useState('');
 
   const preview = useMemo(() => {
@@ -28,7 +28,7 @@ export const TransactionQuickEntry: React.FC<TransactionQuickEntryProps> = ({ on
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 focus-within:ring-2 focus-within:ring-slate-400 dark:focus-within:ring-slate-500 transition-all">
-        <Zap className="w-4 h-4 text-amber-500 shrink-0" />
+        <Sparkles className="w-4 h-4 text-primary-500 shrink-0" />
         <input
           data-testid="quick-entry-input"
           type="text"

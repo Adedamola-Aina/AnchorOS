@@ -11,7 +11,6 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { Modal } from '../../components/shared/Modal';
 import { AccountForm } from './AccountForm';
 import { TransactionForm } from './TransactionForm';
-import { TransactionQuickEntry } from './components/TransactionQuickEntry';
 import type { AnchorTransaction, Currency } from '../../types';
 import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { EmptyAccountsState } from './components/EmptyAccountsState';
@@ -22,7 +21,6 @@ import { TotalAssetsSummaryBar } from '../../components/finance/TotalAssetsSumma
 import { SkeletonCards } from '../../components/finance/SkeletonCards';
 import { useReorderAccounts } from '../../hooks/useReorderAccounts';
 import { logProductEvent } from '../../services/telemetry';
-import type { ParsedTransaction } from '../../services/fabric/transactionParser';
 import { FinanceAccountsRoute } from './components/FinanceAccountsRoute';
 import { FinanceDesktopContent } from './components/FinanceDesktopContent';
 import { TransactionHistorySection } from './components/TransactionHistorySection';
@@ -94,11 +92,6 @@ const FinanceView = () => {
   const handleDeleteConfirm = () => {
     if (transactionToDelete) { deleteTransaction(transactionToDelete.id, transactionToDelete.accountId); setTransactionToDelete(null); }
   };
-  const handleQuickEntry = (parsed: ParsedTransaction) => {
-    setPrefillData({ amount: parsed.amount, category: parsed.category, title: parsed.title });
-    setInitialTransactionType('expense'); setMode('addTx');
-    logProductEvent('finance_quick_entry_used', { hasAmount: !!parsed.amount, hasCategory: !!parsed.category });
-  };
 
   useEffect(() => {
     if (selectedAccountId && !selectedAccount && !loadingFinance) {
@@ -158,9 +151,6 @@ const FinanceView = () => {
             <Plus className="w-4 h-4 text-white dark:text-slate-900" strokeWidth={2.5} />
           </button>
         </div>
-
-        {/* Quick Entry — NLP transaction input (UX-036) */}
-        {activeAccounts.length > 0 && mode === 'view' && <TransactionQuickEntry onParsed={handleQuickEntry} />}
 
         {/* Zone 2–3: Mobile = wallet stack, Desktop = production layout */}
         {isMobile ? (
