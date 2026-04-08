@@ -10,11 +10,9 @@ import { FabricUpcomingCard } from './FabricUpcomingCard';
 import { FabricMoodCard } from './FabricMoodCard';
 import { FabricPredictionsSection } from './FabricPredictionsSection';
 import { FabricQuerySection } from './FabricQuerySection';
-import { FabricQuickEntry } from './FabricQuickEntry';
 import { FabricWeeklySnapshotSection } from './FabricWeeklySnapshotSection';
 import { logProductEvent } from '../../services/telemetry';
 import { useFabricView } from './useFabricView';
-import type { ParsedTransaction } from '../../services/fabric/transactionParser';
 
 const FabricView: React.FC = () => {
   const { navigateTo } = useApp();
@@ -44,18 +42,6 @@ const FabricView: React.FC = () => {
     currency,
   } = useFabricView();
 
-  const handleQuickEntry = (parsed: ParsedTransaction) => {
-    navigateTo('finance', {
-      amount: parsed.amount,
-      category: parsed.category,
-      description: parsed.title,
-    });
-    logProductEvent('fabric_quick_entry_used', {
-      hasAmount: !!parsed.amount,
-      hasCategory: !!parsed.category,
-    });
-  };
-
   if (!isEnabled) {
     return (
       <FeatureErrorBoundary featureName="Anchor AI">
@@ -81,9 +67,6 @@ const FabricView: React.FC = () => {
             <p className="text-sm text-slate-500 dark:text-slate-400 pl-7">{briefing.subtitle}</p>
           )}
         </header>
-
-        {/* ── Quick transaction entry (AI-powered NLP parsing) ─────────── */}
-        <FabricQuickEntry onParsed={handleQuickEntry} />
 
         {/* ── Onboarding (first-time only) ────────────────────────────────── */}
         {(!isReady || patterns.length === 0) && <FabricOnboarding />}

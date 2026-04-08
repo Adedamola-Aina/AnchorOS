@@ -28,6 +28,7 @@ export const useRecurringTransactions = (userId: string | undefined) => {
     // The actual data flow happens through onSnapshot in the effect
     const { data: initialData } = useQuery<RecurringTransaction[]>({
         queryKey,
+        queryFn: () => [],
         enabled: false, // Start disabled, we hydrate via subscription
         initialData: [],
     });

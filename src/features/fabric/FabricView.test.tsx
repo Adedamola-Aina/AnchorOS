@@ -34,14 +34,6 @@ vi.mock('./FabricUpcomingCard', () => ({
   FabricUpcomingCard: () => <div data-testid="upcoming-card">upcoming</div>,
 }));
 
-vi.mock('./FabricQuickEntry', () => ({
-  FabricQuickEntry: ({ onParsed }: { onParsed: (d: Record<string, unknown>) => void }) => (
-    <div data-testid="fabric-quick-entry">
-      <button data-testid="trigger-quick-entry" onClick={() => onParsed({ amount: 50, category: 'Groceries', title: 'test' })}>quick</button>
-    </div>
-  ),
-}));
-
 const baseHook = {
   isEnabled: true,
   isReady: true,

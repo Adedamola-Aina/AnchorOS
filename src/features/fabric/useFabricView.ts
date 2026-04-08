@@ -90,6 +90,13 @@ export function useFabricView(): UseFabricViewResult {
     if (type === 'navigate' && typeof payload.page === 'string') {
       navigateTo(payload.page as TabView);
     }
+    if (type === 'record_transaction') {
+      navigateTo('finance', {
+        amount: payload.amount as number | undefined,
+        category: payload.category as string | undefined,
+        description: payload.title as string | undefined,
+      });
+    }
   };
 
   const currency = (briefing?.currency ?? 'USD') as Currency;

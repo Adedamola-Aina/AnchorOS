@@ -60,6 +60,12 @@ export const FabricPromptChips: React.FC<FabricPromptChipsProps> = ({ onPrompt, 
       onTap: () => navigateTo('dashboard'),
     },
     {
+      id: 'log-transaction',
+      label: 'Log a transaction',
+      prompt: 'record an expense',
+      onTap: () => navigateTo('finance'),
+    },
+    {
       id: 'weekly-report',
       label: 'Generate weekly report',
       prompt: 'generate weekly report',
