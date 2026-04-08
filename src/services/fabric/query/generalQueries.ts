@@ -13,8 +13,8 @@ export function navigateQuery(intent: ParsedIntent): FabricQueryResult {
 export function fallbackQuery(): FabricQueryResult {
   return {
     data: null,
-    summary: "I didn't quite catch that.",
-    detail: "Try asking:\n• 'How much did I spend on food this month?'\n• 'What's my savings rate?'\n• 'Which day do I spend the most?'\n• 'How do my habits connect to my spending?'\n• 'How am I trending this week?'",
+    summary: "That's not something I can help with yet.",
+    detail: "Try asking:\n• 'How much did I spend on food this month?'\n• 'What's my savings rate?'\n• 'Which day do I spend the most?'\n• 'I bought fuel for 7000 naira'\n• 'How am I trending this week?'",
     visualizable: false,
     actions: [],
   };

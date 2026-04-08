@@ -191,7 +191,7 @@ describe('runFabricQuery extended handlers', () => {
       [],
     );
 
-    expect(result.summary).toBe("I didn't quite catch that.");
+    expect(result.summary).toBe("That's not something I can help with yet.");
     expect(result.detail).toContain("What's my savings rate?");
     expect(result.detail).toContain('Which day do I spend the most?');
   });

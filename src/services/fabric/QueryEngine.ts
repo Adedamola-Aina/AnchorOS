@@ -44,6 +44,13 @@ export function runFabricQuery(input: RunFabricQueryInput): FabricQueryResult {
     return recordTransactionQuery(input);
   }
 
+  if (action === 'unknown' && input.intent.entities.amount) {
+    return recordTransactionQuery({
+      ...input,
+      intent: { ...input.intent, action: 'record_expense' },
+    });
+  }
+
   return fallbackQuery();
 }
 

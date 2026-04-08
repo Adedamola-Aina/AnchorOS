@@ -118,7 +118,7 @@ describe('runFabricQuery route coverage', () => {
   it('falls back when navigate action has no page', () => {
     const result = run(makeIntent('navigate'));
 
-    expect(result.summary).toBe("I didn't quite catch that.");
+    expect(result.summary).toBe("That's not something I can help with yet.");
   });
 
   it('routes record_income action to transaction prefill query', () => {

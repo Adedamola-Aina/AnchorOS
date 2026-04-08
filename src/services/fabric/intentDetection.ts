@@ -10,8 +10,9 @@ interface IntentRule {
 
 const INTENT_RULES: IntentRule[] = [
   { action: 'navigate', priority: 100, test: (i) => /\b(go to|open|navigate|take me to|show me)\b/.test(i) },
-  { action: 'record_expense', priority: 90, test: (i) => /\b(record|add|log|track|paid|just paid|spent|i spent)\b/.test(i) && /\b(expense|buy|bought|food|fuel|bill|transport|groceries|rent|subscription)\b/.test(i) },
+  { action: 'record_expense', priority: 90, test: (i) => /\b(record|add|log|track|paid|just paid|spent|i spent|bought|purchased|got|used|charged)\b/.test(i) && /\b(expense|buy|bought|food|fuel|bill|transport|groceries|rent|subscription|airtime|data|electricity|water)\b/.test(i) },
   { action: 'record_expense', priority: 85, test: (i) => /\b(record|add|log|track)\b/.test(i) && /₦|\$|naira|dollars?/.test(i) },
+  { action: 'record_expense', priority: 82, test: (i) => /\b(bought|purchased|got|used|charged|paid for)\b/.test(i) && /₦|\$|naira|dollars?|\d{3,}/.test(i) },
   { action: 'record_income', priority: 90, test: (i) => /\b(record|add|log|received|got paid|salary|credited)\b/.test(i) && /\b(income|salary|credit|payment|received)\b/.test(i) },
   { action: 'summarize_week', priority: 80, test: (i) => /\b(week(ly)?\s+(summary|report|review)|how\s+(did|was)\s+my\s+week|this\s+week\s+recap)\b/.test(i) },
   { action: 'query_commitments', priority: 70, test: (i) => /\b(commitment|commitments|streak|task|tasks|habit|habits|daily|todo)\b/.test(i) && !/\b(spend|spending|money|finance|connection\s+between|correlation)\b/.test(i) },

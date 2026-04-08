@@ -116,7 +116,7 @@ describe('runFabricQuery', () => {
       now: new Date('2026-03-09T10:00:00.000Z'),
     });
 
-    expect(result.summary).toBe("I didn't quite catch that.");
+    expect(result.summary).toBe("That's not something I can help with yet.");
     expect(result.detail).toContain("What's my savings rate?");
     expect(result.visualizable).toBe(false);
   });
