@@ -12,6 +12,7 @@ import {
   buildStreakInsight,
 } from './insights/commitmentInsights';
 import { buildCorrelationInsight } from './insights/patternInsights';
+import { buildSavingsInsight } from './insights/savingsInsights';
 import type { InsightInput } from './insights/types';
 
 export function buildInsights(input: InsightInput): Insight[] {
@@ -24,14 +25,15 @@ export function buildInsights(input: InsightInput): Insight[] {
   const savings = buildSavingsRateInsight(input.transactions, input.now);
   const dayOfWeek = buildDayOfWeekInsight(input.transactions, input.now);
   const correlation = buildCorrelationInsight(input.transactions, input.commitments, input.now);
+  const savingsSuggestion = buildSavingsInsight(input.transactions, input.now);
 
   if (input.feature === 'finance') {
-    return [spending, subscriptions, savings, dayOfWeek].filter((i): i is Insight => !!i);
+    return [spending, subscriptions, savings, dayOfWeek, savingsSuggestion].filter((i): i is Insight => !!i);
   }
   if (input.feature === 'commitments') {
     return [commitment, streak].filter((i): i is Insight => !!i);
   }
   if (input.feature === 'family') return family ? [family] : [];
 
-  return [correlation, spending, commitment, streak, savings, dayOfWeek].filter((i): i is Insight => !!i);
+  return [correlation, spending, commitment, streak, savings, dayOfWeek, savingsSuggestion].filter((i): i is Insight => !!i);
 }

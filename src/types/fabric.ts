@@ -63,6 +63,7 @@ export interface Insight {
   category: 'commitments' | 'spending' | 'patterns' | 'achievements' | 'household';
   headline: string;
   detail: string;
+  reasoning?: string;
   trend: 'up' | 'down' | 'stable';
   severity: 'positive' | 'neutral' | 'attention';
   metric?: {

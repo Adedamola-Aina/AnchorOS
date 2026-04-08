@@ -19,7 +19,9 @@ export type PredictionType =
   | 'recurring_due'
   | 'cash_flow_alert'
   | 'unusual_spending'
-  | 'commitment_reminder';
+  | 'commitment_reminder'
+  | 'goal_on_track'
+  | 'goal_at_risk';
 
 export interface PredictionAction {
   label: string;

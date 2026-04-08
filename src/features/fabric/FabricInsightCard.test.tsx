@@ -59,4 +59,18 @@ describe('FabricInsightCard', () => {
     expect(() => render(<FabricInsightCard insight={insight} onDismiss={vi.fn()} />)).not.toThrow();
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
   });
+
+  it('renders reasoning when provided', () => {
+    const withReasoning = {
+      ...insight,
+      reasoning: 'Based on 30 days of transaction history across 47 expenses.',
+    };
+    render(<FabricInsightCard insight={withReasoning} />);
+    expect(screen.getByText('Based on 30 days of transaction history across 47 expenses.')).toBeInTheDocument();
+  });
+
+  it('does not render reasoning section when absent', () => {
+    render(<FabricInsightCard insight={insight} />);
+    expect(screen.queryByTestId('insight-reasoning')).not.toBeInTheDocument();
+  });
 });

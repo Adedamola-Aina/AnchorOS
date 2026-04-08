@@ -44,6 +44,11 @@ export const FabricInsightCard: React.FC<FabricInsightCardProps> = ({ insight, o
         <span className="text-xs text-slate-500 dark:text-slate-400" aria-hidden="true">{TREND_ICON[insight.trend]}</span>
       </div>
       <p className="text-sm text-slate-600 dark:text-slate-300">{insight.detail}</p>
+      {insight.reasoning && (
+        <p data-testid="insight-reasoning" className="text-xs text-slate-400 dark:text-slate-500 italic">
+          {insight.reasoning}
+        </p>
+      )}
       {onDismiss && (
         <button
           type="button"

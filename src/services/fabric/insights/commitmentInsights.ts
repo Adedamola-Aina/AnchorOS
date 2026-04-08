@@ -25,6 +25,7 @@ export function buildCommitmentInsight(
     category: 'commitments',
     headline: `Commitment completion: ${rate}%`,
     detail: `${completed} of ${pool.length} done in the last 30 days.${streakNote}`,
+    reasoning: `Based on ${pool.length} commitments tracked over the last 30 days. ${completed} marked complete.`,
     trend: rate >= 80 ? 'up' : rate >= 50 ? 'stable' : 'down',
     severity: rate >= 70 ? 'positive' : 'attention',
     metric: { current: rate, previous: 0, unit: '%' },
@@ -53,6 +54,7 @@ export function buildStreakInsight(
       : days >= 14
         ? `Two solid weeks in a row. Keep the momentum going.`
         : `Great consistency — you're building a lasting habit.`,
+    reasoning: `"${best.title}" has been completed every day for the last ${days} consecutive days.`,
     trend: 'up',
     severity: 'positive',
     metric: { current: days, previous: 0, unit: 'days' },
@@ -81,6 +83,7 @@ export function buildFamilyInsight(
     category: 'household',
     headline: `${familyTxns.length} shared transactions this month`,
     detail: `${formatCents(totalSpent, currency)} in shared account expenses.`,
+    reasoning: `Counted ${familyTxns.length} family-scoped transactions this month totalling ${formatCents(totalSpent, currency)}.`,
     trend: 'stable',
     severity: 'neutral',
     metric: { current: familyTxns.length, previous: 0, unit: 'transactions' },

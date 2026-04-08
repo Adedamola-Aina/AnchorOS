@@ -48,6 +48,7 @@ export function buildCorrelationInsight(
               ? ` This week is on track — you're in a high-completion week.`
               : ` This week's completion is at ${Math.round(currentCompletion * 100)}% — ` +
                 `worth watching your discretionary spend.`),
+    reasoning: `Analysed ${buckets.length} weeks of spending and commitment data. Compared ${highCompletion.length} high-completion weeks against ${lowCompletion.length} low-completion weeks.`,
     trend,
     severity: trend === 'up' ? 'positive' : 'attention',
     metric: {

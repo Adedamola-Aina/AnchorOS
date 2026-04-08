@@ -43,6 +43,7 @@ export function buildSpendingInsight(
     category: 'spending',
     headline: `Top spend this month: ${category}`,
     detail: `${formatCents(total, currency)} in ${category}${prevTotal > 0 ? ` — ${trend === 'up' ? '↑' : trend === 'down' ? '↓' : '≈'} vs last month (${formatCents(prevTotal, currency)})` : ''}.`,
+    reasoning: `Compared ${thisMonthExpenses.length} expenses this month against last month's ${category} total${prevTotal > 0 ? ` of ${formatCents(prevTotal, currency)}` : ''}.`,
     trend,
     severity: trend === 'up' ? 'attention' : 'neutral',
     metric: {
@@ -88,6 +89,7 @@ export function buildSavingsRateInsight(
       : savingsRate >= 0
         ? `You saved ${formatCents(savedCents, currency)} of ${formatCents(income, currency)} earned. Aim for 20% to build a buffer.`
         : `Your expenses outpaced your income this month. Review discretionary spending.`,
+    reasoning: `Calculated from ${formatCents(income, currency)} income minus ${formatCents(expenses, currency)} expenses this month.`,
     trend,
     severity: savingsRate >= 20 ? 'positive' : savingsRate >= 0 ? 'neutral' : 'attention',
     metric: { current: savingsRate, previous: 0, unit: '%' },
@@ -122,6 +124,7 @@ export function buildDayOfWeekInsight(
             (now.getDay() === highSpend.day
               ? `Today is ${highSpend.dayName} — worth being intentional.`
               : `Next ${highSpend.dayName}, consider tracking more closely.`),
+    reasoning: `Analysed spending by day of week over the last 30 days. ${highSpend.dayName} averaged ${pct}% above the daily mean.`,
     trend: 'stable',
     severity: 'attention',
     metric: { current: highSpend.value, previous: overallAvg, unit: currency },
@@ -149,6 +152,7 @@ export function buildSubscriptionInsight(
     detail: subs.length <= 4
       ? `${subs.map((s) => s.title).join(', ')}.`
       : `Including ${subs.slice(0, 3).map((s) => s.title).join(', ')} and ${subs.length - 3} more.`,
+    reasoning: `Found ${subs.length} active monthly recurring expense${subs.length === 1 ? '' : 's'} totalling ${formatCents(totalCents, currency)}.`,
     trend: 'stable',
     severity: 'neutral',
     metric: { current: Number((totalCents / 100).toFixed(2)), previous: 0, unit: currency },
