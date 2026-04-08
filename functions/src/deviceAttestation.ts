@@ -5,7 +5,6 @@
  * Currently validates the request came through App Check.
  * Future: integrate Play Integrity API (Android) and DeviceCheck API (iOS).
  */
-// @ts-nocheck
 
 import { HttpsError } from 'firebase-functions/v2/https';
 import { secureOnCall } from './callable';

@@ -51,6 +51,12 @@ const ALL_EXPORTS: string[] = [
     'syncBankAccountNow', 'monoWebhook',
     // Auth events
     'recordAuthEvent', 'reportUnrecognisedSignIn', 'dismissAuthEvent',
+    // Auth — session management
+    'listActiveSessions', 'revokeSession',
+    // Auth — email change sync
+    'syncEmailToProfile',
+    // Security — device attestation
+    'verifyDeviceAttestation',
     // Passkey
     'issuePasskeyChallenge', 'verifyPasskeyAssertion',
     'completePasskeyRegistration', 'deletePasskey',

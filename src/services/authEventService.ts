@@ -23,6 +23,8 @@ export interface AuthEvent {
     method?: 'password' | 'google' | 'apple' | 'passkey';
     /** True if user flagged this event as "Not me" (SEC-009) */
     reported?: boolean;
+    /** True if this sign-in was from a device not seen before (AUTH-008) */
+    newDevice?: boolean;
 }
 
 interface DeviceInfo {
@@ -103,6 +105,7 @@ export async function getAuthEvents(userId: string): Promise<AuthEvent[]> {
             ipHash: typeof event.ipHash === 'string' ? event.ipHash : 'unknown',
             method: (event.method as AuthEvent['method']) ?? 'password',
             reported: Boolean(event.reported),
+            newDevice: Boolean(event.newDevice),
         } as AuthEvent;
     });
 
@@ -124,6 +127,15 @@ export async function reportUnrecognisedSignIn(eventId: string): Promise<void> {
 export async function dismissAuthEvent(eventId: string): Promise<void> {
     const dismissFn = httpsCallable(functions, 'dismissAuthEvent');
     await dismissFn({ eventId });
+}
+
+/**
+ * Revoke a specific session (AUTH-003).
+ * Records a security audit log entry and removes the session event.
+ */
+export async function revokeSession(eventId: string): Promise<void> {
+    const revokeFn = httpsCallable(functions, 'revokeSession');
+    await revokeFn({ eventId });
 }
 
 export { parseUserAgent };

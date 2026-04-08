@@ -1,19 +1,18 @@
 /**
- * AuthEventHistory — SEC-009
+ * AuthEventHistory — SEC-009 / AUTH-003
  *
  * Shows the last 10 sign-in events for the current user with device info.
- * Lets the user report an unrecognised event which force-revokes all sessions.
+ * Lets the user report an unrecognised event which force-revokes all sessions,
+ * or dismiss (revoke) individual sessions from their history.
  */
-// @ts-nocheck
-
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Monitor, Smartphone, AlertTriangle, RefreshCw, X } from 'lucide-react';
+import { Monitor, Smartphone, AlertTriangle, RefreshCw, X, ShieldAlert } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotifications } from '../../../context/NotificationContext';
-import { getAuthEvents, reportUnrecognisedSignIn, dismissAuthEvent, type AuthEvent } from '../../../services/authEventService';
+import { getAuthEvents, reportUnrecognisedSignIn, revokeSession, type AuthEvent } from '../../../services/authEventService';
 import { captureError } from '../../../utils/error';
 
 function DeviceIcon({ os }: { os: string }) {
@@ -63,7 +62,7 @@ export const AuthEventHistory: React.FC = () => {
         setEvents(prev => prev.filter(e => e.id !== event.id));
         setDismissing(event.id);
         try {
-            await dismissAuthEvent(event.id);
+            await revokeSession(event.id);
         } catch (err) {
             // Roll back optimistic update on failure
             captureError(err, 'AuthEventHistory.dismiss');
@@ -133,9 +132,17 @@ export const AuthEventHistory: React.FC = () => {
                             >
                                 <DeviceIcon os={event.deviceInfo?.os ?? ''} />
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
-                                        {event.deviceInfo?.os ?? 'Unknown'} · {event.deviceInfo?.browser ?? 'Unknown'}
-                                    </p>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
+                                            {event.deviceInfo?.os ?? 'Unknown'} · {event.deviceInfo?.browser ?? 'Unknown'}
+                                        </p>
+                                        {event.newDevice && (
+                                            <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-full px-2 py-0.5 shrink-0">
+                                                <ShieldAlert className="w-3 h-3" />
+                                                New device
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-1">
                                         {formatTimestamp(event.timestamp)}
                                         {event.method ? <span>· {event.method}</span> : null}

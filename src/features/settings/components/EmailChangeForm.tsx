@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { Mail } from 'lucide-react';
 import { verifyBeforeUpdateEmail } from 'firebase/auth';

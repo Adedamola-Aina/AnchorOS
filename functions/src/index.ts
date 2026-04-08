@@ -77,6 +77,9 @@ export { syncEmailToProfile } from './emailChangeSync';
 // Device attestation (SEC-006)
 export { verifyDeviceAttestation } from './deviceAttestation';
 
+// Session management (AUTH-003)
+export { listActiveSessions, revokeSession } from './sessionManagement';
+
 // Passkey (WebAuthn) server-side challenge + assertion verification (GAP-011)
 export { issuePasskeyChallenge, verifyPasskeyAssertion } from './passkeyAuth';
 export { completePasskeyRegistration, deletePasskey } from './passkeyRegistration';

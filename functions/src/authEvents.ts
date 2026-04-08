@@ -4,8 +4,6 @@
  * SEC-009: Records each successful sign-in with device/IP context.
  * Provides "Not me" incident reporting that force-revokes all sessions.
  */
-// @ts-nocheck
-
 
 import { createHash } from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';

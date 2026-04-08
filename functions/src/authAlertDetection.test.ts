@@ -5,6 +5,11 @@ vi.mock('firebase-admin/auth', () => ({
   getAuth: () => ({ getUser: vi.fn().mockResolvedValue({ email: 'user@example.com' }) }),
 }));
 vi.mock('./helpers', () => ({ createAuditLog: vi.fn() }));
+vi.mock('./config', () => ({
+  getResend: () => ({ emails: { send: vi.fn().mockResolvedValue({ id: 'email-id' }) } }),
+  EMAIL_FROM: 'Anchor OS <noreply@example.com>',
+  APP_URL: 'https://anchor-os.web.app',
+}));
 
 describe('isNewDevice', () => {
   it('returns true for first-ever sign-in (no history)', () => {
@@ -52,5 +57,21 @@ describe('describeDevice', () => {
 
   it('returns Unknown device for empty string', () => {
     expect(describeDevice('')).toBe('Unknown device');
+  });
+
+  it('detects Android + Chrome', () => {
+    expect(describeDevice('Mozilla/5.0 (Linux; Android 12) Chrome/100')).toBe('Android on Chrome');
+  });
+
+  it('detects Windows + Edge', () => {
+    expect(describeDevice('Mozilla/5.0 (Windows NT 10.0) Edg/100')).toBe('Windows PC on Edge');
+  });
+
+  it('detects Linux + Firefox', () => {
+    expect(describeDevice('Mozilla/5.0 (X11; Linux x86_64; rv:100.0) Firefox/100')).toBe('Linux PC on Firefox');
+  });
+
+  it('returns os-only when browser is unrecognised', () => {
+    expect(describeDevice('Mozilla/5.0 (Mac OS X) OperaMini/7')).toBe('Mac');
   });
 });

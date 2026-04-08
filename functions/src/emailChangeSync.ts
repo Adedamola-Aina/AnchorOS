@@ -5,7 +5,6 @@
  * When a user changes their email via Firebase Auth (verifyBeforeUpdateEmail),
  * this callable updates the Firestore profile and related records.
  */
-// @ts-nocheck
 
 import { HttpsError } from 'firebase-functions/v2/https';
 import { getAuth } from 'firebase-admin/auth';

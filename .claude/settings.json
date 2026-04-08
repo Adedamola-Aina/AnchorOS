@@ -16,12 +16,16 @@
       "Bash(touch .claude/plan.lock)",
       "Bash(rm -f .claude/gather.lock)",
       "Bash(rm -f .claude/plan.lock)",
-      "Bash(rm -f .claude/gather.lock .claude/plan.lock)"
+      "Bash(rm -f .claude/gather.lock .claude/plan.lock)",
+      "Bash(echo \"Exit: $?\")"
     ],
     "deny": [
       "Bash(firebase deploy*)",
       "Bash(rm -rf /)*",
       "Read(.env*)"
+    ],
+    "additionalDirectories": [
+      "/root/anchor-os/.claude"
     ]
   },
   "hooks": {
