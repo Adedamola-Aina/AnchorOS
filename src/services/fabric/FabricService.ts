@@ -2,7 +2,7 @@ import type { AnchorAccount, AnchorTask, AnchorTransaction, FabricContext, Fabri
 import { BehavioralEngine } from './BehavioralEngine';
 import { getAmbientContext } from './AmbientContext';
 import { parseIntent } from './IntentParser';
-import { clearFabricData, persistPredictionState } from './fabricPersistence';
+import { clearFabricData, loadRecentConversationMessages, persistPredictionState } from './fabricPersistence';
 import { initializeFabricState } from './fabricServiceInitialization';
 import { applyPredictionDismissFeedback } from './fabricServicePredictionUtils';
 import { getProactiveQuestionText, resolveQuestionShownState } from './fabricServiceQuestionUtils';
@@ -128,9 +128,12 @@ export class FabricService implements IFabricService {
   }
 
   async query(input: string): Promise<FabricQueryResult> {
+    const context = this.activeUserId
+      ? await loadRecentConversationMessages(this.activeUserId, 4)
+      : undefined;
     return runQueryAndPersistConversation({
       rawInput: input,
-      intent: this.parseIntent(input),
+      intent: parseIntent(input, context),
       userId: this.activeUserId,
       enabled: this.enabled,
       transactions: this.transactions,

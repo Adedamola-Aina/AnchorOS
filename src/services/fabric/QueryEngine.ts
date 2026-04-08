@@ -13,6 +13,7 @@ import { fallbackQuery, navigateQuery } from './query/generalQueries';
 import { correlationQuery, dayOfWeekQuery, savingsRateQuery } from './query/insightQueries';
 import { momentumQuery } from './query/momentumQueries';
 import { planWeek, todayQuery, upcomingQuery } from './query/planningQueries';
+import { scenarioQuery } from './query/scenarioQueries';
 import type { RunFabricQueryInput } from './query/types';
 
 export function runFabricQuery(input: RunFabricQueryInput): FabricQueryResult {
@@ -33,6 +34,7 @@ export function runFabricQuery(input: RunFabricQueryInput): FabricQueryResult {
   if (action === 'query_upcoming') return upcomingQuery(input);
   if (action === 'plan_week') return planWeek(input);
   if (action === 'summarize_week') return weekSummary(input);
+  if (action === 'query_scenario') return scenarioQuery(input);
 
   if (action === 'navigate' && input.intent.entities.page) {
     return navigateQuery(input.intent);

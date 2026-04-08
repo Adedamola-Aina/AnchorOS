@@ -1,4 +1,5 @@
 import type { AnchorAccount, AnchorTask, AnchorTransaction, FabricMessage, Prediction, RecurringTransaction, WeeklyReport } from '../../types';
+import type { MonthlyReview } from './MonthlyReviewEngine';
 import { APP_ID } from '../../config/firebase';
 import { secureDb } from '../../utils/secureDb';
 import { db } from '../../config/firebase';
@@ -100,4 +101,20 @@ export async function appendFabricConversation(userId: string, userMessage: stri
     startedAt: existing?.startedAt ?? nowIso,
     updatedAt: nowIso,
   });
+}
+
+export interface MonthlyReflection {
+  month: string;
+  review: MonthlyReview;
+  answers: Record<string, string>;
+  savedAt: string;
+}
+
+export async function saveMonthlyReflection(userId: string, reflection: MonthlyReflection): Promise<void> {
+  await secureDb.setDocument(userId, ['fabric_monthly_reviews', reflection.month], reflection as unknown as Record<string, unknown>);
+}
+
+export async function loadMonthlyReflection(userId: string, month: string): Promise<MonthlyReflection | null> {
+  const doc = await secureDb.getDocument<MonthlyReflection>(userId, ['fabric_monthly_reviews', month]);
+  return doc ?? null;
 }

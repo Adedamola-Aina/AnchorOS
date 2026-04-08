@@ -53,6 +53,7 @@ export type IntentAction =
   | 'query_net_worth'
   | 'query_today'
   | 'query_upcoming'
+  | 'query_scenario'
   | 'plan_week'
   | 'summarize_week'
   | 'navigate'

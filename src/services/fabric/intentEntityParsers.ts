@@ -82,3 +82,12 @@ export function parseCategory(input: string): string | undefined {
   const words = normalized.replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(Boolean);
   return words.find((w) => w.length > 2 && !STOPWORDS.has(w));
 }
+
+/** Keyword-only category extraction (no fallback to arbitrary words). Used for context resolution. */
+export function extractContextCategory(input: string): string | undefined {
+  const normalized = input.toLowerCase();
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS) as [string, string[]][]) {
+    if (keywords.some((kw) => normalized.includes(kw.toLowerCase()))) return category;
+  }
+  return undefined;
+}

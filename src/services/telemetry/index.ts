@@ -105,7 +105,7 @@ export function logProductEvent(name: AnalyticsEventName, payload: Record<string
     const event = validateAnalyticsEvent({ name, payload });
     logEvent(`product.${event.name}`, {
         level: 'info',
-        attributes: event.payload,
+        attributes: { ...event.payload, ...experimentContext },
     });
 }
 
@@ -122,11 +122,24 @@ export function createTracer(featureName: string) {
     };
 }
 
+let experimentContext: Record<string, string> = {};
+
+export function setExperimentContext(assignments: Record<string, string>): void {
+    experimentContext = { ...assignments };
+    Sentry.setContext('experiments', experimentContext);
+}
+
+export function getExperimentContext(): Record<string, string> {
+    return { ...experimentContext };
+}
+
 export const TelemetryService = {
     trace,
     logEvent,
     logProductEvent,
     createTracer,
+    setExperimentContext,
+    getExperimentContext,
 };
 
 export default TelemetryService;

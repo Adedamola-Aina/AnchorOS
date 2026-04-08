@@ -28,6 +28,7 @@ const INTENT_RULES: IntentRule[] = [
   { action: 'query_today', priority: 75, test: (i) => /\b(what\s+(do\s+i\s+have|is\s+on|should\s+i\s+do)\s+today|today's?\s+(schedule|plan|tasks?|agenda)|what's?\s+today)\b/.test(i) },
   { action: 'query_upcoming', priority: 65, test: (i) => /\b(what's?\s+coming\s+up|upcoming\s+(bills?|payments?|expenses?)|due\s+soon|next\s+(bill|payment)|what\s+do\s+i\s+owe|remind\s+me)\b/.test(i) },
   { action: 'plan_week', priority: 78, test: (i) => /\b(plan\s+(my\s+)?week|week\s+(ahead|plan|overview|preview)|help\s+me\s+plan|what's?\s+(this|next)\s+week)\b/.test(i) },
+  { action: 'query_scenario', priority: 72, test: (i) => /\b(what\s+if|what\s+would\s+happen|if\s+i\s+(cut|reduce|stop|save|spend\s+less)|scenario|simulate|hypothetical)\b/.test(i) },
 ];
 
 export function detectAction(input: string): IntentAction {
@@ -57,6 +58,7 @@ export function confidenceFor(action: IntentAction): number {
     case 'query_net_worth':
     case 'query_today':
     case 'query_upcoming':
+    case 'query_scenario':
     case 'plan_week': return 0.8;
     default: return 0.2;
   }
