@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.0-rc.3](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.16.1...v1.17.0-rc.3) (2026-04-10)
+
+
+### Features
+
+* **auth:** complete auth sprint — AUTH-003 AUTH-006 AUTH-008 SEC-006 ARCH-025 ([557e8fd](https://github.com/Adedamola-Aina/AnchorOS/commit/557e8fd2d57d49eeddf51f9d02cb146d44607c2d))
+* **auth:** sprint 7 auth and security — AUTH-003 AUTH-006 AUTH-008 SEC-006 ([a12aabc](https://github.com/Adedamola-Aina/AnchorOS/commit/a12aabc09068dd1a663ef4a198bab735408c9d23))
+* **commitments:** sprint 6 commitments domain — COMM-007 COMM-001 COMM-002 FIN-014 ([7a9e5c3](https://github.com/Adedamola-Aina/AnchorOS/commit/7a9e5c32a6a57d879250567c79d9ada329cde407))
+* **fabric:** sprint 8 — insight reasoning, anomaly alerts, savings suggestions, goal projection ([8287957](https://github.com/Adedamola-Aina/AnchorOS/commit/8287957bcd2a03dde9e2b72cde587e33f71588e3))
+* **fabric:** sprint 9 — scenario modelling, conversation context, experiments, monthly review ([c8fc152](https://github.com/Adedamola-Aina/AnchorOS/commit/c8fc152064839084fb551f7ed248fdc936ebcd6f))
+* **finance:** sprint 5 product features — PRD-007 UX-036 COMM-006 PRD-010 ([ad74935](https://github.com/Adedamola-Aina/AnchorOS/commit/ad7493568e93069d2ecd99d3373dd8b78bf66e21))
+* **functions:** sprint 3 schema and migration foundation — ENG-003 DB-001 ARCH-025 BUG-025 ([20de8a6](https://github.com/Adedamola-Aina/AnchorOS/commit/20de8a65e83781347ab417bbdc2f89dac1af23e7))
+* **functions:** sprint 4 observability and measurement — ENG-007 SRE-004 SRE-005 DATA-003 ([7128292](https://github.com/Adedamola-Aina/AnchorOS/commit/71282921f30cea57811975e0e0286e6feb4c6e44))
+* **quality:** sprint 1 quality gate foundation — GAP-006 ARCH-024 DB-004 ARCH-027 ([9d0cafd](https://github.com/Adedamola-Aina/AnchorOS/commit/9d0cafdb1bd322cbeb9b8a09e55c14739fe8e012))
+* **quality:** sprint 2 code health and performance — GAP-010 GAP-008 PERF-006 PSE-003 ([b0e194d](https://github.com/Adedamola-Aina/AnchorOS/commit/b0e194d10d0b91aefcf41bc72cd22424d05d3c79))
+
+
+### Bug Fixes
+
+* **e2e:** stabilize nav and unblock staging pipeline ([8634a53](https://github.com/Adedamola-Aina/AnchorOS/commit/8634a53bf0343d2da7c27055c64fb9adec482764))
+* **fabric:** expand intent detection for natural transaction phrases ([2f819cd](https://github.com/Adedamola-Aina/AnchorOS/commit/2f819cde025ba99ea5b6ecb46a906555c3619819))
+
 ## [1.17.0-rc.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.16.1...v1.17.0-rc.2) (2026-04-10)
 
 
