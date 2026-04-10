@@ -213,10 +213,11 @@ test.describe('Finance - Transactions', () => {
         if (await openFirstAccount(page)) {
             // Look for delete button on transactions
             const deleteBtn = page.locator('button:has(svg.lucide-trash-2)').first();
-            await expect(
-                deleteBtn.or(page.locator('text=No transactions').first()).or(page.locator('text=History').first())
-                    .or(page.getByRole('heading', { name: 'Finance' }).first())
-            ).toBeVisible({ timeout: 10000 });
+            const hasDeleteButton = await deleteBtn.isVisible().catch(() => false);
+            const hasNoTransactions = await page.locator('text=No transactions').first().isVisible().catch(() => false);
+            const hasHistory = await page.locator('text=History').first().isVisible().catch(() => false);
+            const hasFinanceHeading = await page.getByRole('heading', { name: 'Finance' }).first().isVisible().catch(() => false);
+            expect(hasDeleteButton || hasNoTransactions || hasHistory || hasFinanceHeading).toBe(true);
             return;
         }
 
