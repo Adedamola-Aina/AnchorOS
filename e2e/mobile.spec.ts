@@ -111,7 +111,8 @@ test.describe('Mobile Viewport - Dashboard', () => {
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
             await dashboardBtn.click();
-            await page.waitForLoadState('networkidle');
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForTimeout(1200);
             // Charts should resize for mobile — check SVGs are in the DOM
             const chartCount = await page.locator('svg').count();
             expect(chartCount).toBeGreaterThan(0);

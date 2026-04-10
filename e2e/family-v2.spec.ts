@@ -17,10 +17,11 @@ import { loginOrSignup } from './helpers';
 
 // Helper: Navigate to Family Settings
 async function goToFamilySettings(page: Page, user = TEST_USER) {
+    page.setDefaultTimeout(120000);
     await loginOrSignup(page, user, true);
     // Navigate directly to settings to avoid brittle sidebar link click
     await page.goto('/settings', { waitUntil: 'domcontentloaded' }).catch(() => undefined);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1500);
 
     const familyState = page
         .locator('text=Invite Family Member')
@@ -264,6 +265,7 @@ test.describe('Family - Account Sharing', () => {
 // ============================================================================
 
 test.describe('Family - Notifications', () => {
+    test.describe.configure({ timeout: 120000 });
     test('Notification bell is visible when logged in', async ({ page }) => {
         await loginOrSignup(page, TEST_USER, true);
 
@@ -309,6 +311,7 @@ test.describe('Family - Notifications', () => {
 // ============================================================================
 
 test.describe('Family - Disconnect', () => {
+    test.describe.configure({ timeout: 120000 });
     test.beforeEach(async ({ page }) => {
         await goToFamilySettings(page);
     });

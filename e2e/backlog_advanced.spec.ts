@@ -164,9 +164,21 @@ test.describe('UI Content Stress', () => {
         }
         await page.waitForTimeout(1000);
 
-        await page.locator('input[placeholder*="Zenith"], input[placeholder*="Main Checking" i], input[placeholder*="e.g." i]').first().fill(longName);
-        await page.locator('input[placeholder="0.00"], input[inputmode="decimal"], input[name*="balance" i]').first().fill('1');
-        await page.getByRole('button', { name: /Create Account|Save Account|Create|Save/i }).first().click();
+        const modal = page.getByRole('dialog').last();
+        await expect(modal).toBeVisible({ timeout: 10000 });
+
+        await modal
+            .locator('input[placeholder*="Zenith"], input[placeholder*="Main Checking" i], input[placeholder*="e.g." i]')
+            .first()
+            .fill(longName);
+        await modal
+            .locator('input[placeholder="0.00"], input[inputmode="decimal"], input[name*="balance" i]')
+            .first()
+            .fill('1');
+
+        const submitButton = modal.getByRole('button', { name: /Create Account|Save Account|Save/i }).first();
+        await expect(submitButton).toBeVisible({ timeout: 5000 });
+        await submitButton.click();
 
         // Should show validation error
         await page.waitForTimeout(3000);
