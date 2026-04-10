@@ -15,8 +15,34 @@ interface ProcessResult {
     failed: number;
 }
 
+const memoryQueueStore = new Map<string, unknown>();
+
+async function safeGet<T>(key: string): Promise<T | undefined> {
+    try {
+        return await get<T>(key);
+    } catch {
+        return memoryQueueStore.get(key) as T | undefined;
+    }
+}
+
+async function safeSet<T>(key: string, value: T): Promise<void> {
+    try {
+        await set(key, value);
+    } catch {
+        memoryQueueStore.set(key, value);
+    }
+}
+
+async function safeDel(key: string): Promise<void> {
+    try {
+        await del(key);
+    } catch {
+        memoryQueueStore.delete(key);
+    }
+}
+
 async function readQueue(): Promise<QueueEntry[]> {
-    const data = await get<QueueEntry[]>(IDB_KEY);
+    const data = await safeGet<QueueEntry[]>(IDB_KEY);
     return Array.isArray(data) ? data : [];
 }
 
@@ -29,7 +55,7 @@ export async function enqueueTransaction(userId: string, payload: CreateTransact
         createdAt: new Date().toISOString(),
     };
     queue.push(entry);
-    await set(IDB_KEY, queue);
+    await safeSet(IDB_KEY, queue);
 }
 
 export async function getQueueLength(): Promise<number> {
@@ -54,7 +80,7 @@ export async function processQueue(
         }
     }
 
-    await set(IDB_KEY, failed);
+    await safeSet(IDB_KEY, failed);
     return { succeeded, failed: failed.length };
 }
 
@@ -84,12 +110,12 @@ export async function processQueueForUser(
         }
     }
 
-    await set(IDB_KEY, remaining);
+    await safeSet(IDB_KEY, remaining);
     return { succeeded, failed };
 }
 
 export async function clearQueue(): Promise<void> {
-    await del(IDB_KEY);
+    await safeDel(IDB_KEY);
 }
 
 // --- Task Toggle Offline Queue ---
@@ -105,7 +131,7 @@ export interface TaskQueueEntry {
 }
 
 async function readTaskQueue(): Promise<TaskQueueEntry[]> {
-    const data = await get<TaskQueueEntry[]>(TASK_QUEUE_KEY);
+    const data = await safeGet<TaskQueueEntry[]>(TASK_QUEUE_KEY);
     return Array.isArray(data) ? data : [];
 }
 
@@ -120,7 +146,7 @@ export async function enqueueTaskToggle(userId: string, taskId: string, currentS
         createdAt: new Date().toISOString(),
     };
     filtered.push(entry);
-    await set(TASK_QUEUE_KEY, filtered);
+    await safeSet(TASK_QUEUE_KEY, filtered);
 }
 
 export async function getTaskQueueLength(): Promise<number> {
@@ -145,7 +171,7 @@ export async function processTaskQueue(
         }
     }
 
-    await set(TASK_QUEUE_KEY, failed);
+    await safeSet(TASK_QUEUE_KEY, failed);
     return { succeeded, failed: failed.length };
 }
 
@@ -175,10 +201,10 @@ export async function processTaskQueueForUser(
         }
     }
 
-    await set(TASK_QUEUE_KEY, remaining);
+    await safeSet(TASK_QUEUE_KEY, remaining);
     return { succeeded, failed };
 }
 
 export async function clearTaskQueue(): Promise<void> {
-    await del(TASK_QUEUE_KEY);
+    await safeDel(TASK_QUEUE_KEY);
 }

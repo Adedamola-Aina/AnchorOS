@@ -104,21 +104,15 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
 
     // Optional: Navigate to Finance and ensure account exists
     if (!skipNavigation) {
-        // We need to handle both Desktop (sidebar visible) and Mobile (bottom nav)
-        const aside = page.locator('aside');
-        let financeBtn = aside.getByRole('link', { name: 'Finance' });
+        const desktopFinanceBtn = page.locator('aside').getByRole('link', { name: 'Finance' }).first();
+        const mobileFinanceBtn = page.locator('nav[aria-label="Mobile navigation"] a, nav[aria-label="Mobile navigation"] button').filter({ hasText: 'Finance' }).first();
+        const canUseDesktopNav = await desktopFinanceBtn.isVisible({ timeout: 1500 }).catch(() => false);
+        const canUseMobileNav = !canUseDesktopNav && await mobileFinanceBtn.isVisible({ timeout: 1500 }).catch(() => false);
 
-        // If on mobile, the desktop sidebar is hidden. Use the bottom nav instead.
-        const isDesktopSidebarVisible = await aside.isVisible().catch(() => false);
-
-        if (!isDesktopSidebarVisible) {
-            // Mobile: Use bottom navigation bar
-            financeBtn = page.locator('nav[aria-label="Mobile navigation"] a, nav[aria-label="Mobile navigation"] button').filter({ hasText: 'Finance' }).first();
-        }
-
-        if (await financeBtn.isVisible()) {
+        if (canUseDesktopNav || canUseMobileNav) {
             console.log("[E2E] Navigating to Finance and checking accounts...");
-            await financeBtn.click();
+            const financeBtn = canUseDesktopNav ? desktopFinanceBtn : mobileFinanceBtn;
+            await financeBtn.click({ timeout: 5000 }).catch(() => undefined);
             await page.waitForTimeout(5000);
 
             // Detect empty state

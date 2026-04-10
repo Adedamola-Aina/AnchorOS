@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as AuthContextExports from './context/auth';
-import * as UiExports from './libs/ui';
+import * as UiExports from '@anchor-os/ui';
 import * as FinanceComponentExports from './features/finance/components';
 import * as TransactionFormExports from './features/finance/components/transactionForm';
 

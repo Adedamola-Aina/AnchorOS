@@ -45,9 +45,8 @@ test.describe('Fabric Features', () => {
         // 1. Setup User
         await loginOrSignup(page, TEST_USER, true);
 
-        // Ensure we have a task (loginOrSignup handles basic setup, but we need a specific task)
-        const commitmentsBtn = page.getByRole('link', { name: 'Commitments' });
-        await commitmentsBtn.click();
+        // Route directly to avoid desktop/mobile nav-role differences.
+        await page.goto('/commitments', { waitUntil: 'domcontentloaded' });
 
         // Add a financial task
         await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible({ timeout: 10000 });

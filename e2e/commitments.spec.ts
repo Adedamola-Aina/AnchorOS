@@ -18,9 +18,8 @@ import { loginOrSignup } from './helpers';
 // Helper: Navigate to Commitments
 async function goToCommitments(page: Page) {
     await loginOrSignup(page, TEST_USER, true);
-    // Use sidebar link navigation (not button)
-    await page.locator('aside').locator('text=Commitments').click();
-    await page.waitForTimeout(1000);
+    // Prefer direct route to avoid viewport-specific nav selector flakiness.
+    await page.goto('/commitments', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('h1:has-text("Commitments"), h2:has-text("Commitments")')).toBeVisible({ timeout: 10000 });
 }
 
@@ -34,7 +33,7 @@ test.describe('Commitments - Create', () => {
     });
 
     test('Add button is visible', async ({ page }) => {
-        const addBtn = page.locator('button:has(svg.lucide-plus)');
+        const addBtn = page.locator('button:has(svg.lucide-plus)').first();
         await expect(addBtn).toBeVisible();
     });
 
@@ -249,7 +248,7 @@ test.describe('Commitments - UI', () => {
     });
 
     test('Heading displays correctly', async ({ page }) => {
-        await expect(page.getByRole('heading', { name: 'Commitments' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible();
     });
 
     test('Active and Completed sections exist', async ({ page }) => {

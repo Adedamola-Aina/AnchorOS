@@ -1,4 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Mock idb-keyval
+vi.mock('idb-keyval', () => ({
+    get: vi.fn(),
+    set: vi.fn(),
+    del: vi.fn(),
+}));
+
 import {
     enqueueTransaction,
     processQueue,
@@ -11,13 +19,6 @@ import {
     getTaskQueueLength,
     clearTaskQueue
 } from './offlineQueue';
-
-// Mock idb-keyval
-vi.mock('idb-keyval', () => ({
-    get: vi.fn(),
-    set: vi.fn(),
-    del: vi.fn(),
-}));
 
 import { get, set, del } from 'idb-keyval';
 

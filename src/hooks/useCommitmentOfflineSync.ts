@@ -5,6 +5,12 @@ import { toggleCommitmentCompletion } from '../api/CommitmentApi';
 import { TASK_KEYS } from './queries/useTaskQueries';
 import { enqueueTaskToggle, processTaskQueueForUser } from '../utils/offlineQueue';
 
+interface SyncCapableRegistration extends ServiceWorkerRegistration {
+    sync?: {
+        register: (tag: string) => Promise<void>;
+    };
+}
+
 export function useCommitmentOfflineSync(user: User | null) {
     const queryClient = useQueryClient();
 
@@ -35,8 +41,10 @@ export function useCommitmentOfflineSync(user: User | null) {
         if (!user) return false;
         await enqueueTaskToggle(user.uid, taskId, currentStatus);
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
-            const reg = await navigator.serviceWorker.ready;
-            await reg.sync.register('sync-task-toggles');
+            const reg = (await navigator.serviceWorker.ready) as SyncCapableRegistration;
+            if (reg.sync?.register) {
+                await reg.sync.register('sync-task-toggles');
+            }
         }
         return true;
     }, [user]);

@@ -13,12 +13,18 @@ const enc = FieldEncryption.fromEnv();
 
 export async function decryptTransactions(raw: AnchorTransaction[]): Promise<AnchorTransaction[]> {
     if (!enc.isEnabled()) return raw;
-    return Promise.all(raw.map(t => enc.decryptFields(t, ENCRYPTED_TRANSACTION_FIELDS)));
+    const decrypted = await Promise.all(
+        raw.map(t => enc.decryptFields(t as unknown as Record<string, unknown>, ENCRYPTED_TRANSACTION_FIELDS))
+    );
+    return decrypted as unknown as AnchorTransaction[];
 }
 
 export async function decryptAccounts(raw: AnchorAccount[]): Promise<AnchorAccount[]> {
     if (!enc.isEnabled()) return raw;
-    return Promise.all(raw.map(a => enc.decryptFields(a, ENCRYPTED_ACCOUNT_FIELDS)));
+    const decrypted = await Promise.all(
+        raw.map(a => enc.decryptFields(a as unknown as Record<string, unknown>, ENCRYPTED_ACCOUNT_FIELDS))
+    );
+    return decrypted as unknown as AnchorAccount[];
 }
 
 export async function fetchTransactionsPage(

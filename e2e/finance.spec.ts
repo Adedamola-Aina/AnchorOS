@@ -187,7 +187,9 @@ test.describe('Finance - Transactions', () => {
             await expect(backdatedBadge.first()).toBeVisible();
             return;
         }
-        await expect(txRows.first().or(page.getByRole('heading', { name: 'Finance' }).first())).toBeVisible({ timeout: 10000 });
+        const hasHistoryHeading = await txRows.first().isVisible().catch(() => false);
+        const hasFinanceHeading = await page.getByRole('heading', { name: 'Finance' }).first().isVisible().catch(() => false);
+        expect(hasHistoryHeading || hasFinanceHeading).toBe(true);
     });
 
     test('Search by description', async ({ page }) => {
@@ -225,10 +227,9 @@ test.describe('Finance - Transactions', () => {
             await expect(categoryIcons.first()).toBeVisible();
             return;
         }
-        await expect(
-            page.locator('text=Transactions').or(page.locator('text=History')).first()
-                .or(page.getByRole('heading', { name: 'Finance' }).first())
-        ).toBeVisible({ timeout: 10000 });
+        const hasHistoryHeading = await page.locator('text=Transactions').or(page.locator('text=History')).first().isVisible().catch(() => false);
+        const hasFinanceHeading = await page.getByRole('heading', { name: 'Finance' }).first().isVisible().catch(() => false);
+        expect(hasHistoryHeading || hasFinanceHeading).toBe(true);
     });
 });
 
@@ -295,10 +296,11 @@ test.describe('Finance - Transfers', () => {
     test('Transfer button exists in account detail', async ({ page }) => {
         if (await openFirstAccount(page)) {
             const transferBtn = page.locator('button:has-text("Transfer")');
-            await expect(
-                transferBtn.or(page.locator('text=History').first()).or(page.locator('text=Transactions').first())
-                    .or(page.getByRole('heading', { name: 'Finance' }).first())
-            ).toBeVisible({ timeout: 10000 });
+            const hasTransferButton = await transferBtn.first().isVisible().catch(() => false);
+            const hasHistoryHeading = await page.locator('text=History').first().isVisible().catch(() => false);
+            const hasTransactionsHeading = await page.locator('text=Transactions').first().isVisible().catch(() => false);
+            const hasFinanceHeading = await page.getByRole('heading', { name: 'Finance' }).first().isVisible().catch(() => false);
+            expect(hasTransferButton || hasHistoryHeading || hasTransactionsHeading || hasFinanceHeading).toBe(true);
             return;
         }
 

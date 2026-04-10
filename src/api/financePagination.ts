@@ -28,12 +28,14 @@ export function buildTransactionPageConstraints(
     return [...base, startAfter(cursor.date, cursor.id), limit(pageSize + 1)];
 }
 
-type TransactionWithCursor = { id: string; date?: string };
+type TransactionWithCursor = { id: string; date?: string | Date };
 
 export function sliceTransactionPage<T extends TransactionWithCursor>(rows: T[], pageSize: number): TransactionPageResult<T> {
     const hasMore = rows.length > pageSize;
     const page = hasMore ? rows.slice(0, pageSize) : rows;
     const last = page.length > 0 ? page[page.length - 1] : null;
-    const nextCursor = last?.date ? { date: last.date, id: last.id } : null;
+    const nextCursor = last?.date
+        ? { date: last.date instanceof Date ? last.date.toISOString() : last.date, id: last.id }
+        : null;
     return { page, hasMore, nextCursor };
 }

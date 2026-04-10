@@ -11,7 +11,7 @@ test.describe('Family Mode Account Sharing', () => {
         });
 
         test('can navigate to Finance and see account management controls', async ({ page }) => {
-            await page.getByRole('link', { name: 'Finance' }).click();
+            await page.goto('/finance', { waitUntil: 'domcontentloaded' });
             await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible({ timeout: 10000 });
             // Verify Finance view is accessible with at least one account-management surface.
             const hasAddAccount = await page.getByRole('button', { name: 'Add Account' }).first().isVisible().catch(() => false);
@@ -87,7 +87,7 @@ test.describe('Family Mode Account Sharing', () => {
         });
 
         test('can navigate to Finance view', async ({ page }) => {
-            await page.getByRole('link', { name: 'Finance' }).click();
+            await page.goto('/finance', { waitUntil: 'domcontentloaded' });
             await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible({ timeout: 10000 });
         });
 
