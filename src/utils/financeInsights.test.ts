@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { getWeeklySpending, detectRecurring, getCashFlowAnalysis, getAssetDistribution } from './financeInsights';
 import type { AnchorTransaction } from '../types';
-import { buildAccount, buildTransaction } from '../test/factories';
+import { buildAccount } from '../test/factories';
 
 describe('financeInsights', () => {
     const mockTxs: AnchorTransaction[] = [
@@ -392,4 +392,3 @@ describe('financeInsights', () => {
         });
     });
 });
-

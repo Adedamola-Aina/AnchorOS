@@ -7,8 +7,7 @@
  * @module services/FinanceService
  */
 
-import type { Firestore } from 'firebase/firestore';
-import { db } from '../utils/secureDb';
+import { db, type Firestore } from '../utils/secureDb';
 import { AccountService } from './AccountService';
 import { TransactionService } from './TransactionService';
 import type { AnchorAccount, AnchorTransaction } from '../types';

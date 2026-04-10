@@ -4,7 +4,7 @@
  * Layout: X/... header → Card → Balance strip → Monthly chart → Transaction history.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { AnchorAccount, AnchorTransaction } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
@@ -47,7 +47,7 @@ interface AccountDetailsViewProps {
 }
 
 export const AccountDetailsView = ({
-  account, onBack, onDelete, onShare, onAddTransaction, onEdit, familyMemberId,
+  account, onBack, onDelete, onShare: _onShare, onAddTransaction, onEdit, familyMemberId: _familyMemberId,
 }: AccountDetailsViewProps) => {
   const { transactions, deleteTransaction, updateAccountPersonalization, currentMonth } = useFinance();
   const { user } = useAuth();
@@ -70,13 +70,13 @@ export const AccountDetailsView = ({
   const { activities, loading: loadingActivities } = useAccountActivity({
     accountId: account.id, accountOwnerId: account.ownerId || user?.uid || '', enabled: isSharedAccount,
   });
-  const { accountTransactions, weeklyData, maxWeeklyAmount, monthlyBalance, filteredList, carryoverDividerIndex } =
+  const { accountTransactions, weeklyData, maxWeeklyAmount, monthlyBalance: _monthlyBalance, filteredList, carryoverDividerIndex } =
     useAccountTransactions(account, currentMonth, transactions, user?.uid, { searchQuery, filterType, selectedWeekStart });
 
-  const handleExportCsv = () => {
+  const handleExportCsv = useCallback(() => {
     logProductEvent('finance_transaction_exported', { accountId: account.id, transactionCount: filteredList.length });
     exportAccountCsv(account.name, filteredList, account.currency);
-  };
+  }, [account.id, account.name, account.currency, filteredList]);
 
   const handleColorSelect = async (color: string) => {
     if (!isOwner) { showToast('Only the account owner can change card personalization', 'error'); return; }
@@ -106,12 +106,12 @@ export const AccountDetailsView = ({
     } finally { setIsUploadingArtwork(false); }
   };
 
-  const handleSyncNow = async () => {
+  const handleSyncNow = useCallback(async () => {
     try {
       const r = await syncNow(account.id);
       showToast(`Synced ${r.transactionsAdded} transaction${r.transactionsAdded !== 1 ? 's' : ''}`, 'success');
     } catch { showToast('Bank sync failed — try again later', 'error'); }
-  };
+  }, [account.id, showToast, syncNow]);
 
   const actionItems = useMemo(() => {
     const items = [];
@@ -121,7 +121,7 @@ export const AccountDetailsView = ({
     if (account.source === 'linked') items.push({ label: isSyncing ? 'Syncing...' : 'Sync Now', icon: <RefreshCw className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />, onPress: handleSyncNow });
     if (onDelete && isOwner) items.push({ label: 'Delete Account', icon: <Trash2 className="w-5 h-5" />, destructive: true, onPress: onDelete });
     return items;
-  }, [isOwner, account.source, isSyncing, onDelete]);
+  }, [isOwner, account.source, isSyncing, onDelete, handleExportCsv, handleSyncNow, showToast]);
 
   return (
     <>

@@ -36,7 +36,6 @@ describe('MonthCalendarView', () => {
 
   it('highlights today', () => {
     render(<MonthCalendarView tasks={[]} onToggle={vi.fn()} />);
-    const today = new Date().getDate().toString();
     const todayEl = screen.getByTestId('calendar-today');
     expect(todayEl).toBeInTheDocument();
   });

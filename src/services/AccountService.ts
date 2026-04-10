@@ -13,6 +13,7 @@ import { canManageAccount } from '../features/finance/utils/permissions';
 import type { CreateAccountPayload } from './financeTypes';
 import { FieldEncryption, ENCRYPTED_ACCOUNT_FIELDS } from './FieldEncryption';
 import { updateAccountPersonalization as updatePersonalization } from './AccountPersonalizationService';
+import { enforceServerRateLimit } from './serverRateLimit';
 
 // Re-export types for backward compatibility
 export type { CreateAccountPayload } from './financeTypes';
@@ -29,6 +30,8 @@ export class AccountService {
 
     /** Add a new account */
     async addAccount(userId: string, payload: CreateAccountPayload): Promise<string> {
+        await enforceServerRateLimit('accountCreate', userId);
+
         // Rate limit: 10 accounts per 24 hours
         const rateCheck = checkRateLimit(`accountCreate:${userId}`, RATE_LIMIT_CONFIGS.accountCreate);
         if (rateCheck.isLimited) {

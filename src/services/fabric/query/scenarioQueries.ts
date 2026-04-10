@@ -30,6 +30,6 @@ export function scenarioQuery(input: RunFabricQueryInput): FabricQueryResult {
     summary: `If you cut ${catLabel} by ${percent}%, you'd save ~${saved} over ${result.projectionMonths} months.`,
     detail: `Baseline: ${formatCents(result.baseline.monthlyExpenseCents, currency)}/mo expenses → projected: ${formatCents(result.projected.monthlyExpenseCents, currency)}/mo. That's ${monthlySaved}/mo in extra savings.`,
     visualizable: true,
-    actions: [{ label: 'View spending', navigateTo: '/finance' }],
+    actions: [{ label: 'View spending', type: 'navigate' as const, payload: { path: '/finance' } }],
   };
 }

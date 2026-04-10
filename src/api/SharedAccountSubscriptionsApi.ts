@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { collection, doc, onSnapshot, orderBy, query, where } from 'firebase/firestore';
-import type { DocumentSnapshot, QuerySnapshot, DocumentData, FirestoreError } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
+import { collection, doc, onSnapshot, orderBy, query, where, db } from '../utils/secureDb';
+import type { DocumentSnapshot, QuerySnapshot, DocumentData, FirestoreError } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 import type { AnchorAccount, AnchorTransaction } from '../types';
 
 interface SharedAccountInfo {

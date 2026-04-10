@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ExperimentService, type ExperimentDefinition, type ExperimentVariant } from '../../services/experiments/ExperimentService';
+import { ExperimentService, type ExperimentDefinition, type ExperimentVariant } from '../services/experiments/ExperimentService';
 
 const DEFAULT_EXPERIMENTS: Record<string, ExperimentDefinition> = {};
 

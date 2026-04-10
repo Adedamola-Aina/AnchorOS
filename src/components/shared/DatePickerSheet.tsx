@@ -48,17 +48,17 @@ export const DatePickerSheet: React.FC<DatePickerSheetProps> = ({
   onToday,
   onClose,
 }) => {
-  const today = new Date();
   const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstDay = getFirstDayOfWeek(viewYear, viewMonth);
 
-  const isToday = useCallback(
-    (day: number) =>
+  const isToday = useCallback((day: number) => {
+    const today = new Date();
+    return (
       viewYear === today.getFullYear() &&
       viewMonth === today.getMonth() &&
-      day === today.getDate(),
-    [viewYear, viewMonth, today],
-  );
+      day === today.getDate()
+    );
+  }, [viewYear, viewMonth]);
 
   const isSelected = useCallback(
     (day: number) =>

@@ -5,8 +5,8 @@
 // @ts-nocheck
 
 
-import { collection, doc, writeBatch, serverTimestamp, getDoc, type FieldValue } from 'firebase/firestore';
-import { db, APP_ID } from '../config/firebase';
+import { collection, doc, writeBatch, serverTimestamp, getDoc, type FieldValue, db } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 import type { AnchorAccount, AnchorTask, TimeOfDay } from '../types';
 import { TITLES, ACCOUNT_NAMES, TASK_TITLES, CATEGORIES, DOMAINS, ACCOUNT_COLORS, randomDate, randomItem, secureRandomInt } from './seederData';
 

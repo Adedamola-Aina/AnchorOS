@@ -18,6 +18,7 @@ import { canAddTransaction, canDeleteTransaction } from '../features/finance/uti
 import { processTransferTransaction, processStandardTransaction } from './TransferOperations';
 import { updateTransaction as updateTransactionOp } from './TransactionUpdateOps';
 import type { CreateTransactionPayload, UpdateTransactionPayload } from './financeTypes';
+import { enforceServerRateLimit } from './serverRateLimit';
 
 // Re-export types for backward compatibility
 export type { CreateTransactionPayload, UpdateTransactionPayload } from './financeTypes';
@@ -34,6 +35,8 @@ export class TransactionService {
 
     /** Add a new transaction (handles transfers and standard transactions) */
     async addTransaction(userId: string, payload: CreateTransactionPayload, accounts: AnchorAccount[]): Promise<void> {
+        await enforceServerRateLimit('transactionCreate', userId);
+
         // Rate limit: 100 transactions per hour
         const rateCheck = checkRateLimit(`transactionCreate:${userId}`, RATE_LIMIT_CONFIGS.transactionCreate);
         if (rateCheck.isLimited) {

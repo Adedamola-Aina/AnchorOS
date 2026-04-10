@@ -5,8 +5,8 @@
  * Can be used in services and hooks without the React hook overhead.
  */
 
-import { db, APP_ID } from '../config/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { db, collection, addDoc } from '../utils/secureDb';
+import { APP_ID } from '../config/firebase';
 import type { ActivityAction, AccountActivity } from '../types/activity';
 import { createActivityEntry } from '../types/activity';
 
