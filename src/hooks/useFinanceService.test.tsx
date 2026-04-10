@@ -123,6 +123,10 @@ vi.mock('./useSharedAccounts', () => ({
   }))
 }));
 
+vi.mock('../services/serverRateLimit', () => ({
+  enforceServerRateLimit: vi.fn().mockResolvedValue(undefined),
+}));
+
 // 3. Test Data
 const mockUser: User = {
   uid: 'test-user-123',

@@ -23,6 +23,10 @@ vi.mock('../../features/finance/utils/permissions', () => ({
     canManageAccount: vi.fn((account, userId) => account.ownerId === userId),
 }));
 
+vi.mock('../serverRateLimit', () => ({
+    enforceServerRateLimit: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('AccountService', () => {
     let service: AccountService;
     let mockFirestore: any;

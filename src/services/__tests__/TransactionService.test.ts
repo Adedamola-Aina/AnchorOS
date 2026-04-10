@@ -32,6 +32,10 @@ vi.mock('../TransferOperations', () => ({
     processStandardTransaction: vi.fn(),
 }));
 
+vi.mock('../serverRateLimit', () => ({
+    enforceServerRateLimit: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('TransactionService', () => {
     let service: TransactionService;
     let mockFirestore: any;

@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+const loggerMock = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+}));
+
 vi.mock('firebase-functions', () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  logger: loggerMock,
 }));
 
 vi.mock('firebase-functions/v2/scheduler', () => ({
@@ -25,12 +31,15 @@ vi.mock('./config', () => ({
 import {
   evaluateQuotaThresholds,
   buildQuotaMetrics,
+  checkFirestoreQuota,
   type QuotaMetrics,
-  type QuotaAlert,
 } from './quotaMonitor';
 
 describe('quotaMonitor', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useRealTimers();
+  });
 
   describe('buildQuotaMetrics', () => {
     it('returns metrics with correct structure', () => {
@@ -102,7 +111,7 @@ describe('quotaMonitor', () => {
         storageBytes: 1_073_741_824,
       };
       const alerts = evaluateQuotaThresholds(metrics, limits);
-      expect(alerts.length).toBe(3); // reads, writes, storage
+      expect(alerts.length).toBe(3);
     });
 
     it('includes severity "critical" when above 95%', () => {
@@ -139,6 +148,91 @@ describe('quotaMonitor', () => {
       };
       const alerts = evaluateQuotaThresholds(metrics, limits);
       expect(alerts[0].severity).toBe('warning');
+    });
+  });
+
+  describe('checkFirestoreQuota', () => {
+    it('warns and stores zeroed metrics when usage source is missing', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-10T00:00:00.000Z'));
+      mockDb.get.mockResolvedValueOnce({ exists: false, data: () => null });
+
+      await checkFirestoreQuota();
+
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        '[QuotaMonitor] Missing daily_usage source document. Metrics may be stale.',
+        expect.objectContaining({
+          'monitoring.alert': true,
+          'monitoring.severity': 'warning',
+        }),
+      );
+      expect(mockDb.set).toHaveBeenCalledTimes(1);
+      expect(mockDb.doc).toHaveBeenCalledWith('2026-04-10T00-00-00-000Z');
+      expect(mockDb.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dailyReads: 0,
+          dailyWrites: 0,
+          dailyDeletes: 0,
+          storageBytes: 0,
+          collectedAt: '2026-04-10T00:00:00.000Z',
+        }),
+      );
+      expect(loggerMock.info).toHaveBeenCalledWith(
+        '[QuotaMonitor] All metrics within limits',
+        expect.any(Object),
+      );
+    });
+
+    it('normalizes invalid usage values, logs stale source, and stores alerts', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-10T12:00:00.000Z'));
+      mockDb.get.mockResolvedValueOnce({
+        exists: true,
+        data: () => ({
+          dailyReads: '49000',
+          dailyWrites: -5,
+          dailyDeletes: 25.8,
+          storageBytes: 'not-a-number',
+          updatedAt: '2026-04-09T00:00:00.000Z',
+        }),
+      });
+
+      await checkFirestoreQuota();
+
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        '[QuotaMonitor] daily_usage source appears stale.',
+        expect.objectContaining({
+          sourceAgeHours: 36,
+        }),
+      );
+
+      expect(mockDb.set).toHaveBeenCalledTimes(2);
+      expect(mockDb.set).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          dailyReads: 49_000,
+          dailyWrites: 0,
+          dailyDeletes: 25,
+          storageBytes: 0,
+        }),
+      );
+
+      const secondSetPayload = mockDb.set.mock.calls[1]?.[0] as {
+        alerts: Array<{ metric: string; severity: string; percentUsed: number }>;
+      };
+      expect(secondSetPayload.alerts).toHaveLength(1);
+      expect(secondSetPayload.alerts[0]).toMatchObject({
+        metric: 'dailyReads',
+        severity: 'critical',
+        percentUsed: 98,
+      });
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        '[QuotaMonitor] CRITICAL: dailyReads',
+        expect.objectContaining({
+          'monitoring.alert': true,
+          'monitoring.severity': 'critical',
+        }),
+      );
     });
   });
 });

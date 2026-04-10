@@ -133,6 +133,10 @@ vi.mock('./useFamilySharing', () => ({
     }))
 }));
 
+vi.mock('../services/serverRateLimit', () => ({
+    enforceServerRateLimit: vi.fn().mockResolvedValue(undefined),
+}));
+
 const mockUser: User = { uid: 'user-1', email: 'user@test.com', displayName: 'User 1' } as any;
 
 const createWrapper = () => {
