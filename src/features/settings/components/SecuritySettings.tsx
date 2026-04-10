@@ -16,7 +16,6 @@ import { MfaStep1GetApp, MfaStep2ScanQR, MfaStep3Verify } from './SecuritySettin
 import { PasswordChange } from './PasswordChange';
 import { PasskeySection } from './PasskeySection';
 import { AuthEventHistory } from './AuthEventHistory';
-import { SessionManagement } from './SessionManagement';
 import { EmailChangeForm } from './EmailChangeForm';
 
 interface SecuritySettingsProps {
@@ -101,7 +100,6 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
             </CardContent>
         </Card>
         <AuthEventHistory />
-        <SessionManagement />
         </>
     );
 };
