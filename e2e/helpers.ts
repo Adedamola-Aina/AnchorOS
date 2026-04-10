@@ -122,21 +122,35 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
             await page.waitForTimeout(5000);
 
             // Detect empty state
-            const noAccountsYet = page.locator('h3:has-text("No accounts yet")');
-            if (await noAccountsYet.isVisible()) {
-                console.log("[E2E] Creating initial account...");
-                await page.click('button:has-text("Create your first account")');
+            const noAccountsYet = page.locator('h3:has-text("No accounts yet"), text=No accounts yet').first();
+            const createFirstAccountCta = page.getByRole('button', { name: /Create your first account/i }).first();
+            const addAccountBtn = page.getByRole('button', { name: /Add Account/i }).first();
 
-                const form = page.locator('form').filter({ hasText: 'Account Name' });
+            if (await noAccountsYet.isVisible().catch(() => false) || await createFirstAccountCta.isVisible().catch(() => false) || await addAccountBtn.isVisible().catch(() => false)) {
+                console.log("[E2E] Creating initial account...");
+                if (await createFirstAccountCta.isVisible().catch(() => false)) {
+                    await createFirstAccountCta.click();
+                } else if (await addAccountBtn.isVisible().catch(() => false)) {
+                    await addAccountBtn.click();
+                }
+
+                const form = page.locator('form').filter({ hasText: /Account Name|Account/i });
                 await expect(form).toBeVisible({ timeout: 10000 });
 
-                await form.getByPlaceholder(/Zenith Spending/).fill('Checking');
-                await form.getByPlaceholder('0.00').fill('1000');
-                await form.locator('button[type="submit"]').click();
+                const nameInput = form.locator('input[placeholder*="Zenith"], input[placeholder*="Main Checking" i], input[placeholder*="e.g." i]').first();
+                await expect(nameInput).toBeVisible({ timeout: 5000 });
+                await nameInput.fill('Checking');
+
+                const amountInput = form.locator('input[placeholder="0.00"], input[inputmode="decimal"], input[name*="balance" i]').first();
+                await expect(amountInput).toBeVisible({ timeout: 5000 });
+                await amountInput.fill('1000');
+
+                const submitBtn = form.getByRole('button', { name: /Create Account|Save Account|Create|Save/i }).first();
+                await submitBtn.click();
 
                 await page.waitForTimeout(5000);
 
-                const accountCreated = page.locator('text=Checking').or(page.locator('text=Net Worth'));
+                const accountCreated = page.locator('text=Checking').or(page.locator('text=Net Worth')).or(page.getByRole('heading', { name: 'Finance' }));
                 await expect(accountCreated.first()).toBeVisible({ timeout: 20000 });
                 console.log("[E2E] Account setup complete.");
             }

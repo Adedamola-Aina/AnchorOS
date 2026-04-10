@@ -73,10 +73,16 @@ test.describe('Smoke Tests', () => {
             await expect(modal).toBeVisible({ timeout: 5000 });
             // Close modal
             await page.keyboard.press('Escape');
+            await expect(modal).not.toBeVisible({ timeout: 5000 });
+            return;
         }
 
-        // Test passes if we have accounts or add button
-        expect(true).toBe(true);
+        // If Add Account CTA is not visible, the page must still show account content.
+        await expect(
+            page.locator('[data-testid="account-card"]').first()
+                .or(page.locator('text=Net Worth').first())
+                .or(page.getByRole('heading', { name: 'Finance' }))
+        ).toBeVisible({ timeout: 10000 });
     });
 
     test('Logout works', async ({ page }) => {
@@ -97,10 +103,11 @@ test.describe('Smoke Tests', () => {
             // Should be back on auth page
             const authPage = page.locator('input[type="email"]');
             await expect(authPage).toBeVisible({ timeout: 10000 });
-        } else {
-            // If no sign out button visible, test still passes (UI may differ)
-            expect(true).toBe(true);
+            return;
         }
+
+        // If sign-out action is unavailable, at minimum ensure settings screen is stable.
+        await expect(page.getByRole('heading', { name: 'System' })).toBeVisible({ timeout: 10000 });
     });
 
     test('No console errors on main pages', async ({ page }) => {

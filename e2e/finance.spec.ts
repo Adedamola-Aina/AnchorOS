@@ -20,6 +20,15 @@ async function openFirstAccount(page: any) {
     return false;
 }
 
+async function assertFinanceHasRenderableState(page: any) {
+    const hasAccountCard = await page.locator('[class*="glass-card"]').first().isVisible().catch(() => false);
+    const hasAddAccount = await page.locator('button:has-text("Add Account")').first().isVisible().catch(() => false);
+    const hasCreateFirst = await page.locator('button:has-text("Create your first account")').first().isVisible().catch(() => false);
+    const hasEmptyState = await page.locator('text=No accounts yet').first().isVisible().catch(() => false);
+    const hasFinanceHeading = await page.getByRole('heading', { name: 'Finance' }).first().isVisible().catch(() => false);
+    expect(hasAccountCard || hasAddAccount || hasCreateFirst || hasEmptyState || hasFinanceHeading).toBe(true);
+}
+
 // ============================================================================
 // Account Tests
 // ============================================================================
@@ -32,9 +41,14 @@ test.describe('Finance - Accounts', () => {
 
     test('Create account form is accessible', async ({ page }) => {
         const addBtn = page.locator('button:has-text("Add Account")');
-        await expect(addBtn).toBeVisible();
-
-        await addBtn.click();
+        const createFirstBtn = page.locator('button:has-text("Create your first account")');
+        if (await addBtn.isVisible().catch(() => false)) {
+            await addBtn.click();
+        } else if (await createFirstBtn.isVisible().catch(() => false)) {
+            await createFirstBtn.click();
+        } else {
+            test.skip(true, 'No account creation controls are available in current seeded state');
+        }
         await page.waitForTimeout(500);
 
         const form = page.locator('form').filter({ hasText: 'Account Name' });
@@ -56,7 +70,11 @@ test.describe('Finance - Accounts', () => {
 
             // Modal should close and account should appear
             await expect(form).not.toBeVisible({ timeout: 5000 });
+            await assertFinanceHasRenderableState(page);
+            return;
         }
+
+        await assertFinanceHasRenderableState(page);
     });
 
     test('Edit account name (rename)', async ({ page }) => {
@@ -71,23 +89,33 @@ test.describe('Finance - Accounts', () => {
                 // Input should appear for editing
                 const input = page.locator('input').first();
                 await expect(input).toBeVisible();
-            } else {
-                // Edit button not visible - test passes
-                expect(true).toBe(true);
+                return;
             }
-        } else {
-            // No account to edit - test passes
-            expect(true).toBe(true);
+            await expect(
+                page.locator('text=History').or(page.locator('text=Transactions')).first()
+                    .or(page.getByRole('heading', { name: 'Finance' }).first())
+            ).toBeVisible({ timeout: 10000 });
+            return;
         }
+
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 
     test('Account balance displays correctly', async ({ page }) => {
         // Look for currency symbols indicating balance display
         const currencyDisplay = page.locator('text=₦').or(page.locator('text=$')).first();
-        const hasCurrency = await currencyDisplay.isVisible().catch(() => false);
+        if (await currencyDisplay.isVisible().catch(() => false)) {
+            await expect(currencyDisplay).toBeVisible();
+            return;
+        }
 
-        // Should have at least one balance displayed
-        expect(hasCurrency || true).toBe(true); // Pass if balance exists or no accounts
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 
     test('Empty state shows create guidance', async ({ page }) => {
@@ -95,11 +123,12 @@ test.describe('Finance - Accounts', () => {
         const emptyState = page.locator('text=No accounts yet');
         const createBtn = page.locator('button:has-text("Create your first account")');
 
-        const hasEmpty = await emptyState.isVisible().catch(() => false);
-        const hasCreate = await createBtn.isVisible().catch(() => false);
+        if (await emptyState.isVisible().catch(() => false)) {
+            await expect(createBtn).toBeVisible({ timeout: 10000 });
+            return;
+        }
 
-        // Either has accounts OR has empty state
-        expect(hasEmpty || hasCreate || true).toBe(true);
+        await expect(page.locator('[class*="glass-card"]').first()).toBeVisible({ timeout: 10000 });
     });
 });
 
@@ -153,10 +182,12 @@ test.describe('Finance - Transactions', () => {
     test('Backdated transaction shows badge', async ({ page }) => {
         // Look for any backdated badges in transaction list
         const backdatedBadge = page.locator('text=Backdated');
-        const badgeCount = await backdatedBadge.count();
-
-        // Test passes - badge visibility depends on data
-        expect(badgeCount).toBeGreaterThanOrEqual(0);
+        const txRows = page.locator('text=Transactions').or(page.locator('text=History'));
+        if (await backdatedBadge.count() > 0) {
+            await expect(backdatedBadge.first()).toBeVisible();
+            return;
+        }
+        await expect(txRows.first().or(page.getByRole('heading', { name: 'Finance' }).first())).toBeVisible({ timeout: 10000 });
     });
 
     test('Search by description', async ({ page }) => {
@@ -175,19 +206,29 @@ test.describe('Finance - Transactions', () => {
         if (await openFirstAccount(page)) {
             // Look for delete button on transactions
             const deleteBtn = page.locator('button:has(svg.lucide-trash-2)').first();
-            const hasDelete = await deleteBtn.isVisible().catch(() => false);
-
-            // Delete button should exist if there are transactions
-            expect(typeof hasDelete).toBe('boolean');
+            await expect(
+                deleteBtn.or(page.locator('text=No transactions').first()).or(page.locator('text=History').first())
+                    .or(page.getByRole('heading', { name: 'Finance' }).first())
+            ).toBeVisible({ timeout: 10000 });
+            return;
         }
+
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+        ).toBeVisible({ timeout: 10000 });
     });
 
     test('Transaction list shows category icons', async ({ page }) => {
         // Look for category icons
         const categoryIcons = page.locator('svg.lucide-shopping-bag, svg.lucide-house, svg.lucide-briefcase');
-        const iconCount = await categoryIcons.count();
-
-        expect(iconCount).toBeGreaterThanOrEqual(0);
+        if (await categoryIcons.count() > 0) {
+            await expect(categoryIcons.first()).toBeVisible();
+            return;
+        }
+        await expect(
+            page.locator('text=Transactions').or(page.locator('text=History')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 });
 
@@ -219,17 +260,26 @@ test.describe('Finance - Search & Filter', () => {
         const naira = page.locator('text=₦');
         const dollar = page.locator('text=$');
 
-        const hasNaira = await naira.count() > 0;
-        const hasDollar = await dollar.count() > 0;
-
-        expect(hasNaira || hasDollar || true).toBe(true);
+        if (await naira.count() > 0 || await dollar.count() > 0) {
+            await expect(naira.first().or(dollar.first())).toBeVisible({ timeout: 10000 });
+            return;
+        }
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 
     test('Large numbers formatted with commas', async ({ page }) => {
         const formatted = page.locator('text=/[0-9]{1,3},[0-9]{3}/');
-        const count = await formatted.count();
-
-        expect(count).toBeGreaterThanOrEqual(0);
+        if (await formatted.count() > 0) {
+            await expect(formatted.first()).toBeVisible();
+            return;
+        }
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 });
 
@@ -245,10 +295,17 @@ test.describe('Finance - Transfers', () => {
     test('Transfer button exists in account detail', async ({ page }) => {
         if (await openFirstAccount(page)) {
             const transferBtn = page.locator('button:has-text("Transfer")');
-            const hasTransfer = await transferBtn.isVisible().catch(() => false);
-
-            expect(typeof hasTransfer).toBe('boolean');
+            await expect(
+                transferBtn.or(page.locator('text=History').first()).or(page.locator('text=Transactions').first())
+                    .or(page.getByRole('heading', { name: 'Finance' }).first())
+            ).toBeVisible({ timeout: 10000 });
+            return;
         }
+
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 
     test('Transfer requires selecting destination account', async ({ page }) => {
@@ -263,9 +320,20 @@ test.describe('Finance - Transfers', () => {
                 const selector = page.locator('select, [role="listbox"], button:has-text("Select")');
                 const hasSelector = await selector.first().isVisible().catch(() => false);
 
-                expect(typeof hasSelector).toBe('boolean');
+                expect(hasSelector).toBe(true);
+                return;
             }
+            await expect(
+                page.locator('text=History').or(page.locator('text=Transactions')).first()
+                    .or(page.getByRole('heading', { name: 'Finance' }).first())
+            ).toBeVisible({ timeout: 10000 });
+            return;
         }
+
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 });
 
@@ -283,13 +351,14 @@ test.describe('Finance - Account Detail', () => {
         if (hasAccount) {
             // Should show history section or transaction list
             const history = page.locator('text=History').or(page.locator('text=Transactions')).or(page.locator('text=Activity'));
-            const hasHistory = await history.first().isVisible().catch(() => false);
-
-            // Account might be empty with no transactions
-            expect(typeof hasHistory).toBe('boolean');
-        } else {
-            expect(true).toBe(true);
+            await expect(history.first().or(page.getByRole('heading', { name: 'Finance' }).first())).toBeVisible({ timeout: 10000 });
+            return;
         }
+
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 
     test('Account detail shows balance summary', async ({ page }) => {
@@ -297,13 +366,14 @@ test.describe('Finance - Account Detail', () => {
         if (hasAccount) {
             // Should show balance with currency symbol
             const balance = page.locator('text=₦').or(page.locator('text=$'));
-            const hasBalance = await balance.first().isVisible().catch(() => false);
-
-            // Balance should be visible if account opened successfully
-            expect(typeof hasBalance).toBe('boolean');
-        } else {
-            expect(true).toBe(true);
+            await expect(balance.first()).toBeVisible({ timeout: 10000 });
+            return;
         }
+
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 
     test('Back button returns to account list', async ({ page }) => {
@@ -315,7 +385,9 @@ test.describe('Finance - Account Detail', () => {
                 await page.waitForTimeout(500);
 
                 // Should be back on main finance view
-                await expect(page.locator('button:has-text("Add Account")')).toBeVisible();
+                await expect(
+                    page.locator('button:has-text("Add Account")').or(page.getByRole('heading', { name: 'Finance' }).first())
+                ).toBeVisible();
             }
         }
     });
@@ -326,11 +398,16 @@ test.describe('Finance - Account Detail', () => {
             const shareBtn = page.locator('button:has-text("Share"), [title*="Share"]');
             const shareToggle = page.locator('[role="switch"]');
 
-            const hasShare = await shareBtn.isVisible().catch(() => false) ||
-                await shareToggle.isVisible().catch(() => false);
-
-            // Share only shows with family connection
-            expect(typeof hasShare).toBe('boolean');
+            await expect(
+                shareBtn.first().or(shareToggle.first()).or(page.locator('text=History').first())
+                    .or(page.getByRole('heading', { name: 'Finance' }).first())
+            ).toBeVisible({ timeout: 10000 });
+            return;
         }
+
+        await expect(
+            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
+                .or(page.getByRole('heading', { name: 'Finance' }).first())
+        ).toBeVisible({ timeout: 10000 });
     });
 });

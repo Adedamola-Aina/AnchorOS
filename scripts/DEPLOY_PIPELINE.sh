@@ -38,6 +38,7 @@ SKIP_E2E=false
 SKIP_TESTS=false
 SKIP_LINT=false
 SKIP_MUTATION=false
+SKIP_VERSION_BUMP=false
 YES=false
 
 while [[ $# -gt 0 ]]; do
@@ -65,6 +66,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-lint)
             SKIP_LINT=true
+            shift
+            ;;
+        --skip-version-bump)
+            SKIP_VERSION_BUMP=true
             shift
             ;;
         --yes|-y)
@@ -163,13 +168,17 @@ else
     fi
 fi
 # 2b. Version Bump (automatic per environment)
-echo -e "\n${YELLOW}📦 Stage 2b: Version Bump (${ENV})${NC}"
-if ./scripts/bump-version.sh --env="$ENV"; then
-    NEW_VERSION=$(node -p "require('./package.json').version")
-    echo -e "${GREEN}✅ Version bumped to ${NEW_VERSION}${NC}"
+if [[ "$SKIP_VERSION_BUMP" == true ]]; then
+    echo -e "\n${YELLOW}⏭️  Stage 2b: Version Bump Skipped (--skip-version-bump)${NC}"
 else
-    echo -e "${RED}❌ Version bump failed.${NC}"
-    exit 1
+    echo -e "\n${YELLOW}📦 Stage 2b: Version Bump (${ENV})${NC}"
+    if ./scripts/bump-version.sh --env="$ENV"; then
+        NEW_VERSION=$(node -p "require('./package.json').version")
+        echo -e "${GREEN}✅ Version bumped to ${NEW_VERSION}${NC}"
+    else
+        echo -e "${RED}❌ Version bump failed.${NC}"
+        exit 1
+    fi
 fi
 
 # 3. Build (with environment mode)

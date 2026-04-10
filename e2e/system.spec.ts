@@ -243,7 +243,8 @@ test.describe('System - Basic Performance', () => {
             await page.waitForTimeout(200);
         }
 
-        // If we get here without crash, test passes
-        expect(true).toBe(true);
+        // Verify core shell still renders after repeated navigation.
+        await expect(page.locator('aside')).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
     });
 });

@@ -139,7 +139,7 @@ test.describe('Mobile Viewport - Finance', () => {
             // Cards should stack vertically on mobile
             const cards = page.locator('[class*="glass-card"]');
             const cardCount = await cards.count();
-            expect(cardCount).toBeGreaterThanOrEqual(0);
+            expect(cardCount).toBeGreaterThan(0);
         } else {
             test.skip();
         }
@@ -216,6 +216,9 @@ test.describe('Dark Mode on Mobile', () => {
         const themeBtn = page.locator('button:has(svg.lucide-sun), button:has(svg.lucide-moon), button[title*="Theme"], button[aria-label*="Theme"]');
         const buttonCount = await themeBtn.count();
 
-        expect(buttonCount).toBeGreaterThanOrEqual(0); // Optional based on load state
+        if (buttonCount === 0) {
+            test.skip(true, 'Theme toggle is unavailable on this auth surface');
+        }
+        expect(buttonCount).toBeGreaterThan(0);
     });
 });

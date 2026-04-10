@@ -177,8 +177,9 @@ test.describe('Error Handling - Form Validation', () => {
         const value = await emailInput.inputValue();
         expect(value).toContain('<script>');
 
-        // No alert should appear - page should be safe
-        expect(true).toBe(true);
+        // No injected side effects should execute.
+        const xssExecuted = await page.evaluate(() => (window as unknown as { XSS_DETECTED?: boolean }).XSS_DETECTED === true);
+        expect(xssExecuted).toBe(false);
     });
 
     test('should handle special characters in password', async ({ page }) => {
@@ -236,7 +237,7 @@ test.describe('Error Handling - UI Edge Cases', () => {
             const body = page.locator('body');
             await expect(body).toBeVisible();
         } else {
-            expect(true).toBe(true);
+            test.skip(true, 'Main dashboard navigation is unavailable for this account state');
         }
     });
 
@@ -297,7 +298,7 @@ test.describe('Error Handling - Data Loading', () => {
             const financeHeading = page.getByRole('heading', { name: 'Finance' });
             await expect(financeHeading).toBeVisible();
         } else {
-            expect(true).toBe(true);
+            test.skip(true, 'Main dashboard navigation is unavailable for this account state');
         }
     });
 
@@ -318,9 +319,11 @@ test.describe('Error Handling - Data Loading', () => {
             const hasAddBtn = await addBtn.isVisible().catch(() => false);
             const hasEmpty = await emptyState.isVisible().catch(() => false);
 
-            expect(hasAddBtn || hasEmpty || true).toBe(true);
+            const financeHeading = page.getByRole('heading', { name: 'Finance' });
+            const hasHeading = await financeHeading.isVisible().catch(() => false);
+            expect(hasAddBtn || hasEmpty || hasHeading).toBe(true);
         } else {
-            expect(true).toBe(true);
+            test.skip(true, 'Main dashboard navigation is unavailable for this account state');
         }
     });
 });

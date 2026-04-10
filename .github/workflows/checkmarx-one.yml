@@ -26,12 +26,8 @@ permissions:
 jobs:
   preflight:
     runs-on: ubuntu-latest
-    outputs:
-      enabled: ${{ steps.evaluate.outputs.enabled }}
-      reason: ${{ steps.evaluate.outputs.reason }}
     steps:
       - name: Evaluate Checkmarx policy gate
-        id: evaluate
         env:
           CHECKMARX_ENABLED: ${{ vars.CHECKMARX_ENABLED }}
           CX_CLIENT_ID: ${{ secrets.CX_CLIENT_ID }}
@@ -40,9 +36,8 @@ jobs:
         run: |
           set -e
           if [[ "${CHECKMARX_ENABLED}" != "true" ]]; then
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "reason=disabled-by-variable" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "CHECKMARX_ENABLED must be true for PRs to master."
+            exit 1
           fi
 
           missing=""
@@ -51,18 +46,15 @@ jobs:
           [[ -z "${CX_TENANT}" ]] && missing="${missing} CX_TENANT"
 
           if [[ -n "${missing}" ]]; then
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "reason=missing-secrets:${missing# }" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "Missing Checkmarx secrets:${missing}"
+            exit 1
           fi
 
-          echo "enabled=true" >> "$GITHUB_OUTPUT"
-          echo "reason=ready" >> "$GITHUB_OUTPUT"
+          echo "Checkmarx preflight passed."
 
   # This workflow contains a single job called "build"
   build:
     needs: preflight
-    if: needs.preflight.outputs.enabled == 'true'
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -90,13 +82,3 @@ jobs:
         with:
           # Path to SARIF file relative to the root of the repository
           sarif_file: cx_result.sarif
-
-  skipped:
-    needs: preflight
-    if: needs.preflight.outputs.enabled != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Report Checkmarx skip reason
-        run: |
-          echo "Checkmarx scan skipped: ${{ needs.preflight.outputs.reason }}"
-          echo "Set repository variable CHECKMARX_ENABLED=true and configure CX_CLIENT_ID/CX_CLIENT_SECRET/CX_TENANT secrets to enable scanning."

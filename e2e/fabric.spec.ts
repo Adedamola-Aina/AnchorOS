@@ -75,9 +75,15 @@ test.describe('Fabric Features', () => {
         const uniqueTaskTitle = `Pay Electric Bill ${Date.now()}`;
         await taskInput.fill(uniqueTaskTitle);
 
-        // Touch other fields to assume interaction
-        await page.locator('select').selectOption('Work');
-        await page.getByRole('button', { name: 'Afternoon' }).click();
+        // Touch other fields to assume interaction (new UI avoids native <select>).
+        const workCategoryBtn = page.getByRole('button', { name: /^Work$/ }).first();
+        if (await workCategoryBtn.isVisible().catch(() => false)) {
+            await workCategoryBtn.click();
+        }
+        const afternoonBtn = page.getByRole('button', { name: 'Afternoon' }).first();
+        if (await afternoonBtn.isVisible().catch(() => false)) {
+            await afternoonBtn.click();
+        }
 
         // Save
         const saveBtn = page.getByRole('button', { name: 'Save Commitment' });

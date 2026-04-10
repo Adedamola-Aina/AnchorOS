@@ -33,7 +33,7 @@ test.describe('Family Mode Settings', () => {
     test('should display Family Mode section', async ({ page }) => {
         const settingsHeading = page.getByRole('heading', { name: 'System Settings' });
         if (!(await settingsHeading.isVisible().catch(() => false))) {
-            expect(true).toBe(true); return;
+            test.skip(true, 'System Settings page is not visible for current account state'); return;
         }
         await expect(page.locator('text=Invite Family Member').or(page.locator('text=Family Connected')).first()).toBeVisible();
     });
@@ -41,7 +41,7 @@ test.describe('Family Mode Settings', () => {
     test('should display Family Mode toggle', async ({ page }) => {
         const settingsHeading = page.getByRole('heading', { name: 'System Settings' });
         if (!(await settingsHeading.isVisible().catch(() => false))) {
-            expect(true).toBe(true); return;
+            test.skip(true, 'System Settings page is not visible for current account state'); return;
         }
         // Look for family section card
         const familySection = page.locator('text=Invite Family Member').or(page.locator('text=Family Connected')).first();
@@ -49,14 +49,18 @@ test.describe('Family Mode Settings', () => {
 
         // There should be some toggle or status indicator
         const toggle = page.locator('button:has-text("Personal"), button:has-text("Family")');
-        const visible = await toggle.count();
-        expect(visible).toBeGreaterThanOrEqual(0); // Toggle may be inside dropdown
+        const toggleVisible = await toggle.first().isVisible().catch(() => false);
+        const modeLabelVisible = await page.locator('text=Family Mode').first().isVisible().catch(() => false);
+        if (!toggleVisible && !modeLabelVisible) {
+            test.skip(true, 'Family toggle UI is not rendered for this account state');
+        }
+        expect(toggleVisible || modeLabelVisible).toBe(true);
     });
 
     test('should show Connect Spouse section', async ({ page }) => {
         const settingsHeading = page.getByRole('heading', { name: 'System Settings' });
         if (!(await settingsHeading.isVisible().catch(() => false))) {
-            expect(true).toBe(true); return;
+            test.skip(true, 'System Settings page is not visible for current account state'); return;
         }
         // Look for spouse connection UI - check for any related text
         const spouseTexts = [
@@ -89,8 +93,8 @@ test.describe('Spouse Invitation Flow', () => {
         // Check if we're on settings page first
         const settingsHeading = page.getByRole('heading', { name: 'System Settings' });
         if (!(await settingsHeading.isVisible().catch(() => false))) {
-            // Not on settings page (might be on email verify) - skip test assertion
-            expect(true).toBe(true);
+            // Not on settings page (might be on verification flow)
+            test.skip(true, 'System Settings page is not visible for current account state');
             return;
         }
 
@@ -167,8 +171,14 @@ test.describe('Account Sharing', () => {
         const shareCount = await shareButtons.count();
         const hasAccounts = await accountCards.isVisible().catch(() => false);
 
-        // Test passes if either we have share buttons or there are no accounts/spouse
-        expect(shareCount >= 0 || !hasAccounts).toBe(true);
+        if (!hasAccounts) {
+            test.skip(true, 'No account cards are visible in this environment');
+        }
+        const familyNotConnected = await page.locator('text=Invite Family Member').or(page.locator('text=Connect Family')).first().isVisible().catch(() => false);
+        if (shareCount === 0 && !familyNotConnected) {
+            test.skip(true, 'Sharing controls are not exposed for this account state');
+        }
+        expect(shareCount > 0 || familyNotConnected).toBe(true);
     });
 
     test('should open share modal when share button clicked', async ({ page }) => {
@@ -215,16 +225,17 @@ test.describe('Shared Accounts Display', () => {
         const sharedBadges = page.locator('text=Shared In').or(page.locator('text=Shared Out')).or(page.locator('text=Shared'));
         const badgeCount = await sharedBadges.count();
 
-        // Badge count depends on whether accounts are shared - test structure is valid
-        expect(badgeCount).toBeGreaterThanOrEqual(0);
+        if (badgeCount === 0) {
+            test.skip(true, 'No shared accounts are currently present for this test user');
+        }
+        expect(badgeCount).toBeGreaterThan(0);
     });
 
     test('should display accounts from spouse if shared', async ({ page }) => {
         // If spouse has shared accounts, they should appear
         // This is data-dependent but we verify the structure works
         const accountCards = page.locator('[class*="glass-card"]');
-        const hasCards = await accountCards.count();
-
-        expect(hasCards).toBeGreaterThanOrEqual(0);
+        const count = await accountCards.count();
+        expect(count).toBeGreaterThan(0);
     });
 });
