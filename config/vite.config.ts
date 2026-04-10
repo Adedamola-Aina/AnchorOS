@@ -115,7 +115,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': path.resolve(rootDir, 'src'),
-      '@anchor-os/ui': path.resolve(rootDir, 'src/libs/ui'),
+      '@anchor-os/ui': path.resolve(rootDir, 'packages/ui/src/index.ts'),
       '@anchor-os/types': path.resolve(rootDir, 'packages/types/src/index.ts'),
     },
   },

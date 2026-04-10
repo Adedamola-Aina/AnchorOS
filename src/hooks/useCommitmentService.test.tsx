@@ -98,10 +98,12 @@ vi.mock('firebase/firestore', () => ({
   runTransaction: firestoreMocks.runTransaction,
 }));
 
-// Mock offlineQueue
-const mockEnqueueTaskToggle = vi.fn();
-vi.mock('../utils/offlineQueue', () => ({
-  enqueueTaskToggle: (...args: unknown[]) => mockEnqueueTaskToggle(...args),
+// Mock commitment offline sync hook
+const mockEnqueueOfflineToggle = vi.fn();
+vi.mock('./useCommitmentOfflineSync', () => ({
+  useCommitmentOfflineSync: () => ({
+    enqueueOfflineToggle: (...args: unknown[]) => mockEnqueueOfflineToggle(...args),
+  }),
 }));
 
 // 3. Test Data
@@ -404,12 +406,12 @@ describe('useCommitmentService', () => {
 
   describe('Offline Toggle Resilience', () => {
     beforeEach(() => {
-      mockEnqueueTaskToggle.mockClear();
+      mockEnqueueOfflineToggle.mockClear();
     });
 
     it('should enqueue toggle when network error occurs', async () => {
       firestoreMocks.runTransaction.mockRejectedValueOnce(new Error('Failed to fetch'));
-      mockEnqueueTaskToggle.mockResolvedValue(undefined);
+      mockEnqueueOfflineToggle.mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useCommitmentService(mockUser), { wrapper: createWrapper() });
       await waitFor(() => expect(result.current.tasks).toBeDefined());
@@ -419,7 +421,7 @@ describe('useCommitmentService', () => {
         await result.current.toggleTask('task-123', false);
       });
 
-      expect(mockEnqueueTaskToggle).toHaveBeenCalledWith('test-user-123', 'task-123', false);
+      expect(mockEnqueueOfflineToggle).toHaveBeenCalledWith('task-123', false);
     });
 
     it('should throw non-network errors after rollback', async () => {
@@ -434,12 +436,12 @@ describe('useCommitmentService', () => {
         })
       ).rejects.toThrow('Permission denied');
 
-      expect(mockEnqueueTaskToggle).not.toHaveBeenCalled();
+      expect(mockEnqueueOfflineToggle).not.toHaveBeenCalled();
     });
 
     it('should enqueue on "unavailable" error message', async () => {
       firestoreMocks.runTransaction.mockRejectedValueOnce(new Error('service unavailable'));
-      mockEnqueueTaskToggle.mockResolvedValue(undefined);
+      mockEnqueueOfflineToggle.mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useCommitmentService(mockUser), { wrapper: createWrapper() });
       await waitFor(() => expect(result.current.tasks).toBeDefined());
@@ -448,7 +450,7 @@ describe('useCommitmentService', () => {
         await result.current.toggleTask('task-123', true);
       });
 
-      expect(mockEnqueueTaskToggle).toHaveBeenCalledWith('test-user-123', 'task-123', true);
+      expect(mockEnqueueOfflineToggle).toHaveBeenCalledWith('task-123', true);
     });
   });
 });

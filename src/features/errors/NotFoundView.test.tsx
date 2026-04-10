@@ -14,6 +14,7 @@ describe('NotFoundView', () => {
 
     expect(screen.getByText('Error 404')).toBeInTheDocument();
     expect(screen.getByText('Page not found')).toBeInTheDocument();
+    expect(screen.getByTestId('not-found-illustration')).toBeInTheDocument();
   });
 
   it('renders dashboard link', () => {

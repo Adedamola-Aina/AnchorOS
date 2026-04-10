@@ -1,11 +1,13 @@
 // @ts-nocheck
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Circle, Check, Pencil, Trash2 } from 'lucide-react';
 import { Badge, TaskContextBadge } from '../../../components/shared';
 import type { AnchorTask } from '../../../types';
 import { Card } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { getStreakMilestone, getStreakNudge } from '../utils/streakUtils';
+import { microMotion } from '../../../animations/microInteractions';
 
 interface TaskItemProps {
     task: AnchorTask;
@@ -71,9 +73,12 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                     {/* Checkbox Button with Animation */}
-                    <button
+                    <motion.button
                         onClick={handleToggle}
                         disabled={isAnimating}
+                        variants={microMotion.completionPop}
+                        initial="idle"
+                        animate={isAnimating ? 'complete' : 'idle'}
                         className={`relative min-w-11 min-h-11 flex items-center justify-center rounded-full shrink-0 ${isAnimating
                             ? 'bg-emerald-500 text-white scale-150 ring-4 ring-emerald-300 dark:ring-emerald-700 shadow-lg shadow-emerald-500/50'
                             : task.completed
@@ -95,7 +100,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                         ) : (
                             <Circle className="w-4 h-4" />
                         )}
-                    </button>
+                    </motion.button>
                     <div className="min-w-0 flex-1">
                         {/* Title row with streak inline */}
                         <div className="flex items-center gap-2">

@@ -6,7 +6,7 @@
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { collection, onSnapshot, where, orderBy, limit } from 'firebase/firestore';
+import { collection, onSnapshot, where, orderBy, limit, getDocs, startAfter } from 'firebase/firestore';
 import { FinanceApi } from './FinanceApi';
 
 describe('FinanceApi', () => {
@@ -193,6 +193,40 @@ describe('FinanceApi', () => {
         it('uses custom limit when provided', () => {
             api.searchTransactions('u1', { limit: 200 }, vi.fn(), vi.fn());
             expect(limit).toHaveBeenCalledWith(200);
+        });
+    });
+
+    // ── fetchTransactionsPage ───────────────────────────────────────
+    describe('fetchTransactionsPage', () => {
+        it('returns page with hasMore and next cursor when extra row exists', async () => {
+            vi.mocked(getDocs).mockResolvedValue({
+                docs: [
+                    { id: 'tx-3', data: () => ({ date: '2026-04-03', title: 'Three' }) },
+                    { id: 'tx-2', data: () => ({ date: '2026-04-02', title: 'Two' }) },
+                    { id: 'tx-1', data: () => ({ date: '2026-04-01', title: 'One' }) },
+                ],
+            } as any);
+
+            const result = await api.fetchTransactionsPage('u1', '2026-04-01', '2026-04-30', 2);
+
+            expect(result.page.map(tx => tx.id)).toEqual(['tx-3', 'tx-2']);
+            expect(result.hasMore).toBe(true);
+            expect(result.nextCursor).toEqual({ date: '2026-04-02', id: 'tx-2' });
+            expect(limit).toHaveBeenCalledWith(3);
+        });
+
+        it('uses cursor in subsequent page query', async () => {
+            vi.mocked(getDocs).mockResolvedValue({
+                docs: [{ id: 'tx-9', data: () => ({ date: '2026-04-09', title: 'Nine' }) }],
+            } as any);
+
+            await api.fetchTransactionsPage('u1', '2026-04-01', '2026-04-30', 20, {
+                date: '2026-04-10',
+                id: 'tx-10',
+            });
+
+            expect(startAfter).toHaveBeenCalledWith('2026-04-10', 'tx-10');
+            expect(limit).toHaveBeenCalledWith(21);
         });
     });
 });

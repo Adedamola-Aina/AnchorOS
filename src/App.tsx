@@ -21,12 +21,14 @@ import { EnvironmentBanner } from './components/shared/EnvironmentBanner';
 import { useVersionCheck } from './hooks/useVersionCheck';
 import { useAccessibility } from './hooks/useAccessibility';
 import { useIOSKeyboardFix } from './hooks/useIOSKeyboardFix';
+import { useAndroidBackButton } from './hooks/useAndroidBackButton';
 
 const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
   useLocation();
   useAccessibility(profile?.accessibility);
   useIOSKeyboardFix();
+  useAndroidBackButton();
 
   // Sync theme to root element with System support (PWA-006)
   React.useEffect(() => {

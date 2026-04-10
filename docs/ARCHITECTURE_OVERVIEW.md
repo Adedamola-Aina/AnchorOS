@@ -175,6 +175,12 @@ Developer ← Browser ← Tailscale ← React App (Dev) ← Firebase SDK ← Fir
 
 ## Frontend Architecture
 
+### Frontend Decision Records
+
+- ADR-0001: Shared component library (`@anchor-os/ui`)
+- ADR-0002: Anchor AI (Fabric 2.0) foundation
+- ADR-0003: Micro-frontend exploration (`ARCH-020`) — modular monolith now, federation-ready seams, defer runtime remotes
+
 ### Component Hierarchy
 
 ```

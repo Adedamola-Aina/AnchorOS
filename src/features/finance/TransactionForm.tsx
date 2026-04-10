@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { ArrowRightLeft, Wallet } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 import { getTransactionLabel } from '../../utils/finance';
@@ -17,6 +18,7 @@ import {
 } from './components/transactionForm';
 import { useTransactionSubmit } from './components/transactionForm/useTransactionSubmit';
 import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
+import { microMotion } from '../../animations/microInteractions';
 
 interface TransactionFormProps {
     onClose: () => void;
@@ -78,7 +80,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     const projectedBalance = (formState.type === 'expense' || formState.type === 'transfer') ? currentBalance - expenseAmount : currentBalance + expenseAmount;
     const isOverdraft = (formState.type === 'expense' || formState.type === 'transfer') && projectedBalance < 0;
 
-    const { isSubmitting, errors, setErrors, handleSubmit } = useTransactionSubmit({
+    const { isSubmitting, didJustSave, errors, setErrors, handleSubmit } = useTransactionSubmit({
         formState, amount, setAmount, transactionDate, setTransactionDate,
         isRecurring, setIsRecurring, frequency, interval,
         initialData, sourceAccount, isDifferentCurrency: !!isDifferentCurrency, onClose,
@@ -172,9 +174,16 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
                 <div className="flex justify-end gap-3 pt-2">
                     <button type="button" onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-sm">Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="bg-slate-800 dark:bg-slate-600 hover:bg-slate-900 dark:hover:bg-slate-500 text-white px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    <motion.button
+                        type="submit"
+                        disabled={isSubmitting}
+                        variants={microMotion.savePulse}
+                        initial="idle"
+                        animate={isSubmitting ? 'saving' : didJustSave ? 'done' : 'idle'}
+                        className="bg-slate-800 dark:bg-slate-600 hover:bg-slate-900 dark:hover:bg-slate-500 text-white px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                         {submitLabel}
-                    </button>
+                    </motion.button>
                 </div>
             </form>
         </div>

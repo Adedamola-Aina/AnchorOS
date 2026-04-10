@@ -20,19 +20,8 @@ import {
 } from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 import type { AnchorTransaction, AnchorAccount } from '../types';
-import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS, ENCRYPTED_ACCOUNT_FIELDS } from '../services/FieldEncryption';
-
-const enc = FieldEncryption.fromEnv();
-
-async function decryptTransactions(raw: AnchorTransaction[]): Promise<AnchorTransaction[]> {
-    if (!enc.isEnabled()) return raw;
-    return Promise.all(raw.map(t => enc.decryptFields(t, ENCRYPTED_TRANSACTION_FIELDS)));
-}
-
-async function decryptAccounts(raw: AnchorAccount[]): Promise<AnchorAccount[]> {
-    if (!enc.isEnabled()) return raw;
-    return Promise.all(raw.map(a => enc.decryptFields(a, ENCRYPTED_ACCOUNT_FIELDS)));
-}
+import type { TransactionPageCursor, TransactionPageResult } from './financePagination';
+import { decryptTransactions, decryptAccounts, fetchTransactionsPage as fetchTransactionsPageHelper } from './financeApiHelpers';
 
 export class FinanceApi {
     private static instance: FinanceApi;
@@ -133,6 +122,21 @@ export class FinanceApi {
             (error) => onError(error)
         );
     }
+
+    /**
+     * Fetch a single cursor-based page of transactions.
+     * Returns one extra row internally to determine whether more pages exist.
+     */
+    async fetchTransactionsPage(
+        userId: string,
+        start: string,
+        end: string,
+        pageSize: number,
+        cursor?: TransactionPageCursor
+    ): Promise<TransactionPageResult<AnchorTransaction>> {
+        return fetchTransactionsPageHelper(userId, start, end, pageSize, cursor);
+    }
+
     /**
      * Advanced transaction search utilizing server-side filtering
      * Requires composite indexes defined in firestore.indexes.json

@@ -25,6 +25,14 @@ describe('useIOSKeyboardFix', () => {
     document.documentElement.classList.remove('is-ios');
   });
 
+  const setStandalonePWA = () => {
+    Object.defineProperty(navigator, 'standalone', { value: true, configurable: true });
+    Object.defineProperty(window, 'matchMedia', {
+      value: () => ({ matches: true, addListener: () => { }, removeListener: () => { } }),
+      configurable: true,
+    });
+  };
+
   it('adds is-ios class on iOS devices', () => {
     setIOS();
     const { unmount } = renderHook(() => useIOSKeyboardFix());
@@ -80,5 +88,27 @@ describe('useIOSKeyboardFix', () => {
     expect(div.getAttribute('autocomplete')).toBeNull();
 
     document.body.removeChild(div);
+  });
+
+  it('temporarily demotes sibling fields in iOS PWA mode', async () => {
+    setIOS();
+    setStandalonePWA();
+    renderHook(() => useIOSKeyboardFix());
+
+    const form = document.createElement('form');
+    const first = document.createElement('input');
+    const second = document.createElement('input');
+    form.appendChild(first);
+    form.appendChild(second);
+    document.body.appendChild(form);
+
+    first.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(second.getAttribute('tabindex')).toBe('-1');
+
+    first.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 140));
+    expect(second.getAttribute('tabindex')).toBeNull();
+
+    document.body.removeChild(form);
   });
 });

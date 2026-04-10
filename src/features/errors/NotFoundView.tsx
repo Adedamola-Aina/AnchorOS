@@ -1,13 +1,14 @@
 // @ts-nocheck
 import { Link } from 'react-router-dom';
-import { Compass, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
+import { StateIllustration } from '../../components/illustrations';
 
 export default function NotFoundView() {
   return (
     <div className="h-full w-full flex items-center justify-center p-6">
       <div className="w-full max-w-lg text-center">
-        <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
-          <Compass className="w-8 h-8" />
+        <div className="mx-auto mb-2 flex justify-center">
+          <StateIllustration kind="not-found" className="w-44 h-28" testId="not-found-illustration" />
         </div>
         <p className="text-sm font-bold tracking-[0.2em] uppercase text-slate-400 mb-2">Error 404</p>
         <h1 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white mb-3">Page not found</h1>

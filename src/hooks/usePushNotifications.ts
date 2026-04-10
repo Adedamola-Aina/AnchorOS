@@ -14,6 +14,7 @@ import { getFcmTokenWithRetry } from '../services/fcmTokenService';
 import { captureError } from '../utils/error';
 import type { NotificationType } from '../context/NotificationContextDefinition';
 import { deleteStoredPushToken, upsertPushToken } from '../api/PushTokenApi';
+import { setAppBadgeCount } from '../utils/appBadge';
 
 const PUSH_DISABLED_KEY = 'anchor_push_disabled';
 
@@ -58,6 +59,11 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
 
         const unsubscribe = onMessage(messaging, (payload) => {
             if (import.meta.env.DEV) console.info('Foreground message received:', payload);
+            const badgeCountRaw = payload?.data?.badgeCount;
+            const badgeCount = badgeCountRaw != null ? Number.parseInt(String(badgeCountRaw), 10) : Number.NaN;
+            if (Number.isFinite(badgeCount)) {
+                void setAppBadgeCount(badgeCount);
+            }
             if (payload.notification) {
                 showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
             }

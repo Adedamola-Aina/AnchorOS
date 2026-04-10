@@ -1,8 +1,12 @@
 import React from 'react';
+import { StateIllustration } from '../../components/illustrations';
 
 export const FabricOnboarding: React.FC = () => {
   return (
     <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 space-y-4">
+      <div className="flex justify-center">
+        <StateIllustration kind="fabric" className="w-44 h-28" testId="fabric-onboarding-illustration" />
+      </div>
       <h2 className="text-lg font-bold text-slate-900 dark:text-white">Hey! I&apos;m Anchor AI.</h2>
       <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
         I&apos;m still learning about your patterns and preferences. The more you use Anchor,

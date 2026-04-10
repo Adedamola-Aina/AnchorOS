@@ -34,6 +34,7 @@ export function useFinanceOfflineSync(
 
     useEffect(() => {
         if (!user) return;
+        void flushOfflineQueue();
         const handleOnline = () => { void flushOfflineQueue(); };
         const handleSwMessage = (event: MessageEvent) => {
             if (event.data?.type === 'PROCESS_OFFLINE_QUEUE') void flushOfflineQueue();

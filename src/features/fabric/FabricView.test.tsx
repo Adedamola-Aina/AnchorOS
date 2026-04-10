@@ -83,6 +83,7 @@ describe('FabricView', () => {
     );
 
     expect(screen.getByText("Hey! I'm Anchor AI.")).toBeInTheDocument();
+    expect(screen.getByTestId('fabric-onboarding-illustration')).toBeInTheDocument();
   });
 
   it('renders free-text chat input', () => {

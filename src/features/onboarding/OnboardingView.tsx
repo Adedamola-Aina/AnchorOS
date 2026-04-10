@@ -23,6 +23,7 @@ import { OnboardingGoalStep } from './components/OnboardingGoalStep';
 import { OnboardingHabitStep } from './components/OnboardingHabitStep';
 import { GettingStartedSecurity } from './components/GettingStartedSecurity';
 import { OnboardingProgress } from './components/OnboardingProgress';
+import { StateIllustration } from '../../components/illustrations';
 
 const TOTAL_STEPS = 5;
 type AccountType = 'checking' | 'savings' | 'salary' | 'investment';
@@ -136,6 +137,9 @@ export const OnboardingView = () => {
   return (
     <div className="h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
       <div className="w-full max-w-lg">
+        <div className="mb-2 flex justify-center">
+          <StateIllustration kind="onboarding" className="w-52 h-32" testId="onboarding-illustration" />
+        </div>
         <OnboardingProgress currentStep={step} totalSteps={TOTAL_STEPS} />
 
         {step === 1 && (

@@ -14,6 +14,7 @@ describe('ServerErrorView', () => {
 
     expect(screen.getByText('Error 500')).toBeInTheDocument();
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.getByTestId('server-error-illustration')).toBeInTheDocument();
   });
 
   it('renders reload action button', () => {

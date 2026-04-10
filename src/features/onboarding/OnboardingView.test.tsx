@@ -138,6 +138,7 @@ describe('OnboardingView', () => {
         expect(screen.getByText('Welcome to Anchor OS.')).toBeInTheDocument();
         expect(screen.getByDisplayValue('Test Captain')).toBeInTheDocument();
         expect(screen.getByText("Let's Begin")).toBeInTheDocument();
+        expect(screen.getByTestId('onboarding-illustration')).toBeInTheDocument();
     });
 
     it('transitions to Step 2 (Account) on click', async () => {

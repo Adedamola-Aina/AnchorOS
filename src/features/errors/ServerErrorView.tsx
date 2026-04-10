@@ -1,13 +1,17 @@
 // @ts-nocheck
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { StateIllustration } from '../../components/illustrations';
 
 export default function ServerErrorView() {
   return (
     <div className="h-full w-full flex items-center justify-center p-6">
       <div className="w-full max-w-lg text-center">
-        <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-          <AlertCircle className="w-8 h-8" />
+        <div className="mx-auto mb-2 flex justify-center">
+          <StateIllustration kind="error" className="w-44 h-28" testId="server-error-illustration" />
+        </div>
+        <div className="mx-auto mb-3 w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+          <AlertCircle className="w-7 h-7" />
         </div>
         <p className="text-sm font-bold tracking-[0.2em] uppercase text-slate-400 mb-2">Error 500</p>
         <h1 className="text-h2 lg:text-h2-lg text-slate-900 dark:text-white mb-3">Something went wrong</h1>

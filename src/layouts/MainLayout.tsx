@@ -114,16 +114,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                     {children}
                 </div>
 
-                {/* Bottom Navigation - NEW, mobile only per M3.2 */}
-                {isMobile && <BottomNavigation accountColors={accountColors} anchorAIEnabled={anchorAIEnabled} />}
-
                 {/* PWA Install Prompt */}
                 <InstallPrompt />
             </main>
+
+            {/* Keep mobile bottom nav outside the scrolling container to avoid iOS fixed-position drift */}
+            {isMobile && <BottomNavigation accountColors={accountColors} anchorAIEnabled={anchorAIEnabled} />}
         </div>
     );
 };
 
 export default MainLayout;
-
 

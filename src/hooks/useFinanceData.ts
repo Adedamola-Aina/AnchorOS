@@ -131,6 +131,7 @@ export const useFinanceData = (user: User | null) => {
     const refetch = useCallback(async () => {
         await Promise.all([
             queryClient.refetchQueries({ queryKey: ['finance', 'transactions'] }),
+            queryClient.refetchQueries({ queryKey: ['finance', 'paginatedTransactions'] }),
             queryClient.refetchQueries({ queryKey: ['finance', 'recentTransactions'] }),
         ]);
     }, [queryClient]);

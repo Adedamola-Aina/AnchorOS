@@ -111,6 +111,7 @@ async function readTaskQueue(): Promise<TaskQueueEntry[]> {
 
 export async function enqueueTaskToggle(userId: string, taskId: string, currentStatus: boolean): Promise<void> {
     const queue = await readTaskQueue();
+    const filtered = queue.filter(entry => !(entry.userId === userId && entry.taskId === taskId));
     const entry: TaskQueueEntry = {
         id: crypto.randomUUID(),
         userId,
@@ -118,8 +119,8 @@ export async function enqueueTaskToggle(userId: string, taskId: string, currentS
         currentStatus,
         createdAt: new Date().toISOString(),
     };
-    queue.push(entry);
-    await set(TASK_QUEUE_KEY, queue);
+    filtered.push(entry);
+    await set(TASK_QUEUE_KEY, filtered);
 }
 
 export async function getTaskQueueLength(): Promise<number> {
@@ -146,6 +147,36 @@ export async function processTaskQueue(
 
     await set(TASK_QUEUE_KEY, failed);
     return { succeeded, failed: failed.length };
+}
+
+export async function processTaskQueueForUser(
+    userId: string,
+    processor: (entry: TaskQueueEntry) => Promise<void>,
+): Promise<ProcessResult> {
+    const queue = await readTaskQueue();
+    if (queue.length === 0) return { succeeded: 0, failed: 0 };
+
+    const remaining: TaskQueueEntry[] = [];
+    let succeeded = 0;
+    let failed = 0;
+
+    for (const entry of queue) {
+        if (entry.userId !== userId) {
+            remaining.push(entry);
+            continue;
+        }
+
+        try {
+            await processor(entry);
+            succeeded++;
+        } catch {
+            failed++;
+            remaining.push(entry);
+        }
+    }
+
+    await set(TASK_QUEUE_KEY, remaining);
+    return { succeeded, failed };
 }
 
 export async function clearTaskQueue(): Promise<void> {

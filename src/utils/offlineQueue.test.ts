@@ -1,5 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { enqueueTransaction, processQueue, processQueueForUser, getQueueLength, clearQueue, enqueueTaskToggle, processTaskQueue, getTaskQueueLength, clearTaskQueue } from './offlineQueue';
+import {
+    enqueueTransaction,
+    processQueue,
+    processQueueForUser,
+    getQueueLength,
+    clearQueue,
+    enqueueTaskToggle,
+    processTaskQueue,
+    processTaskQueueForUser,
+    getTaskQueueLength,
+    clearTaskQueue
+} from './offlineQueue';
 
 // Mock idb-keyval
 vi.mock('idb-keyval', () => ({
@@ -183,7 +194,7 @@ describe('taskOfflineQueue', () => {
             );
         });
 
-        it('appends to existing task queue entries', async () => {
+        it('appends to existing task queue entries for different tasks', async () => {
             const existing = [{ id: 'old-1', userId: 'user-1', taskId: 'task-1', currentStatus: false, createdAt: '2026-01-01' }];
             mockGet.mockResolvedValue(existing);
 
@@ -191,6 +202,21 @@ describe('taskOfflineQueue', () => {
 
             const savedQueue = mockSet.mock.calls[0][1] as Array<unknown>;
             expect(savedQueue).toHaveLength(2);
+        });
+
+        it('coalesces toggles for the same task and user', async () => {
+            const existing = [
+                { id: 'old-1', userId: 'user-1', taskId: 'task-42', currentStatus: false, createdAt: '2026-01-01' },
+                { id: 'old-2', userId: 'user-1', taskId: 'task-7', currentStatus: true, createdAt: '2026-01-01' },
+            ];
+            mockGet.mockResolvedValue(existing);
+
+            await enqueueTaskToggle('user-1', 'task-42', true);
+
+            const savedQueue = mockSet.mock.calls[0][1] as Array<{ userId: string; taskId: string; currentStatus: boolean }>;
+            expect(savedQueue).toHaveLength(2);
+            expect(savedQueue.filter(entry => entry.taskId === 'task-42')).toHaveLength(1);
+            expect(savedQueue.find(entry => entry.taskId === 'task-42')?.currentStatus).toBe(true);
         });
 
         it('assigns a unique id and timestamp to each entry', async () => {
@@ -268,6 +294,24 @@ describe('taskOfflineQueue', () => {
         it('removes all task entries from IndexedDB', async () => {
             await clearTaskQueue();
             expect(mockDel).toHaveBeenCalledWith('anchor_task_offline_queue');
+        });
+    });
+
+    describe('processTaskQueueForUser', () => {
+        it('processes only matching user entries and preserves others', async () => {
+            const entries = [
+                { id: '1', userId: 'user-1', taskId: 'task-1', currentStatus: false, createdAt: '2026-01-01' },
+                { id: '2', userId: 'user-2', taskId: 'task-2', currentStatus: true, createdAt: '2026-01-02' },
+            ];
+            mockGet.mockResolvedValue(entries);
+
+            const processor = vi.fn().mockResolvedValue(undefined);
+            const result = await processTaskQueueForUser('user-1', processor);
+
+            expect(processor).toHaveBeenCalledTimes(1);
+            expect(result.succeeded).toBe(1);
+            expect(result.failed).toBe(0);
+            expect(mockSet).toHaveBeenCalledWith('anchor_task_offline_queue', [entries[1]]);
         });
     });
 });

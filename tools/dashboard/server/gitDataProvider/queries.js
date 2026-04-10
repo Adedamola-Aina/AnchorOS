@@ -4,7 +4,7 @@
 const deploymentTracker = require('../deploymentTracker');
 const { getAllTrackedItems } = require('./tracker');
 const { isInitiativeType, sortKanbanLane, partitionFeatureBacklog } = require('./constants');
-const { loadRoadmap, roadmapBacklogItems } = require('./roadmap');
+const { loadRoadmap, enrichRoadmapInitiativesWithTrackedStatus, roadmapBacklogItems } = require('./roadmap');
 
 async function getDeployStatus() {
     return deploymentTracker.getDeploymentSummary();
@@ -25,12 +25,16 @@ const RAW_HASH_RE = /^[a-f0-9]{7}$/i;
 const isNamedItem = i => !RAW_HASH_RE.test(i.id);
 
 async function getKanbanData() {
-    const items = await getAllTrackedItems();
+    const items = await getAllTrackedItems(500);
     const roadmapData = loadRoadmap();
     const deferredIds = new Set(roadmapData.initiatives.filter(i => i.status === 'deferred').map(i => i.id));
     const activeItems = items.filter(i => !deferredIds.has(i.id));
     const namedItems = activeItems.filter(isNamedItem);
-    const backlog = roadmapBacklogItems(roadmapData, namedItems, deferredIds);
+    const enrichedRoadmapData = {
+        ...roadmapData,
+        initiatives: enrichRoadmapInitiativesWithTrackedStatus(roadmapData, namedItems)
+    };
+    const backlog = roadmapBacklogItems(enrichedRoadmapData, namedItems, deferredIds);
 
     const todo = sortKanbanLane(namedItems.filter(i => i.status === 'dev')
         .map(item => ({ ...item, lifecycle: item.lifecycle || 'todo', lifecycleReason: 'Commit detected in development branch ancestry' })));

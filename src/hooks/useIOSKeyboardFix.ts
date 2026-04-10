@@ -18,6 +18,8 @@
 // @ts-nocheck
 
 import { useEffect } from 'react';
+import { Keyboard } from '@capacitor/keyboard';
+import { isIOS as isCapacitorIOS, isNative, isPluginAvailable } from '../utils/platform';
 
 const isIOS = (): boolean => {
   if (typeof navigator === 'undefined') return false;
@@ -33,16 +35,37 @@ const isStandalonePWA = (): boolean => {
 
 export function useIOSKeyboardFix(): void {
   useEffect(() => {
+    // Hide iOS keyboard accessory bar (Prev/Next/Done) in native app.
+    // This is the strip shown above the keyboard across forms.
+    if (isNative() && isCapacitorIOS() && isPluginAvailable('Keyboard')) {
+      void Keyboard.setAccessoryBarVisible({ isVisible: false });
+    }
+
     if (!isIOS()) return;
 
     // Mark <html> so CSS can target iOS-specific overrides
     document.documentElement.classList.add('is-ios');
 
     const isPWA = isStandalonePWA();
+    let demotedInputs: Array<{ element: HTMLElement; previousTabIndex: string | null }> = [];
+
+    const isTextControl = (element: Element): element is HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement =>
+      element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement;
+
+    const restoreDemotedInputs = () => {
+      demotedInputs.forEach(({ element, previousTabIndex }) => {
+        if (previousTabIndex === null) {
+          element.removeAttribute('tabindex');
+        } else {
+          element.setAttribute('tabindex', previousTabIndex);
+        }
+      });
+      demotedInputs = [];
+    };
 
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
-      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
+      if (!isTextControl(target)) return;
 
       // Skip inputs that explicitly need autocomplete (passwords, emails)
       const autoCompleteValue = target.getAttribute('autocomplete');
@@ -61,23 +84,52 @@ export function useIOSKeyboardFix(): void {
         }
       }
 
-      // PWA-specific: break the toolbar attachment by blur+refocus micro-cycle
-      // This only runs once per focus event to prevent infinite loops
-      if (isPWA && !target.hasAttribute('data-ios-fixed')) {
+      if (!isPWA) return;
+
+      const parentForm = target.closest('form');
+      if (parentForm && !parentForm.hasAttribute('autocomplete')) {
+        parentForm.setAttribute('autocomplete', 'off');
+      }
+
+      restoreDemotedInputs();
+      const controls = Array.from(document.querySelectorAll('input, textarea, select'));
+      demotedInputs = controls
+        .filter((control) => control !== target && isTextControl(control))
+        .map((control) => {
+          const element = control as HTMLElement;
+          const previousTabIndex = element.getAttribute('tabindex');
+          element.setAttribute('tabindex', '-1');
+          return { element, previousTabIndex };
+        });
+
+      // PWA-only: encourage iOS to attach keyboard in single-field mode.
+      if ((target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) && !target.hasAttribute('data-ios-fixed')) {
         target.setAttribute('data-ios-fixed', 'true');
-        target.blur();
+        target.readOnly = true;
         requestAnimationFrame(() => {
+          target.readOnly = false;
           target.focus({ preventScroll: true });
-          // Clean up the marker after a short delay so it works on next focus
           setTimeout(() => target.removeAttribute('data-ios-fixed'), 300);
         });
       }
     };
 
+    const handleFocusOut = (e: FocusEvent) => {
+      if (!isPWA) return;
+      const next = e.relatedTarget;
+      if (next && isTextControl(next)) return;
+      setTimeout(() => {
+        restoreDemotedInputs();
+      }, 120);
+    };
+
     document.addEventListener('focusin', handleFocusIn, { passive: true });
+    document.addEventListener('focusout', handleFocusOut);
 
     return () => {
+      restoreDemotedInputs();
       document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
       document.documentElement.classList.remove('is-ios');
     };
   }, []);

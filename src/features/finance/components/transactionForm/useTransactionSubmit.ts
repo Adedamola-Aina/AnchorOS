@@ -58,6 +58,7 @@ export function useTransactionSubmit(options: UseTransactionSubmitOptions) {
     const { mutateAsync: createRecurring } = useCreateRecurringTransaction();
     const { showToast } = useNotifications();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [didJustSave, setDidJustSave] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
 
     const validate = useCallback(() => {
@@ -127,6 +128,8 @@ export function useTransactionSubmit(options: UseTransactionSubmitOptions) {
                 haptic.trigger('success');
                 showToast('Transaction recorded', 'success');
             }
+            setDidJustSave(true);
+            setTimeout(() => setDidJustSave(false), 450);
 
             await refetch();
             if (!initialData) {
@@ -151,5 +154,5 @@ export function useTransactionSubmit(options: UseTransactionSubmitOptions) {
         haptic, showToast
     ]);
 
-    return { isSubmitting, errors, setErrors, handleSubmit };
+    return { isSubmitting, didJustSave, errors, setErrors, handleSubmit };
 }

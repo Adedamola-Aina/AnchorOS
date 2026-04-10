@@ -29,6 +29,47 @@ function mapRoadmapInitiativeToType(initiative) {
     return 'feature';
 }
 
+function normalizeStatus(status) {
+    if (!status) return 'planned';
+    if (status === 'inProgress') return 'in-progress';
+    if (status === 'todo') return 'planned';
+    return status;
+}
+
+function deriveStatusFromTrackedItem(item) {
+    if (!item) return null;
+    if (item.status === 'deployed') return 'completed';
+    if (item.status === 'staging' || item.status === 'dev') return 'in-progress';
+    return null;
+}
+
+function enrichRoadmapInitiativesWithTrackedStatus(roadmapData, trackedItems) {
+    const trackedById = new Map((trackedItems || []).map(item => [String(item.id || '').toUpperCase(), item]));
+
+    return (roadmapData.initiatives || []).map(initiative => {
+        const id = String(initiative.id || '').toUpperCase();
+        const trackedItem = trackedById.get(id);
+        const currentStatus = normalizeStatus(initiative.status);
+
+        if (currentStatus === 'deferred') {
+            return { ...initiative, status: 'deferred', detectedFromGit: false };
+        }
+
+        const trackedStatus = deriveStatusFromTrackedItem(trackedItem);
+        if (!trackedStatus) {
+            return { ...initiative, status: currentStatus, detectedFromGit: false };
+        }
+
+        return {
+            ...initiative,
+            status: trackedStatus,
+            detectedFromGit: trackedStatus !== currentStatus,
+            matchedCommits: trackedItem.relatedCommits || (trackedItem.hash ? [trackedItem.hash] : []),
+            trackedStatus: trackedItem.status
+        };
+    });
+}
+
 function roadmapBacklogItems(roadmapData, activeItems, deferredIds) {
     const activeIds = new Set(activeItems.map(item => item.id.toUpperCase()));
     return (roadmapData.initiatives || [])
@@ -52,4 +93,10 @@ function roadmapBacklogItems(roadmapData, activeItems, deferredIds) {
         }));
 }
 
-module.exports = { loadRoadmap, getInitiativeTitle, mapRoadmapInitiativeToType, roadmapBacklogItems };
+module.exports = {
+    loadRoadmap,
+    getInitiativeTitle,
+    mapRoadmapInitiativeToType,
+    enrichRoadmapInitiativesWithTrackedStatus,
+    roadmapBacklogItems
+};

@@ -12,7 +12,7 @@ import {
   toggleCommitmentCompletion,
   updateCommitment,
 } from '../api/CommitmentApi';
-import { enqueueTaskToggle } from '../utils/offlineQueue';
+import { useCommitmentOfflineSync } from './useCommitmentOfflineSync';
 
 function isNetworkError(error: unknown): boolean {
   if (error instanceof Error) {
@@ -25,6 +25,7 @@ function isNetworkError(error: unknown): boolean {
 export const useCommitmentService = (user: User | null) => {
   const queryClient = useQueryClient();
   const { data: rawTasks = [], isLoading } = useTasksQuery(user?.uid);
+  const { enqueueOfflineToggle } = useCommitmentOfflineSync(user);
 
   // Lazy reset: auto-reset completed status and break streaks when cycle changes
   useCommitmentResetEffect(user, rawTasks);
@@ -122,7 +123,7 @@ export const useCommitmentService = (user: User | null) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.list(user.uid) });
 
       if (isNetworkError(error)) {
-        await enqueueTaskToggle(user.uid, id, currentStatus);
+        await enqueueOfflineToggle(id, currentStatus);
         return; // Queued for retry — don't throw
       }
       throw error;
@@ -132,7 +133,7 @@ export const useCommitmentService = (user: User | null) => {
     if (!currentStatus) {
       auditCommitments.completed(id);
     }
-  }, [user, queryClient]);
+  }, [user, queryClient, enqueueOfflineToggle]);
 
   const deleteTask = useCallback(async (id: string) => {
     if (!user) return;

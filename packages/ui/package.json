@@ -1,0 +1,25 @@
+{
+  "name": "@anchor-os/ui",
+  "version": "1.0.0",
+  "description": "Shared UI component library for Anchor OS",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["anchor-os", "ui", "components"],
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

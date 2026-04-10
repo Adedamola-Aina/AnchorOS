@@ -9,6 +9,7 @@ describe('EmptyState', () => {
     render(<EmptyState />);
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByText('Nothing here')).toBeInTheDocument();
+    expect(screen.getByTestId('empty-state-illustration')).toBeInTheDocument();
   });
 
   it('renders preset configuration', () => {

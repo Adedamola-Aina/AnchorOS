@@ -119,6 +119,15 @@ self.addEventListener('sync', (event) => {
             })
         );
     }
+    if (event.tag === 'sync-task-toggles') {
+        event.waitUntil(
+            self.clients.matchAll().then((clients) => {
+                clients.forEach((client) => {
+                    client.postMessage({ type: 'PROCESS_TASK_OFFLINE_QUEUE' });
+                });
+            })
+        );
+    }
 });
 
 // Fetch: Network-first for HTML/JS, Stale-While-Revalidate for static assets

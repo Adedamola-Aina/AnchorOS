@@ -82,4 +82,4 @@ export type { QueryConstraint, Unsubscribe, DocumentSnapshot, FieldValue, WriteB
 export { withTimeout, mapSecureDbError, getUserDocRef, getUserCollectionPath } from './secureDbCore';
 export { db } from '../config/firebase';
 // addDoc / setDoc / updateDoc / deleteDoc / doc / collection — exported for batch/transaction callers
-export { addDoc, setDoc, updateDoc, deleteDoc, doc, collection, getDocs, getDoc } from 'firebase/firestore';
+export { addDoc, setDoc, updateDoc, deleteDoc, doc, collection, getDocs, getDoc, startAfter, documentId } from 'firebase/firestore';

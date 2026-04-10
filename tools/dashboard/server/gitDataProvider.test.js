@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const gitDataProvider = require('./gitDataProvider');
+const { enrichRoadmapInitiativesWithTrackedStatus, roadmapBacklogItems } = require('./gitDataProvider/roadmap');
 
 describe('gitDataProvider initiative type grouping', () => {
     it('treats FIN items as initiative work', () => {
@@ -85,5 +86,52 @@ describe('gitDataProvider initiative type grouping', () => {
         expect(usedIds).toBeTypeOf('object');
         expect(Object.keys(usedIds).length).toBeGreaterThan(0);
         expect(Object.values(usedIds).every((entry) => entry instanceof Set)).toBe(true);
+    });
+});
+
+describe('roadmap status enrichment consistency', () => {
+    it('maps tracked deployment status to effective roadmap status', () => {
+        const roadmapData = {
+            initiatives: [
+                { id: 'BUG-105', title: 'Stack overflow', status: 'planned', priority: 'P1', team: 'Engineering' },
+                { id: 'FIN-016', title: 'Pagination', status: 'planned', priority: 'P1', team: 'Engineering' },
+                { id: 'SEC-010', title: 'Policy reacceptance', status: 'deferred', priority: 'P2', team: 'Security' }
+            ]
+        };
+        const tracked = [
+            { id: 'BUG-105', status: 'deployed', relatedCommits: ['abc1234'] },
+            { id: 'FIN-016', status: 'staging', relatedCommits: ['def5678'] },
+            { id: 'SEC-010', status: 'deployed', relatedCommits: ['zzz9999'] }
+        ];
+
+        const enriched = enrichRoadmapInitiativesWithTrackedStatus(roadmapData, tracked);
+        const byId = Object.fromEntries(enriched.map(item => [item.id, item]));
+
+        expect(byId['BUG-105'].status).toBe('completed');
+        expect(byId['BUG-105'].detectedFromGit).toBe(true);
+        expect(byId['FIN-016'].status).toBe('in-progress');
+        expect(byId['SEC-010'].status).toBe('deferred');
+    });
+
+    it('excludes non-planned enriched items from kanban backlog', () => {
+        const roadmapData = {
+            initiatives: [
+                { id: 'BUG-105', title: 'Stack overflow', status: 'planned', priority: 'P1', team: 'Engineering' },
+                { id: 'FIN-016', title: 'Pagination', status: 'planned', priority: 'P1', team: 'Engineering' },
+                { id: 'PLT-007', title: 'Offline queue', status: 'planned', priority: 'P1', team: 'Engineering' }
+            ]
+        };
+        const tracked = [
+            { id: 'BUG-105', status: 'deployed' },
+            { id: 'FIN-016', status: 'staging' }
+        ];
+
+        const enriched = {
+            ...roadmapData,
+            initiatives: enrichRoadmapInitiativesWithTrackedStatus(roadmapData, tracked)
+        };
+
+        const backlog = roadmapBacklogItems(enriched, tracked, new Set());
+        expect(backlog.map(item => item.id)).toEqual(['PLT-007']);
     });
 });

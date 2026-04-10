@@ -16,6 +16,7 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
+import { StateIllustration, type IllustrationKind } from '../illustrations';
 import { 
   Inbox, 
   Target, 
@@ -55,6 +56,8 @@ interface EmptyStateProps {
   className?: string;
   /** Icon accent color (Tailwind class) */
   accentColor?: string;
+  /** Optional custom illustration variant */
+  illustration?: IllustrationKind;
 }
 
 const presets: Record<EmptyStatePreset, {
@@ -122,6 +125,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   onAction,
   className = '',
   accentColor,
+  illustration,
 }) => {
   // Use preset if provided, allow overrides
   const presetConfig = preset ? presets[preset] : null;
@@ -130,16 +134,21 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   const message = customMessage || presetConfig?.message || '';
   const accent = accentColor || presetConfig?.accent || 'text-slate-400';
 
+  const illustrationKind = illustration || (preset === 'no-search-results' ? 'not-found' : 'empty');
+
   return (
     <div 
       className={`flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in-95 duration-500 ${className}`}
       role="status"
       aria-label={title}
     >
-      {/* Icon with gradient background */}
+      {/* Illustration + icon */}
       <div className="relative mb-5">
-        <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-full flex items-center justify-center shadow-sm">
-          <Icon className={`w-10 h-10 ${accent} opacity-80`} strokeWidth={1.5} />
+        <StateIllustration kind={illustrationKind} className="w-36 h-24 opacity-90" testId="empty-state-illustration" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-14 h-14 bg-white/85 dark:bg-slate-900/85 rounded-full flex items-center justify-center shadow-sm">
+            <Icon className={`w-7 h-7 ${accent} opacity-90`} strokeWidth={1.7} />
+          </div>
         </div>
       </div>
 

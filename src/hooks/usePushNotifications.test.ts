@@ -36,11 +36,15 @@ vi.mock('../api/PushTokenApi', () => ({
     upsertPushToken: vi.fn(),
     deleteStoredPushToken: vi.fn(),
 }));
+vi.mock('../utils/appBadge', () => ({
+    setAppBadgeCount: vi.fn(),
+}));
 
 import { deleteToken, onMessage } from 'firebase/messaging';
 import { deleteStoredPushToken, upsertPushToken } from '../api/PushTokenApi';
 import { getFcmTokenWithRetry } from '../services/fcmTokenService';
 import { captureError } from '../utils/error';
+import { setAppBadgeCount } from '../utils/appBadge';
 import { usePushNotifications } from './usePushNotifications';
 
 describe('usePushNotifications', () => {
@@ -97,6 +101,25 @@ describe('usePushNotifications', () => {
         });
 
         expect(showToast).toHaveBeenCalledWith('Heads up: Reminder due soon', 'info');
+    });
+
+    it('updates app badge from foreground data payload', async () => {
+        const showToast = vi.fn();
+        renderHook(() => usePushNotifications({ showToast }));
+
+        await waitFor(() => {
+            expect(mockState.onMessageCallback).toBeDefined();
+        });
+
+        act(() => {
+            mockState.onMessageCallback?.({
+                data: {
+                    badgeCount: '4',
+                },
+            });
+        });
+
+        expect(setAppBadgeCount).toHaveBeenCalledWith(4);
     });
 
     it('disables notifications when currently granted and token exists', async () => {

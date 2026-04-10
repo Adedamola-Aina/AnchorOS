@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Landmark, Link2 } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 import type { AnchorAccount, Currency } from '../../types';
@@ -10,6 +11,7 @@ import { captureError } from '../../utils/error';
 import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 import { LinkBankAccount } from './components/LinkBankAccount';
 import { PopoverMenu, SegmentedControl } from '../../components/shared';
+import { microMotion } from '../../animations/microInteractions';
 
 type AccountMode = 'manual' | 'link';
 
@@ -79,7 +81,12 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="bg-slate-50 dark:bg-slate-800 p-1 rounded-xl">
+        <motion.div
+            variants={microMotion.createSlideIn}
+            initial="hidden"
+            animate="visible"
+            className="bg-slate-50 dark:bg-slate-800 p-1 rounded-xl"
+        >
             <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                 <Landmark className="w-5 h-5" /> Setup New Account
             </h3>
@@ -169,6 +176,6 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
                 </div>
             </form>
             )}
-        </div>
+        </motion.div>
     );
 };

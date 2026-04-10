@@ -7,6 +7,7 @@ export { TaskContext };
 
 import { useTaskReminders } from '../hooks/useTaskReminders';
 import { useFabricContext } from './FabricContext';
+import { useCommitmentBadge } from '../hooks/useCommitmentBadge';
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user } = useAuth();
@@ -15,6 +16,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const commitmentService = useCommitmentService(user);
     useTaskReminders(commitmentService.tasks);
+    useCommitmentBadge({ userId: user?.uid, tasks: commitmentService.tasks });
 
     const toggleTaskWithHaptic = useCallback(async (id: string, currentStatus: boolean) => {
         await commitmentService.toggleTask(id, currentStatus);

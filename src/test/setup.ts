@@ -88,6 +88,8 @@ vi.mock('firebase/firestore', () => ({
     query: vi.fn((ref, ...constraints) => ({ ...ref, _constraints: constraints })),
     where: vi.fn((...args) => ({ type: 'where', args })),
     orderBy: vi.fn((...args) => ({ type: 'orderBy', args })),
+    startAfter: vi.fn((...args) => ({ type: 'startAfter', args })),
+    documentId: vi.fn(() => '__name__'),
     onSnapshot: vi.fn(() => () => { }),
     limit: vi.fn((n) => ({ type: 'limit', n })),
     enableIndexedDbPersistence: vi.fn(() => Promise.resolve()),

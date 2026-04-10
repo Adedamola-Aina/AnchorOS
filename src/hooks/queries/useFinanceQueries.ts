@@ -6,10 +6,11 @@
 // @ts-nocheck
 
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { financeApi } from '../../api/FinanceApi';
 import type { AnchorTransaction, AnchorAccount } from '../../types';
+import type { TransactionPageCursor } from '../../api/financePagination';
 
 export const FINANCE_KEYS = {
     all: ['finance'] as const,
@@ -17,6 +18,8 @@ export const FINANCE_KEYS = {
         [...FINANCE_KEYS.all, 'transactions', userId, { start, end }] as const,
     recentTransactions: (userId: string, limitCount: number) =>
         [...FINANCE_KEYS.all, 'recentTransactions', userId, limitCount] as const,
+    paginatedTransactions: (userId: string, start: string, end: string, pageSize: number) =>
+        [...FINANCE_KEYS.all, 'paginatedTransactions', userId, { start, end, pageSize }] as const,
     accounts: (userId: string) =>
         [...FINANCE_KEYS.all, 'accounts', userId] as const,
 };
@@ -25,34 +28,24 @@ export const FINANCE_KEYS = {
  * Query own transactions for a date range
  */
 export const useTransactionsQuery = (userId: string | undefined, start: string, end: string) => {
-    const queryClient = useQueryClient();
-    const queryKey = useMemo(
-        () => FINANCE_KEYS.transactions(userId || '', start, end),
-        [userId, start, end]
+    const paged = useInfiniteTransactionsQuery(userId, start, end, 200, !!userId);
+    const { hasNextPage, isFetchingNextPage, fetchNextPage, isLoading, error, refetch } = paged;
+    const data = useMemo(
+        () => (paged.data?.pages || []).flatMap(page => page.page || []),
+        [paged.data]
     );
 
     useEffect(() => {
-        if (!userId) return;
+        if (!hasNextPage || isFetchingNextPage) return;
+        void fetchNextPage();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-        const unsubscribe = financeApi.subscribeToTransactions(
-            userId,
-            start,
-            end,
-            (data) => queryClient.setQueryData(queryKey, data),
-            (error) => console.error("Transactions Query Error:", error)
-        );
-
-        return () => unsubscribe();
-    }, [userId, start, end, queryClient, queryKey]);
-
-    return useQuery<AnchorTransaction[]>({
-        queryKey,
-        queryFn: () => Promise.resolve([]),
-        enabled: !!userId,
-        staleTime: Infinity,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-    });
+    return {
+        data,
+        isLoading: isLoading || isFetchingNextPage,
+        error,
+        refetch,
+    };
 };
 
 /**
@@ -113,6 +106,33 @@ export const useRecentTransactionsQuery = (userId: string | undefined, limitCoun
         enabled: !!userId,
         staleTime: Infinity,
         refetchOnMount: false,
+        refetchOnWindowFocus: false,
+    });
+};
+
+/**
+ * Cursor-based transactions query for large lists.
+ */
+export const useInfiniteTransactionsQuery = (
+    userId: string | undefined,
+    start: string,
+    end: string,
+    pageSize: number = 100,
+    enabled: boolean = true
+) => {
+    const queryKey = useMemo(
+        () => FINANCE_KEYS.paginatedTransactions(userId || '', start, end, pageSize),
+        [userId, start, end, pageSize]
+    );
+
+    return useInfiniteQuery({
+        queryKey,
+        enabled: !!userId && enabled,
+        initialPageParam: null as TransactionPageCursor | null,
+        queryFn: ({ pageParam }) =>
+            financeApi.fetchTransactionsPage(userId || '', start, end, pageSize, pageParam || undefined),
+        getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
+        staleTime: 60_000,
         refetchOnWindowFocus: false,
     });
 };
