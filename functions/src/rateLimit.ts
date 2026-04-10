@@ -19,6 +19,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     codeVerification:    { maxAttempts: 5,   windowMs: 15 * MIN, blockDurationMs: HOUR },
     disconnectFamily:    { maxAttempts: 3,   windowMs: HOUR,     blockDurationMs: DAY },
     emailSend:           { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
+    accountCreate:       { maxAttempts: 10,  windowMs: DAY,      blockDurationMs: HOUR },
     transactionCreate:   { maxAttempts: 100, windowMs: HOUR,     blockDurationMs: 15 * MIN },
     revokeInvitation:    { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
     createInvitation:    { maxAttempts: 5,   windowMs: HOUR,     blockDurationMs: HOUR },
@@ -41,10 +42,31 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     recordAuthEvent:     { maxAttempts: 30,  windowMs: HOUR,     blockDurationMs: 15 * MIN },
     reportUnrecognisedSignIn: { maxAttempts: 5, windowMs: HOUR,  blockDurationMs: HOUR },
     dismissAuthEvent:    { maxAttempts: 30,  windowMs: HOUR,     blockDurationMs: 15 * MIN },
+    revokeSession:       { maxAttempts: 10,  windowMs: HOUR,     blockDurationMs: HOUR },
+    deviceAttestation:   { maxAttempts: 30,  windowMs: HOUR,     blockDurationMs: 30 * MIN },
+    emailSync:           { maxAttempts: 15,  windowMs: HOUR,     blockDurationMs: 15 * MIN },
     // Passkey (WebAuthn) — GAP-011
     passkeyChallenge:    { maxAttempts: 10,  windowMs: 15 * MIN, blockDurationMs: HOUR },
     passkeyVerify:       { maxAttempts: 5,   windowMs: 15 * MIN, blockDurationMs: HOUR },
 };
+
+interface RateLimitDecision {
+    outcome: 'allowed' | 'blocked' | 'exceeded';
+    remainingMin?: number;
+    blockedUntilIso?: string;
+    attempts?: number;
+    maxAttempts?: number;
+    blockedForMinutes?: number;
+    warning: boolean;
+}
+
+async function safeAudit(action: string, identifier: string, metadata: Record<string, unknown>): Promise<void> {
+    try {
+        await createAuditLog(action, identifier, metadata);
+    } catch (error) {
+        console.error('[RateLimit] Audit logging failed:', error);
+    }
+}
 
 export async function enforceRateLimit(action: string, identifier: string): Promise<void> {
     const config = RATE_LIMITS[action];
@@ -56,24 +78,19 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
     const now = Date.now();
 
     try {
-        await db.runTransaction(async (transaction) => {
+        const decision = await db.runTransaction<RateLimitDecision>(async (transaction) => {
             const doc = await transaction.get(rateLimitRef);
             const docData = doc.data();
 
             if (docData?.blockedUntil && docData.blockedUntil > now) {
                 const remainingMs = docData.blockedUntil - now;
                 const remainingMin = Math.ceil(remainingMs / 60000);
-
-                await createAuditLog('rate_limit_blocked', identifier, {
-                    action, remainingMinutes: remainingMin,
-                    blockedUntil: new Date(docData.blockedUntil).toISOString(),
-                    severity: 'high',
-                });
-
-                throw new HttpsError(
-                    'resource-exhausted',
-                    `Too many attempts. Please try again in ${remainingMin} minute(s).`
-                );
+                return {
+                    outcome: 'blocked',
+                    remainingMin,
+                    blockedUntilIso: new Date(docData.blockedUntil).toISOString(),
+                    warning: false,
+                };
             }
 
             const windowStart = now - config.windowMs;
@@ -84,30 +101,58 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
             if (attempts.length >= config.maxAttempts) {
                 const blockedUntil = now + config.blockDurationMs;
                 transaction.set(rateLimitRef, { attempts: [], blockedUntil, lastAttempt: now });
-
-                await createAuditLog('rate_limit_exceeded', identifier, {
-                    action, attempts: attempts.length, maxAttempts: config.maxAttempts,
+                return {
+                    outcome: 'exceeded',
+                    attempts: attempts.length,
+                    maxAttempts: config.maxAttempts,
                     blockedForMinutes: Math.ceil(config.blockDurationMs / 60000),
-                    severity: 'critical',
-                });
-
-                throw new HttpsError(
-                    'resource-exhausted',
-                    'Rate limit exceeded. You have been temporarily blocked.'
-                );
+                    warning: false,
+                };
             }
 
             const warningThreshold = Math.floor(config.maxAttempts * 0.8);
-            if (attempts.length >= warningThreshold && attempts.length < config.maxAttempts) {
-                await createAuditLog('rate_limit_warning', identifier, {
-                    action, attempts: attempts.length + 1, maxAttempts: config.maxAttempts,
-                    severity: 'medium',
-                });
-            }
+            const warning = attempts.length >= warningThreshold && attempts.length < config.maxAttempts;
 
             attempts.push(now);
             transaction.set(rateLimitRef, { attempts, blockedUntil: null, lastAttempt: now });
+            return { outcome: 'allowed', warning, attempts: attempts.length, maxAttempts: config.maxAttempts };
         });
+
+        if (decision.warning) {
+            await safeAudit('rate_limit_warning', identifier, {
+                action,
+                attempts: decision.attempts,
+                maxAttempts: decision.maxAttempts,
+                severity: 'medium',
+            });
+        }
+
+        if (decision.outcome === 'blocked') {
+            await safeAudit('rate_limit_blocked', identifier, {
+                action,
+                remainingMinutes: decision.remainingMin,
+                blockedUntil: decision.blockedUntilIso,
+                severity: 'high',
+            });
+            throw new HttpsError(
+                'resource-exhausted',
+                `Too many attempts. Please try again in ${decision.remainingMin} minute(s).`,
+            );
+        }
+
+        if (decision.outcome === 'exceeded') {
+            await safeAudit('rate_limit_exceeded', identifier, {
+                action,
+                attempts: decision.attempts,
+                maxAttempts: decision.maxAttempts,
+                blockedForMinutes: decision.blockedForMinutes,
+                severity: 'critical',
+            });
+            throw new HttpsError(
+                'resource-exhausted',
+                'Rate limit exceeded. You have been temporarily blocked.',
+            );
+        }
     } catch (error) {
         if (error instanceof HttpsError) throw error;
         console.error('[RateLimit] Enforcement failed:', error);

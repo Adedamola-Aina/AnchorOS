@@ -10,7 +10,7 @@ import type { MigrationDefinition, MigrationContext, MigrationResult } from '../
 // Mock Firestore — use vi.hoisted so factories can reference them
 const {
     mockDoc: _mockDoc, mockSet, mockGet, mockCollection,
-    mockWhere: _mockWhere, mockOrderBy, mockGetQuery,
+    mockWhere: _mockWhere, mockOrderBy: _mockOrderBy, mockGetQuery,
 } = vi.hoisted(() => {
     const mockDoc = vi.fn();
     const mockSet = vi.fn().mockResolvedValue(undefined);

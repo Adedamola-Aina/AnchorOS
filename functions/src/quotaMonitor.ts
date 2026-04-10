@@ -102,6 +102,21 @@ async function storeMetrics(metrics: QuotaMetrics): Promise<void> {
     .set(metrics);
 }
 
+function normalizeUsage(usage: Partial<Omit<QuotaMetrics, 'collectedAt'>>): Omit<QuotaMetrics, 'collectedAt'> {
+  const toNonNegativeInt = (value: unknown): number => {
+    const parsed = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) return 0;
+    return Math.floor(parsed);
+  };
+
+  return {
+    dailyReads: toNonNegativeInt(usage.dailyReads),
+    dailyWrites: toNonNegativeInt(usage.dailyWrites),
+    dailyDeletes: toNonNegativeInt(usage.dailyDeletes),
+    storageBytes: toNonNegativeInt(usage.storageBytes),
+  };
+}
+
 /**
  * Scheduled function: runs every 6 hours to check Firestore quota.
  * Logs structured alerts for Cloud Monitoring/Alerting integration.
@@ -125,9 +140,30 @@ export const checkFirestoreQuota = onSchedule(
       .doc('daily_usage')
       .get();
 
-    const usage = usageDoc.exists
-      ? (usageDoc.data() as Omit<QuotaMetrics, 'collectedAt'>)
-      : { dailyReads: 0, dailyWrites: 0, dailyDeletes: 0, storageBytes: 0 };
+    if (!usageDoc.exists) {
+      logger.warn('[QuotaMonitor] Missing daily_usage source document. Metrics may be stale.', {
+        'monitoring.alert': true,
+        'monitoring.severity': 'warning',
+        source: 'artifacts/anchor-os/system/daily_usage',
+      });
+    }
+
+    const rawUsage = usageDoc.exists ? (usageDoc.data() as Partial<Omit<QuotaMetrics, 'collectedAt'>>) : {};
+    const usage = normalizeUsage(rawUsage);
+
+    const sourceUpdatedAt = rawUsage && typeof rawUsage === 'object' && 'updatedAt' in rawUsage
+      ? Date.parse(String((rawUsage as Record<string, unknown>).updatedAt))
+      : NaN;
+    if (Number.isFinite(sourceUpdatedAt)) {
+      const ageMs = Date.now() - sourceUpdatedAt;
+      if (ageMs > 30 * 60 * 60 * 1000) {
+        logger.warn('[QuotaMonitor] daily_usage source appears stale.', {
+          'monitoring.alert': true,
+          'monitoring.severity': 'warning',
+          sourceAgeHours: Math.round(ageMs / (60 * 60 * 1000)),
+        });
+      }
+    }
 
     const metrics = buildQuotaMetrics(usage);
     await storeMetrics(metrics);

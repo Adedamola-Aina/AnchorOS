@@ -32,8 +32,9 @@ export const generateWeeklyReport = onSchedule(
     const weekKey = format(now, 'yyyy-MM-dd');
     const currentTime = format(now, 'HH:mm');
     const sevenDaysAgo = subDays(now, 7);
-    const sevenDaysAgoStr = format(sevenDaysAgo, 'yyyy-MM-dd');
-    const sevenDaysFromNow = format(subDays(now, -7), 'yyyy-MM-dd');
+    const sevenDaysAgoIso = sevenDaysAgo.toISOString();
+    const nowIso = now.toISOString();
+    const sevenDaysFromNow = subDays(now, -7);
 
     const usersRef = db.collection('artifacts').doc(APP_ID).collection('users');
     const usersSnap = await usersRef.get();
@@ -53,8 +54,9 @@ export const generateWeeklyReport = onSchedule(
       if (existingReport.exists) continue;
 
       // 3. Load transactions from last 7 days
-      const txSnap = await userRef.collection('transactions')
-        .where('date', '>=', sevenDaysAgoStr)
+      const txSnap = await userRef.collection('finance')
+        .where('date', '>=', sevenDaysAgoIso)
+        .where('date', '<=', nowIso)
         .get();
 
       const expenses: Array<{ amountCents: number; category: string }> = [];
@@ -103,7 +105,14 @@ export const generateWeeklyReport = onSchedule(
       let upcomingBills = 0;
       for (const rtDoc of recurringSnap.docs) {
         const rt = rtDoc.data();
-        if (rt.type === 'expense' && rt.nextRunAt && rt.nextRunAt <= sevenDaysFromNow) {
+        const nextRunAt = typeof rt.nextRunAt === 'string' ? new Date(rt.nextRunAt) : null;
+        if (
+          rt.type === 'expense' &&
+          nextRunAt &&
+          !Number.isNaN(nextRunAt.getTime()) &&
+          nextRunAt >= now &&
+          nextRunAt <= sevenDaysFromNow
+        ) {
           upcomingBills++;
         }
       }

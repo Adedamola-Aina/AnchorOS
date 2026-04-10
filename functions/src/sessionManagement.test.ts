@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mockGet = vi.fn();
 const mockDelete = vi.fn();
 const mockCreateAuditLog = vi.fn();
 const mockEnforceRateLimit = vi.fn();
