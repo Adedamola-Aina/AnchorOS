@@ -5,6 +5,8 @@
 
 // 
 
+// 
+
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -84,11 +86,12 @@ export const BottomNavigation = ({
     return (
         <nav
             role="navigation"
-            className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 z-40"
+            data-bottom-nav
+            className="md:hidden fixed bottom-0 left-0 right-0 bg-white/88 dark:bg-slate-900/82 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-700/80 z-40"
             aria-label="Mobile navigation"
-            style={{ paddingBottom: 'env(safe-area-inset-bottom)', WebkitTapHighlightColor: 'transparent' }}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-            <div className={`grid ${anchorAIEnabled ? 'grid-cols-5' : 'grid-cols-4'} h-[49px]`}>
+            <div data-bottom-nav-items className={`grid ${anchorAIEnabled ? 'grid-cols-5' : 'grid-cols-4'} h-[49px]`}>
                 {navItems.map(({ to, label, isIconOnly, renderIcon }) => (
                     <NavLink
                         key={to}

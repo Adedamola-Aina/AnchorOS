@@ -45,7 +45,21 @@ body.platform-native {
 
 /* Bottom navigation with safe area */
 .platform-native [data-bottom-nav] {
-  padding-bottom: calc(var(--safe-area-inset-bottom) + 0.5rem);
+  /* Keep a native feel, but avoid excessive dead space below icons on iOS. */
+  --bottom-nav-safe-space: max(calc(var(--safe-area-inset-bottom) - 10px), 8px);
+  padding-bottom: var(--bottom-nav-safe-space);
+}
+
+.platform-native [data-bottom-nav-items] {
+  align-items: center;
+}
+
+.platform-ios [data-bottom-nav] {
+  box-shadow: 0 -1px 0 rgba(15, 23, 42, 0.08), 0 -8px 24px rgba(2, 6, 23, 0.12);
+}
+
+.platform-ios [data-bottom-nav-items] {
+  padding-bottom: 2px;
 }
 
 /* Modal/dialog safe areas */

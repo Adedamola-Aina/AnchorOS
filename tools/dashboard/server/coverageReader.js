@@ -1,4 +1,5 @@
 // @ts-nocheck
+// 
 /**
  * coverageReader.js
  *
@@ -14,7 +15,8 @@ const COVERAGE_PATH = path.join(__dirname, '../../..', 'coverage', 'coverage-fin
 const STALE_WARN_MS  = 24 * 60 * 60 * 1000;  // 24 hours
 const STALE_CRIT_MS  = 72 * 60 * 60 * 1000;  // 72 hours
 
-const THRESHOLDS = { statements: 80, branches: 70, functions: 90, lines: 80 };
+// Keep in sync with config/vitest.config.ts global coverage thresholds.
+const THRESHOLDS = { statements: 86, branches: 76, functions: 83, lines: 89 };
 
 function pct(covered, total) {
     return total === 0 ? 100 : Math.round((covered / total) * 10000) / 100;

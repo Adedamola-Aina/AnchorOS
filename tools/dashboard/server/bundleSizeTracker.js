@@ -1,4 +1,5 @@
 // @ts-nocheck
+// 
 /**
  * bundleSizeTracker.js
  *
@@ -77,6 +78,16 @@ function loadHistory() {
  */
 function appendHistory(entry) {
     let history = loadHistory();
+    const last = history[history.length - 1];
+    if (last) {
+        const lastTs = new Date(last.measuredAt).getTime();
+        const nextTs = new Date(entry.measuredAt).getTime();
+        const withinSixHours = Number.isFinite(lastTs) && Number.isFinite(nextTs) && (nextTs - lastTs) < (6 * 60 * 60 * 1000);
+        if (withinSixHours && last.totalKb === entry.totalKb && last.fileCount === entry.fileCount) {
+            return history;
+        }
+    }
+
     history.push(entry);
     if (history.length > 90) history = history.slice(-90);
     try {
@@ -92,14 +103,14 @@ function appendHistory(entry) {
  */
 function getWeekAgoSnapshot(history) {
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    // Find the newest entry older than 7 days
+    // Find the newest entry older than 7 days.
+    // Do not fallback to same-day/nearby snapshots — that produces false "This Week" alerts.
     for (let i = history.length - 1; i >= 0; i--) {
         if (new Date(history[i].measuredAt).getTime() <= cutoff) {
             return history[i];
         }
     }
-    // Fallback: use oldest available entry
-    return history.length > 1 ? history[0] : null;
+    return null;
 }
 
 /**

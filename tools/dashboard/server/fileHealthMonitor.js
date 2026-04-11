@@ -6,6 +6,8 @@
  */
 // @ts-nocheck
 
+// 
+
 
 const { exec } = require('child_process');
 const path = require('path');
@@ -17,6 +19,8 @@ const ROOT_PATH = path.join(__dirname, '../../..');
 const FILE_HEALTH_EXCLUDES = [
     './node_modules/*',
     './.git/*',
+    './.stryker-tmp/*',
+    './.stryker-mutator.log',
     './dist/*',
     './build/*',
     './coverage/*',
@@ -32,6 +36,22 @@ const FILE_HEALTH_EXCLUDES = [
 ];
 
 const FILE_HEALTH_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
+
+function normalizePathForFilter(filePath) {
+    return String(filePath || '').replace(/\\/g, '/');
+}
+
+function isIgnoredFilePath(filePath) {
+    const normalized = normalizePathForFilter(filePath);
+    return normalized.includes('/node_modules/')
+        || normalized.includes('/dist/')
+        || normalized.includes('/.stryker-tmp/')
+        || normalized.endsWith('/.stryker-mutator.log')
+        || normalized.includes('/coverage/')
+        || normalized.includes('/functions/coverage/')
+        || normalized.includes('/playwright-report/')
+        || normalized.includes('/test-results/');
+}
 
 function buildFileHealthScanCommand() {
     const excludes = FILE_HEALTH_EXCLUDES.map((entry) => `! -path "${entry}"`).join(' ');
@@ -67,7 +87,7 @@ async function checkFileLineCount() {
                 const lineCount = parseInt(match[1]);
                 const filePath = match[2];
 
-                if (!filePath.includes('node_modules') && !filePath.includes('dist')) {
+                if (!isIgnoredFilePath(filePath)) {
                     files.push({
                         path: filePath,
                         lines: lineCount,
