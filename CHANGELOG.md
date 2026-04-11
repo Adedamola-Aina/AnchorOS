@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.1-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.17.0...v1.17.1-rc.0) (2026-04-11)
+
+
+### Bug Fixes
+
+* **dashboard:** reconcile roadmap status from deployment evidence ([45faee7](https://github.com/Adedamola-Aina/AnchorOS/commit/45faee72bdda098666fe560524193459728393cb))
+* **mobile:** PWA-008 stabilize iOS bottom nav safe-area and dashboard health signals ([a85fe8b](https://github.com/Adedamola-Aina/AnchorOS/commit/a85fe8b9b8c5203d75d83460fa530dfc0a3c5df4))
+
 ## [1.17.1-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.17.0...v1.17.1-dev.0) (2026-04-11)
 
 
