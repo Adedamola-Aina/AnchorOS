@@ -1,10 +1,15 @@
 // @ts-nocheck
+// 
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const gitDataProvider = require('./gitDataProvider');
-const { enrichRoadmapInitiativesWithTrackedStatus, roadmapBacklogItems } = require('./gitDataProvider/roadmap');
+const {
+    enrichRoadmapInitiativesWithTrackedStatus,
+    roadmapBacklogItems,
+    inferRoadmapIdsFromCommitEvidence
+} = require('./gitDataProvider/roadmap');
 
 describe('gitDataProvider initiative type grouping', () => {
     it('treats FIN items as initiative work', () => {
@@ -50,7 +55,8 @@ describe('gitDataProvider initiative type grouping', () => {
             'fix(finance): BUG-111 and REG-004',
             'Implements FEAT-010',
             'Follow-up FIN-005 + SEC-001 and UX-003',
-            'Also touches QA-002 and DATA-007'
+            'Also touches QA-002 and DATA-007',
+            'Plus COMM-005 FAB-003 FAM-003 PSE-001 PERF-005 OBS-002 DX-003'
         ].join('\n'));
 
         expect(ids.map((item) => item.id)).toEqual(expect.arrayContaining([
@@ -61,7 +67,14 @@ describe('gitDataProvider initiative type grouping', () => {
             'SEC-001',
             'UX-003',
             'QA-002',
-            'DATA-007'
+            'DATA-007',
+            'COMM-005',
+            'FAB-003',
+            'FAM-003',
+            'PSE-001',
+            'PERF-005',
+            'OBS-002',
+            'DX-003'
         ]));
     });
 
@@ -90,6 +103,16 @@ describe('gitDataProvider initiative type grouping', () => {
 });
 
 describe('roadmap status enrichment consistency', () => {
+    it('infers roadmap IDs from commit evidence when explicit IDs are missing', () => {
+        const inferred = inferRoadmapIdsFromCommitEvidence({
+            message: 'refactor(finance): replace limit-only query with cursor startAfter pagination',
+            files: ['src/api/financePagination.ts', 'src/hooks/queries/useFinanceQueries.ts']
+        });
+
+        const ids = inferred.map(item => item.id);
+        expect(ids).toContain('FIN-016');
+    });
+
     it('maps tracked deployment status to effective roadmap status', () => {
         const roadmapData = {
             initiatives: [

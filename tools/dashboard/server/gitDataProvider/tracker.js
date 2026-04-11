@@ -1,4 +1,5 @@
 // @ts-nocheck
+// 
 /**
  * tracker.js — getAllTrackedItems + commit-level cache.
  * Core function that reads git log and resolves deployment status.
@@ -10,7 +11,7 @@ const deploymentTracker = require('../deploymentTracker');
 const { classifyCommit } = require('../gitAnalyzer');
 const { classifyWorkItem, deriveLifecycle } = require('../workIntelligence');
 const { extractIds, detectType } = require('./constants');
-const { getInitiativeTitle } = require('./roadmap');
+const { getInitiativeTitle, inferRoadmapIdsFromCommitEvidence } = require('./roadmap');
 
 const git = simpleGit(path.join(__dirname, '../../../..'));
 
@@ -54,7 +55,16 @@ async function getAllTrackedItems(limit = 200) {
 
             const changedFiles = await getChangedFilesForCommit(commit.hash);
             const fullMessage = commit.body ? `${commit.message}\n${commit.body}` : commit.message;
-            const ids = extractIds(fullMessage);
+            const explicitIds = extractIds(fullMessage);
+            const inferredIds = inferRoadmapIdsFromCommitEvidence({ message: fullMessage, files: changedFiles });
+            const seenIds = new Set();
+            const ids = [];
+            for (const idInfo of [...explicitIds, ...inferredIds]) {
+                const upperId = String(idInfo.id || '').toUpperCase();
+                if (!upperId || seenIds.has(upperId)) continue;
+                seenIds.add(upperId);
+                ids.push({ ...idInfo, id: upperId });
+            }
             const shortHash = commit.hash.substring(0, 7);
 
             const bodyLines = (commit.body || '').split('\n').filter(l => l.trim());

@@ -1,8 +1,11 @@
 // @ts-nocheck
+// 
 /** Roadmap.json helpers for gitDataProvider. */
 
 const fs = require('fs');
 const path = require('path');
+
+let roadmapDetectionCache = null;
 
 function loadRoadmap() {
     try {
@@ -13,6 +16,66 @@ function loadRoadmap() {
     }
 }
 
+function normalizePattern(pattern) {
+    return String(pattern || '').trim().toLowerCase();
+}
+
+function isShortAcronym(pattern) {
+    return pattern.length <= 4 && /^[a-z]+$/i.test(pattern);
+}
+
+function buildRoadmapDetectionIndex() {
+    if (roadmapDetectionCache) return roadmapDetectionCache;
+
+    const roadmap = loadRoadmap();
+    const initiatives = (roadmap.initiatives || []).map((initiative) => {
+        const id = String(initiative.id || '').toUpperCase();
+        const rawPatterns = Array.isArray(initiative.detectionPatterns) ? initiative.detectionPatterns : [];
+        const patterns = rawPatterns
+            .map(normalizePattern)
+            .filter(Boolean);
+        return {
+            id,
+            type: mapRoadmapInitiativeToType(initiative),
+            patterns
+        };
+    });
+
+    roadmapDetectionCache = { initiatives };
+    return roadmapDetectionCache;
+}
+
+function inferRoadmapIdsFromCommitEvidence({ message = '', files = [] } = {}) {
+    const { initiatives } = buildRoadmapDetectionIndex();
+    const messageText = String(message || '').toLowerCase();
+    const fileText = Array.isArray(files) ? files.join('\n').toLowerCase() : '';
+    const evidenceText = `${messageText}\n${fileText}`;
+    const inferred = [];
+
+    for (const initiative of initiatives) {
+        const matchedPatterns = [];
+        for (const pattern of initiative.patterns) {
+            if (!pattern) continue;
+
+            // Tiny acronyms (e.g. ADR, LLM) are noisy in file paths; restrict to commit text.
+            const haystack = isShortAcronym(pattern) ? messageText : evidenceText;
+            if (haystack.includes(pattern)) {
+                matchedPatterns.push(pattern);
+            }
+        }
+
+        if (matchedPatterns.length > 0) {
+            inferred.push({
+                id: initiative.id,
+                type: initiative.type,
+                matchedPatterns
+            });
+        }
+    }
+
+    return inferred;
+}
+
 function getInitiativeTitle(id) {
     const roadmap = loadRoadmap();
     const initiative = roadmap.initiatives.find(i => i.id.toUpperCase() === id.toUpperCase());
@@ -21,12 +84,15 @@ function getInitiativeTitle(id) {
 
 function mapRoadmapInitiativeToType(initiative) {
     const idPrefix = (initiative.id || '').split('-')[0].toLowerCase();
-    if (idPrefix === 'bug' || idPrefix === 'reg') return 'bug';
-    if (idPrefix === 'gap') return 'gap';
-    if (idPrefix === 'ux' || idPrefix === 'des' || idPrefix === 'brand') return 'ux';
-    if (idPrefix === 'sec') return 'sec';
+    if (idPrefix === 'feat') return 'feature';
+    if (idPrefix === 'reg') return 'bug';
     if (idPrefix === 'arch') return 'architecture';
-    return 'feature';
+    if (idPrefix === 'ux') return 'ux';
+    if (idPrefix === 'task') return 'task';
+    if (idPrefix === 'gap') return 'gap';
+    if (idPrefix === 'bug') return 'bug';
+    if (idPrefix === 'enh') return 'enhancement';
+    return idPrefix || 'feature';
 }
 
 function normalizeStatus(status) {
@@ -97,6 +163,7 @@ module.exports = {
     loadRoadmap,
     getInitiativeTitle,
     mapRoadmapInitiativeToType,
+    inferRoadmapIdsFromCommitEvidence,
     enrichRoadmapInitiativesWithTrackedStatus,
     roadmapBacklogItems
 };

@@ -1,4 +1,5 @@
 // @ts-nocheck
+// 
 /** Shared patterns, types, and pure helpers for gitDataProvider. */
 
 const ID_PATTERNS = {
@@ -9,13 +10,17 @@ const ID_PATTERNS = {
     des: /DES-(\d+)/gi,    eng: /ENG-(\d+)/gi,         inn: /INN-(\d+)/gi,
     auth: /AUTH-(\d+)/gi,  pwa: /PWA-(\d+)/gi,         db: /DB-(\d+)/gi,
     qa: /QA-(\d+)/gi,      rnd: /RND-(\d+)/gi,         data: /DATA-(\d+)/gi,
-    brand: /BRAND-(\d+)/gi, web: /WEB-(\d+)/gi
+    brand: /BRAND-(\d+)/gi, web: /WEB-(\d+)/gi,        comm: /COMM-(\d+)/gi,
+    fab: /FAB-(\d+)/gi,    fam: /FAM-(\d+)/gi,         dx: /DX-(\d+)/gi,
+    mkt: /MKT-(\d+)/gi,    obs: /OBS-(\d+)/gi,         perf: /PERF-(\d+)/gi,
+    pse: /PSE-(\d+)/gi
 };
 
 const INITIATIVE_TYPES = [
     'feature', 'enhancement', 'ux', 'task', 'gap', 'architecture',
     'fin', 'sec', 'prd', 'sre', 'plt', 'des', 'eng', 'auth',
-    'pwa', 'db', 'qa', 'rnd', 'data', 'brand', 'web'
+    'pwa', 'db', 'qa', 'rnd', 'data', 'brand', 'web', 'comm',
+    'fab', 'fam', 'dx', 'mkt', 'obs', 'perf', 'pse'
 ];
 
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
