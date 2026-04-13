@@ -18,6 +18,10 @@ targets:
         product: FirebaseAuth
       - package: Firebase
         product: FirebaseCore
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseFirestoreSwift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.anchoros.native

@@ -1,94 +1,111 @@
 import SwiftUI
 
+/// Anchor AI screen — Fabric briefing, weekly snapshot, and prompts.
+/// Data sources: FinanceStore + CommitmentsStore (real numbers, AI copy is aspirational)
 struct AnchorAIView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var projectStateStore: ProjectStateStore
-    @State private var selectedPrompt: String = "How much did I save?"
+    @EnvironmentObject private var financeStore: FinanceStore
+    @EnvironmentObject private var commitmentsStore: CommitmentsStore
+    @State private var selectedPrompt: String = ""
+
+    private let prompts = ["How much did I save?", "Risk this month", "Family spending", "Upcoming bills"]
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
                     AnchorSectionTabs(labels: ["Brief", "Insights", "Predictions", "Prompts"])
-
-                    AnchorCard(title: "Today's Brief", icon: "sparkles") {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("You're on track this week. Spending velocity is below your 30-day average.")
-                                .foregroundStyle(AnchorPalette.textPrimary)
-                            Text("Next: review recurring bills before Friday.")
-                                .foregroundStyle(AnchorPalette.textSecondary)
-                        }
-                    }
-
-                    AnchorCard(title: "Weekly Snapshot", icon: "chart.line.uptrend.xyaxis") {
-                        VStack(alignment: .leading, spacing: 8) {
-                            row("Savings trend", savingsTrendValue)
-                            row("Critical pressure", "\(projectStateStore.snapshot?.criticalAlerts ?? 0)")
-                            row("Commitment momentum", momentumValue)
-                        }
-                    }
-
-                    AnchorCard(title: "Quick Prompts", icon: "quote.bubble") {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 8) {
-                                promptChip("How much did I save?")
-                                promptChip("Risk this month")
-                            }
-                            HStack(spacing: 8) {
-                                promptChip("Family spending")
-                                promptChip("Upcoming bills")
-                            }
-                            Text("Selected: \(selectedPrompt)")
-                                .font(.footnote)
-                                .foregroundStyle(AnchorPalette.textSecondary)
-                        }
-                    }
+                    briefCard
+                    snapshotCard
+                    promptsCard
                 }
                 .padding(16)
             }
             .background(AnchorBackground())
-            .navigationTitle("Anchor")
+            .navigationTitle("Anchor AI")
             .navigationBarTitleDisplayMode(.inline)
-            .task {
-                await projectStateStore.refresh(for: appState.environment)
+            .task { await projectStateStore.refresh(for: appState.environment) }
+        }
+    }
+
+    // MARK: — Brief
+
+    private var briefCard: some View {
+        AnchorCard(title: "Today's Brief", icon: "sparkles") {
+            VStack(alignment: .leading, spacing: 8) {
+                let completionPct = Int(commitmentsStore.completionPercent * 100)
+                Text(completionPct >= 50
+                     ? "You're on track this week. Spending velocity looks steady."
+                     : "\(commitmentsStore.activeCount) commitment\(commitmentsStore.activeCount == 1 ? "" : "s") still open — you've got this.")
+                    .foregroundStyle(AnchorPalette.textPrimary)
+                Text("\(financeStore.accounts.count) account\(financeStore.accounts.count == 1 ? "" : "s") tracked • \(commitmentsStore.totalCount) commitment\(commitmentsStore.totalCount == 1 ? "" : "s")")
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                    .font(.footnote)
             }
         }
     }
 
-    private func row(_ label: String, _ value: String) -> some View {
-        HStack {
-            Text(label)
-                .foregroundStyle(AnchorPalette.textSecondary)
-            Spacer()
-            Text(value)
-                .foregroundStyle(AnchorPalette.textPrimary)
-                .fontWeight(.semibold)
+    // MARK: — Weekly Snapshot
+
+    private var snapshotCard: some View {
+        AnchorCard(title: "Weekly Snapshot", icon: "chart.line.uptrend.xyaxis") {
+            VStack(alignment: .leading, spacing: 8) {
+                row("Net worth", financeStore.netWorthFormatted)
+                row("Commitments done", "\(commitmentsStore.completedCount) / \(commitmentsStore.totalCount)")
+                row("Active remaining", "\(commitmentsStore.activeCount)")
+                row("Completion", "\(Int(commitmentsStore.completionPercent * 100))%")
+                row("Accounts tracked", "\(financeStore.accounts.count)")
+                row("Transactions (recent)", "\(financeStore.transactions.count)")
+                row("Critical alerts", "\(projectStateStore.snapshot?.criticalAlerts ?? 0)")
+            }
         }
-        .font(.subheadline)
     }
 
-    private var savingsTrendValue: String {
-        let completed = projectStateStore.snapshot?.completedThisWeek ?? 0
-        return completed > 0 ? "+\(completed)" : "Flat"
-    }
+    // MARK: — Quick Prompts
 
-    private var momentumValue: String {
-        let inProgress = projectStateStore.snapshot?.inProgressCount ?? 0
-        return inProgress > 2 ? "Active" : "Stable"
+    private var promptsCard: some View {
+        AnchorCard(title: "Quick Prompts", icon: "quote.bubble") {
+            VStack(alignment: .leading, spacing: 12) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                    ForEach(prompts, id: \.self) { p in
+                        promptChip(p)
+                    }
+                }
+                if !selectedPrompt.isEmpty {
+                    Text(""\(selectedPrompt)"")
+                        .font(.footnote)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                        .italic()
+                        .padding(.top, 4)
+                    Text("Natural language query support coming in Sprint 3.")
+                        .font(.caption)
+                        .foregroundStyle(AnchorPalette.textSecondary.opacity(0.7))
+                }
+            }
+        }
     }
 
     private func promptChip(_ label: String) -> some View {
-        Button {
-            selectedPrompt = label
-        } label: {
+        Button { selectedPrompt = label } label: {
             Text(label)
                 .font(.subheadline)
-                .foregroundStyle(AnchorPalette.textSecondary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .foregroundStyle(selectedPrompt == label ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
                 .background(selectedPrompt == label ? AnchorPalette.chipActive : AnchorPalette.chip)
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+    }
+
+    private func row(_ label: String, _ value: String) -> some View {
+        HStack {
+            Text(label).foregroundStyle(AnchorPalette.textSecondary)
+            Spacer()
+            Text(value).foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
+        }
+        .font(.subheadline)
     }
 }

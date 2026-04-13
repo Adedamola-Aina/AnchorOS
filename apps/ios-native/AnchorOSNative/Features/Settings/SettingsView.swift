@@ -1,7 +1,10 @@
 import SwiftUI
 
+/// Settings screen with real user profile from Firestore.
+/// Data source: UserProfileStore (uid-scoped via SecureDb)
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var userProfileStore: UserProfileStore
     @State private var fontSize: String = "Default"
     @State private var highContrast: Bool = false
 
@@ -10,7 +13,6 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     AnchorSectionTabs(labels: ["Profile", "Theme", "Security", "Alerts", "AI", "Family"])
-
                     profileCard
                     appearanceCard
                     securityCard
@@ -24,22 +26,27 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: — Profile
+
     private var profileCard: some View {
         AnchorCard(title: "Profile", icon: "person.circle") {
             VStack(alignment: .leading, spacing: 10) {
-                row("Display Name", "Alex Owner")
-                row("User ID", "test-owner")
+                row("Display Name", userProfileStore.displayName)
+                row("Email", userProfileStore.email.isEmpty ? "—" : userProfileStore.email)
                 row("Sign-in Method", "Email & Password")
+                row("Currency", userProfileStore.currency)
+                row("MFA", userProfileStore.mfaEnabled ? "Enabled" : "Disabled")
             }
         }
     }
 
+    // MARK: — Appearance
+
     private var appearanceCard: some View {
         AnchorCard(title: "Appearance", icon: "paintbrush") {
             VStack(alignment: .leading, spacing: 12) {
-                Text("VISUAL THEME")
-                    .font(.caption)
-                    .fontWeight(.bold)
+                Text("ENVIRONMENT")
+                    .font(.caption).fontWeight(.bold)
                     .foregroundStyle(AnchorPalette.textSecondary)
 
                 Picker("Environment", selection: Binding(
@@ -53,8 +60,7 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
 
                 Text("ACCESSIBILITY")
-                    .font(.caption)
-                    .fontWeight(.bold)
+                    .font(.caption).fontWeight(.bold)
                     .foregroundStyle(AnchorPalette.textSecondary)
 
                 Picker("Font", selection: $fontSize) {
@@ -71,17 +77,19 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: — Security
+
     private var securityCard: some View {
         AnchorCard(title: "Security", icon: "lock.shield") {
             VStack(alignment: .leading, spacing: 8) {
                 row("Auth Status", appState.isAuthenticated ? "Signed in" : "Signed out")
+                row("MFA", userProfileStore.mfaEnabled ? "Active" : "Not enrolled")
                 row("Session", "Active")
-                Text(appState.statusMessage)
-                    .font(.footnote)
-                    .foregroundStyle(AnchorPalette.textSecondary)
             }
         }
     }
+
+    // MARK: — Sign Out
 
     private var signOutCard: some View {
         AnchorCard(title: "Session", icon: "rectangle.portrait.and.arrow.right") {
@@ -100,14 +108,13 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: — Helpers
+
     private func row(_ key: String, _ value: String) -> some View {
         HStack {
-            Text(key)
-                .foregroundStyle(AnchorPalette.textSecondary)
+            Text(key).foregroundStyle(AnchorPalette.textSecondary)
             Spacer()
-            Text(value)
-                .foregroundStyle(AnchorPalette.textPrimary)
-                .fontWeight(.semibold)
+            Text(value).foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
         }
         .font(.subheadline)
     }

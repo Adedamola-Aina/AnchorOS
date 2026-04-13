@@ -3,6 +3,9 @@ import SwiftUI
 struct RootTabView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var projectStateStore: ProjectStateStore
+    @EnvironmentObject private var financeStore: FinanceStore
+    @EnvironmentObject private var commitmentsStore: CommitmentsStore
+    @EnvironmentObject private var userProfileStore: UserProfileStore
 
     var body: some View {
         if appState.isAuthenticated {

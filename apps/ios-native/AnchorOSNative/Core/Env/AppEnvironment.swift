@@ -34,6 +34,7 @@ enum AppEnvironment: String, CaseIterable {
 final class AppState: ObservableObject {
     @Published var environment: AppEnvironment = .development
     @Published var isAuthenticated: Bool = false
+    @Published var currentUID: String? = nil
     @Published var isBusy: Bool = false
     @Published var statusMessage: String = "Native iOS starter."
 
@@ -52,8 +53,9 @@ final class AppState: ObservableObject {
             return
         }
         bindAuthListener()
-        if AuthService.shared.currentUserID() != nil {
+        if let uid = AuthService.shared.currentUserID() {
             isAuthenticated = true
+            currentUID = uid
         }
     }
 
@@ -101,6 +103,7 @@ final class AppState: ObservableObject {
         authStateHandle = AuthService.shared.addStateListener { [weak self] userID in
             Task { @MainActor in
                 self?.isAuthenticated = (userID != nil)
+                self?.currentUID = userID
             }
         }
     }

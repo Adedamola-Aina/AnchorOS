@@ -1,127 +1,147 @@
 import SwiftUI
 
+/// Commitments screen with live Firestore data + toggle-complete interactions.
+/// Data source: CommitmentsStore (uid-scoped via SecureDb)
 struct TasksView: View {
     @EnvironmentObject private var appState: AppState
-    @EnvironmentObject private var projectStateStore: ProjectStateStore
-    @State private var scope: String = "Today"
+    @EnvironmentObject private var commitmentsStore: CommitmentsStore
+    @State private var selectedFilter: String = "All"
 
-    private let tasks: [TaskItem] = [
-        .init(title: "Morning review", subtitle: "07:00 • Daily", completed: true, category: "Routine"),
-        .init(title: "Budget check", subtitle: "19:00 • Daily", completed: false, category: "Finance"),
-        .init(title: "Family sync", subtitle: "Sunday • Weekly", completed: false, category: "Family"),
-        .init(title: "Workout", subtitle: "18:30 • Daily", completed: true, category: "Health")
-    ]
+    private let filters = ["All", "Daily", "Weekly", "Monthly", "Todo"]
+
+    private var filtered: [AnchorCommitment] {
+        guard selectedFilter != "All" else { return commitmentsStore.commitments }
+        return commitmentsStore.commitments.filter {
+            $0.type.lowercased() == selectedFilter.lowercased()
+        }
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    AnchorSectionTabs(labels: ["Today", "Week", "Month", "Habits", "Calendar"])
+                    AnchorSectionTabs(labels: filters)
+                        .onChange(of: selectedFilter) { _, _ in }
 
-                    progressCard
-
-                    AnchorCard(title: "Commitments", icon: "checkmark.circle") {
-                        VStack(alignment: .leading, spacing: 12) {
-                            ForEach(tasks) { task in
-                                HStack(spacing: 12) {
-                                    Image(systemName: task.completed ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(task.completed ? AnchorPalette.chipActive : AnchorPalette.textSecondary)
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(task.title)
-                                            .foregroundStyle(AnchorPalette.textPrimary)
-                                            .fontWeight(.semibold)
-                                        Text(task.subtitle)
-                                            .foregroundStyle(AnchorPalette.textSecondary)
-                                            .font(.caption)
-                                        Text(task.category.uppercased())
-                                            .font(.caption2)
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(AnchorPalette.textSecondary)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(AnchorPalette.chip)
-                                            .clipShape(Capsule())
-                                    }
-                                    Spacer()
-                                }
+                    HStack(spacing: 8) {
+                        ForEach(filters, id: \.self) { f in
+                            Button {
+                                selectedFilter = f
+                            } label: {
+                                Text(f)
+                                    .font(.footnote).fontWeight(.semibold)
+                                    .foregroundStyle(selectedFilter == f ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                                    .padding(.horizontal, 14).padding(.vertical, 8)
+                                    .background(selectedFilter == f ? AnchorPalette.chipActive : AnchorPalette.chip)
+                                    .clipShape(Capsule())
                             }
+                            .buttonStyle(.plain)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                    upcomingCard
+                    progressCard
+                    commitmentsCard
                 }
                 .padding(16)
             }
             .background(AnchorBackground())
             .navigationTitle("Tasks")
             .navigationBarTitleDisplayMode(.inline)
-            .task {
-                await projectStateStore.refresh(for: appState.environment)
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Picker("Scope", selection: $scope) {
-                        Text("Today").tag("Today")
-                        Text("Week").tag("Week")
-                        Text("Month").tag("Month")
-                    }
-                    .pickerStyle(.menu)
-                }
-            }
         }
     }
+
+    // MARK: — Progress
 
     private var progressCard: some View {
         AnchorCard(title: "Progress", icon: "chart.bar") {
-            HStack {
+            HStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .stroke(AnchorPalette.chip, lineWidth: 6)
+                    Circle()
+                        .trim(from: 0, to: commitmentsStore.completionPercent)
+                        .stroke(AnchorPalette.chipActive, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .animation(.easeInOut, value: commitmentsStore.completionPercent)
+                }
+                .frame(width: 48, height: 48)
+
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("\(projectStateStore.snapshot?.completedThisWeek ?? 0) completed this week")
-                        .foregroundStyle(AnchorPalette.textPrimary)
-                        .fontWeight(.semibold)
-                    Text(progressSubtitle)
-                        .foregroundStyle(AnchorPalette.textSecondary)
-                        .font(.footnote)
+                    Text("\(commitmentsStore.completedCount) of \(commitmentsStore.totalCount) complete")
+                        .foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
+                    Text("\(commitmentsStore.activeCount) remaining")
+                        .foregroundStyle(AnchorPalette.textSecondary).font(.footnote)
                 }
                 Spacer()
-                Text(progressValue)
+                Text("\(Int(commitmentsStore.completionPercent * 100))%")
                     .foregroundStyle(AnchorPalette.textPrimary)
+                    .font(.title3).fontWeight(.bold)
+            }
+        }
+    }
+
+    // MARK: — Commitments List
+
+    private var commitmentsCard: some View {
+        AnchorCard(title: "Commitments", icon: "checkmark.circle") {
+            if commitmentsStore.isLoading {
+                ProgressView().tint(.white).frame(maxWidth: .infinity)
+            } else if filtered.isEmpty {
+                Text(selectedFilter == "All" ? "No commitments yet." : "No \(selectedFilter.lowercased()) commitments.")
+                    .foregroundStyle(AnchorPalette.textSecondary).font(.subheadline)
+            } else {
+                VStack(alignment: .leading, spacing: 14) {
+                    ForEach(filtered) { task in
+                        taskRow(task)
+                    }
+                }
+            }
+        }
+    }
+
+    private func taskRow(_ task: AnchorCommitment) -> some View {
+        HStack(spacing: 12) {
+            Button {
+                Task { await commitmentsStore.toggleCompleted(taskId: task.resolvedId) }
+            } label: {
+                Image(systemName: task.completed ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .fontWeight(.bold)
+                    .foregroundStyle(task.completed ? AnchorPalette.chipActive : AnchorPalette.textSecondary)
             }
+            .buttonStyle(.plain)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(task.title)
+                    .foregroundStyle(task.completed ? AnchorPalette.textSecondary : AnchorPalette.textPrimary)
+                    .fontWeight(.semibold)
+                    .strikethrough(task.completed, color: AnchorPalette.textSecondary)
+
+                HStack(spacing: 6) {
+                    Text(task.typeLabel)
+                        .font(.caption2).fontWeight(.bold)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(AnchorPalette.chip)
+                        .clipShape(Capsule())
+
+                    if let domain = task.domainLabel {
+                        Text(domain)
+                            .font(.caption2).fontWeight(.bold)
+                            .foregroundStyle(AnchorPalette.chipActive)
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(AnchorPalette.chipActive.opacity(0.15))
+                            .clipShape(Capsule())
+                    }
+
+                    if let streak = task.currentStreak, streak > 1 {
+                        Label("\(streak)", systemImage: "flame.fill")
+                            .font(.caption2).fontWeight(.bold)
+                            .foregroundStyle(AnchorPalette.warning)
+                    }
+                }
+            }
+            Spacer()
         }
     }
-
-    private var upcomingCard: some View {
-        AnchorCard(title: "Upcoming", icon: "calendar") {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Tomorrow • Pay electricity bill")
-                    .foregroundStyle(AnchorPalette.textPrimary)
-                Text("Friday • Review weekly spending")
-                    .foregroundStyle(AnchorPalette.textSecondary)
-                Text("Sunday • Family planning check-in")
-                    .foregroundStyle(AnchorPalette.textSecondary)
-            }
-            .font(.subheadline)
-        }
-    }
-
-    private var progressSubtitle: String {
-        let inProgress = projectStateStore.snapshot?.inProgressCount ?? 0
-        return inProgress == 0 ? "Nothing currently blocked." : "\(inProgress) active work items remain."
-    }
-
-    private var progressValue: String {
-        let completed = projectStateStore.snapshot?.completedThisWeek ?? 0
-        let total = completed + max(projectStateStore.snapshot?.inProgressCount ?? 0, 1)
-        let percentage = Int((Double(completed) / Double(total)) * 100)
-        return "\(percentage)%"
-    }
-}
-
-private struct TaskItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
-    let completed: Bool
-    let category: String
 }
