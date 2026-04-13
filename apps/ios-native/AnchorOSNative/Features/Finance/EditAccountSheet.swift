@@ -41,7 +41,7 @@ struct EditAccountSheet: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         // Name
-                        AnchorFormField(label: "Account Name", text: $name)
+                        AnchorFormField(placeholder: "Account Name", text: $name)
 
                         // Type chips
                         VStack(alignment: .leading, spacing: 8) {
@@ -84,7 +84,7 @@ struct EditAccountSheet: View {
                                 .foregroundStyle(AnchorPalette.textSecondary)
                                 .font(.title3).fontWeight(.semibold)
                                 .frame(width: 24)
-                            AnchorFormField(label: "Current Balance", text: $balanceText, keyboard: .decimalPad)
+                            AnchorFormField(placeholder: "Current Balance", text: $balanceText, keyboardType: .decimalPad)
                         }
 
                         // Save button

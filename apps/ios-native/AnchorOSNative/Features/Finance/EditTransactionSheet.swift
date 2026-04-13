@@ -67,10 +67,10 @@ struct EditTransactionSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
                         // Description
-                        AnchorFormField(label: "Description", text: $title)
+                        AnchorFormField(placeholder: "e.g. Grocery run, Salary", text: $title)
 
                         // Amount
-                        AnchorFormField(label: "Amount (\(transaction.currency))", text: $amountText, keyboard: .decimalPad)
+                        AnchorFormField(placeholder: "0.00", text: $amountText, keyboardType: .decimalPad)
 
                         // Category chips (not shown for transfer)
                         if type != "transfer" {
