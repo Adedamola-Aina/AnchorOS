@@ -18,7 +18,7 @@ struct SettingsView: View {
                 }
                 .padding(16)
             }
-            .background(AnchorPalette.background.ignoresSafeArea())
+            .background(AnchorBackground())
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -112,4 +112,3 @@ struct SettingsView: View {
         .font(.subheadline)
     }
 }
-

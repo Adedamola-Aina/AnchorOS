@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct TasksView: View {
+    @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var projectStateStore: ProjectStateStore
     @State private var scope: String = "Today"
 
     private let tasks: [TaskItem] = [
@@ -50,9 +52,12 @@ struct TasksView: View {
                 }
                 .padding(16)
             }
-            .background(AnchorPalette.background.ignoresSafeArea())
+            .background(AnchorBackground())
             .navigationTitle("Tasks")
             .navigationBarTitleDisplayMode(.inline)
+            .task {
+                await projectStateStore.refresh(for: appState.environment)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Picker("Scope", selection: $scope) {
@@ -70,15 +75,15 @@ struct TasksView: View {
         AnchorCard(title: "Progress", icon: "chart.bar") {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("2 of 4 completed")
+                    Text("\(projectStateStore.snapshot?.completedThisWeek ?? 0) completed this week")
                         .foregroundStyle(AnchorPalette.textPrimary)
                         .fontWeight(.semibold)
-                    Text("Solid consistency this week.")
+                    Text(progressSubtitle)
                         .foregroundStyle(AnchorPalette.textSecondary)
                         .font(.footnote)
                 }
                 Spacer()
-                Text("50%")
+                Text(progressValue)
                     .foregroundStyle(AnchorPalette.textPrimary)
                     .font(.title3)
                     .fontWeight(.bold)
@@ -98,6 +103,18 @@ struct TasksView: View {
             }
             .font(.subheadline)
         }
+    }
+
+    private var progressSubtitle: String {
+        let inProgress = projectStateStore.snapshot?.inProgressCount ?? 0
+        return inProgress == 0 ? "Nothing currently blocked." : "\(inProgress) active work items remain."
+    }
+
+    private var progressValue: String {
+        let completed = projectStateStore.snapshot?.completedThisWeek ?? 0
+        let total = completed + max(projectStateStore.snapshot?.inProgressCount ?? 0, 1)
+        let percentage = Int((Double(completed) / Double(total)) * 100)
+        return "\(percentage)%"
     }
 }
 

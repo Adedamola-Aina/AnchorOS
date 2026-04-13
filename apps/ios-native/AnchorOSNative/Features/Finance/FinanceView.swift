@@ -2,7 +2,7 @@ import SwiftUI
 
 struct FinanceView: View {
     @EnvironmentObject private var appState: AppState
-    @State private var snapshot: DashboardSnapshot?
+    @EnvironmentObject private var projectStateStore: ProjectStateStore
     @State private var selectedPeriod: String = "30D"
 
     private let accounts: [FinanceAccount] = [
@@ -30,23 +30,23 @@ struct FinanceView: View {
 
                     AnchorCard(title: "Operational Signals", icon: "waveform.path.ecg") {
                         VStack(alignment: .leading, spacing: 8) {
-                            signalRow("Alerts", value: "\(snapshot?.alertsCount ?? 0)")
-                            signalRow("Critical", value: "\(snapshot?.criticalAlerts ?? 0)")
-                            signalRow("In Progress", value: "\(snapshot?.inProgressCount ?? 0)")
-                            signalRow("Completed", value: "\(snapshot?.completedThisWeek ?? 0)")
+                            signalRow("Alerts", value: "\(projectStateStore.snapshot?.alertsCount ?? 0)")
+                            signalRow("Critical", value: "\(projectStateStore.snapshot?.criticalAlerts ?? 0)")
+                            signalRow("In Progress", value: "\(projectStateStore.snapshot?.inProgressCount ?? 0)")
+                            signalRow("Completed", value: "\(projectStateStore.snapshot?.completedThisWeek ?? 0)")
                         }
                     }
                 }
                 .padding(16)
             }
-            .background(AnchorPalette.background.ignoresSafeArea())
+            .background(AnchorBackground())
             .navigationTitle("Finance")
             .navigationBarTitleDisplayMode(.inline)
             .task {
-                await loadSnapshot()
+                await projectStateStore.refresh(for: appState.environment)
             }
             .onChange(of: appState.environment) { _, _ in
-                Task { await loadSnapshot() }
+                Task { await projectStateStore.refresh(for: appState.environment, force: true) }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -135,10 +135,6 @@ struct FinanceView: View {
                 .foregroundStyle(AnchorPalette.textPrimary)
                 .fontWeight(.semibold)
         }
-    }
-
-    private func loadSnapshot() async {
-        snapshot = try? await APIClient.shared.fetchDashboardSnapshot(baseURL: appState.environment.baseURL)
     }
 
     private func formatCurrency(_ value: Double) -> String {

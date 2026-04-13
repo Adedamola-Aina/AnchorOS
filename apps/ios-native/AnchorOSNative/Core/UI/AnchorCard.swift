@@ -18,12 +18,21 @@ struct AnchorCard<Content: View>: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AnchorPalette.card)
+        .background(
+            LinearGradient(
+                colors: [
+                    AnchorPalette.card.opacity(0.98),
+                    AnchorPalette.card.opacity(0.92)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(AnchorPalette.cardBorder, lineWidth: 1)
         )
+        .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 10)
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
-

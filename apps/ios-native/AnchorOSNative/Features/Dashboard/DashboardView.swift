@@ -2,13 +2,8 @@ import SwiftUI
 
 struct DashboardView: View {
     @EnvironmentObject private var appState: AppState
-    @State private var healthStatusText: String = "Checking..."
+    @EnvironmentObject private var projectStateStore: ProjectStateStore
     @State private var selectedTheme: String = "Auto"
-    @State private var alertCount: Int = 0
-    @State private var criticalAlertCount: Int = 0
-    @State private var completedThisWeek: Int = 0
-    @State private var inProgressCount: Int = 0
-    @State private var functionCoverageText: String = "N/A"
 
     var body: some View {
         NavigationStack {
@@ -22,17 +17,15 @@ struct DashboardView: View {
                 }
                 .padding(16)
             }
-            .background(AnchorPalette.background.ignoresSafeArea())
+            .background(AnchorBackground())
             .navigationTitle("Anchor OS")
             .navigationBarTitleDisplayMode(.inline)
             .task {
-                await loadHealth()
-                await loadProjectState()
+                await projectStateStore.refresh(for: appState.environment)
             }
             .onChange(of: appState.environment) { _, _ in
                 Task {
-                    await loadHealth()
-                    await loadProjectState()
+                    await projectStateStore.refresh(for: appState.environment, force: true)
                 }
             }
         }
@@ -97,13 +90,13 @@ struct DashboardView: View {
     private var statusCard: some View {
         AnchorCard(title: "System Status", icon: "wave.3.right.circle") {
             VStack(alignment: .leading, spacing: 8) {
-                statusRow("Backend Health", value: healthStatusText)
+                statusRow("Backend Health", value: projectStateStore.healthStatus)
                 statusRow("Auth", value: appState.isAuthenticated ? "Signed in" : "Signed out")
                 statusRow("Environment", value: appState.environment.rawValue.capitalized)
-                statusRow("Alerts", value: "\(alertCount)")
-                statusRow("Critical Alerts", value: "\(criticalAlertCount)")
-                statusRow("Completed This Week", value: "\(completedThisWeek)")
-                statusRow("In Progress", value: "\(inProgressCount)")
+                statusRow("Alerts", value: "\(projectStateStore.snapshot?.alertsCount ?? 0)")
+                statusRow("Critical Alerts", value: "\(projectStateStore.snapshot?.criticalAlerts ?? 0)")
+                statusRow("Completed This Week", value: "\(projectStateStore.snapshot?.completedThisWeek ?? 0)")
+                statusRow("In Progress", value: "\(projectStateStore.snapshot?.inProgressCount ?? 0)")
                 statusRow("Fn Coverage", value: functionCoverageText)
                 Text(appState.statusMessage)
                     .font(.footnote)
@@ -141,33 +134,10 @@ struct DashboardView: View {
         .buttonStyle(.plain)
     }
 
-    private func loadHealth() async {
-        do {
-            let health = try await APIClient.shared.fetchHealth(baseURL: appState.environment.baseURL)
-            healthStatusText = health.ok ? "Healthy" : "Unhealthy"
-        } catch {
-            healthStatusText = "Unavailable"
+    private var functionCoverageText: String {
+        if let pct = projectStateStore.snapshot?.functionCoveragePct {
+            return String(format: "%.2f%%", pct)
         }
-    }
-
-    private func loadProjectState() async {
-        do {
-            let snapshot = try await APIClient.shared.fetchDashboardSnapshot(baseURL: appState.environment.baseURL)
-            alertCount = snapshot.alertsCount
-            criticalAlertCount = snapshot.criticalAlerts
-            completedThisWeek = snapshot.completedThisWeek
-            inProgressCount = snapshot.inProgressCount
-            if let pct = snapshot.functionCoveragePct {
-                functionCoverageText = String(format: "%.2f%%", pct)
-            } else {
-                functionCoverageText = "N/A"
-            }
-        } catch {
-            alertCount = 0
-            criticalAlertCount = 0
-            completedThisWeek = 0
-            inProgressCount = 0
-            functionCoverageText = "Unavailable"
-        }
+        return projectStateStore.snapshot == nil ? "Unavailable" : "N/A"
     }
 }

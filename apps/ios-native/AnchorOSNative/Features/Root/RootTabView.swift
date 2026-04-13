@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootTabView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var projectStateStore: ProjectStateStore
 
     var body: some View {
         if appState.isAuthenticated {
@@ -39,8 +40,18 @@ struct RootTabView: View {
                             Text("Settings")
                         }
                 }
+                .toolbarBackground(AnchorPalette.card.opacity(0.96), for: .tabBar)
+                .toolbarBackground(.visible, for: .tabBar)
             }
             .tint(AnchorPalette.chipActive)
+            .task {
+                await projectStateStore.refresh(for: appState.environment)
+            }
+            .onChange(of: appState.environment) { _, _ in
+                Task {
+                    await projectStateStore.refresh(for: appState.environment, force: true)
+                }
+            }
         } else {
             AuthView()
         }

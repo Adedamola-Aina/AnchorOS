@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct AnchorOSNativeApp: App {
     @StateObject private var appState: AppState
+    @StateObject private var projectStateStore = ProjectStateStore()
 
     init() {
         let state = AppState()
@@ -14,6 +15,7 @@ struct AnchorOSNativeApp: App {
         WindowGroup {
             RootTabView()
                 .environmentObject(appState)
+                .environmentObject(projectStateStore)
         }
     }
 }

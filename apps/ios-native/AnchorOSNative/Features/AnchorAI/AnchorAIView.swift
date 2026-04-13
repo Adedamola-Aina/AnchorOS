@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AnchorAIView: View {
+    @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var projectStateStore: ProjectStateStore
     @State private var selectedPrompt: String = "How much did I save?"
 
     var body: some View {
@@ -20,9 +22,9 @@ struct AnchorAIView: View {
 
                     AnchorCard(title: "Weekly Snapshot", icon: "chart.line.uptrend.xyaxis") {
                         VStack(alignment: .leading, spacing: 8) {
-                            row("Savings trend", "+12.4%")
-                            row("Budget drift", "-3.1%")
-                            row("Commitment momentum", "Stable")
+                            row("Savings trend", savingsTrendValue)
+                            row("Critical pressure", "\(projectStateStore.snapshot?.criticalAlerts ?? 0)")
+                            row("Commitment momentum", momentumValue)
                         }
                     }
 
@@ -44,9 +46,12 @@ struct AnchorAIView: View {
                 }
                 .padding(16)
             }
-            .background(AnchorPalette.background.ignoresSafeArea())
+            .background(AnchorBackground())
             .navigationTitle("Anchor")
             .navigationBarTitleDisplayMode(.inline)
+            .task {
+                await projectStateStore.refresh(for: appState.environment)
+            }
         }
     }
 
@@ -60,6 +65,16 @@ struct AnchorAIView: View {
                 .fontWeight(.semibold)
         }
         .font(.subheadline)
+    }
+
+    private var savingsTrendValue: String {
+        let completed = projectStateStore.snapshot?.completedThisWeek ?? 0
+        return completed > 0 ? "+\(completed)" : "Flat"
+    }
+
+    private var momentumValue: String {
+        let inProgress = projectStateStore.snapshot?.inProgressCount ?? 0
+        return inProgress > 2 ? "Active" : "Stable"
     }
 
     private func promptChip(_ label: String) -> some View {
