@@ -21,7 +21,6 @@ struct DashboardView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     greetingHeader
-                    AnchorSectionTabs(labels: ["Overview", "Wealth", "Activity", "Focus"])
                     wealthCard
                     tasksProgressCard
                     recentActivityCard

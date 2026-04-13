@@ -6,42 +6,59 @@ struct TasksView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @State private var selectedFilter: String = "All"
+    @State private var completedExpanded: Bool = false
 
     private let filters = ["All", "Daily", "Weekly", "Monthly", "Todo"]
 
-    private var filtered: [AnchorCommitment] {
-        guard selectedFilter != "All" else { return commitmentsStore.commitments }
-        return commitmentsStore.commitments.filter {
+    private var activeFiltered: [AnchorCommitment] {
+        let base = selectedFilter == "All" ? commitmentsStore.commitments : commitmentsStore.commitments.filter {
             $0.type.lowercased() == selectedFilter.lowercased()
         }
+        return base.filter { !$0.completed }
+    }
+
+    private var completedFiltered: [AnchorCommitment] {
+        let base = selectedFilter == "All" ? commitmentsStore.commitments : commitmentsStore.commitments.filter {
+            $0.type.lowercased() == selectedFilter.lowercased()
+        }
+        return base.filter { $0.completed }
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    AnchorSectionTabs(labels: filters)
-                        .onChange(of: selectedFilter) { _, _ in }
-
-                    HStack(spacing: 8) {
-                        ForEach(filters, id: \.self) { f in
-                            Button {
-                                selectedFilter = f
-                            } label: {
-                                Text(f)
-                                    .font(.footnote).fontWeight(.semibold)
-                                    .foregroundStyle(selectedFilter == f ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
-                                    .padding(.horizontal, 14).padding(.vertical, 8)
-                                    .background(selectedFilter == f ? AnchorPalette.chipActive : AnchorPalette.chip)
-                                    .clipShape(Capsule())
+                    // Filter chips — single row, state-bound
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(filters, id: \.self) { f in
+                                Button {
+                                    selectedFilter = f
+                                } label: {
+                                    Text(f.uppercased())
+                                        .font(.caption).fontWeight(.bold)
+                                        .foregroundStyle(selectedFilter == f ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                                        .padding(.horizontal, 16).padding(.vertical, 8)
+                                        .background(selectedFilter == f ? AnchorPalette.chipActive : AnchorPalette.chip)
+                                        .clipShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     progressCard
-                    commitmentsCard
+
+                    // Active tasks section
+                    if commitmentsStore.isLoading {
+                        ProgressView().tint(.white).frame(maxWidth: .infinity)
+                    } else {
+                        activeSectionCard
+                        if !completedFiltered.isEmpty {
+                            completedSectionCard
+                        }
+                    }
                 }
                 .padding(16)
             }
@@ -81,24 +98,61 @@ struct TasksView: View {
         }
     }
 
-    // MARK: — Commitments List
+    // MARK: — Active Tasks
 
-    private var commitmentsCard: some View {
-        AnchorCard(title: "Commitments", icon: "checkmark.circle") {
-            if commitmentsStore.isLoading {
-                ProgressView().tint(.white).frame(maxWidth: .infinity)
-            } else if filtered.isEmpty {
-                Text(selectedFilter == "All" ? "No commitments yet." : "No \(selectedFilter.lowercased()) commitments.")
+    private var activeSectionCard: some View {
+        AnchorCard(title: "Active Tasks", icon: "square.and.pencil") {
+            if activeFiltered.isEmpty {
+                Text(selectedFilter == "All" ? "All done! 🎉" : "No active \(selectedFilter.lowercased()) tasks.")
                     .foregroundStyle(AnchorPalette.textSecondary).font(.subheadline)
             } else {
                 VStack(alignment: .leading, spacing: 14) {
-                    ForEach(filtered) { task in
+                    ForEach(activeFiltered) { task in
                         taskRow(task)
                     }
                 }
             }
         }
     }
+
+    // MARK: — Completed Tasks (collapsible)
+
+    private var completedSectionCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    completedExpanded.toggle()
+                }
+            } label: {
+                HStack {
+                    Text("COMPLETED (\(completedFiltered.count))")
+                        .font(.caption).fontWeight(.bold)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                    Spacer()
+                    Image(systemName: completedExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                }
+                .padding(.horizontal, 16).padding(.vertical, 12)
+                .background(AnchorPalette.chip.opacity(0.6))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+
+            if completedExpanded {
+                AnchorCard(title: "", icon: "checkmark.circle.fill") {
+                    VStack(alignment: .leading, spacing: 14) {
+                        ForEach(completedFiltered) { task in
+                            taskRow(task)
+                        }
+                    }
+                }
+                .padding(.top, 4)
+            }
+        }
+    }
+
+    // MARK: — Task Row
 
     private func taskRow(_ task: AnchorCommitment) -> some View {
         HStack(spacing: 12) {

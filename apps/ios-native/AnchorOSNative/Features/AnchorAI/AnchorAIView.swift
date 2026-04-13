@@ -1,22 +1,41 @@
 import SwiftUI
 
-/// Anchor AI screen — Fabric briefing, weekly snapshot, and prompts.
-/// Data sources: FinanceStore + CommitmentsStore (real numbers, AI copy is aspirational)
+/// Anchor AI screen — mirrors PWA FabricView layout.
+/// Data sources: FinanceStore + CommitmentsStore (real numbers, AI logic in Sprint 3)
 struct AnchorAIView: View {
     @EnvironmentObject private var appState: AppState
-    @EnvironmentObject private var projectStateStore: ProjectStateStore
     @EnvironmentObject private var financeStore: FinanceStore
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
+    @State private var selectedMood: Int? = nil
     @State private var selectedPrompt: String = ""
 
+    private struct MoodOption: Identifiable {
+        let id: Int; let emoji: String; let label: String
+    }
+    private let moods = [
+        MoodOption(id: 1, emoji: "😔", label: "Rough"),
+        MoodOption(id: 2, emoji: "😕", label: "Okay-ish"),
+        MoodOption(id: 3, emoji: "😐", label: "Alright"),
+        MoodOption(id: 4, emoji: "🙂", label: "Good"),
+        MoodOption(id: 5, emoji: "😄", label: "Great"),
+    ]
     private let prompts = ["How much did I save?", "Risk this month", "Family spending", "Upcoming bills"]
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    AnchorSectionTabs(labels: ["Brief", "Insights", "Predictions", "Prompts"])
-                    briefCard
+                    // Header subtitle
+                    HStack {
+                        Text("\(commitmentsStore.activeCount) task\(commitmentsStore.activeCount == 1 ? "" : "s") remaining")
+                            .font(.subheadline)
+                            .foregroundStyle(AnchorPalette.textSecondary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 4)
+
+                    todayCard
+                    moodCard
                     snapshotCard
                     promptsCard
                 }
@@ -24,24 +43,85 @@ struct AnchorAIView: View {
             }
             .background(AnchorBackground())
             .navigationTitle("Anchor AI")
-            .navigationBarTitleDisplayMode(.inline)
-            .task { await projectStateStore.refresh(for: appState.environment) }
+            .navigationBarTitleDisplayMode(.large)
         }
     }
 
-    // MARK: — Brief
+    // MARK: — TODAY card (progress bar style)
 
-    private var briefCard: some View {
-        AnchorCard(title: "Today's Brief", icon: "sparkles") {
-            VStack(alignment: .leading, spacing: 8) {
-                let completionPct = Int(commitmentsStore.completionPercent * 100)
-                Text(completionPct >= 50
-                     ? "You're on track this week. Spending velocity looks steady."
-                     : "\(commitmentsStore.activeCount) commitment\(commitmentsStore.activeCount == 1 ? "" : "s") still open — you've got this.")
-                    .foregroundStyle(AnchorPalette.textPrimary)
-                Text("\(financeStore.accounts.count) account\(financeStore.accounts.count == 1 ? "" : "s") tracked • \(commitmentsStore.totalCount) commitment\(commitmentsStore.totalCount == 1 ? "" : "s")")
-                    .foregroundStyle(AnchorPalette.textSecondary)
-                    .font(.footnote)
+    private var todayCard: some View {
+        AnchorCard(title: "Today", icon: "sun.max") {
+            VStack(alignment: .leading, spacing: 10) {
+                let done = commitmentsStore.completedCount
+                let total = commitmentsStore.totalCount
+                let pct = commitmentsStore.completionPercent
+                let allDone = done == total && total > 0
+
+                // Label row
+                HStack {
+                    Text(allDone ? "All done!" : "\(done) of \(total) done")
+                        .foregroundStyle(allDone ? AnchorPalette.success : AnchorPalette.textPrimary)
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Text("\(Int(pct * 100))%")
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                        .font(.caption)
+                }
+
+                // Progress bar
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(AnchorPalette.chip)
+                            .frame(height: 8)
+                        Capsule()
+                            .fill(allDone ? AnchorPalette.success : AnchorPalette.chipActive)
+                            .frame(width: max(0, geo.size.width * pct), height: 8)
+                            .animation(.easeInOut(duration: 0.5), value: pct)
+                    }
+                }
+                .frame(height: 8)
+
+                // Remaining tasks
+                if commitmentsStore.activeCount > 0 {
+                    HStack(spacing: 8) {
+                        Image(systemName: "circle")
+                            .font(.caption)
+                            .foregroundStyle(AnchorPalette.textSecondary)
+                        Text("\(commitmentsStore.activeCount) task\(commitmentsStore.activeCount == 1 ? "" : "s") remaining")
+                            .font(.subheadline)
+                            .foregroundStyle(AnchorPalette.textSecondary)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: — Mood card
+
+    private var moodCard: some View {
+        AnchorCard(title: "How are you feeling?", icon: "face.smiling") {
+            HStack(spacing: 0) {
+                ForEach(moods) { m in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { selectedMood = m.id }
+                    } label: {
+                        VStack(spacing: 4) {
+                            Text(m.emoji)
+                                .font(.title2)
+                                .scaleEffect(selectedMood == m.id ? 1.25 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selectedMood)
+                            Text(m.label)
+                                .font(.caption2)
+                                .foregroundStyle(selectedMood == m.id ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(selectedMood == m.id ? AnchorPalette.chipActive.opacity(0.2) : Color.clear)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
     }
@@ -53,11 +133,9 @@ struct AnchorAIView: View {
             VStack(alignment: .leading, spacing: 8) {
                 row("Net worth", financeStore.netWorthFormatted)
                 row("Commitments done", "\(commitmentsStore.completedCount) / \(commitmentsStore.totalCount)")
-                row("Active remaining", "\(commitmentsStore.activeCount)")
                 row("Completion", "\(Int(commitmentsStore.completionPercent * 100))%")
                 row("Accounts tracked", "\(financeStore.accounts.count)")
                 row("Transactions (recent)", "\(financeStore.transactions.count)")
-                row("Critical alerts", "\(projectStateStore.snapshot?.criticalAlerts ?? 0)")
             }
         }
     }
@@ -73,7 +151,7 @@ struct AnchorAIView: View {
                     }
                 }
                 if !selectedPrompt.isEmpty {
-                    Text("\"\(selectedPrompt)\"")
+                    Text("Selected: \(selectedPrompt)")
                         .font(.footnote)
                         .foregroundStyle(AnchorPalette.textSecondary)
                         .italic()

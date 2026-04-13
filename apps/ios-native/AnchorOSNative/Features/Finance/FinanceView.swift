@@ -5,95 +5,158 @@ import SwiftUI
 struct FinanceView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var financeStore: FinanceStore
-    @EnvironmentObject private var projectStateStore: ProjectStateStore
-    @State private var selectedPeriod: String = "30D"
+    @State private var monthOffset: Int = 0
+
+    private var monthLabel: String {
+        guard let date = Calendar.current.date(byAdding: .month, value: monthOffset, to: Date()) else { return "" }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "MMMM yyyy"
+        return fmt.string(from: date)
+    }
+
+    /// Per-currency balance totals for the TOTAL ASSETS bar
+    private var currencyTotals: [(currency: String, symbol: String, formatted: String)] {
+        var groups: [String: Double] = [:]
+        for account in financeStore.accounts {
+            let amount = Double(account.balanceCents) / 100.0
+            groups[account.currency, default: 0] += amount
+        }
+        let numFmt = NumberFormatter()
+        numFmt.numberStyle = .decimal
+        numFmt.minimumFractionDigits = 2
+        numFmt.maximumFractionDigits = 2
+        return groups.sorted { $0.key < $1.key }.map { (currency, total) in
+            let symbol = currency == "USD" ? "$" : "₦"
+            let str = numFmt.string(from: NSNumber(value: total)) ?? "0.00"
+            return (currency, symbol, "\(symbol)\(str)")
+        }
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    AnchorSectionTabs(labels: ["Accounts", "Transactions", "Bills", "Insights"])
-                    netWorthCard
-                    accountsCard
-                    transactionsCard
-                    signalsCard
+                VStack(spacing: 0) {
+                    // TOTAL ASSETS bar
+                    totalAssetsBar
+
+                    // Full-width account card stack
+                    accountStack
+
+                    VStack(spacing: 16) {
+                        // Month navigation + search hint
+                        monthNavRow
+
+                        transactionsCard
+                    }
+                    .padding(16)
                 }
-                .padding(16)
             }
             .background(AnchorBackground())
             .navigationTitle("Finance")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Picker("Period", selection: $selectedPeriod) {
-                        Text("7D").tag("7D")
-                        Text("30D").tag("30D")
-                        Text("90D").tag("90D")
+            .navigationBarTitleDisplayMode(.large)
+        }
+    }
+
+    // MARK: — Total Assets
+
+    private var totalAssetsBar: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("TOTAL ASSETS")
+                .font(.caption).fontWeight(.bold)
+                .foregroundStyle(AnchorPalette.textSecondary)
+            if financeStore.isLoading {
+                ProgressView().tint(.white)
+            } else if currencyTotals.isEmpty {
+                Text("—").foregroundStyle(AnchorPalette.textPrimary).font(.title3)
+            } else {
+                HStack(spacing: 16) {
+                    ForEach(currencyTotals, id: \.currency) { entry in
+                        Text(entry.formatted)
+                            .font(.title3).fontWeight(.bold)
+                            .foregroundStyle(AnchorPalette.textPrimary)
                     }
-                    .pickerStyle(.menu)
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 12)
     }
 
-    // MARK: — Net Worth
+    // MARK: — Account Card Stack (full-width vertical)
 
-    private var netWorthCard: some View {
-        AnchorCard(title: "Net Position", icon: "chart.pie") {
-            VStack(alignment: .leading, spacing: 6) {
-                if financeStore.isLoading {
-                    ProgressView().tint(.white)
-                } else {
-                    Text(financeStore.netWorthFormatted)
-                        .font(.title2).fontWeight(.bold)
-                        .foregroundStyle(AnchorPalette.textPrimary)
-                    Text("Across \(financeStore.accounts.count) account\(financeStore.accounts.count == 1 ? "" : "s") • \(selectedPeriod)")
-                        .foregroundStyle(AnchorPalette.textSecondary)
-                        .font(.footnote)
-                }
-            }
-        }
-    }
-
-    // MARK: — Account Cards
-
-    private var accountsCard: some View {
-        AnchorCard(title: "Accounts", icon: "wallet.pass") {
+    private var accountStack: some View {
+        VStack(spacing: 1) {
             if financeStore.accounts.isEmpty && !financeStore.isLoading {
                 Text("No accounts yet.")
                     .foregroundStyle(AnchorPalette.textSecondary)
-                    .font(.subheadline)
+                    .padding(20)
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(Array(financeStore.accounts.enumerated()), id: \.element.resolvedId) { index, account in
-                            accountCard(account, at: index)
-                        }
-                    }
+                ForEach(Array(financeStore.accounts.enumerated()), id: \.element.resolvedId) { index, account in
+                    fullWidthAccountCard(account, at: index)
                 }
             }
         }
     }
 
-    private func accountCard(_ account: AnchorAccount, at index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(account.type.uppercased())
-                .font(.caption2).fontWeight(.bold)
-                .foregroundStyle(.white.opacity(0.75))
-            Text(account.name)
-                .foregroundStyle(.white).fontWeight(.semibold)
+    private func fullWidthAccountCard(_ account: AnchorAccount, at index: Int) -> some View {
+        HStack(alignment: .center, spacing: 0) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(account.name)
+                    .font(.body).fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                Text(account.type.uppercased())
+                    .font(.caption2).fontWeight(.bold)
+                    .foregroundStyle(.white.opacity(0.65))
+            }
             Spacer()
             Text(account.formattedBalance)
+                .font(.body).fontWeight(.bold)
                 .foregroundStyle(.white)
-                .font(.title3).fontWeight(.bold)
         }
-        .padding(14)
-        .frame(width: 190, height: 110, alignment: .leading)
+        .padding(.horizontal, 20).padding(.vertical, 16)
         .background(account.cardColor(at: index))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
-    // MARK: — Recent Transactions
+    // MARK: — Month Navigation
+
+    private var monthNavRow: some View {
+        HStack(spacing: 0) {
+            Button {
+                monthOffset -= 1
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.footnote).fontWeight(.semibold)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                    .padding(.horizontal, 12).padding(.vertical, 8)
+            }
+            .buttonStyle(.plain)
+
+            HStack(spacing: 6) {
+                Image(systemName: "calendar")
+                    .font(.caption)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                Text(monthLabel)
+                    .font(.subheadline).fontWeight(.semibold)
+                    .foregroundStyle(AnchorPalette.textPrimary)
+            }
+            .frame(maxWidth: .infinity)
+
+            Button {
+                monthOffset += 1
+            } label: {
+                Image(systemName: "chevron.right")
+                    .font(.footnote).fontWeight(.semibold)
+                    .foregroundStyle(monthOffset < 0 ? AnchorPalette.textSecondary : AnchorPalette.textSecondary.opacity(0.3))
+                    .padding(.horizontal, 12).padding(.vertical, 8)
+            }
+            .buttonStyle(.plain)
+            .disabled(monthOffset >= 0)
+        }
+        .background(AnchorPalette.chip.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    // MARK: — Transactions
 
     private var transactionsCard: some View {
         AnchorCard(title: "Recent Activity", icon: "list.bullet.rectangle") {
@@ -102,7 +165,7 @@ struct FinanceView: View {
                     .foregroundStyle(AnchorPalette.textSecondary)
                     .font(.subheadline)
             } else {
-                VStack(spacing: 10) {
+                VStack(spacing: 12) {
                     ForEach(financeStore.recentTransactions) { tx in
                         txRow(tx)
                     }
@@ -112,14 +175,46 @@ struct FinanceView: View {
     }
 
     private func txRow(_ tx: AnchorTransaction) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(alignment: .top, spacing: 12) {
+            // Category icon bubble
+            ZStack {
+                Circle()
+                    .fill(tx.type == "income" ? AnchorPalette.success.opacity(0.15) :
+                          tx.type == "transfer" ? AnchorPalette.chipActive.opacity(0.15) :
+                          AnchorPalette.danger.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                Image(systemName: tx.type == "income" ? "arrow.down.circle" :
+                      tx.type == "transfer" ? "arrow.left.arrow.right" : "bolt.fill")
+                    .font(.caption)
+                    .foregroundStyle(tx.type == "income" ? AnchorPalette.success :
+                                     tx.type == "transfer" ? AnchorPalette.chipActive :
+                                     AnchorPalette.warning)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
                 Text(tx.title)
                     .foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
-                Text("\(tx.displayDate) • \(tx.accountName ?? tx.category ?? "")")
-                    .foregroundStyle(AnchorPalette.textSecondary).font(.caption)
+                    .font(.subheadline)
+                HStack(spacing: 6) {
+                    Text(tx.displayDate)
+                        .foregroundStyle(AnchorPalette.textSecondary).font(.caption)
+                    if let cat = tx.category {
+                        Text(cat)
+                            .font(.caption2).fontWeight(.bold)
+                            .foregroundStyle(AnchorPalette.chipActive)
+                            .padding(.horizontal, 7).padding(.vertical, 2)
+                            .background(AnchorPalette.chipActive.opacity(0.15))
+                            .clipShape(Capsule())
+                    }
+                    if let acct = tx.accountName {
+                        Text(acct)
+                            .foregroundStyle(AnchorPalette.textSecondary).font(.caption)
+                    }
+                }
             }
+
             Spacer()
+
             Text(tx.formattedAmount)
                 .foregroundStyle(
                     tx.type == "income" ? AnchorPalette.success :
@@ -127,28 +222,7 @@ struct FinanceView: View {
                     AnchorPalette.danger
                 )
                 .fontWeight(.bold)
+                .font(.subheadline)
         }
-    }
-
-    // MARK: — Signals
-
-    private var signalsCard: some View {
-        AnchorCard(title: "Operational Signals", icon: "waveform.path.ecg") {
-            VStack(alignment: .leading, spacing: 8) {
-                signalRow("Alerts", value: "\(projectStateStore.snapshot?.alertsCount ?? 0)")
-                signalRow("Critical", value: "\(projectStateStore.snapshot?.criticalAlerts ?? 0)")
-                signalRow("In Progress", value: "\(projectStateStore.snapshot?.inProgressCount ?? 0)")
-                signalRow("Completed", value: "\(projectStateStore.snapshot?.completedThisWeek ?? 0)")
-            }
-        }
-    }
-
-    private func signalRow(_ name: String, value: String) -> some View {
-        HStack {
-            Text(name).foregroundStyle(AnchorPalette.textSecondary)
-            Spacer()
-            Text(value).foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
-        }
-        .font(.subheadline)
     }
 }
