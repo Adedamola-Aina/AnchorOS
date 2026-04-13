@@ -73,7 +73,7 @@ struct AnchorAIView: View {
                     }
                 }
                 if !selectedPrompt.isEmpty {
-                    Text(""\(selectedPrompt)"")
+                    Text("\"\(selectedPrompt)\"")
                         .font(.footnote)
                         .foregroundStyle(AnchorPalette.textSecondary)
                         .italic()
