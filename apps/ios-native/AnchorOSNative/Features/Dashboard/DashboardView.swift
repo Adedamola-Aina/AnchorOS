@@ -41,24 +41,14 @@ struct DashboardView: View {
     private var sectionChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                chip("Profile")
-                chip("Theme")
-                chip("Security")
-                chip("Alerts")
-                chip("AI")
-                chip("Family")
+                AnchorChip(label: "Profile")
+                AnchorChip(label: "Theme")
+                AnchorChip(label: "Security")
+                AnchorChip(label: "Alerts")
+                AnchorChip(label: "AI")
+                AnchorChip(label: "Family")
             }
         }
-    }
-
-    private func chip(_ label: String) -> some View {
-        Text(label)
-            .font(.subheadline)
-            .foregroundStyle(AnchorPalette.textSecondary)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(AnchorPalette.chip)
-            .clipShape(Capsule())
     }
 
     private var dashboardHeader: some View {
@@ -188,32 +178,5 @@ struct DashboardView: View {
             inProgressCount = 0
             functionCoverageText = "Unavailable"
         }
-    }
-}
-
-private struct AnchorCard<Content: View>: View {
-    let title: String
-    let icon: String
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 10) {
-                Image(systemName: icon)
-                    .foregroundStyle(AnchorPalette.textPrimary)
-                Text(title)
-                    .font(.headline)
-                    .foregroundStyle(AnchorPalette.textPrimary)
-            }
-            content
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AnchorPalette.card)
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(AnchorPalette.cardBorder, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }

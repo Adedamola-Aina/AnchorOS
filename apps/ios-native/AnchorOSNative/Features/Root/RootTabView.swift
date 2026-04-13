@@ -15,19 +15,19 @@ struct RootTabView: View {
                             Text("Home")
                         }
 
-                    PlaceholderView(title: "Tasks", subtitle: "Commitments migration next.")
+                    TasksView()
                         .tabItem {
                             Image(systemName: "checkmark.circle")
                             Text("Tasks")
                         }
 
-                    PlaceholderView(title: "Anchor AI", subtitle: "Fabric native migration queued.")
+                    AnchorAIView()
                         .tabItem {
                             Image(systemName: "dot.radiowaves.left.and.right")
                             Text("Anchor")
                         }
 
-                    PlaceholderView(title: "Finance", subtitle: "Finance native read path is next.")
+                    FinanceView()
                         .tabItem {
                             Image(systemName: "creditcard")
                             Text("Finance")
@@ -44,24 +44,6 @@ struct RootTabView: View {
         } else {
             AuthView()
         }
-    }
-}
-
-private struct PlaceholderView: View {
-    let title: String
-    let subtitle: String
-
-    var body: some View {
-        VStack(spacing: 12) {
-            Text(title)
-                .font(.title2)
-                .fontWeight(.bold)
-            Text(subtitle)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(AnchorPalette.background)
     }
 }
 
