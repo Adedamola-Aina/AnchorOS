@@ -4,6 +4,11 @@ struct DashboardView: View {
     @EnvironmentObject private var appState: AppState
     @State private var healthStatusText: String = "Checking..."
     @State private var selectedTheme: String = "Auto"
+    @State private var alertCount: Int = 0
+    @State private var criticalAlertCount: Int = 0
+    @State private var completedThisWeek: Int = 0
+    @State private var inProgressCount: Int = 0
+    @State private var functionCoverageText: String = "N/A"
 
     var body: some View {
         NavigationStack {
@@ -21,6 +26,13 @@ struct DashboardView: View {
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 await loadHealth()
+                await loadProjectState()
+            }
+            .onChange(of: appState.environment) { _, _ in
+                Task {
+                    await loadHealth()
+                    await loadProjectState()
+                }
             }
         }
     }
@@ -83,6 +95,11 @@ struct DashboardView: View {
                 statusRow("Backend Health", value: healthStatusText)
                 statusRow("Auth", value: appState.isAuthenticated ? "Signed in" : "Signed out")
                 statusRow("Environment", value: appState.environment.rawValue.capitalized)
+                statusRow("Alerts", value: "\(alertCount)")
+                statusRow("Critical Alerts", value: "\(criticalAlertCount)")
+                statusRow("Completed This Week", value: "\(completedThisWeek)")
+                statusRow("In Progress", value: "\(inProgressCount)")
+                statusRow("Fn Coverage", value: functionCoverageText)
                 Text(appState.statusMessage)
                     .font(.footnote)
                     .foregroundStyle(AnchorPalette.textSecondary)
@@ -125,6 +142,27 @@ struct DashboardView: View {
             healthStatusText = health.ok ? "Healthy" : "Unhealthy"
         } catch {
             healthStatusText = "Unavailable"
+        }
+    }
+
+    private func loadProjectState() async {
+        do {
+            let snapshot = try await APIClient.shared.fetchDashboardSnapshot(baseURL: appState.environment.baseURL)
+            alertCount = snapshot.alertsCount
+            criticalAlertCount = snapshot.criticalAlerts
+            completedThisWeek = snapshot.completedThisWeek
+            inProgressCount = snapshot.inProgressCount
+            if let pct = snapshot.functionCoveragePct {
+                functionCoverageText = String(format: "%.2f%%", pct)
+            } else {
+                functionCoverageText = "N/A"
+            }
+        } catch {
+            alertCount = 0
+            criticalAlertCount = 0
+            completedThisWeek = 0
+            inProgressCount = 0
+            functionCoverageText = "Unavailable"
         }
     }
 }
