@@ -1,6 +1,6 @@
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
+
 
 /// Maps artifacts/anchor-os/users/{uid}/commitments/{taskId}
 /// Schema reference: docs/FIRESTORE_SCHEMA.md §5

@@ -1,6 +1,6 @@
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
+
 
 /// Maps artifacts/anchor-os/users/{uid}/finance/{transactionId}
 /// Schema reference: docs/FIRESTORE_SCHEMA.md §3

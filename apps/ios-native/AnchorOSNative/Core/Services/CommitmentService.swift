@@ -1,5 +1,5 @@
 import FirebaseFirestore
-import FirebaseFirestoreSwift
+
 
 /// Real-time listener + write operations for the user's commitments.
 /// All reads/writes go through SecureDb — never bypass to Firestore directly.

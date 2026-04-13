@@ -1,5 +1,5 @@
 import FirebaseFirestore
-import FirebaseFirestoreSwift
+
 
 /// Real-time listener for the user's financial accounts.
 /// All reads go through SecureDb — never bypass to Firestore directly.

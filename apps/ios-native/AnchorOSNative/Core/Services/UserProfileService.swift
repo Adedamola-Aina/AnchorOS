@@ -1,5 +1,5 @@
 import FirebaseFirestore
-import FirebaseFirestoreSwift
+
 
 /// One-time fetch for the authenticated user's profile document.
 /// All reads go through SecureDb — never bypass to Firestore directly.

@@ -1,6 +1,6 @@
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
+
 
 /// Maps artifacts/anchor-os/users/{uid}/accounts/{accountId}
 /// Schema reference: docs/FIRESTORE_SCHEMA.md §2
