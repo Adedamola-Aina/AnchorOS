@@ -29,4 +29,29 @@ final class CommitmentService {
         }
         try await ref.updateData(data)
     }
+
+    func addCommitment(
+        uid: String,
+        title: String,
+        type: String,
+        domain: String,
+        timeOfDay: String?,
+        notes: String?
+    ) async throws {
+        let ref = db.commitmentsCollection(uid: uid).document()
+        var data: [String: Any] = [
+            "title": title,
+            "type": type,
+            "domain": domain,
+            "completed": false,
+            "createdAt": FieldValue.serverTimestamp()
+        ]
+        if let t = timeOfDay { data["timeOfDay"] = t }
+        if let n = notes, !n.isEmpty { data["notes"] = n }
+        try await ref.setData(data)
+    }
+
+    func deleteCommitment(uid: String, taskId: String) async throws {
+        try await db.commitmentDocument(uid: uid, taskId: taskId).delete()
+    }
 }

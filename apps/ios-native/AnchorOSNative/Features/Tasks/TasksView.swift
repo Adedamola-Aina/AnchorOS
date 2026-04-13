@@ -7,6 +7,7 @@ struct TasksView: View {
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @State private var selectedFilter: String = "All"
     @State private var completedExpanded: Bool = false
+    @State private var showAddCommitment = false
 
     private let filters = ["All", "Daily", "Weekly", "Monthly", "Todo"]
 
@@ -65,6 +66,21 @@ struct TasksView: View {
             .background(AnchorBackground())
             .navigationTitle("Tasks")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAddCommitment = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                    }
+                }
+            }
+            .sheet(isPresented: $showAddCommitment) {
+                AddCommitmentSheet()
+                    .environmentObject(commitmentsStore)
+            }
         }
     }
 
@@ -196,6 +212,13 @@ struct TasksView: View {
                 }
             }
             Spacer()
+        }
+        .contextMenu {
+            Button(role: .destructive) {
+                Task { try? await commitmentsStore.deleteCommitment(taskId: task.resolvedId) }
+            } label: {
+                Label("Delete Task", systemImage: "trash")
+            }
         }
     }
 }

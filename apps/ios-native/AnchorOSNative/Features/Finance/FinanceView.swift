@@ -6,6 +6,10 @@ struct FinanceView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var financeStore: FinanceStore
     @State private var monthOffset: Int = 0
+    @State private var showAddTransaction = false
+    @State private var showAddAccount = false
+    @State private var showDeleteAccountAlert = false
+    @State private var accountToDelete: AnchorAccount? = nil
 
     private var monthLabel: String {
         guard let date = Calendar.current.date(byAdding: .month, value: monthOffset, to: Date()) else { return "" }
@@ -36,16 +40,10 @@ struct FinanceView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 0) {
-                    // TOTAL ASSETS bar
                     totalAssetsBar
-
-                    // Full-width account card stack
                     accountStack
-
                     VStack(spacing: 16) {
-                        // Month navigation + search hint
                         monthNavRow
-
                         transactionsCard
                     }
                     .padding(16)
@@ -54,6 +52,45 @@ struct FinanceView: View {
             .background(AnchorBackground())
             .navigationTitle("Finance")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button { showAddTransaction = true } label: {
+                            Label("Add Transaction", systemImage: "plus.circle")
+                        }
+                        Button { showAddAccount = true } label: {
+                            Label("New Account", systemImage: "creditcard.fill")
+                        }
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(AnchorPalette.chipActive)
+                    }
+                }
+            }
+            .sheet(isPresented: $showAddTransaction) {
+                AddTransactionSheet()
+                    .environmentObject(financeStore)
+            }
+            .sheet(isPresented: $showAddAccount) {
+                AddAccountSheet()
+                    .environmentObject(financeStore)
+            }
+            .alert("Delete Account?", isPresented: $showDeleteAccountAlert, presenting: accountToDelete) { acc in
+                Button("Delete", role: .destructive) {
+                    Task {
+                        do {
+                            try await financeStore.deleteAccount(accountId: acc.resolvedId)
+                            ToastStore.shared.show("Account removed", style: .info)
+                        } catch {
+                            ToastStore.shared.show("Failed to remove account", style: .error)
+                        }
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: { acc in
+                Text("Remove \"\(acc.name)\"? Transactions will remain in history.")
+            }
         }
     }
 
@@ -115,6 +152,14 @@ struct FinanceView: View {
         }
         .padding(.horizontal, 20).padding(.vertical, 16)
         .background(account.cardColor(at: index))
+        .contextMenu {
+            Button(role: .destructive) {
+                accountToDelete = account
+                showDeleteAccountAlert = true
+            } label: {
+                Label("Remove Account", systemImage: "trash")
+            }
+        }
     }
 
     // MARK: — Month Navigation
@@ -223,6 +268,13 @@ struct FinanceView: View {
                 )
                 .fontWeight(.bold)
                 .font(.subheadline)
+        }
+        .contextMenu {
+            Button(role: .destructive) {
+                Task { try? await financeStore.deleteTransaction(transactionId: tx.resolvedId) }
+            } label: {
+                Label("Remove Transaction", systemImage: "trash")
+            }
         }
     }
 }

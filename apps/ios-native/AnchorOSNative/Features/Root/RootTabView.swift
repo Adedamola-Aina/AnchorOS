@@ -9,42 +9,47 @@ struct RootTabView: View {
 
     var body: some View {
         if appState.isAuthenticated {
-            VStack(spacing: 0) {
-                EnvironmentBanner(environment: appState.environment)
+            ZStack(alignment: .bottom) {
+                VStack(spacing: 0) {
+                    EnvironmentBanner(environment: appState.environment)
 
-                TabView {
-                    DashboardView()
-                        .tabItem {
-                            Image(systemName: "house")
-                            Text("Home")
-                        }
+                    TabView {
+                        DashboardView()
+                            .tabItem {
+                                Image(systemName: "house")
+                                Text("Home")
+                            }
 
-                    TasksView()
-                        .tabItem {
-                            Image(systemName: "checkmark.circle")
-                            Text("Tasks")
-                        }
+                        TasksView()
+                            .tabItem {
+                                Image(systemName: "checkmark.circle")
+                                Text("Tasks")
+                            }
 
-                    AnchorAIView()
-                        .tabItem {
-                            Image(systemName: "dot.radiowaves.left.and.right")
-                            Text("Anchor")
-                        }
+                        AnchorAIView()
+                            .tabItem {
+                                Image(systemName: "dot.radiowaves.left.and.right")
+                                Text("Anchor")
+                            }
 
-                    FinanceView()
-                        .tabItem {
-                            Image(systemName: "creditcard")
-                            Text("Finance")
-                        }
+                        FinanceView()
+                            .tabItem {
+                                Image(systemName: "creditcard")
+                                Text("Finance")
+                            }
 
-                    SettingsView()
-                        .tabItem {
-                            Image(systemName: "gearshape")
-                            Text("Settings")
-                        }
+                        SettingsView()
+                            .tabItem {
+                                Image(systemName: "gearshape")
+                                Text("Settings")
+                            }
+                    }
+                    .toolbarBackground(AnchorPalette.card.opacity(0.96), for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
                 }
-                .toolbarBackground(AnchorPalette.card.opacity(0.96), for: .tabBar)
-                .toolbarBackground(.visible, for: .tabBar)
+
+                // Global toast overlay — sits above tab bar
+                AnchorToastOverlay()
             }
             .tint(AnchorPalette.chipActive)
             .task {

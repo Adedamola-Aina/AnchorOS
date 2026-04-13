@@ -7,6 +7,7 @@ import FirebaseAuth
 final class UserProfileStore: ObservableObject {
     @Published private(set) var profile: AnchorUserProfile?
 
+    private var uid: String?
     private let service = UserProfileService()
 
     /// Resolves display name: Firestore doc → Firebase Auth displayName → email prefix → "You"
@@ -29,10 +30,19 @@ final class UserProfileStore: ObservableObject {
     var mfaEnabled: Bool { profile?.mfaEnabled ?? false }
 
     func start(uid: String) async {
+        self.uid = uid
         profile = await service.fetch(uid: uid)
     }
 
     func stop() {
         profile = nil
+        uid = nil
+    }
+
+    func updateDisplayName(_ name: String) async throws {
+        guard let uid else { return }
+        try await service.updateDisplayName(uid: uid, name: name)
+        // Refresh profile
+        profile = await service.fetch(uid: uid)
     }
 }

@@ -53,7 +53,17 @@ final class CommitmentsStore: ObservableObject {
         do {
             try await service.toggleCompleted(uid: uid, taskId: taskId, completed: newValue)
         } catch {
-            // Listener will reconcile state automatically on failure
+            // Listener will reconcile state on failure
         }
+    }
+
+    func addCommitment(title: String, type: String, domain: String, timeOfDay: String?, notes: String?) async throws {
+        guard let uid else { return }
+        try await service.addCommitment(uid: uid, title: title, type: type, domain: domain, timeOfDay: timeOfDay, notes: notes)
+    }
+
+    func deleteCommitment(taskId: String) async throws {
+        guard let uid else { return }
+        try await service.deleteCommitment(uid: uid, taskId: taskId)
     }
 }

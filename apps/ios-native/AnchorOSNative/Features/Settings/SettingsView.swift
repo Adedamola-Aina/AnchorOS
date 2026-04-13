@@ -7,6 +7,8 @@ struct SettingsView: View {
     @EnvironmentObject private var userProfileStore: UserProfileStore
     @State private var fontSize: String = "Default"
     @State private var highContrast: Bool = false
+    @State private var editingName = false
+    @State private var nameInput = ""
 
     var body: some View {
         NavigationStack {
@@ -31,7 +33,51 @@ struct SettingsView: View {
     private var profileCard: some View {
         AnchorCard(title: "Profile", icon: "person.circle") {
             VStack(alignment: .leading, spacing: 10) {
-                row("Display Name", userProfileStore.displayName)
+                // Editable display name row
+                HStack {
+                    Text("Display Name")
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                        .font(.subheadline)
+                    Spacer()
+                    if editingName {
+                        TextField("Name", text: $nameInput)
+                            .multilineTextAlignment(.trailing)
+                            .font(.subheadline)
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                            .submitLabel(.done)
+                            .onSubmit {
+                                Task {
+                                    try? await userProfileStore.updateDisplayName(nameInput)
+                                    editingName = false
+                                    ToastStore.shared.show("Name updated", style: .success)
+                                }
+                            }
+                        Button("Save") {
+                            Task {
+                                try? await userProfileStore.updateDisplayName(nameInput)
+                                editingName = false
+                                ToastStore.shared.show("Name updated", style: .success)
+                            }
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AnchorPalette.chipActive)
+                    } else {
+                        Button {
+                            nameInput = userProfileStore.displayName
+                            editingName = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text(userProfileStore.displayName)
+                                    .foregroundStyle(AnchorPalette.textPrimary)
+                                    .font(.subheadline)
+                                Image(systemName: "pencil")
+                                    .font(.caption)
+                                    .foregroundStyle(AnchorPalette.textSecondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
                 row("Email", userProfileStore.email.isEmpty ? "—" : userProfileStore.email)
                 row("Sign-in Method", "Email & Password")
                 row("Currency", userProfileStore.currency)

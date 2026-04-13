@@ -9,6 +9,7 @@ final class FinanceStore: ObservableObject {
     @Published private(set) var transactions: [AnchorTransaction] = []
     @Published private(set) var isLoading = true
 
+    private var uid: String?
     private let accountService = AccountService()
     private let transactionService = TransactionService()
     private var accountsListener: ListenerRegistration?
@@ -36,6 +37,7 @@ final class FinanceStore: ObservableObject {
     // MARK: — Lifecycle
 
     func start(uid: String) {
+        self.uid = uid
         isLoading = true
         accountsListener = accountService.listen(uid: uid) { [weak self] accounts in
             Task { @MainActor in
@@ -55,8 +57,44 @@ final class FinanceStore: ObservableObject {
         transactionsListener?.remove()
         accountsListener = nil
         transactionsListener = nil
+        uid = nil
         accounts = []
         transactions = []
         isLoading = true
+    }
+
+    // MARK: — Write: Accounts
+
+    func addAccount(name: String, type: String, currency: String, balanceCents: Int) async throws {
+        guard let uid else { return }
+        try await accountService.addAccount(uid: uid, name: name, type: type, currency: currency, balanceCents: balanceCents)
+    }
+
+    func deleteAccount(accountId: String) async throws {
+        guard let uid else { return }
+        try await accountService.deleteAccount(uid: uid, accountId: accountId)
+    }
+
+    // MARK: — Write: Transactions
+
+    func addTransaction(
+        title: String,
+        amountCents: Int,
+        type: String,
+        category: String?,
+        accountId: String,
+        currency: String
+    ) async throws {
+        guard let uid else { return }
+        let accountName = accounts.first(where: { $0.resolvedId == accountId })?.name
+        try await transactionService.addTransaction(
+            uid: uid, title: title, amountCents: amountCents, type: type,
+            category: category, accountId: accountId, accountName: accountName, currency: currency
+        )
+    }
+
+    func deleteTransaction(transactionId: String) async throws {
+        guard let uid else { return }
+        try await transactionService.deleteTransaction(uid: uid, transactionId: transactionId)
     }
 }
