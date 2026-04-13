@@ -5,6 +5,8 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var userProfileStore: UserProfileStore
+    @EnvironmentObject private var familyStore: FamilyStore
+    @EnvironmentObject private var financeStore: FinanceStore
     @State private var fontSize: String = "Default"
     @State private var highContrast: Bool = false
     @State private var editingName = false
@@ -16,6 +18,7 @@ struct SettingsView: View {
                 VStack(spacing: 16) {
                     AnchorSectionTabs(labels: ["Profile", "Theme", "Security", "Alerts", "AI", "Family"])
                     profileCard
+                    familyNavCard
                     appearanceCard
                     securityCard
                     signOutCard
@@ -84,6 +87,57 @@ struct SettingsView: View {
                 row("MFA", userProfileStore.mfaEnabled ? "Enabled" : "Disabled")
             }
         }
+    }
+
+    // MARK: — Family Nav
+
+    private var familyNavCard: some View {
+        NavigationLink(destination: FamilyView()
+            .environmentObject(familyStore)
+            .environmentObject(userProfileStore)
+            .environmentObject(financeStore)
+        ) {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(AnchorPalette.chipActive.opacity(0.15))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "person.2.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(AnchorPalette.chipActive)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Family Mode")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(AnchorPalette.textPrimary)
+                    Text(familyStore.hasConnection
+                         ? "Connected with \(familyStore.partnerName)"
+                         : "Invite a family member")
+                        .font(.caption)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                }
+
+                Spacer()
+
+                if familyStore.hasConnection {
+                    HStack(spacing: 4) {
+                        Circle().fill(AnchorPalette.success).frame(width: 8, height: 8)
+                        Text("Active")
+                            .font(.caption2).fontWeight(.bold)
+                            .foregroundStyle(AnchorPalette.success)
+                    }
+                }
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+            }
+            .padding(16)
+            .background(AnchorPalette.chip.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: — Appearance

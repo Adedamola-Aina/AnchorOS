@@ -7,6 +7,7 @@ struct AnchorOSNativeApp: App {
     @StateObject private var financeStore = FinanceStore()
     @StateObject private var commitmentsStore = CommitmentsStore()
     @StateObject private var userProfileStore = UserProfileStore()
+    @StateObject private var familyStore = FamilyStore()
 
     init() {
         let state = AppState()
@@ -22,14 +23,17 @@ struct AnchorOSNativeApp: App {
                 .environmentObject(financeStore)
                 .environmentObject(commitmentsStore)
                 .environmentObject(userProfileStore)
+                .environmentObject(familyStore)
                 .onChange(of: appState.isAuthenticated) { _, authenticated in
                     if authenticated, let uid = appState.currentUID {
                         financeStore.start(uid: uid)
                         commitmentsStore.start(uid: uid)
+                        familyStore.start(uid: uid)
                         Task { await userProfileStore.start(uid: uid) }
                     } else {
                         financeStore.stop()
                         commitmentsStore.stop()
+                        familyStore.stop()
                         userProfileStore.stop()
                     }
                 }
@@ -38,6 +42,7 @@ struct AnchorOSNativeApp: App {
                     if appState.isAuthenticated, let uid = appState.currentUID {
                         financeStore.start(uid: uid)
                         commitmentsStore.start(uid: uid)
+                        familyStore.start(uid: uid)
                         await userProfileStore.start(uid: uid)
                     }
                 }

@@ -1,0 +1,99 @@
+import FirebaseFirestore
+import FirebaseFunctions
+
+/// FamilyService — Cloud Function calls + Firestore listeners for Family Mode.
+///
+/// All Firestore reads go through SecureDb. Cloud Functions are called via
+/// FirebaseFunctions — the server enforces all security rules.
+final class FamilyService {
+    private let db = SecureDb.shared
+    private let functions = Functions.functions()
+
+    // MARK: — Active Connection Listener
+
+    /// Subscribe to the active family connection for `uid`.
+    /// Mirrors `subscribeToActiveFamilyConnection` in the PWA.
+    /// The PWA runs two queries (ownerUid + memberUid); we do the same.
+    func subscribeToConnection(
+        uid: String,
+        onChange: @escaping (AnchorFamilyConnection?) -> Void
+    ) -> [ListenerRegistration] {
+        let col = db.familyConnectionsCollection
+        var ownerResult: AnchorFamilyConnection?
+        var memberResult: AnchorFamilyConnection?
+
+        let emit = {
+            onChange(ownerResult ?? memberResult)
+        }
+
+        let ownerListener = col
+            .whereField("ownerUid", isEqualTo: uid)
+            .whereField("status", isEqualTo: "active")
+            .addSnapshotListener { snapshot, _ in
+                ownerResult = snapshot?.documents.first.flatMap {
+                    try? $0.data(as: AnchorFamilyConnection.self)
+                }
+                emit()
+            }
+
+        let memberListener = col
+            .whereField("memberUid", isEqualTo: uid)
+            .whereField("status", isEqualTo: "active")
+            .addSnapshotListener { snapshot, _ in
+                memberResult = snapshot?.documents.first.flatMap {
+                    try? $0.data(as: AnchorFamilyConnection.self)
+                }
+                emit()
+            }
+
+        return [ownerListener, memberListener]
+    }
+
+    // MARK: — Cloud Function Calls
+
+    /// Send a family invitation to `recipientEmail`.
+    /// Calls `createFamilyInvitation` Cloud Function.
+    func createInvitation(ownerName: String, recipientEmail: String) async throws {
+        let callable = functions.httpsCallable("createFamilyInvitation")
+        _ = try await callable.call([
+            "recipientEmail": recipientEmail,
+            "ownerName": ownerName
+        ] as [String: Any])
+    }
+
+    /// Accept a family invitation with the 6-digit `token`.
+    /// Calls `acceptInvitation` Cloud Function.
+    func acceptInvitation(token: String) async throws {
+        let callable = functions.httpsCallable("acceptInvitation")
+        _ = try await callable.call(["inviteToken": token] as [String: Any])
+    }
+
+    /// Share or unshare an account with the connected family member.
+    /// Calls `shareAccount` Cloud Function.
+    func shareAccount(accountId: String, share: Bool) async throws {
+        let callable = functions.httpsCallable("shareAccount")
+        _ = try await callable.call([
+            "accountId": accountId,
+            "share": share
+        ] as [String: Any])
+    }
+
+    /// Disconnect from the family connection.
+    /// Calls `disconnectFamily` Cloud Function.
+    /// `type`: "remove_member" (owner removes) | "leave" (member leaves)
+    func disconnectFamily(type: String) async throws {
+        let callable = functions.httpsCallable("disconnectFamily")
+        _ = try await callable.call(["type": type] as [String: Any])
+    }
+
+    // MARK: — Mood Persistence
+
+    /// Write today's mood to Firestore fabric/mood doc.
+    func saveMood(uid: String, mood: String) async throws {
+        let data: [String: Any] = [
+            "mood": mood,
+            "recordedAt": FieldValue.serverTimestamp()
+        ]
+        try await db.userMoodDocument(uid: uid).setData(data, merge: true)
+    }
+}

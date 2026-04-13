@@ -35,4 +35,17 @@ final class SecureDb {
     func commitmentsCollection(uid: String) -> CollectionReference {
         db.collection("\(Self.root)/users/\(uid)/commitments")
     }
+
+    // MARK: — Family (root-level collections, not uid-scoped)
+
+    /// `artifacts/anchor-os/family_connections` — queried by ownerUid or memberUid
+    var familyConnectionsCollection: CollectionReference {
+        db.collection("\(Self.root)/family_connections")
+    }
+
+    // MARK: — Mood (user-scoped)
+
+    func userMoodDocument(uid: String) -> DocumentReference {
+        db.document("\(Self.root)/users/\(uid)/fabric/mood")
+    }
 }

@@ -9,6 +9,8 @@ struct AnchorAIView: View {
     @State private var selectedMood: Int? = nil
     @State private var selectedPrompt: String = ""
 
+    private let moodService = FamilyService()
+
     private struct MoodOption: Identifiable {
         let id: Int; let emoji: String; let label: String
     }
@@ -105,6 +107,11 @@ struct AnchorAIView: View {
                 ForEach(moods) { m in
                     Button {
                         withAnimation(.easeInOut(duration: 0.2)) { selectedMood = m.id }
+                        if let uid = appState.currentUID {
+                            Task {
+                                try? await moodService.saveMood(uid: uid, mood: m.label.lowercased())
+                            }
+                        }
                     } label: {
                         VStack(spacing: 4) {
                             Text(m.emoji)
