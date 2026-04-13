@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseAuth
+import FirebaseCore
 
 enum AppEnvironment: String, CaseIterable {
     case development
@@ -39,11 +40,17 @@ final class AppState: ObservableObject {
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     deinit {
-        AuthService.shared.removeStateListener(authStateHandle)
+        if FirebaseApp.app() != nil {
+            AuthService.shared.removeStateListener(authStateHandle)
+        }
     }
 
     func bootstrap() {
         statusMessage = FirebaseBootstrap.configure(environment: environment)
+        guard FirebaseApp.app() != nil else {
+            isAuthenticated = false
+            return
+        }
         bindAuthListener()
         if AuthService.shared.currentUserID() != nil {
             isAuthenticated = true
@@ -51,6 +58,10 @@ final class AppState: ObservableObject {
     }
 
     func signIn(email: String, password: String) async {
+        guard FirebaseApp.app() != nil else {
+            statusMessage = "Firebase not configured. Check GoogleService plist files."
+            return
+        }
         guard !email.isEmpty, !password.isEmpty else {
             statusMessage = "Email and password are required."
             return
@@ -67,6 +78,10 @@ final class AppState: ObservableObject {
     }
 
     func signOut() {
+        guard FirebaseApp.app() != nil else {
+            isAuthenticated = false
+            return
+        }
         do {
             try AuthService.shared.signOut()
             isAuthenticated = false
