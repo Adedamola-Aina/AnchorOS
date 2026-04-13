@@ -53,4 +53,21 @@ final class TransactionService {
         try await db.financeCollection(uid: uid).document(transactionId)
             .updateData(["isSoftDeleted": true])
     }
+
+    func updateTransaction(
+        uid: String,
+        transactionId: String,
+        title: String,
+        amountCents: Int,
+        type: String,
+        category: String?
+    ) async throws {
+        var data: [String: Any] = [
+            "title": title,
+            "amountCents": amountCents,
+            "type": type
+        ]
+        if let cat = category { data["category"] = cat }
+        try await db.financeCollection(uid: uid).document(transactionId).updateData(data)
+    }
 }

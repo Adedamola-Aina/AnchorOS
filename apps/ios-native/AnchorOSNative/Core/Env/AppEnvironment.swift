@@ -93,6 +93,31 @@ final class AppState: ObservableObject {
         }
     }
 
+    func signUp(email: String, password: String, displayName: String) async {
+        guard FirebaseApp.app() != nil else {
+            statusMessage = "Firebase not configured. Check GoogleService plist files."
+            return
+        }
+        guard !email.isEmpty, !password.isEmpty else {
+            statusMessage = "Email and password are required."
+            return
+        }
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            if !displayName.isEmpty {
+                let req = result.user.createProfileChangeRequest()
+                req.displayName = displayName
+                try await req.commitChanges()
+            }
+            statusMessage = "Account created."
+            isAuthenticated = true
+        } catch {
+            statusMessage = "Sign up failed: \(error.localizedDescription)"
+        }
+    }
+
     func setEnvironment(_ newEnvironment: AppEnvironment) {
         environment = newEnvironment
         statusMessage = "Environment set to \(newEnvironment.rawValue). Restart app to reload Firebase config."

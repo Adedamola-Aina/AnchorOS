@@ -43,4 +43,13 @@ final class AccountService {
     func deleteAccount(uid: String, accountId: String) async throws {
         try await db.accountsCollection(uid: uid).document(accountId).updateData(["isArchived": true])
     }
+
+    func updateAccount(uid: String, accountId: String, name: String, type: String, currency: String, balanceCents: Int) async throws {
+        try await db.accountsCollection(uid: uid).document(accountId).updateData([
+            "name": name,
+            "type": type,
+            "currency": currency,
+            "balanceCents": balanceCents
+        ] as [String: Any])
+    }
 }

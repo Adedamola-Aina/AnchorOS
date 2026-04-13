@@ -97,4 +97,14 @@ final class FinanceStore: ObservableObject {
         guard let uid else { return }
         try await transactionService.deleteTransaction(uid: uid, transactionId: transactionId)
     }
+
+    func updateAccount(accountId: String, name: String, type: String, currency: String, balanceCents: Int) async throws {
+        guard let uid else { return }
+        try await accountService.updateAccount(uid: uid, accountId: accountId, name: name, type: type, currency: currency, balanceCents: balanceCents)
+    }
+
+    func updateTransaction(transactionId: String, title: String, amountCents: Int, type: String, category: String?) async throws {
+        guard let uid else { return }
+        try await transactionService.updateTransaction(uid: uid, transactionId: transactionId, title: title, amountCents: amountCents, type: type, category: category)
+    }
 }

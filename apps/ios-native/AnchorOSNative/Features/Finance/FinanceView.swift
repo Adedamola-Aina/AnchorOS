@@ -10,6 +10,7 @@ struct FinanceView: View {
     @State private var showAddAccount = false
     @State private var showDeleteAccountAlert = false
     @State private var accountToDelete: AnchorAccount? = nil
+    @State private var txToEdit: AnchorTransaction? = nil
 
     private var monthLabel: String {
         guard let date = Calendar.current.date(byAdding: .month, value: monthOffset, to: Date()) else { return "" }
@@ -76,6 +77,10 @@ struct FinanceView: View {
                 AddAccountSheet()
                     .environmentObject(financeStore)
             }
+            .sheet(item: $txToEdit) { tx in
+                EditTransactionSheet(transaction: tx)
+                    .environmentObject(financeStore)
+            }
             .alert("Delete Account?", isPresented: $showDeleteAccountAlert, presenting: accountToDelete) { acc in
                 Button("Delete", role: .destructive) {
                     Task {
@@ -129,7 +134,13 @@ struct FinanceView: View {
                     .padding(20)
             } else {
                 ForEach(Array(financeStore.accounts.enumerated()), id: \.element.resolvedId) { index, account in
-                    fullWidthAccountCard(account, at: index)
+                    NavigationLink(destination:
+                        AccountDetailView(account: account, accountIndex: index)
+                            .environmentObject(financeStore)
+                    ) {
+                        fullWidthAccountCard(account, at: index)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -270,6 +281,9 @@ struct FinanceView: View {
                 .font(.subheadline)
         }
         .contextMenu {
+            Button { txToEdit = tx } label: {
+                Label("Edit Transaction", systemImage: "pencil")
+            }
             Button(role: .destructive) {
                 Task { try? await financeStore.deleteTransaction(transactionId: tx.resolvedId) }
             } label: {
