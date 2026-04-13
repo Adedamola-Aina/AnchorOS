@@ -24,4 +24,8 @@ final class UserProfileService {
         changeRequest?.displayName = name
         try await changeRequest?.commitChanges()
     }
+
+    func updateCurrency(uid: String, currency: String) async throws {
+        try await db.userDocument(uid: uid).setData(["currency": currency], merge: true)
+    }
 }

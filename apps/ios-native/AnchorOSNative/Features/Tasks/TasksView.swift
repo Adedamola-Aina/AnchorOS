@@ -8,6 +8,7 @@ struct TasksView: View {
     @State private var selectedFilter: String = "All"
     @State private var completedExpanded: Bool = false
     @State private var showAddCommitment = false
+    @State private var taskToEdit: AnchorCommitment?
 
     private let filters = ["All", "Daily", "Weekly", "Monthly", "Todo"]
 
@@ -79,6 +80,10 @@ struct TasksView: View {
             }
             .sheet(isPresented: $showAddCommitment) {
                 AddCommitmentSheet()
+                    .environmentObject(commitmentsStore)
+            }
+            .sheet(item: $taskToEdit) { task in
+                EditCommitmentSheet(commitment: task)
                     .environmentObject(commitmentsStore)
             }
         }
@@ -214,6 +219,11 @@ struct TasksView: View {
             Spacer()
         }
         .contextMenu {
+            Button {
+                taskToEdit = task
+            } label: {
+                Label("Edit Task", systemImage: "pencil")
+            }
             Button(role: .destructive) {
                 Task { try? await commitmentsStore.deleteCommitment(taskId: task.resolvedId) }
             } label: {

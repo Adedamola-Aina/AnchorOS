@@ -45,4 +45,10 @@ final class UserProfileStore: ObservableObject {
         // Refresh profile
         profile = await service.fetch(uid: uid)
     }
+
+    func updateCurrency(_ currency: String) async throws {
+        guard let uid else { return }
+        try await service.updateCurrency(uid: uid, currency: currency)
+        profile = await service.fetch(uid: uid)
+    }
 }

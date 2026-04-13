@@ -11,6 +11,9 @@ struct SettingsView: View {
     @State private var highContrast: Bool = false
     @State private var editingName = false
     @State private var nameInput = ""
+    @State private var showCurrencyPicker = false
+
+    private let currencies = ["NGN", "USD", "GBP", "EUR", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"]
 
     var body: some View {
         NavigationStack {
@@ -83,7 +86,41 @@ struct SettingsView: View {
                 }
                 row("Email", userProfileStore.email.isEmpty ? "—" : userProfileStore.email)
                 row("Sign-in Method", "Email & Password")
-                row("Currency", userProfileStore.currency)
+                // Currency picker
+                HStack {
+                    Text("Currency")
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                        .font(.subheadline)
+                    Spacer()
+                    Menu {
+                        ForEach(currencies, id: \.self) { c in
+                            Button {
+                                Task {
+                                    try? await userProfileStore.updateCurrency(c)
+                                    ToastStore.shared.show("Currency updated to \(c)", style: .success)
+                                }
+                            } label: {
+                                HStack {
+                                    Text(c)
+                                    if c == userProfileStore.currency {
+                                        Spacer()
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(userProfileStore.currency)
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                                .fontWeight(.semibold)
+                                .font(.subheadline)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption2)
+                                .foregroundStyle(AnchorPalette.textSecondary)
+                        }
+                    }
+                }
                 row("MFA", userProfileStore.mfaEnabled ? "Enabled" : "Disabled")
             }
         }

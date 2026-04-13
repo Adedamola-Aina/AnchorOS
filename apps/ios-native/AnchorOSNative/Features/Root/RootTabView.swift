@@ -7,8 +7,24 @@ struct RootTabView: View {
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @EnvironmentObject private var userProfileStore: UserProfileStore
 
+    @State private var needsOnboarding: Bool = !UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+
     var body: some View {
-        if appState.isAuthenticated {
+        if appState.isAuthenticated && needsOnboarding {
+            OnboardingView()
+                .environmentObject(appState)
+                .environmentObject(userProfileStore)
+                .environmentObject(financeStore)
+                .environmentObject(commitmentsStore)
+                .onChange(of: UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")) { _, completed in
+                    if completed { needsOnboarding = false }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+                    if UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") {
+                        needsOnboarding = false
+                    }
+                }
+        } else if appState.isAuthenticated {
             ZStack(alignment: .bottom) {
                 VStack(spacing: 0) {
                     EnvironmentBanner(environment: appState.environment)

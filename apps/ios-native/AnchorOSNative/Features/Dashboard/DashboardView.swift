@@ -9,6 +9,9 @@ struct DashboardView: View {
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @EnvironmentObject private var userProfileStore: UserProfileStore
 
+    @State private var showAddTransaction = false
+    @State private var showAddCommitment = false
+
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         if hour < 12 { return "Good morning" }
@@ -31,6 +34,34 @@ struct DashboardView: View {
             .background(AnchorBackground())
             .navigationTitle("Anchor OS")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button {
+                            showAddTransaction = true
+                        } label: {
+                            Label("Add Transaction", systemImage: "plus.circle")
+                        }
+                        Button {
+                            showAddCommitment = true
+                        } label: {
+                            Label("Add Commitment", systemImage: "checkmark.circle")
+                        }
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                    }
+                }
+            }
+            .sheet(isPresented: $showAddTransaction) {
+                AddTransactionSheet()
+                    .environmentObject(financeStore)
+            }
+            .sheet(isPresented: $showAddCommitment) {
+                AddCommitmentSheet()
+                    .environmentObject(commitmentsStore)
+            }
             .task { await projectStateStore.refresh(for: appState.environment) }
             .onChange(of: appState.environment) { _, _ in
                 Task { await projectStateStore.refresh(for: appState.environment, force: true) }

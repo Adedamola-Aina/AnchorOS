@@ -66,4 +66,9 @@ final class CommitmentsStore: ObservableObject {
         guard let uid else { return }
         try await service.deleteCommitment(uid: uid, taskId: taskId)
     }
+
+    func updateCommitment(taskId: String, title: String, type: String, domain: String, timeOfDay: String?, notes: String?) async throws {
+        guard let uid else { return }
+        try await service.updateCommitment(uid: uid, taskId: taskId, title: title, type: type, domain: domain, timeOfDay: timeOfDay, notes: notes)
+    }
 }
