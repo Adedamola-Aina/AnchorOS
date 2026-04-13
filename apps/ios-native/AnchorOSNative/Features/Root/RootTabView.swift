@@ -18,6 +18,7 @@ struct RootTabView: View {
                         Text("Settings")
                     }
             }
+            .tint(AnchorPalette.chipActive)
         } else {
             AuthView()
         }

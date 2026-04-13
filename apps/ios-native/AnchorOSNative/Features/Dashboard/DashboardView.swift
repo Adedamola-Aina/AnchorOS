@@ -3,23 +3,120 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject private var appState: AppState
     @State private var healthStatusText: String = "Checking..."
+    @State private var selectedTheme: String = "Auto"
 
     var body: some View {
         NavigationStack {
-            List {
-                Section("Environment") {
-                    Text(appState.environment.rawValue.capitalized)
+            ScrollView {
+                VStack(spacing: 16) {
+                    dashboardHeader
+                    profileCard
+                    appearanceCard
+                    statusCard
                 }
-
-                Section("Backend Health") {
-                    Text(healthStatusText)
-                }
+                .padding(16)
             }
-            .navigationTitle("Dashboard")
+            .background(AnchorPalette.background.ignoresSafeArea())
+            .navigationTitle("Anchor OS")
+            .navigationBarTitleDisplayMode(.inline)
             .task {
                 await loadHealth()
             }
         }
+    }
+
+    private var dashboardHeader: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(appState.environment.rawValue.uppercased() + " ENVIRONMENT")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundStyle(AnchorPalette.textSecondary)
+
+            Text("Welcome back")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(AnchorPalette.textPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var profileCard: some View {
+        AnchorCard(title: "Profile", icon: "person.crop.circle") {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Alex Owner")
+                    .font(.headline)
+                    .foregroundStyle(AnchorPalette.textPrimary)
+                Text("test-owner")
+                    .font(.subheadline)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                Text("EMAIL & PASSWORD")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(AnchorPalette.chip)
+                    .clipShape(Capsule())
+                    .foregroundStyle(AnchorPalette.textSecondary)
+            }
+        }
+    }
+
+    private var appearanceCard: some View {
+        AnchorCard(title: "Appearance", icon: "paintbrush") {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("VISUAL THEME")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                HStack(spacing: 8) {
+                    themeButton("Light")
+                    themeButton("Auto")
+                    themeButton("Dark")
+                }
+            }
+        }
+    }
+
+    private var statusCard: some View {
+        AnchorCard(title: "System Status", icon: "wave.3.right.circle") {
+            VStack(alignment: .leading, spacing: 8) {
+                statusRow("Backend Health", value: healthStatusText)
+                statusRow("Auth", value: appState.isAuthenticated ? "Signed in" : "Signed out")
+                statusRow("Environment", value: appState.environment.rawValue.capitalized)
+                Text(appState.statusMessage)
+                    .font(.footnote)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                    .padding(.top, 4)
+            }
+        }
+    }
+
+    private func statusRow(_ label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .foregroundStyle(AnchorPalette.textSecondary)
+            Spacer()
+            Text(value)
+                .foregroundStyle(AnchorPalette.textPrimary)
+                .fontWeight(.semibold)
+        }
+        .font(.subheadline)
+    }
+
+    private func themeButton(_ label: String) -> some View {
+        Button {
+            selectedTheme = label
+        } label: {
+            Text(label.uppercased())
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(selectedTheme == label ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(selectedTheme == label ? AnchorPalette.chipActive : AnchorPalette.chip)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
     }
 
     private func loadHealth() async {
@@ -29,5 +126,32 @@ struct DashboardView: View {
         } catch {
             healthStatusText = "Unavailable"
         }
+    }
+}
+
+private struct AnchorCard<Content: View>: View {
+    let title: String
+    let icon: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .foregroundStyle(AnchorPalette.textPrimary)
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(AnchorPalette.textPrimary)
+            }
+            content
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AnchorPalette.card)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(AnchorPalette.cardBorder, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
