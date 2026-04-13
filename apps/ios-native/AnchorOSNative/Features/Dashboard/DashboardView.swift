@@ -39,16 +39,7 @@ struct DashboardView: View {
     }
 
     private var sectionChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                AnchorChip(label: "Profile")
-                AnchorChip(label: "Theme")
-                AnchorChip(label: "Security")
-                AnchorChip(label: "Alerts")
-                AnchorChip(label: "AI")
-                AnchorChip(label: "Family")
-            }
-        }
+        AnchorSectionTabs(labels: ["Profile", "Theme", "Security", "Alerts", "AI", "Family"])
     }
 
     private var dashboardHeader: some View {
