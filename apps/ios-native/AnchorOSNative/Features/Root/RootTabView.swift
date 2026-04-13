@@ -5,23 +5,63 @@ struct RootTabView: View {
 
     var body: some View {
         if appState.isAuthenticated {
-            TabView {
-                DashboardView()
-                    .tabItem {
-                        Image(systemName: "house")
-                        Text("Home")
-                    }
+            VStack(spacing: 0) {
+                EnvironmentBanner(environment: appState.environment)
 
-                SettingsView()
-                    .tabItem {
-                        Image(systemName: "gearshape")
-                        Text("Settings")
-                    }
+                TabView {
+                    DashboardView()
+                        .tabItem {
+                            Image(systemName: "house")
+                            Text("Home")
+                        }
+
+                    PlaceholderView(title: "Tasks", subtitle: "Commitments migration next.")
+                        .tabItem {
+                            Image(systemName: "checkmark.circle")
+                            Text("Tasks")
+                        }
+
+                    PlaceholderView(title: "Anchor AI", subtitle: "Fabric native migration queued.")
+                        .tabItem {
+                            Image(systemName: "dot.radiowaves.left.and.right")
+                            Text("Anchor")
+                        }
+
+                    PlaceholderView(title: "Finance", subtitle: "Finance native read path is next.")
+                        .tabItem {
+                            Image(systemName: "creditcard")
+                            Text("Finance")
+                        }
+
+                    SettingsView()
+                        .tabItem {
+                            Image(systemName: "gearshape")
+                            Text("Settings")
+                        }
+                }
             }
             .tint(AnchorPalette.chipActive)
         } else {
             AuthView()
         }
+    }
+}
+
+private struct PlaceholderView: View {
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text(title)
+                .font(.title2)
+                .fontWeight(.bold)
+            Text(subtitle)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AnchorPalette.background)
     }
 }
 

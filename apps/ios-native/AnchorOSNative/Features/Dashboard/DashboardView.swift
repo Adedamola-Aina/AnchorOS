@@ -15,6 +15,7 @@ struct DashboardView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     dashboardHeader
+                    sectionChips
                     profileCard
                     appearanceCard
                     statusCard
@@ -35,6 +36,29 @@ struct DashboardView: View {
                 }
             }
         }
+    }
+
+    private var sectionChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                chip("Profile")
+                chip("Theme")
+                chip("Security")
+                chip("Alerts")
+                chip("AI")
+                chip("Family")
+            }
+        }
+    }
+
+    private func chip(_ label: String) -> some View {
+        Text(label)
+            .font(.subheadline)
+            .foregroundStyle(AnchorPalette.textSecondary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(AnchorPalette.chip)
+            .clipShape(Capsule())
     }
 
     private var dashboardHeader: some View {
