@@ -35,11 +35,11 @@ targets:
         DEVELOPMENT_TEAM: ""
       configs:
         Debug:
-          GOOGLE_SERVICE_PLIST_SOURCE: AnchorOSNative/Resources/GoogleService-Info-Dev.plist
+          GOOGLE_SERVICE_PLIST_SOURCE: AnchorOSNative/Resources/GoogleService-Info-Development.plist
         Staging:
           GOOGLE_SERVICE_PLIST_SOURCE: AnchorOSNative/Resources/GoogleService-Info-Staging.plist
         Release:
-          GOOGLE_SERVICE_PLIST_SOURCE: AnchorOSNative/Resources/GoogleService-Info-Prod.plist
+          GOOGLE_SERVICE_PLIST_SOURCE: AnchorOSNative/Resources/GoogleService-Info-Production.plist
     preBuildScripts:
       - name: "Copy GoogleService-Info.plist"
         script: |
