@@ -145,6 +145,16 @@ struct OnboardingView: View {
         withAnimation { step = 2 }
     }
 
+    func saveSavingsGoal() async {
+        savingsGoalSaving = true
+        defer { savingsGoalSaving = false }
+        let amount = Int((Double(savingsGoal) ?? 0) * 100)
+        if amount > 0 {
+            try? await financeStore.setSavingsGoal(monthlyCents: amount)
+        }
+        withAnimation { step = 4 }
+    }
+
     // MARK: — Helpers
 
     func completeOnboarding() {

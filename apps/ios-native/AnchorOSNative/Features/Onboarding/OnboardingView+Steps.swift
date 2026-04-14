@@ -97,16 +97,7 @@ extension OnboardingView {
         }
     }
 
-    @MainActor
-    func saveSavingsGoal() async {
-        savingsGoalSaving = true
-        defer { savingsGoalSaving = false }
-        let amount = Int((Double(savingsGoal) ?? 0) * 100)
-        if amount > 0 {
-            try? await financeStore.setSavingsGoal(monthlyCents: amount)
-        }
-        withAnimation { step = 4 }
-    }
+    // saveSavingsGoal() lives in OnboardingView.swift (needs direct @EnvironmentObject access)
 
     // MARK: — Step 4: First Commitment
 
