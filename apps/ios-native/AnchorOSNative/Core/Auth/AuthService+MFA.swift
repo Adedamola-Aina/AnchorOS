@@ -43,7 +43,7 @@ extension AuthService {
     // MARK: - MFA Verification (TOTP only)
 
     func verifyMFA(resolver: MultiFactorResolver, code: String) async throws {
-        guard let totpHint = resolver.hints.first(where: { $0 is TOTPMultiFactorInfo }) as? TOTPMultiFactorInfo else {
+        guard let totpHint = resolver.hints.first(where: { $0.factorID == "totp" }) else {
             throw AuthServiceError.noMFAEnrolled
         }
         let assertion = TOTPMultiFactorGenerator.assertionForSignIn(
