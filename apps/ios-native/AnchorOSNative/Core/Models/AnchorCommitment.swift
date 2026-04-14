@@ -16,6 +16,7 @@ struct AnchorCommitment: Identifiable, Codable {
     let currentStreak: Int?
     let longestStreak: Int?
     let lastCompletedAt: String?
+    let priority: String?     // "low" | "medium" | "high" | "critical"
 
     var resolvedId: String { id ?? "" }
 
@@ -33,5 +34,23 @@ struct AnchorCommitment: Identifiable, Codable {
     var domainLabel: String? {
         guard let d = domain, !d.isEmpty else { return nil }
         return d.uppercased()
+    }
+
+    var priorityColor: Color {
+        switch priority?.lowercased() {
+        case "critical": return Color(hex: "#DC2626") ?? .red
+        case "high":     return Color(hex: "#EA580C") ?? .orange
+        case "medium":   return Color(hex: "#D97706") ?? .yellow
+        default:         return Color(hex: "#059669") ?? .green   // low
+        }
+    }
+
+    var priorityIcon: String {
+        switch priority?.lowercased() {
+        case "critical": return "exclamationmark.2"
+        case "high":     return "exclamationmark"
+        case "medium":   return "minus"
+        default:         return "arrow.down"
+        }
     }
 }

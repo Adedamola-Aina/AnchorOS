@@ -25,13 +25,14 @@ final class AccountService {
             }
     }
 
-    func addAccount(uid: String, name: String, type: String, currency: String, balanceCents: Int) async throws {
+    func addAccount(uid: String, name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
         let ref = db.accountsCollection(uid: uid).document()
         let data: [String: Any] = [
             "name": name,
             "type": type,
             "currency": currency,
             "balanceCents": balanceCents,
+            "color": color,
             "scope": "personal",
             "isArchived": false,
             "sortOrder": Int(Date().timeIntervalSince1970),
@@ -44,12 +45,13 @@ final class AccountService {
         try await db.accountsCollection(uid: uid).document(accountId).updateData(["isArchived": true])
     }
 
-    func updateAccount(uid: String, accountId: String, name: String, type: String, currency: String, balanceCents: Int) async throws {
+    func updateAccount(uid: String, accountId: String, name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
         try await db.accountsCollection(uid: uid).document(accountId).updateData([
             "name": name,
             "type": type,
             "currency": currency,
-            "balanceCents": balanceCents
+            "balanceCents": balanceCents,
+            "color": color
         ] as [String: Any])
     }
 }

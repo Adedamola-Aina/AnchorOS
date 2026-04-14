@@ -31,7 +31,10 @@ final class TransactionService {
         category: String?,
         accountId: String,
         accountName: String?,
-        currency: String
+        currency: String,
+        date: String? = nil,
+        isRecurring: Bool = false,
+        recurringFrequency: String? = nil
     ) async throws {
         let ref = db.financeCollection(uid: uid).document()
         var data: [String: Any] = [
@@ -40,12 +43,14 @@ final class TransactionService {
             "type": type,
             "accountId": accountId,
             "currency": currency,
-            "date": ISO8601DateFormatter().string(from: Date()),
+            "date": date ?? ISO8601DateFormatter().string(from: Date()),
+            "isRecurring": isRecurring,
             "isSoftDeleted": false,
             "createdAt": FieldValue.serverTimestamp()
         ]
         if let cat = category { data["category"] = cat }
         if let name = accountName { data["accountName"] = name }
+        if let freq = recurringFrequency { data["recurringFrequency"] = freq }
         try await ref.setData(data)
     }
 

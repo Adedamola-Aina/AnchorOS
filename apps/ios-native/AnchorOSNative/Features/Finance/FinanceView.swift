@@ -48,7 +48,15 @@ struct FinanceView: View {
                         AnchorErrorBanner()
                             .padding(16)
                     } else {
-                        accountStack
+                    WalletCardStack(
+                        accounts: financeStore.accounts,
+                        onAdd: { showAddAccount = true },
+                        onEdit: { _ in },
+                        onDelete: { acc in
+                            accountToDelete = acc
+                            showDeleteAccountAlert = true
+                        }
+                    )
                         if familyStore.hasConnection { sharedAccountsSection }
                         VStack(spacing: 16) {
                             monthNavRow
@@ -61,6 +69,7 @@ struct FinanceView: View {
             .background(AnchorBackground())
             .navigationTitle("Finance")
 
+            .refreshable { await financeStore.refresh() }
             .task {
                 try? await Task.sleep(for: .seconds(12))
                 if financeStore.isLoading { loadTimedOut = true }
@@ -270,7 +279,14 @@ struct FinanceView: View {
             } else {
                 VStack(spacing: 12) {
                     ForEach(financeStore.recentTransactions) { tx in
-                        txRow(tx)
+                        SwipeableRow(
+                            deleteAction: {
+                                Task { try? await financeStore.deleteTransaction(transactionId: tx.resolvedId) }
+                            },
+                            editAction: { txToEdit = tx }
+                        ) {
+                            txRow(tx)
+                        }
                     }
                 }
             }
@@ -327,15 +343,7 @@ struct FinanceView: View {
                 .fontWeight(.bold)
                 .font(.subheadline)
         }
-        .contextMenu {
-            Button { txToEdit = tx } label: {
-                Label("Edit Transaction", systemImage: "pencil")
-            }
-            Button(role: .destructive) {
-                Task { try? await financeStore.deleteTransaction(transactionId: tx.resolvedId) }
-            } label: {
-                Label("Remove Transaction", systemImage: "trash")
-            }
-        }
+        .contentShape(Rectangle())
+        .onTapGesture { txToEdit = tx }
     }
 }

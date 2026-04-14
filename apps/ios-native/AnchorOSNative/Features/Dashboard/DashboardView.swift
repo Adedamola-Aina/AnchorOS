@@ -25,6 +25,12 @@ struct DashboardView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     greetingHeader
+                    BeyondBasicsCard(
+                        hasAccount: !financeStore.accounts.isEmpty,
+                        hasTransaction: !financeStore.transactions.isEmpty,
+                        hasCommitment: !commitmentsStore.commitments.isEmpty,
+                        mfaEnabled: userProfileStore.mfaEnabled
+                    )
                     if loadTimedOut && financeStore.accounts.isEmpty && commitmentsStore.commitments.isEmpty {
                         AnchorErrorBanner()
                     } else {
@@ -66,6 +72,11 @@ struct DashboardView: View {
             .sheet(isPresented: $showAddCommitment) {
                 AddCommitmentSheet()
                     .environmentObject(commitmentsStore)
+            }
+            .refreshable {
+                async let _ = projectStateStore.refresh(for: appState.environment, force: true)
+                async let _ = financeStore.refresh()
+                async let _ = commitmentsStore.refresh()
             }
             .task { await projectStateStore.refresh(for: appState.environment) }
             .task {

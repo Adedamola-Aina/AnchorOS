@@ -12,6 +12,7 @@ struct EditAccountSheet: View {
     @State private var selectedType: String
     @State private var selectedCurrency: String
     @State private var balanceText: String
+    @State private var selectedColorHex: String
     @State private var isSaving = false
 
     private let accountTypes = ["checking", "savings", "investment", "wallet", "cash", "credit"]
@@ -24,6 +25,7 @@ struct EditAccountSheet: View {
         _selectedCurrency = State(initialValue: account.currency)
         let bal = Double(account.balanceCents) / 100.0
         _balanceText = State(initialValue: String(format: "%.2f", bal))
+        _selectedColorHex = State(initialValue: account.color ?? "#3D52D5")
     }
 
     private var balanceCents: Int {
@@ -87,6 +89,9 @@ struct EditAccountSheet: View {
                             AnchorFormField(placeholder: "Current Balance", text: $balanceText, keyboardType: .decimalPad)
                         }
 
+                        // Color picker
+                        CardColorPicker(selectedHex: $selectedColorHex)
+
                         // Save button
                         Button {
                             Task { await save() }
@@ -132,7 +137,8 @@ struct EditAccountSheet: View {
                 name: name,
                 type: selectedType,
                 currency: selectedCurrency,
-                balanceCents: balanceCents
+                balanceCents: balanceCents,
+                color: selectedColorHex
             )
             ToastStore.shared.show("Account updated", style: .success)
             dismiss()

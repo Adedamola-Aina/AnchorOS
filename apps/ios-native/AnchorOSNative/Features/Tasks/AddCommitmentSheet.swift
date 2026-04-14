@@ -15,7 +15,15 @@ struct AddCommitmentSheet: View {
     @State private var domain: String = "Personal Development"
     @State private var timeOfDay: String = "morning"
     @State private var notes: String = ""
+    @State private var priority: String = "medium"
     @State private var isSaving = false
+
+    private let priorities: [(id: String, label: String)] = [
+        ("low", "Low"),
+        ("medium", "Medium"),
+        ("high", "High"),
+        ("critical", "Critical")
+    ]
 
     private let types: [(id: String, label: String, icon: String, desc: String)] = [
         ("daily", "Daily", "arrow.clockwise", "Repeats every day"),
@@ -161,6 +169,23 @@ struct AddCommitmentSheet: View {
                         .background(AnchorPalette.chip.opacity(0.6))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
+
+                formSection("Priority") {
+                    HStack(spacing: 8) {
+                        ForEach(priorities, id: \.id) { p in
+                            Button { priority = p.id } label: {
+                                Text(p.label)
+                                    .font(.caption).fontWeight(.semibold)
+                                    .foregroundStyle(priority == p.id ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 9)
+                                    .background(priority == p.id ? AnchorPalette.chipActive : AnchorPalette.chip)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
             }
             .padding(20)
         }
@@ -213,7 +238,8 @@ struct AddCommitmentSheet: View {
                 type: type,
                 domain: domain,
                 timeOfDay: type == "daily" ? timeOfDay : nil,
-                notes: notes.isEmpty ? nil : notes
+                notes: notes.isEmpty ? nil : notes,
+                priority: priority
             )
             ToastStore.shared.show("Commitment added", style: .success)
             dismiss()

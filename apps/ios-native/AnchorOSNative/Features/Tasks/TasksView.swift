@@ -89,6 +89,7 @@ struct TasksView: View {
                 EditCommitmentSheet(commitment: task)
                     .environmentObject(commitmentsStore)
             }
+            .refreshable { await commitmentsStore.refresh() }
             .task {
                 try? await Task.sleep(for: .seconds(12))
                 if commitmentsStore.isLoading { loadTimedOut = true }
@@ -136,7 +137,14 @@ struct TasksView: View {
             } else {
                 VStack(alignment: .leading, spacing: 14) {
                     ForEach(activeFiltered) { task in
-                        taskRow(task)
+                        SwipeableRow(
+                            deleteAction: {
+                                Task { try? await commitmentsStore.deleteCommitment(taskId: task.resolvedId) }
+                            },
+                            editAction: { taskToEdit = task }
+                        ) {
+                            taskRow(task)
+                        }
                     }
                 }
             }
@@ -171,7 +179,14 @@ struct TasksView: View {
                 AnchorCard(title: "", icon: "checkmark.circle.fill") {
                     VStack(alignment: .leading, spacing: 14) {
                         ForEach(completedFiltered) { task in
-                            taskRow(task)
+                            SwipeableRow(
+                                deleteAction: {
+                                    Task { try? await commitmentsStore.deleteCommitment(taskId: task.resolvedId) }
+                                },
+                                editAction: { taskToEdit = task }
+                            ) {
+                                taskRow(task)
+                            }
                         }
                     }
                 }
@@ -221,24 +236,18 @@ struct TasksView: View {
                             .font(.caption2).fontWeight(.bold)
                             .foregroundStyle(AnchorPalette.warning)
                     }
+
+                    if let p = task.priority, p != "low" {
+                        Image(systemName: task.priorityIcon)
+                            .font(.caption2).fontWeight(.bold)
+                            .foregroundStyle(task.priorityColor)
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .onTapGesture { taskToEdit = task }
             Spacer(minLength: 0)
-        }
-        .contextMenu {
-            Button {
-                taskToEdit = task
-            } label: {
-                Label("Edit Task", systemImage: "pencil")
-            }
-            Button(role: .destructive) {
-                Task { try? await commitmentsStore.deleteCommitment(taskId: task.resolvedId) }
-            } label: {
-                Label("Delete Task", systemImage: "trash")
-            }
         }
     }
 }

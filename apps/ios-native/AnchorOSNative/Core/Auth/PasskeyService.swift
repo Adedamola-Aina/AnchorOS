@@ -151,4 +151,27 @@ final class PasskeyService: NSObject, ObservableObject {
             return false
         }
     }
+
+    // MARK: - Convenience API for PasskeyManagerView
+
+    static let shared = PasskeyService()
+
+    /// Register a passkey for the current user (uses current Firebase user context)
+    func register() async throws {
+        guard let user = Auth.auth().currentUser else { throw PasskeyError.invalidChallenge }
+        _ = await registerPasskey(userId: user.uid, email: user.email ?? "", displayName: user.displayName ?? "")
+        if let err = error { throw NSError(domain: err, code: 0) }
+    }
+
+    /// Remove a passkey by credential ID
+    func remove(credentialId: String) async throws {
+        let success = await removePasskey(credentialId: credentialId)
+        if !success, let err = error { throw NSError(domain: err, code: 0) }
+    }
+
+    /// List passkeys registered for the current user
+    func listPasskeys() async throws -> [[String: Any]] {
+        let result = try await functions.httpsCallable("listPasskeys").call([:])
+        return (result.data as? [[String: Any]]) ?? []
+    }
 }

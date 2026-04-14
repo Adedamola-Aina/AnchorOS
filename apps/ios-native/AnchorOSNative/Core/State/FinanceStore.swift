@@ -65,9 +65,9 @@ final class FinanceStore: ObservableObject {
 
     // MARK: — Write: Accounts
 
-    func addAccount(name: String, type: String, currency: String, balanceCents: Int) async throws {
+    func addAccount(name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
         guard let uid else { return }
-        try await accountService.addAccount(uid: uid, name: name, type: type, currency: currency, balanceCents: balanceCents)
+        try await accountService.addAccount(uid: uid, name: name, type: type, currency: currency, balanceCents: balanceCents, color: color)
     }
 
     func deleteAccount(accountId: String) async throws {
@@ -83,13 +83,17 @@ final class FinanceStore: ObservableObject {
         type: String,
         category: String?,
         accountId: String,
-        currency: String
+        currency: String,
+        date: String? = nil,
+        isRecurring: Bool = false,
+        recurringFrequency: String? = nil
     ) async throws {
         guard let uid else { return }
         let accountName = accounts.first(where: { $0.resolvedId == accountId })?.name
         try await transactionService.addTransaction(
             uid: uid, title: title, amountCents: amountCents, type: type,
-            category: category, accountId: accountId, accountName: accountName, currency: currency
+            category: category, accountId: accountId, accountName: accountName, currency: currency,
+            date: date, isRecurring: isRecurring, recurringFrequency: recurringFrequency
         )
     }
 
@@ -98,9 +102,9 @@ final class FinanceStore: ObservableObject {
         try await transactionService.deleteTransaction(uid: uid, transactionId: transactionId)
     }
 
-    func updateAccount(accountId: String, name: String, type: String, currency: String, balanceCents: Int) async throws {
+    func updateAccount(accountId: String, name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
         guard let uid else { return }
-        try await accountService.updateAccount(uid: uid, accountId: accountId, name: name, type: type, currency: currency, balanceCents: balanceCents)
+        try await accountService.updateAccount(uid: uid, accountId: accountId, name: name, type: type, currency: currency, balanceCents: balanceCents, color: color)
     }
 
     func updateTransaction(transactionId: String, title: String, amountCents: Int, type: String, category: String?) async throws {
@@ -117,5 +121,14 @@ final class FinanceStore: ObservableObject {
             "savingsGoalMonthlyCents": monthlyCents,
             "updatedAt": FieldValue.serverTimestamp()
         ], merge: true)
+    }
+
+    // MARK: — Refresh (pull-to-refresh)
+
+    func refresh() async {
+        guard let uid else { return }
+        isLoading = true
+        stop()
+        start(uid: uid)
     }
 }

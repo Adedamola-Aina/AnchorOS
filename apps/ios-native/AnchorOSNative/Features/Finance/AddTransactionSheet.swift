@@ -11,7 +11,13 @@ struct AddTransactionSheet: View {
     @State private var type: String = "expense"   // expense | income | transfer
     @State private var selectedAccountId: String = ""
     @State private var selectedCategory: String = "General"
+    @State private var transactionDate: Date = Date()
+    @State private var showDatePicker: Bool = false
+    @State private var isRecurring: Bool = false
+    @State private var recurringFrequency: String = "monthly"  // weekly | monthly | yearly
     @State private var isSaving = false
+
+    private let recurringOptions = ["weekly", "monthly", "yearly"]
 
     private let types = ["expense", "income", "transfer"]
     private let categories = [
@@ -45,7 +51,62 @@ struct AddTransactionSheet: View {
 
                     // Fields
                     formSection("Description") {
-                        AnchorFormField(placeholder: "e.g. Grocery run, Salary", text: $title)
+                        AnchorFormField(placeholder: "e.g. Groceries, Salary…", text: $title)
+                    }
+
+                    formSection("Date") {
+                        Button { showDatePicker.toggle() } label: {
+                            HStack {
+                                Image(systemName: "calendar")
+                                    .foregroundStyle(AnchorPalette.textSecondary)
+                                Text(dateLabel)
+                                    .foregroundStyle(AnchorPalette.textPrimary)
+                                Spacer()
+                                Image(systemName: showDatePicker ? "chevron.up" : "chevron.down")
+                                    .font(.caption)
+                                    .foregroundStyle(AnchorPalette.textSecondary)
+                            }
+                            .padding(14)
+                            .background(AnchorPalette.chip.opacity(0.6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                        .buttonStyle(.plain)
+
+                        if showDatePicker {
+                            DatePicker(
+                                "Transaction Date",
+                                selection: $transactionDate,
+                                in: ...Date(),
+                                displayedComponents: [.date]
+                            )
+                            .datePickerStyle(.graphical)
+                            .tint(AnchorPalette.chipActive)
+                            .colorScheme(.dark)
+                        }
+                    }
+
+                    formSection("Recurring") {
+                        VStack(spacing: 10) {
+                            Toggle("Mark as recurring", isOn: $isRecurring)
+                                .tint(AnchorPalette.chipActive)
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                            if isRecurring {
+                                HStack(spacing: 8) {
+                                    ForEach(recurringOptions, id: \.self) { freq in
+                                        Button { recurringFrequency = freq } label: {
+                                            Text(freq.capitalized)
+                                                .font(.caption).fontWeight(.semibold)
+                                                .foregroundStyle(recurringFrequency == freq ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                                                .frame(maxWidth: .infinity)
+                                                .padding(.vertical, 9)
+                                                .background(recurringFrequency == freq ? AnchorPalette.chipActive : AnchorPalette.chip)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     formSection("Amount") {
@@ -120,6 +181,12 @@ struct AddTransactionSheet: View {
                 selectedAccountId = first.resolvedId
             }
         }
+    }
+
+    private var dateLabel: String {
+        let fmt = DateFormatter()
+        fmt.dateStyle = .medium
+        return Calendar.current.isDateInToday(transactionDate) ? "Today" : fmt.string(from: transactionDate)
     }
 
     private var submitLabel: String {
@@ -197,13 +264,17 @@ struct AddTransactionSheet: View {
         defer { isSaving = false }
         do {
             let currency = selectedAccount?.currency ?? "NGN"
+            let iso = ISO8601DateFormatter()
             try await financeStore.addTransaction(
                 title: title.trimmingCharacters(in: .whitespaces),
                 amountCents: amountCents,
                 type: type,
                 category: type == "transfer" ? nil : selectedCategory,
                 accountId: selectedAccountId,
-                currency: currency
+                currency: currency,
+                date: iso.string(from: transactionDate),
+                isRecurring: isRecurring,
+                recurringFrequency: isRecurring ? recurringFrequency : nil
             )
             ToastStore.shared.show("\(type.capitalized) recorded", style: .success)
             dismiss()

@@ -36,7 +36,8 @@ final class CommitmentService {
         type: String,
         domain: String,
         timeOfDay: String?,
-        notes: String?
+        notes: String?,
+        priority: String? = nil
     ) async throws {
         let ref = db.commitmentsCollection(uid: uid).document()
         var data: [String: Any] = [
@@ -48,6 +49,7 @@ final class CommitmentService {
         ]
         if let t = timeOfDay { data["timeOfDay"] = t }
         if let n = notes, !n.isEmpty { data["notes"] = n }
+        if let p = priority, !p.isEmpty { data["priority"] = p }
         try await ref.setData(data)
     }
 
@@ -58,7 +60,8 @@ final class CommitmentService {
         type: String,
         domain: String,
         timeOfDay: String?,
-        notes: String?
+        notes: String?,
+        priority: String? = nil
     ) async throws {
         var data: [String: Any] = [
             "title": title,
@@ -68,6 +71,7 @@ final class CommitmentService {
         ]
         if let t = timeOfDay { data["timeOfDay"] = t }
         if let n = notes, !n.isEmpty { data["notes"] = n }
+        if let p = priority { data["priority"] = p }
         try await db.commitmentDocument(uid: uid, taskId: taskId).updateData(data)
     }
 

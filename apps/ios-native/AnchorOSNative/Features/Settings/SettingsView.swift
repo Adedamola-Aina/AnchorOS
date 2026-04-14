@@ -12,6 +12,13 @@ struct SettingsView: View {
     @State private var editingName = false
     @State private var nameInput = ""
     @State private var showCurrencyPicker = false
+    @State private var showPasswordChange = false
+    @State private var showEmailChange = false
+    @State private var showMFAEnrollment = false
+    @State private var showRecoveryCodes = false
+    @State private var showAuthHistory = false
+    @State private var showDangerZone = false
+    @State private var showPasskeyManager = false
 
     private let currencies = ["NGN", "USD", "GBP", "EUR", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"]
 
@@ -24,6 +31,7 @@ struct SettingsView: View {
                     familyNavCard
                     appearanceCard
                     securityCard
+                    dangerZoneCard
                     signOutCard
                 }
                 .padding(16)
@@ -218,11 +226,122 @@ struct SettingsView: View {
 
     private var securityCard: some View {
         AnchorCard(title: "Security", icon: "lock.shield") {
-            VStack(alignment: .leading, spacing: 8) {
-                row("Auth Status", appState.isAuthenticated ? "Signed in" : "Signed out")
-                row("MFA", userProfileStore.mfaEnabled ? "Active" : "Not enrolled")
-                row("Session", "Active")
+            VStack(alignment: .leading, spacing: 4) {
+                securityNavRow(
+                    icon: "key.fill",
+                    label: "Change Password",
+                    subtitle: "Update your account password"
+                ) { showPasswordChange = true }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "envelope.badge.shield.half.filled",
+                    label: "Change Email",
+                    subtitle: userProfileStore.email.isEmpty ? "Not set" : userProfileStore.email
+                ) { showEmailChange = true }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "lock.shield.fill",
+                    label: "Two-Factor Authentication",
+                    subtitle: userProfileStore.mfaEnabled ? "Enabled" : "Not enrolled"
+                ) { showMFAEnrollment = true }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "key.2.on.ring.fill",
+                    label: "Recovery Codes",
+                    subtitle: "View or regenerate backup codes"
+                ) { showRecoveryCodes = true }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "faceid",
+                    label: "Passkeys",
+                    subtitle: "Manage your passkey devices"
+                ) { showPasskeyManager = true }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "clock.arrow.circlepath",
+                    label: "Login History",
+                    subtitle: "View recent sign-in activity"
+                ) { showAuthHistory = true }
             }
+        }
+        .sheet(isPresented: $showPasswordChange) {
+            PasswordChangeView().environmentObject(appState)
+        }
+        .sheet(isPresented: $showEmailChange) {
+            EmailChangeView().environmentObject(appState)
+        }
+        .sheet(isPresented: $showMFAEnrollment) {
+            MFAEnrollmentView().environmentObject(appState)
+        }
+        .sheet(isPresented: $showRecoveryCodes) {
+            RecoveryCodesSettingsView()
+        }
+        .sheet(isPresented: $showPasskeyManager) {
+            PasskeyManagerView()
+        }
+        .sheet(isPresented: $showAuthHistory) {
+            AuthEventHistoryView()
+        }
+    }
+
+    private func securityNavRow(icon: String, label: String, subtitle: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.subheadline)
+                    .foregroundStyle(AnchorPalette.chipActive)
+                    .frame(width: 24)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(label)
+                        .font(.subheadline).fontWeight(.semibold)
+                        .foregroundStyle(AnchorPalette.textPrimary)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+            }
+            .padding(.vertical, 10)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: — Danger Zone
+
+    private var dangerZoneCard: some View {
+        AnchorCard(title: "Account", icon: "exclamationmark.triangle") {
+            Button {
+                showDangerZone = true
+            } label: {
+                HStack {
+                    Image(systemName: "person.crop.circle.badge.minus")
+                        .foregroundStyle(AnchorPalette.danger)
+                    Text("Delete Account")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(AnchorPalette.danger)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+        .sheet(isPresented: $showDangerZone) {
+            DangerZoneView().environmentObject(appState)
         }
     }
 

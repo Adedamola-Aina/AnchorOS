@@ -10,6 +10,7 @@ struct AddAccountSheet: View {
     @State private var type: String = "checking"
     @State private var currency: String = "NGN"
     @State private var balanceText: String = ""
+    @State private var selectedColorHex: String = "#3D52D5"
     @State private var isSaving = false
 
     private let accountTypes = ["checking", "savings", "investment", "wallet", "cash", "credit"]
@@ -84,6 +85,10 @@ struct AddAccountSheet: View {
                         .background(AnchorPalette.chip.opacity(0.6))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+
+                    formSection("Card Color") {
+                        CardColorPicker(selectedHex: $selectedColorHex)
+                    }
                 }
                 .padding(20)
             }
@@ -132,7 +137,8 @@ struct AddAccountSheet: View {
                 name: name.trimmingCharacters(in: .whitespaces),
                 type: type,
                 currency: currency,
-                balanceCents: balanceCents
+                balanceCents: balanceCents,
+                color: selectedColorHex
             )
             ToastStore.shared.show("Account created", style: .success)
             dismiss()
