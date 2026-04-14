@@ -16,7 +16,7 @@ final class PasskeyService: NSObject, ObservableObject {
     @Published var error: String?
 
     private let functions = Functions.functions()
-    private var continuation: CheckedContinuation<ASAuthorizationResult, Error>?
+    var continuation: CheckedContinuation<ASAuthorizationResult, Error>?
 
     override init() {
         super.init()

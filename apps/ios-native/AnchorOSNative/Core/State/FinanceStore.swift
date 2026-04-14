@@ -107,4 +107,15 @@ final class FinanceStore: ObservableObject {
         guard let uid else { return }
         try await transactionService.updateTransaction(uid: uid, transactionId: transactionId, title: title, amountCents: amountCents, type: type, category: category)
     }
+
+    // MARK: — Savings Goal
+
+    func setSavingsGoal(monthlyCents: Int) async throws {
+        guard let uid else { return }
+        let db = Firestore.firestore()
+        try await db.collection("users").document(uid).setData([
+            "savingsGoalMonthlyCents": monthlyCents,
+            "updatedAt": FieldValue.serverTimestamp()
+        ], merge: true)
+    }
 }
