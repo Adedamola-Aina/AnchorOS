@@ -12,6 +12,7 @@ struct FinanceView: View {
     @State private var showDeleteAccountAlert = false
     @State private var accountToDelete: AnchorAccount? = nil
     @State private var txToEdit: AnchorTransaction? = nil
+    @State private var loadTimedOut = false
 
     private var monthLabel: String {
         guard let date = Calendar.current.date(byAdding: .month, value: monthOffset, to: Date()) else { return "" }
@@ -43,20 +44,27 @@ struct FinanceView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     totalAssetsBar
-                    accountStack
-                    if familyStore.hasConnection {
-                        sharedAccountsSection
+                    if loadTimedOut && financeStore.accounts.isEmpty {
+                        AnchorErrorBanner()
+                            .padding(16)
+                    } else {
+                        accountStack
+                        if familyStore.hasConnection { sharedAccountsSection }
+                        VStack(spacing: 16) {
+                            monthNavRow
+                            transactionsCard
+                        }
+                        .padding(16)
                     }
-                    VStack(spacing: 16) {
-                        monthNavRow
-                        transactionsCard
-                    }
-                    .padding(16)
                 }
             }
             .background(AnchorBackground())
             .navigationTitle("Finance")
 
+            .task {
+                try? await Task.sleep(for: .seconds(12))
+                if financeStore.isLoading { loadTimedOut = true }
+            }
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

@@ -11,6 +11,7 @@ struct DashboardView: View {
 
     @State private var showAddTransaction = false
     @State private var showAddCommitment = false
+    @State private var loadTimedOut = false
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -24,10 +25,14 @@ struct DashboardView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     greetingHeader
-                    wealthCard
-                    tasksProgressCard
-                    recentActivityCard
-                    statusCard
+                    if loadTimedOut && financeStore.accounts.isEmpty && commitmentsStore.commitments.isEmpty {
+                        AnchorErrorBanner()
+                    } else {
+                        wealthCard
+                        tasksProgressCard
+                        recentActivityCard
+                        statusCard
+                    }
                 }
                 .padding(16)
             }
@@ -63,6 +68,10 @@ struct DashboardView: View {
                     .environmentObject(commitmentsStore)
             }
             .task { await projectStateStore.refresh(for: appState.environment) }
+            .task {
+                try? await Task.sleep(for: .seconds(12))
+                if financeStore.isLoading || commitmentsStore.isLoading { loadTimedOut = true }
+            }
             .onChange(of: appState.environment) { _, _ in
                 Task { await projectStateStore.refresh(for: appState.environment, force: true) }
             }

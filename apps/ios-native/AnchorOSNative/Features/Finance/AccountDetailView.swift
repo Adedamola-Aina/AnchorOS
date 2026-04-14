@@ -30,6 +30,14 @@ struct AccountDetailView: View {
                     // Hero card
                     heroCard
 
+                    // Spending Trends
+                    let buckets = AnchorFabricEngine.weeklyBuckets(transactions: financeStore.recentTransactions.filter { $0.accountId == account.resolvedId })
+                    if buckets.contains(where: { $0.incomeCents > 0 || $0.expenseCents > 0 }) {
+                        AnchorCard(title: "Spending Trends", icon: "chart.bar.fill") {
+                            SpendingTrendsChart(buckets: buckets, currency: account.currency)
+                        }
+                    }
+
                     // Transactions
                     AnchorCard(title: "Transactions", icon: "list.bullet.rectangle") {
                         VStack(alignment: .leading, spacing: 12) {

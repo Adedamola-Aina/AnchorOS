@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseCore
+import FirebaseFirestore
 
 @main
 struct AnchorOSNativeApp: App {
@@ -11,6 +13,10 @@ struct AnchorOSNativeApp: App {
 
     init() {
         let state = AppState()
+        // Enable Firestore offline persistence — app reads cached data when offline
+        let settings = FirestoreSettings()
+        settings.cacheSettings = PersistentCacheSettings()
+        Firestore.firestore().settings = settings
         state.bootstrap()
         _appState = StateObject(wrappedValue: state)
     }

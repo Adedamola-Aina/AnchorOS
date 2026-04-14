@@ -9,6 +9,7 @@ struct TasksView: View {
     @State private var completedExpanded: Bool = false
     @State private var showAddCommitment = false
     @State private var taskToEdit: AnchorCommitment?
+    @State private var loadTimedOut = false
 
     private let filters = ["All", "Daily", "Weekly", "Monthly", "Todo"]
 
@@ -55,6 +56,8 @@ struct TasksView: View {
                     // Active tasks section
                     if commitmentsStore.isLoading {
                         ProgressView().tint(.white).frame(maxWidth: .infinity)
+                    } else if loadTimedOut && commitmentsStore.commitments.isEmpty {
+                        AnchorErrorBanner()
                     } else {
                         activeSectionCard
                         if !completedFiltered.isEmpty {
@@ -85,6 +88,10 @@ struct TasksView: View {
             .sheet(item: $taskToEdit) { task in
                 EditCommitmentSheet(commitment: task)
                     .environmentObject(commitmentsStore)
+            }
+            .task {
+                try? await Task.sleep(for: .seconds(12))
+                if commitmentsStore.isLoading { loadTimedOut = true }
             }
         }
     }
