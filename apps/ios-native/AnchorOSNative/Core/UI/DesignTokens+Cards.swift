@@ -42,7 +42,8 @@ extension DesignTokens {
     ]
 
     // MARK: Card dimensions (UX-041)
-    static let cardAspectRatio: CGFloat = 2.2
+    // PWA: aspectRatio 89.6/56 ≈ 1.6 (standard credit card format)
+    static let cardAspectRatio: CGFloat = 1.6
     static let cardCornerRadius: CGFloat = 20
     static let cardHeaderReveal: CGFloat = 48
 }

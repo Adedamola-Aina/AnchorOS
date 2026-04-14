@@ -32,7 +32,7 @@ struct AnchorCard<Content: View>: View {
             RoundedRectangle(cornerRadius: 14)
                 .stroke(AnchorPalette.cardBorder, lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 10)
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }

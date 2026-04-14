@@ -10,20 +10,15 @@ enum AnchorPalette {
 
     // MARK: Backgrounds
 
-    static let background       = adaptive(light: 0xF8FAFC, dark: 0x0A0F1A)
-    static let surface          = adaptive(light: 0xFFFFFF, dark: 0x0F172A)
-    static let surfaceElevated  = adaptive(light: 0xF1F5F9, dark: 0x1E293B)
-    static let backgroundGlowTop    = DesignTokens.Primary.p800
-    static let backgroundGlowBottom = Color(hex: 0x0F766E)
+    static let background      = adaptive(light: 0xF8FAFC, dark: 0x0A0F1A)
+    static let surface         = adaptive(light: 0xFFFFFF, dark: 0x0F172A)
+    static let surfaceElevated = adaptive(light: 0xF1F5F9, dark: 0x1E293B)
 
     // MARK: Cards
 
     static let card = adaptive(light: 0xFFFFFF, dark: 0x0F172A)
-    static let cardBorder = Color(UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(white: 1.0, alpha: 0.05)
-            : UIColor(white: 1.0, alpha: 0.3)
-    })
+    // PWA: border-slate-200 dark:border-slate-800
+    static let cardBorder = adaptive(light: 0xE2E8F0, dark: 0x1E293B)
 
     // MARK: Chips
 
