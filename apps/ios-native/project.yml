@@ -3,6 +3,10 @@ options:
   bundleIdPrefix: com.anchoros
   deploymentTarget:
     iOS: "17.0"
+configs:
+  Debug: debug
+  Staging: release
+  Release: release
 packages:
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk.git
@@ -29,5 +33,34 @@ targets:
         SWIFT_VERSION: 5.0
         TARGETED_DEVICE_FAMILY: "1,2"
         DEVELOPMENT_TEAM: ""
+      configs:
+        Debug:
+          GOOGLE_SERVICE_PLIST_SOURCE: AnchorOSNative/Resources/GoogleService-Info-Dev.plist
+        Staging:
+          GOOGLE_SERVICE_PLIST_SOURCE: AnchorOSNative/Resources/GoogleService-Info-Staging.plist
+        Release:
+          GOOGLE_SERVICE_PLIST_SOURCE: AnchorOSNative/Resources/GoogleService-Info-Prod.plist
+    preBuildScripts:
+      - name: "Copy GoogleService-Info.plist"
+        script: |
+          # Copies the environment-specific Firebase plist to the required name.
+          # Source is defined per build configuration in GOOGLE_SERVICE_PLIST_SOURCE.
+          SOURCE="${SRCROOT}/${GOOGLE_SERVICE_PLIST_SOURCE}"
+          DEST="${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist"
+          if [ -f "$SOURCE" ]; then
+            cp "$SOURCE" "$DEST"
+            echo "Copied $SOURCE → $DEST"
+          else
+            echo "error: GoogleService-Info plist not found at $SOURCE"
+            exit 1
+          fi
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME).app/GoogleService-Info.plist
     scheme:
       testTargets: []
+      gatherCoverageData: false
+      buildConfigs:
+        - Debug
+        - Staging
+        - Release

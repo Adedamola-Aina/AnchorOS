@@ -4,3 +4,9 @@ xcuserdata/
 *.moved-aside
 *.pbxuser
 !default.pbxuser
+
+# Firebase environment plists — never commit, contain secrets
+AnchorOSNative/Resources/GoogleService-Info.plist
+AnchorOSNative/Resources/GoogleService-Info-Dev.plist
+AnchorOSNative/Resources/GoogleService-Info-Staging.plist
+AnchorOSNative/Resources/GoogleService-Info-Prod.plist
