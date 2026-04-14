@@ -12,6 +12,7 @@ struct AnchorOSNativeApp: App {
     @StateObject private var familyStore = FamilyStore()
 
     init() {
+        FirebaseApp.configure()
         let state = AppState()
         // Enable Firestore offline persistence — app reads cached data when offline
         let settings = FirestoreSettings()
