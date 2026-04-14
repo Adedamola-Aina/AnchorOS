@@ -97,6 +97,7 @@ extension OnboardingView {
         }
     }
 
+    @MainActor
     func saveSavingsGoal() async {
         savingsGoalSaving = true
         defer { savingsGoalSaving = false }
