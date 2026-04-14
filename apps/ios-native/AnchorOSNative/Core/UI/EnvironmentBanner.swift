@@ -16,12 +16,9 @@ struct EnvironmentBanner: View {
 
     private var backgroundColor: Color {
         switch environment {
-        case .development:
-            return Color(red: 0.16, green: 0.44, blue: 0.98)
-        case .staging:
-            return Color(red: 0.98, green: 0.80, blue: 0.12)
-        case .production:
-            return Color(red: 0.18, green: 0.80, blue: 0.45)
+        case .development: return DesignTokens.Primary.p500
+        case .staging:     return DesignTokens.StatusLight.warning
+        case .production:  return DesignTokens.Finance.f500
         }
     }
 }
