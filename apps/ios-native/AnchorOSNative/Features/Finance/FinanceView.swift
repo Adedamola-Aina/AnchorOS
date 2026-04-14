@@ -5,6 +5,7 @@ import SwiftUI
 struct FinanceView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var financeStore: FinanceStore
+    @EnvironmentObject private var familyStore: FamilyStore
     @State private var monthOffset: Int = 0
     @State private var showAddTransaction = false
     @State private var showAddAccount = false
@@ -43,6 +44,9 @@ struct FinanceView: View {
                 VStack(spacing: 0) {
                     totalAssetsBar
                     accountStack
+                    if familyStore.hasConnection {
+                        sharedAccountsSection
+                    }
                     VStack(spacing: 16) {
                         monthNavRow
                         transactionsCard
@@ -52,6 +56,7 @@ struct FinanceView: View {
             }
             .background(AnchorBackground())
             .navigationTitle("Finance")
+
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -95,6 +100,40 @@ struct FinanceView: View {
                 Button("Cancel", role: .cancel) {}
             } message: { acc in
                 Text("Remove \"\(acc.name)\"? Transactions will remain in history.")
+            }
+        }
+    }
+
+    // MARK: — Shared Accounts (Family Mode)
+
+    private var sharedAccountsSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 6) {
+                Image(systemName: "person.2.fill")
+                    .font(.caption2)
+                    .foregroundStyle(AnchorPalette.chipActive)
+                Text("SHARED WITH \(familyStore.partnerName.uppercased())")
+                    .font(.caption).fontWeight(.bold)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+            }
+            .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 8)
+
+            let shared = financeStore.accounts.filter { $0.scope == "shared" }
+            if shared.isEmpty {
+                Text("No shared accounts yet.")
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                    .font(.caption)
+                    .padding(.horizontal, 20).padding(.bottom, 12)
+            } else {
+                ForEach(Array(shared.enumerated()), id: \.element.resolvedId) { index, account in
+                    NavigationLink(destination:
+                        AccountDetailView(account: account, accountIndex: index + financeStore.accounts.count)
+                            .environmentObject(financeStore)
+                    ) {
+                        fullWidthAccountCard(account, at: index + financeStore.accounts.count)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
     }

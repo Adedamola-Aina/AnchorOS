@@ -216,7 +216,10 @@ struct TasksView: View {
                     }
                 }
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture { taskToEdit = task }
+            Spacer(minLength: 0)
         }
         .contextMenu {
             Button {

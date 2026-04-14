@@ -12,9 +12,14 @@ struct AccountDetailView: View {
     @State private var showEditAccount = false
     @State private var showDeleteAlert = false
     @State private var txToEdit: AnchorTransaction? = nil
+    @State private var selectedType: String = "All"
+
+    private let typeFilters = ["All", "Income", "Expense", "Transfer"]
 
     private var accountTransactions: [AnchorTransaction] {
-        financeStore.recentTransactions.filter { $0.accountId == account.resolvedId }
+        let all = financeStore.recentTransactions.filter { $0.accountId == account.resolvedId }
+        guard selectedType != "All" else { return all }
+        return all.filter { $0.type.lowercased() == selectedType.lowercased() }
     }
 
     var body: some View {
@@ -27,14 +32,33 @@ struct AccountDetailView: View {
 
                     // Transactions
                     AnchorCard(title: "Transactions", icon: "list.bullet.rectangle") {
-                        if accountTransactions.isEmpty {
-                            Text("No transactions for this account.")
-                                .foregroundStyle(AnchorPalette.textSecondary)
-                                .font(.subheadline)
-                        } else {
-                            VStack(spacing: 12) {
-                                ForEach(accountTransactions) { tx in
-                                    txRow(tx)
+                        VStack(alignment: .leading, spacing: 12) {
+                            // Filter chips
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(typeFilters, id: \.self) { f in
+                                        Button { selectedType = f } label: {
+                                            Text(f.uppercased())
+                                                .font(.caption2).fontWeight(.bold)
+                                                .foregroundStyle(selectedType == f ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                                                .padding(.horizontal, 12).padding(.vertical, 6)
+                                                .background(selectedType == f ? AnchorPalette.chipActive : AnchorPalette.chip)
+                                                .clipShape(Capsule())
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+
+                            if accountTransactions.isEmpty {
+                                Text(selectedType == "All" ? "No transactions for this account." : "No \(selectedType.lowercased()) transactions.")
+                                    .foregroundStyle(AnchorPalette.textSecondary)
+                                    .font(.subheadline)
+                            } else {
+                                VStack(spacing: 12) {
+                                    ForEach(accountTransactions) { tx in
+                                        txRow(tx)
+                                    }
                                 }
                             }
                         }
