@@ -37,6 +37,7 @@ final class AppState: ObservableObject {
     @Published var currentUID: String? = nil
     @Published var isBusy: Bool = false
     @Published var statusMessage: String = "Native iOS starter."
+    @Published var mfaResolver: MultiFactorResolver?
 
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
@@ -60,10 +61,7 @@ final class AppState: ObservableObject {
     }
 
     func signIn(email: String, password: String) async {
-        guard FirebaseApp.app() != nil else {
-            statusMessage = "Firebase not configured. Check GoogleService plist files."
-            return
-        }
+        guard firebaseReady else { return }
         guard !email.isEmpty, !password.isEmpty else {
             statusMessage = "Email and password are required."
             return
@@ -74,13 +72,20 @@ final class AppState: ObservableObject {
             try await AuthService.shared.signIn(email: email, password: password)
             statusMessage = "Signed in."
             isAuthenticated = true
-        } catch {
-            statusMessage = "Sign in failed: \(error.localizedDescription)"
+            AuthEventService.recordEvent(method: "password")
+        } catch let nsError as NSError {
+            if nsError.code == 17409,
+               let resolver = nsError.userInfo["FIRAuthErrorUserInfoMultiFactorResolverKey"] as? MultiFactorResolver {
+                mfaResolver = resolver
+                statusMessage = "MFA required."
+            } else {
+                statusMessage = "Sign in failed: \(nsError.localizedDescription)"
+            }
         }
     }
 
     func signOut() {
-        guard FirebaseApp.app() != nil else {
+        guard firebaseReady else {
             isAuthenticated = false
             return
         }
@@ -94,10 +99,7 @@ final class AppState: ObservableObject {
     }
 
     func signUp(email: String, password: String, displayName: String) async {
-        guard FirebaseApp.app() != nil else {
-            statusMessage = "Firebase not configured. Check GoogleService plist files."
-            return
-        }
+        guard firebaseReady else { return }
         guard !email.isEmpty, !password.isEmpty else {
             statusMessage = "Email and password are required."
             return
@@ -105,22 +107,46 @@ final class AppState: ObservableObject {
         isBusy = true
         defer { isBusy = false }
         do {
-            let result = try await Auth.auth().createUser(withEmail: email, password: password)
-            if !displayName.isEmpty {
-                let req = result.user.createProfileChangeRequest()
-                req.displayName = displayName
-                try await req.commitChanges()
-            }
+            _ = try await AuthService.shared.signUp(
+                email: email, password: password, displayName: displayName
+            )
             statusMessage = "Account created."
             isAuthenticated = true
+            AuthEventService.recordEvent(method: "password")
         } catch {
             statusMessage = "Sign up failed: \(error.localizedDescription)"
         }
     }
 
+    // MARK: - Password Reset
+
+    func sendPasswordReset(email: String) async {
+        guard firebaseReady else { return }
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            try await AuthService.shared.sendPasswordReset(email: email)
+            statusMessage = "Reset link sent to \(email)."
+        } catch {
+            statusMessage = "Reset failed: \(error.localizedDescription)"
+        }
+    }
+
+    // MARK: - Environment
+
     func setEnvironment(_ newEnvironment: AppEnvironment) {
         environment = newEnvironment
         statusMessage = "Environment set to \(newEnvironment.rawValue). Restart app to reload Firebase config."
+    }
+
+    // MARK: - Private
+
+    var firebaseReady: Bool {
+        guard FirebaseApp.app() != nil else {
+            statusMessage = "Firebase not configured. Check GoogleService plist files."
+            return false
+        }
+        return true
     }
 
     private func bindAuthListener() {
