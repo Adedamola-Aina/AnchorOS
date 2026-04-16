@@ -91,4 +91,27 @@ extension AnchorQueryEngine {
             actions: []
         )
     }
+
+    // MARK: — query_family (Phase 4e-3c)
+
+    static func familySummary(_ i: Input) -> AnchorFabricQueryResult {
+        let currency = primaryCurrency(i.transactions)
+        let (start, end) = dateRange(for: i.intent.entities.timePeriod ?? .thisMonth, now: i.now)
+        let family = i.transactions.filter { tx in
+            tx.scope == "family" && !(tx.isSoftDeleted ?? false) &&
+            AnchorDateRange.inRange(tx.date, start: start, end: end)
+        }
+        if family.isEmpty {
+            return .init(
+                summary: "No shared family transactions found for that period.",
+                actions: [.init(label: "Open Finance", kind: .navigate(page: "finance"))]
+            )
+        }
+        let totalSpent = family.filter { $0.type == "expense" }.reduce(0) { $0 + $1.amountCents }
+        let label = periodLabel(i.intent.entities.timePeriod ?? .thisMonth)
+        return .init(
+            summary: "\(family.count) shared transactions \(label) — \(AnchorFabricEngine.formatCents(totalSpent, currency)) in shared expenses.",
+            actions: [.init(label: "Open Finance", kind: .navigate(page: "finance"))]
+        )
+    }
 }

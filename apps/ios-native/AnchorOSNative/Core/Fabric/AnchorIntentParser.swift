@@ -56,6 +56,8 @@ enum AnchorIntentParser {
               pattern: #"\b(account|accounts|balance|balances|how much (do i have|is in))\b"#),
         .init(action: .queryRecurring,  priority: 55,
               pattern: #"\b(recurring|subscriptions?|subscription|automatic|auto.?pay|bills? due|scheduled payment)\b"#),
+        .init(action: .queryFamily,     priority: 55,
+              pattern: #"\b(family|shared|household|partner|spouse)\b"#),
         .init(action: .queryNetWorth,   priority: 55,
               pattern: #"\b(net worth|total wealth|overall balance|financial position)\b"#),
     ]

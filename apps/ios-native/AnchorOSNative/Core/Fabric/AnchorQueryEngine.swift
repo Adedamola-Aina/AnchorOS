@@ -48,6 +48,7 @@ enum AnchorQueryEngine {
         case .queryScenario:     return scenario(input)
         case .queryCorrelation:  return correlation(input)
         case .queryDayOfWeek:    return dayOfWeek(input)
+        case .queryFamily:       return familySummary(input)
         case .recordExpense:     return recordTransaction(input, type: .expense)
         case .recordIncome:      return recordTransaction(input, type: .income)
         case .navigate:          return navigate(input)

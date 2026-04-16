@@ -141,7 +141,6 @@ extension AnchorQueryEngine {
     }
 
     // MARK: — query_scenario
-
     static func scenario(_ i: Input) -> AnchorFabricQueryResult {
         let currency = primaryCurrency(i.transactions)
         let category = i.intent.entities.category

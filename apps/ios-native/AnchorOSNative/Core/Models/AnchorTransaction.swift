@@ -15,6 +15,9 @@ struct AnchorTransaction: Identifiable, Codable {
     let currency: String
     let date: String
     let isSoftDeleted: Bool?
+    /// Optional "personal" | "family". Absent on older documents and treated
+    /// as "personal". Matches src/types/financeTypes.ts `AnchorTransaction.scope`.
+    var scope: String? = nil
 
     var resolvedId: String { id ?? "" }
 

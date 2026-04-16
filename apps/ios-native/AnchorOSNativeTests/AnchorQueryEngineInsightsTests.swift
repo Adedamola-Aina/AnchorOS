@@ -86,4 +86,34 @@ final class AnchorQueryEngineInsightsTests: XCTestCase {
         let p = AnchorIntentParser.parse("is there a connection between my habits and spending")
         XCTAssertEqual(p.action, .queryCorrelation)
     }
+
+    // MARK: — family (4e-3c)
+
+    func test_parserDetectsFamilyIntent() {
+        let p = AnchorIntentParser.parse("how much did my family spend this month")
+        XCTAssertEqual(p.action, .queryFamily)
+    }
+
+    func test_familySummaryWithNoSharedTransactions() {
+        let personal = AnchorTransaction(
+            id: "p", title: "t", amountCents: 500_00, type: "expense",
+            category: "Food", accountId: nil, accountName: nil,
+            currency: "NGN", date: iso(1), isSoftDeleted: false,
+            scope: "personal"
+        )
+        let r = AnchorQueryEngine.run(input(.queryFamily, tx: [personal]))
+        XCTAssertTrue(r.summary.contains("No shared family transactions"))
+    }
+
+    func test_familySummaryAggregatesScopeFamily() {
+        let family = AnchorTransaction(
+            id: "f", title: "groceries", amountCents: 1_500_00, type: "expense",
+            category: "Groceries", accountId: nil, accountName: nil,
+            currency: "NGN", date: iso(2), isSoftDeleted: false,
+            scope: "family"
+        )
+        let r = AnchorQueryEngine.run(input(.queryFamily, tx: [family]))
+        XCTAssertTrue(r.summary.contains("1 shared transactions"))
+        XCTAssertTrue(r.summary.contains("this month"))
+    }
 }
