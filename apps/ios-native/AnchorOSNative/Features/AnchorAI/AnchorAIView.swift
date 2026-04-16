@@ -50,6 +50,18 @@ struct AnchorAIView: View {
                         currency: financeStore.transactions.first?.currency ?? "NGN"
                     )
 
+                    if let q = fabricStore.proactiveQuestion {
+                        FabricProactiveQuestionCard(
+                            question: q,
+                            onTap: { _ in
+                                // TODO (Phase 4e): route to NLP query input.
+                                // For now, acknowledging the question dismisses it.
+                                fabricStore.dismissQuestion()
+                            },
+                            onDismiss: { _ in fabricStore.dismissQuestion() }
+                        )
+                    }
+
                     FabricPredictionsSection(
                         predictions: fabricStore.predictions,
                         onAction: { prediction in

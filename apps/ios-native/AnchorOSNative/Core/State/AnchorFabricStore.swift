@@ -16,10 +16,16 @@ final class AnchorFabricStore: ObservableObject {
     @Published private(set) var predictions: [AnchorPrediction] = []
     @Published private(set) var weeklyReport: AnchorWeeklyReport?
     @Published private(set) var upcoming: [AnchorUpcomingItem] = []
+    @Published private(set) var proactiveQuestion: AnchorProactiveQuestion?
 
     /// Recurring transactions feeding the upcoming feed. Native doesn't
     /// yet have a RecurringStore — this stays empty until one lands.
     private var recurringTransactions: [AnchorRecurringTransaction] = []
+
+    /// Per-kind shownAt persistence for proactive questions. Mirrors the PWA
+    /// `wasQuestionShownRecently(last, kind, now)` check — suppresses repeats
+    /// of the same kind for 7 days after it was last shown/dismissed.
+    private let questionShownKeyPrefix = "com.anchoros.fabric.questionShownAt."
 
     private var dismissedIds: Set<String> = []
     private let storageKey = "com.anchoros.fabric.dismissedPredictionIds"
@@ -61,11 +67,27 @@ final class AnchorFabricStore: ObservableObject {
         recompute()
     }
 
+    /// Suppress the current question (and any repeat of its kind for 7d).
+    func dismissQuestion() {
+        guard let q = proactiveQuestion else { return }
+        let key = questionShownKeyPrefix + q.kind.rawValue
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: key)
+        proactiveQuestion = nil
+    }
+
+    private func wasQuestionShownRecently(_ kind: AnchorProactiveQuestion.Kind, now: Date) -> Bool {
+        let key = questionShownKeyPrefix + kind.rawValue
+        let ts = UserDefaults.standard.double(forKey: key)
+        guard ts > 0 else { return false }
+        return now.timeIntervalSince1970 - ts < 7 * 24 * 3600
+    }
+
     private func recompute() {
         guard let f = financeStore, let c = commitmentsStore else {
             predictions = []
             weeklyReport = nil
             upcoming = []
+            proactiveQuestion = nil
             return
         }
         let now = Date()
@@ -87,6 +109,19 @@ final class AnchorFabricStore: ObservableObject {
         upcoming = AnchorDailyBriefingEngine.upcoming(
             recurring: recurringTransactions,
             now: now
+        )
+
+        proactiveQuestion = AnchorProactiveQuestionEngine.build(
+            .init(
+                patterns: [],   // TODO: wire native PatternsStore
+                transactions: f.transactions,
+                commitments: c.commitments,
+                accounts: f.accounts,
+                now: now
+            ),
+            wasShownRecently: { [weak self] kind in
+                self?.wasQuestionShownRecently(kind, now: now) ?? false
+            }
         )
     }
 }
