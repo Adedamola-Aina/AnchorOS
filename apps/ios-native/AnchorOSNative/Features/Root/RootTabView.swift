@@ -29,36 +29,41 @@ struct RootTabView: View {
                 VStack(spacing: 0) {
                     EnvironmentBanner(environment: appState.environment)
 
-                    TabView {
+                    TabView(selection: $appState.selectedTab) {
                         DashboardView()
                             .tabItem {
                                 Image(systemName: "house")
                                 Text("Home")
                             }
+                            .tag(0)
 
                         TasksView()
                             .tabItem {
                                 Image(systemName: "checkmark.circle")
                                 Text("Tasks")
                             }
+                            .tag(1)
 
                         AnchorAIView()
                             .tabItem {
                                 Image(systemName: "dot.radiowaves.left.and.right")
                                 Text("Anchor")
                             }
+                            .tag(2)
 
                         FinanceView()
                             .tabItem {
                                 Image(systemName: "creditcard")
                                 Text("Finance")
                             }
+                            .tag(3)
 
                         SettingsView()
                             .tabItem {
                                 Image(systemName: "gearshape")
                                 Text("Settings")
                             }
+                            .tag(4)
                     }
                     .toolbarBackground(AnchorPalette.card.opacity(0.96), for: .tabBar)
                     .toolbarBackground(.visible, for: .tabBar)

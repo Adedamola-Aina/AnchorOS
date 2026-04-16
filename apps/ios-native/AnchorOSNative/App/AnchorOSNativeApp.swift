@@ -10,6 +10,7 @@ struct AnchorOSNativeApp: App {
     @StateObject private var commitmentsStore = CommitmentsStore()
     @StateObject private var userProfileStore = UserProfileStore()
     @StateObject private var familyStore = FamilyStore()
+    @StateObject private var fabricStore = AnchorFabricStore()
 
     init() {
         FirebaseApp.configure()
@@ -31,12 +32,14 @@ struct AnchorOSNativeApp: App {
                 .environmentObject(commitmentsStore)
                 .environmentObject(userProfileStore)
                 .environmentObject(familyStore)
+                .environmentObject(fabricStore)
                 .onChange(of: appState.isAuthenticated) { _, authenticated in
                     if authenticated, let uid = appState.currentUID {
                         financeStore.start(uid: uid)
                         commitmentsStore.start(uid: uid)
                         familyStore.start(uid: uid)
                         Task { await userProfileStore.start(uid: uid) }
+                        fabricStore.start(financeStore: financeStore, commitmentsStore: commitmentsStore)
                     } else {
                         financeStore.stop()
                         commitmentsStore.stop()
@@ -51,6 +54,7 @@ struct AnchorOSNativeApp: App {
                         commitmentsStore.start(uid: uid)
                         familyStore.start(uid: uid)
                         await userProfileStore.start(uid: uid)
+                        fabricStore.start(financeStore: financeStore, commitmentsStore: commitmentsStore)
                     }
                 }
         }

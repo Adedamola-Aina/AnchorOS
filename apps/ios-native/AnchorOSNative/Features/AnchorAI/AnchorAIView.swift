@@ -6,6 +6,7 @@ struct AnchorAIView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var financeStore: FinanceStore
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
+    @EnvironmentObject private var fabricStore: AnchorFabricStore
     @State private var selectedMood: Int? = nil
 
     private let moodService = FamilyService()
@@ -43,6 +44,19 @@ struct AnchorAIView: View {
 
                     todayCard
                     moodCard
+
+                    FabricPredictionsSection(
+                        predictions: fabricStore.predictions,
+                        onAction: { prediction in
+                            if let target = prediction.action?.navigateTo {
+                                appState.navigate(to: target)
+                            }
+                            fabricStore.dismiss(prediction.id)
+                        },
+                        onDismiss: { prediction in
+                            fabricStore.dismiss(prediction.id)
+                        }
+                    )
 
                     if !insights.isEmpty {
                         AnchorAIInsightsCard(insights: insights)

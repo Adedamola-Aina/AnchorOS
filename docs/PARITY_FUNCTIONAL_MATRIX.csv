@@ -68,7 +68,7 @@ fabric,FabricTodayCard.tsx,Today card,AnchorAIView.swift#todayCard,done,Phase 4:
 fabric,FabricUpcomingCard.tsx,Upcoming card,(missing),deferred,Phase 4b — needs DailyBriefingEngine port (upcoming recurring bills in next 7d)
 fabric,FabricInsightCard.tsx,Insight card,AnchorAIInsightsCard.swift,done,Phase 4: extracted card; 4 insight types (spending/savings/networth/streak) with 14 parity tests
 fabric,FabricMoodCard.tsx,Mood picker,AnchorAIView.swift#moodCard,done,Phase 4: 5-emoji picker wired to FamilyService.saveMood
-fabric,FabricPredictionsSection.tsx,Predictions,AnchorPredictionsEngine.swift (engine only),partial,Phase 4b-1..4b-5: all 5 signal modules ported (anomaly + budget/burn + behavior + goal + pattern + recurring_due) with 53 parity tests. Only UI wiring into AnchorAIView remains (Phase 4b-6)
+fabric,FabricPredictionsSection.tsx,Predictions,FabricPredictionsSection.swift,complete,Phase 4b-1..4b-6: engine (5 modules) + UI wiring shipped. 61 parity tests. Amber alert cards with action button + dismiss. Dismissed IDs persist via UserDefaults. Tab routing via AppState.navigate(/finance → Finance tab, /commitments → Tasks tab). Goals + patterns data-sources still empty arrays (separate future phase).
 fabric,FabricProactiveQuestionCard.tsx,Proactive Q,(missing),deferred,Phase 4b — needs ProactiveQuestionEngine port
 fabric,FabricPromptChips.tsx,Prompt chips,(missing),deferred,Phase 4b — pairs with query section
 fabric,FabricQuerySection.tsx,NL query input,(missing),deferred,Phase 4b — needs QueryEngine + IntentParser port

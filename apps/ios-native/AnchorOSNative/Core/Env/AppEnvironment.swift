@@ -38,6 +38,22 @@ final class AppState: ObservableObject {
     @Published var isBusy: Bool = false
     @Published var statusMessage: String = "Native iOS starter."
     @Published var mfaResolver: MultiFactorResolver?
+    /// Top-level tab routing. 0=Home 1=Tasks 2=Anchor 3=Finance 4=Settings.
+    @Published var selectedTab: Int = 0
+
+    /// Accepts PWA-style paths ("/finance", "/commitments") and switches
+    /// to the matching native tab. Unknown paths are ignored.
+    func navigate(to path: String) {
+        let trimmed = path.hasPrefix("/") ? String(path.dropFirst()) : path
+        switch trimmed {
+        case "", "home", "dashboard":      selectedTab = 0
+        case "commitments", "tasks":       selectedTab = 1
+        case "fabric", "anchor", "anchor-ai": selectedTab = 2
+        case "finance":                    selectedTab = 3
+        case "settings":                   selectedTab = 4
+        default:                           break
+        }
+    }
 
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
