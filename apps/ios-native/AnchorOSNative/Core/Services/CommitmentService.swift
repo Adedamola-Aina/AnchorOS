@@ -22,12 +22,12 @@ final class CommitmentService {
     }
 
     func toggleCompleted(uid: String, taskId: String, completed: Bool) async throws {
-        let ref = db.commitmentDocument(uid: uid, taskId: taskId)
         var data: [String: Any] = ["completed": completed]
         if completed {
             data["lastCompletedAt"] = ISO8601DateFormatter().string(from: Date())
         }
-        try await ref.updateData(data)
+        // Routes through SecureDb — updatedAt/updatedBy added centrally.
+        try await db.updateDocument(uid: uid, path: ["commitments", taskId], data: data)
     }
 
     func addCommitment(
@@ -39,18 +39,16 @@ final class CommitmentService {
         notes: String?,
         priority: String? = nil
     ) async throws {
-        let ref = db.commitmentsCollection(uid: uid).document()
         var data: [String: Any] = [
             "title": title,
             "type": type,
             "domain": domain,
-            "completed": false,
-            "createdAt": FieldValue.serverTimestamp()
+            "completed": false
         ]
         if let t = timeOfDay { data["timeOfDay"] = t }
         if let n = notes, !n.isEmpty { data["notes"] = n }
         if let p = priority, !p.isEmpty { data["priority"] = p }
-        try await ref.setData(data)
+        try await db.addDocument(uid: uid, collection: "commitments", data: data)
     }
 
     func updateCommitment(
@@ -66,16 +64,16 @@ final class CommitmentService {
         var data: [String: Any] = [
             "title": title,
             "type": type,
-            "domain": domain,
-            "updatedAt": FieldValue.serverTimestamp()
+            "domain": domain
         ]
         if let t = timeOfDay { data["timeOfDay"] = t }
         if let n = notes, !n.isEmpty { data["notes"] = n }
         if let p = priority { data["priority"] = p }
-        try await db.commitmentDocument(uid: uid, taskId: taskId).updateData(data)
+        // Routes through SecureDb — updatedAt/updatedBy added centrally.
+        try await db.updateDocument(uid: uid, path: ["commitments", taskId], data: data)
     }
 
     func deleteCommitment(uid: String, taskId: String) async throws {
-        try await db.commitmentDocument(uid: uid, taskId: taskId).delete()
+        try await db.deleteDocument(uid: uid, path: ["commitments", taskId])
     }
 }

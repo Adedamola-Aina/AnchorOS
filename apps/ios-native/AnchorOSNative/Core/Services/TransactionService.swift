@@ -36,7 +36,6 @@ final class TransactionService {
         isRecurring: Bool = false,
         recurringFrequency: String? = nil
     ) async throws {
-        let ref = db.financeCollection(uid: uid).document()
         var data: [String: Any] = [
             "title": title,
             "amountCents": amountCents,
@@ -45,18 +44,17 @@ final class TransactionService {
             "currency": currency,
             "date": date ?? ISO8601DateFormatter().string(from: Date()),
             "isRecurring": isRecurring,
-            "isSoftDeleted": false,
-            "createdAt": FieldValue.serverTimestamp()
+            "isSoftDeleted": false
         ]
         if let cat = category { data["category"] = cat }
         if let name = accountName { data["accountName"] = name }
         if let freq = recurringFrequency { data["recurringFrequency"] = freq }
-        try await ref.setData(data)
+        // Routes through SecureDb — audit fields added centrally.
+        try await db.addDocument(uid: uid, collection: "finance", data: data)
     }
 
     func deleteTransaction(uid: String, transactionId: String) async throws {
-        try await db.financeCollection(uid: uid).document(transactionId)
-            .updateData(["isSoftDeleted": true])
+        try await db.updateDocument(uid: uid, path: ["finance", transactionId], data: ["isSoftDeleted": true])
     }
 
     func updateTransaction(
@@ -73,6 +71,6 @@ final class TransactionService {
             "type": type
         ]
         if let cat = category { data["category"] = cat }
-        try await db.financeCollection(uid: uid).document(transactionId).updateData(data)
+        try await db.updateDocument(uid: uid, path: ["finance", transactionId], data: data)
     }
 }

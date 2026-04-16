@@ -26,7 +26,6 @@ final class AccountService {
     }
 
     func addAccount(uid: String, name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
-        let ref = db.accountsCollection(uid: uid).document()
         let data: [String: Any] = [
             "name": name,
             "type": type,
@@ -35,23 +34,25 @@ final class AccountService {
             "color": color,
             "scope": "personal",
             "isArchived": false,
-            "sortOrder": Int(Date().timeIntervalSince1970),
-            "createdAt": FieldValue.serverTimestamp()
+            "sortOrder": Int(Date().timeIntervalSince1970)
         ]
-        try await ref.setData(data)
+        // Routes through SecureDb — audit fields (createdAt/createdBy/updatedAt/updatedBy) added centrally.
+        try await db.addDocument(uid: uid, collection: "accounts", data: data)
     }
 
     func deleteAccount(uid: String, accountId: String) async throws {
-        try await db.accountsCollection(uid: uid).document(accountId).updateData(["isArchived": true])
+        // Soft-delete: audit fields updated so downstream sees the archive event.
+        try await db.updateDocument(uid: uid, path: ["accounts", accountId], data: ["isArchived": true])
     }
 
     func updateAccount(uid: String, accountId: String, name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
-        try await db.accountsCollection(uid: uid).document(accountId).updateData([
+        let data: [String: Any] = [
             "name": name,
             "type": type,
             "currency": currency,
             "balanceCents": balanceCents,
             "color": color
-        ] as [String: Any])
+        ]
+        try await db.updateDocument(uid: uid, path: ["accounts", accountId], data: data)
     }
 }

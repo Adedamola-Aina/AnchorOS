@@ -58,9 +58,26 @@ targets:
         outputFiles:
           - $(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME).app/GoogleService-Info.plist
     scheme:
-      testTargets: []
-      gatherCoverageData: false
+      testTargets:
+        - AnchorOSNativeTests
+      gatherCoverageData: true
       buildConfigs:
         - Debug
         - Staging
         - Release
+  AnchorOSNativeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: AnchorOSNativeTests
+    dependencies:
+      - target: AnchorOSNative
+      - package: Firebase
+        product: FirebaseFirestore
+    settings:
+      base:
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AnchorOSNative.app/AnchorOSNative"
+        INFOPLIST_FILE: AnchorOSNativeTests/Info.plist
+        SWIFT_VERSION: 5.0
+        GENERATE_INFOPLIST_FILE: YES

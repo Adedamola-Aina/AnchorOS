@@ -17,8 +17,8 @@ final class UserProfileService {
     }
 
     func updateDisplayName(uid: String, name: String) async throws {
-        // Write to Firestore document
-        try await db.userDocument(uid: uid).setData(["displayName": name], merge: true)
+        // Routes through SecureDb (merge) — audit fields added centrally.
+        try await db.setDocument(uid: uid, path: [], data: ["displayName": name], merge: true)
         // Also sync to Firebase Auth profile
         let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
         changeRequest?.displayName = name
@@ -26,6 +26,6 @@ final class UserProfileService {
     }
 
     func updateCurrency(uid: String, currency: String) async throws {
-        try await db.userDocument(uid: uid).setData(["currency": currency], merge: true)
+        try await db.setDocument(uid: uid, path: [], data: ["currency": currency], merge: true)
     }
 }
