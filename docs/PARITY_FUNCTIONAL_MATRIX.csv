@@ -62,19 +62,19 @@ dashboard,RecentActivityList.tsx,Recent activity,DashboardStatusSection.swift,do
 dashboard,BeyondBasicsChecklist.tsx,Beyond basics checklist,BeyondBasicsCard.swift + BeyondBasicsCalculator.swift,done,Phase 3: 6-item parity (was 4); 7 parity tests mirror PWA useBeyondBasics contract
 dashboard,DashboardCharts.tsx,Dashboard charts index,(missing),deferred,Phase 2b/7 — needs SwiftUI chart primitives (AssetAllocation/CashFlow/AssetDistribution)
 dashboard,TodaysFocusWidget,Today's focus (top 3 daily),DashboardFocusSection.swift,done,Phase 3: filter type==daily && !completed; top 3
-fabric,FabricView.tsx,Open anchor AI,AnchorAIView.swift,stub,View is placeholder
-fabric,FabricOnboarding.tsx,Onboard opt-in,(missing),missing,—
-fabric,FabricTodayCard.tsx,Today card,(missing),missing,—
-fabric,FabricUpcomingCard.tsx,Upcoming card,(missing),missing,—
-fabric,FabricInsightCard.tsx,Insight card,(missing),missing,—
-fabric,FabricMoodCard.tsx,Mood picker,(missing),missing,—
-fabric,FabricPredictionsSection.tsx,Predictions,(missing),missing,—
-fabric,FabricProactiveQuestionCard.tsx,Proactive Q,(missing),missing,—
-fabric,FabricPromptChips.tsx,Prompt chips,(missing),missing,—
-fabric,FabricQuerySection.tsx,NL query input,(missing),missing,—
-fabric,FabricWeeklySnapshotSection.tsx,Weekly snapshot,(missing),missing,—
-fabric,FabricTransparency.tsx,Transparency page,(missing),missing,—
-fabric,MonthlyReviewModal.tsx,Monthly review,(missing),missing,—
+fabric,FabricView.tsx,Open anchor AI,AnchorAIView.swift,partial,Phase 4: stale-duplicate code removed; today/mood/insights/snapshot live. Predictions/query/upcoming/proactive deferred to 4b
+fabric,FabricOnboarding.tsx,Onboard opt-in,(missing),deferred,Phase 4b — requires FabricService readiness gate + pattern store
+fabric,FabricTodayCard.tsx,Today card,AnchorAIView.swift#todayCard,done,Phase 4: progress bar + remaining task count match PWA
+fabric,FabricUpcomingCard.tsx,Upcoming card,(missing),deferred,Phase 4b — needs DailyBriefingEngine port (upcoming recurring bills in next 7d)
+fabric,FabricInsightCard.tsx,Insight card,AnchorAIInsightsCard.swift,done,Phase 4: extracted card; 4 insight types (spending/savings/networth/streak) with 14 parity tests
+fabric,FabricMoodCard.tsx,Mood picker,AnchorAIView.swift#moodCard,done,Phase 4: 5-emoji picker wired to FamilyService.saveMood
+fabric,FabricPredictionsSection.tsx,Predictions,(missing),deferred,Phase 4b — needs PredictionsEngine port (anomaly/goal/budget/behavior/pattern signals)
+fabric,FabricProactiveQuestionCard.tsx,Proactive Q,(missing),deferred,Phase 4b — needs ProactiveQuestionEngine port
+fabric,FabricPromptChips.tsx,Prompt chips,(missing),deferred,Phase 4b — pairs with query section
+fabric,FabricQuerySection.tsx,NL query input,(missing),deferred,Phase 4b — needs QueryEngine + IntentParser port
+fabric,FabricWeeklySnapshotSection.tsx,Weekly snapshot,AnchorAIView.swift#snapshotCard,partial,Phase 4: basic rows live; full WeeklyReportEngine (spending deltas, streak highlights) deferred to 4b
+fabric,FabricTransparency.tsx,Transparency page,(missing),deferred,Phase 4b
+fabric,MonthlyReviewModal.tsx,Monthly review,(missing),deferred,Phase 4b — needs MonthlyReviewEngine port
 settings,SettingsView.tsx,Open settings,SettingsView.swift,partial,—
 settings,ProfileSettings.tsx,Edit display name,SettingsView.swift,done,—
 settings,ProfileSettings.tsx,Avatar,(missing),missing,—
