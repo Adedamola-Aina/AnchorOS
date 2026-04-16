@@ -156,10 +156,23 @@ extension AuthView {
         keyboard: UIKeyboardType = .default,
         secure: Bool = false
     ) -> some View {
+        // Parity: PWA group-focus-within text-blue-500 — icon color tweens to
+        // chipActive while the field owns focus. We key focus by placeholder
+        // match against the focused Field, keeping this helper reusable.
+        let isFocused: Bool = {
+            switch focused {
+            case .name:    return placeholder == "Your name"
+            case .email:   return placeholder == "Email address"
+            case .password: return placeholder.hasPrefix("Password")
+            case .mfaCode: return placeholder.contains("code")
+            case .none:    return false
+            }
+        }()
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.subheadline)
-                .foregroundStyle(AnchorPalette.textSecondary)
+                .foregroundStyle(isFocused ? AnchorPalette.chipActive : AnchorPalette.textSecondary)
+                .animation(.easeOut(duration: 0.2), value: isFocused)
                 .frame(width: 20)
             if secure {
                 SecureField(placeholder, text: text)

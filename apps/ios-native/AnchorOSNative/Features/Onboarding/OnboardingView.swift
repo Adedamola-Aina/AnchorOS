@@ -62,9 +62,22 @@ struct OnboardingView: View {
                     }
                 }
                 .padding(.horizontal, 24)
+                // Parity: PWA OnboardingView step change uses animate-in
+                // fade-in slide-in-from-right-4 (x 16->0 + fade 300ms).
+                .id(step)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .leading).combined(with: .opacity)
+                ))
+                .animation(.easeInOut(duration: 0.3), value: step)
 
                 Spacer()
             }
+        }
+        .fadeInOnAppear(duration: 0.4)
+        .onChange(of: step) { _, _ in
+            // Parity: PWA OnboardingProgress fires haptic.selection on step advance.
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
     }
 

@@ -19,6 +19,10 @@ struct PasswordStrengthMeter: View {
                 Text(strengthLabel)
                     .font(AnchorTypography.caption)
                     .foregroundStyle(strengthColor)
+                    // Parity: PWA PasswordStrengthMeter applies AnchorLogo animate-in
+                    // zoom-in (scale 0 -> 1 over 300ms) when strength hits max.
+                    .scaleEffect(strength >= 5 ? 1.15 : 1.0)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.55), value: strength >= 5)
             }
 
             // Bar
