@@ -1,15 +1,12 @@
 import Foundation
 import Combine
 
-/// Reactive store that recomputes Anchor AI predictions from FinanceStore +
-/// CommitmentsStore and persists dismissed prediction IDs.
+/// Reactive store that recomputes Anchor AI predictions/upcoming/proactive
+/// questions from FinanceStore + CommitmentsStore + RecurringStore +
+/// PatternsStore, and persists dismissed prediction IDs.
 ///
 /// Parity: mirrors the consumer-facing contract of `FabricService` in
-/// src/services/fabric/FabricService.ts — get predictions, dismiss by id,
-/// dismissed ids survive across sessions.
-///
-/// Goals & patterns are not yet loaded natively, so we pass empty arrays
-/// for those. When stores land, wire them here — no other changes needed.
+/// src/services/fabric/FabricService.ts.
 @MainActor
 final class AnchorFabricStore: ObservableObject {
 
@@ -18,21 +15,20 @@ final class AnchorFabricStore: ObservableObject {
     @Published private(set) var upcoming: [AnchorUpcomingItem] = []
     @Published private(set) var proactiveQuestion: AnchorProactiveQuestion?
 
-    /// NLP query surface (Phase 4e). `queryText` is what the user is typing;
-    /// `queryResult` is the last engine response; `isQuerying` drives the
-    /// "Thinking..." placeholder in FabricQuerySection.
+    /// NLP query surface (Phase 4e).
     @Published var queryText: String = ""
     @Published private(set) var queryResult: AnchorFabricQueryResult?
     @Published private(set) var isQuerying: Bool = false
 
-    /// Conversation history for contextual follow-ups (Phase 4e-4). In-memory
-    /// only — matches the PWA's session-scoped FabricPage `messages` state.
+    /// Conversation history for contextual follow-ups (Phase 4e-4).
     @Published private(set) var messages: [AnchorFabricMessage] = []
     private let maxMessages = 20
 
-    /// Recurring transactions feeding the upcoming feed. Native doesn't
-    /// yet have a RecurringStore — this stays empty until one lands.
+    /// Recurring transactions hydrated by `AnchorRecurringStore` (Phase 4f).
     private var recurringTransactions: [AnchorRecurringTransaction] = []
+
+    /// Behavioral patterns hydrated by `AnchorPatternsStore` (Phase 4f).
+    private var patterns: [AnchorUserPattern] = []
 
     /// Per-kind shownAt persistence for proactive questions. Mirrors the PWA
     /// `wasQuestionShownRecently(last, kind, now)` check — suppresses repeats
@@ -44,6 +40,8 @@ final class AnchorFabricStore: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     private weak var financeStore: FinanceStore?
     private weak var commitmentsStore: CommitmentsStore?
+    private weak var recurringStore: AnchorRecurringStore?
+    private weak var patternsStore: AnchorPatternsStore?
 
     init() {
         if let stored = UserDefaults.standard.array(forKey: storageKey) as? [String] {
@@ -51,18 +49,36 @@ final class AnchorFabricStore: ObservableObject {
         }
     }
 
-    func start(financeStore: FinanceStore, commitmentsStore: CommitmentsStore) {
+    func start(
+        financeStore: FinanceStore,
+        commitmentsStore: CommitmentsStore,
+        recurringStore: AnchorRecurringStore? = nil,
+        patternsStore: AnchorPatternsStore? = nil
+    ) {
         self.financeStore = financeStore
         self.commitmentsStore = commitmentsStore
+        self.recurringStore = recurringStore
+        self.patternsStore = patternsStore
+        recurringTransactions = recurringStore?.recurring ?? []
+        patterns = patternsStore?.patterns ?? []
         recompute()
-        financeStore.objectWillChange
+        observe(financeStore) {}
+        observe(commitmentsStore) {}
+        if let r = recurringStore {
+            observe(r) { [weak self] in self?.recurringTransactions = r.recurring }
+        }
+        if let p = patternsStore {
+            observe(p) { [weak self] in self?.patterns = p.patterns }
+        }
+    }
+
+    private func observe<T: ObservableObject>(_ store: T, update: @escaping () -> Void) {
+        store.objectWillChange
             .sink { [weak self] _ in
-                Task { @MainActor in self?.recompute() }
-            }
-            .store(in: &cancellables)
-        commitmentsStore.objectWillChange
-            .sink { [weak self] _ in
-                Task { @MainActor in self?.recompute() }
+                Task { @MainActor in
+                    update()
+                    self?.recompute()
+                }
             }
             .store(in: &cancellables)
     }
@@ -134,10 +150,8 @@ final class AnchorFabricStore: ObservableObject {
     }
 
     private func wasQuestionShownRecently(_ kind: AnchorProactiveQuestion.Kind, now: Date) -> Bool {
-        let key = questionShownKeyPrefix + kind.rawValue
-        let ts = UserDefaults.standard.double(forKey: key)
-        guard ts > 0 else { return false }
-        return now.timeIntervalSince1970 - ts < 7 * 24 * 3600
+        let ts = UserDefaults.standard.double(forKey: questionShownKeyPrefix + kind.rawValue)
+        return ts > 0 && (now.timeIntervalSince1970 - ts) < 7 * 24 * 3600
     }
 
     private func recompute() {
@@ -153,7 +167,7 @@ final class AnchorFabricStore: ObservableObject {
             transactions: f.transactions,
             commitments: c.commitments,
             goals: [],          // TODO: wire native GoalsStore
-            patterns: [],       // TODO: wire native PatternsStore
+            patterns: patterns,
             now: now
         )
         let fresh = AnchorPredictionsEngine.build(input)
@@ -171,7 +185,7 @@ final class AnchorFabricStore: ObservableObject {
 
         proactiveQuestion = AnchorProactiveQuestionEngine.build(
             .init(
-                patterns: [],   // TODO: wire native PatternsStore
+                patterns: patterns,
                 transactions: f.transactions,
                 commitments: c.commitments,
                 accounts: f.accounts,

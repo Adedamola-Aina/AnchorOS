@@ -11,6 +11,8 @@ struct AnchorOSNativeApp: App {
     @StateObject private var userProfileStore = UserProfileStore()
     @StateObject private var familyStore = FamilyStore()
     @StateObject private var fabricStore = AnchorFabricStore()
+    @StateObject private var recurringStore = AnchorRecurringStore()
+    @StateObject private var patternsStore = AnchorPatternsStore()
 
     init() {
         FirebaseApp.configure()
@@ -33,18 +35,29 @@ struct AnchorOSNativeApp: App {
                 .environmentObject(userProfileStore)
                 .environmentObject(familyStore)
                 .environmentObject(fabricStore)
+                .environmentObject(recurringStore)
+                .environmentObject(patternsStore)
                 .onChange(of: appState.isAuthenticated) { _, authenticated in
                     if authenticated, let uid = appState.currentUID {
                         financeStore.start(uid: uid)
                         commitmentsStore.start(uid: uid)
                         familyStore.start(uid: uid)
                         Task { await userProfileStore.start(uid: uid) }
-                        fabricStore.start(financeStore: financeStore, commitmentsStore: commitmentsStore)
+                        recurringStore.start(uid: uid)
+                        patternsStore.start(uid: uid)
+                        fabricStore.start(
+                            financeStore: financeStore,
+                            commitmentsStore: commitmentsStore,
+                            recurringStore: recurringStore,
+                            patternsStore: patternsStore
+                        )
                     } else {
                         financeStore.stop()
                         commitmentsStore.stop()
                         familyStore.stop()
                         userProfileStore.stop()
+                        recurringStore.stop()
+                        patternsStore.stop()
                     }
                 }
                 // Bootstrap stores if already authenticated at launch
@@ -54,7 +67,14 @@ struct AnchorOSNativeApp: App {
                         commitmentsStore.start(uid: uid)
                         familyStore.start(uid: uid)
                         await userProfileStore.start(uid: uid)
-                        fabricStore.start(financeStore: financeStore, commitmentsStore: commitmentsStore)
+                        recurringStore.start(uid: uid)
+                        patternsStore.start(uid: uid)
+                        fabricStore.start(
+                            financeStore: financeStore,
+                            commitmentsStore: commitmentsStore,
+                            recurringStore: recurringStore,
+                            patternsStore: patternsStore
+                        )
                     }
                 }
         }
