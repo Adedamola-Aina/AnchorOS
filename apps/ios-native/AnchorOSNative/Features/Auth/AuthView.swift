@@ -29,6 +29,7 @@ struct AuthView: View {
                 }
             }
         }
+        .authMountTransition(duration: 0.5) // Parity: PWA AuthView.tsx `animate-in fade-in zoom-in-95` over 500ms.
     }
 
     // MARK: - Header
@@ -142,8 +143,9 @@ struct AuthView: View {
                 .focused($focused, equals: .password)
                 .submitLabel(.go)
                 .onSubmit { Task { await submit() } }
-            if !password.isEmpty {
+            if mode == .signup && !password.isEmpty {
                 PasswordStrengthMeter(password: password)
+                    .slideFadeFromTop(offset: 4, duration: 0.2)
             }
         }
     }

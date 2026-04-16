@@ -27,7 +27,7 @@ extension AuthView {
             .foregroundStyle(formIsValid ? .white : AnchorPalette.textSecondary)
         }
         .disabled(!formIsValid || appState.isBusy || rateLimiter.isLocked)
-        .buttonStyle(.plain)
+        .buttonStyle(PressScaleStyle())
     }
 
     private var submitLabel: String {
@@ -109,8 +109,14 @@ extension AuthView {
                             : AnchorPalette.textSecondary
                     )
                     .multilineTextAlignment(.center)
+                    // Parity: PWA AuthView.tsx error message `animate-in fade-in slide-in-from-top-2` over 300ms.
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .opacity
+                    ))
             }
         }
+        .animation(.easeOut(duration: 0.3), value: appState.statusMessage)
     }
 
     // MARK: - Environment Picker

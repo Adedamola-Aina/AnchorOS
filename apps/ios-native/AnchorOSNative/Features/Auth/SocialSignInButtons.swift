@@ -28,7 +28,7 @@ struct SocialSignInButtons: View {
                 .background(AnchorPalette.chip)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PressScaleStyle())
             .disabled(isLoading)
 
             // Google Sign-In
@@ -44,7 +44,7 @@ struct SocialSignInButtons: View {
                 .background(AnchorPalette.chip)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PressScaleStyle())
             .disabled(isLoading)
         }
     }

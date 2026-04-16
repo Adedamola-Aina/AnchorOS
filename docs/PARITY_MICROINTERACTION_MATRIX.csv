@@ -11,14 +11,14 @@ finance,WalletCard expand,tap to expand,useFinanceCardInteraction.ts,card scale 
 finance,WalletStack cycle,cycle to next,useCardCycle.ts,y-pan drag snap + reorder,spring,—,haptic.selection on cycle (!= collapse),instant swap,complete,"Phase 4j verified: WalletCardStack.dragGesture onEnded fires UIImpactFeedbackGenerator(.light) when translation crosses ±60pt threshold before incrementing/decrementing currentIndex; spring(0.4, 0.8) reset on dragOffset."
 finance,SpendingTrendsChart,mount/data change,SpendingTrendsChart.tsx,—,—,—,—,—,complete,"Phase 4j verified: SwiftUI Charts BarMark applies the framework's default implicit mount + data-change animation; PWA equivalent is transition-all/transition-colors on bar divs (no explicit axis-tick animation). Behavior matches."
 dashboard,any card,mount,various animate-in fade-in,opacity 0 → 1,300-500,ease,—,instant,partial,Use .transition(.opacity.combined(with:.move(edge:.bottom))) and gate on reduce-motion
-auth,AuthView,mount,AuthView.tsx animate-in fade-in zoom-in-95,opacity+scale 95% → 100%,500,ease,—,instant,missing,—
-auth,AuthLeftPanel,mount,animate-in fade-in zoom-in,opacity+scale,1000,ease,—,instant,missing,—
-auth,error message,error appears,AuthView.tsx animate-in fade-in slide-in-from-top-2,y -8 → 0 + fade,300,ease,—,instant,missing,—
-auth,AuthFormFields,invalid field,animate-in fade-in slide-in-from-top-1,y -4 → 0 + fade,200,ease,—,instant,missing,—
-auth,SocialSignInButtons,tap,active:scale-[0.98] + transition-all,instant scale,—,—,—,instant,partial,Verify on AuthView.swift buttons
-auth,AuthSubmitButton,tap,active:scale-[0.98],instant scale,—,—,—,instant,partial,—
-auth,AuthSubmitButton,loading,w-5 h-5 animate-spin rounded-full,spin,1000 linear,linear,—,static,partial,ProgressView()
-auth,PasswordStrengthMeter,appear,animate-in fade-in slide-in-from-top-2,y+fade,500,ease,—,instant,missing,—
+auth,AuthView,mount,AuthView.tsx animate-in fade-in zoom-in-95,opacity+scale 95% → 100%,500,ease,—,instant,complete,"Phase 4k: AuthView.swift .authMountTransition(duration: 0.5) modifier — opacity 0→1 + scale 0.95→1.0 over 500ms easeOut. Reduce Motion honored."
+auth,AuthLeftPanel,mount,animate-in fade-in zoom-in,opacity+scale,1000,ease,—,instant,n/a,"PWA-only: AuthLeftPanel is the desktop split-view promo panel rendered at lg: breakpoint only. Native iOS auth is single-column; no equivalent surface."
+auth,error message,error appears,AuthView.tsx animate-in fade-in slide-in-from-top-2,y -8 → 0 + fade,300,ease,—,instant,complete,"Phase 4k: AuthView+Helpers.swift statusRow uses .transition(.asymmetric(.move(.top)+.opacity, .opacity)) + .animation(.easeOut(0.3)) on statusMessage changes."
+auth,AuthFormFields,invalid field,animate-in fade-in slide-in-from-top-1,y -4 → 0 + fade,200,ease,—,instant,partial,"Phase 4k: .slideFadeFromTop(offset: 4, 0.2) modifier available; needs inline error banner surface on AuthView fields. Defer to Phase 4k-2 when field-level error state is added."
+auth,SocialSignInButtons,tap,active:scale-[0.98] + transition-all,instant scale,—,—,—,instant,complete,"Phase 4k: SocialSignInButtons.swift Apple+Google buttons now use .buttonStyle(PressScaleStyle()) — 0.98× scale while pressed, easeOut(0.12) return. Reduce Motion short-circuits."
+auth,AuthSubmitButton,tap,active:scale-[0.98],instant scale,—,—,—,instant,complete,"Phase 4k: AuthView+Helpers.swift submitButton now uses .buttonStyle(PressScaleStyle()) — 0.98× scale while pressed, easeOut(0.12) return."
+auth,AuthSubmitButton,loading,w-5 h-5 animate-spin rounded-full,spin,1000 linear,linear,—,static,complete,"Phase 4k verified: AuthView+Helpers.swift submitButton renders ProgressView().tint(.white) during appState.isBusy — SwiftUI ProgressView matches PWA's 1s linear spin contract."
+auth,PasswordStrengthMeter,appear,animate-in fade-in slide-in-from-top-2,y+fade,500,ease,—,instant,complete,"Phase 4k: AuthView.swift signupFields renders PasswordStrengthMeter with .slideFadeFromTop(offset: 4, duration: 0.2) — opacity 0→1 + y -4→0 easeOut."
 auth,PasswordStrengthMeter,full strength,AnchorLogo animate-in zoom-in,scale 0 → 1,300,ease,—,instant,missing,—
 auth,AuthFormFields icon,focus,group-focus-within text-blue-500 transition-colors,color tween,—,ease,—,instant,missing,—
 fabric,FabricView,mount,animate-in fade-in,opacity,300,ease,—,instant,missing,—
