@@ -18,6 +18,13 @@ final class AnchorFabricStore: ObservableObject {
     @Published private(set) var upcoming: [AnchorUpcomingItem] = []
     @Published private(set) var proactiveQuestion: AnchorProactiveQuestion?
 
+    /// NLP query surface (Phase 4e). `queryText` is what the user is typing;
+    /// `queryResult` is the last engine response; `isQuerying` drives the
+    /// "Thinking..." placeholder in FabricQuerySection.
+    @Published var queryText: String = ""
+    @Published private(set) var queryResult: AnchorFabricQueryResult?
+    @Published private(set) var isQuerying: Bool = false
+
     /// Recurring transactions feeding the upcoming feed. Native doesn't
     /// yet have a RecurringStore — this stays empty until one lands.
     private var recurringTransactions: [AnchorRecurringTransaction] = []
@@ -73,6 +80,40 @@ final class AnchorFabricStore: ObservableObject {
         let key = questionShownKeyPrefix + q.kind.rawValue
         UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: key)
         proactiveQuestion = nil
+    }
+
+    /// Run an NLP query against currently-loaded finance + commitment state.
+    /// Short-circuits on empty input. Parity: equivalent to the
+    /// `handleSubmit` path in FabricPage that calls
+    /// `parseIntent → runFabricQuery`.
+    func submitQuery(_ raw: String) {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard let f = financeStore, let c = commitmentsStore else { return }
+        isQuerying = true
+        let intent = AnchorIntentParser.parse(trimmed)
+        let input = AnchorQueryEngine.Input(
+            intent: intent,
+            transactions: f.transactions,
+            commitments: c.commitments,
+            accounts: f.accounts,
+            upcoming: upcoming,
+            weeklyReport: weeklyReport,
+            now: Date()
+        )
+        queryResult = AnchorQueryEngine.run(input)
+        isQuerying = false
+    }
+
+    /// Prefill the input and immediately submit — used by PromptChips.
+    func runPrompt(_ prompt: String) {
+        queryText = prompt
+        submitQuery(prompt)
+    }
+
+    func clearQuery() {
+        queryText = ""
+        queryResult = nil
     }
 
     private func wasQuestionShownRecently(_ kind: AnchorProactiveQuestion.Kind, now: Date) -> Bool {

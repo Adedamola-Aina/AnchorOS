@@ -45,6 +45,27 @@ struct AnchorAIView: View {
                     todayCard
                     moodCard
 
+                    FabricQuerySection(
+                        text: Binding(
+                            get: { fabricStore.queryText },
+                            set: { fabricStore.queryText = $0 }
+                        ),
+                        isQuerying: fabricStore.isQuerying,
+                        result: fabricStore.queryResult,
+                        onSubmit: { fabricStore.submitQuery(fabricStore.queryText) },
+                        onPrompt: { fabricStore.runPrompt($0) },
+                        onGenerateWeeklyReport: {
+                            fabricStore.runPrompt("generate weekly report")
+                        },
+                        onAction: { kind in
+                            switch kind {
+                            case .navigate(let page): appState.navigate(to: page)
+                            case .generateWeeklyReport:
+                                fabricStore.runPrompt("generate weekly report")
+                            }
+                        }
+                    )
+
                     FabricUpcomingCard(
                         items: fabricStore.upcoming,
                         currency: financeStore.transactions.first?.currency ?? "NGN"
@@ -53,9 +74,10 @@ struct AnchorAIView: View {
                     if let q = fabricStore.proactiveQuestion {
                         FabricProactiveQuestionCard(
                             question: q,
-                            onTap: { _ in
-                                // TODO (Phase 4e): route to NLP query input.
-                                // For now, acknowledging the question dismisses it.
+                            onTap: { question in
+                                // Phase 4e: route the question into the query
+                                // input for NLP handling.
+                                fabricStore.runPrompt(question.question)
                                 fabricStore.dismissQuestion()
                             },
                             onDismiss: { _ in fabricStore.dismissQuestion() }
