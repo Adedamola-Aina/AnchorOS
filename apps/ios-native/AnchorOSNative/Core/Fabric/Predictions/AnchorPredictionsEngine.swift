@@ -23,11 +23,15 @@ enum AnchorPredictionsEngine {
             transactions: input.transactions,
             now: input.now
         )
+        let behavior = AnchorBehaviorSignals.build(
+            transactions: input.transactions,
+            commitments: input.commitments,
+            now: input.now
+        )
         // When more signal modules land, concatenate them here:
-        // let behavior = AnchorBehaviorSignals.build(input)
         // let goal     = AnchorGoalSignals.build(input)
         // let pattern  = AnchorPatternSignals.build(input)
-        let all = anomaly + budget
+        let all = anomaly + budget + behavior
         return all.sorted { $0.confidence > $1.confidence }
             .prefix(maxPredictions)
             .map { $0 }
