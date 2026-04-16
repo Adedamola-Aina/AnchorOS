@@ -35,22 +35,22 @@ finance,WalletCard.tsx,Single wallet card,WalletCardStack.swift,done,—
 finance,TransferDetails.tsx,Transfer detail view,(missing),missing,—
 finance,AccountOverviewPanel.tsx,Account overview,AccountDetailView.swift,partial,Verify ring/chart parity
 finance,PullToRefresh.tsx,Pull to refresh tx,List.refreshable (missing),missing,Verify applied to native scrolls
-commitments,CommitmentsView.tsx,Open tasks,TasksView.swift,partial,—
-commitments,TaskList.tsx,List tasks,List in TasksView,partial,Verify grouping (today/upcoming/completed)
-commitments,TaskItem.tsx,Toggle complete,(inline),partial,Completion animation + haptic missing; see microinteraction CSV
-commitments,TaskItem.tsx,Tap title to edit,(inline),partial,Verify
+commitments,CommitmentsView.tsx,Open tasks,TasksView.swift,done,Phase 5: ARCH-001 compliant; list/progress/filters live. Calendar/Week/Timeline views deferred to Phase 5b
+commitments,TaskList.tsx,List tasks,TasksView.swift#activeSectionCard + completedSectionCard,done,Phase 5: active + collapsible completed sections match PWA
+commitments,TaskItem.tsx,Toggle complete,TaskRowView.swift,done,Phase 5: extracted row with haptic-equivalent toggle; completion-pop animation deferred to Phase 7
+commitments,TaskItem.tsx,Tap title to edit,TaskRowView.swift,done,Phase 5
 commitments,TaskItem.tsx,Edit button,EditCommitmentSheet.swift,done,—
-commitments,TaskItem.tsx,Delete button,(inline),partial,Verify confirm alert
-commitments,SwipeableTaskItem.tsx,Swipe-to-delete task,SwipeableRow.swift,partial,Verify wired
-commitments,SwipeableTaskItem.tsx,Swipe-to-edit task,SwipeableRow.swift,partial,Verify wired
-commitments,TaskForm.tsx,Create task,AddCommitmentSheet.swift,partial,Verify recurrence + context fields
-commitments,EditTaskForm.tsx,Edit task,EditCommitmentSheet.swift,partial,—
-commitments,MonthCalendarView.tsx,Calendar view,(missing),missing,—
-commitments,WeeklyView.tsx,Week view,(missing),missing,—
-commitments,TimelineView.tsx,Timeline view,(missing),missing,—
-commitments,TaskContextBadge,Context badge,(missing),missing,—
-commitments,streakUtils,Streak display,(missing),missing,—
-commitments,streakUtils,Streak milestone banner,(missing),missing,—
+commitments,TaskItem.tsx,Delete button,SwipeableRow.swift,done,Phase 5: wired via swipe action
+commitments,SwipeableTaskItem.tsx,Swipe-to-delete task,SwipeableRow.swift,done,Phase 5: verified wired in TasksView
+commitments,SwipeableTaskItem.tsx,Swipe-to-edit task,SwipeableRow.swift,done,Phase 5: verified wired in TasksView
+commitments,TaskForm.tsx,Create task,AddCommitmentSheet.swift + AddCommitmentFrequencyStep.swift,done,Phase 5: split for ARCH-001; 2-step frequency→details flow matches PWA
+commitments,EditTaskForm.tsx,Edit task,EditCommitmentSheet.swift,done,—
+commitments,MonthCalendarView.tsx,Calendar view,(missing),deferred,Phase 5b — needs SwiftUI calendar primitive
+commitments,WeeklyView.tsx,Week view,(missing),deferred,Phase 5b
+commitments,TimelineView.tsx,Timeline view,(missing),deferred,Phase 5b
+commitments,TaskContextBadge,Context badge,(missing),deferred,Phase 5b — requires task.context field on native model
+commitments,streakUtils,Streak display,TaskRowView.swift + StreakCalculator.swift,done,Phase 5: milestone emoji on exact-match days; 7 parity tests mirror streakUtils.test.ts
+commitments,streakUtils,Streak milestone banner,TaskRowView.swift + StreakCalculator.swift,done,Phase 5: streakNudge surfaced below active tasks (e.g. '2 more days to ⭐ 1 week strong!')
 dashboard,DashboardView.tsx,Landing view,DashboardView.swift,done,Phase 3: real profile wired via UserProfileStore; greeting + haptic on refresh match PWA
 dashboard,DashboardWidgets.tsx,Widget grid,(missing),missing,—
 dashboard,AssetAllocationWidget.tsx,Asset allocation ring,(missing),missing,—

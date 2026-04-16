@@ -25,11 +25,8 @@ struct AddCommitmentSheet: View {
         ("critical", "Critical")
     ]
 
-    private let types: [(id: String, label: String, icon: String, desc: String)] = [
-        ("daily", "Daily", "arrow.clockwise", "Repeats every day"),
-        ("weekly", "Weekly", "calendar.badge.clock", "Repeats each week"),
-        ("monthly", "Monthly", "calendar", "Repeats each month"),
-        ("todo", "One-Off", "checkmark.square", "Do it once"),
+    private let typeLabels: [String: String] = [
+        "daily": "Daily", "weekly": "Weekly", "monthly": "Monthly", "todo": "One-Off"
     ]
 
     private let domains = [
@@ -46,7 +43,11 @@ struct AddCommitmentSheet: View {
     var body: some View {
         NavigationStack {
             if step == 1 {
-                frequencyStep
+                AddCommitmentFrequencyStep(
+                    type: $type,
+                    onAdvance: { withAnimation { step = 2 } },
+                    onCancel: { dismiss() }
+                )
             } else {
                 detailsStep
             }
@@ -55,61 +56,7 @@ struct AddCommitmentSheet: View {
         .presentationDragIndicator(.visible)
     }
 
-    // MARK: — Step 1: Frequency
-
-    private var frequencyStep: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                Text("How often?")
-                    .font(.title3).fontWeight(.bold)
-                    .foregroundStyle(AnchorPalette.textPrimary)
-                    .padding(.top, 8)
-
-                ForEach(types, id: \.id) { t in
-                    Button {
-                        type = t.id
-                        withAnimation { step = 2 }
-                    } label: {
-                        HStack(spacing: 14) {
-                            Image(systemName: t.icon)
-                                .font(.title3)
-                                .foregroundStyle(AnchorPalette.chipActive)
-                                .frame(width: 32)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(t.label)
-                                    .foregroundStyle(AnchorPalette.textPrimary)
-                                    .fontWeight(.semibold)
-                                Text(t.desc)
-                                    .foregroundStyle(AnchorPalette.textSecondary)
-                                    .font(.caption)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(AnchorPalette.textSecondary)
-                        }
-                        .padding(16)
-                        .background(AnchorPalette.card)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(AnchorPalette.cardBorder, lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(20)
-        }
-        .background(AnchorBackground())
-        .navigationTitle("New Commitment")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }.foregroundStyle(AnchorPalette.textSecondary)
-            }
-        }
-    }
+    // MARK: — Step 1 rendered by AddCommitmentFrequencyStep (extracted for ARCH-001).
 
     // MARK: — Step 2: Details
 
@@ -190,7 +137,7 @@ struct AddCommitmentSheet: View {
             .padding(20)
         }
         .background(AnchorBackground())
-        .navigationTitle("\(types.first(where: { $0.id == type })?.label ?? "") Commitment")
+        .navigationTitle("\(typeLabels[type] ?? "") Commitment")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {

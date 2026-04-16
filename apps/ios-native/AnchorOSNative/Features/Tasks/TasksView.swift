@@ -100,31 +100,12 @@ struct TasksView: View {
     // MARK: — Progress
 
     private var progressCard: some View {
-        AnchorCard(title: "Progress", icon: "chart.bar") {
-            HStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .stroke(AnchorPalette.chip, lineWidth: 6)
-                    Circle()
-                        .trim(from: 0, to: commitmentsStore.completionPercent)
-                        .stroke(AnchorPalette.chipActive, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                        .animation(.easeInOut, value: commitmentsStore.completionPercent)
-                }
-                .frame(width: 48, height: 48)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(commitmentsStore.completedCount) of \(commitmentsStore.totalCount) complete")
-                        .foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
-                    Text("\(commitmentsStore.activeCount) remaining")
-                        .foregroundStyle(AnchorPalette.textSecondary).font(.footnote)
-                }
-                Spacer()
-                Text("\(Int(commitmentsStore.completionPercent * 100))%")
-                    .foregroundStyle(AnchorPalette.textPrimary)
-                    .font(.title3).fontWeight(.bold)
-            }
-        }
+        TasksProgressCard(
+            completed: commitmentsStore.completedCount,
+            total: commitmentsStore.totalCount,
+            active: commitmentsStore.activeCount,
+            percent: commitmentsStore.completionPercent
+        )
     }
 
     // MARK: — Active Tasks
@@ -195,59 +176,13 @@ struct TasksView: View {
         }
     }
 
-    // MARK: — Task Row
+    // MARK: — Task Row (extracted to TaskRowView)
 
     private func taskRow(_ task: AnchorCommitment) -> some View {
-        HStack(spacing: 12) {
-            Button {
-                Task { await commitmentsStore.toggleCompleted(taskId: task.resolvedId) }
-            } label: {
-                Image(systemName: task.completed ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(task.completed ? AnchorPalette.chipActive : AnchorPalette.textSecondary)
-            }
-            .buttonStyle(.plain)
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(task.title)
-                    .foregroundStyle(task.completed ? AnchorPalette.textSecondary : AnchorPalette.textPrimary)
-                    .fontWeight(.semibold)
-                    .strikethrough(task.completed, color: AnchorPalette.textSecondary)
-
-                HStack(spacing: 6) {
-                    Text(task.typeLabel)
-                        .font(.caption2).fontWeight(.bold)
-                        .foregroundStyle(AnchorPalette.textSecondary)
-                        .padding(.horizontal, 8).padding(.vertical, 3)
-                        .background(AnchorPalette.chip)
-                        .clipShape(Capsule())
-
-                    if let domain = task.domainLabel {
-                        Text(domain)
-                            .font(.caption2).fontWeight(.bold)
-                            .foregroundStyle(AnchorPalette.chipActive)
-                            .padding(.horizontal, 8).padding(.vertical, 3)
-                            .background(AnchorPalette.chipActive.opacity(0.15))
-                            .clipShape(Capsule())
-                    }
-
-                    if let streak = task.currentStreak, streak > 1 {
-                        Label("\(streak)", systemImage: "flame.fill")
-                            .font(.caption2).fontWeight(.bold)
-                            .foregroundStyle(AnchorPalette.warning)
-                    }
-
-                    if let p = task.priority, p != "low" {
-                        Image(systemName: task.priorityIcon)
-                            .font(.caption2).fontWeight(.bold)
-                            .foregroundStyle(task.priorityColor)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
-            .onTapGesture { taskToEdit = task }
-            Spacer(minLength: 0)
-        }
+        TaskRowView(
+            task: task,
+            onToggle: { Task { await commitmentsStore.toggleCompleted(taskId: task.resolvedId) } },
+            onTap: { taskToEdit = task }
+        )
     }
 }
