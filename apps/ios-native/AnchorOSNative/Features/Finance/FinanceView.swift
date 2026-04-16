@@ -160,25 +160,36 @@ struct FinanceView: View {
     // MARK: — Total Assets
 
     private var totalAssetsBar: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("TOTAL ASSETS")
-                .font(.caption).fontWeight(.bold)
-                .foregroundStyle(AnchorPalette.textSecondary)
-            if financeStore.isLoading {
-                ProgressView().tint(.white)
-            } else if currencyTotals.isEmpty {
-                Text("—").foregroundStyle(AnchorPalette.textPrimary).font(.title3)
-            } else {
-                HStack(spacing: 16) {
-                    ForEach(currencyTotals, id: \.currency) { entry in
-                        Text(entry.formatted)
-                            .font(.title3).fontWeight(.bold)
-                            .foregroundStyle(AnchorPalette.textPrimary)
+        ZStack {
+            // PWA parity: microMotion.netWorthRise shimmer when total > 0.
+            LinearGradient(
+                colors: [Color.clear, AnchorPalette.finance.opacity(0.3), Color.clear],
+                startPoint: .leading, endPoint: .trailing
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .allowsHitTesting(false)
+            .netWorthRise(trigger: !currencyTotals.isEmpty)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("TOTAL ASSETS")
+                    .font(.caption).fontWeight(.bold)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                if financeStore.isLoading {
+                    ProgressView().tint(.white)
+                } else if currencyTotals.isEmpty {
+                    Text("—").foregroundStyle(AnchorPalette.textPrimary).font(.title3)
+                } else {
+                    HStack(spacing: 16) {
+                        ForEach(currencyTotals, id: \.currency) { entry in
+                            Text(entry.formatted)
+                                .font(.title3).fontWeight(.bold)
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                        }
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 12)
     }
 

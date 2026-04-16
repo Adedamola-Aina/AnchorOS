@@ -14,7 +14,7 @@ finance,SwipeableTransactionItem.tsx,Swipe-to-delete tx,SwipeableRow.swift,parti
 finance,SwipeableTransactionItem.tsx,Swipe-to-edit tx,SwipeableRow.swift,partial,Verify left/right action parity
 finance,VirtualTransactionList.tsx,Infinite scroll tx,List+onAppear (missing),missing,Native list not virtualized
 finance,CategorySelector.tsx,Pick category,Picker (missing),missing,Category taxonomy not ported
-finance,NetWorthCards.tsx,View net worth cards,FinanceView.totalAssetsBar + NetWorthCalculator.swift,partial,Phase 2: per-currency math matches PWA calculateNetWorth; missing savePulse animation + dedicated cards UI
+finance,NetWorthCards.tsx,View net worth cards,FinanceView.totalAssetsBar + NetWorthCalculator.swift,complete,"Phase 2: per-currency math matches PWA calculateNetWorth. Phase 4g: AnchorMicroMotion.netWorthRise ported (opacity [0, 0.22, 0] over 1.1s ease-out via SwiftUI withAnimation, honors Reduce Motion). Shimmer gradient overlay behind totalAssetsBar triggers when totals are non-empty."
 finance,finance.ts calculateNetWorth,Calculate net worth per currency,NetWorthCalculator.swift,done,Phase 2: pure function mirrors src/utils/finance.ts; 6 parity test cases in NetWorthCalculatorTests.swift
 finance,FinanceStore.setSavingsGoal,Write savings goal,FinanceStore.setSavingsGoal,done,Phase 2: now routes through SecureDb (was bypassing to wrong root users/{uid})
 finance,InsightCards.tsx,View monthly insight,MonthlyInsight (missing),missing,No AI insight row
@@ -62,7 +62,7 @@ dashboard,RecentActivityList.tsx,Recent activity,DashboardStatusSection.swift,do
 dashboard,BeyondBasicsChecklist.tsx,Beyond basics checklist,BeyondBasicsCard.swift + BeyondBasicsCalculator.swift,done,Phase 3: 6-item parity (was 4); 7 parity tests mirror PWA useBeyondBasics contract
 dashboard,DashboardCharts.tsx,Dashboard charts index,(missing),deferred,Phase 2b/7 — needs SwiftUI chart primitives (AssetAllocation/CashFlow/AssetDistribution)
 dashboard,TodaysFocusWidget,Today's focus (top 3 daily),DashboardFocusSection.swift,done,Phase 3: filter type==daily && !completed; top 3
-fabric,FabricView.tsx,Open anchor AI,AnchorAIView.swift,partial,Phase 4: stale-duplicate code removed; today/mood/insights/snapshot live. Predictions/query/upcoming/proactive deferred to 4b
+fabric,FabricView.tsx,Open anchor AI,AnchorAIView.swift,complete,"Phase 4: today/mood/insights/snapshot. Phase 4b: predictions engine + UI. Phase 4c: upcoming card. Phase 4d: proactive question. Phase 4e/e-2/e-3/e-3b/e-3c: full NLP query surface (20 rules, parser, engine routes). Phase 4f: RecurringStore + PatternsStore data sources wired. All sub-deferrals resolved."
 fabric,FabricOnboarding.tsx,Onboard opt-in,(missing),deferred,Phase 4b — requires FabricService readiness gate + pattern store
 fabric,FabricTodayCard.tsx,Today card,AnchorAIView.swift#todayCard,done,Phase 4: progress bar + remaining task count match PWA
 fabric,FabricUpcomingCard.tsx,Upcoming card,FabricUpcomingCard.swift,complete,"Phase 4c: DailyBriefingEngine.upcoming ported with 7 parity tests. View renders today/tomorrow/in-Nd badges. Hidden when empty. Phase 4f: AnchorRecurringStore wires live Firestore listener on artifacts/anchor-os/recurring_transactions (userId-filtered, matching PWA fabricPersistence.loadRecurringRules). Hydrates into AnchorFabricStore; Combine subscription triggers recompute on change."
