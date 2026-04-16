@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Dashboard — "Life at a glance" with real name, net worth, tasks + activity.
 /// Data sources: UserProfileStore, FinanceStore, CommitmentsStore
@@ -20,24 +21,53 @@ struct DashboardView: View {
         return "Good evening"
     }
 
+    // MARK: — Derived state (pure calculators — parity with PWA)
+
+    private var productivity: ProductivityCalculator.Metrics {
+        ProductivityCalculator.calculate(commitments: commitmentsStore.commitments)
+    }
+
+    private var beyondBasics: BeyondBasicsCalculator.Result {
+        BeyondBasicsCalculator.calculate(
+            accounts: financeStore.accounts,
+            transactions: financeStore.transactions,
+            commitments: commitmentsStore.commitments,
+            themeCustomized: userProfileStore.profile?.preferences?.theme != nil,
+            notificationsSet: userProfileStore.profile?.preferences?.notifications != nil,
+            emailVerified: AuthService.shared.isEmailVerified,
+            mfaEnabled: userProfileStore.mfaEnabled
+        )
+    }
+
+    /// Top 3 incomplete daily commitments — matches PWA todaysPriorities.
+    private var todaysPriorities: [AnchorCommitment] {
+        commitmentsStore.commitments
+            .filter { $0.type == "daily" && !$0.completed }
+            .prefix(3)
+            .map { $0 }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
                     greetingHeader
-                    BeyondBasicsCard(
-                        hasAccount: !financeStore.accounts.isEmpty,
-                        hasTransaction: !financeStore.transactions.isEmpty,
-                        hasCommitment: !commitmentsStore.commitments.isEmpty,
-                        mfaEnabled: userProfileStore.mfaEnabled
-                    )
+                    BeyondBasicsCard(result: beyondBasics)
                     if loadTimedOut && financeStore.accounts.isEmpty && commitmentsStore.commitments.isEmpty {
                         AnchorErrorBanner()
                     } else {
                         wealthCard
-                        tasksProgressCard
-                        recentActivityCard
-                        statusCard
+                        DashboardFocusSection(
+                            metrics: productivity,
+                            todaysPriorities: todaysPriorities
+                        )
+                        DashboardStatusSection(
+                            recentTransactions: financeStore.recentTransactions,
+                            environment: appState.environment.rawValue,
+                            healthStatus: projectStateStore.healthStatus,
+                            alertsCount: projectStateStore.snapshot?.alertsCount ?? 0,
+                            inProgressCount: projectStateStore.snapshot?.inProgressCount ?? 0
+                        )
                     }
                 }
                 .padding(16)
@@ -74,9 +104,13 @@ struct DashboardView: View {
                     .environmentObject(commitmentsStore)
             }
             .refreshable {
-                async let _ = projectStateStore.refresh(for: appState.environment, force: true)
-                async let _ = financeStore.refresh()
-                async let _ = commitmentsStore.refresh()
+                // Haptic parity with PWA: light on start, success on complete.
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                async let a: Void = projectStateStore.refresh(for: appState.environment, force: true)
+                async let b: Void = financeStore.refresh()
+                async let c: Void = commitmentsStore.refresh()
+                _ = await (a, b, c)
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
             }
             .task { await projectStateStore.refresh(for: appState.environment) }
             .task {
@@ -129,80 +163,7 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: — Tasks Progress
-
-    private var tasksProgressCard: some View {
-        AnchorCard(title: "Today's Commitments", icon: "checkmark.circle") {
-            HStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .stroke(AnchorPalette.chip, lineWidth: 5)
-                    Circle()
-                        .trim(from: 0, to: commitmentsStore.completionPercent)
-                        .stroke(AnchorPalette.chipActive, style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                        .animation(.easeInOut, value: commitmentsStore.completionPercent)
-                }
-                .frame(width: 44, height: 44)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(commitmentsStore.completedCount) done, \(commitmentsStore.activeCount) remaining")
-                        .foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
-                    Text(commitmentsStore.totalCount == 0 ? "Add your first commitment." : "Keep going — you're making progress.")
-                        .foregroundStyle(AnchorPalette.textSecondary).font(.caption)
-                }
-                Spacer()
-            }
-        }
-    }
-
-    // MARK: — Recent Activity
-
-    private var recentActivityCard: some View {
-        AnchorCard(title: "Recent Activity", icon: "clock.arrow.circlepath") {
-            if financeStore.recentTransactions.isEmpty {
-                Text("No recent transactions.")
-                    .foregroundStyle(AnchorPalette.textSecondary).font(.subheadline)
-            } else {
-                VStack(spacing: 8) {
-                    ForEach(financeStore.recentTransactions.prefix(3)) { tx in
-                        HStack {
-                            Image(systemName: tx.type == "income" ? "arrow.down.circle.fill" : tx.type == "transfer" ? "arrow.left.arrow.right.circle.fill" : "arrow.up.circle.fill")
-                                .foregroundStyle(tx.type == "income" ? AnchorPalette.success : tx.type == "transfer" ? AnchorPalette.textSecondary : AnchorPalette.danger)
-                            Text(tx.title)
-                                .foregroundStyle(AnchorPalette.textPrimary)
-                                .fontWeight(.medium)
-                            Spacer()
-                            Text(tx.formattedAmount)
-                                .foregroundStyle(tx.type == "income" ? AnchorPalette.success : tx.type == "transfer" ? AnchorPalette.textSecondary : AnchorPalette.danger)
-                                .fontWeight(.semibold)
-                        }
-                        .font(.subheadline)
-                    }
-                }
-            }
-        }
-    }
-
-    // MARK: — System Status
-
-    private var statusCard: some View {
-        AnchorCard(title: "System Status", icon: "wave.3.right.circle") {
-            VStack(alignment: .leading, spacing: 8) {
-                statusRow("Backend Health", value: projectStateStore.healthStatus)
-                statusRow("Environment", value: appState.environment.rawValue.capitalized)
-                statusRow("Alerts", value: "\(projectStateStore.snapshot?.alertsCount ?? 0)")
-                statusRow("In Progress", value: "\(projectStateStore.snapshot?.inProgressCount ?? 0)")
-            }
-        }
-    }
-
-    private func statusRow(_ label: String, value: String) -> some View {
-        HStack {
-            Text(label).foregroundStyle(AnchorPalette.textSecondary)
-            Spacer()
-            Text(value).foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
-        }
-        .font(.subheadline)
-    }
+    // MARK: — Tasks progress is now rendered by DashboardFocusSection.
+    // Recent Activity + System Status are rendered by DashboardStatusSection.
+    // Extractions were required to keep this file under ARCH-001's 200-line budget.
 }

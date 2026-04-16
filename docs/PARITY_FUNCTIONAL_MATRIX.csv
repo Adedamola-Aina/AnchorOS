@@ -51,16 +51,17 @@ commitments,TimelineView.tsx,Timeline view,(missing),missing,—
 commitments,TaskContextBadge,Context badge,(missing),missing,—
 commitments,streakUtils,Streak display,(missing),missing,—
 commitments,streakUtils,Streak milestone banner,(missing),missing,—
-dashboard,DashboardView.tsx,Landing view,DashboardView.swift,partial,Hardcoded Alex Owner; wire real profile
+dashboard,DashboardView.tsx,Landing view,DashboardView.swift,done,Phase 3: real profile wired via UserProfileStore; greeting + haptic on refresh match PWA
 dashboard,DashboardWidgets.tsx,Widget grid,(missing),missing,—
 dashboard,AssetAllocationWidget.tsx,Asset allocation ring,(missing),missing,—
 dashboard,AssetDistributionChart.tsx,Distribution chart,(missing),missing,—
 dashboard,CashFlowChart.tsx,Cash flow,(missing),missing,—
-dashboard,ProductivityScoreCard.tsx,Productivity score,(missing),missing,—
+dashboard,ProductivityScoreCard.tsx,Productivity score,DashboardFocusSection.swift + ProductivityCalculator.swift,done,Phase 3: score/trend/insight mirror src/utils/taskInsights.ts— 8 parity tests
 dashboard,CompletionRing.tsx,Completion ring,(missing),missing,—
-dashboard,RecentActivityList.tsx,Recent activity,(missing),missing,—
-dashboard,BeyondBasicsChecklist.tsx,Beyond basics checklist,BeyondBasicsCard.swift,partial,Verify item parity
-dashboard,DashboardCharts.tsx,Dashboard charts index,(missing),missing,—
+dashboard,RecentActivityList.tsx,Recent activity,DashboardStatusSection.swift,done,Phase 3: extracted to own section; same 3-item preview as PWA RecentActivityWidget
+dashboard,BeyondBasicsChecklist.tsx,Beyond basics checklist,BeyondBasicsCard.swift + BeyondBasicsCalculator.swift,done,Phase 3: 6-item parity (was 4); 7 parity tests mirror PWA useBeyondBasics contract
+dashboard,DashboardCharts.tsx,Dashboard charts index,(missing),deferred,Phase 2b/7 — needs SwiftUI chart primitives (AssetAllocation/CashFlow/AssetDistribution)
+dashboard,TodaysFocusWidget,Today's focus (top 3 daily),DashboardFocusSection.swift,done,Phase 3: filter type==daily && !completed; top 3
 fabric,FabricView.tsx,Open anchor AI,AnchorAIView.swift,stub,View is placeholder
 fabric,FabricOnboarding.tsx,Onboard opt-in,(missing),missing,—
 fabric,FabricTodayCard.tsx,Today card,(missing),missing,—
