@@ -130,7 +130,7 @@ final class AnchorAnomalySignalsTests: XCTestCase {
             tx(id: "tx-4", amount: 5000, title: "Big one"),
         ]
         let result = AnchorPredictionsEngine.build(.init(
-            transactions: txns, commitments: [], goals: [], now: fixedNow
+            transactions: txns, commitments: [], goals: [], patterns: [], now: fixedNow
         ))
         XCTAssertEqual(result.count, 1)
         XCTAssertEqual(result[0].kind, .unusualSpending)

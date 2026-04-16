@@ -12,6 +12,7 @@ enum AnchorPredictionsEngine {
         let transactions: [AnchorTransaction]
         let commitments: [AnchorCommitment]
         let goals: [AnchorGoal]
+        let patterns: [AnchorUserPattern]
         let now: Date
     }
 
@@ -34,9 +35,17 @@ enum AnchorPredictionsEngine {
             transactions: input.transactions,
             now: input.now
         )
-        // When more signal modules land, concatenate them here:
-        // let pattern  = AnchorPatternSignals.build(input)
-        let all = anomaly + budget + behavior + goal
+        let pattern = AnchorPatternSignals.build(
+            patterns: input.patterns,
+            transactions: input.transactions,
+            commitments: input.commitments,
+            now: input.now
+        )
+        let recurring = AnchorPatternSignals.buildRecurringDue(
+            patterns: input.patterns,
+            now: input.now
+        )
+        let all = anomaly + budget + behavior + goal + pattern + recurring
         return all.sorted { $0.confidence > $1.confidence }
             .prefix(maxPredictions)
             .map { $0 }
