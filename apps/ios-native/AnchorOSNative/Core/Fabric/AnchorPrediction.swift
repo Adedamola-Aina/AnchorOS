@@ -15,6 +15,7 @@ struct AnchorPrediction: Identifiable, Equatable {
         case streakAtRisk      = "streak_at_risk"
         case cashFlowAlert     = "cash_flow_alert"
         case recurringDue      = "recurring_due"
+        case goalOnTrack       = "goal_on_track"
     }
 
     struct Action: Equatable {
