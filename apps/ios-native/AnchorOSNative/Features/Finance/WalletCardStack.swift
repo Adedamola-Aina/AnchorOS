@@ -121,6 +121,16 @@ struct WalletCardStack: View {
         .zIndex(Double(index == currentIndex ? 100 : index))
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentIndex)
         .animation(isDragging ? .none : .spring(response: 0.4, dampingFraction: 0.8), value: dragOffset)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            // Parity: PWA useFinanceCardInteraction fires haptic.selection on expand.
+            // Native stack: tapping a background card brings it to the top.
+            guard !isTop else { return }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                currentIndex = index
+            }
+        }
     }
 
     // MARK: — Empty Card
