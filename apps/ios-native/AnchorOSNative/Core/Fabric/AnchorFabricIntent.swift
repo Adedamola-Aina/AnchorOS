@@ -28,6 +28,8 @@ struct AnchorFabricIntent: Equatable {
         case queryRecurring        = "query_recurring"
         case queryMomentum         = "query_momentum"
         case queryScenario         = "query_scenario"
+        case queryCorrelation      = "query_correlation"
+        case queryDayOfWeek        = "query_day_of_week"
         case recordExpense         = "record_expense"
         case recordIncome          = "record_income"
         case navigate              = "navigate"
