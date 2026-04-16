@@ -32,7 +32,11 @@ const ContactModal: React.FC<ContactModalProps> = ({ onClose, currentPage = 'unk
         if (!message.trim()) return;
         setIsSubmitting(true); setError('');
 
-        const metadata = { userId: user?.uid || 'anonymous', appVersion: APP_VERSION, deviceType: navigator.userAgent, platform: navigator.platform, currentPage, timestamp: new Date().toISOString() };
+        // navigator.platform is deprecated and returns "" in iOS Safari and some Chrome versions.
+        // Derive a safe fallback from userAgent so the Cloud Function's non-empty check never fails.
+        const ua = navigator.userAgent || '';
+        const detectedPlatform = navigator.platform || (ua.match(/iPhone|iPad|iPod/i) ? 'iOS' : ua.match(/Android/i) ? 'Android' : 'web');
+        const metadata = { userId: user?.uid || 'anonymous', appVersion: APP_VERSION || 'unknown', deviceType: ua || 'unknown', platform: detectedPlatform || 'web', currentPage: currentPage || 'unknown', timestamp: new Date().toISOString() };
         const payload = { subject: SUBJECTS.find(s => s.value === subject)?.label || subject, message, name, email, ...metadata };
 
         try {

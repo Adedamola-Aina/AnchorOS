@@ -96,4 +96,25 @@ describe('ContactModal', () => {
     // The actual assertion checks that the form is still visible
     expect(textarea).toBeInTheDocument();
   });
+
+  it('sends "web" platform when navigator.platform is empty (BUG-132)', async () => {
+    const originalPlatform = Object.getOwnPropertyDescriptor(navigator, 'platform');
+    Object.defineProperty(navigator, 'platform', { value: '', configurable: true });
+
+    mockCreateFeedbackBackup.mockResolvedValue(undefined);
+    render(<ContactModal onClose={vi.fn()} />);
+
+    const textarea = screen.getByPlaceholderText(/what's on your mind/i);
+    fireEvent.change(textarea, { target: { value: 'Test from deprecated platform browser' } });
+    const form = textarea.closest('form');
+    if (form) fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(mockCreateFeedbackBackup).toHaveBeenCalledWith(
+        expect.objectContaining({ platform: expect.stringMatching(/^(iOS|Android|web)$/) })
+      );
+    });
+
+    if (originalPlatform) Object.defineProperty(navigator, 'platform', originalPlatform);
+  });
 });
