@@ -1,5 +1,5 @@
 import SwiftUI
-
+import UIKit
 /// Add Transaction — bottom sheet form matching PWA TransactionForm fields.
 /// Writes through FinanceStore → TransactionService → SecureDb.
 struct AddTransactionSheet: View {
@@ -16,6 +16,9 @@ struct AddTransactionSheet: View {
     @State private var isRecurring: Bool = false
     @State private var recurringFrequency: String = "monthly"  // weekly | monthly | yearly
     @State private var isSaving = false
+    /// Drives `.savePulse` modifier on the save button. PWA parity:
+    /// microMotion.savePulse — `saving` = scale 1→1.02→1 loop; `done` = 1→1.08→1 once.
+    @State private var saveState: AnchorMicroMotion.SaveState = .idle
 
     private let recurringOptions = ["weekly", "monthly", "yearly"]
 
@@ -171,6 +174,7 @@ struct AddTransactionSheet: View {
                         }
                     }
                     .disabled(!canSubmit || isSaving)
+                    .savePulse(state: saveState)
                 }
             }
         }
@@ -261,6 +265,7 @@ struct AddTransactionSheet: View {
     private func submit() async {
         guard canSubmit, !isSaving else { return }
         isSaving = true
+        saveState = .saving
         defer { isSaving = false }
         do {
             let currency = selectedAccount?.currency ?? "NGN"
@@ -276,9 +281,17 @@ struct AddTransactionSheet: View {
                 isRecurring: isRecurring,
                 recurringFrequency: isRecurring ? recurringFrequency : nil
             )
+            // Parity: useHaptic('success') = vibrate([15,50,15]).
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            saveState = .done
             ToastStore.shared.show("\(type.capitalized) recorded", style: .success)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { saveState = .idle }
             dismiss()
         } catch {
+            // Parity: useHaptic('error') = vibrate([50,50,50,50,50]).
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            saveState = .idle
             ToastStore.shared.show("Failed to save transaction", style: .error)
         }
     }
