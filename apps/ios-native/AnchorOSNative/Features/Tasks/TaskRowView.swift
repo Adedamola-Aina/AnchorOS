@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Single task row extracted from TasksView (ARCH-001).
 /// Now surfaces streak milestone/nudge copy to match PWA TaskItem parity
@@ -8,14 +9,21 @@ struct TaskRowView: View {
     let onToggle: () -> Void
     let onTap: () -> Void
 
+    /// Drives the `completionPop` micro-motion (src/animations/microInteractions.ts).
+    /// Set true on a tap that completes the task, cleared 0.5s later — matches the
+    /// PWA TaskItem `isAnimating` handshake + 500ms timeout.
+    @State private var isAnimating: Bool = false
+
     var body: some View {
         HStack(spacing: 12) {
-            Button(action: onToggle) {
+            Button(action: handleToggle) {
                 Image(systemName: task.completed ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
                     .foregroundStyle(task.completed ? AnchorPalette.chipActive : AnchorPalette.textSecondary)
+                    .completionPop(trigger: isAnimating)
             }
             .buttonStyle(.plain)
+            .disabled(isAnimating)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(task.title)
@@ -81,5 +89,20 @@ struct TaskRowView: View {
         let current = task.currentStreak ?? 0
         let longest = task.longestStreak ?? 0
         return StreakCalculator.nudge(currentStreak: current, longestStreak: longest)
+    }
+
+    /// Mirrors PWA TaskItem.handleToggle — animates the checkbox pop + haptic
+    /// only when transitioning incomplete → complete; unchecking is silent.
+    private func handleToggle() {
+        if !task.completed {
+            isAnimating = true
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            onToggle()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isAnimating = false
+            }
+        } else {
+            onToggle()
+        }
     }
 }
