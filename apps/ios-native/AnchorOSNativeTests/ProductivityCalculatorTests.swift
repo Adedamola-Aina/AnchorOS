@@ -9,7 +9,7 @@ final class ProductivityCalculatorTests: XCTestCase {
         AnchorCommitment(id: UUID().uuidString, title: "T", type: "daily",
                          completed: completed, category: category, domain: nil,
                          timeOfDay: nil, notes: nil, currentStreak: nil,
-                         longestStreak: nil, lastCompletedAt: nil, priority: nil)
+                         longestStreak: nil, lastCompletedAt: nil, createdAt: nil, priority: nil)
     }
 
     func test_emptyReturnsZero() {

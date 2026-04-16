@@ -35,7 +35,7 @@ final class AnchorBehaviorSignalsTests: XCTestCase {
         AnchorCommitment(
             id: UUID().uuidString, title: title, type: "daily", completed: completed,
             category: nil, domain: nil, timeOfDay: nil, notes: nil,
-            currentStreak: streak, longestStreak: streak, lastCompletedAt: nil, priority: nil
+            currentStreak: streak, longestStreak: streak, lastCompletedAt: nil, createdAt: nil, priority: nil
         )
     }
 
@@ -100,7 +100,7 @@ final class AnchorBehaviorSignalsTests: XCTestCase {
         let weekly = AnchorCommitment(
             id: "a", title: "Review", type: "weekly", completed: false,
             category: nil, domain: nil, timeOfDay: nil, notes: nil,
-            currentStreak: 3, longestStreak: 3, lastCompletedAt: nil, priority: nil
+            currentStreak: 3, longestStreak: 3, lastCompletedAt: nil, createdAt: nil, priority: nil
         )
         let r = AnchorBehaviorSignals.build(
             transactions: [], commitments: [weekly], now: midMonth

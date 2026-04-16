@@ -14,6 +14,12 @@ import Combine
 final class AnchorFabricStore: ObservableObject {
 
     @Published private(set) var predictions: [AnchorPrediction] = []
+    @Published private(set) var weeklyReport: AnchorWeeklyReport?
+    @Published private(set) var upcoming: [AnchorUpcomingItem] = []
+
+    /// Recurring transactions feeding the upcoming feed. Native doesn't
+    /// yet have a RecurringStore — this stays empty until one lands.
+    private var recurringTransactions: [AnchorRecurringTransaction] = []
 
     private var dismissedIds: Set<String> = []
     private let storageKey = "com.anchoros.fabric.dismissedPredictionIds"
@@ -58,16 +64,29 @@ final class AnchorFabricStore: ObservableObject {
     private func recompute() {
         guard let f = financeStore, let c = commitmentsStore else {
             predictions = []
+            weeklyReport = nil
+            upcoming = []
             return
         }
+        let now = Date()
         let input = AnchorPredictionsEngine.Input(
             transactions: f.transactions,
             commitments: c.commitments,
             goals: [],          // TODO: wire native GoalsStore
             patterns: [],       // TODO: wire native PatternsStore
-            now: Date()
+            now: now
         )
         let fresh = AnchorPredictionsEngine.build(input)
         predictions = fresh.filter { !dismissedIds.contains($0.id) }
+
+        weeklyReport = AnchorWeeklyReportEngine.build(
+            transactions: f.transactions,
+            commitments: c.commitments,
+            now: now
+        )
+        upcoming = AnchorDailyBriefingEngine.upcoming(
+            recurring: recurringTransactions,
+            now: now
+        )
     }
 }

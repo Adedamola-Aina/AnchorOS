@@ -45,6 +45,11 @@ struct AnchorAIView: View {
                     todayCard
                     moodCard
 
+                    FabricUpcomingCard(
+                        items: fabricStore.upcoming,
+                        currency: financeStore.transactions.first?.currency ?? "NGN"
+                    )
+
                     FabricPredictionsSection(
                         predictions: fabricStore.predictions,
                         onAction: { prediction in
@@ -62,7 +67,7 @@ struct AnchorAIView: View {
                         AnchorAIInsightsCard(insights: insights)
                     }
 
-                    snapshotCard
+                    FabricWeeklySnapshotSection(report: fabricStore.weeklyReport)
                 }
                 .padding(16)
             }
@@ -147,29 +152,6 @@ struct AnchorAIView: View {
     }
 
     // MARK: — Insights rendered by AnchorAIInsightsCard (extracted for ARCH-001).
-
-    // MARK: — Weekly Snapshot
-
-    private var snapshotCard: some View {
-        AnchorCard(title: "Snapshot", icon: "chart.line.uptrend.xyaxis") {
-            VStack(alignment: .leading, spacing: 8) {
-                row("Net worth", financeStore.netWorthFormatted)
-                row("Commitments done", "\(commitmentsStore.completedCount) / \(commitmentsStore.totalCount)")
-                row("Completion", "\(Int(commitmentsStore.completionPercent * 100))%")
-                row("Accounts tracked", "\(financeStore.accounts.count)")
-                row("Recent transactions", "\(financeStore.transactions.count)")
-            }
-        }
-    }
-
-    // MARK: — Helpers
-
-    private func row(_ label: String, _ value: String) -> some View {
-        HStack {
-            Text(label).foregroundStyle(AnchorPalette.textSecondary)
-            Spacer()
-            Text(value).foregroundStyle(AnchorPalette.textPrimary).fontWeight(.semibold)
-        }
-        .font(.subheadline)
-    }
+    // MARK: — Weekly Snapshot rendered by FabricWeeklySnapshotSection (extracted, Phase 4c).
+    // MARK: — Upcoming rendered by FabricUpcomingCard (extracted, Phase 4c).
 }

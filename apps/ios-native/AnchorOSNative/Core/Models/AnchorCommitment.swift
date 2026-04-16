@@ -16,6 +16,7 @@ struct AnchorCommitment: Identifiable, Codable {
     let currentStreak: Int?
     let longestStreak: Int?
     let lastCompletedAt: String?
+    let createdAt: String?
     let priority: String?     // "low" | "medium" | "high" | "critical"
 
     var resolvedId: String { id ?? "" }

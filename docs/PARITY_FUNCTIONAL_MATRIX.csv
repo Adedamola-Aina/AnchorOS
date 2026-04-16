@@ -65,14 +65,14 @@ dashboard,TodaysFocusWidget,Today's focus (top 3 daily),DashboardFocusSection.sw
 fabric,FabricView.tsx,Open anchor AI,AnchorAIView.swift,partial,Phase 4: stale-duplicate code removed; today/mood/insights/snapshot live. Predictions/query/upcoming/proactive deferred to 4b
 fabric,FabricOnboarding.tsx,Onboard opt-in,(missing),deferred,Phase 4b — requires FabricService readiness gate + pattern store
 fabric,FabricTodayCard.tsx,Today card,AnchorAIView.swift#todayCard,done,Phase 4: progress bar + remaining task count match PWA
-fabric,FabricUpcomingCard.tsx,Upcoming card,(missing),deferred,Phase 4b — needs DailyBriefingEngine port (upcoming recurring bills in next 7d)
+fabric,FabricUpcomingCard.tsx,Upcoming card,FabricUpcomingCard.swift,partial,Phase 4c: DailyBriefingEngine.upcoming ported with 7 parity tests. View renders today/tomorrow/in-Nd badges. Hidden when empty. Data source (RecurringStore) still not wired natively — feed is always empty until a future phase lands recurring transactions.
 fabric,FabricInsightCard.tsx,Insight card,AnchorAIInsightsCard.swift,done,Phase 4: extracted card; 4 insight types (spending/savings/networth/streak) with 14 parity tests
 fabric,FabricMoodCard.tsx,Mood picker,AnchorAIView.swift#moodCard,done,Phase 4: 5-emoji picker wired to FamilyService.saveMood
 fabric,FabricPredictionsSection.tsx,Predictions,FabricPredictionsSection.swift,complete,Phase 4b-1..4b-6: engine (5 modules) + UI wiring shipped. 61 parity tests. Amber alert cards with action button + dismiss. Dismissed IDs persist via UserDefaults. Tab routing via AppState.navigate(/finance → Finance tab, /commitments → Tasks tab). Goals + patterns data-sources still empty arrays (separate future phase).
 fabric,FabricProactiveQuestionCard.tsx,Proactive Q,(missing),deferred,Phase 4b — needs ProactiveQuestionEngine port
 fabric,FabricPromptChips.tsx,Prompt chips,(missing),deferred,Phase 4b — pairs with query section
 fabric,FabricQuerySection.tsx,NL query input,(missing),deferred,Phase 4b — needs QueryEngine + IntentParser port
-fabric,FabricWeeklySnapshotSection.tsx,Weekly snapshot,AnchorAIView.swift#snapshotCard,partial,Phase 4: basic rows live; full WeeklyReportEngine (spending deltas, streak highlights) deferred to 4b
+fabric,FabricWeeklySnapshotSection.tsx,Weekly snapshot,FabricWeeklySnapshotSection.swift,complete,Phase 4c: WeeklyReportEngine ported (totals + net cash flow + top category + vsLastWeek % + completion rate + best/worst category + longest streak) with 10 parity tests. View surfaces all fields with ↑/↓ delta badge.
 fabric,FabricTransparency.tsx,Transparency page,(missing),deferred,Phase 4b
 fabric,MonthlyReviewModal.tsx,Monthly review,(missing),deferred,Phase 4b — needs MonthlyReviewEngine port
 settings,SettingsView.tsx,Open settings,SettingsView.swift,partial,—

@@ -68,6 +68,7 @@ final class AnchorFabricEngineTests: XCTestCase {
             currentStreak: streak,
             longestStreak: streak,
             lastCompletedAt: nil,
+            createdAt: nil,
             priority: "medium"
         )
     }

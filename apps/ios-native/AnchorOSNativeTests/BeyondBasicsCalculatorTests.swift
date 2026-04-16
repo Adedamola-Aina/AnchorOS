@@ -23,7 +23,7 @@ final class BeyondBasicsCalculatorTests: XCTestCase {
         AnchorCommitment(id: UUID().uuidString, title: "T", type: type, completed: false,
                          category: "personal", domain: nil, timeOfDay: nil, notes: nil,
                          currentStreak: nil, longestStreak: nil, lastCompletedAt: nil,
-                         priority: nil)
+                         createdAt: nil, priority: nil)
     }
 
     func test_sixItemsAlwaysReturned() {

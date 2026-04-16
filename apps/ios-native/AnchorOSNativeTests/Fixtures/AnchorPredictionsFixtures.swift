@@ -45,7 +45,7 @@ enum AnchorPredictionsFixtures {
             id: id, title: title, type: "daily", completed: completed,
             category: nil, domain: nil, timeOfDay: nil, notes: nil,
             currentStreak: streak, longestStreak: streak,
-            lastCompletedAt: nil, priority: nil
+            lastCompletedAt: nil, createdAt: nil, priority: nil
         )
     }
 }
