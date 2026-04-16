@@ -1,0 +1,51 @@
+feature,surface,interaction_type,pwa_source,native_equivalent,native_status,notes
+global,any scrollable list,pull-to-refresh,src/components/mobile/PullToRefresh.tsx,List.refreshable,missing,Apply to TasksView, FinanceView, DashboardView scrolls
+global,bottom nav,tab tap,src/components/mobile/BottomNavigation.tsx (useHaptic),RootTabView.swift,partial,Add UIImpactFeedbackGenerator(.light) on selection change
+global,bottom nav,tab re-tap scrolls to top,BottomNavigation.tsx,ScrollViewReader,missing,PWA scrolls tab content to top on re-tap
+global,bottom nav,active icon morph,AnimatedNavIcons.tsx,SF Symbols variable,missing,Port NavIconAnimations.ts mapping
+global,any row,swipe-left-to-reveal actions,SwipeableRow.tsx + useSwipeGesture.ts,SwipeableRow.swift,partial,Verify threshold (60px) + action width (80px PWA vs 72px native)
+global,any row,swipe-right-to-reveal,SwipeableRow.tsx leftAction,SwipeableRow.swift,missing,Native only implements trailing actions
+global,any sheet,drag-to-dismiss,browser-native,.presentationDragIndicator + detents,partial,Verify all sheets use medium/large detents where PWA modal has corresponding height
+global,any sheet,backdrop tap dismiss,browser-native,sheet default,done,—
+global,any sheet,escape key dismiss,browser-native,swipe-down + cancel button,done,iOS equivalent; hardware cmd-W on iPad missing
+global,any button,active press scale,active:scale-[0.98] (Tailwind),.scaleEffect on press,partial,Verify applied to all primary buttons in AnchorCard/AnchorChip
+global,any input,focus ring,focus:ring-4 (Tailwind),.focused + .overlay,partial,Verify color matches AnchorPalette
+global,edge-swipe back,navigation pop,browser-native,NavigationStack,done,Native iOS default
+commitments,TaskItem,checkbox tap,TaskItem.tsx handleToggle + trigger('success'),(inline in TasksView),missing,Implement 800ms pop + haptic (see microinteraction CSV)
+commitments,TaskItem,title tap to edit,onTitleClick prop,(missing),missing,Native only edits via swipe or row tap
+commitments,SwipeableTaskItem,swipe delete,SwipeableTaskItem.tsx,SwipeableRow.swift,partial,Verify wired in TasksView
+commitments,SwipeableTaskItem,swipe edit,SwipeableTaskItem.tsx,SwipeableRow.swift,partial,Verify wired in TasksView
+commitments,calendar,swipe month,MonthCalendarView.tsx,(missing),missing,Whole calendar view not ported
+commitments,timeline,horizontal scroll,TimelineView.tsx,(missing),missing,—
+finance,WalletStack,pan to cycle cards,CardStack.tsx + useCardCycle.ts (framer drag y),WalletCardStack.swift gesture,partial,Verify axis (y) + snap-back + haptic.selection on cycle
+finance,WalletStack,tap card to expand,useFinanceCardInteraction.ts haptic.selection,WalletCardStack.swift tap,partial,Verify haptic on expand
+finance,TransactionForm,amount keypad,inputmode='decimal',.keyboardType(.decimalPad),partial,Verify on all amount fields
+finance,TransactionForm,return-key chains fields,form default,.submitLabel + focus bindings,missing,—
+finance,TransactionForm,keyboard done bar,absent PWA,toolbar keyboard Done,n/a,Native-only UX enhancement (acceptable)
+finance,TransactionForm,dismiss keyboard on scroll,body,.scrollDismissesKeyboard(.immediately),missing,Verify set on sheet
+finance,SwipeableTransactionItem,swipe delete,SwipeableRow,SwipeableRow.swift,partial,Verify wired
+finance,SwipeableTransactionItem,swipe edit,SwipeableRow,SwipeableRow.swift,partial,Verify wired
+finance,VirtualTransactionList,infinite scroll threshold,IntersectionObserver + load-more,List.onAppear paging,missing,—
+finance,FinanceSearchSheet,open via search icon,FinanceSearchSheet.tsx,(missing),missing,—
+finance,AccountForm,currency picker,select+searchable,Picker,partial,Verify 10-currency parity + search
+finance,AccountForm,card color picker,(Tailwind palette),CardColorPicker.swift,done,Verify haptic on selection
+dashboard,DashboardView,quick-action tap,useHaptic('light'),DashboardView.swift,missing,Add haptic on Beyond Basics tap
+dashboard,DashboardView,ring tap navigates,BeyondBasicsChecklist,BeyondBasicsCard.swift,partial,Verify tap target size (44pt) and nav target
+fabric,FabricQuerySection,send-on-enter,Enter key,.submitLabel(.send) on TextField,missing,Feature not built
+fabric,FabricPromptChips,chip tap auto-send,PromptChips.tsx,(missing),missing,—
+fabric,FabricMoodCard,mood emoji tap,button+scale-150 transition,(missing),missing,—
+settings,SectionNav,tab tap scrolls to section,SectionNav.tsx (scrollIntoView),AnchorSectionTabs.swift ScrollViewReader,missing,Currently decorative in native
+settings,PasswordChange,show/hide password,eye toggle,.textFieldStyle + @State,partial,Verify in PasswordChangeView.swift
+settings,ReauthModal,biometric prompt,WebAuthn,LAContext(.deviceOwnerAuthenticationWithBiometrics),missing,—
+settings,DangerZone,long-press confirm,confirm double-click,.alert,partial,Verify destructive role + re-auth gate
+a11y,any view,VoiceOver labels,aria-label,.accessibilityLabel,partial,Sweep required on Sprint outputs
+a11y,any view,Dynamic Type,rem-based,.dynamicTypeSize,partial,Verify with xxxLarge
+a11y,any view,Reduced Motion,prefers-reduced-motion CSS,@Environment(\.accessibilityReduceMotion),missing,Must gate all microMotion variants
+a11y,any view,Voice Control labels,aria-label,.accessibilityInputLabels,missing,—
+a11y,any view,contrast >= 4.5:1,tailwind slate palette,AnchorPalette,verify,Check dark mode token contrast
+keyboard,any input,autofocus first field,autofocus,.focused on appear,partial,Verify in sheets
+keyboard,code entry,numeric only,inputmode='numeric',.keyboardType(.numberPad),partial,Verify on InviteCodeEntry + 6-digit MFA
+keyboard,amount,decimal,inputmode='decimal',.keyboardType(.decimalPad),partial,—
+nav,deep link,anchor://finance/account/:id,React Router,Universal Links + NavigationPath,missing,—
+nav,universal link,https://anchor-os.web.app/*,browser,AASA file,missing,—
+nav,back gesture,edge-swipe,browser,NavigationStack default,done,—

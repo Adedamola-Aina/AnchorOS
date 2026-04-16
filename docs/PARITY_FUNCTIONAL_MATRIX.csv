@@ -1,0 +1,103 @@
+feature,pwa_component,pwa_action,native_component,native_status,notes
+finance,FinanceView.tsx,Open account list,FinanceView.swift,partial,Shows hardcoded stub accounts; wire Firestore via SecureDb.swift
+finance,FinanceView.tsx,Search transactions,FinanceSearchSheet (missing),missing,No native search sheet
+finance,FinanceView.tsx,Summary sheet,FinanceSummarySheet (missing),missing,No native summary sheet
+finance,AccountCard.tsx,Tap card to open details,AccountDetailView.swift,done,Check deep-link parity
+finance,AccountForm.tsx,Create account,AddAccountSheet.swift,done,Verify validation parity (min balance, currency)
+finance,AccountForm.tsx,Edit account,EditAccountSheet.swift,done,Verify color picker parity
+finance,TransactionForm.tsx,Record income,AddTransactionSheet.swift,partial,Verify account selector UX
+finance,TransactionForm.tsx,Record expense,AddTransactionSheet.swift,partial,Verify category parity
+finance,TransactionForm.tsx,Record transfer (internal),AddTransactionSheet.swift,missing,Transfer mode not in native sheet
+finance,TransactionForm.tsx,Link bank account,LinkBankAccount (missing),missing,Plaid/bank link not on native
+finance,TransactionItem.tsx,Tap tx to edit,EditTransactionSheet.swift,done,—
+finance,SwipeableTransactionItem.tsx,Swipe-to-delete tx,SwipeableRow.swift,partial,Swift swipe exists; verify wired in tx list
+finance,SwipeableTransactionItem.tsx,Swipe-to-edit tx,SwipeableRow.swift,partial,Verify left/right action parity
+finance,VirtualTransactionList.tsx,Infinite scroll tx,List+onAppear (missing),missing,Native list not virtualized
+finance,CategorySelector.tsx,Pick category,Picker (missing),missing,Category taxonomy not ported
+finance,NetWorthCards.tsx,View net worth cards,Stub text,missing,No animated net-worth panel
+finance,InsightCards.tsx,View monthly insight,MonthlyInsight (missing),missing,No AI insight row
+finance,NotificationBanner.tsx,View top banner,Banner (missing),missing,No banner surface
+finance,UpcomingBillsPanel.tsx,View upcoming bills,Stub,missing,—
+finance,FinanceBillsSection.tsx,Manage bills,(missing),missing,—
+finance,RecurringOptions.tsx,Set tx recurrence,(missing),missing,Recurring UI not in AddTransactionSheet.swift
+finance,OverdraftWarning.tsx,Show overdraft,(missing),missing,—
+finance,SubscriptionDetectorCard.tsx,Subscription suggestion,(missing),missing,—
+finance,SharePermissionPicker.tsx,Pick share permission,FamilyView toggle,reduced,Native is boolean; PWA has Read/Transact/Manage
+finance,SharedActivitySection.tsx,Shared activity feed,(missing),missing,—
+finance,ActivityFeed.tsx,Activity log,(missing),missing,—
+finance,SpendingTrendsChart.tsx,Trends chart,SpendingTrendsChart.swift,partial,Verify data source + legend
+finance,AssetDistributionChart.tsx,Asset distribution,(missing),missing,—
+finance,CashFlowChart.tsx,Cash flow chart,(missing),missing,—
+finance,WalletStack.tsx,Card stack w/ cycle,WalletCardStack.swift,partial,Verify cycle + haptic
+finance,WalletCard.tsx,Single wallet card,WalletCardStack.swift,done,—
+finance,TransferDetails.tsx,Transfer detail view,(missing),missing,—
+finance,AccountOverviewPanel.tsx,Account overview,AccountDetailView.swift,partial,Verify ring/chart parity
+finance,PullToRefresh.tsx,Pull to refresh tx,List.refreshable (missing),missing,Verify applied to native scrolls
+commitments,CommitmentsView.tsx,Open tasks,TasksView.swift,partial,—
+commitments,TaskList.tsx,List tasks,List in TasksView,partial,Verify grouping (today/upcoming/completed)
+commitments,TaskItem.tsx,Toggle complete,(inline),partial,Completion animation + haptic missing; see microinteraction CSV
+commitments,TaskItem.tsx,Tap title to edit,(inline),partial,Verify
+commitments,TaskItem.tsx,Edit button,EditCommitmentSheet.swift,done,—
+commitments,TaskItem.tsx,Delete button,(inline),partial,Verify confirm alert
+commitments,SwipeableTaskItem.tsx,Swipe-to-delete task,SwipeableRow.swift,partial,Verify wired
+commitments,SwipeableTaskItem.tsx,Swipe-to-edit task,SwipeableRow.swift,partial,Verify wired
+commitments,TaskForm.tsx,Create task,AddCommitmentSheet.swift,partial,Verify recurrence + context fields
+commitments,EditTaskForm.tsx,Edit task,EditCommitmentSheet.swift,partial,—
+commitments,MonthCalendarView.tsx,Calendar view,(missing),missing,—
+commitments,WeeklyView.tsx,Week view,(missing),missing,—
+commitments,TimelineView.tsx,Timeline view,(missing),missing,—
+commitments,TaskContextBadge,Context badge,(missing),missing,—
+commitments,streakUtils,Streak display,(missing),missing,—
+commitments,streakUtils,Streak milestone banner,(missing),missing,—
+dashboard,DashboardView.tsx,Landing view,DashboardView.swift,partial,Hardcoded Alex Owner; wire real profile
+dashboard,DashboardWidgets.tsx,Widget grid,(missing),missing,—
+dashboard,AssetAllocationWidget.tsx,Asset allocation ring,(missing),missing,—
+dashboard,AssetDistributionChart.tsx,Distribution chart,(missing),missing,—
+dashboard,CashFlowChart.tsx,Cash flow,(missing),missing,—
+dashboard,ProductivityScoreCard.tsx,Productivity score,(missing),missing,—
+dashboard,CompletionRing.tsx,Completion ring,(missing),missing,—
+dashboard,RecentActivityList.tsx,Recent activity,(missing),missing,—
+dashboard,BeyondBasicsChecklist.tsx,Beyond basics checklist,BeyondBasicsCard.swift,partial,Verify item parity
+dashboard,DashboardCharts.tsx,Dashboard charts index,(missing),missing,—
+fabric,FabricView.tsx,Open anchor AI,AnchorAIView.swift,stub,View is placeholder
+fabric,FabricOnboarding.tsx,Onboard opt-in,(missing),missing,—
+fabric,FabricTodayCard.tsx,Today card,(missing),missing,—
+fabric,FabricUpcomingCard.tsx,Upcoming card,(missing),missing,—
+fabric,FabricInsightCard.tsx,Insight card,(missing),missing,—
+fabric,FabricMoodCard.tsx,Mood picker,(missing),missing,—
+fabric,FabricPredictionsSection.tsx,Predictions,(missing),missing,—
+fabric,FabricProactiveQuestionCard.tsx,Proactive Q,(missing),missing,—
+fabric,FabricPromptChips.tsx,Prompt chips,(missing),missing,—
+fabric,FabricQuerySection.tsx,NL query input,(missing),missing,—
+fabric,FabricWeeklySnapshotSection.tsx,Weekly snapshot,(missing),missing,—
+fabric,FabricTransparency.tsx,Transparency page,(missing),missing,—
+fabric,MonthlyReviewModal.tsx,Monthly review,(missing),missing,—
+settings,SettingsView.tsx,Open settings,SettingsView.swift,partial,—
+settings,ProfileSettings.tsx,Edit display name,SettingsView.swift,done,—
+settings,ProfileSettings.tsx,Avatar,(missing),missing,—
+settings,AppearanceSettings.tsx,Theme toggle,(missing),missing,—
+settings,AppearanceSettings.tsx,Font size,SettingsView.swift,done,—
+settings,AccessibilityControls.tsx,Reduced motion,(missing),missing,—
+settings,AccessibilityControls.tsx,High contrast,SettingsView.swift,done,—
+settings,PasswordChange.tsx,Change password,PasswordChangeView.swift,done,—
+settings,EmailChangeForm.tsx,Change email,EmailChangeView.swift,done,—
+settings,SecuritySettings.tsx,MFA enrollment,(missing),missing,—
+settings,MfaConfirmationCard.tsx,MFA confirm,(missing),missing,—
+settings,RecoveryCodesDisplay.tsx,Recovery codes,RecoveryCodesSettingsView.swift,partial,Verify generate+display flow
+settings,PasskeySection.tsx,Passkey mgmt,PasskeyManagerView.swift,partial,Verify WebAuthn-iOS ASAuthorization parity
+settings,AuthEventHistory.tsx,Login log,AuthEventHistoryView.swift,partial,Verify pagination
+settings,AuthSessionList.tsx,Active sessions,(missing),missing,—
+settings,NotificationSettings.tsx,Notification prefs,(missing),missing,—
+settings,NotificationCategoryToggles.tsx,Category toggles,(missing),missing,—
+settings,QuietHoursSettings.tsx,Quiet hours,(missing),missing,—
+settings,AnchorAISettings.tsx,Fabric prefs,(missing),missing,—
+settings,AnchorAIKnowledgePanel.tsx,AI knowledge,(missing),missing,—
+settings,FamilySettingsV2.tsx,Family settings,FamilyView.swift,partial,Permission levels reduced to toggle
+settings,InviteFamilyMember.tsx,Invite (4-step),FamilyView.swift,reduced,Native is single-step; verify MFA step
+settings,PendingInviteCard.tsx,Pending invite,(missing),missing,—
+settings,DataManagement.tsx,Export/Import,(missing),missing,—
+settings,DangerZone.tsx,Delete account,DangerZoneView.swift,partial,Verify re-auth + wipe
+settings,DeveloperTools.tsx,Dev tools panel,(missing),missing,—
+settings,SupportSettings.tsx,Support/contact,(missing),missing,—
+settings,ReauthModal.tsx,Reauth modal,(missing),missing,—
+settings,SectionNav.tsx,Scroll-to-section tabs,AnchorSectionTabs.swift,reduced,Tabs are decorative; do not scroll

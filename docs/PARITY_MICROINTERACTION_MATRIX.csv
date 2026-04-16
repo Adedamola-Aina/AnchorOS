@@ -1,0 +1,41 @@
+feature,surface,trigger,pwa_source,animation,duration_ms,easing,haptic,reduced_motion_fallback,native_equivalent,native_status,notes
+commitments,TaskItem checkbox,tap to complete,TaskItem.tsx microMotion.completionPop,scale 1 → 1.18 → 1 with bg→emerald-500 + ring-4 + Check stroke,350 (inner) / 800 (outer reassurance),easeOut + cubic-bezier(0.34 1.56 0.64 1),useHaptic('success') = navigator.vibrate([15 50 15]),instant toggle no bounce,(missing),missing,The green checkbox animation; must also do title color emerald-600 + strike-through
+commitments,TaskItem title,during completion,TaskItem.tsx,text color slate-800 → emerald-600 + line-through fade-in,300,ease-out,—,instant color switch,(missing),missing,—
+commitments,TaskItem,streak milestone reached,streakUtils getStreakMilestone,subtle emerald badge fade-in,—,—,—,instant,(missing),missing,—
+finance,AccountForm,mount,AccountForm.tsx microMotion.createSlideIn,opacity 0 + y 10 → opacity 1 + y 0,260,easeOut,—,instant appear,(missing),missing,—
+finance,TransactionForm save button,saving,TransactionForm.tsx microMotion.savePulse,scale 1 → 1.02 → 1 repeating,900 (repeat),easeInOut,—,static scale 1 + spinner,partial,done state: scale 1 → 1.08 → 1 over 320ms; verify in AddTransactionSheet.swift
+finance,TransactionForm save,submit success,useTransactionSubmit.ts,savePulse done state,320,easeOut,useHaptic('success'),instant,partial,UIImpactFeedbackGenerator(.medium) + UINotificationFeedbackGenerator().notificationOccurred(.success)
+finance,TransactionForm save,submit error,useTransactionSubmit.ts,—,—,—,useHaptic('error') = [50x5],—,partial,UINotificationFeedbackGenerator().notificationOccurred(.error)
+finance,NetWorthCards,value update,NetWorthCards.tsx microMotion.netWorthRise,opacity 0 → 0.22 → 0 sparkle,1100,easeOut,—,instant value,(missing),missing,—
+finance,WalletCard expand,tap to expand,useFinanceCardInteraction.ts,card scale + reveal details,—,spring,haptic.selection = vibrate(10),instant,partial,Verify in WalletCardStack.swift
+finance,WalletStack cycle,cycle to next,useCardCycle.ts,y-pan drag snap + reorder,spring,—,haptic.selection on cycle (!= collapse),instant swap,partial,Verify
+finance,SpendingTrendsChart,mount/data change,SpendingTrendsChart.tsx,—,—,—,—,—,partial,Verify axis tick animation
+dashboard,any card,mount,various animate-in fade-in,opacity 0 → 1,300-500,ease,—,instant,partial,Use .transition(.opacity.combined(with:.move(edge:.bottom))) and gate on reduce-motion
+auth,AuthView,mount,AuthView.tsx animate-in fade-in zoom-in-95,opacity+scale 95% → 100%,500,ease,—,instant,missing,—
+auth,AuthLeftPanel,mount,animate-in fade-in zoom-in,opacity+scale,1000,ease,—,instant,missing,—
+auth,error message,error appears,AuthView.tsx animate-in fade-in slide-in-from-top-2,y -8 → 0 + fade,300,ease,—,instant,missing,—
+auth,AuthFormFields,invalid field,animate-in fade-in slide-in-from-top-1,y -4 → 0 + fade,200,ease,—,instant,missing,—
+auth,SocialSignInButtons,tap,active:scale-[0.98] + transition-all,instant scale,—,—,—,instant,partial,Verify on AuthView.swift buttons
+auth,AuthSubmitButton,tap,active:scale-[0.98],instant scale,—,—,—,instant,partial,—
+auth,AuthSubmitButton,loading,w-5 h-5 animate-spin rounded-full,spin,1000 linear,linear,—,static,partial,ProgressView()
+auth,PasswordStrengthMeter,appear,animate-in fade-in slide-in-from-top-2,y+fade,500,ease,—,instant,missing,—
+auth,PasswordStrengthMeter,full strength,AnchorLogo animate-in zoom-in,scale 0 → 1,300,ease,—,instant,missing,—
+auth,AuthFormFields icon,focus,group-focus-within text-blue-500 transition-colors,color tween,—,ease,—,instant,missing,—
+fabric,FabricView,mount,animate-in fade-in,opacity,300,ease,—,instant,missing,—
+fabric,FabricMoodCard,select emoji,transition-transform scale-100 → scale-150,scale,300,ease,—,instant,missing,—
+fabric,FabricTodayCard,progress bar,transition-all duration-500 + bg-primary-500 → bg-green-500,width+color,500,ease,—,snap to value,missing,—
+fabric,FabricQuerySection,thinking,animate-pulse on 'Thinking...',opacity 1 → 0.5,2000 repeat,ease,—,static,missing,—
+fabric,FabricTransparency,mount,animate-in fade-in,opacity,300,ease,—,instant,missing,—
+settings,SettingsView,mount,animate-in fade-in slide-in-from-bottom-6,y 24 → 0 + fade,500,ease,—,instant,missing,—
+settings,PasswordChange form,open,animate-in fade-in,opacity,300,ease,—,instant,missing,—
+settings,FamilySettingsStates hover,card hover,transition-colors + border amber-300,color,—,ease,—,instant,n/a,Hover not on iOS; use press state instead
+onboarding,GettingStartedWelcome,mount,animate-in fade-in slide-in-from-bottom-8,y+fade,700,ease,—,instant,missing,Verify in Onboarding/ feature
+onboarding,any step,step change,animate-in fade-in slide-in-from-right-8,x+fade,500,ease,—,instant,missing,—
+onboarding,InviteCodeEntry CTA,tap,transition-all,—,—,—,—,—,missing,—
+onboarding,OnboardingProgress,step change,transition-all bg-primary-500,bg + width,—,ease,—,snap,missing,—
+loading,any busy state,loading,animate-spin (Loader2),spin 360°,1000 linear,linear,—,static icon,done,ProgressView() covers this
+loading,skeleton,placeholder,animate-pulse,opacity 1 ↔ 0.5,2000 repeat,ease,—,static placeholder,done,SkeletonView.swift present
+nav,BottomNavigation,tab change,AnimatedNavIcons.tsx (NavIconAnimations.ts),icon morph per tab,varies,spring,trigger('light'),instant,missing,—
+haptic system,any,generic,src/utils/haptic.ts + src/hooks/useHaptic.ts,—,—,—,patterns: light=10ms medium=25ms heavy=50ms error=[50x5] success=[15 50 15],—,partial,Map to iOS: light→UIImpactFeedbackGenerator(.light); medium→(.medium); heavy→(.heavy); success→UINotificationFeedbackGenerator(.success); error→(.error)
+haptic system,Capacitor native,via plugin,src/hooks/useCapacitor.ts @capacitor/haptics,—,—,—,impact(style) + notification(type) + vibrate(),—,done-on-capacitor,Reference implementation for mapping
+reduced-motion,global,os preference,no PWA-level gate yet,all microMotion must be gated,—,—,—,—,(missing),missing,Add @Environment(\.accessibilityReduceMotion) guard on every AnchorAnimations modifier
