@@ -52,6 +52,23 @@ struct SlideFadeFromTop: ViewModifier {
     }
 }
 
+// MARK: - FadeInOnAppear
+/// PWA `animate-in fade-in` → plain opacity 0→1 on mount.
+struct FadeInOnAppear: ViewModifier {
+    var duration: Double = 0.3
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .onAppear {
+                if reduceMotion { shown = true; return }
+                withAnimation(.easeOut(duration: duration)) { shown = true }
+            }
+    }
+}
+
 extension View {
     /// 44px-safe press feedback — matches PWA `active:scale-[0.98]`.
     func pressScale(_ scale: CGFloat = 0.98) -> some View {
@@ -63,8 +80,13 @@ extension View {
         modifier(AuthMountTransition(duration: duration))
     }
 
-    /// Slide-in from top with fade — matches PWA error/invalid-field animation.
+    /// Slide-in from top with fade — matches PWA `animate-in fade-in slide-in-from-top-*`.
     func slideFadeFromTop(offset: CGFloat = 8, duration: Double = 0.3) -> some View {
         modifier(SlideFadeFromTop(offset: offset, duration: duration))
+    }
+
+    /// Plain opacity 0→1 on mount — matches PWA `animate-in fade-in`.
+    func fadeInOnAppear(duration: Double = 0.3) -> some View {
+        modifier(FadeInOnAppear(duration: duration))
     }
 }

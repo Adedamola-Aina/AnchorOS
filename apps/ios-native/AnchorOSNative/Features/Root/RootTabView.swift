@@ -67,6 +67,10 @@ struct RootTabView: View {
                     }
                     .toolbarBackground(AnchorPalette.card.opacity(0.96), for: .tabBar)
                     .toolbarBackground(.visible, for: .tabBar)
+                    .onChange(of: appState.selectedTab) { _, _ in
+                        // Parity: PWA BottomNavigation fires haptic.selection on tab change.
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
                 }
 
                 // Global toast overlay — sits above tab bar

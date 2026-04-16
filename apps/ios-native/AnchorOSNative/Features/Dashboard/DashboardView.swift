@@ -121,6 +121,7 @@ struct DashboardView: View {
                 Task { await projectStateStore.refresh(for: appState.environment, force: true) }
             }
         }
+        .fadeInOnAppear(duration: 0.4) // Parity: PWA dashboard cards `animate-in fade-in` 300-500ms.
     }
 
     // MARK: — Greeting

@@ -73,13 +73,7 @@ struct FabricQuerySection: View {
                 .foregroundStyle(AnchorPalette.textSecondary)
 
             if isQuerying {
-                Text("Thinking...")
-                    .font(.subheadline)
-                    .foregroundStyle(AnchorPalette.textSecondary)
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(AnchorPalette.chip))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AnchorPalette.cardBorder, lineWidth: 1))
+                ThinkingPulseView()
             } else if let r = result {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(r.summary)
@@ -126,5 +120,29 @@ private struct FlexibleHStack<Content: View>: View {
     @ViewBuilder let content: () -> Content
     var body: some View {
         HStack(spacing: spacing) { content() }
+    }
+}
+
+/// "Thinking..." placeholder with pulsing opacity — PWA parity for the
+/// FabricQuerySection thinking state (animate-pulse: opacity 1 → 0.5 → 1 loop).
+private struct ThinkingPulseView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var pulse = false
+
+    var body: some View {
+        Text("Thinking...")
+            .font(.subheadline)
+            .foregroundStyle(AnchorPalette.textSecondary)
+            .opacity(pulse ? 0.5 : 1.0)
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(RoundedRectangle(cornerRadius: 12).fill(AnchorPalette.chip))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AnchorPalette.cardBorder, lineWidth: 1))
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                    pulse = true
+                }
+            }
     }
 }

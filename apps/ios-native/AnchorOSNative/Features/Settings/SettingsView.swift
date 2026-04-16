@@ -40,6 +40,7 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .fadeInOnAppear(duration: 0.3) // Parity: PWA SettingsView `animate-in fade-in` 300ms ease.
     }
 
     // MARK: — Profile

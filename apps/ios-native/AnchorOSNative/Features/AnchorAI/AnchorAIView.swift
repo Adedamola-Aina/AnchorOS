@@ -116,6 +116,7 @@ struct AnchorAIView: View {
             .navigationTitle("Anchor AI")
             .navigationBarTitleDisplayMode(.large)
         }
+        .fadeInOnAppear(duration: 0.3) // Parity: PWA FabricView `animate-in fade-in` 300ms ease.
     }
 
     // MARK: — TODAY card
@@ -167,6 +168,8 @@ struct AnchorAIView: View {
             HStack(spacing: 0) {
                 ForEach(moods) { m in
                     Button {
+                        // Parity: PWA FabricMoodCard fires haptic.selection on emoji tap.
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         withAnimation(.easeInOut(duration: 0.2)) { selectedMood = m.id }
                         if let uid = appState.currentUID {
                             Task { try? await moodService.saveMood(uid: uid, mood: m.label.lowercased()) }
