@@ -17,17 +17,27 @@ final class FinanceStore: ObservableObject {
 
     // MARK: — Computed
 
-    var netWorthCents: Int { accounts.reduce(0) { $0 + $1.balanceCents } }
+    /// Structured net worth (per-currency) — mirrors PWA calculateNetWorth.
+    var netWorth: NetWorthCalculator.Result {
+        NetWorthCalculator.calculate(accounts: accounts)
+    }
+
+    /// Cents of the dominant currency only. Do NOT use this to sum across
+    /// currencies — that was the regression Phase 2 fixed. For per-currency
+    /// totals use `netWorth.ngnCents` / `netWorth.usdCents`.
+    var netWorthCents: Int {
+        let nw = netWorth
+        return nw.total.currency == "NGN" ? nw.ngnCents : nw.usdCents
+    }
 
     var netWorthFormatted: String {
-        let primaryCurrency = accounts.first?.currency ?? "NGN"
-        let amount = Double(netWorthCents) / 100.0
-        let symbol = primaryCurrency == "USD" ? "$" : "₦"
+        let nw = netWorth
+        let symbol = nw.total.currency == "USD" ? "$" : "₦"
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.minimumFractionDigits = 2
         formatter.maximumFractionDigits = 2
-        return "\(symbol)\(formatter.string(from: NSNumber(value: amount)) ?? "0.00")"
+        return "\(symbol)\(formatter.string(from: NSNumber(value: nw.total.amount)) ?? "0.00")"
     }
 
     var recentTransactions: [AnchorTransaction] {
@@ -114,13 +124,17 @@ final class FinanceStore: ObservableObject {
 
     // MARK: — Savings Goal
 
+    /// Phase 2: routed through SecureDb so audit fields + uid validation
+    /// apply. Previous implementation bypassed the gateway and wrote to
+    /// `users/{uid}` (wrong root) instead of `artifacts/anchor-os/users/{uid}`.
     func setSavingsGoal(monthlyCents: Int) async throws {
         guard let uid else { return }
-        let db = Firestore.firestore()
-        try await db.collection("users").document(uid).setData([
-            "savingsGoalMonthlyCents": monthlyCents,
-            "updatedAt": FieldValue.serverTimestamp()
-        ], merge: true)
+        try await SecureDb.shared.setDocument(
+            uid: uid,
+            path: [],
+            data: ["savingsGoalMonthlyCents": monthlyCents],
+            merge: true
+        )
     }
 
     // MARK: — Refresh (pull-to-refresh)

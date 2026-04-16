@@ -21,22 +21,24 @@ struct FinanceView: View {
         return fmt.string(from: date)
     }
 
-    /// Per-currency balance totals for the TOTAL ASSETS bar
+    /// Per-currency balance totals for the TOTAL ASSETS bar.
+    /// Sourced from NetWorthCalculator so PWA parity is enforced centrally.
     private var currencyTotals: [(currency: String, symbol: String, formatted: String)] {
-        var groups: [String: Double] = [:]
-        for account in financeStore.accounts {
-            let amount = Double(account.balanceCents) / 100.0
-            groups[account.currency, default: 0] += amount
-        }
+        let nw = financeStore.netWorth
         let numFmt = NumberFormatter()
         numFmt.numberStyle = .decimal
         numFmt.minimumFractionDigits = 2
         numFmt.maximumFractionDigits = 2
-        return groups.sorted { $0.key < $1.key }.map { (currency, total) in
-            let symbol = currency == "USD" ? "$" : "₦"
-            let str = numFmt.string(from: NSNumber(value: total)) ?? "0.00"
-            return (currency, symbol, "\(symbol)\(str)")
+        var rows: [(String, String, String)] = []
+        if nw.ngnCents != 0 || nw.usdCents == 0 {
+            let s = numFmt.string(from: NSNumber(value: nw.ngn)) ?? "0.00"
+            rows.append(("NGN", "₦", "₦\(s)"))
         }
+        if nw.usdCents != 0 {
+            let s = numFmt.string(from: NSNumber(value: nw.usd)) ?? "0.00"
+            rows.append(("USD", "$", "$\(s)"))
+        }
+        return rows
     }
 
     var body: some View {

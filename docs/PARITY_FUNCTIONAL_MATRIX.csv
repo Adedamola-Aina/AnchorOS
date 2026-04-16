@@ -1,5 +1,5 @@
 feature,pwa_component,pwa_action,native_component,native_status,notes
-finance,FinanceView.tsx,Open account list,FinanceView.swift,partial,Shows hardcoded stub accounts; wire Firestore via SecureDb.swift
+finance,FinanceView.tsx,Open account list,FinanceView.swift,done,Phase 2: Firestore wired via SecureDb; FinanceView 351 lines (ARCH-001 follow-up)
 finance,FinanceView.tsx,Search transactions,FinanceSearchSheet (missing),missing,No native search sheet
 finance,FinanceView.tsx,Summary sheet,FinanceSummarySheet (missing),missing,No native summary sheet
 finance,AccountCard.tsx,Tap card to open details,AccountDetailView.swift,done,Check deep-link parity
@@ -14,7 +14,9 @@ finance,SwipeableTransactionItem.tsx,Swipe-to-delete tx,SwipeableRow.swift,parti
 finance,SwipeableTransactionItem.tsx,Swipe-to-edit tx,SwipeableRow.swift,partial,Verify left/right action parity
 finance,VirtualTransactionList.tsx,Infinite scroll tx,List+onAppear (missing),missing,Native list not virtualized
 finance,CategorySelector.tsx,Pick category,Picker (missing),missing,Category taxonomy not ported
-finance,NetWorthCards.tsx,View net worth cards,Stub text,missing,No animated net-worth panel
+finance,NetWorthCards.tsx,View net worth cards,FinanceView.totalAssetsBar + NetWorthCalculator.swift,partial,Phase 2: per-currency math matches PWA calculateNetWorth; missing savePulse animation + dedicated cards UI
+finance,finance.ts calculateNetWorth,Calculate net worth per currency,NetWorthCalculator.swift,done,Phase 2: pure function mirrors src/utils/finance.ts; 6 parity test cases in NetWorthCalculatorTests.swift
+finance,FinanceStore.setSavingsGoal,Write savings goal,FinanceStore.setSavingsGoal,done,Phase 2: now routes through SecureDb (was bypassing to wrong root users/{uid})
 finance,InsightCards.tsx,View monthly insight,MonthlyInsight (missing),missing,No AI insight row
 finance,NotificationBanner.tsx,View top banner,Banner (missing),missing,No banner surface
 finance,UpcomingBillsPanel.tsx,View upcoming bills,Stub,missing,—
