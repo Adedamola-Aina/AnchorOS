@@ -47,18 +47,20 @@ final class AnchorQueryEngineTests: XCTestCase {
         tx: [AnchorTransaction] = [],
         commitments: [AnchorCommitment] = [],
         accounts: [AnchorAccount] = [],
+        recurring: [AnchorRecurringTransaction] = [],
         upcoming: [AnchorUpcomingItem] = [],
         report: AnchorWeeklyReport? = nil
     ) -> AnchorQueryEngine.Input {
         let intent = AnchorFabricIntent(
             action: action, confidence: 0.8,
-            entities: .init(timePeriod: period, page: page),
+            entities: .init(amount: nil, category: nil,
+                            timePeriod: period, page: page),
             rawInput: ""
         )
         return .init(
             intent: intent, transactions: tx, commitments: commitments,
-            accounts: accounts, upcoming: upcoming,
-            weeklyReport: report, now: now
+            accounts: accounts, recurring: recurring,
+            upcoming: upcoming, weeklyReport: report, now: now
         )
     }
 

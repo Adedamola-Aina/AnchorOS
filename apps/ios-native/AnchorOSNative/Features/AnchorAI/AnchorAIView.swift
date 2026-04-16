@@ -62,6 +62,13 @@ struct AnchorAIView: View {
                             case .navigate(let page): appState.navigate(to: page)
                             case .generateWeeklyReport:
                                 fabricStore.runPrompt("generate weekly report")
+                            case .openAddTransaction:
+                                // Phase 4e-2: record_expense / record_income
+                                // intents route to Finance where the Add
+                                // Transaction sheet lives. Future work can
+                                // pipe the parsed amount/category directly
+                                // into that sheet via AppState.
+                                appState.navigate(to: "finance")
                             }
                         }
                     )

@@ -25,6 +25,11 @@ final class AnchorFabricStore: ObservableObject {
     @Published private(set) var queryResult: AnchorFabricQueryResult?
     @Published private(set) var isQuerying: Bool = false
 
+    /// Conversation history for contextual follow-ups (Phase 4e-4). In-memory
+    /// only — matches the PWA's session-scoped FabricPage `messages` state.
+    @Published private(set) var messages: [AnchorFabricMessage] = []
+    private let maxMessages = 20
+
     /// Recurring transactions feeding the upcoming feed. Native doesn't
     /// yet have a RecurringStore — this stays empty until one lands.
     private var recurringTransactions: [AnchorRecurringTransaction] = []
@@ -91,18 +96,29 @@ final class AnchorFabricStore: ObservableObject {
         guard !trimmed.isEmpty else { return }
         guard let f = financeStore, let c = commitmentsStore else { return }
         isQuerying = true
-        let intent = AnchorIntentParser.parse(trimmed)
+        let intent = AnchorIntentParser.parse(trimmed, history: messages)
         let input = AnchorQueryEngine.Input(
             intent: intent,
             transactions: f.transactions,
             commitments: c.commitments,
             accounts: f.accounts,
+            recurring: recurringTransactions,
             upcoming: upcoming,
             weeklyReport: weeklyReport,
             now: Date()
         )
-        queryResult = AnchorQueryEngine.run(input)
+        let result = AnchorQueryEngine.run(input)
+        queryResult = result
+        appendMessage(.init(role: .user, content: trimmed, timestamp: Date()))
+        appendMessage(.init(role: .assistant, content: result.summary, timestamp: Date()))
         isQuerying = false
+    }
+
+    private func appendMessage(_ m: AnchorFabricMessage) {
+        messages.append(m)
+        if messages.count > maxMessages {
+            messages.removeFirst(messages.count - maxMessages)
+        }
     }
 
     /// Prefill the input and immediately submit — used by PromptChips.
@@ -114,6 +130,7 @@ final class AnchorFabricStore: ObservableObject {
     func clearQuery() {
         queryText = ""
         queryResult = nil
+        messages.removeAll()
     }
 
     private func wasQuestionShownRecently(_ kind: AnchorProactiveQuestion.Kind, now: Date) -> Bool {

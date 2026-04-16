@@ -16,6 +16,12 @@ struct AnchorFabricQueryResult: Equatable {
         /// Trigger a weekly-report modal / refresh. Used by the "Generate
         /// weekly report" chip.
         case generateWeeklyReport
+        /// Prefill + present the Add-Transaction form. Payload mirrors
+        /// the PWA `record_transaction` action payload (amount in major
+        /// units, category optional, type narrows the form).
+        case openAddTransaction(type: TransactionKind, amount: Double?, category: String?)
+
+        enum TransactionKind: String, Equatable { case expense, income }
     }
 
     struct Action: Equatable {
