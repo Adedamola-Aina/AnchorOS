@@ -7,6 +7,7 @@ struct AnchorPrediction: Identifiable, Equatable {
     enum Severity: String, Equatable { case info, warning, critical }
     enum Kind: String, Equatable {
         case unusualSpending   = "unusual_spending"
+        case budgetOverage     = "budget_overage"
         case budgetRisk        = "budget_risk"
         case goalAtRisk        = "goal_at_risk"
         case behaviorNudge     = "behavior_nudge"
