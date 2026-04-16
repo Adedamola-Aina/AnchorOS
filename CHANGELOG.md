@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.17.1...v1.18.0) (2026-04-16)
+
+
+### Features
+
+* **auth:** iOS native Sprint 2 — Authentication Parity ([dbff7de](https://github.com/Adedamola-Aina/AnchorOS/commit/dbff7de5b4c853c58cd0bd9b5352a41398929021))
+* **ios:** add native anchor dashboard shell ui ([2f568a0](https://github.com/Adedamola-Aina/AnchorOS/commit/2f568a0ddb0e12e62b41f81db63efdced00c9482))
+* **ios:** add one-command native sync and open scripts ([ae7732d](https://github.com/Adedamola-Aina/AnchorOS/commit/ae7732ddbc5f447580535672b006d6b3555e7917))
+* **ios:** align native shell with anchor tab and banner layout ([bdafa0c](https://github.com/Adedamola-Aina/AnchorOS/commit/bdafa0c03e28963ea303b3df640aa86fd6cf6f5a))
+* **ios:** bootstrap native swiftui app with firebase auth scaffold ([fa9318a](https://github.com/Adedamola-Aina/AnchorOS/commit/fa9318ace6da007c3e9ab3fdeda465d62e3230a1))
+* **ios:** deliver full native ui parity pass across core tabs ([392a8d1](https://github.com/Adedamola-Aina/AnchorOS/commit/392a8d16c4ec078374578c2790d0995a10576696))
+* **ios:** expand native tabs with tasks anchor and finance views ([013428b](https://github.com/Adedamola-Aina/AnchorOS/commit/013428bac20739450a1434bd1b7fcaeb27221862))
+* **ios:** FIN-018 Firestore service layer + live data on all 5 native screens ([ecd7eb3](https://github.com/Adedamola-Aina/AnchorOS/commit/ecd7eb371577e120f7166517851a2fcbdbdc2710))
+* **ios:** multi-environment Firebase plist swap via build configs ([3de8e3f](https://github.com/Adedamola-Aina/AnchorOS/commit/3de8e3f8cfdfb59951e55114bd9dcfb64546a558))
+* **ios:** Sprint 2 — write operations, CRUD forms, toast system ([4b454e3](https://github.com/Adedamola-Aina/AnchorOS/commit/4b454e3033fc0babc4a710af9edc4e6d18758338))
+* **ios:** Sprint 3 — Family Mode, mood persistence, FirebaseFunctions ([b8acec1](https://github.com/Adedamola-Aina/AnchorOS/commit/b8acec1d989cb0115e7a74c25068288665ccb3a8))
+* **ios:** Sprint 4 — sign-up, edit forms, account detail view ([bec7713](https://github.com/Adedamola-Aina/AnchorOS/commit/bec771372bd31bdd11727afa0f8a0a53cf424863))
+* **ios:** Sprint 5 — EditCommitmentSheet, OnboardingView, Dashboard quick-actions, Currency picker ([c24d275](https://github.com/Adedamola-Aina/AnchorOS/commit/c24d275fc0c5e58c50849eb914b3680c4f9ab7d9))
+* **ios:** Sprint 6 — tap-to-edit tasks, shared accounts, transaction type filter ([e62b1d2](https://github.com/Adedamola-Aina/AnchorOS/commit/e62b1d288af6ee6d0e1ab6fdadc3dc78ef1f3d7d))
+* **ios:** Sprint 7 — Fabric AI insights, spending trends chart, error states, offline persistence ([25b3468](https://github.com/Adedamola-Aina/AnchorOS/commit/25b3468d728e5ebd048286cce0f16f6429fa4c51))
+* **ios:** unify native tabs around shared live state and shell polish ([7c91381](https://github.com/Adedamola-Aina/AnchorOS/commit/7c913817361f9f87f31c46a3496e57b666306dad))
+* **ios:** wire native dashboard to live project state ([4a95928](https://github.com/Adedamola-Aina/AnchorOS/commit/4a95928f82c40f7dfa868cb30e431ee71ba12f72))
+* **mobile:** iOS native Sprint 1 — Foundation & Design System ([0380b2c](https://github.com/Adedamola-Aina/AnchorOS/commit/0380b2c67c870843d90adcbc273b8f58f06f5b5f))
+* **mobile:** iOS Sprint 3 — swipe, refresh, security settings FIN-019 ([07e3a0d](https://github.com/Adedamola-Aina/AnchorOS/commit/07e3a0dfadfe85d6e78d8b4931c43752e1c8ffd5))
+
+
+### Bug Fixes
+
+* **auth:** replace invalid type cast with factorID check BUG-000 ([53f80f4](https://github.com/Adedamola-Aina/AnchorOS/commit/53f80f45cb408c5379da6cffa0026ebf03672aec))
+* **auth:** resolve xcode compile errors in passkey + onboarding BUG-000 ([73335a2](https://github.com/Adedamola-Aina/AnchorOS/commit/73335a2e6fbd6e56e4a5752e0335032e8efd9280))
+* **finance:** feedback fails when navigator.platform is empty BUG-132 ([5b0937c](https://github.com/Adedamola-Aina/AnchorOS/commit/5b0937c1c723426ba32c7b4471900d283da4637c))
+* **ios:** align plist source names with actual file names (Development/Staging/Production) ([708e2b5](https://github.com/Adedamola-Aina/AnchorOS/commit/708e2b5c4c552a9009029caf81b0585836b37e16))
+* **ios:** call FirebaseApp.configure() before Firestore init ([2497960](https://github.com/Adedamola-Aina/AnchorOS/commit/2497960a49f70ee9b7452f529d9ffaecb0fe56e1))
+* **ios:** configure firebase before auth access ([50b8506](https://github.com/Adedamola-Aina/AnchorOS/commit/50b85062ca2237d555169dd0657d1c799036748d))
+* **ios:** correct AnchorFormField param names in edit sheets (label→placeholder, keyboard→keyboardType) ([f4b347a](https://github.com/Adedamola-Aina/AnchorOS/commit/f4b347af626dc4fd64d552d02416f6e60987d11c))
+* **ios:** escape curly quotes in AnchorAIView string interpolation ([390365f](https://github.com/Adedamola-Aina/AnchorOS/commit/390365f83a67f30cca2bc11157073812e07e0ee8))
+* **ios:** pwa visual parity — background, card border, shadow, aspect ratio BUG-000 ([ec06351](https://github.com/Adedamola-Aina/AnchorOS/commit/ec06351428baca4f0e295797fcfbd06e738e1d4b))
+* **ios:** remove FirebaseFirestoreSwift — merged into FirebaseFirestore in SDK 11 ([3ee4178](https://github.com/Adedamola-Aina/AnchorOS/commit/3ee4178e895d5879eaa99a9f9b51eb30c16e751b))
+* **ios:** UI/UX parity pass — match PWA layout across all 5 screens ([e0554c9](https://github.com/Adedamola-Aina/AnchorOS/commit/e0554c9382657bc0762cafbdee73a720d223f858))
+* **mobile:** add @MainActor to saveSavingsGoal for FinanceStore isolation BUG-000 ([d7e4dfe](https://github.com/Adedamola-Aina/AnchorOS/commit/d7e4dfe3953916c7b3bc2091350dcb8793c67456))
+* **mobile:** move saveSavingsGoal to main view for correct env object access BUG-000 ([b4adb51](https://github.com/Adedamola-Aina/AnchorOS/commit/b4adb51a13b7b85e817ff3b7186d2c5b7b80903c))
+
 ## [1.17.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.17.0...v1.17.1) (2026-04-11)
 
 
