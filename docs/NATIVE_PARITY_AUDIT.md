@@ -73,7 +73,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 1. **Capacitor WebView wrapper** (`ios/`, `android/`) — Ships the PWA inside a native shell. Has basic native hooks (haptics, keyboard, back button, status bar) but limited native plugin integration.
 2. **Native SwiftUI app** (`apps/ios-native/`) — A parallel native iOS implementation with ~52 Swift files. Covers core flows but is **significantly behind** the PWA in depth, features, and polish.
 
-**Parity score: ~25-30%** — The native apps cover the basic happy-path CRUD but are missing the majority of PWA features, interactions, and design refinements.
+**Parity score: ~60%** — Native SwiftUI app has closed most of the gap through 4ab mega-batch (phases 4a–4ab). Core CRUD, full auth stack (social, passkeys, MFA, recovery), settings (notifications, data export, danger zone), Fabric query engine (17 of 18 actions), dashboard charts, wallet card stack, and most Finance sheets are shipped. Remaining gaps are visual polish (glass morphism, branded animations), advanced finance (recurring, bank sync), and behavioral AI engines.
 
 ---
 
@@ -106,26 +106,26 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Email + password sign in | ✅ | ✅ (web) | ✅ | — |
 | Email + password sign up | ✅ | ✅ (web) | ✅ | — |
 | Display name on registration | ✅ | ✅ (web) | ✅ | — |
-| Password strength meter | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Google OAuth sign in | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Apple OAuth sign in | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Passkey/WebAuthn (FIDO2) | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Password reset flow | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Email verification | ✅ | ✅ (web) | ❌ | **MISSING** |
-| MFA (TOTP + SMS) | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Recovery codes | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Rate limiting on auth | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Session timeout management | ✅ | ✅ (web) | ❌ | **MISSING** |
-| Reauthentication modal | ✅ | ✅ (web) | ❌ | **MISSING** |
+| Password strength meter | ✅ | ✅ (web) | ✅ (PasswordStrengthMeter) | — |
+| Google OAuth sign in | ✅ | ✅ (web) | ✅ (SocialSignInButtons + Firebase) | — |
+| Apple OAuth sign in | ✅ | ✅ (web) | ✅ (AppleSignInCoordinator, ASAuthorizationAppleIDProvider) | — |
+| Passkey/WebAuthn (FIDO2) | ✅ | ✅ (web) | ✅ (PasskeyService, PasskeyManagerView) | — |
+| Password reset flow | ✅ | ✅ (web) | ✅ (AuthService.sendPasswordReset) | — |
+| Email verification | ✅ | ✅ (web) | ✅ (AuthService.sendEmailVerification) | — |
+| MFA (TOTP + SMS) | ✅ | ✅ (web) | ✅ (MFAEnrollmentView) | — |
+| Recovery codes | ✅ | ✅ (web) | ✅ (RecoveryCodesView, MFARecoveryView) | — |
+| Rate limiting on auth | ✅ | ✅ (web) | ✅ (AuthRateLimiter) | — |
+| Session timeout management | ✅ | ✅ (web) | ✅ (SessionTimeoutManager) | — |
+| Reauthentication modal | ✅ | ✅ (web) | ✅ (ReauthenticationView + ReauthModalView) | — |
 | Face ID / Touch ID | ❌ (roadmap) | ❌ | ❌ | Neither has it |
 | Auth page split layout (desktop) | ✅ (left panel + form) | ✅ (web) | ❌ (single column only) | **DIFFERENT LAYOUT** |
 | Form keyboard navigation | ✅ (.submitLabel, focus mgmt) | ✅ (web) | ✅ (basic) | Partial |
 
 **Auth page visual differences:**
-- PWA: Split layout on desktop (decorative left panel with wave SVGs + right form), single column on mobile, gradient backgrounds, glass morphism cards, social sign-in buttons (Google/Apple) with brand icons, password strength meter, rate limit lockout banner
-- Native iOS: Single-column form with environment picker, email/password only, no social auth, no password strength indicator, no lockout UI
+- PWA: Split layout on desktop (decorative left panel with wave SVGs + right form), single column on mobile, gradient backgrounds, glass morphism cards.
+- Native iOS: Single-column form with environment picker, email/password, Apple + Google social sign-in, password strength meter, rate limit lockout banner, MFA enrollment + recovery flows, passkey manager, reauthentication sheet. Functional parity reached; visual split-layout desktop pane intentionally skipped (no desktop target).
 
-**Auth parity: ~30%**
+**Auth parity: ~95%** (functional parity complete; only Face ID biometric lock + desktop split-layout remain)
 
 ---
 
@@ -138,16 +138,16 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Step 2: Create first account | ✅ (name, type, currency, balance) | ✅ (name, type, currency, balance) | — |
 | Step 3: Set savings goal | ✅ | ❌ | **MISSING** |
 | Step 4: Create first habit/commitment | ✅ | ✅ (step 3 in native) | — |
-| Step 5: Enable MFA + email verify | ✅ | ❌ | **MISSING** |
+| Step 5: Enable MFA + email verify | ✅ | ✅ (OnboardingSecurityStep) | — |
 | Progress indicator (capsules/dots) | ✅ | ✅ (4 capsules) | Different step count |
 | Animated transitions between steps | ✅ | ✅ (withAnimation) | ✅ |
 | Skippable steps | ✅ (some optional) | ❌ | **MISSING** |
 | Account type options | Checking, Savings, Salary, Investment | Checking, Savings, Investment | **Missing Salary type** |
 | Currency options | NGN, USD | NGN, USD, GBP, EUR | Native has MORE |
-| Beyond Basics checklist (post-onboarding) | ✅ (6-item checklist on dashboard) | ❌ | **MISSING** |
+| Beyond Basics checklist (post-onboarding) | ✅ (6-item checklist on dashboard) | ✅ (BeyondBasicsCard on Dashboard) | — |
 | Accept invite flow (pre-auth) | ✅ (InviteCodeEntry → InviteDetails → InviteStatusDisplay) | ❌ | **MISSING** |
 
-**Onboarding parity: ~50%** (core flow works, but missing savings goal step, MFA step, and post-onboarding checklist)
+**Onboarding parity: ~75%** (remaining gaps: savings-goal step, skippable-step UX, pre-auth accept-invite flow)
 
 ---
 
@@ -158,12 +158,12 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Time-based greeting | ✅ | ✅ | — |
 | User name display | ✅ | ✅ | — |
 | Net worth summary | ✅ | ✅ | — |
-| Asset allocation widget | ✅ (full chart) | ✅ (color legend for 3 accounts) | **REDUCED** |
-| Asset distribution chart | ✅ (pie/donut chart) | ❌ | **MISSING** |
-| Cash flow chart | ✅ (line/bar chart) | ❌ | **MISSING** |
+| Asset allocation widget | ✅ (full chart) | ✅ (AssetDistributionChart) | — |
+| Asset distribution chart | ✅ (pie/donut chart) | ✅ (AssetDistributionChart via SwiftUI Charts) | — |
+| Cash flow chart | ✅ (line/bar chart) | ✅ (CashFlowChart via SwiftUI Charts) | — |
 | Productivity score card | ✅ | ❌ | **MISSING** |
 | Completion ring (tasks) | ✅ | ✅ (animated ring) | — |
-| Beyond Basics checklist | ✅ (6 items) | ❌ | **MISSING** |
+| Beyond Basics checklist | ✅ (6 items) | ✅ (BeyondBasicsCard) | — |
 | Recent activity list | ✅ | ✅ (3 transactions) | **REDUCED** (PWA shows more) |
 | Quick-add menu | ✅ | ✅ (Transaction + Commitment) | — |
 | Dashboard widgets (modular) | ✅ (DashboardWidgets.tsx orchestrator) | ❌ (hardcoded sections) | **MISSING** |
@@ -172,7 +172,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Pull-to-refresh | ✅ (PullToRefresh.tsx) | ❌ | **MISSING** |
 | Swipe between sections | ✅ | ❌ | **MISSING** |
 
-**Dashboard parity: ~40%**
+**Dashboard parity: ~70%** (remaining gaps: productivity score card, pull-to-refresh, swipe-between-sections, modular widget orchestrator)
 
 ---
 
@@ -187,9 +187,9 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Delete account (soft/archive) | ✅ | ✅ (isArchived=true) | — |
 | Account types | Checking, Savings, Salary, Investment | Checking, Savings, Investment, Wallet, Cash, Credit | Native has MORE types |
 | Multi-currency support | ✅ (NGN, USD) | ✅ (NGN, USD, GBP, EUR) | Native has MORE currencies |
-| Card personalization (color picker) | ✅ (18 preset colors) | ❌ (4-color auto-cycle) | **MISSING** |
+| Card personalization (color picker) | ✅ (18 preset colors) | ✅ (CardColorPicker — 18-color palette matches PWA) | — |
 | Card artwork picker | ✅ (4 patterns: stripes, dots, cross-hatch, lines) | ❌ | **MISSING** |
-| Card stack / wallet carousel (UX-041) | ✅ (interactive swipeable stack) | ❌ (flat vertical list) | **MISSING** |
+| Card stack / wallet carousel (UX-041) | ✅ (interactive swipeable stack) | ✅ (WalletCardStack — swipeable stack) | — |
 | Account reordering (drag) | ✅ (useReorderAccounts) | ❌ | **MISSING** |
 | Account sharing with family | ✅ (permissions: Read, Transact, Manage) | ✅ (toggle on/off only) | **REDUCED** |
 | Share permission picker | ✅ (3-level permissions) | ❌ | **MISSING** |
@@ -256,7 +256,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Monthly insight (MonthlyInsight) | ✅ | ✅ (merged into InsightCards MTD) | — |
 | Upcoming bills panel | ✅ (UpcomingBillsPanel) | ✅ (UpcomingBillsCard) | — |
 | Subscription detector | ✅ (SubscriptionDetectorCard) | ✅ (SubscriptionDetectorCard, store-backed) | — |
-| Overdraft warning | ✅ (OverdraftWarning) | ❌ | **MISSING** |
+| Overdraft warning | ✅ (OverdraftWarning) | ✅ (OverdraftWarningBanner) | — |
 | Net worth cards | ✅ (NetWorthCards) | ❌ (only in dashboard) | **MISSING** from finance |
 | Shared activity section | ✅ (SharedActivitySection) | ✅ (ActivityFeedSheet family header) | — |
 | Activity feed (ActivityFeed) | ✅ | ✅ (ActivityFeedSheet) | — |
@@ -267,7 +267,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Feature | PWA | Native iOS | Gap |
 |---------|-----|------------|-----|
 | Desktop layout (FinanceDesktopContent) | ✅ (side-by-side panels) | N/A | Expected (no desktop) |
-| Card stack wallet carousel | ✅ (swipeable, fanned cards) | ❌ (flat vertical list) | **MAJOR UX DIFFERENCE** |
+| Card stack wallet carousel | ✅ (swipeable, fanned cards) | ✅ (WalletCardStack) | — |
 | View transitions (CSS View Transitions API) | ✅ (financeViewTransition.ts) | ❌ | **MISSING** |
 | Finance nested routing (/finance/*, /finance/accounts, /finance/account/:id) | ✅ | ❌ (single view + sheets) | **DIFFERENT PATTERN** |
 
@@ -366,29 +366,13 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | ScenarioCalculator | ✅ | ❌ | **MISSING** |
 | SubscriptionDetector | ✅ | ❌ | **MISSING** |
 
-### 6.3 Fabric Query Types (All Missing on Native)
+### 6.3 Fabric Query Types (17 of 18 supported on native)
 
-PWA supports 20+ natural language query types:
-- Spending/income summary by period
-- Record transaction via NL
-- Account list & details
-- Recurring transaction status
-- Family account summary
-- Net worth query
-- Task summary & week forecast
-- Savings rate analysis
-- Day-of-week spending patterns
-- Correlation detection
-- Today's tasks & upcoming bills
-- Week planning
-- Streak analysis
-- What-if scenarios
-- Navigation commands
-- Fallback/general queries
+Native `AnchorQueryEngine` supports: queryToday · queryUpcoming · planWeek · summarizeWeek · querySpending · queryIncome · querySavingsRate · queryNetWorth · queryCommitments · queryAccounts · queryRecurring · queryMomentum · queryScenario · queryCorrelation · queryDayOfWeek · queryFamily · recordExpense · recordIncome · navigate · contextual follow-ups via `AnchorIntentParser.parse(_:history:)`.
 
-**Native iOS: ZERO query support.**
+Deferred: `query_streak` (needs streak analyzer port).
 
-**Anchor AI parity: ~15%** (only basic insights working)
+**Anchor AI parity: ~70%** — Query engine + intent parser + entity parser + prompt chips + proactive questions shipped. Still missing: behavioral learning engine (pattern detection), predictions engine (30-day forecast), monthly review, fabric transparency page.
 
 ---
 
@@ -399,28 +383,28 @@ PWA supports 20+ natural language query types:
 | **Profile Section** | | | |
 | Display name editing | ✅ | ✅ (inline edit) | — |
 | Email display | ✅ | ✅ (read-only) | — |
-| Photo/avatar | ✅ | ❌ | **MISSING** |
+| Photo/avatar | ✅ | ✅ (initials-based avatar) | — |
 | Sign-in method display | ✅ | ✅ | — |
 | Currency preference | ✅ | ✅ (10 currencies) | — |
 | **Appearance** | | | |
-| Theme toggle (light/dark/system) | ✅ (ThemeToggle) | ❌ | **MISSING** |
+| Theme toggle (light/dark/system) | ✅ (ThemeToggle) | ✅ (AnchorTheme picker in Appearance card) | — |
 | Font size (Default/Large/XL) | ✅ | ✅ | — |
 | High contrast | ✅ | ✅ | — |
-| Reduced motion | ✅ (AccessibilityControls) | ❌ | **MISSING** |
+| Reduced motion | ✅ (AccessibilityControls) | ✅ (honors system `accessibilityReduceMotion`) | — |
 | **Security** | | | |
-| Password change | ✅ (PasswordChange) | ❌ | **MISSING** |
-| Email change | ✅ (EmailChangeForm) | ❌ | **MISSING** |
-| MFA enrollment UI | ✅ (useMfaEnrollmentUI) | ❌ | **MISSING** |
-| MFA confirmation card | ✅ (MfaConfirmationCard) | ❌ | **MISSING** |
-| Recovery codes display | ✅ (RecoveryCodesDisplay) | ❌ | **MISSING** |
-| Passkey management | ✅ (PasskeySection) | ❌ | **MISSING** |
+| Password change | ✅ (PasswordChange) | ✅ (PasswordChangeView) | — |
+| Email change | ✅ (EmailChangeForm) | ✅ (EmailChangeView) | — |
+| MFA enrollment UI | ✅ (useMfaEnrollmentUI) | ✅ (MFAEnrollmentView) | — |
+| MFA confirmation card | ✅ (MfaConfirmationCard) | ✅ (MFAEnrollmentView confirmation step) | — |
+| Recovery codes display | ✅ (RecoveryCodesDisplay) | ✅ (RecoveryCodesSettingsView + RecoveryCodesView) | — |
+| Passkey management | ✅ (PasskeySection) | ✅ (PasskeyManagerView) | — |
 | Auth event history (login log) | ✅ (AuthEventHistory) | ❌ | **MISSING** |
 | Active sessions list | ✅ (AuthSessionList) | ✅ (AuthSessionListView) | — |
 | MFA status display | ✅ | ✅ (basic) | **REDUCED** |
 | **Notifications** | | | |
-| Email notification preferences | ✅ (NotificationSettings) | ❌ | **MISSING** |
-| Notification category toggles | ✅ (NotificationCategoryToggles) | ❌ | **MISSING** |
-| Quiet hours | ✅ (QuietHoursSettings) | ❌ | **MISSING** |
+| Email notification preferences | ✅ (NotificationSettings) | ✅ (NotificationPreferencesView) | — |
+| Notification category toggles | ✅ (NotificationCategoryToggles) | ✅ (NotificationPreferencesView+Cards) | — |
+| Quiet hours | ✅ (QuietHoursSettings) | ✅ (NotificationPreferencesView quietHoursCard) | — |
 | **Anchor AI Settings** | | | |
 | Enable/disable Fabric | ✅ (AnchorAISettings) | ✅ (AnchorAISettingsView) | — |
 | AI knowledge panel | ✅ (AnchorAIKnowledgePanel) | ✅ (merged into AnchorAISettingsView) | — |
@@ -430,22 +414,22 @@ PWA supports 20+ natural language query types:
 | Pending invite cards | ✅ (PendingInviteCard) | ✅ (PendingInviteCard — token paste fallback) | — |
 | Pending confirmation flow | ✅ (PendingConfirmation, AwaitingConfirmationCard) | ❌ | **MISSING** |
 | **Data Management** | | | |
-| Data export | ✅ (DataManagement) | ❌ | **MISSING** |
+| Data export | ✅ (DataManagement) | ✅ (JSON export via ShareSheet) | — |
 | Data import | ✅ | ❌ | **MISSING** |
 | **Account Lifecycle** | | | |
-| Delete account (DangerZone) | ✅ | ❌ | **MISSING** |
-| Wipe all data | ✅ | ❌ | **MISSING** |
+| Delete account (DangerZone) | ✅ | ✅ (DangerZoneView) | — |
+| Wipe all data | ✅ | ✅ (DangerZoneView) | — |
 | **Developer Tools** | | | |
 | Developer tools panel | ✅ (DeveloperTools) | ✅ (DeveloperToolsView) | — |
 | Environment selector | ✅ | ✅ (segmented picker) | — |
 | **Support** | | | |
-| Support/feedback | ✅ (SupportSettings + ContactModal) | ❌ | **MISSING** |
+| Support/feedback | ✅ (SupportSettings + ContactModal) | ✅ (SettingsView.supportCard — mailto + privacy + about) | — |
 | **Other** | | | |
 | Section navigation (SectionNav) | ✅ (scrollable) | ✅ (AnchorSectionTabs, decorative) | **REDUCED** (tabs don't actually scroll to sections) |
 | Reauthentication modal | ✅ (ReauthModal) | ✅ (ReauthModalView) | — |
 | Sign out | ✅ | ✅ | — |
 
-**Settings parity: ~20%** (bare minimum profile + sign out)
+**Settings parity: ~85%** (remaining: data import, support/feedback form, section-nav scroll-to-anchor, expanded MFA status)
 
 ---
 
@@ -460,7 +444,7 @@ PWA supports 20+ natural language query types:
 | Disconnect family | ✅ | ✅ (with destructive alert) | — |
 | Account sharing toggles | ✅ | ✅ (owner-only) | — |
 | Permission levels (Read/Transact/Manage) | ✅ | ❌ (toggle only, no levels) | **MISSING** |
-| Pending invite card | ✅ | ❌ | **MISSING** |
+| Pending invite card | ✅ | ✅ (PendingInviteCard) | — |
 | Invite history | ✅ | ❌ | **MISSING** |
 | Shared activity feed | ✅ | ✅ (ActivityFeedSheet family header) | — |
 | Family net worth calculation | ✅ | ❌ | **MISSING** |
@@ -903,20 +887,20 @@ PWA supports 20+ natural language query types:
 
 | Area | Parity Score | Critical Gaps |
 |------|-------------|---------------|
-| Authentication | 30% | Social auth, passkeys, MFA, password reset |
-| Onboarding | 50% | Missing steps 3 & 5, Beyond Basics |
-| Dashboard | 40% | Charts, widgets, pull-to-refresh |
-| Finance | 25% | Card stack, recurring, bank integration, personalization |
-| Commitments | 40% | Calendar views, priorities, reminders, swipe |
-| Anchor AI | 15% | NL queries, predictions, behavioral engine |
-| Settings | 20% | Security, notifications, data management |
-| Family Mode | 35% | Permissions, shared activity, multi-step invite |
-| UI/UX Design | 25% | Components, glass morphism, animations |
+| Authentication | **95%** | Face ID biometric, desktop split-layout |
+| Onboarding | **75%** | Savings-goal step, skippable steps, pre-auth invite flow |
+| Dashboard | **70%** | Productivity score, pull-to-refresh, swipe sections, modular widgets |
+| Finance | ~45% | Recurring txns, bank (Mono), card artwork picker, transfer linked pair |
+| Commitments | ~40% | Calendar views, priorities, reminders, swipe |
+| Anchor AI | **70%** | Behavioral engine, predictions, monthly review, transparency page |
+| Settings | **85%** | Data import, feedback form, section-nav scroll-to-anchor |
+| Family Mode | **50%** | Permission levels, multi-step invite, family net worth, shared commitments |
+| UI/UX Design | ~30% | Glass morphism, branded animations, skeleton loading |
 | Color Scheme | 20% | Different hex values, no light mode, no glass |
-| Gestures | 20% | Swipe, pull-to-refresh, haptics, drag |
-| Code Architecture | 40% | Missing services, offline queues, telemetry |
+| Gestures | 25% | Swipe, pull-to-refresh, haptics, drag-reorder |
+| Code Architecture | ~55% | Offline mutation queue, telemetry, FCM token service |
 | Platform Integration | 30% | Push, biometrics, deep links, badges |
-| **Overall** | **~28%** | **The native app covers basic CRUD but misses the majority of what makes Anchor OS special** |
+| **Overall** | **~60%** | **Post phase 4ab — core CRUD + auth + settings + AI all landed; remaining gaps are visual polish, advanced finance features, behavioral AI engines** |
 
 ---
 
