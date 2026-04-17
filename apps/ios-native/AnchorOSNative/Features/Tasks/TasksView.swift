@@ -47,6 +47,7 @@ struct TasksView: View {
                                         .clipShape(Capsule())
                                 }
                                 .buttonStyle(.plain)
+                                .anchorPressable()
                             }
                         }
                     }

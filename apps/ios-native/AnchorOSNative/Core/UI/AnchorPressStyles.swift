@@ -75,6 +75,14 @@ extension View {
         buttonStyle(PressScaleStyle(scale: scale))
     }
 
+    /// Composable press-scale — applies PressScaleStyle without replacing
+    /// a `buttonStyle(.plain)` child. Use when the button already opts
+    /// out of system styling (most `AnchorCard` / `AnchorChip` primary
+    /// buttons do). Matches PWA `active:scale-[0.98]`.
+    func anchorPressable(_ scale: CGFloat = 0.98) -> some View {
+        modifier(AnchorPressableModifier(scale: scale))
+    }
+
     /// Auth mount — opacity+scale from 95% to 100%.
     func authMountTransition(duration: Double = 0.5) -> some View {
         modifier(AuthMountTransition(duration: duration))
@@ -88,5 +96,26 @@ extension View {
     /// Plain opacity 0→1 on mount — matches PWA `animate-in fade-in`.
     func fadeInOnAppear(duration: Double = 0.3) -> some View {
         modifier(FadeInOnAppear(duration: duration))
+    }
+}
+
+// MARK: - AnchorPressableModifier
+/// Press-scale feedback that composes alongside `buttonStyle(.plain)`.
+/// Uses a simultaneous gesture so it does not swallow the button's tap,
+/// and honors Reduce Motion. Matches PWA `active:scale-[0.98]`.
+struct AnchorPressableModifier: ViewModifier {
+    var scale: CGFloat = 0.98
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isPressed: Bool = false
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(isPressed && !reduceMotion ? scale : 1.0)
+            .animation(.easeOut(duration: 0.12), value: isPressed)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in if !isPressed { isPressed = true } }
+                    .onEnded { _ in isPressed = false }
+            )
     }
 }

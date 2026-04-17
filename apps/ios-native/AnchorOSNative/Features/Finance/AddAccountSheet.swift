@@ -12,9 +12,9 @@ struct AddAccountSheet: View {
     @State private var balanceText: String = ""
     @State private var selectedColorHex: String = "#3D52D5"
     @State private var isSaving = false
+    @State private var showCurrencyPicker = false
 
     private let accountTypes = ["checking", "savings", "investment", "wallet", "cash", "credit"]
-    private let currencies = ["NGN", "USD", "GBP", "EUR"]
 
     private var balanceCents: Int {
         let cleaned = balanceText.replacingOccurrences(of: ",", with: "")
@@ -54,27 +54,35 @@ struct AddAccountSheet: View {
                     }
 
                     formSection("Currency") {
-                        HStack(spacing: 8) {
-                            ForEach(currencies, id: \.self) { c in
-                                Button {
-                                    currency = c
-                                } label: {
-                                    Text(c)
-                                        .font(.subheadline).fontWeight(.semibold)
-                                        .foregroundStyle(currency == c ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 10)
-                                        .background(currency == c ? AnchorPalette.chipActive : AnchorPalette.chip)
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                }
-                                .buttonStyle(.plain)
+                        Button {
+                            showCurrencyPicker = true
+                        } label: {
+                            HStack {
+                                Text(currency)
+                                    .font(.subheadline).fontWeight(.semibold)
+                                    .foregroundStyle(AnchorPalette.textPrimary)
+                                Text(currencySymbol(currency))
+                                    .font(.subheadline)
+                                    .foregroundStyle(AnchorPalette.textSecondary)
+                                Spacer()
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption)
+                                    .foregroundStyle(AnchorPalette.textSecondary)
                             }
+                            .padding(.horizontal, 14)
+                            .frame(minHeight: 44)
+                            .background(AnchorPalette.chip)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(AnchorPalette.cardBorder, lineWidth: 1))
                         }
+                        .buttonStyle(.plain)
+                        .anchorPressable()
+                        .accessibilityLabel("Currency: \(currency). Tap to change.")
                     }
 
                     formSection("Opening Balance") {
                         HStack {
-                            Text(currency == "USD" ? "$" : "₦")
+                            Text(currencySymbol(currency))
                                 .foregroundStyle(AnchorPalette.textSecondary)
                                 .padding(.leading, 14)
                             TextField("0.00", text: $balanceText)
@@ -117,6 +125,15 @@ struct AddAccountSheet: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showCurrencyPicker) {
+            CurrencyPickerSheet(selection: $currency)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+    }
+
+    private func currencySymbol(_ code: String) -> String {
+        CurrencyPickerSheet.all.first { $0.code == code }?.symbol ?? code
     }
 
     private func formSection<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {

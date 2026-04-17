@@ -64,6 +64,7 @@ struct AnchorCompletionRing: View {
                 )
             }
             .buttonStyle(.plain)
+            .anchorPressable()
             .accessibilityLabel("Onboarding progress: \(completed) of \(total) complete")
             .onAppear {
                 if !reduceMotion { pulse = true }

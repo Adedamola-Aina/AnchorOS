@@ -14,9 +14,9 @@ struct EditAccountSheet: View {
     @State private var balanceText: String
     @State private var selectedColorHex: String
     @State private var isSaving = false
+    @State private var showCurrencyPicker = false
 
     private let accountTypes = ["checking", "savings", "investment", "wallet", "cash", "credit"]
-    private let currencies  = ["NGN", "USD", "GBP", "EUR"]
 
     init(account: AnchorAccount) {
         self.account = account
@@ -33,7 +33,9 @@ struct EditAccountSheet: View {
         return Int((Double(cleaned) ?? 0) * 100)
     }
 
-    private var currencySymbol: String { selectedCurrency == "USD" ? "$" : "₦" }
+    private var currencySymbol: String {
+        CurrencyPickerSheet.all.first { $0.code == selectedCurrency }?.symbol ?? selectedCurrency
+    }
     private var formIsValid: Bool { !name.isEmpty }
 
     var body: some View {
@@ -74,10 +76,30 @@ struct EditAccountSheet: View {
                             Text("CURRENCY")
                                 .font(.caption).fontWeight(.bold)
                                 .foregroundStyle(AnchorPalette.textSecondary)
-                            Picker("Currency", selection: $selectedCurrency) {
-                                ForEach(currencies, id: \.self) { Text($0).tag($0) }
+                            Button {
+                                showCurrencyPicker = true
+                            } label: {
+                                HStack {
+                                    Text(selectedCurrency)
+                                        .font(.subheadline).fontWeight(.semibold)
+                                        .foregroundStyle(AnchorPalette.textPrimary)
+                                    Text(currencySymbol)
+                                        .font(.subheadline)
+                                        .foregroundStyle(AnchorPalette.textSecondary)
+                                    Spacer()
+                                    Image(systemName: "chevron.up.chevron.down")
+                                        .font(.caption)
+                                        .foregroundStyle(AnchorPalette.textSecondary)
+                                }
+                                .padding(.horizontal, 14)
+                                .frame(minHeight: 44)
+                                .background(AnchorPalette.chip)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(AnchorPalette.cardBorder, lineWidth: 1))
                             }
-                            .pickerStyle(.segmented)
+                            .buttonStyle(.plain)
+                            .anchorPressable()
+                            .accessibilityLabel("Currency: \(selectedCurrency). Tap to change.")
                         }
 
                         // Balance
@@ -127,6 +149,11 @@ struct EditAccountSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .sheet(isPresented: $showCurrencyPicker) {
+            CurrencyPickerSheet(selection: $selectedCurrency)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
     }
 
     private func save() async {

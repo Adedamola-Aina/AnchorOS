@@ -49,6 +49,7 @@ struct FabricPromptChips: View {
                             .overlay(Capsule().stroke(AnchorPalette.cardBorder, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
+                    .anchorPressable()
                 }
             }
             .padding(.horizontal, 1)

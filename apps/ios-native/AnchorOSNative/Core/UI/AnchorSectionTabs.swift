@@ -25,6 +25,7 @@ struct AnchorSectionTabs: View {
                         AnchorChip(label: label, isActive: selected == label)
                     }
                     .buttonStyle(.plain)
+                    .anchorPressable()
                     .accessibilityLabel("Jump to \(label) section")
                 }
             }

@@ -91,11 +91,15 @@ struct FinanceView: View {
                                 .font(.body.weight(.semibold))
                                 .foregroundStyle(AnchorPalette.textPrimary)
                         }
+                        .anchorPressable()
+                        .accessibilityLabel("Search transactions")
                         Button { showSummarySheet = true } label: {
                             Image(systemName: "chart.pie")
                                 .font(.body.weight(.semibold))
                                 .foregroundStyle(AnchorPalette.textPrimary)
                         }
+                        .anchorPressable()
+                        .accessibilityLabel("Finance summary")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
