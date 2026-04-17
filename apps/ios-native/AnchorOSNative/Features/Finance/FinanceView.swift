@@ -14,6 +14,8 @@ struct FinanceView: View {
     @State private var accountToDelete: AnchorAccount? = nil
     @State private var txToEdit: AnchorTransaction? = nil
     @State private var loadTimedOut = false
+    @State private var showSummarySheet = false
+    @State private var showSearchSheet = false
 
     private var monthLabel: String {
         guard let date = Calendar.current.date(byAdding: .month, value: monthOffset, to: Date()) else { return "" }
@@ -80,6 +82,20 @@ struct FinanceView: View {
             }
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    HStack(spacing: 4) {
+                        Button { showSearchSheet = true } label: {
+                            Image(systemName: "magnifyingglass")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                        }
+                        Button { showSummarySheet = true } label: {
+                            Image(systemName: "chart.pie")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                        }
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button { showAddTransaction = true } label: {
@@ -106,6 +122,26 @@ struct FinanceView: View {
             .sheet(item: $txToEdit) { tx in
                 EditTransactionSheet(transaction: tx)
                     .environmentObject(financeStore)
+            }
+            .sheet(isPresented: $showSummarySheet) {
+                FinanceSummarySheet(
+                    accounts: financeStore.accounts,
+                    onOpenAccount: { _ in
+                        // Navigation to account detail from sheet is a follow-up;
+                        // current wallet stack already supports direct card taps.
+                    }
+                )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showSearchSheet) {
+                FinanceSearchSheet(
+                    accounts: financeStore.accounts,
+                    transactions: financeStore.transactions,
+                    onOpenAccount: { _ in }
+                )
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
             }
             .alert("Delete Account?", isPresented: $showDeleteAccountAlert, presenting: accountToDelete) { acc in
                 Button("Delete", role: .destructive) {

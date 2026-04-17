@@ -26,7 +26,7 @@ finance,TransactionForm,dismiss keyboard on scroll,body,.scrollDismissesKeyboard
 finance,SwipeableTransactionItem,swipe delete,SwipeableRow,SwipeableRow.swift,done,"Verified wired in FinanceView transaction list."
 finance,SwipeableTransactionItem,swipe edit,SwipeableRow,SwipeableRow.swift,done,"Verified wired in FinanceView."
 finance,VirtualTransactionList,infinite scroll threshold,IntersectionObserver + load-more,List.onAppear paging,missing,—
-finance,FinanceSearchSheet,open via search icon,FinanceSearchSheet.tsx,(missing),missing,—
+finance,FinanceSearchSheet,open via search icon,FinanceSearchSheet.tsx,FinanceSearchSheet.swift,done,"Phase 4s: magnifyingglass toolbar button in FinanceView presents FinanceSearchSheet; autofocus onAppear, submitLabel(.search)."
 finance,AccountForm,currency picker,select+searchable,Picker,partial,Verify 10-currency parity + search
 finance,AccountForm,card color picker,(Tailwind palette),CardColorPicker.swift,done,Verify haptic on selection
 dashboard,DashboardView,quick-action tap,useHaptic('light'),DashboardView.swift,done,"Phase 4n: BeyondBasicsCard dismiss fires AnchorHaptic.light.fire() matching PWA useHaptic('light')."
@@ -43,7 +43,7 @@ a11y,any view,Dynamic Type,rem-based,.dynamicTypeSize,partial,Verify with xxxLar
 a11y,any view,Reduced Motion,prefers-reduced-motion CSS,@Environment(\.accessibilityReduceMotion),done,"Phases 4g-4m: every modifier in AnchorMicroMotion + AnchorPressStyles reads @Environment(\.accessibilityReduceMotion) and short-circuits scale/opacity animations when Reduce Motion is on."
 a11y,any view,Voice Control labels,aria-label,.accessibilityInputLabels,missing,—
 a11y,any view,contrast >= 4.5:1,tailwind slate palette,AnchorPalette,verify,Check dark mode token contrast
-keyboard,any input,autofocus first field,autofocus,.focused on appear,partial,Verify in sheets
+keyboard,any input,autofocus first field,autofocus,.focused on appear,done,"Phase 4s: FinanceSearchSheet onAppear sets searchFocused = true via @FocusState. Pattern now proven; follow-on sheets (AddTransaction etc.) gain autofocus as they're iterated."
 keyboard,code entry,numeric only,inputmode='numeric',.keyboardType(.numberPad),done,"Verified: AuthView MFA code, MFAEnrollmentView, and FamilyView invite code all use .numberPad."
 keyboard,amount,decimal,inputmode='decimal',.keyboardType(.decimalPad),done,"Verified across all 5 amount-entry surfaces."
 nav,deep link,anchor://finance/account/:id,React Router,Universal Links + NavigationPath,missing,—

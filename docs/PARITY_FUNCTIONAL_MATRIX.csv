@@ -1,7 +1,7 @@
 feature,pwa_component,pwa_action,native_component,native_status,notes
 finance,FinanceView.tsx,Open account list,FinanceView.swift,done,Phase 2: Firestore wired via SecureDb; FinanceView 351 lines (ARCH-001 follow-up)
-finance,FinanceView.tsx,Search transactions,FinanceSearchSheet (missing),missing,No native search sheet
-finance,FinanceView.tsx,Summary sheet,FinanceSummarySheet (missing),missing,No native summary sheet
+finance,FinanceView.tsx,Search transactions,FinanceSearchSheet.swift,done,"Phase 4s: SwiftUI port of PWA FinanceSearchSheet. Case-insensitive substring match across title/category/accountName/formatted amount; empty query returns the 8 most recent. Autofocus on appear, submitLabel(.search), chip-active focus ring. Presented from new magnifyingglass toolbar button in FinanceView."
+finance,FinanceView.tsx,Summary sheet,FinanceSummarySheet.swift,done,"Phase 4s: SwiftUI port of PWA FinanceSummarySheet. 2-column per-currency totals grid + sorted accounts list with capitalized account type. Presented from new chart.pie toolbar button in FinanceView at medium/large detents with drag indicator."
 finance,AccountCard.tsx,Tap card to open details,AccountDetailView.swift,done,Check deep-link parity
 finance,AccountForm.tsx,Create account,AddAccountSheet.swift,done,Verify validation parity (min balance, currency)
 finance,AccountForm.tsx,Edit account,EditAccountSheet.swift,done,Verify color picker parity
