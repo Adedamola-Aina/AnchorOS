@@ -19,8 +19,8 @@ finance,finance.ts calculateNetWorth,Calculate net worth per currency,NetWorthCa
 finance,FinanceStore.setSavingsGoal,Write savings goal,FinanceStore.setSavingsGoal,done,Phase 2: now routes through SecureDb (was bypassing to wrong root users/{uid})
 finance,InsightCards.tsx,View monthly insight,MonthlyInsight (missing),missing,No AI insight row
 finance,NotificationBanner.tsx,View top banner,Banner (missing),missing,No banner surface
-finance,UpcomingBillsPanel.tsx,View upcoming bills,Stub,missing,—
-finance,FinanceBillsSection.tsx,Manage bills,(missing),missing,—
+finance,UpcomingBillsPanel.tsx,View upcoming bills,UpcomingBillsCard.swift,done,"Phase 4r: SwiftUI port of PWA UpcomingBillsPanel + billReminderUtils.getUpcomingBills. Filters recurringStore.recurring to active bills with nextRunAt inside 7-day window, sorts by due date, renders with urgent (≤1 day) amber highlighting + exclamation icon + monospaced amount. Mounted in FinanceView above the transactions list."
+finance,FinanceBillsSection.tsx,Manage bills,UpcomingBillsCard.swift,done,"PWA FinanceBillsSection is a thin wrapper that returns UpcomingBillsPanel when bills exist. Native equivalent is UpcomingBillsCard mounted inline in FinanceView (no wrapper needed on iOS)."
 finance,RecurringOptions.tsx,Set tx recurrence,AddTransactionSheet.swift,done,"Toggle 'Mark as recurring' + 3-chip frequency picker (weekly/monthly/yearly) persists via FinanceStore.addTransaction isRecurring/recurringFrequency."
 finance,OverdraftWarning.tsx,Show overdraft,OverdraftWarningBanner.swift,done,"Phase 4q: SwiftUI port. AddTransactionSheet now computes projectedBalanceCents = account.balanceCents - amountCents when type==expense, mounts OverdraftWarningBanner above the Submit when projected < 0. Rose-tinted banner with arrow.left.arrow.right icon and slide-from-top transition."
 finance,SubscriptionDetectorCard.tsx,Subscription suggestion,(missing),missing,—

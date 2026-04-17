@@ -6,6 +6,7 @@ struct FinanceView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var financeStore: FinanceStore
     @EnvironmentObject private var familyStore: FamilyStore
+    @EnvironmentObject private var recurringStore: AnchorRecurringStore
     @State private var monthOffset: Int = 0
     @State private var showAddTransaction = false
     @State private var showAddAccount = false
@@ -62,6 +63,7 @@ struct FinanceView: View {
                         if familyStore.hasConnection { sharedAccountsSection }
                         VStack(spacing: 16) {
                             monthNavRow
+                            UpcomingBillsCard(bills: recurringStore.recurring)
                             transactionsCard
                         }
                         .padding(16)
