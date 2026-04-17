@@ -12,7 +12,7 @@ global,any button,active press scale,active:scale-[0.98] (Tailwind),.scaleEffect
 global,any input,focus ring,focus:ring-4 (Tailwind),.focused + .overlay,done,"Phase 4m: AuthView field icons tween foregroundStyle to AnchorPalette.chipActive while focused. SwiftUI TextField provides system-level focus indicator ring at OS level for keyboard navigation."
 global,edge-swipe back,navigation pop,browser-native,NavigationStack,done,Native iOS default
 commitments,TaskItem,checkbox tap,TaskItem.tsx handleToggle + trigger('success'),TaskRowView.swift,done,"Phase 4h: TaskRowView applies .completionPop(trigger:) + UINotificationFeedbackGenerator.success on incomplete -> complete toggle."
-commitments,TaskItem,title tap to edit,onTitleClick prop,(missing),missing,Native only edits via swipe or row tap
+commitments,TaskItem,title tap to edit,onTitleClick prop,TaskRowView.swift .onTapGesture,done,"TaskRowView wraps title + chip row in `.contentShape(Rectangle()).onTapGesture(perform: onTap)`; TasksView passes `onTap: { taskToEdit = task }` so tapping the title body opens the edit sheet. Matches PWA TaskItem onTitleClick."
 commitments,SwipeableTaskItem,swipe delete,SwipeableTaskItem.tsx,SwipeableRow.swift,done,"Verified wired in TasksView (two SwipeableRow usages)."
 commitments,SwipeableTaskItem,swipe edit,SwipeableTaskItem.tsx,SwipeableRow.swift,done,"Verified wired in TasksView."
 commitments,calendar,swipe month,MonthCalendarView.tsx,(missing),missing,Whole calendar view not ported
@@ -31,10 +31,10 @@ finance,AccountForm,currency picker,select+searchable,Picker,partial,Verify 10-c
 finance,AccountForm,card color picker,(Tailwind palette),CardColorPicker.swift,done,Verify haptic on selection
 dashboard,DashboardView,quick-action tap,useHaptic('light'),DashboardView.swift,done,"Phase 4n: BeyondBasicsCard dismiss fires AnchorHaptic.light.fire() matching PWA useHaptic('light')."
 dashboard,DashboardView,ring tap navigates,BeyondBasicsChecklist,BeyondBasicsCard.swift,partial,Verify tap target size (44pt) and nav target
-fabric,FabricQuerySection,send-on-enter,Enter key,.submitLabel(.send) on TextField,missing,Feature not built
-fabric,FabricPromptChips,chip tap auto-send,PromptChips.tsx,(missing),missing,—
+fabric,FabricQuerySection,send-on-enter,Enter key,FabricQuerySection.swift .onSubmit,done,"FabricQuerySection TextField has .onSubmit(onSubmit) (line 40); hardware / software keyboard Enter fires the query. Send button + disabled state when empty/querying match PWA."
+fabric,FabricPromptChips,chip tap auto-send,PromptChips.tsx,FabricPromptChips.swift,done,"9 chips in same order as PWA (today, upcoming, plan-week, spending-month, savings-rate, habits-spending, how-doing, log-transaction, weekly-report). Tap → onPrompt(text) or onGenerateWeeklyReport (matches PWA hoisted action), min-height 44pt touch target."
 fabric,FabricMoodCard,mood emoji tap,button+scale-150 transition,AnchorAIView.moodCard,done,"Phase 4l: moodCard Button fires UIImpactFeedbackGenerator(.light) then animates .scaleEffect(1.25) via .spring(0.3, 0.6)."
-settings,SectionNav,tab tap scrolls to section,SectionNav.tsx (scrollIntoView),AnchorSectionTabs.swift ScrollViewReader,missing,Currently decorative in native
+settings,SectionNav,tab tap scrolls to section,SectionNav.tsx (scrollIntoView),AnchorSectionTabs.swift ScrollViewReader,done,"Phase 4t: AnchorSectionTabs now emits onSelect(label); SettingsView wraps its ScrollView in a ScrollViewReader and scrolls to matching .id(label) anchor with easeInOut(0.35). Selected chip renders with chipActive palette. Haptic UIImpactFeedbackGenerator(.light) fires on tap for parity with PWA scrollIntoView + active-state highlight."
 settings,PasswordChange,show/hide password,eye toggle,.textFieldStyle + @State,done,"Phase 4n: PasswordChangeView.secureField() added @State showPasswords toggle; eye button swaps SecureField ⇄ TextField across all three password fields with a 44pt touch target and proper accessibilityLabel."
 settings,ReauthModal,biometric prompt,WebAuthn,LAContext(.deviceOwnerAuthenticationWithBiometrics),missing,—
 settings,DangerZone,long-press confirm,confirm double-click,.alert,partial,Verify destructive role + re-auth gate

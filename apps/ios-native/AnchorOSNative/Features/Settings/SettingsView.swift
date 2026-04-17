@@ -19,22 +19,35 @@ struct SettingsView: View {
     @State private var showAuthHistory = false
     @State private var showDangerZone = false
     @State private var showPasskeyManager = false
+    @State private var selectedSection: String = "Profile"
 
     private let currencies = ["NGN", "USD", "GBP", "EUR", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"]
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    AnchorSectionTabs(labels: ["Profile", "Theme", "Security", "Alerts", "AI", "Family"])
-                    profileCard
-                    familyNavCard
-                    appearanceCard
-                    securityCard
-                    dangerZoneCard
-                    signOutCard
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 16) {
+                        AnchorSectionTabs(
+                            labels: ["Profile", "Theme", "Security", "Alerts", "AI", "Family"],
+                            selected: selectedSection,
+                            onSelect: { label in
+                                selectedSection = label
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                withAnimation(.easeInOut(duration: 0.35)) {
+                                    proxy.scrollTo(label, anchor: .top)
+                                }
+                            }
+                        )
+                        profileCard.id("Profile")
+                        familyNavCard.id("Family")
+                        appearanceCard.id("Theme")
+                        securityCard.id("Security")
+                        dangerZoneCard
+                        signOutCard
+                    }
+                    .padding(16)
                 }
-                .padding(16)
             }
             .background(AnchorBackground())
             .navigationTitle("Settings")
