@@ -78,9 +78,9 @@ fabric,MonthlyReviewModal.tsx,Monthly review,(missing),deferred,Phase 4b — nee
 settings,SettingsView.tsx,Open settings,SettingsView.swift,done,"Full sectioned settings screen with profile/appearance/a11y/security/family/danger — parity with PWA SettingsView.tsx sections."
 settings,ProfileSettings.tsx,Edit display name,SettingsView.swift,done,—
 settings,ProfileSettings.tsx,Avatar,(missing),missing,—
-settings,AppearanceSettings.tsx,Theme toggle,(missing),missing,—
+settings,AppearanceSettings.tsx,Theme toggle,SettingsView.swift appearanceCard,done,Phase 4x: segmented Theme picker (System/Light/Dark) bound to AnchorTheme @Published mode. Applied to root via .anchorTheme() -> .preferredColorScheme. Persisted to UserDefaults key anchor_theme_mode.
 settings,AppearanceSettings.tsx,Font size,SettingsView.swift,done,—
-settings,AccessibilityControls.tsx,Reduced motion,(missing),missing,—
+settings,AccessibilityControls.tsx,Reduced motion,SettingsView.swift appearanceCard,done,"Phase 4x: Reduce Motion row deep-links to iOS Settings via UIApplication.openSettingsURLString (iOS surfaces reduce-motion at the OS level). Font size picker and High Contrast toggle now persist via @AppStorage anchor_font_size / anchor_high_contrast and the root applies .anchorDynamicType() mapping Default->.large, Large->.xLarge, Extra Large->.xxLarge."
 settings,AccessibilityControls.tsx,High contrast,SettingsView.swift,done,—
 settings,PasswordChange.tsx,Change password,PasswordChangeView.swift,done,—
 settings,EmailChangeForm.tsx,Change email,EmailChangeView.swift,done,—

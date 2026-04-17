@@ -13,6 +13,7 @@ struct AnchorOSNativeApp: App {
     @StateObject private var fabricStore = AnchorFabricStore()
     @StateObject private var recurringStore = AnchorRecurringStore()
     @StateObject private var patternsStore = AnchorPatternsStore()
+    @StateObject private var theme = AnchorTheme()
 
     init() {
         FirebaseApp.configure()
@@ -28,6 +29,9 @@ struct AnchorOSNativeApp: App {
     var body: some Scene {
         WindowGroup {
             RootTabView()
+                .anchorTheme()
+                .anchorDynamicType()
+                .environmentObject(theme)
                 .environmentObject(appState)
                 .environmentObject(projectStateStore)
                 .environmentObject(financeStore)

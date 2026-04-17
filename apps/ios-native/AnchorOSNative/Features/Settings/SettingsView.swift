@@ -8,8 +8,9 @@ struct SettingsView: View {
     @EnvironmentObject private var familyStore: FamilyStore
     @EnvironmentObject private var financeStore: FinanceStore
     @EnvironmentObject private var tabScroll: TabScrollCoordinator
-    @State private var fontSize: String = "Default"
-    @State private var highContrast: Bool = false
+    @EnvironmentObject private var theme: AnchorTheme
+    @AppStorage("anchor_font_size") private var fontSize: String = "Default"
+    @AppStorage("anchor_high_contrast") private var highContrast: Bool = false
     @State private var editingName = false
     @State private var nameInput = ""
     @State private var showCurrencyPicker = false
@@ -225,6 +226,17 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.segmented)
 
+                Text("THEME")
+                    .font(.caption).fontWeight(.bold)
+                    .foregroundStyle(AnchorPalette.textSecondary)
+
+                Picker("Theme", selection: $theme.mode) {
+                    Text("System").tag(AnchorTheme.Mode.system)
+                    Text("Light").tag(AnchorTheme.Mode.light)
+                    Text("Dark").tag(AnchorTheme.Mode.dark)
+                }
+                .pickerStyle(.segmented)
+
                 Text("ACCESSIBILITY")
                     .font(.caption).fontWeight(.bold)
                     .foregroundStyle(AnchorPalette.textSecondary)
@@ -239,6 +251,30 @@ struct SettingsView: View {
                 Toggle("High Contrast", isOn: $highContrast)
                     .tint(AnchorPalette.chipActive)
                     .foregroundStyle(AnchorPalette.textPrimary)
+
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "figure.walk.motion")
+                            .foregroundStyle(AnchorPalette.chipActive)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Reduce Motion")
+                                .font(.subheadline).fontWeight(.semibold)
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                            Text("Managed in iOS Settings \u203A Accessibility")
+                                .font(.caption)
+                                .foregroundStyle(AnchorPalette.textSecondary)
+                        }
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .foregroundStyle(AnchorPalette.textSecondary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
         }
     }

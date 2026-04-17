@@ -12,7 +12,16 @@ final class AnchorTheme: ObservableObject {
         var id: String { rawValue }
     }
 
-    @AppStorage("anchor_theme_mode") var mode: Mode = .system
+    @Published var mode: Mode {
+        didSet {
+            UserDefaults.standard.set(mode.rawValue, forKey: "anchor_theme_mode")
+        }
+    }
+
+    init() {
+        let raw = UserDefaults.standard.string(forKey: "anchor_theme_mode") ?? Mode.system.rawValue
+        self.mode = Mode(rawValue: raw) ?? .system
+    }
 
     var resolvedColorScheme: ColorScheme? {
         switch mode {
@@ -37,5 +46,27 @@ struct AnchorThemeModifier: ViewModifier {
 extension View {
     func anchorTheme() -> some View {
         modifier(AnchorThemeModifier())
+    }
+
+    func anchorDynamicType() -> some View {
+        modifier(AnchorDynamicTypeModifier())
+    }
+}
+
+// MARK: - Dynamic Type override from Settings
+
+struct AnchorDynamicTypeModifier: ViewModifier {
+    @AppStorage("anchor_font_size") private var fontSize: String = "Default"
+
+    func body(content: Content) -> some View {
+        content.dynamicTypeSize(resolvedSize)
+    }
+
+    private var resolvedSize: DynamicTypeSize {
+        switch fontSize {
+        case "Large":       return .xLarge
+        case "Extra Large": return .xxLarge
+        default:            return .large
+        }
     }
 }
