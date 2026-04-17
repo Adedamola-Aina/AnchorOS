@@ -57,7 +57,7 @@ dashboard,AssetAllocationWidget.tsx,Asset allocation ring,(missing),missing,—
 dashboard,AssetDistributionChart.tsx,Distribution chart,(missing),missing,—
 dashboard,CashFlowChart.tsx,Cash flow,(missing),missing,—
 dashboard,ProductivityScoreCard.tsx,Productivity score,DashboardFocusSection.swift + ProductivityCalculator.swift,done,Phase 3: score/trend/insight mirror src/utils/taskInsights.ts— 8 parity tests
-dashboard,CompletionRing.tsx,Completion ring,(missing),missing,—
+dashboard,CompletionRing.tsx,Completion ring,AnchorCompletionRing.swift,done,"Phase 4p: SwiftUI port of PWA CompletionRing.tsx. Rose-red .trim arc with 700ms ease-in-out progress tween, 1.5s pulse (reduce-motion gated), 11pt completed/total label, disappears at 100%. Mounted in DashboardView toolbar leading slot at 36pt size."
 dashboard,RecentActivityList.tsx,Recent activity,DashboardStatusSection.swift,done,Phase 3: extracted to own section; same 3-item preview as PWA RecentActivityWidget
 dashboard,BeyondBasicsChecklist.tsx,Beyond basics checklist,BeyondBasicsCard.swift + BeyondBasicsCalculator.swift,done,Phase 3: 6-item parity (was 4); 7 parity tests mirror PWA useBeyondBasics contract
 dashboard,DashboardCharts.tsx,Dashboard charts index,(missing),deferred,Phase 2b/7 — needs SwiftUI chart primitives (AssetAllocation/CashFlow/AssetDistribution)

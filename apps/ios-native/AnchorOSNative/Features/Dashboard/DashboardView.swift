@@ -76,6 +76,19 @@ struct DashboardView: View {
             .navigationTitle("Anchor OS")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // Parity: PWA CompletionRing in dashboard header (top-right of card).
+                // Native shows it in the toolbar leading slot; tapping scrolls
+                // back to the Beyond Basics card which is always at the top.
+                ToolbarItem(placement: .topBarLeading) {
+                    AnchorCompletionRing(
+                        completed: beyondBasics.completedCount,
+                        total: beyondBasics.totalCount,
+                        action: {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        },
+                        size: 36
+                    )
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button {
