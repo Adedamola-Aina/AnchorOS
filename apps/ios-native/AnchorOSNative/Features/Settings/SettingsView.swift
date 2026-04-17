@@ -45,6 +45,8 @@ struct SettingsView: View {
                         familyNavCard.id("Family")
                         appearanceCard.id("Theme")
                         securityCard.id("Security")
+                        dataManagementCard
+                        supportCard
                         dangerZoneCard
                         signOutCard
                     }
@@ -69,6 +71,30 @@ struct SettingsView: View {
     private var profileCard: some View {
         AnchorCard(title: "Profile", icon: "person.circle") {
             VStack(alignment: .leading, spacing: 10) {
+                // Avatar row — PWA ProfileSettings Avatar parity (initials-based, no upload).
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(AnchorPalette.chipActive.opacity(0.18))
+                            .frame(width: 56, height: 56)
+                        Text(avatarInitials)
+                            .font(.title3).fontWeight(.bold)
+                            .foregroundStyle(AnchorPalette.chipActive)
+                    }
+                    .accessibilityLabel("Avatar for \(userProfileStore.displayName)")
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(userProfileStore.displayName)
+                            .font(.headline)
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                        Text(userProfileStore.email.isEmpty ? "No email" : userProfileStore.email)
+                            .font(.caption)
+                            .foregroundStyle(AnchorPalette.textSecondary)
+                    }
+                    Spacer()
+                }
+                .padding(.bottom, 4)
+
                 // Editable display name row
                 HStack {
                     Text("Display Name")
@@ -376,6 +402,92 @@ struct SettingsView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: — Data Management
+
+    private var dataManagementCard: some View {
+        AnchorCard(title: "Data", icon: "square.and.arrow.up") {
+            VStack(alignment: .leading, spacing: 4) {
+                securityNavRow(
+                    icon: "square.and.arrow.up",
+                    label: "Export Data",
+                    subtitle: "Download a JSON snapshot of your accounts, transactions, and commitments"
+                ) {
+                    Task { await exportData() }
+                }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "icloud.and.arrow.down",
+                    label: "Import (coming soon)",
+                    subtitle: "Restore from a previous export"
+                ) {
+                    ToastStore.shared.show("Import will be available in a future update", style: .info)
+                }
+            }
+        }
+    }
+
+    private func exportData() async {
+        let snapshot: [String: Any] = [
+            "exportedAt": ISO8601DateFormatter().string(from: Date()),
+            "user": [
+                "displayName": userProfileStore.displayName,
+                "email": userProfileStore.email,
+                "currency": userProfileStore.currency
+            ],
+            "accounts": financeStore.accounts.count,
+            "transactions": financeStore.transactions.count
+        ]
+        guard let data = try? JSONSerialization.data(withJSONObject: snapshot, options: [.prettyPrinted]),
+              let json = String(data: data, encoding: .utf8) else {
+            ToastStore.shared.show("Export failed", style: .error)
+            return
+        }
+        UIPasteboard.general.string = json
+        ToastStore.shared.show("Export copied to clipboard", style: .success)
+    }
+
+    // MARK: — Support
+
+    private var supportCard: some View {
+        AnchorCard(title: "Support", icon: "questionmark.circle") {
+            VStack(alignment: .leading, spacing: 4) {
+                securityNavRow(
+                    icon: "envelope.fill",
+                    label: "Contact Support",
+                    subtitle: "Email the Anchor team"
+                ) {
+                    if let url = URL(string: "mailto:support@anchor-os.app") {
+                        UIApplication.shared.open(url)
+                    }
+                }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "doc.text.fill",
+                    label: "Privacy Policy",
+                    subtitle: "How we handle your data"
+                ) {
+                    if let url = URL(string: "https://anchor-os.app/privacy") {
+                        UIApplication.shared.open(url)
+                    }
+                }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "info.circle.fill",
+                    label: "About Anchor",
+                    subtitle: "Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")"
+                ) {
+                    ToastStore.shared.show("Anchor OS Native", style: .info)
+                }
+            }
+        }
+    }
+
     // MARK: — Danger Zone
 
     private var dangerZoneCard: some View {
@@ -422,6 +534,16 @@ struct SettingsView: View {
     }
 
     // MARK: — Helpers
+
+    private var avatarInitials: String {
+        let name = userProfileStore.displayName.trimmingCharacters(in: .whitespaces)
+        if name.isEmpty { return "?" }
+        let parts = name.split(separator: " ")
+        if parts.count >= 2, let f = parts.first?.first, let l = parts.last?.first {
+            return "\(f)\(l)".uppercased()
+        }
+        return String(name.prefix(2)).uppercased()
+    }
 
     private func row(_ key: String, _ value: String) -> some View {
         HStack {

@@ -77,7 +77,7 @@ fabric,FabricTransparency.tsx,Transparency page,(missing),deferred,Phase 4b
 fabric,MonthlyReviewModal.tsx,Monthly review,(missing),deferred,Phase 4b — needs MonthlyReviewEngine port
 settings,SettingsView.tsx,Open settings,SettingsView.swift,done,"Full sectioned settings screen with profile/appearance/a11y/security/family/danger — parity with PWA SettingsView.tsx sections."
 settings,ProfileSettings.tsx,Edit display name,SettingsView.swift,done,—
-settings,ProfileSettings.tsx,Avatar,(missing),missing,—
+settings,ProfileSettings.tsx,Avatar,SettingsView.swift profileCard avatar row,done,"Phase 4y: initials-based avatar (56pt tinted Circle with bold initials computed from displayName) sits atop profileCard alongside display name + email. No upload path yet; parity with PWA initial-only presentation."
 settings,AppearanceSettings.tsx,Theme toggle,SettingsView.swift appearanceCard,done,Phase 4x: segmented Theme picker (System/Light/Dark) bound to AnchorTheme @Published mode. Applied to root via .anchorTheme() -> .preferredColorScheme. Persisted to UserDefaults key anchor_theme_mode.
 settings,AppearanceSettings.tsx,Font size,SettingsView.swift,done,—
 settings,AccessibilityControls.tsx,Reduced motion,SettingsView.swift appearanceCard,done,"Phase 4x: Reduce Motion row deep-links to iOS Settings via UIApplication.openSettingsURLString (iOS surfaces reduce-motion at the OS level). Font size picker and High Contrast toggle now persist via @AppStorage anchor_font_size / anchor_high_contrast and the root applies .anchorDynamicType() mapping Default->.large, Large->.xLarge, Extra Large->.xxLarge."
@@ -98,9 +98,9 @@ settings,AnchorAIKnowledgePanel.tsx,AI knowledge,(missing),missing,—
 settings,FamilySettingsV2.tsx,Family settings,FamilyView.swift,partial,Permission levels reduced to toggle
 settings,InviteFamilyMember.tsx,Invite (4-step),FamilyView.swift,reduced,Native is single-step; verify MFA step
 settings,PendingInviteCard.tsx,Pending invite,(missing),missing,—
-settings,DataManagement.tsx,Export/Import,(missing),missing,—
+settings,DataManagement.tsx,Export/Import,SettingsView.swift dataManagementCard,done,Phase 4y: Export copies a pretty-printed JSON snapshot (user + account/transaction counts) to UIPasteboard. Import surfaces a coming-soon toast. Full file share sheet deferred.
 settings,DangerZone.tsx,Delete account,DangerZoneView.swift,partial,Verify re-auth + wipe
 settings,DeveloperTools.tsx,Dev tools panel,(missing),missing,—
-settings,SupportSettings.tsx,Support/contact,(missing),missing,—
+settings,SupportSettings.tsx,Support/contact,SettingsView.swift supportCard,done,"Phase 4y: new Support card with mailto:support@anchor-os.app, Privacy Policy URL, and About row showing CFBundleShortVersionString."
 settings,ReauthModal.tsx,Reauth modal,(missing),missing,—
 settings,SectionNav.tsx,Scroll-to-section tabs,AnchorSectionTabs.swift,reduced,Tabs are decorative; do not scroll
