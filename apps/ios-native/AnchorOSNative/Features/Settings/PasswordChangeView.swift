@@ -15,6 +15,7 @@ struct PasswordChangeView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var didSucceed = false
+    @State private var showPasswords = false
 
     private var canSubmit: Bool {
         currentPassword.count >= 6 &&
@@ -141,11 +142,32 @@ struct PasswordChangeView: View {
             Image(systemName: icon)
                 .foregroundStyle(AnchorPalette.textSecondary)
                 .frame(width: 20)
-            SecureField(placeholder, text: text)
-                .foregroundStyle(AnchorPalette.textPrimary)
-                .autocorrectionDisabled()
+            // Parity: PWA PasswordChange eye toggle — @State showPasswords
+            // swaps SecureField ⇄ TextField across all three password fields.
+            if showPasswords {
+                TextField(placeholder, text: text)
+                    .foregroundStyle(AnchorPalette.textPrimary)
+                    .autocorrectionDisabled()
+                    .autocapitalization(.none)
+            } else {
+                SecureField(placeholder, text: text)
+                    .foregroundStyle(AnchorPalette.textPrimary)
+                    .autocorrectionDisabled()
+            }
+            Button {
+                showPasswords.toggle()
+            } label: {
+                Image(systemName: showPasswords ? "eye.slash" : "eye")
+                    .foregroundStyle(AnchorPalette.textSecondary)
+                    .frame(width: 44, height: 44) // 44pt touch target
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(showPasswords ? "Hide password" : "Show password")
         }
-        .padding(14)
+        .padding(.leading, 14)
+        .padding(.trailing, 4)
+        .padding(.vertical, 4)
         .background(AnchorPalette.chip)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }

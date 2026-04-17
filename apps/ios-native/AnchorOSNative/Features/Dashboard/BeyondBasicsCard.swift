@@ -108,7 +108,11 @@ struct BeyondBasicsCard: View {
                         stepRow(step)
                     }
                     if allDone {
-                        Button("Dismiss") { dismissed = true }
+                        Button("Dismiss") {
+                            // Parity: PWA Beyond Basics dismiss fires useHaptic('light').
+                            AnchorHaptic.light.fire()
+                            dismissed = true
+                        }
                             .font(.footnote).fontWeight(.semibold)
                             .foregroundStyle(AnchorPalette.chipActive)
                             .frame(maxWidth: .infinity, alignment: .trailing)

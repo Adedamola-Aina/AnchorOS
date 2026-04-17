@@ -133,6 +133,7 @@ struct EditTransactionSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .scrollDismissesKeyboard(.interactively) // Parity: PWA TransactionForm dismisses keyboard on scroll.
     }
 
     private func save() async {

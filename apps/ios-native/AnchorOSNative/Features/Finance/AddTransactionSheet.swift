@@ -30,6 +30,10 @@ struct AddTransactionSheet: View {
 
     private var activeAccounts: [AnchorAccount] { financeStore.accounts }
 
+    /// Parity: PWA TransactionForm return-key chains title → amount → submit.
+    private enum FocusedField: Hashable { case title, amount }
+    @FocusState private var focusedField: FocusedField?
+
     private var selectedAccount: AnchorAccount? {
         activeAccounts.first(where: { $0.resolvedId == selectedAccountId })
     }
@@ -54,7 +58,14 @@ struct AddTransactionSheet: View {
 
                     // Fields
                     formSection("Description") {
-                        AnchorFormField(placeholder: "e.g. Groceries, Salary…", text: $title)
+                        TextField("e.g. Groceries, Salary…", text: $title)
+                            .focused($focusedField, equals: .title)
+                            .submitLabel(.next)
+                            .onSubmit { focusedField = .amount }
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                            .padding(14)
+                            .background(AnchorPalette.chip.opacity(0.6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
 
                     formSection("Date") {
@@ -113,7 +124,17 @@ struct AddTransactionSheet: View {
                     }
 
                     formSection("Amount") {
-                        AnchorFormField(placeholder: "0.00", text: $amountText, keyboardType: .decimalPad)
+                        TextField("0.00", text: $amountText)
+                            .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .amount)
+                            .submitLabel(.go)
+                            .onSubmit {
+                                if canSubmit { Task { await submit() } }
+                            }
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                            .padding(14)
+                            .background(AnchorPalette.chip.opacity(0.6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
 
                     formSection("Account") {
@@ -180,6 +201,7 @@ struct AddTransactionSheet: View {
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .scrollDismissesKeyboard(.interactively) // Parity: PWA TransactionForm dismisses keyboard on scroll.
         .onAppear {
             if selectedAccountId.isEmpty, let first = activeAccounts.first {
                 selectedAccountId = first.resolvedId
