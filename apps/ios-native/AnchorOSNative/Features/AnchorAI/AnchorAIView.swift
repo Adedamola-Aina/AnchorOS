@@ -34,6 +34,7 @@ struct AnchorAIView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
+                    Color.clear.frame(height: 0).id(ScrollToTopAnchor.id)
                     HStack {
                         Text("\(commitmentsStore.activeCount) task\(commitmentsStore.activeCount == 1 ? "" : "s") remaining")
                             .font(.subheadline)
@@ -112,6 +113,7 @@ struct AnchorAIView: View {
                 }
                 .padding(16)
             }
+            .scrollsToTopOnTabRetap(tab: 2)
             .background(AnchorBackground())
             .navigationTitle("Anchor AI")
             .navigationBarTitleDisplayMode(.large)

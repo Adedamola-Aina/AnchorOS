@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RootTabView: View {
     @EnvironmentObject private var appState: AppState
@@ -6,8 +7,26 @@ struct RootTabView: View {
     @EnvironmentObject private var financeStore: FinanceStore
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @EnvironmentObject private var userProfileStore: UserProfileStore
+    @StateObject private var tabScroll = TabScrollCoordinator()
 
     @State private var needsOnboarding: Bool = !UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+
+    /// Re-tap-aware binding. Setting the same tab as currently-selected
+    /// emits a scroll-to-top request instead of a tab change — parity
+    /// with PWA BottomNavigation.
+    private var tabBinding: Binding<Int> {
+        Binding(
+            get: { appState.selectedTab },
+            set: { newValue in
+                if newValue == appState.selectedTab {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    tabScroll.requestScrollToTop(tab: newValue)
+                } else {
+                    appState.selectedTab = newValue
+                }
+            }
+        )
+    }
 
     var body: some View {
         if appState.isAuthenticated && needsOnboarding {
@@ -29,7 +48,7 @@ struct RootTabView: View {
                 VStack(spacing: 0) {
                     EnvironmentBanner(environment: appState.environment)
 
-                    TabView(selection: $appState.selectedTab) {
+                    TabView(selection: tabBinding) {
                         DashboardView()
                             .tabItem {
                                 Image(systemName: "house")
@@ -77,6 +96,7 @@ struct RootTabView: View {
                 AnchorToastOverlay()
             }
             .tint(AnchorPalette.chipActive)
+            .environmentObject(tabScroll)
             .task {
                 await projectStateStore.refresh(for: appState.environment)
             }

@@ -7,6 +7,7 @@ struct SettingsView: View {
     @EnvironmentObject private var userProfileStore: UserProfileStore
     @EnvironmentObject private var familyStore: FamilyStore
     @EnvironmentObject private var financeStore: FinanceStore
+    @EnvironmentObject private var tabScroll: TabScrollCoordinator
     @State private var fontSize: String = "Default"
     @State private var highContrast: Bool = false
     @State private var editingName = false
@@ -47,6 +48,12 @@ struct SettingsView: View {
                         signOutCard
                     }
                     .padding(16)
+                }
+                .onChange(of: tabScroll.scrollRequestId) { _, _ in
+                    guard tabScroll.targetTab == 4 else { return }
+                    withAnimation(.easeInOut(duration: 0.35)) {
+                        proxy.scrollTo("Profile", anchor: .top)
+                    }
                 }
             }
             .background(AnchorBackground())

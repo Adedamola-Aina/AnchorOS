@@ -51,6 +51,7 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
+                    Color.clear.frame(height: 0).id(ScrollToTopAnchor.id)
                     greetingHeader
                     BeyondBasicsCard(result: beyondBasics)
                     if loadTimedOut && financeStore.accounts.isEmpty && commitmentsStore.commitments.isEmpty {
@@ -72,6 +73,7 @@ struct DashboardView: View {
                 }
                 .padding(16)
             }
+            .scrollsToTopOnTabRetap(tab: 0)
             .background(AnchorBackground())
             .navigationTitle("Anchor OS")
             .navigationBarTitleDisplayMode(.inline)

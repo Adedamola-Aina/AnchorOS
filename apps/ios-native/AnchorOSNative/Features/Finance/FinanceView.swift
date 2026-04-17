@@ -48,6 +48,7 @@ struct FinanceView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 0) {
+                    Color.clear.frame(height: 0).id(ScrollToTopAnchor.id)
                     totalAssetsBar
                     if loadTimedOut && financeStore.accounts.isEmpty {
                         AnchorErrorBanner()
@@ -72,6 +73,7 @@ struct FinanceView: View {
                     }
                 }
             }
+            .scrollsToTopOnTabRetap(tab: 3)
             .background(AnchorBackground())
             .navigationTitle("Finance")
 

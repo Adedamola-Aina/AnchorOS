@@ -31,6 +31,7 @@ struct TasksView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
+                    Color.clear.frame(height: 0).id(ScrollToTopAnchor.id)
                     // Filter chips — single row, state-bound
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
@@ -67,6 +68,7 @@ struct TasksView: View {
                 }
                 .padding(16)
             }
+            .scrollsToTopOnTabRetap(tab: 1)
             .background(AnchorBackground())
             .navigationTitle("Tasks")
             .navigationBarTitleDisplayMode(.inline)
