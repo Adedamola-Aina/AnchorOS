@@ -22,7 +22,7 @@ finance,NotificationBanner.tsx,View top banner,Banner (missing),missing,No banne
 finance,UpcomingBillsPanel.tsx,View upcoming bills,Stub,missing,—
 finance,FinanceBillsSection.tsx,Manage bills,(missing),missing,—
 finance,RecurringOptions.tsx,Set tx recurrence,AddTransactionSheet.swift,done,"Toggle 'Mark as recurring' + 3-chip frequency picker (weekly/monthly/yearly) persists via FinanceStore.addTransaction isRecurring/recurringFrequency."
-finance,OverdraftWarning.tsx,Show overdraft,(missing),missing,—
+finance,OverdraftWarning.tsx,Show overdraft,OverdraftWarningBanner.swift,done,"Phase 4q: SwiftUI port. AddTransactionSheet now computes projectedBalanceCents = account.balanceCents - amountCents when type==expense, mounts OverdraftWarningBanner above the Submit when projected < 0. Rose-tinted banner with arrow.left.arrow.right icon and slide-from-top transition."
 finance,SubscriptionDetectorCard.tsx,Subscription suggestion,(missing),missing,—
 finance,SharePermissionPicker.tsx,Pick share permission,FamilyView toggle,reduced,Native is boolean; PWA has Read/Transact/Manage
 finance,SharedActivitySection.tsx,Shared activity feed,(missing),missing,—

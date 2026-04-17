@@ -49,6 +49,16 @@ struct AddTransactionSheet: View {
         !selectedAccountId.isEmpty
     }
 
+    /// Parity: PWA TransactionForm overdraft check (src/features/finance/TransactionForm.tsx line 105).
+    /// Expense + selected account whose balance - amount < 0 → show OverdraftWarning.
+    private var projectedBalanceCents: Int? {
+        guard type == "expense", amountCents > 0, let acc = selectedAccount else { return nil }
+        return acc.balanceCents - amountCents
+    }
+    private var isOverdraft: Bool {
+        (projectedBalanceCents ?? 0) < 0
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -135,6 +145,14 @@ struct AddTransactionSheet: View {
                             .padding(14)
                             .background(AnchorPalette.chip.opacity(0.6))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+
+                    if isOverdraft, let projected = projectedBalanceCents {
+                        OverdraftWarningBanner(
+                            projectedBalanceCents: projected,
+                            currency: selectedAccount?.currency ?? "NGN"
+                        )
+                        .animation(.easeInOut(duration: 0.25), value: isOverdraft)
                     }
 
                     formSection("Account") {
