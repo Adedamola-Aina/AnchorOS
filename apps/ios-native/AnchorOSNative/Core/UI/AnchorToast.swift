@@ -38,6 +38,7 @@ struct ToastMessage: Equatable {
 final class ToastStore: ObservableObject {
     static let shared = ToastStore()
     @Published var current: ToastMessage? = nil
+    @Published var banner: BannerMessage? = nil
     private var dismissTask: Task<Void, Never>?
 
     private init() {}
@@ -53,10 +54,34 @@ final class ToastStore: ObservableObject {
         }
     }
 
+    func showBanner(_ message: String, detail: String? = nil, style: ToastStyle = .info) {
+        banner = BannerMessage(message: message, detail: detail, style: style)
+    }
+
+    func dismissBanner() {
+        banner = nil
+    }
+
     func dismiss() {
         dismissTask?.cancel()
         current = nil
     }
+}
+
+struct BannerMessage: Equatable {
+    let id: UUID
+    let message: String
+    let detail: String?
+    let style: ToastStyle
+
+    init(message: String, detail: String? = nil, style: ToastStyle = .info) {
+        self.id = UUID()
+        self.message = message
+        self.detail = detail
+        self.style = style
+    }
+
+    static func == (lhs: BannerMessage, rhs: BannerMessage) -> Bool { lhs.id == rhs.id }
 }
 
 struct AnchorToastOverlay: View {

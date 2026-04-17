@@ -252,15 +252,15 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Feature | PWA | Native iOS | Gap |
 |---------|-----|------------|-----|
 | Spending trends chart | ✅ (SpendingTrendsChart) | ✅ (SwiftUI Charts, 4 weeks) | — |
-| Insight cards (InsightCards) | ✅ | ❌ (only in AI view) | **MISSING** from finance |
-| Monthly insight (MonthlyInsight) | ✅ | ❌ | **MISSING** |
-| Upcoming bills panel | ✅ (UpcomingBillsPanel) | ❌ | **MISSING** |
-| Subscription detector | ✅ (SubscriptionDetectorCard) | ❌ | **MISSING** |
+| Insight cards (InsightCards) | ✅ | ✅ (InsightCards) | — |
+| Monthly insight (MonthlyInsight) | ✅ | ✅ (merged into InsightCards MTD) | — |
+| Upcoming bills panel | ✅ (UpcomingBillsPanel) | ✅ (UpcomingBillsCard) | — |
+| Subscription detector | ✅ (SubscriptionDetectorCard) | ✅ (SubscriptionDetectorCard, store-backed) | — |
 | Overdraft warning | ✅ (OverdraftWarning) | ❌ | **MISSING** |
 | Net worth cards | ✅ (NetWorthCards) | ❌ (only in dashboard) | **MISSING** from finance |
-| Shared activity section | ✅ (SharedActivitySection) | ❌ | **MISSING** |
-| Activity feed (ActivityFeed) | ✅ | ❌ | **MISSING** |
-| Notification banner | ✅ (NotificationBanner) | ❌ | **MISSING** |
+| Shared activity section | ✅ (SharedActivitySection) | ✅ (ActivityFeedSheet family header) | — |
+| Activity feed (ActivityFeed) | ✅ | ✅ (ActivityFeedSheet) | — |
+| Notification banner | ✅ (NotificationBanner) | ✅ (NotificationBanner + ToastStore.banner) | — |
 
 ### 4.7 Finance View Layout
 
@@ -415,19 +415,19 @@ PWA supports 20+ natural language query types:
 | Recovery codes display | ✅ (RecoveryCodesDisplay) | ❌ | **MISSING** |
 | Passkey management | ✅ (PasskeySection) | ❌ | **MISSING** |
 | Auth event history (login log) | ✅ (AuthEventHistory) | ❌ | **MISSING** |
-| Active sessions list | ✅ (AuthSessionList) | ❌ | **MISSING** |
+| Active sessions list | ✅ (AuthSessionList) | ✅ (AuthSessionListView) | — |
 | MFA status display | ✅ | ✅ (basic) | **REDUCED** |
 | **Notifications** | | | |
 | Email notification preferences | ✅ (NotificationSettings) | ❌ | **MISSING** |
 | Notification category toggles | ✅ (NotificationCategoryToggles) | ❌ | **MISSING** |
 | Quiet hours | ✅ (QuietHoursSettings) | ❌ | **MISSING** |
 | **Anchor AI Settings** | | | |
-| Enable/disable Fabric | ✅ (AnchorAISettings) | ❌ | **MISSING** |
-| AI knowledge panel | ✅ (AnchorAIKnowledgePanel) | ❌ | **MISSING** |
+| Enable/disable Fabric | ✅ (AnchorAISettings) | ✅ (AnchorAISettingsView) | — |
+| AI knowledge panel | ✅ (AnchorAIKnowledgePanel) | ✅ (merged into AnchorAISettingsView) | — |
 | **Family Settings** | | | |
 | Family settings view | ✅ (FamilySettingsV2) | ✅ (FamilyView) | — |
 | Invite family member (multi-step) | ✅ (4-step: email → password → MFA → success) | ✅ (single email step) | **REDUCED** |
-| Pending invite cards | ✅ (PendingInviteCard) | ❌ | **MISSING** |
+| Pending invite cards | ✅ (PendingInviteCard) | ✅ (PendingInviteCard — token paste fallback) | — |
 | Pending confirmation flow | ✅ (PendingConfirmation, AwaitingConfirmationCard) | ❌ | **MISSING** |
 | **Data Management** | | | |
 | Data export | ✅ (DataManagement) | ❌ | **MISSING** |
@@ -436,13 +436,13 @@ PWA supports 20+ natural language query types:
 | Delete account (DangerZone) | ✅ | ❌ | **MISSING** |
 | Wipe all data | ✅ | ❌ | **MISSING** |
 | **Developer Tools** | | | |
-| Developer tools panel | ✅ (DeveloperTools) | ❌ | **MISSING** |
+| Developer tools panel | ✅ (DeveloperTools) | ✅ (DeveloperToolsView) | — |
 | Environment selector | ✅ | ✅ (segmented picker) | — |
 | **Support** | | | |
 | Support/feedback | ✅ (SupportSettings + ContactModal) | ❌ | **MISSING** |
 | **Other** | | | |
 | Section navigation (SectionNav) | ✅ (scrollable) | ✅ (AnchorSectionTabs, decorative) | **REDUCED** (tabs don't actually scroll to sections) |
-| Reauthentication modal | ✅ (ReauthModal) | ❌ | **MISSING** |
+| Reauthentication modal | ✅ (ReauthModal) | ✅ (ReauthModalView) | — |
 | Sign out | ✅ | ✅ | — |
 
 **Settings parity: ~20%** (bare minimum profile + sign out)
@@ -462,7 +462,7 @@ PWA supports 20+ natural language query types:
 | Permission levels (Read/Transact/Manage) | ✅ | ❌ (toggle only, no levels) | **MISSING** |
 | Pending invite card | ✅ | ❌ | **MISSING** |
 | Invite history | ✅ | ❌ | **MISSING** |
-| Shared activity feed | ✅ | ❌ | **MISSING** |
+| Shared activity feed | ✅ | ✅ (ActivityFeedSheet family header) | — |
 | Family net worth calculation | ✅ | ❌ | **MISSING** |
 | Family notification banner | ✅ (FamilyNotificationBanner) | ❌ | **MISSING** |
 | Family commitments (shared tasks) | ✅ | ❌ | **MISSING** |

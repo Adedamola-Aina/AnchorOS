@@ -67,7 +67,13 @@ struct FinanceView: View {
                     )
                         if familyStore.hasConnection { sharedAccountsSection }
                         VStack(spacing: 16) {
+                            NotificationBanner()
                             monthNavRow
+                            InsightCards(
+                                transactions: financeStore.transactions,
+                                currency: userProfileStore.currency
+                            )
+                            SubscriptionDetectorCard(recurring: recurringStore.recurring)
                             UpcomingBillsCard(bills: recurringStore.recurring)
                             transactionsCard
                         }

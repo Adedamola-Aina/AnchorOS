@@ -22,6 +22,10 @@ struct SettingsView: View {
     @State private var showDangerZone = false
     @State private var showPasskeyManager = false
     @State private var showNotificationPrefs = false
+    @State private var showAnchorAI = false
+    @State private var showAuthSessions = false
+    @State private var showDeveloperTools = false
+    @State private var showReauth = false
     @State private var selectedSection: String = "Profile"
 
     private let currencies = ["NGN", "USD", "GBP", "EUR", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"]
@@ -44,9 +48,11 @@ struct SettingsView: View {
                         )
                         profileCard.id("Profile")
                         familyNavCard.id("Family")
+                        PendingInviteCard()
                         appearanceCard.id("Theme")
                         securityCard.id("Security")
                         alertsCard.id("Alerts")
+                        aiCard.id("AI")
                         dataManagementCard
                         supportCard
                         dangerZoneCard
@@ -357,6 +363,14 @@ struct SettingsView: View {
                     label: "Login History",
                     subtitle: "View recent sign-in activity"
                 ) { showAuthHistory = true }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "laptopcomputer.and.iphone",
+                    label: "Active Sessions",
+                    subtitle: "Manage and revoke signed-in devices"
+                ) { showAuthSessions = true }
             }
         }
         .sheet(isPresented: $showPasswordChange) {
@@ -377,8 +391,19 @@ struct SettingsView: View {
         .sheet(isPresented: $showAuthHistory) {
             AuthEventHistoryView()
         }
+        .sheet(isPresented: $showAuthSessions) {
+            AuthSessionListView().environmentObject(appState)
+        }
         .sheet(isPresented: $showNotificationPrefs) {
             NotificationPreferencesView()
+        }
+        .sheet(isPresented: $showAnchorAI) {
+            AnchorAISettingsView()
+        }
+        .sheet(isPresented: $showDeveloperTools) {
+            DeveloperToolsView()
+                .environmentObject(appState)
+                .environmentObject(financeStore)
         }
     }
 
@@ -434,6 +459,33 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: — Anchor AI
+
+    private var aiCard: some View {
+        AnchorCard(title: "Anchor AI", icon: "sparkles") {
+            Button { showAnchorAI = true } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "brain.head.profile")
+                        .foregroundStyle(AnchorPalette.chipActive)
+                        .frame(width: 24)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Fabric Preferences & Knowledge")
+                            .font(.subheadline).fontWeight(.semibold)
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                        Text("Tune briefings, proactive nudges, and inspect learned patterns")
+                            .font(.caption)
+                            .foregroundStyle(AnchorPalette.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     private var dataManagementCard: some View {        AnchorCard(title: "Data", icon: "square.and.arrow.up") {
             VStack(alignment: .leading, spacing: 4) {
                 securityNavRow(
@@ -453,6 +505,14 @@ struct SettingsView: View {
                 ) {
                     ToastStore.shared.show("Import will be available in a future update", style: .info)
                 }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
+                    icon: "hammer.fill",
+                    label: "Developer Tools",
+                    subtitle: "Environment, store counts, diagnostics"
+                ) { showDeveloperTools = true }
             }
         }
     }
