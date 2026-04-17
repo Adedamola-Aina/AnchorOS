@@ -21,6 +21,7 @@ struct SettingsView: View {
     @State private var showAuthHistory = false
     @State private var showDangerZone = false
     @State private var showPasskeyManager = false
+    @State private var showNotificationPrefs = false
     @State private var selectedSection: String = "Profile"
 
     private let currencies = ["NGN", "USD", "GBP", "EUR", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"]
@@ -45,6 +46,7 @@ struct SettingsView: View {
                         familyNavCard.id("Family")
                         appearanceCard.id("Theme")
                         securityCard.id("Security")
+                        alertsCard.id("Alerts")
                         dataManagementCard
                         supportCard
                         dangerZoneCard
@@ -375,6 +377,9 @@ struct SettingsView: View {
         .sheet(isPresented: $showAuthHistory) {
             AuthEventHistoryView()
         }
+        .sheet(isPresented: $showNotificationPrefs) {
+            NotificationPreferencesView()
+        }
     }
 
     private func securityNavRow(icon: String, label: String, subtitle: String, action: @escaping () -> Void) -> some View {
@@ -404,8 +409,32 @@ struct SettingsView: View {
 
     // MARK: — Data Management
 
-    private var dataManagementCard: some View {
-        AnchorCard(title: "Data", icon: "square.and.arrow.up") {
+    private var alertsCard: some View {
+        AnchorCard(title: "Alerts", icon: "bell") {
+            Button { showNotificationPrefs = true } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "bell.badge.fill")
+                        .foregroundStyle(AnchorPalette.chipActive)
+                        .frame(width: 24)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Notification Preferences")
+                            .font(.subheadline).fontWeight(.semibold)
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                        Text("Push, categories, quiet hours")
+                            .font(.caption)
+                            .foregroundStyle(AnchorPalette.textSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(AnchorPalette.textSecondary)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var dataManagementCard: some View {        AnchorCard(title: "Data", icon: "square.and.arrow.up") {
             VStack(alignment: .leading, spacing: 4) {
                 securityNavRow(
                     icon: "square.and.arrow.up",

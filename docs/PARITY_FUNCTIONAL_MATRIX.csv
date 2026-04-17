@@ -90,9 +90,9 @@ settings,RecoveryCodesDisplay.tsx,Recovery codes,RecoveryCodesSettingsView.swift
 settings,PasskeySection.tsx,Passkey mgmt,PasskeyManagerView.swift,done,"PasskeyManagerView wires PasskeyService (Core/Auth/PasskeyService.swift line 155 exposes Convenience API for PasskeyManagerView). ASAuthorization flow parity with PWA WebAuthn."
 settings,AuthEventHistory.tsx,Login log,AuthEventHistoryView.swift,partial,Verify pagination
 settings,AuthSessionList.tsx,Active sessions,(missing),missing,—
-settings,NotificationSettings.tsx,Notification prefs,(missing),missing,—
-settings,NotificationCategoryToggles.tsx,Category toggles,(missing),missing,—
-settings,QuietHoursSettings.tsx,Quiet hours,(missing),missing,—
+settings,NotificationSettings.tsx,Notification prefs,NotificationPreferencesView.swift,done,"Phase 4z: sheet with push-permission status card (UNUserNotificationCenter.requestAuthorization + deep link to iOS Settings when denied) and segmented Frequency picker (instant/daily/weekly). Persists via @AppStorage anchor_notify_frequency."
+settings,NotificationCategoryToggles.tsx,Category toggles,NotificationPreferencesView+Cards.swift,done,"Phase 4z: Finance / Commitments / Family category toggles in Categories card. Persisted via @AppStorage keys anchor_notify_finance|commitments|family."
+settings,QuietHoursSettings.tsx,Quiet hours,NotificationPreferencesView+Cards.swift,done,"Phase 4z: Quiet Hours enable toggle + From/Until HH:mm text fields. Persisted via @AppStorage anchor_quiet_enabled|start|end. Enable state reveals fields via .createSlideIn() (Reduce-Motion gated)."
 settings,AnchorAISettings.tsx,Fabric prefs,(missing),missing,—
 settings,AnchorAIKnowledgePanel.tsx,AI knowledge,(missing),missing,—
 settings,FamilySettingsV2.tsx,Family settings,FamilyView.swift,partial,Permission levels reduced to toggle
