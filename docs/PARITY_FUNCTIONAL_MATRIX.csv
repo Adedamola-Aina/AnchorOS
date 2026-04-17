@@ -28,8 +28,8 @@ finance,SharePermissionPicker.tsx,Pick share permission,FamilyView toggle,reduce
 finance,SharedActivitySection.tsx,Shared activity feed,(missing),missing,—
 finance,ActivityFeed.tsx,Activity log,(missing),missing,—
 finance,SpendingTrendsChart.tsx,Trends chart,SpendingTrendsChart.swift,done,"4-week income vs expense bar chart rendered inside AccountDetailView (line 37). Buckets sourced from FinanceStore."
-finance,AssetDistributionChart.tsx,Asset distribution,(missing),missing,—
-finance,CashFlowChart.tsx,Cash flow chart,(missing),missing,—
+finance,AssetDistributionChart.tsx,Asset distribution,AssetDistributionChart.swift,done,"Phase 4aa: SwiftUI Charts SectorMark donut of positive account balances. 8-color palette cycles across slices; legend rows show each account name + percentage of total; negative-balance footer note mirrors PWA behavior."
+finance,CashFlowChart.tsx,Cash flow chart,CashFlowChart.swift,done,"Phase 4aa: 7-day daily income/expense BarMark grouped by type. Transfers excluded via type=='transfer' OR category=='transfer' (BUG-037 parity). Net capsule footer shows direction + currency-formatted net."
 finance,WalletStack.tsx,Card stack w/ cycle,WalletCardStack.swift,done,"Phase 4j verified: pan-to-cycle with haptic + spring snap, tap-to-expand, reduced-motion fallback."
 finance,WalletCard.tsx,Single wallet card,WalletCardStack.swift,done,—
 finance,TransferDetails.tsx,Transfer detail view,(missing),missing,—
@@ -53,9 +53,9 @@ commitments,streakUtils,Streak display,TaskRowView.swift + StreakCalculator.swif
 commitments,streakUtils,Streak milestone banner,TaskRowView.swift + StreakCalculator.swift,done,Phase 5: streakNudge surfaced below active tasks (e.g. '2 more days to ⭐ 1 week strong!')
 dashboard,DashboardView.tsx,Landing view,DashboardView.swift,done,Phase 3: real profile wired via UserProfileStore; greeting + haptic on refresh match PWA
 dashboard,DashboardWidgets.tsx,Widget grid,(missing),missing,—
-dashboard,AssetAllocationWidget.tsx,Asset allocation ring,(missing),missing,—
-dashboard,AssetDistributionChart.tsx,Distribution chart,(missing),missing,—
-dashboard,CashFlowChart.tsx,Cash flow,(missing),missing,—
+dashboard,AssetAllocationWidget.tsx,Asset allocation ring,AssetDistributionChart.swift,done,"Phase 4aa: AssetDistributionChart donut (innerRadius 0.62 ratio) serves as the allocation ring; Widget-style framing consolidated into the same card. Standalone widget grid deferred."
+dashboard,AssetDistributionChart.tsx,Distribution chart,AssetDistributionChart.swift,done,Phase 4aa: same AssetDistributionChart reusable component surfaced via FinanceChartsSheet on Finance tab (iOS consolidates dashboard charts under Finance for 5-tab nav).
+dashboard,CashFlowChart.tsx,Cash flow,CashFlowChart.swift,done,Phase 4aa: same CashFlowChart reusable component surfaced via FinanceChartsSheet.
 dashboard,ProductivityScoreCard.tsx,Productivity score,DashboardFocusSection.swift + ProductivityCalculator.swift,done,Phase 3: score/trend/insight mirror src/utils/taskInsights.ts— 8 parity tests
 dashboard,CompletionRing.tsx,Completion ring,AnchorCompletionRing.swift,done,"Phase 4p: SwiftUI port of PWA CompletionRing.tsx. Rose-red .trim arc with 700ms ease-in-out progress tween, 1.5s pulse (reduce-motion gated), 11pt completed/total label, disappears at 100%. Mounted in DashboardView toolbar leading slot at 36pt size."
 dashboard,RecentActivityList.tsx,Recent activity,DashboardStatusSection.swift,done,Phase 3: extracted to own section; same 3-item preview as PWA RecentActivityWidget

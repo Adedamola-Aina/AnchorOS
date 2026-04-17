@@ -7,6 +7,7 @@ struct FinanceView: View {
     @EnvironmentObject private var financeStore: FinanceStore
     @EnvironmentObject private var familyStore: FamilyStore
     @EnvironmentObject private var recurringStore: AnchorRecurringStore
+    @EnvironmentObject private var userProfileStore: UserProfileStore
     @State private var monthOffset: Int = 0
     @State private var showAddTransaction = false
     @State private var showAddAccount = false
@@ -16,6 +17,7 @@ struct FinanceView: View {
     @State private var loadTimedOut = false
     @State private var showSummarySheet = false
     @State private var showSearchSheet = false
+    @State private var showChartsSheet = false
 
     private var monthLabel: String {
         guard let date = Calendar.current.date(byAdding: .month, value: monthOffset, to: Date()) else { return "" }
@@ -100,6 +102,13 @@ struct FinanceView: View {
                         }
                         .anchorPressable()
                         .accessibilityLabel("Finance summary")
+                        Button { showChartsSheet = true } label: {
+                            Image(systemName: "chart.bar.xaxis")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                        }
+                        .anchorPressable()
+                        .accessibilityLabel("Charts")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -145,6 +154,15 @@ struct FinanceView: View {
                     accounts: financeStore.accounts,
                     transactions: financeStore.transactions,
                     onOpenAccount: { _ in }
+                )
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showChartsSheet) {
+                FinanceChartsSheet(
+                    accounts: financeStore.accounts,
+                    transactions: financeStore.transactions,
+                    currency: userProfileStore.currency
                 )
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
