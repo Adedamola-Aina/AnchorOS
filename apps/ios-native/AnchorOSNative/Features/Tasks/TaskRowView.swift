@@ -69,6 +69,11 @@ struct TaskRowView: View {
                     Label("\(streak) \(milestone.emoji)", systemImage: "flame.fill")
                         .font(.caption2).fontWeight(.bold)
                         .foregroundStyle(AnchorPalette.warning)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(AnchorPalette.warning.opacity(0.15))
+                        .clipShape(Capsule())
+                        .fadeInOnAppear(duration: 0.5)
+                        .id("streak-\(streak)-milestone")
                 } else {
                     Label("\(streak)", systemImage: "flame.fill")
                         .font(.caption2).fontWeight(.bold)

@@ -99,6 +99,7 @@ struct AddAccountSheet: View {
                     }
                 }
                 .padding(20)
+                .createSlideIn()
             }
             .background(AnchorBackground())
             .navigationTitle("New Account")

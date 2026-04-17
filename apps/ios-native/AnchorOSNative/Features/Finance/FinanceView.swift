@@ -212,7 +212,7 @@ struct FinanceView: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .allowsHitTesting(false)
-            .netWorthRise(trigger: !currencyTotals.isEmpty)
+            .netWorthRise(trigger: !currencyTotals.isEmpty, valueHash: currencyTotals.map { "\($0.currency):\($0.formatted)" }.joined().hashValue)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("TOTAL ASSETS")

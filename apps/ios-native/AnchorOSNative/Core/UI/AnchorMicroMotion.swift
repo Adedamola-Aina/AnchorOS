@@ -13,23 +13,28 @@ enum AnchorMicroMotion {
 
     // MARK: - Net Worth Rise
     /// PWA: opacity [0, 0.22, 0] over 1.1s ease-out.
-    /// Single-shot shimmer when net worth transitions to a positive total.
+    /// Single-shot shimmer when net worth transitions to a positive total,
+    /// and replays on every subsequent value change so updates feel alive.
     struct NetWorthRise: ViewModifier {
         let trigger: Bool
+        var valueHash: Int = 0
         @Environment(\.accessibilityReduceMotion) private var reduceMotion
         @State private var opacity: Double = 0
+
+        private func pulse() {
+            guard !reduceMotion, trigger else { return }
+            opacity = 0
+            withAnimation(.easeOut(duration: 0.55)) { opacity = 0.22 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                withAnimation(.easeOut(duration: 0.55)) { opacity = 0 }
+            }
+        }
 
         func body(content: Content) -> some View {
             content
                 .opacity(opacity)
-                .onChange(of: trigger) { _, active in
-                    guard !reduceMotion, active else { return }
-                    opacity = 0
-                    withAnimation(.easeOut(duration: 0.55)) { opacity = 0.22 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-                        withAnimation(.easeOut(duration: 0.55)) { opacity = 0 }
-                    }
-                }
+                .onChange(of: trigger) { _, _ in pulse() }
+                .onChange(of: valueHash) { _, _ in pulse() }
         }
     }
 
@@ -106,8 +111,9 @@ enum AnchorMicroMotion {
 
 extension View {
     /// Brief gradient-opacity shimmer when net worth becomes positive.
-    func netWorthRise(trigger: Bool) -> some View {
-        modifier(AnchorMicroMotion.NetWorthRise(trigger: trigger))
+    /// Pass `valueHash` so the shimmer also replays on every balance update.
+    func netWorthRise(trigger: Bool, valueHash: Int = 0) -> some View {
+        modifier(AnchorMicroMotion.NetWorthRise(trigger: trigger, valueHash: valueHash))
     }
 
     /// Pulse during save; single 1.08× pop when done.
