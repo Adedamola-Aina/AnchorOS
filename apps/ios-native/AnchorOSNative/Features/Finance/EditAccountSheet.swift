@@ -16,7 +16,7 @@ struct EditAccountSheet: View {
     @State private var isSaving = false
     @State private var showCurrencyPicker = false
 
-    private let accountTypes = ["checking", "savings", "investment", "wallet", "cash", "credit"]
+    private let accountTypes = ["checking", "savings", "salary", "investment", "wallet", "cash", "credit"]
 
     init(account: AnchorAccount) {
         self.account = account

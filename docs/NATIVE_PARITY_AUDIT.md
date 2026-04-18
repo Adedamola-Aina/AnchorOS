@@ -134,20 +134,20 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 ### PWA Onboarding (5 steps)
 | Step | PWA | Native iOS | Gap |
 |------|-----|------------|-----|
-| Step 1: Welcome + display name | ✅ | ✅ (combined with step 2) | Slightly different flow |
+| Step 1: Welcome + display name | ✅ | ✅ (separate welcome + name steps) | — |
 | Step 2: Create first account | ✅ (name, type, currency, balance) | ✅ (name, type, currency, balance) | — |
-| Step 3: Set savings goal | ✅ | ❌ | **MISSING** |
-| Step 4: Create first habit/commitment | ✅ | ✅ (step 3 in native) | — |
+| Step 3: Set savings goal | ✅ | ✅ (Savings Goal step with Skip button) | — |
+| Step 4: Create first habit/commitment | ✅ | ✅ (step 4 in native) | — |
 | Step 5: Enable MFA + email verify | ✅ | ✅ (OnboardingSecurityStep) | — |
-| Progress indicator (capsules/dots) | ✅ | ✅ (4 capsules) | Different step count |
+| Progress indicator (capsules/dots) | ✅ | ✅ (6 capsules — welcome/name/account/goal/task/security) | — |
 | Animated transitions between steps | ✅ | ✅ (withAnimation) | ✅ |
-| Skippable steps | ✅ (some optional) | ❌ | **MISSING** |
-| Account type options | Checking, Savings, Salary, Investment | Checking, Savings, Investment | **Missing Salary type** |
+| Skippable steps | ✅ (some optional) | ✅ (Savings Goal step has "Skip" button) | — |
+| Account type options | Checking, Savings, Salary, Investment | Checking, Savings, Salary, Investment (onboarding) + Wallet/Cash/Credit (full sheet) | — |
 | Currency options | NGN, USD | NGN, USD, GBP, EUR | Native has MORE |
 | Beyond Basics checklist (post-onboarding) | ✅ (6-item checklist on dashboard) | ✅ (BeyondBasicsCard on Dashboard) | — |
 | Accept invite flow (pre-auth) | ✅ (InviteCodeEntry → InviteDetails → InviteStatusDisplay) | ❌ | **MISSING** |
 
-**Onboarding parity: ~75%** (remaining gaps: savings-goal step, skippable-step UX, pre-auth accept-invite flow)
+**Onboarding parity: ~90%** (only pre-auth accept-invite flow remains)
 
 ---
 
@@ -232,7 +232,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 
 | Feature | PWA | Native iOS | Gap |
 |---------|-----|------------|-----|
-| Set up recurring expense/income | ✅ | ❌ | **MISSING** |
+| Set up recurring expense/income | ✅ | ⚠️ Partial — Add sheet has recurring toggle + frequency, but no dedicated management screen | **PARTIAL** |
 | Frequencies (weekly/monthly/yearly) | ✅ | ❌ | **MISSING** |
 | Pause/resume recurring | ✅ | ❌ | **MISSING** |
 | Auto-run on schedule | ✅ (Cloud Function) | ❌ | **MISSING** |

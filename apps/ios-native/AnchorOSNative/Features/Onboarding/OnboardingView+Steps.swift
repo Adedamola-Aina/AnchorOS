@@ -20,7 +20,7 @@ extension OnboardingView {
                         .font(.caption).fontWeight(.bold)
                         .foregroundStyle(AnchorPalette.textSecondary)
                     HStack(spacing: 8) {
-                        ForEach(["checking", "savings", "investment"], id: \.self) { t in
+                        ForEach(["checking", "savings", "salary", "investment"], id: \.self) { t in
                             Button {
                                 accountType = t
                             } label: {
