@@ -80,6 +80,11 @@ struct WalletCardStack: View {
                         .font(.caption2).fontWeight(.bold)
                         .foregroundStyle(.white.opacity(0.65))
                         .tracking(1)
+                    if let institution = account.institution, !institution.isEmpty {
+                        Text(institution)
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.75))
+                    }
                 }
                 Spacer()
                 if isTop {
@@ -126,7 +131,7 @@ struct WalletCardStack: View {
             // Parity: PWA useFinanceCardInteraction fires haptic.selection on expand.
             // Native stack: tapping a background card brings it to the top.
             guard !isTop else { return }
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            AnchorHaptics.selection()
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 currentIndex = index
             }
@@ -158,11 +163,14 @@ struct WalletCardStack: View {
 
     private func cardBackground(_ account: AnchorAccount, at index: Int) -> some View {
         let userColor = resolvedColor(account.color, fallbackIndex: index)
-        return LinearGradient(
-            colors: [userColor, userColor.opacity(0.7)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        return ZStack {
+            LinearGradient(
+                colors: [userColor, userColor.opacity(0.7)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            CardArtworkOverlay(style: account.artwork ?? CardArtworkStyle.stripes.rawValue)
+        }
     }
 
     // MARK: — Layout Math
@@ -209,7 +217,7 @@ struct WalletCardStack: View {
     }
 
     private func haptic() {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        AnchorHaptics.selection()
     }
 
     // MARK: — Color Resolution

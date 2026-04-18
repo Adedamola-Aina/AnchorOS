@@ -5,6 +5,11 @@ struct BankConnectionSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @AppStorage("anchor_bank_connected") private var bankConnected = false
+    @AppStorage("anchor_bank_last_sync") private var bankLastSync = "Not yet synced"
+
+    private var handoffURL: URL {
+        URL(string: "https://anchor-os.web.app/finance?native=ios&returnTo=anchoros%3A%2F%2Ffinance%3Fbank%3Dconnected")!
+    }
 
     var body: some View {
         NavigationStack {
@@ -12,13 +17,22 @@ struct BankConnectionSheet: View {
                 VStack(spacing: 16) {
                     AnchorCard(title: "Bank Connection", icon: "building.columns") {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text(bankConnected ? "Your bank connection is active." : "Connect your bank using the secure Anchor web handoff.")
+                            Text(bankConnected ? "Your bank connection is active and ready to sync." : "Connect your bank using the secure Anchor handoff and return automatically to the app.")
                                 .font(.subheadline)
                                 .foregroundStyle(AnchorPalette.textPrimary)
 
+                            HStack(spacing: 8) {
+                                Image(systemName: bankConnected ? "checkmark.seal.fill" : "lock.shield.fill")
+                                    .foregroundStyle(bankConnected ? AnchorPalette.success : AnchorPalette.chipActive)
+                                Text(bankConnected ? "Last sync: \(bankLastSync)" : "Your credentials stay inside the secure provider flow.")
+                                    .font(.caption)
+                                    .foregroundStyle(AnchorPalette.textSecondary)
+                            }
+
                             Button {
-                                bankConnected = true
-                                openURL(URL(string: "https://anchor-os.web.app/finance")!)
+                                AnchorHaptics.light()
+                                bankLastSync = DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short)
+                                openURL(handoffURL)
                             } label: {
                                 HStack { Spacer(); Text(bankConnected ? "Manage Connection" : "Connect Bank").fontWeight(.semibold); Spacer() }
                                     .padding(.vertical, 12)
@@ -30,7 +44,9 @@ struct BankConnectionSheet: View {
 
                             if bankConnected {
                                 Button {
+                                    AnchorHaptics.selection()
                                     bankConnected = false
+                                    bankLastSync = "Disconnected"
                                 } label: {
                                     HStack { Spacer(); Text("Disconnect Bank").fontWeight(.semibold); Spacer() }
                                         .padding(.vertical, 12)

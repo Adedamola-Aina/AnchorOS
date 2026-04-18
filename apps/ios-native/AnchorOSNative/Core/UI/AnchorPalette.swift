@@ -10,35 +10,35 @@ enum AnchorPalette {
 
     // MARK: Backgrounds
 
-    static let background      = adaptive(light: 0xF8FAFC, dark: 0x0A0F1A)
-    static let surface         = adaptive(light: 0xFFFFFF, dark: 0x0F172A)
-    static let surfaceElevated = adaptive(light: 0xF1F5F9, dark: 0x1E293B)
+    static let background      = adaptive(light: AnchorDesignTokenCatalog.hex("surface.light.1", fallback: 0xF8FAFC), dark: AnchorDesignTokenCatalog.hex("surface.dark.1", fallback: 0x0A0F1A))
+    static let surface         = adaptive(light: AnchorDesignTokenCatalog.hex("surface.light.2", fallback: 0xFFFFFF), dark: AnchorDesignTokenCatalog.hex("surface.dark.2", fallback: 0x0F172A))
+    static let surfaceElevated = adaptive(light: AnchorDesignTokenCatalog.hex("surface.light.3", fallback: 0xF1F5F9), dark: AnchorDesignTokenCatalog.hex("surface.dark.3", fallback: 0x1E293B))
 
     // MARK: Cards
 
-    static let card = adaptive(light: 0xFFFFFF, dark: 0x0F172A)
+    static let card = adaptive(light: AnchorDesignTokenCatalog.hex("surface.light.2", fallback: 0xFFFFFF), dark: AnchorDesignTokenCatalog.hex("surface.dark.2", fallback: 0x0F172A))
     // PWA: border-slate-200 dark:border-slate-800
-    static let cardBorder = adaptive(light: 0xE2E8F0, dark: 0x1E293B)
+    static let cardBorder = adaptive(light: AnchorDesignTokenCatalog.hex("slate.200", fallback: 0xE2E8F0), dark: AnchorDesignTokenCatalog.hex("slate.800", fallback: 0x1E293B))
 
     // MARK: Chips
 
-    static let chip      = adaptive(light: 0xF1F5F9, dark: 0x334155)
+    static let chip      = adaptive(light: AnchorDesignTokenCatalog.hex("surface.light.3", fallback: 0xF1F5F9), dark: AnchorDesignTokenCatalog.hex("slate.700", fallback: 0x334155))
     static let chipActive = DesignTokens.Primary.p600
 
     // MARK: Text
 
     static let textPrimary   = adaptive(light: 0x0F172A, dark: 0xFFFFFF)
-    static let textSecondary = adaptive(light: 0x64748B, dark: 0x94A3B8)
+    static let textSecondary = adaptive(light: AnchorDesignTokenCatalog.hex("slate.500", fallback: 0x64748B), dark: AnchorDesignTokenCatalog.hex("slate.400", fallback: 0x94A3B8))
 
     // MARK: Status
 
-    static let success = adaptive(light: 0x10B981, dark: 0x34D399)
-    static let warning = adaptive(light: 0xF59E0B, dark: 0xFBBF24)
-    static let danger  = adaptive(light: 0xF43F5E, dark: 0xF87171)
+    static let success = adaptive(light: AnchorDesignTokenCatalog.hex("status.success.light", fallback: 0x10B981), dark: AnchorDesignTokenCatalog.hex("status.success.dark", fallback: 0x34D399))
+    static let warning = adaptive(light: AnchorDesignTokenCatalog.hex("status.warning.light", fallback: 0xF59E0B), dark: AnchorDesignTokenCatalog.hex("status.warning.dark", fallback: 0xFBBF24))
+    static let danger  = adaptive(light: AnchorDesignTokenCatalog.hex("status.error.light", fallback: 0xF43F5E), dark: AnchorDesignTokenCatalog.hex("status.error.dark", fallback: 0xF87171))
 
     // MARK: Focus
 
-    static let focusRing = adaptive(light: 0x06B6D4, dark: 0x22D3EE)
+    static let focusRing = adaptive(light: AnchorDesignTokenCatalog.hex("focus.light", fallback: 0x06B6D4), dark: AnchorDesignTokenCatalog.hex("focus.dark", fallback: 0x22D3EE))
 
     // MARK: Brand (same in both modes)
 

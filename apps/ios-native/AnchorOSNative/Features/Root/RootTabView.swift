@@ -2,11 +2,13 @@ import SwiftUI
 import UIKit
 
 struct RootTabView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var projectStateStore: ProjectStateStore
     @EnvironmentObject private var financeStore: FinanceStore
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @EnvironmentObject private var userProfileStore: UserProfileStore
+    @EnvironmentObject private var biometricLock: BiometricLockStore
     @StateObject private var tabScroll = TabScrollCoordinator()
 
     @State private var needsOnboarding: Bool = !UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
@@ -19,7 +21,7 @@ struct RootTabView: View {
             get: { appState.selectedTab },
             set: { newValue in
                 if newValue == appState.selectedTab {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    AnchorHaptics.selection()
                     tabScroll.requestScrollToTop(tab: newValue)
                 } else {
                     appState.selectedTab = newValue
@@ -93,18 +95,30 @@ struct RootTabView: View {
                     .toolbarBackground(AnchorPalette.card.opacity(0.96), for: .tabBar)
                     .toolbarBackground(.visible, for: .tabBar)
                     .onChange(of: appState.selectedTab) { _, _ in
-                        // Parity: PWA BottomNavigation fires haptic.selection on tab change.
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        AnchorHaptics.selection()
                     }
                 }
 
                 // Global toast overlay — sits above tab bar
                 AnchorToastOverlay()
+
+                if biometricLock.isLocked {
+                    BiometricLockOverlay()
+                        .environmentObject(biometricLock)
+                        .transition(.opacity)
+                }
             }
             .tint(AnchorPalette.chipActive)
             .environmentObject(tabScroll)
             .task {
                 await projectStateStore.refresh(for: appState.environment)
+                if appState.isAuthenticated {
+                    biometricLock.evaluateForegroundLock()
+                }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active, appState.isAuthenticated else { return }
+                biometricLock.evaluateForegroundLock()
             }
             .onChange(of: appState.environment) { _, _ in
                 Task {

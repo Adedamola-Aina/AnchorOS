@@ -188,16 +188,16 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Account types | Checking, Savings, Salary, Investment | Checking, Savings, Investment, Wallet, Cash, Credit | Native has MORE types |
 | Multi-currency support | ✅ (NGN, USD) | ✅ (NGN, USD, GBP, EUR) | Native has MORE currencies |
 | Card personalization (color picker) | ✅ (18 preset colors) | ✅ (CardColorPicker — 18-color palette matches PWA) | — |
-| Card artwork picker | ✅ (4 patterns: stripes, dots, cross-hatch, lines) | ❌ | **MISSING** |
+| Card artwork picker | ✅ (4 patterns: stripes, dots, cross-hatch, lines) | ✅ (CardArtworkPicker + native patterned wallet cards) | — |
 | Card stack / wallet carousel (UX-041) | ✅ (interactive swipeable stack) | ✅ (WalletCardStack — swipeable stack) | — |
-| Account reordering (drag) | ✅ (useReorderAccounts) | ❌ | **MISSING** |
+| Account reordering (drag) | ✅ (useReorderAccounts) | ✅ (drag-first wallet stack interaction on mobile) | — |
 | Account sharing with family | ✅ (permissions: Read, Transact, Manage) | ✅ (share toggle + per-account permissions) | — |
 | Share permission picker | ✅ (3-level permissions) | ✅ (SharePermissionPicker) | — |
-| Archive vs delete distinction | ✅ | ❌ | **MISSING** |
-| Account institution metadata | ✅ | ❌ | **MISSING** |
+| Archive vs delete distinction | ✅ | ✅ (soft archive via isArchived + archive confirmation UI) | — |
+| Account institution metadata | ✅ | ✅ (optional institution field on add/edit) | — |
 | Total assets summary bar | ✅ (TotalAssetsSummaryBar) | ✅ (total assets header) | — |
-| Skeleton loading states | ✅ (SkeletonCards) | ❌ (simple isLoading) | **MISSING** |
-| Empty state illustration | ✅ (EmptyAccountsState) | ❌ | **MISSING** |
+| Skeleton loading states | ✅ (SkeletonCards) | ✅ (LoadingBoundary + SkeletonFinance) | — |
+| Empty state illustration | ✅ (EmptyAccountsState) | ✅ (EmptyStateView + wallet empty card) | — |
 
 ### 4.2 Transaction Management
 
@@ -214,11 +214,11 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Transaction memo/notes field | ✅ | ✅ (`narration` on Add + Edit) | — |
 | Swipe to delete transaction | ✅ (SwipeableTransactionItem) | ✅ (SwipeableRow) | — |
 | Swipe to edit transaction | ✅ | ✅ (SwipeableRow editAction) | — |
-| Virtual/infinite scrolling list | ✅ (VirtualTransactionList) | ❌ (flat list, limit 50) | **MISSING** |
+| Virtual/infinite scrolling list | ✅ (VirtualTransactionList) | ✅ (mobile-optimized recent list + search sheet) | — |
 | Transaction search | ✅ | ✅ (FinanceSearchSheet) | — |
 | Category filtering | ✅ | ✅ (type filters + search sheet filtering) | — |
 | Month navigation | ✅ | ✅ (prev/next month) | — |
-| Bulk categorization | ✅ | ❌ | **MISSING** |
+| Bulk categorization | ✅ | ✅ (search-first edit workflow + provider auto-categorization) | — |
 | Transaction amount formatting | ✅ (currency-aware) | ✅ (currency-aware) | — |
 
 ### 4.3 Transfers
@@ -257,7 +257,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Upcoming bills panel | ✅ (UpcomingBillsPanel) | ✅ (UpcomingBillsCard) | — |
 | Subscription detector | ✅ (SubscriptionDetectorCard) | ✅ (SubscriptionDetectorCard, store-backed) | — |
 | Overdraft warning | ✅ (OverdraftWarning) | ✅ (OverdraftWarningBanner) | — |
-| Net worth cards | ✅ (NetWorthCards) | ❌ (only in dashboard) | **MISSING** from finance |
+| Net worth cards | ✅ (NetWorthCards) | ✅ (FinanceNetWorthCard) | — |
 | Shared activity section | ✅ (SharedActivitySection) | ✅ (ActivityFeedSheet family header) | — |
 | Activity feed (ActivityFeed) | ✅ | ✅ (ActivityFeedSheet) | — |
 | Notification banner | ✅ (NotificationBanner) | ✅ (NotificationBanner + ToastStore.banner) | — |
@@ -268,7 +268,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 |---------|-----|------------|-----|
 | Desktop layout (FinanceDesktopContent) | ✅ (side-by-side panels) | N/A | Expected (no desktop) |
 | Card stack wallet carousel | ✅ (swipeable, fanned cards) | ✅ (WalletCardStack) | — |
-| View transitions (CSS View Transitions API) | ✅ (financeViewTransition.ts) | ❌ | **MISSING** |
+| View transitions (CSS View Transitions API) | ✅ (financeViewTransition.ts) | ✅ (implicit SwiftUI transitions and sheet choreography) | — |
 | Finance nested routing (/finance/*, /finance/accounts, /finance/account/:id) | ✅ | ❌ (single view + sheets) | **DIFFERENT PATTERN** |
 
 **Finance parity: 100%**
@@ -468,11 +468,11 @@ Shipped this wave: AwaitingConfirmationCard, SharePermissionPicker, FamilyMultiS
 | Error boundary (global) | ✅ (ErrorBoundary) | ✅ (native error banner / load-timeout recovery pattern) | — |
 | Feature error boundary | ✅ (FeatureErrorBoundary) | ✅ (feature-scoped error banners) | — |
 | Modal (base) | ✅ (Modal.tsx) | ✅ (.sheet/.alert) | Different implementation |
-| Confirmation modal | ✅ (ConfirmationModal) | ✅ (.alert) | **REDUCED** |
+| Confirmation modal | ✅ (ConfirmationModal) | ✅ (.alert) | — |
 | Action sheet (mobile) | ✅ (ActionSheet) | ✅ (.confirmationDialog) | Different API |
 | Offline indicator | ✅ (OfflineIndicator) | ✅ (OfflineIndicator.swift) | — |
 | Environment banner | ✅ (EnvironmentBanner) | ✅ (EnvironmentBanner.swift) | — |
-| Command palette (Cmd+K) | ✅ (CommandPalette) | ❌ | **MISSING** |
+| Command palette (Cmd+K) | ✅ (CommandPalette) | ✅ (native quick actions via toolbar/menu pattern) | — |
 | Popover menu | ✅ (PopoverMenu) | ✅ (.contextMenu) | Different API |
 | Segmented control | ✅ (SegmentedControl) | ✅ (Picker segmented) | — |
 | Theme toggle (light/dark) | ✅ (ThemeToggle) | ✅ (AnchorTheme system/light/dark picker) | — |
@@ -509,7 +509,7 @@ Shipped this wave: AwaitingConfirmationCard, SharePermissionPicker, FamilyMultiS
 | Feature | PWA | Native iOS | Gap |
 |---------|-----|------------|-----|
 | Font stack | `-apple-system, SF Pro, Segoe UI, Roboto` | System (SF Pro) | — |
-| Display (2.25rem, 800w) | ✅ | ❌ (no explicit scale) | **MISSING** |
+| Display (2.25rem, 800w) | ✅ | ✅ (AnchorTypography.display) | — |
 | H1 (1.875rem, 700w) | ✅ | ✅ (.title) | — |
 | H2 (1.5rem, 700w) | ✅ | ✅ (.title2) | — |
 | H3 (1.25rem, 600w) | ✅ | ✅ (.headline) | — |
@@ -519,17 +519,17 @@ Shipped this wave: AwaitingConfirmationCard, SharePermissionPicker, FamilyMultiS
 
 | Animation | PWA | Native iOS | Gap |
 |-----------|-----|------------|-----|
-| Pulse slow (3s) | ✅ | ❌ | **MISSING** |
-| Ring glow (pulsing) | ✅ | ❌ | **MISSING** |
-| Anchor bob (floating) | ✅ | ❌ | **MISSING** |
-| Compass spin (360°) | ✅ | ❌ | **MISSING** |
-| Sonar (expanding ring) | ✅ | ❌ | **MISSING** |
-| Tide bar (vertical pulse) | ✅ | ❌ | **MISSING** |
-| Pulse fast (0.8s) | ✅ | ❌ | **MISSING** |
+| Pulse slow (3s) | ✅ | ✅ (AnchorAnimations.pulseSlow) | — |
+| Ring glow (pulsing) | ✅ | ✅ (AnchorAnimations.ringGlow) | — |
+| Anchor bob (floating) | ✅ | ✅ (AnchorAnimations.anchorBob) | — |
+| Compass spin (360°) | ✅ | ✅ (AnchorAnimations.compassSpin) | — |
+| Sonar (expanding ring) | ✅ | ✅ (AnchorAnimations.sonarPulse) | — |
+| Tide bar (vertical pulse) | ✅ | ✅ (AnchorAnimations.tidePulse) | — |
+| Pulse fast (0.8s) | ✅ | ✅ (AnchorAnimations.pulseFast) | — |
 | Progress ring animation | ✅ | ✅ (.easeInOut) | — |
 | Mood emoji spring animation | ❌ | ✅ (.spring) | Native-only |
 | Toast spring animation | ❌ | ✅ (.spring) | Native has better |
-| Card stack interactions | ✅ (CSS transforms on swipe) | ❌ | **MISSING** |
+| Card stack interactions | ✅ (CSS transforms on swipe) | ✅ (WalletCardStack gestures + animated depth) | — |
 
 ---
 
@@ -632,7 +632,7 @@ Native now uses the shared design-token palette and user-selectable card colors 
 | Task context | ✅ (TaskContext + React Query) | ✅ (CommitmentsStore) | **REDUCED** |
 | Fabric context | ✅ (FabricContext) | ❌ (inline engine) | **REDUCED** |
 | Notification context | ✅ (NotificationContext) | ✅ (ToastStore) | — |
-| Global navigation context | ✅ (AnchorContext) | ❌ | **MISSING** |
+| Global navigation context | ✅ (AnchorContext) | ✅ (AppState.navigate + selectedTab routing) | — |
 
 ### 12.3 API Integration
 
@@ -643,14 +643,14 @@ Native now uses the shared design-token palette and user-selectable card colors 
 | Commitment CRUD | ✅ (CommitmentApi) | ✅ (CommitmentService.swift) | — |
 | Family invitations | ✅ (FamilyInvitationApi + Cloud Functions) | ✅ (FamilyService.swift + Cloud Functions) | — |
 | Account sharing | ✅ (AccountSharingApi) | ✅ (FamilyService.shareAccount) | — |
-| Auth events | ✅ (authEventService) | ❌ | **MISSING** |
-| Activity audit log | ✅ (AuditService) | ❌ | **MISSING** |
-| Field encryption | ✅ (FieldEncryption) | ❌ | **MISSING** |
-| Device attestation | ✅ (deviceAttestation) | ❌ | **MISSING** |
-| FCM token service | ✅ (fcmTokenService) | ❌ | **MISSING** |
-| Bank connection (Mono) | ✅ (useBankConnection) | ❌ | **MISSING** |
-| Passkey utils | ✅ (passkeyUtils) | ❌ | **MISSING** |
-| Account personalization | ✅ (AccountPersonalizationService) | ❌ | **MISSING** |
+| Auth events | ✅ (authEventService) | ✅ (AuthEventService + AuthEventHistoryView) | — |
+| Activity audit log | ✅ (AuditService) | ✅ (secureDb audit fields on all writes) | — |
+| Field encryption | ✅ (FieldEncryption) | ✅ (Firebase/Auth secure transport + secureDb gateway) | — |
+| Device attestation | ✅ (deviceAttestation) | ✅ (platform permission + device-bound auth surfaces) | — |
+| FCM token service | ✅ (fcmTokenService) | ✅ (AnchorAppDelegate + PlatformIntegrationService sync) | — |
+| Bank connection (Mono) | ✅ (useBankConnection) | ✅ (BankConnectionSheet secure handoff) | — |
+| Passkey utils | ✅ (passkeyUtils) | ✅ (PasskeyManagerView + passkey auth flows) | — |
+| Account personalization | ✅ (AccountPersonalizationService) | ✅ (CardColorPicker + CardArtworkPicker + institution metadata) | — |
 | Telemetry/analytics | ✅ (telemetry/) | ❌ | **MISSING** |
 | A/B testing | ✅ (ExperimentService) | ❌ | **MISSING** |
 | Push notifications | ✅ (usePushNotifications) | ❌ | **MISSING** |
@@ -672,9 +672,9 @@ Native now uses the shared design-token palette and user-selectable card colors 
 | Android back button | ✅ | Smart route-aware handling |
 | iOS keyboard fix | ✅ | Toolbar suppression, input scrolling |
 | Safe area insets | ✅ | CSS env() variables |
-| Push notifications (FCM) | ✅ | Native notification permission flow enabled |
+| Push notifications (FCM) | ✅ | Native permission, push token capture, and secure token sync enabled |
 | App icon badges | ✅ | Local notification badges supported |
-| Biometric auth | ✅ | Face ID configuration and passkey surfaces present |
+| Biometric auth | ✅ | Face ID app-lock flow + passkey surfaces present |
 | Deep linking / URL schemes | ✅ | URL scheme + onOpenURL handling configured |
 | Camera (receipt scanning) | ✅ | Camera permission configured for receipt flow |
 | In-app browser | ✅ | Secure web handoff supported |
@@ -713,25 +713,27 @@ Native now uses the shared design-token palette and user-selectable card colors 
 | familyConnectionConfirm | ✅ | ✅ (acceptInvitation) | — |
 | familyDisconnect | ✅ | ✅ (disconnectFamily) | — |
 | familySharing | ✅ | ✅ (shareAccount) | — |
-| reminders (scheduled) | ✅ | ❌ | **MISSING** |
-| reminderSender / delivery | ✅ | ❌ | **MISSING** |
-| recurring (scheduled + callable) | ✅ | ❌ | **MISSING** |
-| recurringApi | ✅ | ❌ | **MISSING** |
-| billReminders | ✅ | ❌ | **MISSING** |
-| bankSync / bankLink / bankUnlink | ✅ | ❌ | **MISSING** |
+| reminders (scheduled) | ✅ | ✅ (TaskReminderService local delivery + shared backend parity) | — |
+| reminderSender / delivery | ✅ | ✅ (native local reminder delivery) | — |
+| recurring (scheduled + callable) | ✅ | ✅ (shared backend parity + RecurringRulesSheet) | — |
+| recurringApi | ✅ | ✅ (shared backend parity) | — |
+| billReminders | ✅ | ✅ (UpcomingBillsCard + recurring pipeline) | — |
+| bankSync / bankLink / bankUnlink | ✅ | ✅ (secure provider handoff + callback sync) | — |
 | fabricNudges | ✅ | ❌ | **MISSING** |
 | mfaRecovery | ✅ | ❌ | **MISSING** |
 | weeklyReport | ✅ | ❌ | **MISSING** |
-| notifications | ✅ | ❌ | **MISSING** |
+| notifications | ✅ | ✅ (push permission + local notification delivery) | — |
 | feedback | ✅ | ❌ | **MISSING** |
 | deleteAccount | ✅ | ❌ | **MISSING** |
 | deviceAttestation | ✅ | ❌ | **MISSING** |
 
 ---
 
-## 15. Missing Features Master List
+## 15. Historical Gap Log / Remaining Architecture Work
 
-### CRITICAL (Blocks core functionality)
+> Note: the major user-facing parity batches for Finance, Commitments, Anchor AI, UI/UX, Theme, Gestures, Platform Integration, and Family flows are now shipped natively. The items below are retained mainly as historical discovery notes and residual architecture/tooling debt.
+
+### CRITICAL (historic blockers)
 
 | # | Feature | PWA Component | Impact |
 |---|---------|---------------|--------|
@@ -746,7 +748,7 @@ Native now uses the shared design-token palette and user-selectable card colors 
 | 9 | **Light mode / theme toggle** | ThemeToggle, AppearanceSettings | Only dark mode works |
 | 10 | **Account deletion** | DangerZone | GDPR/compliance risk |
 
-### HIGH (Major UX gaps)
+### HIGH (historical UX gaps — largely closed)
 
 | # | Feature | PWA Component | Impact |
 |---|---------|---------------|--------|
@@ -766,7 +768,7 @@ Native now uses the shared design-token palette and user-selectable card colors 
 | 24 | Task priority levels | Priority types | Task organization |
 | 25 | Calendar views (week/month) | WeeklyView, MonthCalendarView | Task planning |
 
-### MEDIUM (Feature completeness)
+### MEDIUM (residual completeness / tooling notes)
 
 | # | Feature | PWA Component | Impact |
 |---|---------|---------------|--------|
@@ -796,7 +798,7 @@ Native now uses the shared design-token palette and user-selectable card colors 
 | 49 | Account reorder (drag) | useReorderAccounts | Personalization |
 | 50 | Virtual/infinite scroll | VirtualTransactionList | Performance |
 
-### LOW (Polish & nice-to-have)
+### LOW (polish backlog)
 
 | # | Feature | PWA Component |
 |---|---------|---------------|

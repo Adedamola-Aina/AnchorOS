@@ -10,6 +10,7 @@ struct SettingsView: View {
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @EnvironmentObject private var tabScroll: TabScrollCoordinator
     @EnvironmentObject private var theme: AnchorTheme
+    @EnvironmentObject private var biometricLock: BiometricLockStore
     @AppStorage("anchor_font_size") private var fontSize: String = "Default"
     @AppStorage("anchor_high_contrast") private var highContrast: Bool = false
     @State private var editingName = false
@@ -22,6 +23,7 @@ struct SettingsView: View {
     @State private var showAuthHistory = false
     @State private var showDangerZone = false
     @State private var showPasskeyManager = false
+    @State private var showBiometricLock = false
     @State private var showNotificationPrefs = false
     @State private var showAnchorAI = false
     @State private var showAuthSessions = false
@@ -362,6 +364,14 @@ struct SettingsView: View {
                 Divider().background(AnchorPalette.cardBorder)
 
                 securityNavRow(
+                    icon: "lock.circle.fill",
+                    label: "Biometric Lock",
+                    subtitle: biometricLock.isEnabled ? "\(biometricLock.biometryLabel) enabled" : "Require Face ID / Touch ID on open"
+                ) { showBiometricLock = true }
+
+                Divider().background(AnchorPalette.cardBorder)
+
+                securityNavRow(
                     icon: "clock.arrow.circlepath",
                     label: "Login History",
                     subtitle: "View recent sign-in activity"
@@ -390,6 +400,10 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showPasskeyManager) {
             PasskeyManagerView()
+        }
+        .sheet(isPresented: $showBiometricLock) {
+            BiometricLockSheet()
+                .environmentObject(biometricLock)
         }
         .sheet(isPresented: $showAuthHistory) {
             AuthEventHistoryView()

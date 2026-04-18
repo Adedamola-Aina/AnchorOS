@@ -90,9 +90,26 @@ final class FinanceStore: ObservableObject {
 
     // MARK: — Write: Accounts
 
-    func addAccount(name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
+    func addAccount(
+        name: String,
+        type: String,
+        currency: String,
+        balanceCents: Int,
+        color: String = "#3D52D5",
+        institution: String? = nil,
+        artwork: String? = nil
+    ) async throws {
         guard let uid else { return }
-        try await accountService.addAccount(uid: uid, name: name, type: type, currency: currency, balanceCents: balanceCents, color: color)
+        try await accountService.addAccount(
+            uid: uid,
+            name: name,
+            type: type,
+            currency: currency,
+            balanceCents: balanceCents,
+            color: color,
+            institution: institution,
+            artwork: artwork
+        )
     }
 
     func deleteAccount(accountId: String) async throws {
@@ -159,9 +176,28 @@ final class FinanceStore: ObservableObject {
         try await transactionService.deleteTransaction(uid: uid, transactionId: transactionId)
     }
 
-    func updateAccount(accountId: String, name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
+    func updateAccount(
+        accountId: String,
+        name: String,
+        type: String,
+        currency: String,
+        balanceCents: Int,
+        color: String = "#3D52D5",
+        institution: String? = nil,
+        artwork: String? = nil
+    ) async throws {
         guard let uid else { return }
-        try await accountService.updateAccount(uid: uid, accountId: accountId, name: name, type: type, currency: currency, balanceCents: balanceCents, color: color)
+        try await accountService.updateAccount(
+            uid: uid,
+            accountId: accountId,
+            name: name,
+            type: type,
+            currency: currency,
+            balanceCents: balanceCents,
+            color: color,
+            institution: institution,
+            artwork: artwork
+        )
     }
 
     func updateTransaction(

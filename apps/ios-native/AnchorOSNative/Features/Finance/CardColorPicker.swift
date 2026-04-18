@@ -36,7 +36,7 @@ struct CardColorPicker: View {
         let isSelected = selectedHex.lowercased() == hex.lowercased()
         return Button {
             selectedHex = hex
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            AnchorHaptics.selection()
         } label: {
             ZStack {
                 Circle()

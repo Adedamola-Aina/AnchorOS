@@ -189,7 +189,7 @@ struct AnchorAIView: View {
                 ForEach(moods) { m in
                     Button {
                         // Parity: PWA FabricMoodCard fires haptic.selection on emoji tap.
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        AnchorHaptics.selection()
                         withAnimation(.easeInOut(duration: 0.2)) { selectedMood = m.id }
                         if let uid = appState.currentUID {
                             Task { try? await moodService.saveMood(uid: uid, mood: m.label.lowercased()) }

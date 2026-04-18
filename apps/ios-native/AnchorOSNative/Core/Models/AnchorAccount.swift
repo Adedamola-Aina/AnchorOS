@@ -11,6 +11,8 @@ struct AnchorAccount: Identifiable, Codable {
     let currency: String
     let balanceCents: Int
     let color: String?
+    let artwork: String?
+    let institution: String?
     let scope: String?
     let ownerId: String?
     let isArchived: Bool?

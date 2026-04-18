@@ -95,10 +95,13 @@ struct EmptyStateView: View {
                 Circle()
                     .fill(AnchorPalette.chip.opacity(0.5))
                     .frame(width: 72, height: 72)
+                    .ringGlow(color: resolvedAccent)
+                    .sonarPulse()
 
                 Image(systemName: resolvedIcon)
                     .font(.system(size: 28, weight: .medium))
                     .foregroundStyle(resolvedAccent)
+                    .anchorBob()
             }
             .padding(.bottom, 20)
 

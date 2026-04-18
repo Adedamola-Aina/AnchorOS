@@ -105,6 +105,39 @@ struct PulseFastModifier: ViewModifier {
     }
 }
 
+// MARK: - Sonar Pulse (expand + fade ring)
+
+struct SonarPulseModifier: ViewModifier {
+    @State private var animating = false
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(animating ? 1.08 : 0.92)
+            .opacity(animating ? 1.0 : 0.82)
+            .animation(
+                .easeInOut(duration: 1.2).repeatForever(autoreverses: true),
+                value: animating
+            )
+            .onAppear { animating = true }
+    }
+}
+
+// MARK: - Tide Pulse (vertical rise/fall)
+
+struct TidePulseModifier: ViewModifier {
+    @State private var animating = false
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(x: 1, y: animating ? 1.04 : 0.96, anchor: .center)
+            .animation(
+                .easeInOut(duration: 1.4).repeatForever(autoreverses: true),
+                value: animating
+            )
+            .onAppear { animating = true }
+    }
+}
+
 // MARK: - View Extensions
 
 extension View {
@@ -137,5 +170,15 @@ extension View {
     /// Fast pulse: opacity + scale oscillation (matches PWA animate-pulse-fast)
     func pulseFast() -> some View {
         modifier(PulseFastModifier())
+    }
+
+    /// Sonar pulse: subtle expand/fade loop for key icons.
+    func sonarPulse() -> some View {
+        modifier(SonarPulseModifier())
+    }
+
+    /// Tide pulse: vertical rise/fall for cards and bars.
+    func tidePulse() -> some View {
+        modifier(TidePulseModifier())
     }
 }

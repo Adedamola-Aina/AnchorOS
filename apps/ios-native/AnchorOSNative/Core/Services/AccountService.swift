@@ -25,13 +25,24 @@ final class AccountService {
             }
     }
 
-    func addAccount(uid: String, name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
+    func addAccount(
+        uid: String,
+        name: String,
+        type: String,
+        currency: String,
+        balanceCents: Int,
+        color: String = "#3D52D5",
+        institution: String? = nil,
+        artwork: String? = nil
+    ) async throws {
         let data: [String: Any] = [
             "name": name,
             "type": type,
             "currency": currency,
             "balanceCents": balanceCents,
             "color": color,
+            "institution": institution ?? "",
+            "artwork": artwork ?? "stripes",
             "scope": "personal",
             "isArchived": false,
             "sortOrder": Int(Date().timeIntervalSince1970)
@@ -45,13 +56,25 @@ final class AccountService {
         try await db.updateDocument(uid: uid, path: ["accounts", accountId], data: ["isArchived": true])
     }
 
-    func updateAccount(uid: String, accountId: String, name: String, type: String, currency: String, balanceCents: Int, color: String = "#3D52D5") async throws {
+    func updateAccount(
+        uid: String,
+        accountId: String,
+        name: String,
+        type: String,
+        currency: String,
+        balanceCents: Int,
+        color: String = "#3D52D5",
+        institution: String? = nil,
+        artwork: String? = nil
+    ) async throws {
         let data: [String: Any] = [
             "name": name,
             "type": type,
             "currency": currency,
             "balanceCents": balanceCents,
-            "color": color
+            "color": color,
+            "institution": institution ?? "",
+            "artwork": artwork ?? "stripes"
         ]
         try await db.updateDocument(uid: uid, path: ["accounts", accountId], data: data)
     }

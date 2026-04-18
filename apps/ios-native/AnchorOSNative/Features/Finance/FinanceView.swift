@@ -74,6 +74,7 @@ struct FinanceView: View {
                         VStack(spacing: 16) {
                             NotificationBanner()
                             monthNavRow
+                            FinanceNetWorthCard(rows: currencyTotals)
                             InsightCards(
                                 transactions: financeStore.transactions,
                                 currency: userProfileStore.currency
@@ -199,12 +200,12 @@ struct FinanceView: View {
             .sheet(isPresented: $showBankSheet) {
                 BankConnectionSheet()
             }
-            .alert("Delete Account?", isPresented: $showDeleteAccountAlert, presenting: accountToDelete) { acc in
-                Button("Delete", role: .destructive) {
+            .alert("Archive Account?", isPresented: $showDeleteAccountAlert, presenting: accountToDelete) { acc in
+                Button("Archive", role: .destructive) {
                     Task {
                         do {
                             try await financeStore.deleteAccount(accountId: acc.resolvedId)
-                            ToastStore.shared.show("Account removed", style: .info)
+                            ToastStore.shared.show("Account archived", style: .info)
                         } catch {
                             ToastStore.shared.show("Failed to remove account", style: .error)
                         }
@@ -212,7 +213,7 @@ struct FinanceView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: { acc in
-                Text("Remove \"\(acc.name)\"? Transactions will remain in history.")
+                Text("Archive \"\(acc.name)\"? Transactions will remain in history and the account can be restored later.")
             }
         }
     }

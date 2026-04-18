@@ -12,7 +12,9 @@ struct EditAccountSheet: View {
     @State private var selectedType: String
     @State private var selectedCurrency: String
     @State private var balanceText: String
+    @State private var institution: String
     @State private var selectedColorHex: String
+    @State private var selectedArtwork: String
     @State private var isSaving = false
     @State private var showCurrencyPicker = false
 
@@ -25,7 +27,9 @@ struct EditAccountSheet: View {
         _selectedCurrency = State(initialValue: account.currency)
         let bal = Double(account.balanceCents) / 100.0
         _balanceText = State(initialValue: String(format: "%.2f", bal))
+        _institution = State(initialValue: account.institution ?? "")
         _selectedColorHex = State(initialValue: account.color ?? "#3D52D5")
+        _selectedArtwork = State(initialValue: account.artwork ?? CardArtworkStyle.stripes.rawValue)
     }
 
     private var balanceCents: Int {
@@ -46,6 +50,8 @@ struct EditAccountSheet: View {
                     VStack(spacing: 16) {
                         // Name
                         AnchorFormField(placeholder: "Account Name", text: $name)
+
+                        AnchorFormField(placeholder: "Institution (optional)", text: $institution)
 
                         // Type chips
                         VStack(alignment: .leading, spacing: 8) {
@@ -113,6 +119,7 @@ struct EditAccountSheet: View {
 
                         // Color picker
                         CardColorPicker(selectedHex: $selectedColorHex)
+                        CardArtworkPicker(selectedArtwork: $selectedArtwork)
 
                         // Save button
                         Button {
@@ -165,7 +172,9 @@ struct EditAccountSheet: View {
                 type: selectedType,
                 currency: selectedCurrency,
                 balanceCents: balanceCents,
-                color: selectedColorHex
+                color: selectedColorHex,
+                institution: institution.trimmingCharacters(in: .whitespacesAndNewlines),
+                artwork: selectedArtwork
             )
             ToastStore.shared.show("Account updated", style: .success)
             dismiss()

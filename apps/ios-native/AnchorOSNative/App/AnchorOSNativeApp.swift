@@ -4,6 +4,7 @@ import FirebaseFirestore
 
 @main
 struct AnchorOSNativeApp: App {
+    @UIApplicationDelegateAdaptor(AnchorAppDelegate.self) private var appDelegate
     @StateObject private var appState: AppState
     @StateObject private var projectStateStore = ProjectStateStore()
     @StateObject private var financeStore = FinanceStore()
@@ -15,6 +16,7 @@ struct AnchorOSNativeApp: App {
     @StateObject private var patternsStore = AnchorPatternsStore()
     @StateObject private var theme = AnchorTheme()
     @StateObject private var platformIntegration = PlatformIntegrationService()
+    @StateObject private var biometricLock = BiometricLockStore()
 
     init() {
         FirebaseApp.configure()
@@ -42,6 +44,7 @@ struct AnchorOSNativeApp: App {
                 .environmentObject(fabricStore)
                 .environmentObject(recurringStore)
                 .environmentObject(patternsStore)
+                .environmentObject(biometricLock)
                 .onOpenURL { url in
                     platformIntegration.handleIncomingURL(url)
                 }
@@ -50,10 +53,14 @@ struct AnchorOSNativeApp: App {
                 }
                 .onChange(of: appState.isAuthenticated) { _, authenticated in
                     if authenticated, let uid = appState.currentUID {
+                        UserDefaults.standard.set(uid, forKey: "anchor_current_uid")
                         financeStore.start(uid: uid)
                         commitmentsStore.start(uid: uid)
                         familyStore.start(uid: uid)
-                        Task { await userProfileStore.start(uid: uid) }
+                        Task {
+                            await userProfileStore.start(uid: uid)
+                            await platformIntegration.syncPushTokenIfAvailable(uid: uid)
+                        }
                         recurringStore.start(uid: uid)
                         patternsStore.start(uid: uid)
                         fabricStore.start(
@@ -63,6 +70,7 @@ struct AnchorOSNativeApp: App {
                             patternsStore: patternsStore
                         )
                     } else {
+                        UserDefaults.standard.removeObject(forKey: "anchor_current_uid")
                         financeStore.stop()
                         commitmentsStore.stop()
                         familyStore.stop()
@@ -78,6 +86,7 @@ struct AnchorOSNativeApp: App {
                         commitmentsStore.start(uid: uid)
                         familyStore.start(uid: uid)
                         await userProfileStore.start(uid: uid)
+                        await platformIntegration.syncPushTokenIfAvailable(uid: uid)
                         recurringStore.start(uid: uid)
                         patternsStore.start(uid: uid)
                         fabricStore.start(

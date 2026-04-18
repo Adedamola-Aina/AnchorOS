@@ -10,7 +10,9 @@ struct AddAccountSheet: View {
     @State private var type: String = "checking"
     @State private var currency: String = "NGN"
     @State private var balanceText: String = ""
+    @State private var institution: String = ""
     @State private var selectedColorHex: String = "#3D52D5"
+    @State private var selectedArtwork: String = CardArtworkStyle.stripes.rawValue
     @State private var isSaving = false
     @State private var showCurrencyPicker = false
 
@@ -31,6 +33,10 @@ struct AddAccountSheet: View {
                 VStack(spacing: 20) {
                     formSection("Account Name") {
                         AnchorFormField(placeholder: "e.g. Main Checking, Emergency Fund", text: $name)
+                    }
+
+                    formSection("Institution (Optional)") {
+                        AnchorFormField(placeholder: "e.g. GTBank, Chase, Monzo", text: $institution)
                     }
 
                     formSection("Account Type") {
@@ -97,6 +103,8 @@ struct AddAccountSheet: View {
                     formSection("Card Color") {
                         CardColorPicker(selectedHex: $selectedColorHex)
                     }
+
+                    CardArtworkPicker(selectedArtwork: $selectedArtwork)
                 }
                 .padding(20)
                 .createSlideIn()
@@ -156,7 +164,9 @@ struct AddAccountSheet: View {
                 type: type,
                 currency: currency,
                 balanceCents: balanceCents,
-                color: selectedColorHex
+                color: selectedColorHex,
+                institution: institution.trimmingCharacters(in: .whitespacesAndNewlines),
+                artwork: selectedArtwork
             )
             ToastStore.shared.show("Account created", style: .success)
             dismiss()
