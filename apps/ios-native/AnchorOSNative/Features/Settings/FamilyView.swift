@@ -4,12 +4,7 @@ import SwiftUI
 /// Shows: no-connection invite / accept states, and active connection management.
 struct FamilyView: View {
     @EnvironmentObject private var familyStore: FamilyStore
-    @EnvironmentObject private var userProfileStore: UserProfileStore
     @EnvironmentObject private var financeStore: FinanceStore
-
-    // Invite flow
-    @State private var recipientEmail = ""
-    @State private var isSendingInvite = false
 
     // Accept flow
     @State private var inviteToken = ""
@@ -19,9 +14,6 @@ struct FamilyView: View {
     // Disconnect
     @State private var showDisconnectAlert = false
     @State private var isDisconnecting = false
-
-    // Share toggle
-    @State private var sharingAccountId: String? = nil
 
     var body: some View {
         NavigationStack {
@@ -51,51 +43,7 @@ struct FamilyView: View {
 
     private var noConnectionView: some View {
         VStack(spacing: 16) {
-            AnchorCard(title: "Family Mode", icon: "person.2.fill") {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Connect with a spouse or partner to share selected accounts and track finances together.")
-                        .foregroundStyle(AnchorPalette.textSecondary)
-                        .font(.subheadline)
-
-                    Divider().overlay(AnchorPalette.chip)
-
-                    // Invite section
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("INVITE A FAMILY MEMBER")
-                            .font(.caption).fontWeight(.bold)
-                            .foregroundStyle(AnchorPalette.textSecondary)
-
-                        TextField("Their email address", text: $recipientEmail)
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                            .padding(12)
-                            .background(AnchorPalette.chip)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .foregroundStyle(AnchorPalette.textPrimary)
-
-                        Button {
-                            Task { await sendInvite() }
-                        } label: {
-                            HStack {
-                                Spacer()
-                                if isSendingInvite {
-                                    ProgressView().tint(.white)
-                                } else {
-                                    Label("Send Invitation", systemImage: "envelope.fill")
-                                        .fontWeight(.semibold)
-                                }
-                                Spacer()
-                            }
-                            .padding(.vertical, 14)
-                            .background(recipientEmail.isEmpty ? AnchorPalette.chip : AnchorPalette.chipActive)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .foregroundStyle(recipientEmail.isEmpty ? AnchorPalette.textSecondary : .white)
-                        }
-                        .disabled(recipientEmail.isEmpty || isSendingInvite)
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            FamilyMultiStepInvite()
 
             // Accept invite option
             Button {
@@ -129,12 +77,12 @@ struct FamilyView: View {
                     .font(.system(size: 44))
                     .foregroundStyle(AnchorPalette.success)
 
-                Text("Invitation sent to \(recipientEmail)")
+                Text("Your invitation has been sent.")
                     .foregroundStyle(AnchorPalette.textPrimary)
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.center)
 
-                Text("They'll receive a 6-digit code by email. Once they accept, your connection will activate automatically.")
+                Text("They'll receive a 6-digit code by email. Once they accept and you confirm, your connection activates.")
                     .foregroundStyle(AnchorPalette.textSecondary)
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
@@ -192,6 +140,8 @@ struct FamilyView: View {
 
     private var activeConnectionView: some View {
         VStack(spacing: 16) {
+            familyNetWorthBanner
+
             // Connection status card
             AnchorCard(title: "Family Connection", icon: "person.2.fill") {
                 VStack(spacing: 16) {
@@ -261,81 +211,29 @@ struct FamilyView: View {
                 Text("This will revoke access to all shared accounts. This cannot be undone.")
             }
 
-            // Account sharing card (owner only)
+            // Account sharing card (owner only) — extracted to FamilyAccountSharingCard
             if familyStore.isOwner && !financeStore.accounts.isEmpty {
-                accountSharingCard
+                FamilyAccountSharingCard()
             }
         }
     }
 
-    private var accountSharingCard: some View {
-        AnchorCard(title: "Share Accounts", icon: "arrow.triangle.2.circlepath") {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Long-press an account to toggle sharing with \(familyStore.partnerName).")
+    // MARK: — Family Net Worth Banner
+
+    private var familyNetWorthBanner: some View {
+        AnchorCard(title: "Family Net Worth", icon: "chart.line.uptrend.xyaxis") {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(financeStore.familyNetWorthFormatted)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(AnchorPalette.textPrimary)
+                Text("Combined balance across your accounts and accounts shared with you.")
                     .font(.caption)
                     .foregroundStyle(AnchorPalette.textSecondary)
-                    .padding(.bottom, 8)
-
-                ForEach(financeStore.accounts) { account in
-                    let isShared = account.scope == "family"
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(account.name)
-                                .foregroundStyle(AnchorPalette.textPrimary)
-                                .fontWeight(.semibold)
-                                .font(.subheadline)
-                            Text(account.formattedBalance)
-                                .foregroundStyle(AnchorPalette.textSecondary)
-                                .font(.caption)
-                        }
-                        Spacer()
-                        Toggle("", isOn: Binding(
-                            get: { isShared },
-                            set: { newVal in
-                                sharingAccountId = account.resolvedId
-                                Task {
-                                    do {
-                                        try await familyStore.shareAccount(accountId: account.resolvedId, share: newVal)
-                                        ToastStore.shared.show(
-                                            newVal ? "Shared with \(familyStore.partnerName)" : "Sharing removed",
-                                            style: .success
-                                        )
-                                    } catch {
-                                        ToastStore.shared.show("Failed to update sharing", style: .error)
-                                    }
-                                    sharingAccountId = nil
-                                }
-                            }
-                        ))
-                        .tint(AnchorPalette.chipActive)
-                        .disabled(sharingAccountId == account.resolvedId)
-                    }
-                    .padding(.vertical, 6)
-
-                    if account.id != financeStore.accounts.last?.id {
-                        Divider().overlay(AnchorPalette.chip)
-                    }
-                }
             }
         }
     }
 
     // MARK: — Actions
-
-    private func sendInvite() async {
-        guard !recipientEmail.isEmpty else { return }
-        isSendingInvite = true
-        do {
-            try await familyStore.createInvitation(
-                ownerName: userProfileStore.displayName,
-                recipientEmail: recipientEmail
-            )
-            ToastStore.shared.show("Invitation sent!", style: .success)
-        } catch {
-            ToastStore.shared.show("Failed to send invitation", style: .error)
-        }
-        isSendingInvite = false
-    }
 
     private func acceptInvite() async {
         isAccepting = true

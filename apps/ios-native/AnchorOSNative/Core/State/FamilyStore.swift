@@ -80,6 +80,17 @@ final class FamilyStore: ObservableObject {
         try await service.shareAccount(accountId: accountId, share: share)
     }
 
+    /// Update the permission level for the connected member on a shared account.
+    func updateSharedPermission(accountId: String, permission: String) async throws {
+        guard let uid, let conn = connection else { return }
+        try await service.updateSharedPermission(
+            ownerUid: uid,
+            accountId: accountId,
+            memberUid: conn.memberUid,
+            permission: permission
+        )
+    }
+
     /// Owner removes member, or member leaves connection.
     func disconnect() async throws {
         let type = isOwner ? "remove_member" : "leave"

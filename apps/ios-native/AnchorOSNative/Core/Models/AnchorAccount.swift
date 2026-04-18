@@ -15,8 +15,19 @@ struct AnchorAccount: Identifiable, Codable {
     let ownerId: String?
     let isArchived: Bool?
     let sortOrder: Int?
+    /// Family Mode permission map. Keys are member uids; values are permission entries.
+    /// Path: `accounts/{id}.sharedWith.{memberUid} = { grantedAt, grantedBy, permission }`
+    let sharedWith: [String: SharedAccess]?
 
     var resolvedId: String { id ?? "" }
+
+    /// Permission this user has on the account, if any.
+    /// `nil` means not shared with this user.
+    func permission(for uid: String) -> String? {
+        sharedWith?[uid]?.permission
+    }
+
+    var isShared: Bool { (sharedWith?.count ?? 0) > 0 }
 
     var formattedBalance: String {
         let amount = Double(balanceCents) / 100.0
@@ -60,5 +71,13 @@ struct AnchorAccount: Identifiable, Codable {
 extension AnchorAccount {
     func cardColor(at index: Int) -> Color {
         AnchorAccount.cardColors[index % AnchorAccount.cardColors.count]
+    }
+
+    /// Per-uid Family Mode access entry stored under `accounts/{id}.sharedWith`.
+    /// Mirrors PWA `financeTypes.SharedWithEntry`.
+    struct SharedAccess: Codable, Hashable {
+        let grantedAt: String?
+        let grantedBy: String?
+        let permission: String?     // "read" | "transact" | "manage"
     }
 }

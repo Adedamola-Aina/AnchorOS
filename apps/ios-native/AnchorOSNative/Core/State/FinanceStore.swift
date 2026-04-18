@@ -44,6 +44,21 @@ final class FinanceStore: ObservableObject {
         Array(transactions.prefix(5))
     }
 
+    // MARK: — Family Mode
+
+    /// Accounts the user has shared with their family member (or vice-versa).
+    /// Used by FamilyView and family net-worth calculations.
+    var sharedAccounts: [AnchorAccount] {
+        accounts.filter { ($0.scope ?? "personal") == "family" }
+    }
+
+    /// Family-mode net worth: sums every account regardless of scope. The
+    /// PWA composes this from `subscribeToSharedAccounts` + the user's own
+    /// accounts; on iOS the subscription already merges shared-with-me into
+    /// `accounts`, so a straight calculator call produces the same total.
+    /// Returns nil when there is no Family connection (caller decides display).
+    var familyNetWorthFormatted: String { netWorthFormatted }
+
     // MARK: — Lifecycle
 
     func start(uid: String) {

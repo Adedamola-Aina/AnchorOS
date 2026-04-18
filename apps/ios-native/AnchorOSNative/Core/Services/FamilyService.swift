@@ -78,6 +78,22 @@ final class FamilyService {
         ] as [String: Any])
     }
 
+    /// Update permission level for a member already on a shared account.
+    /// Mirrors PWA `updateSharedPermission` — writes directly to Firestore;
+    /// security rules gate the write to the account owner.
+    /// `permission`: "read" | "transact" | "manage"
+    func updateSharedPermission(
+        ownerUid: String,
+        accountId: String,
+        memberUid: String,
+        permission: String
+    ) async throws {
+        let ref = db.accountsCollection(uid: ownerUid).document(accountId)
+        try await ref.updateData([
+            "sharedWith.\(memberUid).permission": permission
+        ])
+    }
+
     /// Disconnect from the family connection.
     /// Calls `disconnectFamily` Cloud Function.
     /// `type`: "remove_member" (owner removes) | "leave" (member leaves)

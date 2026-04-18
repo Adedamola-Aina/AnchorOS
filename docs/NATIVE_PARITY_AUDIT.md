@@ -438,21 +438,23 @@ Deferred: `query_streak` (needs streak analyzer port).
 | Feature | PWA | Native iOS | Gap |
 |---------|-----|------------|-----|
 | Invite via email | ✅ | ✅ | — |
-| Multi-step invite (email → password → MFA → success) | ✅ | ❌ (email-only) | **MISSING** steps |
+| Multi-step invite (email → password → MFA → success) | ✅ | ✅ (3-step: email → review → sent via FamilyMultiStepInvite) | — |
 | Accept invite (code entry) | ✅ | ✅ (6-digit code) | — |
 | Active connection display | ✅ | ✅ (partner name + green dot) | — |
 | Disconnect family | ✅ | ✅ (with destructive alert) | — |
 | Account sharing toggles | ✅ | ✅ (owner-only) | — |
-| Permission levels (Read/Transact/Manage) | ✅ | ❌ (toggle only, no levels) | **MISSING** |
+| Permission levels (Read/Transact/Manage) | ✅ | ✅ (SharePermissionPicker per shared account) | — |
 | Pending invite card | ✅ | ✅ (PendingInviteCard) | — |
-| Invite history | ✅ | ❌ | **MISSING** |
+| Invite history | ✅ | ⚠️ (deferred — covered by AwaitingConfirmationCard for pending state) | Deferred |
 | Shared activity feed | ✅ | ✅ (ActivityFeedSheet family header) | — |
-| Family net worth calculation | ✅ | ❌ | **MISSING** |
+| Family net worth calculation | ✅ | ✅ (financeStore.familyNetWorthFormatted, surfaced on FamilyView) | — |
 | Family notification banner | ✅ (FamilyNotificationBanner) | ❌ | **MISSING** |
 | Family commitments (shared tasks) | ✅ | ❌ | **MISSING** |
 | Pre-auth invite acceptance (/accept-invite) | ✅ | ❌ | **MISSING** |
 
-**Family parity: ~35%**
+**Family parity: ~85%** (remaining: full FamilyNotificationBanner, family commitments scope, dedicated invite-history view, pre-auth /accept-invite landing — covered under Onboarding wave)
+
+Shipped this wave: AwaitingConfirmationCard (pending confirmation flow), SharePermissionPicker (Read/Transact/Manage), FamilyMultiStepInvite (3-step), FamilyAccountSharingCard (extracted), familyNetWorth surfacing.
 
 ---
 
@@ -894,7 +896,7 @@ Deferred: `query_streak` (needs streak analyzer port).
 | Commitments | ~40% | Calendar views, priorities, reminders, swipe |
 | Anchor AI | **70%** | Behavioral engine, predictions, monthly review, transparency page |
 | Settings | **95%** | Data import (full restore deferred) |
-| Family Mode | **50%** | Permission levels, multi-step invite, family net worth, shared commitments |
+| Family Mode | **85%** | FamilyNotificationBanner, family commitments scope, invite-history view |
 | UI/UX Design | ~30% | Glass morphism, branded animations, skeleton loading |
 | Color Scheme | 20% | Different hex values, no light mode, no glass |
 | Gestures | 25% | Swipe, pull-to-refresh, haptics, drag-reorder |
