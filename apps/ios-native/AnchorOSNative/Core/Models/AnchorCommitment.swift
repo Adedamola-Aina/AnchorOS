@@ -18,8 +18,10 @@ struct AnchorCommitment: Identifiable, Codable {
     let lastCompletedAt: String?
     let createdAt: String?
     let priority: String?     // "low" | "medium" | "high" | "critical"
+    let scope: String?        // "personal" | "family"
 
     var resolvedId: String { id ?? "" }
+    var isFamilyShared: Bool { (scope ?? "personal") == "family" }
 
     var typeIcon: String {
         switch type {

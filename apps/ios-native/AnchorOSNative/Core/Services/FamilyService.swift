@@ -121,6 +121,23 @@ final class FamilyService {
             }
     }
 
+    /// Subscribe to recent invite history for the current owner.
+    /// Used by FamilyInviteHistoryCard for visibility into pending / accepted / rejected invites.
+    func subscribeInviteHistory(
+        ownerUid: String,
+        onChange: @escaping ([AnchorFamilyInvitation]) -> Void
+    ) -> ListenerRegistration {
+        db.familyInvitationsCollection
+            .whereField("ownerUid", isEqualTo: ownerUid)
+            .addSnapshotListener { snap, _ in
+                let invites: [AnchorFamilyInvitation] = snap?.documents.compactMap {
+                    try? $0.data(as: AnchorFamilyInvitation.self)
+                } ?? []
+                let sorted = invites.sorted { ($0.createdAt ?? "") > ($1.createdAt ?? "") }
+                onChange(Array(sorted.prefix(10)))
+            }
+    }
+
     /// Owner confirms or rejects a pending invitation.
     /// Calls `confirmConnection` Cloud Function.
     func confirmConnection(inviteId: String, confirmed: Bool) async throws {

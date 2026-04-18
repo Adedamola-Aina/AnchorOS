@@ -57,12 +57,11 @@ struct DashboardView: View {
                     if loadTimedOut && financeStore.accounts.isEmpty && commitmentsStore.commitments.isEmpty {
                         AnchorErrorBanner()
                     } else {
-                        wealthCard
-                        DashboardFocusSection(
+                        DashboardSwipeSections(
+                            netWorthFormatted: financeStore.netWorthFormatted,
+                            accounts: financeStore.accounts,
                             metrics: productivity,
-                            todaysPriorities: todaysPriorities
-                        )
-                        DashboardStatusSection(
+                            todaysPriorities: todaysPriorities,
                             recentTransactions: financeStore.recentTransactions,
                             environment: appState.environment.rawValue,
                             healthStatus: projectStateStore.healthStatus,
@@ -151,32 +150,6 @@ struct DashboardView: View {
                 .foregroundStyle(AnchorPalette.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    // MARK: — Wealth
-
-    private var wealthCard: some View {
-        AnchorCard(title: "Net Worth", icon: "chart.pie.fill") {
-            VStack(alignment: .leading, spacing: 8) {
-                if financeStore.isLoading {
-                    ProgressView().tint(.white)
-                } else {
-                    Text(financeStore.netWorthFormatted)
-                        .font(.title).fontWeight(.bold)
-                        .foregroundStyle(AnchorPalette.textPrimary)
-                    HStack(spacing: 12) {
-                        ForEach(Array(financeStore.accounts.prefix(3).enumerated()), id: \.element.resolvedId) { idx, acc in
-                            Circle()
-                                .fill(acc.cardColor(at: idx))
-                                .frame(width: 10, height: 10)
-                            Text(acc.name)
-                                .font(.caption)
-                                .foregroundStyle(AnchorPalette.textSecondary)
-                        }
-                    }
-                }
-            }
-        }
     }
 
     // MARK: — Tasks progress is now rendered by DashboardFocusSection.

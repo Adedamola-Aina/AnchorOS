@@ -9,6 +9,7 @@ final class FamilyStore: ObservableObject {
     @Published var isLoading = true
     @Published var inviteSent = false   // true after createInvitation succeeds
     @Published var awaitingConfirmations: [AnchorFamilyInvitation] = []
+    @Published var inviteHistory: [AnchorFamilyInvitation] = []
 
     private var uid: String?
     private var listeners: [ListenerRegistration] = []
@@ -51,6 +52,14 @@ final class FamilyStore: ObservableObject {
         }
         listeners.append(awaiting)
 
+        let history = service.subscribeInviteHistory(ownerUid: uid) { [weak self] invites in
+            guard let self else { return }
+            Task { @MainActor in
+                self.inviteHistory = invites
+            }
+        }
+        listeners.append(history)
+
         // Consume any pre-auth invite token saved by AcceptInviteSheet.
         // Mirrors PWA /accept-invite redirect → auto-accept post-auth.
         consumePendingInviteToken()
@@ -85,6 +94,7 @@ final class FamilyStore: ObservableObject {
         isLoading = true
         inviteSent = false
         awaitingConfirmations = []
+        inviteHistory = []
     }
 
     // MARK: — Actions

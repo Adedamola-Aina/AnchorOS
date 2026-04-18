@@ -57,9 +57,9 @@ final class CommitmentsStore: ObservableObject {
         }
     }
 
-    func addCommitment(title: String, type: String, domain: String, timeOfDay: String?, notes: String?, priority: String? = nil) async throws {
+    func addCommitment(title: String, type: String, domain: String, timeOfDay: String?, notes: String?, priority: String? = nil, scope: String? = nil) async throws {
         guard let uid else { return }
-        try await service.addCommitment(uid: uid, title: title, type: type, domain: domain, timeOfDay: timeOfDay, notes: notes, priority: priority)
+        try await service.addCommitment(uid: uid, title: title, type: type, domain: domain, timeOfDay: timeOfDay, notes: notes, priority: priority, scope: scope)
     }
 
     func deleteCommitment(taskId: String) async throws {
@@ -67,9 +67,9 @@ final class CommitmentsStore: ObservableObject {
         try await service.deleteCommitment(uid: uid, taskId: taskId)
     }
 
-    func updateCommitment(taskId: String, title: String, type: String, domain: String, timeOfDay: String?, notes: String?, priority: String? = nil) async throws {
+    func updateCommitment(taskId: String, title: String, type: String, domain: String, timeOfDay: String?, notes: String?, priority: String? = nil, scope: String? = nil) async throws {
         guard let uid else { return }
-        try await service.updateCommitment(uid: uid, taskId: taskId, title: title, type: type, domain: domain, timeOfDay: timeOfDay, notes: notes, priority: priority)
+        try await service.updateCommitment(uid: uid, taskId: taskId, title: title, type: type, domain: domain, timeOfDay: timeOfDay, notes: notes, priority: priority, scope: scope)
     }
 
     // MARK: — Refresh (pull-to-refresh)

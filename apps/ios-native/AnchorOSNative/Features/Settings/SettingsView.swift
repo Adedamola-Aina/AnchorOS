@@ -7,6 +7,7 @@ struct SettingsView: View {
     @EnvironmentObject private var userProfileStore: UserProfileStore
     @EnvironmentObject private var familyStore: FamilyStore
     @EnvironmentObject private var financeStore: FinanceStore
+    @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @EnvironmentObject private var tabScroll: TabScrollCoordinator
     @EnvironmentObject private var theme: AnchorTheme
     @AppStorage("anchor_font_size") private var fontSize: String = "Default"
@@ -26,6 +27,7 @@ struct SettingsView: View {
     @State private var showAuthSessions = false
     @State private var showDeveloperTools = false
     @State private var showReauth = false
+    @State private var showImportSheet = false
     @State private var selectedSection: String = "Profile"
 
     private let currencies = ["NGN", "USD", "GBP", "EUR", "CAD", "AUD", "JPY", "KES", "GHS", "ZAR"]
@@ -406,6 +408,12 @@ struct SettingsView: View {
                 .environmentObject(appState)
                 .environmentObject(financeStore)
         }
+        .sheet(isPresented: $showImportSheet) {
+            DataImportSheet()
+                .environmentObject(userProfileStore)
+                .environmentObject(financeStore)
+                .environmentObject(commitmentsStore)
+        }
     }
 
     private func securityNavRow(icon: String, label: String, subtitle: String, action: @escaping () -> Void) -> some View {
@@ -501,10 +509,10 @@ struct SettingsView: View {
 
                 securityNavRow(
                     icon: "icloud.and.arrow.down",
-                    label: "Import (coming soon)",
-                    subtitle: "Restore from a previous export"
+                    label: "Import from Clipboard",
+                    subtitle: "Restore a JSON backup you previously exported"
                 ) {
-                    ToastStore.shared.show("Import will be available in a future update", style: .info)
+                    showImportSheet = true
                 }
 
                 Divider().background(AnchorPalette.cardBorder)
@@ -519,23 +527,55 @@ struct SettingsView: View {
     }
 
     private func exportData() async {
-        let snapshot: [String: Any] = [
-            "exportedAt": ISO8601DateFormatter().string(from: Date()),
-            "user": [
-                "displayName": userProfileStore.displayName,
-                "email": userProfileStore.email,
-                "currency": userProfileStore.currency
-            ],
-            "accounts": financeStore.accounts.count,
-            "transactions": financeStore.transactions.count
-        ]
-        guard let data = try? JSONSerialization.data(withJSONObject: snapshot, options: [.prettyPrinted]),
+        let snapshot = AnchorDataTransferSnapshot(
+            exportedAt: ISO8601DateFormatter().string(from: Date()),
+            user: .init(
+                displayName: userProfileStore.displayName,
+                email: userProfileStore.email,
+                currency: userProfileStore.currency
+            ),
+            accounts: financeStore.accounts.map {
+                .init(
+                    name: $0.name,
+                    type: $0.type,
+                    currency: $0.currency,
+                    balanceCents: $0.balanceCents,
+                    color: $0.color
+                )
+            },
+            transactions: financeStore.transactions.map {
+                .init(
+                    title: $0.title,
+                    amountCents: $0.amountCents,
+                    type: $0.type,
+                    category: $0.category,
+                    accountName: $0.accountName,
+                    currency: $0.currency,
+                    date: $0.date,
+                    narration: $0.narration
+                )
+            },
+            commitments: commitmentsStore.commitments.map {
+                .init(
+                    title: $0.title,
+                    type: $0.type,
+                    domain: $0.domain ?? "General",
+                    timeOfDay: $0.timeOfDay,
+                    notes: $0.notes,
+                    priority: $0.priority,
+                    scope: $0.scope
+                )
+            }
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let data = try? encoder.encode(snapshot),
               let json = String(data: data, encoding: .utf8) else {
             ToastStore.shared.show("Export failed", style: .error)
             return
         }
         UIPasteboard.general.string = json
-        ToastStore.shared.show("Export copied to clipboard", style: .success)
+        ToastStore.shared.show("Full backup copied to clipboard", style: .success)
     }
 
     // MARK: — Support

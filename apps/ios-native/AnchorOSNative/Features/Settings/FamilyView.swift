@@ -5,6 +5,7 @@ import SwiftUI
 struct FamilyView: View {
     @EnvironmentObject private var familyStore: FamilyStore
     @EnvironmentObject private var financeStore: FinanceStore
+    @EnvironmentObject private var commitmentsStore: CommitmentsStore
 
     // Accept flow
     @State private var inviteToken = ""
@@ -140,7 +141,10 @@ struct FamilyView: View {
 
     private var activeConnectionView: some View {
         VStack(spacing: 16) {
+            FamilyNotificationBanner()
             familyNetWorthBanner
+            FamilyCommitmentsCard()
+            FamilyInviteHistoryCard()
 
             // Connection status card
             AnchorCard(title: "Family Connection", icon: "person.2.fill") {

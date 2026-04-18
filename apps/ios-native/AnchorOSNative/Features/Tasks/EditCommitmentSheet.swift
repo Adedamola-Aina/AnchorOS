@@ -4,6 +4,7 @@ import SwiftUI
 /// Writes through CommitmentsStore → CommitmentService → SecureDb.
 struct EditCommitmentSheet: View {
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
+    @EnvironmentObject private var familyStore: FamilyStore
     @Environment(\.dismiss) private var dismiss
 
     let commitment: AnchorCommitment
@@ -14,6 +15,7 @@ struct EditCommitmentSheet: View {
     @State private var timeOfDay: String
     @State private var notes: String
     @State private var priority: String
+    @State private var scope: String
     @State private var isSaving = false
 
     init(commitment: AnchorCommitment) {
@@ -24,6 +26,7 @@ struct EditCommitmentSheet: View {
         _timeOfDay = State(initialValue: commitment.timeOfDay ?? "morning")
         _notes = State(initialValue: commitment.notes ?? "")
         _priority = State(initialValue: commitment.priority ?? "medium")
+        _scope = State(initialValue: commitment.scope ?? "personal")
     }
 
     private let types: [(id: String, label: String, icon: String)] = [
@@ -121,6 +124,15 @@ struct EditCommitmentSheet: View {
                         }
                     }
 
+                    if familyStore.hasConnection {
+                        formSection("Share With") {
+                            HStack(spacing: 8) {
+                                shareScopeButton("personal", label: "Personal")
+                                shareScopeButton("family", label: "Family")
+                            }
+                        }
+                    }
+
                     formSection("Notes (optional)") {
                         TextField("Any context or reminders...", text: $notes, axis: .vertical)
                             .lineLimit(3, reservesSpace: true)
@@ -186,6 +198,21 @@ struct EditCommitmentSheet: View {
         }
     }
 
+    private func shareScopeButton(_ value: String, label: String) -> some View {
+        Button {
+            scope = value
+        } label: {
+            Text(label)
+                .font(.caption).fontWeight(.semibold)
+                .foregroundStyle(scope == value ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9)
+                .background(scope == value ? AnchorPalette.chipActive : AnchorPalette.chip)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .buttonStyle(.plain)
+    }
+
     private func submit() async {
         guard canSubmit, !isSaving else { return }
         isSaving = true
@@ -198,7 +225,8 @@ struct EditCommitmentSheet: View {
                 domain: domain,
                 timeOfDay: type == "daily" ? timeOfDay : nil,
                 notes: notes.isEmpty ? nil : notes,
-                priority: priority
+                priority: priority,
+                scope: scope
             )
             ToastStore.shared.show("Commitment updated", style: .success)
             dismiss()

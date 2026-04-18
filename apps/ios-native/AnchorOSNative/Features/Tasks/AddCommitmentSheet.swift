@@ -4,6 +4,7 @@ import SwiftUI
 /// Writes through CommitmentsStore → CommitmentService → SecureDb.
 struct AddCommitmentSheet: View {
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
+    @EnvironmentObject private var familyStore: FamilyStore
     @Environment(\.dismiss) private var dismiss
 
     // Step 1: frequency
@@ -16,6 +17,7 @@ struct AddCommitmentSheet: View {
     @State private var timeOfDay: String = "morning"
     @State private var notes: String = ""
     @State private var priority: String = "medium"
+    @State private var scope: String = "personal"
     @State private var isSaving = false
 
     private let priorities: [(id: String, label: String)] = [
@@ -108,6 +110,15 @@ struct AddCommitmentSheet: View {
                     }
                 }
 
+                if familyStore.hasConnection {
+                    formSection("Share With") {
+                        HStack(spacing: 8) {
+                            shareScopeButton("personal", label: "Personal")
+                            shareScopeButton("family", label: "Family")
+                        }
+                    }
+                }
+
                 formSection("Notes (optional)") {
                     TextField("Any context or reminders...", text: $notes, axis: .vertical)
                         .lineLimit(3, reservesSpace: true)
@@ -175,6 +186,21 @@ struct AddCommitmentSheet: View {
         }
     }
 
+    private func shareScopeButton(_ value: String, label: String) -> some View {
+        Button {
+            scope = value
+        } label: {
+            Text(label)
+                .font(.caption).fontWeight(.semibold)
+                .foregroundStyle(scope == value ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9)
+                .background(scope == value ? AnchorPalette.chipActive : AnchorPalette.chip)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .buttonStyle(.plain)
+    }
+
     private func submit() async {
         guard canSubmit, !isSaving else { return }
         isSaving = true
@@ -186,7 +212,8 @@ struct AddCommitmentSheet: View {
                 domain: domain,
                 timeOfDay: type == "daily" ? timeOfDay : nil,
                 notes: notes.isEmpty ? nil : notes,
-                priority: priority
+                priority: priority,
+                scope: scope
             )
             ToastStore.shared.show("Commitment added", style: .success)
             dismiss()
