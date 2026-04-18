@@ -290,7 +290,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Task categories/domains | ✅ | ✅ (8 domains) | — |
 | Time of day (morning/afternoon/evening/any) | ✅ | ✅ (daily only) | — |
 | Notes field | ✅ | ✅ (3-line) | — |
-| Priority levels (high/medium/low) | ✅ | ✅ (low/medium/high/critical) | — |
+| Priority levels (high/medium/low) | ✅ | ✅ (low/medium/high/critical on Add + Edit) | — |
 | Task reminder time | ✅ | ❌ | **MISSING** |
 | Financial commitment linking | ✅ (prompt to log transaction) | ❌ | **MISSING** |
 | Family scope (shared tasks) | ✅ | ❌ | **MISSING** |
@@ -308,7 +308,7 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Timeline view | ✅ (TimelineView) | ❌ | **MISSING** |
 | Filter by type | ✅ | ✅ (chips: All/Daily/Weekly/Monthly/Todo) | — |
 | Filter by completion | ✅ | ✅ (Active vs Completed sections) | — |
-| Filter by priority | ✅ | ❌ | **MISSING** |
+| Filter by priority | ✅ | ✅ (All/Critical/High/Medium/Low chips) | — |
 | Collapsible completed section | ✅ | ✅ (animated) | — |
 | Progress ring | ✅ | ✅ (animated) | — |
 

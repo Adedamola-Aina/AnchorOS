@@ -6,25 +6,33 @@ struct TasksView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @State private var selectedFilter: String = "All"
+    @State private var selectedPriority: String = "All"
     @State private var completedExpanded: Bool = false
     @State private var showAddCommitment = false
     @State private var taskToEdit: AnchorCommitment?
     @State private var loadTimedOut = false
 
     private let filters = ["All", "Daily", "Weekly", "Monthly", "Todo"]
+    /// Parity: PWA TaskList priority filter (src/features/commitments/components/TaskList.tsx).
+    private let priorityFilters = ["All", "Critical", "High", "Medium", "Low"]
+
+    private func matchesPriority(_ task: AnchorCommitment) -> Bool {
+        guard selectedPriority != "All" else { return true }
+        return (task.priority ?? "medium").lowercased() == selectedPriority.lowercased()
+    }
 
     private var activeFiltered: [AnchorCommitment] {
         let base = selectedFilter == "All" ? commitmentsStore.commitments : commitmentsStore.commitments.filter {
             $0.type.lowercased() == selectedFilter.lowercased()
         }
-        return base.filter { !$0.completed }
+        return base.filter { !$0.completed && matchesPriority($0) }
     }
 
     private var completedFiltered: [AnchorCommitment] {
         let base = selectedFilter == "All" ? commitmentsStore.commitments : commitmentsStore.commitments.filter {
             $0.type.lowercased() == selectedFilter.lowercased()
         }
-        return base.filter { $0.completed }
+        return base.filter { $0.completed && matchesPriority($0) }
     }
 
     var body: some View {
@@ -45,6 +53,33 @@ struct TasksView: View {
                                         .padding(.horizontal, 16).padding(.vertical, 8)
                                         .background(selectedFilter == f ? AnchorPalette.chipActive : AnchorPalette.chip)
                                         .clipShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+                                .anchorPressable()
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // Priority filter chips — parity with PWA TaskList
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(priorityFilters, id: \.self) { p in
+                                Button {
+                                    selectedPriority = p
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        if p != "All" {
+                                            Image(systemName: priorityIcon(p))
+                                                .font(.caption2)
+                                        }
+                                        Text(p.uppercased())
+                                            .font(.caption2).fontWeight(.bold)
+                                    }
+                                    .foregroundStyle(selectedPriority == p ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                                    .padding(.horizontal, 12).padding(.vertical, 6)
+                                    .background(selectedPriority == p ? AnchorPalette.chipActive : AnchorPalette.chip)
+                                    .clipShape(Capsule())
                                 }
                                 .buttonStyle(.plain)
                                 .anchorPressable()
@@ -187,5 +222,16 @@ struct TasksView: View {
             onToggle: { Task { await commitmentsStore.toggleCompleted(taskId: task.resolvedId) } },
             onTap: { taskToEdit = task }
         )
+    }
+
+    /// Mirrors AnchorCommitment.priorityIcon for filter chip display.
+    private func priorityIcon(_ p: String) -> String {
+        switch p.lowercased() {
+        case "critical": return "exclamationmark.2"
+        case "high":     return "exclamationmark"
+        case "medium":   return "minus"
+        case "low":      return "arrow.down"
+        default:         return "circle"
+        }
     }
 }

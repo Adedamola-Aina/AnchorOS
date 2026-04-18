@@ -13,6 +13,7 @@ struct EditCommitmentSheet: View {
     @State private var domain: String
     @State private var timeOfDay: String
     @State private var notes: String
+    @State private var priority: String
     @State private var isSaving = false
 
     init(commitment: AnchorCommitment) {
@@ -22,6 +23,7 @@ struct EditCommitmentSheet: View {
         _domain = State(initialValue: commitment.domain ?? "Personal Development")
         _timeOfDay = State(initialValue: commitment.timeOfDay ?? "morning")
         _notes = State(initialValue: commitment.notes ?? "")
+        _priority = State(initialValue: commitment.priority ?? "medium")
     }
 
     private let types: [(id: String, label: String, icon: String)] = [
@@ -37,6 +39,13 @@ struct EditCommitmentSheet: View {
     ]
 
     private let timesOfDay = ["morning", "afternoon", "evening", "anytime"]
+
+    private let priorities: [(id: String, label: String)] = [
+        ("low", "Low"),
+        ("medium", "Medium"),
+        ("high", "High"),
+        ("critical", "Critical")
+    ]
 
     private var canSubmit: Bool {
         !title.trimmingCharacters(in: .whitespaces).isEmpty
@@ -120,6 +129,23 @@ struct EditCommitmentSheet: View {
                             .background(AnchorPalette.chip.opacity(0.6))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
+
+                    formSection("Priority") {
+                        HStack(spacing: 8) {
+                            ForEach(priorities, id: \.id) { p in
+                                Button { priority = p.id } label: {
+                                    Text(p.label)
+                                        .font(.caption).fontWeight(.semibold)
+                                        .foregroundStyle(priority == p.id ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 9)
+                                        .background(priority == p.id ? AnchorPalette.chipActive : AnchorPalette.chip)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
                 }
                 .padding(20)
             }
@@ -171,7 +197,8 @@ struct EditCommitmentSheet: View {
                 type: type,
                 domain: domain,
                 timeOfDay: type == "daily" ? timeOfDay : nil,
-                notes: notes.isEmpty ? nil : notes
+                notes: notes.isEmpty ? nil : notes,
+                priority: priority
             )
             ToastStore.shared.show("Commitment updated", style: .success)
             dismiss()
