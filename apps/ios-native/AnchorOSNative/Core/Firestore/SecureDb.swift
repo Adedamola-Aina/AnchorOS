@@ -57,6 +57,9 @@ final class SecureDb {
     var familyConnectionsCollection: CollectionReference {
         db.collection("\(Self.root)/family_connections")
     }
+    var familyInvitationsCollection: CollectionReference {
+        db.collection("\(Self.root)/family_invitations")
+    }
     func userMoodDocument(uid: String) -> DocumentReference {
         db.document("\(Self.root)/users/\(uid)/fabric/mood")
     }

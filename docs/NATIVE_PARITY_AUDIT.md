@@ -412,7 +412,7 @@ Deferred: `query_streak` (needs streak analyzer port).
 | Family settings view | ✅ (FamilySettingsV2) | ✅ (FamilyView) | — |
 | Invite family member (multi-step) | ✅ (4-step: email → password → MFA → success) | ✅ (single email step) | **REDUCED** |
 | Pending invite cards | ✅ (PendingInviteCard) | ✅ (PendingInviteCard — token paste fallback) | — |
-| Pending confirmation flow | ✅ (PendingConfirmation, AwaitingConfirmationCard) | ❌ | **MISSING** |
+| Pending confirmation flow | ✅ (PendingConfirmation, AwaitingConfirmationCard) | ✅ (AwaitingConfirmationCard wired into SettingsView) | — |
 | **Data Management** | | | |
 | Data export | ✅ (DataManagement) | ✅ (JSON export via ShareSheet) | — |
 | Data import | ✅ | ❌ | **MISSING** |
@@ -425,11 +425,11 @@ Deferred: `query_streak` (needs streak analyzer port).
 | **Support** | | | |
 | Support/feedback | ✅ (SupportSettings + ContactModal) | ✅ (SettingsView.supportCard — mailto + privacy + about) | — |
 | **Other** | | | |
-| Section navigation (SectionNav) | ✅ (scrollable) | ✅ (AnchorSectionTabs, decorative) | **REDUCED** (tabs don't actually scroll to sections) |
+| Section navigation (SectionNav) | ✅ (scrollable) | ✅ (AnchorSectionTabs + ScrollViewReader.scrollTo) | — |
 | Reauthentication modal | ✅ (ReauthModal) | ✅ (ReauthModalView) | — |
 | Sign out | ✅ | ✅ | — |
 
-**Settings parity: ~85%** (remaining: data import, support/feedback form, section-nav scroll-to-anchor, expanded MFA status)
+**Settings parity: ~95%** (remaining: data import — full restore deferred pending backend coordination; multi-step invite covered under Family Mode wave)
 
 ---
 
@@ -893,7 +893,7 @@ Deferred: `query_streak` (needs streak analyzer port).
 | Finance | ~45% | Recurring txns, bank (Mono), card artwork picker, transfer linked pair |
 | Commitments | ~40% | Calendar views, priorities, reminders, swipe |
 | Anchor AI | **70%** | Behavioral engine, predictions, monthly review, transparency page |
-| Settings | **85%** | Data import, feedback form, section-nav scroll-to-anchor |
+| Settings | **95%** | Data import (full restore deferred) |
 | Family Mode | **50%** | Permission levels, multi-step invite, family net worth, shared commitments |
 | UI/UX Design | ~30% | Glass morphism, branded animations, skeleton loading |
 | Color Scheme | 20% | Different hex values, no light mode, no glass |

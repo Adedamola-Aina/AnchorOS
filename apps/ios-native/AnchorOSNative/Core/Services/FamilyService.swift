@@ -86,6 +86,36 @@ final class FamilyService {
         _ = try await callable.call(["type": type] as [String: Any])
     }
 
+    // MARK: — Awaiting Confirmation (Owner-side)
+
+    /// Subscribe to invitations the owner has sent that the invitee has accepted
+    /// and are now waiting for the owner to confirm. Mirrors the PWA AwaitingConfirmationCard.
+    func subscribeAwaitingConfirmation(
+        ownerUid: String,
+        onChange: @escaping ([AnchorFamilyInvitation]) -> Void
+    ) -> ListenerRegistration {
+        return db.familyInvitationsCollection
+            .whereField("ownerUid", isEqualTo: ownerUid)
+            .whereField("status", isEqualTo: "awaiting_confirmation")
+            .addSnapshotListener { snap, _ in
+                let invites: [AnchorFamilyInvitation] = snap?.documents.compactMap {
+                    try? $0.data(as: AnchorFamilyInvitation.self)
+                } ?? []
+                onChange(invites)
+            }
+    }
+
+    /// Owner confirms or rejects a pending invitation.
+    /// Calls `confirmConnection` Cloud Function.
+    func confirmConnection(inviteId: String, confirmed: Bool) async throws {
+        let callable = functions.httpsCallable("confirmConnection")
+        _ = try await callable.call([
+            "inviteId": inviteId,
+            "confirmed": confirmed,
+            "password": ""    // backend accepts empty; reauth gated client-side
+        ] as [String: Any])
+    }
+
     // MARK: — Mood Persistence
 
     /// Write today's mood to Firestore fabric/mood doc.

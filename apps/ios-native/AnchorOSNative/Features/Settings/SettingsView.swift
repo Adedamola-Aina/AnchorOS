@@ -48,6 +48,7 @@ struct SettingsView: View {
                         )
                         profileCard.id("Profile")
                         familyNavCard.id("Family")
+                        AwaitingConfirmationCard()
                         PendingInviteCard()
                         appearanceCard.id("Theme")
                         securityCard.id("Security")

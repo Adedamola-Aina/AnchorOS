@@ -8,6 +8,7 @@ final class FamilyStore: ObservableObject {
     @Published var connection: AnchorFamilyConnection?
     @Published var isLoading = true
     @Published var inviteSent = false   // true after createInvitation succeeds
+    @Published var awaitingConfirmations: [AnchorFamilyInvitation] = []
 
     private var uid: String?
     private var listeners: [ListenerRegistration] = []
@@ -41,6 +42,14 @@ final class FamilyStore: ObservableObject {
             }
         }
         listeners = registered
+
+        let awaiting = service.subscribeAwaitingConfirmation(ownerUid: uid) { [weak self] invites in
+            guard let self else { return }
+            Task { @MainActor in
+                self.awaitingConfirmations = invites
+            }
+        }
+        listeners.append(awaiting)
     }
 
     func stop() {
@@ -50,6 +59,7 @@ final class FamilyStore: ObservableObject {
         connection = nil
         isLoading = true
         inviteSent = false
+        awaitingConfirmations = []
     }
 
     // MARK: — Actions
@@ -74,5 +84,11 @@ final class FamilyStore: ObservableObject {
     func disconnect() async throws {
         let type = isOwner ? "remove_member" : "leave"
         try await service.disconnectFamily(type: type)
+    }
+
+    /// Owner confirms (or rejects) a pending family invitation that the
+    /// invitee has accepted. Calls `confirmConnection` Cloud Function.
+    func confirmConnection(inviteId: String, confirmed: Bool) async throws {
+        try await service.confirmConnection(inviteId: inviteId, confirmed: confirmed)
     }
 }
