@@ -14,6 +14,7 @@ struct AnchorOSNativeApp: App {
     @StateObject private var recurringStore = AnchorRecurringStore()
     @StateObject private var patternsStore = AnchorPatternsStore()
     @StateObject private var theme = AnchorTheme()
+    @StateObject private var platformIntegration = PlatformIntegrationService()
 
     init() {
         FirebaseApp.configure()
@@ -41,6 +42,12 @@ struct AnchorOSNativeApp: App {
                 .environmentObject(fabricStore)
                 .environmentObject(recurringStore)
                 .environmentObject(patternsStore)
+                .onOpenURL { url in
+                    platformIntegration.handleIncomingURL(url)
+                }
+                .task {
+                    await platformIntegration.requestNotificationPermission()
+                }
                 .onChange(of: appState.isAuthenticated) { _, authenticated in
                     if authenticated, let uid = appState.currentUID {
                         financeStore.start(uid: uid)

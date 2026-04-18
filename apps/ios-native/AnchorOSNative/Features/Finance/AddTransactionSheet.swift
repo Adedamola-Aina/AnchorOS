@@ -10,6 +10,7 @@ struct AddTransactionSheet: View {
     @State private var amountText: String = ""
     @State private var type: String = "expense"   // expense | income | transfer
     @State private var selectedAccountId: String = ""
+    @State private var destinationAccountId: String = ""
     @State private var selectedCategory: String = "General"
     @State private var transactionDate: Date = Date()
     @State private var showDatePicker: Bool = false
@@ -47,7 +48,8 @@ struct AddTransactionSheet: View {
     private var canSubmit: Bool {
         !title.trimmingCharacters(in: .whitespaces).isEmpty &&
         amountCents > 0 &&
-        !selectedAccountId.isEmpty
+        !selectedAccountId.isEmpty &&
+        (type != "transfer" || (!destinationAccountId.isEmpty && destinationAccountId != selectedAccountId))
     }
 
     /// Parity: PWA TransactionForm overdraft check (src/features/finance/TransactionForm.tsx line 105).
@@ -156,7 +158,7 @@ struct AddTransactionSheet: View {
                         .animation(.easeInOut(duration: 0.25), value: isOverdraft)
                     }
 
-                    formSection("Account") {
+                    formSection(type == "transfer" ? "From Account" : "Account") {
                         if activeAccounts.isEmpty {
                             Text("No accounts yet. Create one first.")
                                 .foregroundStyle(AnchorPalette.textSecondary)
@@ -165,6 +167,16 @@ struct AddTransactionSheet: View {
                             VStack(spacing: 8) {
                                 ForEach(activeAccounts) { acc in
                                     accountRow(acc)
+                                }
+                            }
+                        }
+                    }
+
+                    if type == "transfer" {
+                        formSection("To Account") {
+                            VStack(spacing: 8) {
+                                ForEach(activeAccounts.filter { $0.resolvedId != selectedAccountId }) { acc in
+                                    destinationAccountRow(acc)
                                 }
                             }
                         }
@@ -281,6 +293,7 @@ struct AddTransactionSheet: View {
     private func accountRow(_ account: AnchorAccount) -> some View {
         Button {
             selectedAccountId = account.resolvedId
+            if destinationAccountId == account.resolvedId { destinationAccountId = "" }
         } label: {
             HStack {
                 Circle()
@@ -300,6 +313,30 @@ struct AddTransactionSheet: View {
             }
             .padding(12)
             .background(selectedAccountId == account.resolvedId ? AnchorPalette.chipActive.opacity(0.12) : AnchorPalette.chip.opacity(0.4))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func destinationAccountRow(_ account: AnchorAccount) -> some View {
+        Button {
+            destinationAccountId = account.resolvedId
+        } label: {
+            HStack {
+                Circle()
+                    .fill(AnchorAccount.cardColors[financeStore.accounts.firstIndex(where: { $0.resolvedId == account.resolvedId }) ?? 0 % AnchorAccount.cardColors.count])
+                    .frame(width: 10, height: 10)
+                Text(account.name)
+                    .foregroundStyle(AnchorPalette.textPrimary)
+                    .font(.subheadline)
+                Spacer()
+                if destinationAccountId == account.resolvedId {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(AnchorPalette.success)
+                }
+            }
+            .padding(12)
+            .background(destinationAccountId == account.resolvedId ? AnchorPalette.success.opacity(0.12) : AnchorPalette.chip.opacity(0.4))
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
@@ -332,7 +369,8 @@ struct AddTransactionSheet: View {
                 date: iso.string(from: transactionDate),
                 isRecurring: isRecurring,
                 recurringFrequency: isRecurring ? recurringFrequency : nil,
-                narration: narration
+                narration: narration,
+                destinationAccountId: destinationAccountId.isEmpty ? nil : destinationAccountId
             )
             // Parity: useHaptic('success') = vibrate([15,50,15]).
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()

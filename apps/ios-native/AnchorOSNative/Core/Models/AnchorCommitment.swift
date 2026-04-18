@@ -13,6 +13,7 @@ struct AnchorCommitment: Identifiable, Codable {
     let domain: String?
     let timeOfDay: String?
     let notes: String?
+    let reminderTime: String?
     let currentStreak: Int?
     let longestStreak: Int?
     let lastCompletedAt: String?

@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseFirestore
+import SwiftUI
 
 /// Live recurring-transactions state for the current user.
 ///
@@ -43,5 +44,16 @@ final class AnchorRecurringStore: ObservableObject {
         listener = nil
         recurring = []
         isLoading = false
+    }
+
+    func updateStatus(recurringId: String, status: String) async {
+        do {
+            try await db.collection("\(SecureDb.root)/recurring_transactions")
+                .document(recurringId)
+                .updateData(["status": status])
+            ToastStore.shared.show(status == "active" ? "Recurring resumed" : "Recurring paused", style: .success)
+        } catch {
+            ToastStore.shared.show("Couldn't update recurring rule", style: .error)
+        }
     }
 }

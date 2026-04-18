@@ -18,6 +18,8 @@ struct FinanceView: View {
     @State private var showSummarySheet = false
     @State private var showSearchSheet = false
     @State private var showChartsSheet = false
+    @State private var showRecurringSheet = false
+    @State private var showBankSheet = false
 
     private var monthLabel: String {
         guard let date = Calendar.current.date(byAdding: .month, value: monthOffset, to: Date()) else { return "" }
@@ -54,6 +56,9 @@ struct FinanceView: View {
                     totalAssetsBar
                     if loadTimedOut && financeStore.accounts.isEmpty {
                         AnchorErrorBanner()
+                            .padding(16)
+                    } else if financeStore.isLoading {
+                        LoadingBoundary(isLoading: true, skeleton: .finance) { EmptyView() }
                             .padding(16)
                     } else {
                     WalletCardStack(
@@ -115,6 +120,20 @@ struct FinanceView: View {
                         }
                         .anchorPressable()
                         .accessibilityLabel("Charts")
+                        Button { showRecurringSheet = true } label: {
+                            Image(systemName: "repeat")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                        }
+                        .anchorPressable()
+                        .accessibilityLabel("Recurring rules")
+                        Button { showBankSheet = true } label: {
+                            Image(systemName: "building.columns")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                        }
+                        .anchorPressable()
+                        .accessibilityLabel("Bank connection")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -172,6 +191,13 @@ struct FinanceView: View {
                 )
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showRecurringSheet) {
+                RecurringRulesSheet()
+                    .environmentObject(recurringStore)
+            }
+            .sheet(isPresented: $showBankSheet) {
+                BankConnectionSheet()
             }
             .alert("Delete Account?", isPresented: $showDeleteAccountAlert, presenting: accountToDelete) { acc in
                 Button("Delete", role: .destructive) {

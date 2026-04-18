@@ -8,6 +8,8 @@ struct AnchorAIView: View {
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
     @EnvironmentObject private var fabricStore: AnchorFabricStore
     @State private var selectedMood: Int? = nil
+    @State private var showMonthlyReview = false
+    @State private var showTransparency = false
 
     private let moodService = FamilyService()
 
@@ -109,6 +111,14 @@ struct AnchorAIView: View {
                         AnchorAIInsightsCard(insights: insights)
                     }
 
+                    HStack(spacing: 10) {
+                        Button("Monthly Review") { showMonthlyReview = true }
+                            .buttonStyle(.borderedProminent)
+                            .tint(AnchorPalette.chipActive)
+                        Button("Transparency") { showTransparency = true }
+                            .buttonStyle(.bordered)
+                    }
+
                     FabricWeeklySnapshotSection(report: fabricStore.weeklyReport)
                 }
                 .padding(16)
@@ -117,6 +127,14 @@ struct AnchorAIView: View {
             .background(AnchorBackground())
             .navigationTitle("Anchor AI")
             .navigationBarTitleDisplayMode(.large)
+            .sheet(isPresented: $showMonthlyReview) {
+                MonthlyReviewSheet()
+                    .environmentObject(financeStore)
+                    .environmentObject(commitmentsStore)
+            }
+            .sheet(isPresented: $showTransparency) {
+                FabricTransparencySheet()
+            }
         }
         .fadeInOnAppear(duration: 0.3) // Parity: PWA FabricView `animate-in fade-in` 300ms ease.
     }

@@ -47,11 +47,13 @@ struct RootTabView: View {
             ZStack(alignment: .bottom) {
                 VStack(spacing: 0) {
                     EnvironmentBanner(environment: appState.environment)
+                    OfflineIndicator()
 
                     TabView(selection: tabBinding) {
                         DashboardView()
                             .tabItem {
                                 Image(systemName: "house")
+                                    .symbolEffect(.bounce, value: appState.selectedTab)
                                 Text("Home")
                             }
                             .tag(0)
@@ -59,6 +61,7 @@ struct RootTabView: View {
                         TasksView()
                             .tabItem {
                                 Image(systemName: "checkmark.circle")
+                                    .symbolEffect(.bounce, value: appState.selectedTab)
                                 Text("Tasks")
                             }
                             .tag(1)
@@ -66,6 +69,7 @@ struct RootTabView: View {
                         AnchorAIView()
                             .tabItem {
                                 Image(systemName: "dot.radiowaves.left.and.right")
+                                    .symbolEffect(.bounce, value: appState.selectedTab)
                                 Text("Anchor")
                             }
                             .tag(2)
@@ -73,6 +77,7 @@ struct RootTabView: View {
                         FinanceView()
                             .tabItem {
                                 Image(systemName: "creditcard")
+                                    .symbolEffect(.bounce, value: appState.selectedTab)
                                 Text("Finance")
                             }
                             .tag(3)
@@ -80,6 +85,7 @@ struct RootTabView: View {
                         SettingsView()
                             .tabItem {
                                 Image(systemName: "gearshape")
+                                    .symbolEffect(.bounce, value: appState.selectedTab)
                                 Text("Settings")
                             }
                             .tag(4)

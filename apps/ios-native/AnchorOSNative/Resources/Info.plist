@@ -25,5 +25,20 @@
   <array>
     <string>UIInterfaceOrientationPortrait</string>
   </array>
+  <key>NSFaceIDUsageDescription</key>
+  <string>Anchor OS uses Face ID to protect access to your financial data.</string>
+  <key>NSCameraUsageDescription</key>
+  <string>Anchor OS may use the camera for receipt capture and identity verification.</string>
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>com.anchoros.native</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>anchoros</string>
+      </array>
+    </dict>
+  </array>
 </dict>
 </plist>

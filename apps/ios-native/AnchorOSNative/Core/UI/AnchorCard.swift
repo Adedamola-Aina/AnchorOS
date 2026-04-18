@@ -19,20 +19,24 @@ struct AnchorCard<Content: View>: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            LinearGradient(
-                colors: [
-                    AnchorPalette.card.opacity(0.98),
-                    AnchorPalette.card.opacity(0.92)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            ZStack {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(.ultraThinMaterial)
+                LinearGradient(
+                    colors: [
+                        AnchorPalette.glassBg,
+                        AnchorPalette.card.opacity(0.88)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(AnchorPalette.cardBorder, lineWidth: 1)
+                .stroke(AnchorPalette.glassBorder, lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }

@@ -38,7 +38,8 @@ final class CommitmentService {
         timeOfDay: String?,
         notes: String?,
         priority: String? = nil,
-        scope: String? = nil
+        scope: String? = nil,
+        reminderTime: String? = nil
     ) async throws {
         var data: [String: Any] = [
             "title": title,
@@ -50,6 +51,7 @@ final class CommitmentService {
         if let n = notes, !n.isEmpty { data["notes"] = n }
         if let p = priority, !p.isEmpty { data["priority"] = p }
         if let s = scope, !s.isEmpty { data["scope"] = s }
+        if let r = reminderTime, !r.isEmpty { data["reminderTime"] = r }
         try await db.addDocument(uid: uid, collection: "commitments", data: data)
     }
 
@@ -62,7 +64,8 @@ final class CommitmentService {
         timeOfDay: String?,
         notes: String?,
         priority: String? = nil,
-        scope: String? = nil
+        scope: String? = nil,
+        reminderTime: String? = nil
     ) async throws {
         var data: [String: Any] = [
             "title": title,
@@ -73,6 +76,7 @@ final class CommitmentService {
         if let n = notes, !n.isEmpty { data["notes"] = n }
         if let p = priority { data["priority"] = p }
         if let s = scope { data["scope"] = s }
+        if let r = reminderTime { data["reminderTime"] = r }
         // Routes through SecureDb — updatedAt/updatedBy added centrally.
         try await db.updateDocument(uid: uid, path: ["commitments", taskId], data: data)
     }

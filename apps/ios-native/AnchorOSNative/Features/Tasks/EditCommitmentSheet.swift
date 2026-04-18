@@ -16,6 +16,8 @@ struct EditCommitmentSheet: View {
     @State private var notes: String
     @State private var priority: String
     @State private var scope: String
+    @State private var remindersEnabled: Bool
+    @State private var reminderTime: Date
     @State private var isSaving = false
 
     init(commitment: AnchorCommitment) {
@@ -27,6 +29,9 @@ struct EditCommitmentSheet: View {
         _notes = State(initialValue: commitment.notes ?? "")
         _priority = State(initialValue: commitment.priority ?? "medium")
         _scope = State(initialValue: commitment.scope ?? "personal")
+        _remindersEnabled = State(initialValue: commitment.reminderTime != nil)
+        let parsedTime = DateFormatter.shortTime.date(from: commitment.reminderTime ?? "08:00") ?? (Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date())
+        _reminderTime = State(initialValue: parsedTime)
     }
 
     private let types: [(id: String, label: String, icon: String)] = [
@@ -133,6 +138,15 @@ struct EditCommitmentSheet: View {
                         }
                     }
 
+                    formSection("Reminder") {
+                        Toggle("Daily reminder", isOn: $remindersEnabled)
+                            .tint(AnchorPalette.chipActive)
+                        if remindersEnabled {
+                            DatePicker("Time", selection: $reminderTime, displayedComponents: [.hourAndMinute])
+                                .tint(AnchorPalette.chipActive)
+                        }
+                    }
+
                     formSection("Notes (optional)") {
                         TextField("Any context or reminders...", text: $notes, axis: .vertical)
                             .lineLimit(3, reservesSpace: true)
@@ -218,16 +232,24 @@ struct EditCommitmentSheet: View {
         isSaving = true
         defer { isSaving = false }
         do {
+            let trimmedTitle = title.trimmingCharacters(in: .whitespaces)
+            let reminderValue = remindersEnabled ? DateFormatter.shortTime.string(from: reminderTime) : nil
             try await commitmentsStore.updateCommitment(
                 taskId: commitment.resolvedId,
-                title: title.trimmingCharacters(in: .whitespaces),
+                title: trimmedTitle,
                 type: type,
                 domain: domain,
                 timeOfDay: type == "daily" ? timeOfDay : nil,
                 notes: notes.isEmpty ? nil : notes,
                 priority: priority,
-                scope: scope
+                scope: scope,
+                reminderTime: reminderValue
             )
+            if remindersEnabled {
+                await TaskReminderService.schedule(title: trimmedTitle, taskId: commitment.resolvedId, time: reminderTime)
+            } else {
+                TaskReminderService.cancel(taskId: commitment.resolvedId)
+            }
             ToastStore.shared.show("Commitment updated", style: .success)
             dismiss()
         } catch {

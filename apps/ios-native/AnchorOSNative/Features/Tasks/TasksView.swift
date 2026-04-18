@@ -5,7 +5,9 @@ import SwiftUI
 struct TasksView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var commitmentsStore: CommitmentsStore
+    @EnvironmentObject private var familyStore: FamilyStore
     @State private var selectedFilter: String = "All"
+    @State private var viewMode: String = "List"
     @State private var selectedPriority: String = "All"
     @State private var completedExpanded: Bool = false
     @State private var showAddCommitment = false
@@ -48,14 +50,19 @@ struct TasksView: View {
                         priorityFilters: priorityFilters
                     )
 
+                    TaskPlanningModesCard(
+                        mode: $viewMode,
+                        tasks: commitmentsStore.commitments
+                    )
+
                     progressCard
 
                     // Active tasks section
                     if commitmentsStore.isLoading {
-                        ProgressView().tint(.white).frame(maxWidth: .infinity)
+                        LoadingBoundary(isLoading: true, skeleton: .commitments) { EmptyView() }
                     } else if loadTimedOut && commitmentsStore.commitments.isEmpty {
                         AnchorErrorBanner()
-                    } else {
+                    } else if viewMode == "List" {
                         activeSectionCard
                         if !completedFiltered.isEmpty {
                             completedSectionCard
@@ -82,10 +89,12 @@ struct TasksView: View {
             .sheet(isPresented: $showAddCommitment) {
                 AddCommitmentSheet()
                     .environmentObject(commitmentsStore)
+                    .environmentObject(familyStore)
             }
             .sheet(item: $taskToEdit) { task in
                 EditCommitmentSheet(commitment: task)
                     .environmentObject(commitmentsStore)
+                    .environmentObject(familyStore)
             }
             .refreshable { await commitmentsStore.refresh() }
             .task {

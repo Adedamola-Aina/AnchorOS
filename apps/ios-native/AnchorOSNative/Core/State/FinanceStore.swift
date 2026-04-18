@@ -112,16 +112,46 @@ final class FinanceStore: ObservableObject {
         date: String? = nil,
         isRecurring: Bool = false,
         recurringFrequency: String? = nil,
-        narration: String? = nil
+        narration: String? = nil,
+        destinationAccountId: String? = nil
     ) async throws {
         guard let uid else { return }
         let accountName = accounts.first(where: { $0.resolvedId == accountId })?.name
-        try await transactionService.addTransaction(
-            uid: uid, title: title, amountCents: amountCents, type: type,
-            category: category, accountId: accountId, accountName: accountName, currency: currency,
-            date: date, isRecurring: isRecurring, recurringFrequency: recurringFrequency,
-            narration: narration
-        )
+
+        if type == "transfer", let destinationAccountId, destinationAccountId != accountId {
+            let destinationName = accounts.first(where: { $0.resolvedId == destinationAccountId })?.name
+            try await transactionService.addTransaction(
+                uid: uid,
+                title: "Transfer to \(destinationName ?? "Account")",
+                amountCents: amountCents,
+                type: "expense",
+                category: nil,
+                accountId: accountId,
+                accountName: accountName,
+                currency: currency,
+                date: date,
+                narration: narration
+            )
+            try await transactionService.addTransaction(
+                uid: uid,
+                title: "Transfer from \(accountName ?? "Account")",
+                amountCents: amountCents,
+                type: "income",
+                category: nil,
+                accountId: destinationAccountId,
+                accountName: destinationName,
+                currency: currency,
+                date: date,
+                narration: narration
+            )
+        } else {
+            try await transactionService.addTransaction(
+                uid: uid, title: title, amountCents: amountCents, type: type,
+                category: category, accountId: accountId, accountName: accountName, currency: currency,
+                date: date, isRecurring: isRecurring, recurringFrequency: recurringFrequency,
+                narration: narration
+            )
+        }
     }
 
     func deleteTransaction(transactionId: String) async throws {

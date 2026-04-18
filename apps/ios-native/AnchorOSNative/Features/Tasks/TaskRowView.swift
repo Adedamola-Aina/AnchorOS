@@ -103,6 +103,9 @@ struct TaskRowView: View {
             isAnimating = true
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             onToggle()
+            if (task.domain ?? "").lowercased() == "financial" {
+                ToastStore.shared.show("Financial task done — you can log the matching transaction in Finance", style: .info)
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 isAnimating = false
             }

@@ -18,6 +18,8 @@ struct AddCommitmentSheet: View {
     @State private var notes: String = ""
     @State private var priority: String = "medium"
     @State private var scope: String = "personal"
+    @State private var remindersEnabled: Bool = false
+    @State private var reminderTime: Date = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
     @State private var isSaving = false
 
     private let priorities: [(id: String, label: String)] = [
@@ -119,6 +121,15 @@ struct AddCommitmentSheet: View {
                     }
                 }
 
+                formSection("Reminder") {
+                    Toggle("Daily reminder", isOn: $remindersEnabled)
+                        .tint(AnchorPalette.chipActive)
+                    if remindersEnabled {
+                        DatePicker("Time", selection: $reminderTime, displayedComponents: [.hourAndMinute])
+                            .tint(AnchorPalette.chipActive)
+                    }
+                }
+
                 formSection("Notes (optional)") {
                     TextField("Any context or reminders...", text: $notes, axis: .vertical)
                         .lineLimit(3, reservesSpace: true)
@@ -206,15 +217,21 @@ struct AddCommitmentSheet: View {
         isSaving = true
         defer { isSaving = false }
         do {
+            let trimmedTitle = title.trimmingCharacters(in: .whitespaces)
+            let reminderValue = remindersEnabled ? DateFormatter.shortTime.string(from: reminderTime) : nil
             try await commitmentsStore.addCommitment(
-                title: title.trimmingCharacters(in: .whitespaces),
+                title: trimmedTitle,
                 type: type,
                 domain: domain,
                 timeOfDay: type == "daily" ? timeOfDay : nil,
                 notes: notes.isEmpty ? nil : notes,
                 priority: priority,
-                scope: scope
+                scope: scope,
+                reminderTime: reminderValue
             )
+            if remindersEnabled, let added = commitmentsStore.commitments.first(where: { $0.title == trimmedTitle }) {
+                await TaskReminderService.schedule(title: trimmedTitle, taskId: added.resolvedId, time: reminderTime)
+            }
             ToastStore.shared.show("Commitment added", style: .success)
             dismiss()
         } catch {
