@@ -269,7 +269,7 @@ jobs:
           fi
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-report
@@ -304,7 +304,7 @@ jobs:
         run: npm run test:e2e
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
@@ -336,7 +336,7 @@ jobs:
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
 
       - name: Upload Stryker report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: stryker-report
@@ -485,7 +485,7 @@ jobs:
         run: npm run build:dev
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dev-build
           path: dist/
@@ -548,7 +548,7 @@ jobs:
         run: npm run build:staging
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: staging-build
           path: dist/
@@ -611,7 +611,7 @@ jobs:
         run: npm run build:production
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: production-build
           path: dist/
@@ -659,7 +659,7 @@ jobs:
         run: npm run lighthouse
 
       - name: Upload Lighthouse report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: lighthouse-report
