@@ -24,7 +24,7 @@ struct DashboardStatusSection: View {
                     .foregroundStyle(AnchorPalette.textSecondary).font(.subheadline)
             } else {
                 VStack(spacing: 8) {
-                    ForEach(recentTransactions.prefix(3)) { tx in
+                    ForEach(recentTransactions.prefix(5)) { tx in
                         activityRow(tx)
                     }
                 }

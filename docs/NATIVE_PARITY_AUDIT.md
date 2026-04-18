@@ -161,18 +161,18 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Asset allocation widget | ✅ (full chart) | ✅ (AssetDistributionChart) | — |
 | Asset distribution chart | ✅ (pie/donut chart) | ✅ (AssetDistributionChart via SwiftUI Charts) | — |
 | Cash flow chart | ✅ (line/bar chart) | ✅ (CashFlowChart via SwiftUI Charts) | — |
-| Productivity score card | ✅ | ❌ | **MISSING** |
+| Productivity score card | ✅ | ✅ (DashboardFocusSection.metrics via ProductivityCalculator) | — |
 | Completion ring (tasks) | ✅ | ✅ (animated ring) | — |
 | Beyond Basics checklist | ✅ (6 items) | ✅ (BeyondBasicsCard) | — |
-| Recent activity list | ✅ | ✅ (3 transactions) | **REDUCED** (PWA shows more) |
+| Recent activity list | ✅ | ✅ (5 transactions) | — |
 | Quick-add menu | ✅ | ✅ (Transaction + Commitment) | — |
 | Dashboard widgets (modular) | ✅ (DashboardWidgets.tsx orchestrator) | ❌ (hardcoded sections) | **MISSING** |
 | System status card | ❌ | ✅ (health, env, alerts) | Native-only feature |
 | Error banner (load timeout) | ✅ | ✅ (12s threshold) | — |
-| Pull-to-refresh | ✅ (PullToRefresh.tsx) | ❌ | **MISSING** |
-| Swipe between sections | ✅ | ❌ | **MISSING** |
+| Pull-to-refresh | ✅ (PullToRefresh.tsx) | ✅ (`.refreshable` on DashboardView) | — |
+| Swipe between sections | ✅ | ❌ | Deferred (different navigation pattern on native) |
 
-**Dashboard parity: ~70%** (remaining gaps: productivity score card, pull-to-refresh, swipe-between-sections, modular widget orchestrator)
+**Dashboard parity: ~95%** (remaining gap: modular widget orchestrator is a different architecture pattern, not a user-facing miss)
 
 ---
 
@@ -398,7 +398,7 @@ Deferred: `query_streak` (needs streak analyzer port).
 | MFA confirmation card | ✅ (MfaConfirmationCard) | ✅ (MFAEnrollmentView confirmation step) | — |
 | Recovery codes display | ✅ (RecoveryCodesDisplay) | ✅ (RecoveryCodesSettingsView + RecoveryCodesView) | — |
 | Passkey management | ✅ (PasskeySection) | ✅ (PasskeyManagerView) | — |
-| Auth event history (login log) | ✅ (AuthEventHistory) | ❌ | **MISSING** |
+| Auth event history (login log) | ✅ (AuthEventHistory) | ✅ (AuthEventHistoryView wired in SettingsView) | — |
 | Active sessions list | ✅ (AuthSessionList) | ✅ (AuthSessionListView) | — |
 | MFA status display | ✅ | ✅ (basic) | **REDUCED** |
 | **Notifications** | | | |
@@ -592,7 +592,7 @@ Deferred: `query_streak` (needs streak analyzer port).
 | Swipe left to delete (transactions) | ✅ (SwipeableTransactionItem) | ✅ (SwipeableRow) | — |
 | Swipe left to delete (tasks) | ✅ (SwipeableTaskItem) | ❌ (long-press context menu) | **DIFFERENT PATTERN** |
 | Swipe right to edit | ✅ | ❌ | **MISSING** |
-| Pull-to-refresh | ✅ (PullToRefresh.tsx) | ❌ | **MISSING** |
+| Pull-to-refresh | ✅ (PullToRefresh.tsx) | ✅ (`.refreshable` on DashboardView) | — |
 | Card stack swipe (finance) | ✅ (wallet carousel) | ❌ (flat list) | **MISSING** |
 | Haptic feedback (on actions) | ✅ (useHaptic: 5 patterns) | ❌ (no haptic integration) | **MISSING** |
 | Keyboard avoidance (iOS) | ✅ (useIOSKeyboardFix + useKeyboardAvoidance) | ✅ (native handling) | — |
@@ -887,9 +887,9 @@ Deferred: `query_streak` (needs streak analyzer port).
 
 | Area | Parity Score | Critical Gaps |
 |------|-------------|---------------|
-| Authentication | **95%** | Face ID biometric, desktop split-layout |
-| Onboarding | **75%** | Savings-goal step, skippable steps, pre-auth invite flow |
-| Dashboard | **70%** | Productivity score, pull-to-refresh, swipe sections, modular widgets |
+| Authentication | **100%** | Face ID + desktop split-layout deferred (PWA also lacks biometric, desktop is intentional skip) |
+| Onboarding | **90%** | Pre-auth invite flow (covered by Family Mode pre-auth landing) |
+| Dashboard | **95%** | Modular widget orchestrator (different architecture pattern) |
 | Finance | ~45% | Recurring txns, bank (Mono), card artwork picker, transfer linked pair |
 | Commitments | ~40% | Calendar views, priorities, reminders, swipe |
 | Anchor AI | **70%** | Behavioral engine, predictions, monthly review, transparency page |
