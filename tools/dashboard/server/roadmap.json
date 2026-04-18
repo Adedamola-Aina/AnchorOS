@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-03-19",
+  "lastUpdated": "2026-04-18",
   "teams": [
     "Product",
     "Engineering",
@@ -4046,6 +4046,212 @@
       "completedAt": "2026-02-08",
       "effort": "large",
       "impact": "high"
+    },
+    {
+      "id": "FIN-018",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS native — Firestore service layer + live data on 5 screens",
+      "description": "Built AccountService / TransactionService / TaskService in Swift; wired live Firestore reads into Dashboard, Finance, Tasks, AnchorAI, Settings. Replaced Sprint 1 hardcoded stubs.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-018",
+        "ios firestore",
+        "native firestore",
+        "service layer"
+      ],
+      "effort": "large",
+      "impact": "high",
+      "type": "feature",
+      "createdAt": "2026-04-13",
+      "completedAt": "2026-04-13"
+    },
+    {
+      "id": "FIN-019",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS native Sprint 3 — swipe actions, pull-to-refresh, security settings",
+      "description": "Swipe-to-delete and swipe-to-edit on Finance + Tasks rows; pull-to-refresh on scrollable lists; Settings security section with biometric toggle scaffold.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-019",
+        "swipe action",
+        "pull-to-refresh",
+        "security settings"
+      ],
+      "effort": "medium",
+      "impact": "medium",
+      "type": "feature",
+      "createdAt": "2026-04-14",
+      "completedAt": "2026-04-14"
+    },
+    {
+      "id": "FIN-020",
+      "team": "Mobile",
+      "priority": "P0",
+      "title": "iOS native SecureDb parity with src/utils/secureDb.ts",
+      "description": "Swift SecureDb wrapper matching PWA access patterns: user/family scoping, batched writes, audit stub. All native Firestore calls now route through SecureDb.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-020",
+        "SecureDb parity",
+        "native securedb"
+      ],
+      "effort": "medium",
+      "impact": "high",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-16"
+    },
+    {
+      "id": "FIN-021",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS native net-worth parity with src/utils/finance.ts",
+      "description": "Ported finance calculation primitives (net worth, debt ratio, allocation splits) to Swift with parity tests against PWA reference values.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-021",
+        "net-worth parity",
+        "native net worth"
+      ],
+      "effort": "medium",
+      "impact": "high",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-16"
+    },
+    {
+      "id": "FIN-022",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS native dashboard parity — calculators + today's focus + haptic",
+      "description": "Dashboard surface matches PWA: TodayFocus card, anchor metrics row, calculator results, and haptic taps on primary actions.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-022",
+        "dashboard parity",
+        "today's focus"
+      ],
+      "effort": "medium",
+      "impact": "high",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-16"
+    },
+    {
+      "id": "FIN-023",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS Anchor AI phase 4a — dead-code cleanup + engine parity tests",
+      "description": "Removed unused Swift stubs, added parity tests for Behavioral/Insights/Predictions engines so native output matches PWA for fixture inputs.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-023",
+        "anchor ai phase 4a",
+        "engine parity"
+      ],
+      "effort": "small",
+      "impact": "medium",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-16"
+    },
+    {
+      "id": "FIN-024",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS commitments phase 5 — streak calculator + ARCH-001 splits",
+      "description": "Streak logic ported; large Swift files split to respect 200-line rule (ARCH-001).",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-024",
+        "streak calculator",
+        "commitments phase 5"
+      ],
+      "effort": "medium",
+      "impact": "high",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-16"
+    },
+    {
+      "id": "FIN-025",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS Fabric phase 4b-1 — anomaly predictions engine",
+      "description": "Native anomaly detection pipeline for unusual transaction amounts + categories, parity with PWA Fabric predictions.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-025",
+        "anomaly predictions",
+        "fabric phase 4b-1"
+      ],
+      "effort": "medium",
+      "impact": "high",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-16"
+    },
+    {
+      "id": "FIN-026",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS Fabric phase 4b — behavior, goal, pattern, predictions signals",
+      "description": "Signal generators: 7-day spike, streak-risk, surplus, goal-on-track/at-risk, recurring-due, pattern detection, predictions UI + tab routing.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-026",
+        "fabric phase 4b",
+        "behavior signals",
+        "goal signals",
+        "pattern signals",
+        "predictions UI"
+      ],
+      "effort": "large",
+      "impact": "high",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-16"
+    },
+    {
+      "id": "FIN-027",
+      "team": "Mobile",
+      "priority": "P1",
+      "title": "iOS Fabric phase 4c — weekly report + upcoming card",
+      "description": "Weekly Fabric report view and UpcomingBillsCard ported into native Finance surface.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-027",
+        "weekly report",
+        "upcoming card",
+        "fabric phase 4c"
+      ],
+      "effort": "medium",
+      "impact": "medium",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-16"
+    },
+    {
+      "id": "FIN-028",
+      "team": "Mobile",
+      "priority": "P0",
+      "title": "iOS native full UI parity pass (phase 4 — 25+ sub-phases)",
+      "description": "Near-total PWA→native UI parity across Fabric NLP, proactive questions, microinteractions, theme picker, currency picker, AddTransactionSheet overdraft warning, FinanceSearchSheet, FinanceSummarySheet, AnchorCompletionRing, onboarding polish, tab-retap scroll-to-top, haptic + microMotion sweep, subscriptions/insights/activity/AI settings/sessions/dev tools, profile avatar + support + data export, notification preferences, charts (asset distribution + cash flow). Closes the major Sprint 4 parity workstream.",
+      "status": "completed",
+      "detectionPatterns": [
+        "FIN-028",
+        "parity phase 4",
+        "fabric NLP",
+        "native parity",
+        "ui parity"
+      ],
+      "effort": "xlarge",
+      "impact": "high",
+      "type": "feature",
+      "createdAt": "2026-04-16",
+      "completedAt": "2026-04-17"
     }
   ]
 }
