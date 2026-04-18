@@ -210,10 +210,10 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 | Categories (11 options) | ✅ | ✅ (11 categories) | — |
 | Category auto-hide for transfers | ✅ | ✅ | — |
 | Date/time editing on transactions | ✅ | ❌ | **MISSING** |
-| Backdating transactions | ✅ | ❌ | **MISSING** |
-| Transaction memo/notes field | ✅ | ❌ | **MISSING** |
-| Swipe to delete transaction | ✅ (SwipeableTransactionItem) | ❌ (long-press context menu) | **DIFFERENT PATTERN** |
-| Swipe to edit transaction | ✅ | ❌ | **MISSING** |
+| Backdating transactions | ✅ | ✅ (DatePicker on Add + Edit, capped at today) | — |
+| Transaction memo/notes field | ✅ | ✅ (`narration` on Add + Edit) | — |
+| Swipe to delete transaction | ✅ (SwipeableTransactionItem) | ✅ (SwipeableRow) | — |
+| Swipe to edit transaction | ✅ | ✅ (SwipeableRow editAction) | — |
 | Virtual/infinite scrolling list | ✅ (VirtualTransactionList) | ❌ (flat list, limit 50) | **MISSING** |
 | Transaction search | ✅ | ❌ | **MISSING** |
 | Category filtering | ✅ | ✅ (type filters: All/Income/Expense/Transfer) | **REDUCED** (no category filter) |
@@ -283,19 +283,19 @@ The PWA web app is the **mature, feature-complete** product with ~200+ component
 |---------|-----|------------|-----|
 | Create task | ✅ | ✅ | — |
 | Edit task | ✅ | ✅ | — |
-| Delete task | ✅ (soft delete) | ✅ (permanent delete!) | **DIFFERENT BEHAVIOR** — native does hard delete |
+| Delete task | ✅ (hard delete) | ✅ (hard delete via SwipeableRow) | — |
 | Toggle complete/incomplete | ✅ | ✅ (optimistic) | — |
 | Task types (daily/weekly/monthly/todo) | ✅ | ✅ | — |
 | Streak tracking (current & longest) | ✅ | ✅ (display only) | — |
 | Task categories/domains | ✅ | ✅ (8 domains) | — |
 | Time of day (morning/afternoon/evening/any) | ✅ | ✅ (daily only) | — |
 | Notes field | ✅ | ✅ (3-line) | — |
-| Priority levels (high/medium/low) | ✅ | ❌ | **MISSING** |
+| Priority levels (high/medium/low) | ✅ | ✅ (low/medium/high/critical) | — |
 | Task reminder time | ✅ | ❌ | **MISSING** |
 | Financial commitment linking | ✅ (prompt to log transaction) | ❌ | **MISSING** |
 | Family scope (shared tasks) | ✅ | ❌ | **MISSING** |
-| Swipe to delete task | ✅ (SwipeableTaskItem) | ❌ (context menu) | **DIFFERENT PATTERN** |
-| Swipe to edit task | ✅ | ❌ | **MISSING** |
+| Swipe to delete task | ✅ (SwipeableTaskItem) | ✅ (SwipeableRow) | — |
+| Swipe to edit task | ✅ | ✅ (SwipeableRow editAction) | — |
 | Strikethrough on completed | ✅ | ✅ | — |
 
 ### 5.2 Task Views
@@ -589,7 +589,7 @@ Deferred: `query_streak` (needs streak analyzer port).
 
 | Gesture/Interaction | PWA | Native iOS | Gap |
 |---------------------|-----|------------|-----|
-| Swipe left to delete (transactions) | ✅ (SwipeableTransactionItem) | ❌ (long-press context menu) | **DIFFERENT PATTERN** |
+| Swipe left to delete (transactions) | ✅ (SwipeableTransactionItem) | ✅ (SwipeableRow) | — |
 | Swipe left to delete (tasks) | ✅ (SwipeableTaskItem) | ❌ (long-press context menu) | **DIFFERENT PATTERN** |
 | Swipe right to edit | ✅ | ❌ | **MISSING** |
 | Pull-to-refresh | ✅ (PullToRefresh.tsx) | ❌ | **MISSING** |

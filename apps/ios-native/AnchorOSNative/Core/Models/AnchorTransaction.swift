@@ -18,6 +18,9 @@ struct AnchorTransaction: Identifiable, Codable {
     /// Optional "personal" | "family". Absent on older documents and treated
     /// as "personal". Matches src/types/financeTypes.ts `AnchorTransaction.scope`.
     var scope: String? = nil
+    /// Optional free-text memo. Mirrors PWA `AnchorTransaction.narration`
+    /// (src/types/financeTypes.ts). Absent on older documents.
+    var narration: String? = nil
 
     var resolvedId: String { id ?? "" }
 

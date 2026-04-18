@@ -34,7 +34,8 @@ final class TransactionService {
         currency: String,
         date: String? = nil,
         isRecurring: Bool = false,
-        recurringFrequency: String? = nil
+        recurringFrequency: String? = nil,
+        narration: String? = nil
     ) async throws {
         var data: [String: Any] = [
             "title": title,
@@ -49,6 +50,9 @@ final class TransactionService {
         if let cat = category { data["category"] = cat }
         if let name = accountName { data["accountName"] = name }
         if let freq = recurringFrequency { data["recurringFrequency"] = freq }
+        if let n = narration?.trimmingCharacters(in: .whitespacesAndNewlines), !n.isEmpty {
+            data["narration"] = n
+        }
         // Routes through SecureDb — audit fields added centrally.
         try await db.addDocument(uid: uid, collection: "finance", data: data)
     }
@@ -63,7 +67,9 @@ final class TransactionService {
         title: String,
         amountCents: Int,
         type: String,
-        category: String?
+        category: String?,
+        date: String? = nil,
+        narration: String? = nil
     ) async throws {
         var data: [String: Any] = [
             "title": title,
@@ -71,6 +77,12 @@ final class TransactionService {
             "type": type
         ]
         if let cat = category { data["category"] = cat }
+        if let d = date { data["date"] = d }
+        // Pass nil → leave untouched; pass empty string → clear; pass value → set.
+        if let n = narration {
+            let trimmed = n.trimmingCharacters(in: .whitespacesAndNewlines)
+            data["narration"] = trimmed.isEmpty ? FieldValue.delete() : trimmed
+        }
         try await db.updateDocument(uid: uid, path: ["finance", transactionId], data: data)
     }
 }

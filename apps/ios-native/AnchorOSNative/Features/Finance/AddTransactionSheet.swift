@@ -15,6 +15,7 @@ struct AddTransactionSheet: View {
     @State private var showDatePicker: Bool = false
     @State private var isRecurring: Bool = false
     @State private var recurringFrequency: String = "monthly"  // weekly | monthly | yearly
+    @State private var narration: String = ""
     @State private var isSaving = false
     /// Drives `.savePulse` modifier on the save button. PWA parity:
     /// microMotion.savePulse — `saving` = scale 1→1.02→1 loop; `done` = 1→1.08→1 once.
@@ -190,6 +191,17 @@ struct AddTransactionSheet: View {
                             }
                         }
                     }
+
+                    // Parity: PWA TransactionForm `narration` textarea
+                    // (src/features/finance/TransactionForm.tsx).
+                    formSection("Notes (optional)") {
+                        TextField("e.g. split with Tunde", text: $narration, axis: .vertical)
+                            .lineLimit(2...4)
+                            .foregroundStyle(AnchorPalette.textPrimary)
+                            .padding(14)
+                            .background(AnchorPalette.chip.opacity(0.6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
                 }
                 .padding(20)
             }
@@ -319,7 +331,8 @@ struct AddTransactionSheet: View {
                 currency: currency,
                 date: iso.string(from: transactionDate),
                 isRecurring: isRecurring,
-                recurringFrequency: isRecurring ? recurringFrequency : nil
+                recurringFrequency: isRecurring ? recurringFrequency : nil,
+                narration: narration
             )
             // Parity: useHaptic('success') = vibrate([15,50,15]).
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()

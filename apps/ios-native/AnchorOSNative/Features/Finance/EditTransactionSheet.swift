@@ -12,6 +12,9 @@ struct EditTransactionSheet: View {
     @State private var amountText: String
     @State private var type: String
     @State private var selectedCategory: String
+    @State private var transactionDate: Date
+    @State private var showDatePicker: Bool = false
+    @State private var narration: String
     @State private var isSaving = false
 
     private let types = ["expense", "income", "transfer"]
@@ -27,6 +30,12 @@ struct EditTransactionSheet: View {
         _amountText = State(initialValue: String(format: "%.2f", amount))
         _type = State(initialValue: transaction.type)
         _selectedCategory = State(initialValue: transaction.category ?? "General")
+        _narration = State(initialValue: transaction.narration ?? "")
+        // Best-effort parse of stored ISO8601 date; fall back to now.
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let parsed = iso.date(from: transaction.date) ?? ISO8601DateFormatter().date(from: transaction.date) ?? Date()
+        _transactionDate = State(initialValue: parsed)
     }
 
     private var amountCents: Int {
@@ -72,6 +81,40 @@ struct EditTransactionSheet: View {
                         // Amount
                         AnchorFormField(placeholder: "0.00", text: $amountText, keyboardType: .decimalPad)
 
+                        // Date — parity with AddTransactionSheet (PWA TransactionForm allows backdating).
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("DATE")
+                                .font(.caption).fontWeight(.bold)
+                                .foregroundStyle(AnchorPalette.textSecondary)
+                            Button { showDatePicker.toggle() } label: {
+                                HStack {
+                                    Image(systemName: "calendar")
+                                        .foregroundStyle(AnchorPalette.textSecondary)
+                                    Text(dateLabel)
+                                        .foregroundStyle(AnchorPalette.textPrimary)
+                                    Spacer()
+                                    Image(systemName: showDatePicker ? "chevron.up" : "chevron.down")
+                                        .font(.caption)
+                                        .foregroundStyle(AnchorPalette.textSecondary)
+                                }
+                                .padding(14)
+                                .background(AnchorPalette.chip.opacity(0.6))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .buttonStyle(.plain)
+                            if showDatePicker {
+                                DatePicker(
+                                    "Transaction Date",
+                                    selection: $transactionDate,
+                                    in: ...Date(),
+                                    displayedComponents: [.date]
+                                )
+                                .datePickerStyle(.graphical)
+                                .tint(AnchorPalette.chipActive)
+                                .colorScheme(.dark)
+                            }
+                        }
+
                         // Category chips (not shown for transfer)
                         if type != "transfer" {
                             VStack(alignment: .leading, spacing: 8) {
@@ -96,6 +139,19 @@ struct EditTransactionSheet: View {
                                     }
                                 }
                             }
+                        }
+
+                        // Notes — parity with PWA TransactionForm `narration`.
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("NOTES (OPTIONAL)")
+                                .font(.caption).fontWeight(.bold)
+                                .foregroundStyle(AnchorPalette.textSecondary)
+                            TextField("e.g. split with Tunde", text: $narration, axis: .vertical)
+                                .lineLimit(2...4)
+                                .foregroundStyle(AnchorPalette.textPrimary)
+                                .padding(14)
+                                .background(AnchorPalette.chip.opacity(0.6))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
 
                         // Save button
@@ -139,12 +195,15 @@ struct EditTransactionSheet: View {
     private func save() async {
         isSaving = true
         do {
+            let iso = ISO8601DateFormatter()
             try await financeStore.updateTransaction(
                 transactionId: transaction.resolvedId,
                 title: title,
                 amountCents: amountCents,
                 type: type,
-                category: type == "transfer" ? nil : selectedCategory
+                category: type == "transfer" ? nil : selectedCategory,
+                date: iso.string(from: transactionDate),
+                narration: narration
             )
             ToastStore.shared.show("Transaction updated", style: .success)
             dismiss()
@@ -152,5 +211,11 @@ struct EditTransactionSheet: View {
             ToastStore.shared.show("Failed to save changes", style: .error)
         }
         isSaving = false
+    }
+
+    private var dateLabel: String {
+        let fmt = DateFormatter()
+        fmt.dateStyle = .medium
+        return Calendar.current.isDateInToday(transactionDate) ? "Today" : fmt.string(from: transactionDate)
     }
 }

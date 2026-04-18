@@ -96,14 +96,16 @@ final class FinanceStore: ObservableObject {
         currency: String,
         date: String? = nil,
         isRecurring: Bool = false,
-        recurringFrequency: String? = nil
+        recurringFrequency: String? = nil,
+        narration: String? = nil
     ) async throws {
         guard let uid else { return }
         let accountName = accounts.first(where: { $0.resolvedId == accountId })?.name
         try await transactionService.addTransaction(
             uid: uid, title: title, amountCents: amountCents, type: type,
             category: category, accountId: accountId, accountName: accountName, currency: currency,
-            date: date, isRecurring: isRecurring, recurringFrequency: recurringFrequency
+            date: date, isRecurring: isRecurring, recurringFrequency: recurringFrequency,
+            narration: narration
         )
     }
 
@@ -117,9 +119,21 @@ final class FinanceStore: ObservableObject {
         try await accountService.updateAccount(uid: uid, accountId: accountId, name: name, type: type, currency: currency, balanceCents: balanceCents, color: color)
     }
 
-    func updateTransaction(transactionId: String, title: String, amountCents: Int, type: String, category: String?) async throws {
+    func updateTransaction(
+        transactionId: String,
+        title: String,
+        amountCents: Int,
+        type: String,
+        category: String?,
+        date: String? = nil,
+        narration: String? = nil
+    ) async throws {
         guard let uid else { return }
-        try await transactionService.updateTransaction(uid: uid, transactionId: transactionId, title: title, amountCents: amountCents, type: type, category: category)
+        try await transactionService.updateTransaction(
+            uid: uid, transactionId: transactionId, title: title,
+            amountCents: amountCents, type: type, category: category,
+            date: date, narration: narration
+        )
     }
 
     // MARK: — Savings Goal
