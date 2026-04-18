@@ -14,6 +14,7 @@ struct AuthView: View {
     @State var password = ""
     @State var displayName = ""
     @State var mfaCode = ""
+    @State var showAcceptInvite = false
     @FocusState var focused: Field?
 
     enum Field: Hashable { case name, email, password, mfaCode }
@@ -95,12 +96,27 @@ struct AuthView: View {
                     .foregroundStyle(AnchorPalette.chipActive)
             }
 
+            // Pre-auth invite acceptance — parity with PWA /accept-invite landing.
+            if mode == .login || mode == .signup {
+                Button {
+                    showAcceptInvite = true
+                } label: {
+                    Label("I have a family invite code", systemImage: "person.2.badge.key")
+                        .font(.footnote)
+                        .foregroundStyle(AnchorPalette.chipActive)
+                }
+                .buttonStyle(.plain)
+            }
+
             envPicker
         }
         .padding(24)
         .background(AnchorPalette.card)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .padding(.horizontal, 20)
+        .sheet(isPresented: $showAcceptInvite) {
+            AcceptInviteSheet()
+        }
     }
 
     // MARK: - Mode Toggle

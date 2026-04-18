@@ -50,6 +50,31 @@ final class FamilyStore: ObservableObject {
             }
         }
         listeners.append(awaiting)
+
+        // Consume any pre-auth invite token saved by AcceptInviteSheet.
+        // Mirrors PWA /accept-invite redirect → auto-accept post-auth.
+        consumePendingInviteToken()
+    }
+
+    /// Reads `anchor_pending_invite_token` from UserDefaults; if present,
+    /// attempts to accept the invitation and clears the token regardless
+    /// of the outcome (failures bubble up as a toast for visibility).
+    private func consumePendingInviteToken() {
+        let key = "anchor_pending_invite_token"
+        let token = UserDefaults.standard.string(forKey: key) ?? ""
+        guard !token.isEmpty else { return }
+        UserDefaults.standard.removeObject(forKey: key)
+        Task { @MainActor in
+            do {
+                try await self.service.acceptInvitation(token: token)
+                ToastStore.shared.show("Family connection activated 🎉", style: .success)
+            } catch {
+                ToastStore.shared.show(
+                    "Invite code couldn't be applied — try in Settings → Family.",
+                    style: .info
+                )
+            }
+        }
     }
 
     func stop() {

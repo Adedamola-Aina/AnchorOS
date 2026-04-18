@@ -450,11 +450,11 @@ Deferred: `query_streak` (needs streak analyzer port).
 | Family net worth calculation | ✅ | ✅ (financeStore.familyNetWorthFormatted, surfaced on FamilyView) | — |
 | Family notification banner | ✅ (FamilyNotificationBanner) | ❌ | **MISSING** |
 | Family commitments (shared tasks) | ✅ | ❌ | **MISSING** |
-| Pre-auth invite acceptance (/accept-invite) | ✅ | ❌ | **MISSING** |
+| Pre-auth invite acceptance (/accept-invite) | ✅ | ✅ (AcceptInviteSheet on AuthView → stashed in @AppStorage → consumed by FamilyStore.start post-auth) | — |
 
-**Family parity: ~85%** (remaining: full FamilyNotificationBanner, family commitments scope, dedicated invite-history view, pre-auth /accept-invite landing — covered under Onboarding wave)
+**Family parity: ~90%** (remaining: full FamilyNotificationBanner, family commitments scope, dedicated invite-history view)
 
-Shipped this wave: AwaitingConfirmationCard (pending confirmation flow), SharePermissionPicker (Read/Transact/Manage), FamilyMultiStepInvite (3-step), FamilyAccountSharingCard (extracted), familyNetWorth surfacing.
+Shipped this wave: AwaitingConfirmationCard (pending confirmation flow), SharePermissionPicker (Read/Transact/Manage), FamilyMultiStepInvite (3-step), FamilyAccountSharingCard (extracted), familyNetWorth surfacing, AcceptInviteSheet pre-auth landing.
 
 ---
 
@@ -890,13 +890,13 @@ Shipped this wave: AwaitingConfirmationCard (pending confirmation flow), SharePe
 | Area | Parity Score | Critical Gaps |
 |------|-------------|---------------|
 | Authentication | **100%** | Face ID + desktop split-layout deferred (PWA also lacks biometric, desktop is intentional skip) |
-| Onboarding | **90%** | Pre-auth invite flow (covered by Family Mode pre-auth landing) |
+| Onboarding | **100%** | (Savings-goal step + skippable steps deferred per design — onboarding is intentionally minimal on native) |
 | Dashboard | **95%** | Modular widget orchestrator (different architecture pattern) |
 | Finance | ~45% | Recurring txns, bank (Mono), card artwork picker, transfer linked pair |
 | Commitments | ~40% | Calendar views, priorities, reminders, swipe |
 | Anchor AI | **70%** | Behavioral engine, predictions, monthly review, transparency page |
 | Settings | **95%** | Data import (full restore deferred) |
-| Family Mode | **85%** | FamilyNotificationBanner, family commitments scope, invite-history view |
+| Family Mode | **90%** | FamilyNotificationBanner, family commitments scope, invite-history view |
 | UI/UX Design | ~30% | Glass morphism, branded animations, skeleton loading |
 | Color Scheme | 20% | Different hex values, no light mode, no glass |
 | Gestures | 25% | Swipe, pull-to-refresh, haptics, drag-reorder |
