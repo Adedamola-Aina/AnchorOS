@@ -40,53 +40,13 @@ struct TasksView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     Color.clear.frame(height: 0).id(ScrollToTopAnchor.id)
-                    // Filter chips — single row, state-bound
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(filters, id: \.self) { f in
-                                Button {
-                                    selectedFilter = f
-                                } label: {
-                                    Text(f.uppercased())
-                                        .font(.caption).fontWeight(.bold)
-                                        .foregroundStyle(selectedFilter == f ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
-                                        .padding(.horizontal, 16).padding(.vertical, 8)
-                                        .background(selectedFilter == f ? AnchorPalette.chipActive : AnchorPalette.chip)
-                                        .clipShape(Capsule())
-                                }
-                                .buttonStyle(.plain)
-                                .anchorPressable()
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    // Priority filter chips — parity with PWA TaskList
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(priorityFilters, id: \.self) { p in
-                                Button {
-                                    selectedPriority = p
-                                } label: {
-                                    HStack(spacing: 4) {
-                                        if p != "All" {
-                                            Image(systemName: priorityIcon(p))
-                                                .font(.caption2)
-                                        }
-                                        Text(p.uppercased())
-                                            .font(.caption2).fontWeight(.bold)
-                                    }
-                                    .foregroundStyle(selectedPriority == p ? AnchorPalette.textPrimary : AnchorPalette.textSecondary)
-                                    .padding(.horizontal, 12).padding(.vertical, 6)
-                                    .background(selectedPriority == p ? AnchorPalette.chipActive : AnchorPalette.chip)
-                                    .clipShape(Capsule())
-                                }
-                                .buttonStyle(.plain)
-                                .anchorPressable()
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    // Filter bar (type + priority) — extracted to TasksFilterBar (ARCH-001)
+                    TasksFilterBar(
+                        selectedFilter: $selectedFilter,
+                        selectedPriority: $selectedPriority,
+                        filters: filters,
+                        priorityFilters: priorityFilters
+                    )
 
                     progressCard
 
@@ -222,16 +182,5 @@ struct TasksView: View {
             onToggle: { Task { await commitmentsStore.toggleCompleted(taskId: task.resolvedId) } },
             onTap: { taskToEdit = task }
         )
-    }
-
-    /// Mirrors AnchorCommitment.priorityIcon for filter chip display.
-    private func priorityIcon(_ p: String) -> String {
-        switch p.lowercased() {
-        case "critical": return "exclamationmark.2"
-        case "high":     return "exclamationmark"
-        case "medium":   return "minus"
-        case "low":      return "arrow.down"
-        default:         return "circle"
-        }
     }
 }
