@@ -28,6 +28,14 @@ targets:
         product: FirebaseFunctions
       - package: Firebase
         product: FirebaseMessaging
+      - package: Firebase
+        product: FirebaseAppCheck
+      - package: Firebase
+        product: FirebaseCrashlytics
+      - package: Firebase
+        product: FirebaseAnalytics
+      - package: Firebase
+        product: FirebasePerformance
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.anchoros.native
@@ -81,5 +89,18 @@ targets:
         BUNDLE_LOADER: "$(TEST_HOST)"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AnchorOSNative.app/AnchorOSNative"
         INFOPLIST_FILE: AnchorOSNativeTests/Info.plist
+        SWIFT_VERSION: 5.0
+        GENERATE_INFOPLIST_FILE: YES
+  AnchorOSNativeUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: AnchorOSNativeUITests
+    dependencies:
+      - target: AnchorOSNative
+    settings:
+      base:
+        TEST_TARGET_NAME: AnchorOSNative
+        INFOPLIST_FILE: AnchorOSNativeUITests/Info.plist
         SWIFT_VERSION: 5.0
         GENERATE_INFOPLIST_FILE: YES

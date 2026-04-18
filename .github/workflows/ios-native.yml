@@ -1,0 +1,87 @@
+name: iOS Native
+on:
+  pull_request:
+    branches: [master, staging]
+    paths:
+      - 'apps/ios-native/**'
+      - '.github/workflows/ios-native.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'apps/ios-native/**'
+
+jobs:
+  build-and-test:
+    name: Build & Test (iOS)
+    runs-on: macos-14
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: apps/ios-native
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app || true
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Cache Swift Package Manager
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+            ~/Library/Caches/org.swift.swiftpm
+          key: ${{ runner.os }}-spm-${{ hashFiles('apps/ios-native/project.yml') }}
+          restore-keys: ${{ runner.os }}-spm-
+
+      - name: Stub missing GoogleService-Info plists
+        run: bash ci_scripts/ci_stub_plists.sh
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Run unit tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project AnchorOSNative.xcodeproj \
+            -scheme AnchorOSNative \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=YES
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: apps/ios-native/TestResults.xcresult
+
+  swift-lint:
+    name: Swift Warnings-as-Errors
+    runs-on: macos-14
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/ios-native
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Stub missing plists
+        run: bash ci_scripts/ci_stub_plists.sh
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build with warnings as errors
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project AnchorOSNative.xcodeproj \
+            -scheme AnchorOSNative \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES

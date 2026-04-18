@@ -107,6 +107,21 @@ struct RootTabView: View {
                         .environmentObject(biometricLock)
                         .transition(.opacity)
                 }
+
+                // WS-8 — App-switcher privacy curtain. iOS takes a snapshot
+                // for the switcher the moment scenePhase becomes .inactive,
+                // so we overlay a frosted view before that happens.
+                if biometricLock.isAppSwitcherHidden {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 48))
+                                .foregroundStyle(AnchorPalette.textSecondary)
+                        )
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                }
             }
             .tint(AnchorPalette.chipActive)
             .environmentObject(tabScroll)
@@ -117,8 +132,17 @@ struct RootTabView: View {
                 }
             }
             .onChange(of: scenePhase) { _, phase in
-                guard phase == .active, appState.isAuthenticated else { return }
-                biometricLock.evaluateForegroundLock()
+                switch phase {
+                case .active:
+                    biometricLock.setAppSwitcherHidden(false)
+                    if appState.isAuthenticated {
+                        biometricLock.evaluateForegroundLock()
+                    }
+                case .inactive, .background:
+                    biometricLock.setAppSwitcherHidden(true)
+                @unknown default:
+                    break
+                }
             }
             .onChange(of: appState.environment) { _, _ in
                 Task {

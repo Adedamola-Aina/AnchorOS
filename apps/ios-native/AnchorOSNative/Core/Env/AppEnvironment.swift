@@ -64,6 +64,15 @@ final class AppState: ObservableObject {
     }
 
     func bootstrap() {
+        // WS-5 — XCUITests launch the app with ANCHOR_UI_TESTS=1 so we can
+        // short-circuit Firebase configuration and land on a deterministic UI
+        // without touching real auth/Firestore.
+        if ProcessInfo.processInfo.environment["ANCHOR_UI_TESTS"] == "1" {
+            statusMessage = "UI Test Mode"
+            isAuthenticated = ProcessInfo.processInfo.environment["ANCHOR_UI_TEST_SIGNED_IN"] == "1"
+            currentUID = isAuthenticated ? "uitest-uid" : nil
+            return
+        }
         statusMessage = FirebaseBootstrap.configure(environment: environment)
         guard FirebaseApp.app() != nil else {
             isAuthenticated = false

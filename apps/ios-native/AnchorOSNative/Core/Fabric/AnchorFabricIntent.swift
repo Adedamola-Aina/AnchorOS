@@ -31,6 +31,7 @@ struct AnchorFabricIntent: Equatable {
         case queryCorrelation      = "query_correlation"
         case queryDayOfWeek        = "query_day_of_week"
         case queryFamily           = "query_family"
+        case queryStreak           = "query_streak"
         case recordExpense         = "record_expense"
         case recordIncome          = "record_income"
         case navigate              = "navigate"

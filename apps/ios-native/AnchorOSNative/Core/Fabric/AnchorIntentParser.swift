@@ -42,6 +42,8 @@ enum AnchorIntentParser {
               pattern: #"\b(which\s+day|what\s+day|best\s+day|worst\s+day|when\s+do\s+i\s+spend\s+most|most\s+expensive\s+day|highest\s+spend\s+day)\b"#),
         .init(action: .queryCommitments, priority: 70,
               pattern: #"\b(commitment|commitments|streak|habit|habits|daily|todo)\b"#),
+        .init(action: .queryStreak,    priority: 73,
+              pattern: #"\b(streak(s)?|best streak|longest streak|current streak|my streak|streak status)\b"#),
         .init(action: .queryUpcoming,   priority: 65,
               pattern: #"\b(what'?s? coming up|upcoming (bills?|payments?|expenses?)|due soon|next (bill|payment)|what do i owe|remind me)\b"#),
         .init(action: .queryMomentum,   priority: 63,

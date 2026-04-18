@@ -13,7 +13,12 @@ final class BiometricLockStore: ObservableObject {
     }
     @Published private(set) var isLocked = false
     @Published private(set) var isAvailable = false
-    @Published private(set) var biometryLabel = "Biometric Lock"
+    /// WS-8 — raised while the app is in the inactive/background phase so
+    /// the root view can overlay a privacy curtain before iOS takes the
+    /// snapshot shown in the app switcher. Independent of `isLocked`
+    /// because it applies even when biometric lock is disabled.
+    @Published private(set) var isAppSwitcherHidden = false
+    @Published var biometryLabel = "Biometric Lock"
     @Published var lastError: String?
 
     init() {
@@ -23,11 +28,19 @@ final class BiometricLockStore: ObservableObject {
 
     func evaluateForegroundLock() {
         refreshAvailability()
+        isAppSwitcherHidden = false
         guard isEnabled else {
             isLocked = false
             return
         }
         isLocked = isAvailable
+    }
+
+    /// WS-8 — called from `.onChange(of: scenePhase)` for inactive/background
+    /// transitions so the root view overlays a blur curtain before iOS takes
+    /// the app-switcher snapshot.
+    func setAppSwitcherHidden(_ hidden: Bool) {
+        isAppSwitcherHidden = hidden
     }
 
     func markUnlockedForCurrentSession() {
