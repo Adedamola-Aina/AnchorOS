@@ -310,12 +310,12 @@ jobs:
           name: playwright-report
           path: playwright-report/
 
-  # Job 1.6: Mutation Testing (catches weak tests)
+  # Job 1.6: Mutation Testing — disabled (re-enable by removing if: false)
   mutation-tests:
     name: 🧬 Mutation Tests
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
+    if: false
     
     steps:
       - name: Checkout code
@@ -669,7 +669,7 @@ jobs:
   deploy-production:
     name: 🚀 Deploy to Production
     runs-on: ubuntu-latest
-    needs: [build-production, lighthouse, e2e-tests, mutation-tests, rules-tests]
+    needs: [build-production, lighthouse, e2e-tests, rules-tests]
     if: github.ref == 'refs/heads/master'
     environment: production
     

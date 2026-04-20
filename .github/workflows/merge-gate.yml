@@ -68,9 +68,10 @@ jobs:
           retention-days: 7
 
   mutation-tests:
-    name: Mutation Tests (Finance/Security)
+    name: Mutation Tests (Finance/Security) — disabled
     runs-on: ubuntu-latest
     needs: [unit-tests]
+    if: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

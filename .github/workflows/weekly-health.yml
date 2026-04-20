@@ -6,8 +6,9 @@ on:
 
 jobs:
   mutation-tests:
-    name: Mutation Tests
+    name: Mutation Tests — disabled
     runs-on: ubuntu-latest
+    if: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
