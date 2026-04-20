@@ -1,5 +1,4 @@
 // @ts-nocheck
-// 
 /**
  * commandCenterAlerts.js
  * Proactive alert generation for the command center.
@@ -54,10 +53,7 @@ async function getProactiveAlerts() {
 
         // 3. ARCH-001 file size violations
         const health = await getHealthReport();
-        const allFiles = (health.fileHealth?.files || []).filter((f) => {
-            const p = String(f?.path || '').replace(/\\/g, '/');
-            return !p.includes('/.stryker-tmp/') && !p.endsWith('/.stryker-mutator.log');
-        });
+        const allFiles = health.fileHealth?.files || [];
         const exceedingFiles = allFiles.filter(f => f.status === 'exceeding');
         const approachingFiles = allFiles.filter(f => f.status === 'warning' || f.status === 'caution');
 

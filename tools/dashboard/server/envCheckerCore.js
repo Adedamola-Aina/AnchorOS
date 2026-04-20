@@ -23,9 +23,50 @@ const gitDataProvider = require('./gitDataProvider');
 
 const REPO_PATH = path.join(__dirname, '../../..');
 
+// Domain → human label mapping
+const DOMAIN_LABELS = {
+    'ios-native': 'iOS Native',
+    'android-native': 'Android Native',
+    'mobile': 'Mobile PWA',
+    'finance': 'Finance',
+    'fabric': 'Anchor AI',
+    'auth': 'Auth',
+    'family': 'Family Mode',
+    'security': 'Security',
+    'dashboard': 'Dashboard',
+    'infrastructure': 'Infrastructure',
+    'docs': 'Docs',
+    'unknown': 'General',
+    'other': 'General',
+};
+
+// WorkKind → human label mapping
+const WORK_KIND_LABELS = {
+    'bugfix': 'Bug Fix',
+    'feature': 'Feature',
+    'security': 'Security Fix',
+    'architecture': 'Architecture',
+    'test': 'Test',
+    'docs': 'Docs',
+    'infra': 'Infrastructure',
+    'other': 'Other',
+};
+
 /**
- * Get current version from package.json (the source of truth)
+ * Derive a short human-readable label like "Bug Fix · Finance" or "Native Feature · iOS"
  */
+function deriveFeatureLabel(workKind, domain, id = '') {
+    const kindLabel = WORK_KIND_LABELS[workKind] || 'Feature';
+    const domainLabel = DOMAIN_LABELS[domain] || domain;
+    // If id prefix gives better context (BUG-, SEC-, ARCH-) use that
+    const prefix = (id || '').split('-')[0].toUpperCase();
+    if (prefix === 'BUG' || prefix === 'REG') return `Bug Fix · ${domainLabel}`;
+    if (prefix === 'SEC') return `Security Fix · ${domainLabel}`;
+    if (prefix === 'ARCH') return `Architecture · ${domainLabel}`;
+    if (prefix === 'FIN' && (domain === 'ios-native' || domain === 'android-native')) return `Native Feature · ${domainLabel}`;
+    return `${kindLabel} · ${domainLabel}`;
+}
+
 function getCurrentVersion() {
     try {
         const packagePath = path.join(REPO_PATH, 'package.json');
@@ -86,11 +127,20 @@ async function checkEnvParity() {
                 dev: false
             };
 
+            // Derive a human-readable label from the item type + domain
+            const primaryDomain = (item.domains || [])[0] || 'unknown';
+            const workKind = item.workKind || item.type || 'feature';
+            const featureLabel = deriveFeatureLabel(workKind, primaryDomain, item.id);
+
             return {
                 name: `**${item.id}**: ${item.title}`,
+                label: featureLabel,          // e.g. "Bug Fix · Finance", "Native Feature · iOS"
                 type: item.type,
-                workKind: item.workKind || item.type,
+                workKind,
                 domains: item.domains || ['unknown'],
+                primaryDomain,
+                kanbanStage: item.kanbanStage || 'todo',
+                priority: item.priority || 'P3',
                 confidence: item.confidence || 0.5,
                 commitCount: item.commitCount || 1,
                 latestCommit: item.hash,

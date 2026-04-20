@@ -215,6 +215,234 @@
       "completedDate": "2026-04-04",
       "cycleTime": null,
       "recordedAt": "2026-04-06T11:00:00.009Z"
+    },
+    {
+      "itemId": "QA-004",
+      "completedDate": "2026-04-10",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.024Z"
+    },
+    {
+      "itemId": "QA-006",
+      "completedDate": "2026-04-10",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.027Z"
+    },
+    {
+      "itemId": "DES-003",
+      "completedDate": "2026-04-10",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.028Z"
+    },
+    {
+      "itemId": "DES-004",
+      "completedDate": "2026-04-10",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.029Z"
+    },
+    {
+      "itemId": "ARCH-025",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.030Z"
+    },
+    {
+      "itemId": "SEC-006",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.030Z"
+    },
+    {
+      "itemId": "AUTH-003",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.031Z"
+    },
+    {
+      "itemId": "AUTH-006",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.031Z"
+    },
+    {
+      "itemId": "AUTH-008",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.033Z"
+    },
+    {
+      "itemId": "BUG-131",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.033Z"
+    },
+    {
+      "itemId": "PRD-009",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.034Z"
+    },
+    {
+      "itemId": "INN-001",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.034Z"
+    },
+    {
+      "itemId": "INN-005",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.034Z"
+    },
+    {
+      "itemId": "DATA-002",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.035Z"
+    },
+    {
+      "itemId": "INN-004",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.035Z"
+    },
+    {
+      "itemId": "FAB-002",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.036Z"
+    },
+    {
+      "itemId": "FAB-003",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.036Z"
+    },
+    {
+      "itemId": "FAB-004",
+      "completedDate": "2026-04-08",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.037Z"
+    },
+    {
+      "itemId": "FIN-014",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.037Z"
+    },
+    {
+      "itemId": "COMM-007",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.038Z"
+    },
+    {
+      "itemId": "COMM-001",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.038Z"
+    },
+    {
+      "itemId": "COMM-002",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.039Z"
+    },
+    {
+      "itemId": "UX-036",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.039Z"
+    },
+    {
+      "itemId": "PRD-007",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.040Z"
+    },
+    {
+      "itemId": "PRD-010",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.040Z"
+    },
+    {
+      "itemId": "COMM-006",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.040Z"
+    },
+    {
+      "itemId": "SRE-004",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.040Z"
+    },
+    {
+      "itemId": "SRE-005",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.041Z"
+    },
+    {
+      "itemId": "ENG-007",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.042Z"
+    },
+    {
+      "itemId": "DATA-003",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.042Z"
+    },
+    {
+      "itemId": "BUG-025",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.043Z"
+    },
+    {
+      "itemId": "ENG-003",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.043Z"
+    },
+    {
+      "itemId": "DB-001",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.044Z"
+    },
+    {
+      "itemId": "GAP-010",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.044Z"
+    },
+    {
+      "itemId": "GAP-008",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.044Z"
+    },
+    {
+      "itemId": "PERF-006",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.045Z"
+    },
+    {
+      "itemId": "PSE-003",
+      "completedDate": "2026-04-06",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T15:00:00.045Z"
+    },
+    {
+      "itemId": "PWA-008",
+      "completedDate": "2026-04-11",
+      "cycleTime": null,
+      "recordedAt": "2026-04-11T18:00:00.014Z"
     }
   ],
   "weeklyStats": [
@@ -237,6 +465,11 @@
       "week": "2026-W14",
       "completed": 8,
       "velocity": 9
+    },
+    {
+      "week": "2026-W15",
+      "completed": 38,
+      "velocity": 15.25
     }
   ],
   "_note": "Reset 2026-03-28. Previous data was bulk-hydrated at init and not real throughput. Rebuilds from git-deployed items going forward."

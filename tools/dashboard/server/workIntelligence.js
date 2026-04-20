@@ -12,7 +12,10 @@ const DOMAIN_RULES = [
     { domain: 'family', patterns: ['src/features/family/', 'src/features/settings/components/invite', 'functions/src/family'] },
     { domain: 'dashboard', patterns: ['tools/dashboard/'] },
     { domain: 'security', patterns: ['config/firestore.rules', 'src/utils/secureDb', 'functions/src/rateLimit', 'functions/src/appCheck'] },
-    { domain: 'mobile', patterns: ['src/components/mobile/', 'android/', 'ios/', 'capacitor.config.ts'] },
+    { domain: 'mobile', patterns: ['src/components/mobile/', 'capacitor.config.ts'] },
+    // Native app domains — separate from Capacitor mobile wrapper
+    { domain: 'ios-native', patterns: ['apps/ios-native/', 'apps/ios-native/AnchorOSNative/'] },
+    { domain: 'android-native', patterns: ['apps/android-native/', 'android/app/src/main/java/'] },
     { domain: 'infrastructure', patterns: ['config/', '.github/', 'firebase.json', 'package.json', 'tools/'] },
     { domain: 'docs', patterns: ['docs/', 'README.md', 'CONTRIBUTING.md', 'CLAUDE.md'] }
 ];

@@ -1,5 +1,4 @@
 // @ts-nocheck
-// 
 /**
  * tracker.js — getAllTrackedItems + commit-level cache.
  * Core function that reads git log and resolves deployment status.
@@ -11,7 +10,7 @@ const deploymentTracker = require('../deploymentTracker');
 const { classifyCommit } = require('../gitAnalyzer');
 const { classifyWorkItem, deriveLifecycle } = require('../workIntelligence');
 const { extractIds, detectType } = require('./constants');
-const { getInitiativeTitle, inferRoadmapIdsFromCommitEvidence } = require('./roadmap');
+const { getInitiativeTitle } = require('./roadmap');
 
 const git = simpleGit(path.join(__dirname, '../../../..'));
 
@@ -55,16 +54,7 @@ async function getAllTrackedItems(limit = 200) {
 
             const changedFiles = await getChangedFilesForCommit(commit.hash);
             const fullMessage = commit.body ? `${commit.message}\n${commit.body}` : commit.message;
-            const explicitIds = extractIds(fullMessage);
-            const inferredIds = inferRoadmapIdsFromCommitEvidence({ message: fullMessage, files: changedFiles });
-            const seenIds = new Set();
-            const ids = [];
-            for (const idInfo of [...explicitIds, ...inferredIds]) {
-                const upperId = String(idInfo.id || '').toUpperCase();
-                if (!upperId || seenIds.has(upperId)) continue;
-                seenIds.add(upperId);
-                ids.push({ ...idInfo, id: upperId });
-            }
+            const ids = extractIds(fullMessage);
             const shortHash = commit.hash.substring(0, 7);
 
             const bodyLines = (commit.body || '').split('\n').filter(l => l.trim());
@@ -123,9 +113,40 @@ async function getAllTrackedItems(limit = 200) {
             const status = deploymentStatus.get(item.fullHash);
             if (status) {
                 item.environments = { dev: status.development, staging: status.staging, production: status.production };
-                item.status = status.production ? 'deployed' : status.staging ? 'staging' : status.development ? 'dev' : 'pending';
+                // Kanban stage: maps directly to Jira/Asana-style columns
+                // backlog    → never reached dev
+                // todo       → tracked (has ID) but not yet in dev
+                // in-progress → on dev, not yet staging
+                // in-review  → on staging, not yet production
+                // done       → on production
+                item.status = status.production ? 'deployed'
+                    : status.staging ? 'staging'
+                    : status.development ? 'dev'
+                    : 'pending';
+                item.kanbanStage = status.production ? 'done'
+                    : status.staging ? 'in-review'
+                    : status.development ? 'in-progress'
+                    : 'todo';
                 item.lifecycle = deriveLifecycle(item.status);
+            } else {
+                item.kanbanStage = 'todo';
             }
+
+            // Enrich with roadmap metadata if available (priority, team, effort)
+            try {
+                const roadmap = require('./roadmap');
+                const roadmapEntry = roadmap.getRoadmapEntry ? roadmap.getRoadmapEntry(item.id) : null;
+                if (roadmapEntry) {
+                    item.priority = roadmapEntry.priority || item.priority || 'P3';
+                    item.team = roadmapEntry.team || item.team;
+                    item.effort = roadmapEntry.effort || item.effort;
+                    item.impact = roadmapEntry.impact || item.impact;
+                    // Use roadmap title if richer than commit subject
+                    if (roadmapEntry.title && roadmapEntry.title.length > item.title.length) {
+                        item.title = roadmapEntry.title;
+                    }
+                }
+            } catch { /* roadmap enrichment is best-effort */ }
         }
 
         const result = Array.from(items.values());

@@ -27,8 +27,11 @@ const PRODUCT_SOURCE_PATHS = [
     'config/firestore.rules',
     'config/firestore.indexes.json',
     'capacitor.config.ts',
-    'android/',
-    'ios/',
+    // Native apps — these are product source, same as src/
+    'apps/ios-native/',
+    'apps/android-native/',
+    'android/app/src/',
+    'ios/App/App/',
     'packages/'
 ];
 
