@@ -64,11 +64,11 @@
     "ui:capture": "npx tsx tools/ui-capture/index.ts"
   },
   "dependencies": {
-    "@capacitor/android": "^8.3.0",
+    "@capacitor/android": "^8.3.1",
     "@capacitor/app": "^8.1.0",
-    "@capacitor/core": "^8.3.0",
+    "@capacitor/core": "^8.3.1",
     "@capacitor/haptics": "^8.0.2",
-    "@capacitor/ios": "^8.3.0",
+    "@capacitor/ios": "^8.3.1",
     "@capacitor/keyboard": "^8.0.3",
     "@capacitor/network": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
@@ -102,7 +102,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.3.0",
+    "@capacitor/cli": "^8.3.1",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint/js": "^10.0.1",
