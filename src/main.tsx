@@ -6,7 +6,7 @@ import './styles/capacitor.css'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { UnsavedChangesProvider } from './hooks/useUnsavedChanges'
-import { getPlatformClasses } from './utils/platform'
+import { initNativeBehavior } from './utils/nativeBehavior'
 import { initStagingConsoleCapture } from './utils/stagingConsoleCapture'
 import { APP_VERSION } from './version'
 
@@ -62,10 +62,9 @@ if (import.meta.env.VITE_APP_ENV === 'production') {
     // console.warn and console.error are preserved for Sentry breadcrumb capture
 }
 
-// Add platform classes to body for native styling
-if (document.body) {
-    document.body.className = getPlatformClasses();
-}
+// Apply platform classes + install native behaviour guards
+// (no-op on web; disables long-press menu, drag-out, pinch & double-tap zoom on native)
+initNativeBehavior();
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
