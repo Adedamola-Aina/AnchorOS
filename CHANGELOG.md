@@ -2,6 +2,76 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.19.0-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.18.0...v1.19.0-dev.0) (2026-05-03)
+
+
+### Features
+
+* **auth,family:** Wave 4 — Onboarding 90→100% (pre-auth invite acceptance) ([fa98f16](https://github.com/Adedamola-Aina/AnchorOS/commit/fa98f162ee45e62ece9e05717936ed615d1a5487))
+* **auth:** host privacy policy and terms of service at /privacy and /terms ([1ec43c3](https://github.com/Adedamola-Aina/AnchorOS/commit/1ec43c3d17cbf239c3c40cc827c675ab956f1c22))
+* **commitments:** native priority on edit + priority filter chips ([6fe1bbe](https://github.com/Adedamola-Aina/AnchorOS/commit/6fe1bbee190b173f2b6e12a28fe51127d8edd6b7))
+* **dashboard,settings:** Wave 1 — Auth/Dashboard at 100% parity ([101397a](https://github.com/Adedamola-Aina/AnchorOS/commit/101397ab6959546134afeda99db0da0df3642bf0))
+* **dashboard:** smart multi-platform intelligence — expand scan scope, native domains, kanban stages, env labels ([1b784e0](https://github.com/Adedamola-Aina/AnchorOS/commit/1b784e0f194fc91574e40bfce506693adbf3a166))
+* **family,settings,dashboard:** complete requested parity sections ([3b13b37](https://github.com/Adedamola-Aina/AnchorOS/commit/3b13b375a1e9db52c4fef377e2c4a4007e41eb4e))
+* **family:** Wave 3 — Family Mode 50→85% parity ([09d9da4](https://github.com/Adedamola-Aina/AnchorOS/commit/09d9da4b8c69d5ba7f4b6f6d4adb196d613b0921))
+* **finance:** add salary account type + audit reconciliation ([9ce1084](https://github.com/Adedamola-Aina/AnchorOS/commit/9ce10840ada7691c06eb03ed08ef392063e1bbff)), closes [#6D28D9](https://github.com/Adedamola-Aina/AnchorOS/issues/6D28D9)
+* **finance:** native transaction memo + edit-time date picker ([5886d25](https://github.com/Adedamola-Aina/AnchorOS/commit/5886d25e9750c76fb7dbb56a9c3b3931519a0043))
+* **ios:** fIN-020 native SecureDb parity with src/utils/secureDb.ts ([bca6cf8](https://github.com/Adedamola-Aina/AnchorOS/commit/bca6cf88e02dca16f734bb2a7dd07a2893665619))
+* **ios:** fIN-021 native net-worth parity with src/utils/finance.ts ([b03a93d](https://github.com/Adedamola-Aina/AnchorOS/commit/b03a93dd3426313138e92829d8090de9647c723c))
+* **ios:** fIN-022 dashboard parity \u2014 calculators + today's focus + haptic ([46c268f](https://github.com/Adedamola-Aina/AnchorOS/commit/46c268fa8ff3c594b75ab3fded0044da3c653993))
+* **ios:** fIN-023 anchor ai phase 4a \u2014 dead-code cleanup + engine parity tests ([4dbe540](https://github.com/Adedamola-Aina/AnchorOS/commit/4dbe540c362a542430c1d49b65863f28da8a3b34))
+* **ios:** fIN-024 commitments phase 5 \u2014 streak calculator + ARCH-001 splits ([490ec14](https://github.com/Adedamola-Aina/AnchorOS/commit/490ec14cf7ce83e36b8526291f0392dde1d2b5e9))
+* **ios:** fIN-025 fabric phase 4b-1 \u2014 anomaly predictions engine ([e63e0c6](https://github.com/Adedamola-Aina/AnchorOS/commit/e63e0c6911192359e9e545d4feff2c42288a18dd))
+* **ios:** fIN-026 fabric phase 4b-2 \u2014 budget & burn-rate signals ([d32a53d](https://github.com/Adedamola-Aina/AnchorOS/commit/d32a53d60b9eff4e89e5748b88999566b9fbda29))
+* **ios:** fIN-026 fabric phase 4b-3 — behavior signals (streak risk + surplus + 7d spike) ([813c52a](https://github.com/Adedamola-Aina/AnchorOS/commit/813c52a7f8399601bc7d0a874dcf0d73dcdaa297))
+* **ios:** fIN-026 fabric phase 4b-4 — goal signals (on-track / at-risk) ([401fd44](https://github.com/Adedamola-Aina/AnchorOS/commit/401fd445cf092add34bf880e31a84aa8e8162030))
+* **ios:** fIN-026 fabric phase 4b-5 — pattern signals + recurring_due ([767fcc7](https://github.com/Adedamola-Aina/AnchorOS/commit/767fcc75244c70e1af70683334f8fab1a94b9024))
+* **ios:** fIN-026 fabric phase 4b-6 — predictions UI + tab routing ([eabc313](https://github.com/Adedamola-Aina/AnchorOS/commit/eabc3134df6a625c1dabf13c13e39abe0352d5a1))
+* **ios:** fIN-027 fabric phase 4c — weekly report + upcoming card ([82bcb5d](https://github.com/Adedamola-Aina/AnchorOS/commit/82bcb5df7f0ce27271f31ba657aef556133b4041))
+* **ios:** fIN-028 fabric phase 4d — proactive questions ([a637c63](https://github.com/Adedamola-Aina/AnchorOS/commit/a637c6310d3e33acdf764bb6f7988f6455703606))
+* **ios:** fIN-028 fabric phase 4e — NLP query surface (MVP) ([2ceac20](https://github.com/Adedamola-Aina/AnchorOS/commit/2ceac206502882da1de614eea12f6d241377f565))
+* **ios:** fIN-028 fabric phase 4e-2/3/4 — record NLP, extended queries, contextual intent ([aacb598](https://github.com/Adedamola-Aina/AnchorOS/commit/aacb59828d6a9ae63364a9fd71b248a562abd209))
+* **ios:** fIN-028 fabric phase 4e-3b — day-of-week + correlation insights ([169aa76](https://github.com/Adedamola-Aina/AnchorOS/commit/169aa767a18eba31bf2f23e6b7676071b471fb0f))
+* **ios:** fIN-028 fabric phase 4e-3c — query_family closes NLP parity ([182beeb](https://github.com/Adedamola-Aina/AnchorOS/commit/182beeb758554597a1a979e1d446689088954636))
+* **ios:** fIN-028 fabric phase 4f — wire RecurringStore + PatternsStore ([31f24a9](https://github.com/Adedamola-Aina/AnchorOS/commit/31f24a9e1eb4c16ebffeef5f853ee8eb6cc7d313))
+* **ios:** fIN-028 parity phase 4aa — finance charts (asset distribution + cash flow) ([6e22a02](https://github.com/Adedamola-Aina/AnchorOS/commit/6e22a0200ebe8a95f99b54119e19b85c4aca3a8e))
+* **ios:** fIN-028 parity phase 4ab — subscriptions, insights, activity, AI settings, sessions, dev tools ([2be8544](https://github.com/Adedamola-Aina/AnchorOS/commit/2be8544d7f22665236c0f5b42a15a7695e959bff))
+* **ios:** fIN-028 parity phase 4g — microMotion port + NetWorthRise on totals ([246a53c](https://github.com/Adedamola-Aina/AnchorOS/commit/246a53c2da46a541803ad5af3c85fd1126a94b3d))
+* **ios:** fIN-028 parity phase 4h — TaskRow completionPop + success haptic ([bb0b372](https://github.com/Adedamola-Aina/AnchorOS/commit/bb0b372afb57210efd09ef64577712fc8ccdae6c))
+* **ios:** fIN-028 parity phase 4i — savePulse + success/error haptics on AddTransactionSheet ([2774a5c](https://github.com/Adedamola-Aina/AnchorOS/commit/2774a5c97319bf63a20f6774b2bee2231d94a4d7))
+* **ios:** fIN-028 parity phase 4j — wallet card tap-to-expand + finance matrix closures ([cb0f26e](https://github.com/Adedamola-Aina/AnchorOS/commit/cb0f26e96cd401f1683407c5f4987ee2ef83c01b))
+* **ios:** fIN-028 parity phase 4k — auth mount, press scale, error slide-in ([c1154f2](https://github.com/Adedamola-Aina/AnchorOS/commit/c1154f2db662f5d8a80ab22941397b378e9a6bf7))
+* **ios:** fIN-028 parity phase 4l — fabric+dashboard+settings mount, nav haptic, thinking pulse ([031cb42](https://github.com/Adedamola-Aina/AnchorOS/commit/031cb42d49c3ac326b376e53e7743864c463202e))
+* **ios:** fIN-028 parity phase 4m — onboarding, auth polish, AnchorHaptic ([11c98ad](https://github.com/Adedamola-Aina/AnchorOS/commit/11c98ad92a26781d7dcf73415235cf442f8d5234))
+* **ios:** fIN-028 parity phase 4n — interaction matrix closures ([8ca7ad1](https://github.com/Adedamola-Aina/AnchorOS/commit/8ca7ad1c80c9f2abca340c57a3048418e3d6c5ba))
+* **ios:** fIN-028 parity phase 4p — AnchorCompletionRing ported to native dashboard ([84538a4](https://github.com/Adedamola-Aina/AnchorOS/commit/84538a4458f4fda1bd718770d096b4f2e2a9d389))
+* **ios:** fIN-028 parity phase 4q — OverdraftWarningBanner ported + wired into AddTransactionSheet ([bc30032](https://github.com/Adedamola-Aina/AnchorOS/commit/bc3003253dd0304ba8780bb20b56bea328a56c2a))
+* **ios:** fIN-028 parity phase 4r — UpcomingBillsCard ported to FinanceView ([07fc4ca](https://github.com/Adedamola-Aina/AnchorOS/commit/07fc4ca1d799a0f52b21ce43628b6bcf3cfbaaa9))
+* **ios:** fIN-028 parity phase 4s — FinanceSearchSheet + FinanceSummarySheet ported ([d4a75e4](https://github.com/Adedamola-Aina/AnchorOS/commit/d4a75e461221f5c5b85f34a748af868b04e4fa51))
+* **ios:** fIN-028 parity phase 4t — fabric + settings + commitments interaction closures ([4b84c1d](https://github.com/Adedamola-Aina/AnchorOS/commit/4b84c1d9780a31214c67129ef970e614bf5fbe1c))
+* **ios:** fIN-028 parity phase 4u — tab re-tap scrolls to top ([e909520](https://github.com/Adedamola-Aina/AnchorOS/commit/e909520925993171a933e4c3ceeffcaeb28ff91d))
+* **ios:** fIN-028 parity phase 4v — searchable currency picker + press-scale sweep ([daee923](https://github.com/Adedamola-Aina/AnchorOS/commit/daee9234f11689f5d06abe90ef5f5635ccbf05ef))
+* **ios:** fIN-028 parity phase 4w — microinteraction sweep ([7fb11ae](https://github.com/Adedamola-Aina/AnchorOS/commit/7fb11aecde3bc22cc34f538b1695ac6db83085ae))
+* **ios:** fIN-028 parity phase 4x — theme picker + dynamic type + reduce-motion link ([c69b19b](https://github.com/Adedamola-Aina/AnchorOS/commit/c69b19badca5bbf21b45036b4f1047456c3e76ea))
+* **ios:** fIN-028 parity phase 4y — profile avatar + support + data export ([60b145d](https://github.com/Adedamola-Aina/AnchorOS/commit/60b145d03c61a6d0e0e8ae73c80acca541acecbd))
+* **ios:** fIN-028 parity phase 4z — notification preferences sheet ([06def56](https://github.com/Adedamola-Aina/AnchorOS/commit/06def56d86843c17ed974df942166cab64e1668e))
+* **mobile:** apply native-feel guards to installed PWA ([2e2db49](https://github.com/Adedamola-Aina/AnchorOS/commit/2e2db49ebe62f590c7a9b3b76b5b159aa4e31901))
+* **mobile:** fIN-029 strip web behaviour on native (long-press, drag, pinch, zoom) ([0ee479a](https://github.com/Adedamola-Aina/AnchorOS/commit/0ee479af7bb75ddb53c96aac2e534fa7c1ad7c18))
+* **native:** close all 10 parity workstreams (WS-1..WS-10) ([739be4a](https://github.com/Adedamola-Aina/AnchorOS/commit/739be4a7f1c49bafea8e806ba91d5fc02cd1f486))
+* **parity:** close remaining native mega-batches ([2d5e23f](https://github.com/Adedamola-Aina/AnchorOS/commit/2d5e23f05b610e73fa94fb679e5254b71d19b1c8))
+* **parity:** complete finance, commitments, AI, polish, gestures, and platform sections ([5cf6970](https://github.com/Adedamola-Aina/AnchorOS/commit/5cf6970cbdca69881e6e0529d5ef233973ad6bd3))
+* **settings,family:** Wave 2 — Settings 85→95% parity ([ae15e8f](https://github.com/Adedamola-Aina/AnchorOS/commit/ae15e8f9fa9e6d50bc9a5eddaa7beed5cd84cf1b))
+
+
+### Bug Fixes
+
+* **security:** patch 1 critical + 2 high vulnerabilities (npm audit fix) ([5d4f9ac](https://github.com/Adedamola-Aina/AnchorOS/commit/5d4f9acf8372cae05c6f3f3839db282ae0b128a4))
+
+
+### Performance
+
+* **finance:** smooth card stack swipe — MotionValue, no setTimeout, fix touch-action ([9da0fde](https://github.com/Adedamola-Aina/AnchorOS/commit/9da0fde6d58afc6014c84bfd9b14dda1e1748d5c))
+
 ## [1.19.0-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.18.0...v1.19.0-rc.0) (2026-05-03)
 
 
