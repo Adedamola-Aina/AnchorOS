@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.1...v1.20.2) (2026-05-03)
+
+
+### Bug Fixes
+
+* **pwa:** auto-reload on sw update + poll for new versions every 60s — BUG-135 ([6d306ca](https://github.com/Adedamola-Aina/AnchorOS/commit/6d306ca18aabf14767f82cc81caa66538beb2699))
+
 ## [1.20.2-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.1...v1.20.2-rc.0) (2026-05-03)
 
 
