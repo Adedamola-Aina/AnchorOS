@@ -1,11 +1,16 @@
 /**
- * Capacitor Native Styles
+ * Capacitor + PWA Native Styles
  *
  * Strips browser chrome/behaviour so a Capacitor-wrapped web bundle
- * feels like a native iOS / Android app.
+ * OR an installed PWA (display-mode: standalone) feels like a native
+ * iOS / Android app.
+ *
+ * Activates via these body classes (set by src/utils/platform.ts):
+ *   .platform-native  — Capacitor iOS/Android shell
+ *   .platform-pwa     — installed PWA (home-screen launched)
+ *   .platform-app     — union of the two (use this for "app-like" rules)
  *
  * Paired with: src/utils/nativeBehavior.ts (runtime JS guards)
- *              body.platform-{ios,android,native,web} classes
  */
 
 /* ─── Safe-area CSS variables ───────────────────────────── */
@@ -16,9 +21,25 @@
   --safe-area-inset-left:   env(safe-area-inset-left, 0px);
 }
 
-/* ─── Native root: kill browser behaviours ──────────────── */
+/* ─── Baseline (all platforms, web included) ─────────────
+   Cheap web-isms that should never feel right in a finance app,
+   even in a regular browser tab. */
+html, body {
+  /* No grey tap-flash on any platform. */
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent iOS landscape font auto-inflation. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ─── App-mode root: kill browser behaviours ─────────────
+   Applies to BOTH Capacitor native AND installed PWA. */
 html.platform-native,
-body.platform-native {
+body.platform-native,
+html.platform-pwa,
+body.platform-pwa,
+html.platform-app,
+body.platform-app {
   /* No pull-to-refresh, no rubber-band over-scroll on the root. */
   overscroll-behavior: none;
   /* No pinch-to-zoom on the document. */
@@ -37,10 +58,16 @@ body.platform-native {
   -webkit-user-drag: none;
 }
 
-/* Everything inside a native app: suppress the same web-isms by default. */
+/* Everything inside an app-mode shell: suppress the same web-isms by default. */
 body.platform-native *,
 body.platform-native *::before,
-body.platform-native *::after {
+body.platform-native *::after,
+body.platform-pwa *,
+body.platform-pwa *::before,
+body.platform-pwa *::after,
+body.platform-app *,
+body.platform-app *::before,
+body.platform-app *::after {
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-user-drag: none;
@@ -50,59 +77,90 @@ body.platform-native *::after {
 body.platform-native img,
 body.platform-native svg,
 body.platform-native video,
-body.platform-native canvas {
+body.platform-native canvas,
+body.platform-pwa img,
+body.platform-pwa svg,
+body.platform-pwa video,
+body.platform-pwa canvas {
   -webkit-user-drag: none;
   user-select: none;
   pointer-events: auto;
 }
 
 /* ─── Selectable regions (opt-in) ───────────────────────── */
-/* Everything is non-selectable by default on native; wrap copyable
+/* Everything is non-selectable by default in app mode; wrap copyable
    things in .selectable (e.g. balances, account numbers, IDs). */
 body.platform-native input,
 body.platform-native textarea,
 body.platform-native [contenteditable="true"],
 body.platform-native .selectable,
-body.platform-native .selectable * {
+body.platform-native .selectable *,
+body.platform-pwa input,
+body.platform-pwa textarea,
+body.platform-pwa [contenteditable="true"],
+body.platform-pwa .selectable,
+body.platform-pwa .selectable * {
   -webkit-user-select: text;
   user-select: text;
   -webkit-touch-callout: default;
 }
 
+/* Inputs ≥16px so iOS Safari doesn't auto-zoom on focus. */
+body.platform-pwa input,
+body.platform-pwa textarea,
+body.platform-pwa select,
+body.platform-native input,
+body.platform-native textarea,
+body.platform-native select {
+  font-size: max(16px, 1rem);
+}
+
 /* ─── Native-feeling focus / press states ───────────────── */
-/* Remove default browser focus outlines on native; render our own. */
+/* Remove default browser focus outlines in app mode; render our own. */
 body.platform-native :focus,
-body.platform-native :focus-visible {
+body.platform-native :focus-visible,
+body.platform-pwa :focus,
+body.platform-pwa :focus-visible {
   outline: none;
 }
 
 /* Instant UIControl-style press feedback. */
 body.platform-native button:active,
 body.platform-native [role="button"]:active,
-body.platform-native a:active {
+body.platform-native a:active,
+body.platform-pwa button:active,
+body.platform-pwa [role="button"]:active,
+body.platform-pwa a:active {
   opacity: 0.65;
   transition: opacity 40ms linear;
 }
 
 /* ─── Scrolling ─────────────────────────────────────────── */
-body.platform-native {
+body.platform-native,
+body.platform-pwa {
   /* Hide the document-level scrollbar track entirely. */
   scrollbar-width: none;
 }
-body.platform-native::-webkit-scrollbar { display: none; }
+body.platform-native::-webkit-scrollbar,
+body.platform-pwa::-webkit-scrollbar { display: none; }
 
 .platform-ios {
   -webkit-overflow-scrolling: touch;
 }
 
-/* No double-tap zoom anywhere interactive on native. */
-body.platform-native * { touch-action: manipulation; }
+/* No double-tap zoom anywhere interactive in app mode. */
+body.platform-native *,
+body.platform-pwa * { touch-action: manipulation; }
 
 /* Scroll containers need pan-y preserved + contained over-scroll. */
 body.platform-native [data-scroll],
 body.platform-native .overflow-y-auto,
 body.platform-native .overflow-auto,
-body.platform-native .overflow-y-scroll {
+body.platform-native .overflow-y-scroll,
+body.platform-pwa [data-scroll],
+body.platform-pwa .overflow-y-auto,
+body.platform-pwa .overflow-auto,
+body.platform-pwa .overflow-y-scroll {
   touch-action: pan-y;
   overscroll-behavior: contain;
 }
@@ -132,12 +190,14 @@ body.platform-android {
 }
 
 /* ─── Bottom navigation with safe area ──────────────────── */
-.platform-native [data-bottom-nav] {
+.platform-native [data-bottom-nav],
+.platform-pwa [data-bottom-nav] {
   --bottom-nav-safe-space: max(calc(var(--safe-area-inset-bottom) - 10px), 8px);
   padding-bottom: var(--bottom-nav-safe-space);
 }
 
-.platform-native [data-bottom-nav-items] {
+.platform-native [data-bottom-nav-items],
+.platform-pwa [data-bottom-nav-items] {
   align-items: center;
 }
 
@@ -158,7 +218,8 @@ body.platform-android {
 }
 
 /* ─── Modal / dialog safe areas ─────────────────────────── */
-.platform-native [role="dialog"] {
+.platform-native [role="dialog"],
+.platform-pwa [role="dialog"] {
   max-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
 }
 

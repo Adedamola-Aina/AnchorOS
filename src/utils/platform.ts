@@ -64,6 +64,23 @@ export function isAndroid(): boolean {
 }
 
 /**
+ * Check if running as an installed PWA (standalone display mode).
+ * True when launched from home-screen on iOS/Android or installed PWA on desktop.
+ * Always false inside Capacitor (use isNative() instead).
+ */
+export function isPWA(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (isNative()) return false;
+  // Standard standalone PWA
+  if (window.matchMedia?.('(display-mode: standalone)').matches) return true;
+  if (window.matchMedia?.('(display-mode: fullscreen)').matches) return true;
+  if (window.matchMedia?.('(display-mode: minimal-ui)').matches) return true;
+  // iOS Safari uses a non-standard property
+  const navAny = window.navigator as Navigator & { standalone?: boolean };
+  return navAny.standalone === true;
+}
+
+/**
  * Check if a Capacitor plugin is available
  */
 export function isPluginAvailable(pluginName: string): boolean {
@@ -102,6 +119,13 @@ export function getPlatformClasses(): string {
 
   if (isNative()) {
     classes.push('platform-native');
+  }
+  if (isPWA()) {
+    // Installed PWA: apply native-style web-feel suppression too.
+    classes.push('platform-pwa', 'platform-app');
+  }
+  if (isNative()) {
+    classes.push('platform-app');
   }
 
   return classes.join(' ');

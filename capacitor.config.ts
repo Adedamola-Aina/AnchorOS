@@ -5,9 +5,11 @@ const config: CapacitorConfig = {
   appName: 'Anchor',
   webDir: 'dist',
   bundledWebRuntime: false,
+  // No `server.hostname` — load bundled `dist/` assets so the app runs as a
+  // true native shell (offline-capable, native navigation, plugin-mediated
+  // network). Use `androidScheme: 'https'` so localStorage/IndexedDB/cookies
+  // share the same origin as web (required for Firebase Auth persistence).
   server: {
-    // Allow loading resources from Firebase Hosting in production
-    hostname: 'anchor-os.web.app',
     androidScheme: 'https',
     iosScheme: 'https',
   },

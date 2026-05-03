@@ -14,7 +14,7 @@
  * Only active on native platforms. Web/PWA keeps normal behaviour.
  */
 
-import { isNative, getPlatformClasses } from './platform';
+import { isNative, isPWA, getPlatformClasses } from './platform';
 
 /**
  * Apply the platform-{ios,android,native,web} classes to BOTH
@@ -39,11 +39,18 @@ export function applyPlatformClasses(): void {
 
 /**
  * Initialise native-only event guards. Safe to call on web (no-ops).
+ *
+ * Activates when running:
+ *   - inside a Capacitor native shell, OR
+ *   - as an installed PWA (display-mode: standalone / fullscreen / minimal-ui).
+ *
+ * The same guards are correct for both: an installed PWA should not show
+ * "Open in new tab", iOS share sheets, or pinch-zoom the document.
  */
 export function initNativeBehavior(): void {
   applyPlatformClasses();
 
-  if (!isNative()) return;
+  if (!isNative() && !isPWA()) return;
 
   // 1) Context menu (iOS long-press share sheet, Android long-press
   //    selection menu, desktop right-click during staging on Safari).
