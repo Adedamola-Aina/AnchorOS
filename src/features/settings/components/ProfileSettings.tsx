@@ -1,8 +1,9 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Mail, Globe } from 'lucide-react';
+import { User, Mail, Globe, Camera, Trash2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
+import { uploadAvatar, deleteAvatar } from '../../../services/AvatarService';
 
 interface ProfileSettingsProps {
     name: string;
@@ -38,17 +39,18 @@ function SignInMethodBadge({ providerId }: { providerId: string }) {
 }
 
 export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onUpdateName }) => {
-    const { user } = useAuth();
+    const { user, profile, updateProfile } = useAuth();
     const providerId = user?.providerData?.[0]?.providerId ?? 'password';
     const [localName, setLocalName] = useState(name);
+    const [avatarUploading, setAvatarUploading] = useState(false);
+    const [avatarError, setAvatarError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const isFirstMount = useRef(true);
 
-    // Sync external prop changes
     useEffect(() => {
         setLocalName(name);
     }, [name]);
 
-    // Debounced update to Firestore
     useEffect(() => {
         if (isFirstMount.current) {
             isFirstMount.current = false;
@@ -63,6 +65,38 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
         return () => clearTimeout(timer);
     }, [localName, name, onUpdateName]);
 
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !uid) return;
+        setAvatarError(null);
+        setAvatarUploading(true);
+        try {
+            const url = await uploadAvatar(uid, file);
+            updateProfile({ photoURL: url });
+        } catch (err: unknown) {
+            setAvatarError((err as Error).message);
+        } finally {
+            setAvatarUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const handleAvatarDelete = async () => {
+        if (!uid) return;
+        setAvatarError(null);
+        setAvatarUploading(true);
+        try {
+            await deleteAvatar(uid);
+            updateProfile({ photoURL: undefined });
+        } catch (err: unknown) {
+            setAvatarError((err as Error).message);
+        } finally {
+            setAvatarUploading(false);
+        }
+    };
+
+    const initials = (profile?.name || name || 'U').slice(0, 2).toUpperCase();
+
     return (
         <Card className="overflow-hidden">
             <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
@@ -73,7 +107,64 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
                     User Profile
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-6 space-y-5">
+                {/* Avatar */}
+                <div className="flex items-center gap-4">
+                    <div className="relative shrink-0">
+                        {profile?.photoURL ? (
+                            <img
+                                src={profile.photoURL}
+                                alt="Profile photo"
+                                className="w-16 h-16 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700"
+                            />
+                        ) : (
+                            <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300 ring-2 ring-slate-200 dark:ring-slate-700">
+                                {initials}
+                            </div>
+                        )}
+                        {avatarUploading && (
+                            <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                disabled={avatarUploading}
+                                onClick={() => fileInputRef.current?.click()}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 min-h-[36px]"
+                            >
+                                <Camera className="w-3.5 h-3.5" />
+                                {profile?.photoURL ? 'Change photo' : 'Upload photo'}
+                            </button>
+                            {profile?.photoURL && (
+                                <button
+                                    type="button"
+                                    disabled={avatarUploading}
+                                    onClick={handleAvatarDelete}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors disabled:opacity-50 min-h-[36px]"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Remove
+                                </button>
+                            )}
+                        </div>
+                        <p className="text-[10px] text-slate-400">JPG, PNG or WebP · max 5 MB</p>
+                        {avatarError && (
+                            <p className="text-[10px] text-rose-500">{avatarError}</p>
+                        )}
+                    </div>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarChange}
+                    />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] uppercase font-bold text-slate-400">Display Name</label>

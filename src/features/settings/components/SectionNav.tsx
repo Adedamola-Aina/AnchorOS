@@ -1,31 +1,24 @@
 /**
- * SectionNav - Mobile-friendly section navigation for Settings
- * SCROLL-001: Quick jump to settings sections on mobile
+ * SectionNav - Mobile quick-jump strip for grouped Settings sections
  */
 // @ts-nocheck
 
-
 import React from 'react';
 
-interface Section {
-    id: string;
-    label: string;
-}
+interface Section { id: string; label: string; }
 
 const baseSections: Section[] = [
-    { id: 'profile', label: 'Profile' },
-    { id: 'appearance', label: 'Theme' },
-    { id: 'security', label: 'Security' },
+    { id: 'profile',       label: 'Profile' },
+    { id: 'security',      label: 'Security' },
+    { id: 'appearance',    label: 'Preferences' },
     { id: 'notifications', label: 'Alerts' },
-    { id: 'family', label: 'Family' },
-    { id: 'support', label: 'Support' },
-    { id: 'data', label: 'Data' },
-    { id: 'danger', label: 'Account' },
+    { id: 'family',        label: 'Family' },
+    { id: 'data',          label: 'Data' },
+    { id: 'support',       label: 'Support' },
+    { id: 'danger',        label: 'Account' },
 ];
 
-interface SectionNavProps {
-    includeAnchorAI?: boolean;
-}
+interface SectionNavProps { includeAnchorAI?: boolean; }
 
 export const SectionNav: React.FC<SectionNavProps> = ({ includeAnchorAI = false }) => {
     const sections: Section[] = includeAnchorAI
@@ -33,10 +26,7 @@ export const SectionNav: React.FC<SectionNavProps> = ({ includeAnchorAI = false 
         : baseSections;
 
     const scrollToSection = (id: string) => {
-        const element = document.getElementById(`settings-${id}`);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        document.getElementById(`settings-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
     return (

@@ -3,7 +3,6 @@ import {
   AnimatedAnchorAIIcon,
   AnimatedFinanceIcon,
   AnimatedHomeIcon,
-  AnimatedSettingsIcon,
   AnimatedTasksIcon,
 } from './AnimatedNavIcons';
 
@@ -21,13 +20,12 @@ export interface BottomNavItem {
 interface BuildBottomNavItemsInput {
   accountColors: string[];
   anchorAIEnabled: boolean;
-  isDarkMode: boolean;
+  isDarkMode?: boolean;
 }
 
 export function buildBottomNavItems({
   accountColors,
   anchorAIEnabled,
-  isDarkMode,
 }: BuildBottomNavItemsInput): BottomNavItem[] {
   const items: BottomNavItem[] = [
     {
@@ -64,24 +62,14 @@ export function buildBottomNavItems({
     });
   }
 
-  items.push(
-    {
-      to: '/finance',
-      label: 'Finance',
-      isIconOnly: false,
-      renderIcon: (isAnimating, className) => (
-        <AnimatedFinanceIcon className={className} isAnimating={isAnimating} />
-      ),
-    },
-    {
-      to: '/settings',
-      label: 'Settings',
-      isIconOnly: false,
-      renderIcon: (isAnimating, className) => (
-        <AnimatedSettingsIcon className={className} isAnimating={isAnimating} isDarkMode={isDarkMode} />
-      ),
-    },
-  );
+  items.push({
+    to: '/finance',
+    label: 'Finance',
+    isIconOnly: false,
+    renderIcon: (isAnimating, className) => (
+      <AnimatedFinanceIcon className={className} isAnimating={isAnimating} />
+    ),
+  });
 
   return items;
 }

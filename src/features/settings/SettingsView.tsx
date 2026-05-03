@@ -1,12 +1,11 @@
 /**
  * SettingsView - Main settings page orchestrator
- * 
- * Refactored per CLAUDE.md §3.2 (200-line rule).
- * Notification banners extracted to SettingsBanners.tsx
- * Reauth modal extracted to ReauthModal.tsx
+ *
+ * Sections are grouped by function so users can navigate purposefully:
+ *   Profile → Account & Security → Preferences → AI & Features →
+ *   Family → Data → Support → Advanced
  */
 // @ts-nocheck
-
 
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
@@ -28,15 +27,24 @@ import { SupportSettings } from './components/SupportSettings';
 import { DeveloperTools } from './components/DeveloperTools';
 import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
-// Notification banners removed — onboarding flow now handles email verify + MFA
 import { ReauthModal } from './components/ReauthModal';
 import { RecoveryCodesDisplay } from './components/RecoveryCodesDisplay';
-import { SectionNav } from './components/SectionNav';
 import { handleWipeData, handleDeleteAccount } from './components/SettingsDataActions';
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { auditSettings } from '../../services/AuditService';
 import { getDisplayVersion } from '../../version';
+
+function SettingsSectionHeader({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-3 mt-2">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 whitespace-nowrap">
+        {label}
+      </span>
+      <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
+    </div>
+  );
+}
 
 const SettingsView = () => {
   const {
@@ -55,7 +63,6 @@ const SettingsView = () => {
   const [isReauthenticating, setIsReauthenticating] = useState(false);
   const [pendingMfaUnenroll, setPendingMfaUnenroll] = useState(false);
 
-  // ARCH-001: MFA enrollment UI state encapsulated in dedicated hook
   const mfa = useMfaEnrollmentUI({
     generateMfaSecret,
     enrollMfa,
@@ -74,7 +81,6 @@ const SettingsView = () => {
       setShowReauthModal(false);
       setReauthPassword('');
 
-      // If we were trying to disable MFA, retry now
       if (pendingMfaUnenroll) {
         setPendingMfaUnenroll(false);
         try {
@@ -94,32 +100,105 @@ const SettingsView = () => {
 
   return (
     <FeatureErrorBoundary featureName="Settings">
-      <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-500 pb-28 md:pb-20">
+      <div className="max-w-3xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-500 pb-28 md:pb-20">
         <div className="flex flex-col gap-2 mb-2">
-          <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white tracking-tight">System Settings</h1>
-          <p className="text-slate-500 dark:text-slate-400">Manage your preferences and environment.</p>
+          <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white tracking-tight">Settings</h1>
+          <p className="text-slate-500 dark:text-slate-400">Manage your account and preferences.</p>
         </div>
 
-        <SectionNav includeAnchorAI={isAnchorAIFlagEnabled} />
+        {/* Profile */}
+        <SettingsSectionHeader label="Profile" />
+        <div id="settings-profile">
+          <ProfileSettings
+            name={profile.name}
+            uid={user?.uid || ''}
+            onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }}
+          />
+        </div>
 
-        <div id="settings-profile"><ProfileSettings name={profile.name} uid={user?.uid || ''} onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }} /></div>
-        <div id="settings-appearance"><AppearanceSettings theme={profile.theme as 'light' | 'dark'} onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }}
-          accessibility={profile.accessibility} onUpdateAccessibility={(prefs) => updateProfile({ accessibility: { ...(profile.accessibility || { fontSize: 'default', highContrast: false, reducedMotion: false }), ...prefs } })} /></div>
-        <div id="settings-security"><SecuritySettings mfaEnabled={profile.mfaEnabled || false} isEnrolling={mfa.isEnrolling} show2FASetup={mfa.show2FASetup} mfaQrUrl={mfa.mfaQrUrl} mfaManualKey={mfa.mfaManualKey}
-          mfaCode={mfa.mfaCode} mfaError={mfa.mfaError} onSetShow2FASetup={mfa.setShow2FASetup} onSetMfaCode={mfa.setMfaCode} onGenerateMfaSecret={mfa.handleGenerateSecret}
-          onEnrollMfa={mfa.handleEnroll} onUnenrollMfa={unenrollMfa} onRequiresReauthForUnenroll={() => { setPendingMfaUnenroll(true); setShowReauthModal(true); }} /></div>
+        {/* Account & Security */}
+        <SettingsSectionHeader label="Account & Security" />
+        <div id="settings-security">
+          <SecuritySettings
+            mfaEnabled={profile.mfaEnabled || false}
+            isEnrolling={mfa.isEnrolling}
+            show2FASetup={mfa.show2FASetup}
+            mfaQrUrl={mfa.mfaQrUrl}
+            mfaManualKey={mfa.mfaManualKey}
+            mfaCode={mfa.mfaCode}
+            mfaError={mfa.mfaError}
+            onSetShow2FASetup={mfa.setShow2FASetup}
+            onSetMfaCode={mfa.setMfaCode}
+            onGenerateMfaSecret={mfa.handleGenerateSecret}
+            onEnrollMfa={mfa.handleEnroll}
+            onUnenrollMfa={unenrollMfa}
+            onRequiresReauthForUnenroll={() => { setPendingMfaUnenroll(true); setShowReauthModal(true); }}
+          />
+        </div>
         {mfa.recoveryCodes && <RecoveryCodesDisplay codes={mfa.recoveryCodes} onDone={mfa.clearRecoveryCodes} />}
-        <div id="settings-notifications"><NotificationSettings emailEnabled={profile.notificationPreferences?.enabled || false} email={profile.notificationPreferences?.email || ''}
-          frequency={profile.notificationPreferences?.frequency || 'instant'} userEmail={user?.email || ''} emailVerified={user?.emailVerified || false}
-          categories={profile.notificationPreferences?.categories}
-          onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || { email: '', frequency: 'instant' as const, enabled: false }), ...prefs } })}
-          pushPermissionStatus={pushPermissionStatus} requestPushPermission={() => requestPushPermission()} /></div>
-        {isAnchorAIFlagEnabled && <div id="settings-anchor-ai"><AnchorAISettings userId={user?.uid} showToast={showToast} /></div>}
-        <div id="settings-family"><FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} connection={familyConnection} connectionLoading={familyLoading} /></div>
-        <div id="settings-support"><SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} /></div>
-        {import.meta.env.VITE_APP_ENV !== 'production' && <DeveloperTools userUid={user?.uid || ''} />}
-        <div id="settings-data"><DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={onWipeData} /></div>
-        <div id="settings-danger"><DangerZone onDeleteAccount={onDeleteAccount} /></div>
+
+        {/* Preferences */}
+        <SettingsSectionHeader label="Preferences" />
+        <div id="settings-appearance">
+          <AppearanceSettings
+            theme={profile.theme as 'light' | 'dark'}
+            onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }}
+            accessibility={profile.accessibility}
+            onUpdateAccessibility={(prefs) => updateProfile({ accessibility: { ...(profile.accessibility || { fontSize: 'default', highContrast: false, reducedMotion: false }), ...prefs } })}
+          />
+        </div>
+        <div id="settings-notifications">
+          <NotificationSettings
+            emailEnabled={profile.notificationPreferences?.enabled || false}
+            email={profile.notificationPreferences?.email || ''}
+            frequency={profile.notificationPreferences?.frequency || 'instant'}
+            userEmail={user?.email || ''}
+            emailVerified={user?.emailVerified || false}
+            categories={profile.notificationPreferences?.categories}
+            onUpdatePreferences={(prefs) => updateProfile({ notificationPreferences: { ...(profile.notificationPreferences || { email: '', frequency: 'instant' as const, enabled: false }), ...prefs } })}
+            pushPermissionStatus={pushPermissionStatus}
+            requestPushPermission={() => requestPushPermission()}
+          />
+        </div>
+
+        {/* AI & Features */}
+        {isAnchorAIFlagEnabled && (
+          <>
+            <SettingsSectionHeader label="AI & Features" />
+            <div id="settings-anchor-ai">
+              <AnchorAISettings userId={user?.uid} showToast={showToast} />
+            </div>
+          </>
+        )}
+
+        {/* Family */}
+        <SettingsSectionHeader label="Family" />
+        <div id="settings-family">
+          <FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} connection={familyConnection} connectionLoading={familyLoading} />
+        </div>
+
+        {/* Data */}
+        <SettingsSectionHeader label="Data" />
+        <div id="settings-data">
+          <DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={onWipeData} />
+        </div>
+
+        {/* Support */}
+        <SettingsSectionHeader label="Support" />
+        <div id="settings-support">
+          <SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} />
+        </div>
+
+        {/* Advanced */}
+        {import.meta.env.VITE_APP_ENV !== 'production' && (
+          <>
+            <SettingsSectionHeader label="Advanced" />
+            <DeveloperTools userUid={user?.uid || ''} />
+          </>
+        )}
+        <div id="settings-danger">
+          <DangerZone onDeleteAccount={onDeleteAccount} />
+        </div>
 
         <div className="mt-8 flex flex-col items-center gap-4 pb-8">
           <Button variant="ghost" size="sm" onClick={() => logout()} className="min-h-11 text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
@@ -129,8 +208,14 @@ const SettingsView = () => {
         </div>
 
         {showContactModal && <ContactModal onClose={() => setShowContactModal(false)} currentPage="settings" initialSubject={initialSubject} />}
-        <ReauthModal show={showReauthModal} password={reauthPassword} isLoading={isReauthenticating}
-          onPasswordChange={setReauthPassword} onConfirm={handleReauthenticate} onClose={() => setShowReauthModal(false)} />
+        <ReauthModal
+          show={showReauthModal}
+          password={reauthPassword}
+          isLoading={isReauthenticating}
+          onPasswordChange={setReauthPassword}
+          onConfirm={handleReauthenticate}
+          onClose={() => setShowReauthModal(false)}
+        />
       </div>
     </FeatureErrorBoundary>
   );

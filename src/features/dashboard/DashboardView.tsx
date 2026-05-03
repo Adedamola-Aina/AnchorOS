@@ -7,6 +7,8 @@
 
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Settings, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../../context/AnchorContext';
 import { useAuth } from '../../context/AuthContext';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -20,7 +22,6 @@ import { PortfolioWidget, CashFlowWidget, RecentActivityWidget, ProductivityWidg
 import type { Currency } from '../../types';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { PullToRefresh } from '../../components/mobile/PullToRefresh';
-import { CompletionRing } from './components/CompletionRing';
 import { BeyondBasicsChecklist } from './components/BeyondBasicsChecklist';
 import { useBeyondBasics } from './hooks/useBeyondBasics';
 
@@ -38,6 +39,7 @@ const DashboardView = () => {
   const { accounts, recentActivity, cashFlow, refetch } = useFinance();
   const { isMobile } = useResponsive();
   const haptic = useHaptic();
+  const navigate = useNavigate();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
   const beyondBasics = useBeyondBasics();
@@ -70,13 +72,31 @@ const DashboardView = () => {
             </p>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Life at a glance.</p>
           </div>
-          {!beyondBasics.allComplete && (
-            <CompletionRing
-              completed={beyondBasics.completedCount}
-              total={beyondBasics.totalCount}
-              onClick={() => setChecklistOpen(true)}
-            />
-          )}
+          <div className="flex items-center gap-2 shrink-0">
+            {!beyondBasics.allComplete && (
+              <button
+                type="button"
+                onClick={() => { haptic.trigger('light'); setChecklistOpen(true); }}
+                data-testid="getting-started-pill"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors min-h-[36px]"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Getting Started</span>
+                <span className="ml-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                  {beyondBasics.totalCount - beyondBasics.completedCount}
+                </span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => { haptic.trigger('light'); navigate('/settings'); }}
+              aria-label="Settings"
+              data-testid="settings-pill"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <BeyondBasicsChecklist

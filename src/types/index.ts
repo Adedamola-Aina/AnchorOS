@@ -67,6 +67,7 @@ export type BeyondBasicsItem = typeof BEYOND_BASICS_ITEMS[number];
 
 export interface UserProfile {
   name: string;
+  photoURL?: string;
   familyMode: boolean;
   theme: 'light' | 'dark' | 'system';
   timezone?: string;
