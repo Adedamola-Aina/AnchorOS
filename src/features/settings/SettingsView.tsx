@@ -29,6 +29,7 @@ import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
 import { ReauthModal } from './components/ReauthModal';
 import { RecoveryCodesDisplay } from './components/RecoveryCodesDisplay';
+import { SectionNav } from './components/SectionNav';
 import { handleWipeData, handleDeleteAccount } from './components/SettingsDataActions';
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
@@ -105,6 +106,8 @@ const SettingsView = () => {
           <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white tracking-tight">Settings</h1>
           <p className="text-slate-500 dark:text-slate-400">Manage your account and preferences.</p>
         </div>
+
+        <SectionNav includeAnchorAI={isAnchorAIFlagEnabled} />
 
         {/* Profile */}
         <SettingsSectionHeader label="Profile" />

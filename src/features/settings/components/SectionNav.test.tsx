@@ -1,4 +1,5 @@
 // @ts-nocheck
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
@@ -12,7 +13,7 @@ describe('SectionNav', () => {
   it('renders all section buttons', () => {
     render(<SectionNav includeAnchorAI={true} />);
     expect(screen.getByText('Profile')).toBeInTheDocument();
-    expect(screen.getByText('Theme')).toBeInTheDocument();
+    expect(screen.getByText('Preferences')).toBeInTheDocument();
     expect(screen.getByText('Security')).toBeInTheDocument();
     expect(screen.getByText('Alerts')).toBeInTheDocument();
     expect(screen.getByText('AI')).toBeInTheDocument();

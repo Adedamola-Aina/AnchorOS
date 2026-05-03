@@ -87,7 +87,7 @@ describe('SettingsView', () => {
 
   it('renders all major settings sections', () => {
     render(<SettingsView />);
-    expect(screen.getByText('System Settings')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
     expect(screen.getByTestId('section-nav')).toBeInTheDocument();
     expect(screen.getByTestId('profile-settings')).toBeInTheDocument();
     expect(screen.getByTestId('appearance-settings')).toBeInTheDocument();
@@ -106,7 +106,7 @@ describe('SettingsView', () => {
 
   it('renders subtitle', () => {
     render(<SettingsView />);
-    expect(screen.getByText(/manage your preferences/i)).toBeInTheDocument();
+    expect(screen.getByText(/manage your account/i)).toBeInTheDocument();
   });
 
   it('opens contact modal via support', () => {
@@ -128,6 +128,6 @@ describe('SettingsView', () => {
 
   it('wraps content in FeatureErrorBoundary', () => {
     render(<SettingsView />);
-    expect(screen.getByText('System Settings')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 });

@@ -1,13 +1,16 @@
 // @ts-nocheck
-import React, { useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { LayoutDashboard, CheckCircle2, CreditCard, Settings, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnchorLogo } from '../components/shared';
 import { CommandPalette } from '../components/shared/CommandPalette';
+import { useResponsive } from '../hooks/useResponsive';
 import { useKeyboardAvoidance } from '../hooks/useKeyboardAvoidance';
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChanges';
+import { BottomNavigation } from '../components/mobile/BottomNavigation';
 import { InstallPrompt } from '../components/pwa/InstallPrompt';
+import { useFinanceService } from '../hooks/useFinanceService';
 import { useFabric } from '../hooks/useFabric';
 
 const AnchorAINavIcon = ({ className = '' }: { className?: string }) => (
@@ -52,6 +55,9 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon }) => {
 const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     const { user, profile, logout } = useAuth();
     const { isEnabled: anchorAIEnabled } = useFabric();
+    const { isMobile } = useResponsive();
+    const { accounts } = useFinanceService(user);
+    const accountColors = useMemo(() => accounts.map(a => a.color).filter(Boolean), [accounts]);
 
     useKeyboardAvoidance();
 
@@ -100,12 +106,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
             <main
                 data-scroll
                 className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0"
+                style={isMobile ? { scrollPaddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px))' } : undefined}
             >
-                <div className="p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto pb-8">
+                {/* On mobile, pad bottom so content isn't hidden behind the tab bar */}
+                <div
+                    className="p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto"
+                    style={isMobile ? { paddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px) + 1.5rem)' } : { paddingBottom: '2rem' }}
+                >
                     {children}
                 </div>
                 <InstallPrompt />
             </main>
+
+            {isMobile && <BottomNavigation accountColors={accountColors} anchorAIEnabled={anchorAIEnabled} />}
         </div>
     );
 };
