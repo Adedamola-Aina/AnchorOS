@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.3-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.2...v1.20.3-dev.0) (2026-05-03)
+
+
+### Bug Fixes
+
+* **mobile:** restore nav as full-width flush tab bar, fix test suite — BUG-136 ([066df7c](https://github.com/Adedamola-Aina/AnchorOS/commit/066df7cbf35fea928c52defe509db168e34c7556))
+
 ## [1.20.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.1...v1.20.2) (2026-05-03)
 
 
