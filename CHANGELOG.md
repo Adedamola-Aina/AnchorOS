@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.0-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.19.1...v1.20.0-rc.0) (2026-05-03)
+
+
+### Features
+
+* **settings:** settings ux overhaul — FEAT-024 ([0584221](https://github.com/Adedamola-Aina/AnchorOS/commit/0584221929a7857d94ef13f47d5146eec5f91cda))
+
 ## [1.19.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.19.0...v1.19.1) (2026-05-03)
 
 
