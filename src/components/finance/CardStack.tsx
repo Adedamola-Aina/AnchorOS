@@ -1,16 +1,14 @@
 /**
  * CardStack — Apple Wallet-style card stack with spring swipe transitions.
  *
- * Smooth-motion architecture:
- *   - One `MotionValue<number>` (`dragY`) shared with all cards.
- *   - Front card binds `style={{ y: dragY }}` so framer-motion's drag writes
- *     directly into the motion value.
- *   - Back cards use `useTransform(dragY, ...)` in <StackCard> for damped
- *     follow without React re-renders.
- *   - Exit animation uses `animate(dragY, target).then(commit)` so the
- *     rotation commit is synced to the spring physics — no setTimeout drift.
- *   - `touchAction: 'none'` on the front card prevents the browser scroll
- *     gesture from competing with the drag.
+ * Smoothness architecture:
+ *   - Single shared `dragY` MotionValue (in useCardCycle), no per-frame
+ *     React renders during drag.
+ *   - CSS `transition: top` on each StackCard handles the slot reshuffle
+ *     when rotation commits — cards slide between slots, never teleport.
+ *   - `recentlyExitedId` masks the unavoidable binding-swap of the
+ *     formerly-front card during the brief window where it transitions
+ *     from raw `dragY` binding to the factored back-card binding.
  */
 import React, {
   useState, useRef, useCallback, useEffect, useMemo,
@@ -27,6 +25,10 @@ import { useCardCycle } from './useCardCycle';
 
 export const EXPANDED_STACK_GAP = 16;
 const MAX_RENDERED_CARDS = 10;
+/** Window during which the formerly-front card stays hidden. Should be
+ *  long enough for the dragY spring to reach near-rest (≈250ms) so the
+ *  visible reveal is at the new slot's resting position. */
+const RECENTLY_EXITED_HIDE_MS = 280;
 
 export interface CardStackProps {
   accounts: AnchorAccount[];
@@ -53,15 +55,49 @@ export const CardStack: React.FC<CardStackProps> = ({
   const visibleAccounts = useMemo(() => {
     if (orderedAccounts.length === 0) return [];
     const off = rotationOffset % orderedAccounts.length;
-    return [...orderedAccounts.slice(off), ...orderedAccounts.slice(0, off)].slice(0, MAX_RENDERED_CARDS);
+    return [
+      ...orderedAccounts.slice(off),
+      ...orderedAccounts.slice(0, off),
+    ].slice(0, MAX_RENDERED_CARDS);
   }, [orderedAccounts, rotationOffset]);
+
+  /* Track which card just left the front so StackCard can hide it
+     during the binding swap. We compare rotation across renders. */
+  const prevRotationRef = useRef(rotationOffset);
+  const prevFrontIdRef = useRef<string | null>(null);
+  const [recentlyExitedId, setRecentlyExitedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (prevRotationRef.current !== rotationOffset) {
+      const exitedId = prevFrontIdRef.current;
+      prevRotationRef.current = rotationOffset;
+      if (exitedId) {
+        setRecentlyExitedId(exitedId);
+        const t = window.setTimeout(
+          () => setRecentlyExitedId(null),
+          RECENTLY_EXITED_HIDE_MS,
+        );
+        return () => window.clearTimeout(t);
+      }
+    }
+    return undefined;
+  }, [rotationOffset]);
+
+  /* Always remember the current front-card id so the next rotation
+     change can mark it as the freshly-exited card. */
+  useEffect(() => {
+    const front = visibleAccounts[visibleAccounts.length - 1];
+    prevFrontIdRef.current = front ? front.id : null;
+  }, [visibleAccounts]);
 
   useEffect(() => { setOrderedAccounts(accounts); }, [accounts]);
   useEffect(() => { resetRotation(); }, [accounts.length, resetRotation]);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const ro = new ResizeObserver(([entry]) => { if (entry) setCardWidth(entry.contentRect.width); });
+    const ro = new ResizeObserver(([entry]) => {
+      if (entry) setCardWidth(entry.contentRect.width);
+    });
     ro.observe(containerRef.current);
     return () => ro.disconnect();
   }, []);
@@ -77,7 +113,9 @@ export const CardStack: React.FC<CardStackProps> = ({
   ), [expandedStep, isCollapsed]);
 
   const getTransitionDelay = useCallback((index: number) => (
-    !isCollapsed ? `${index * STACK_STAGGER_MS}ms` : `${Math.max(visibleAccounts.length - 1 - index, 0) * 14}ms`
+    !isCollapsed
+      ? `${index * STACK_STAGGER_MS}ms`
+      : `${Math.max(visibleAccounts.length - 1 - index, 0) * 14}ms`
   ), [isCollapsed, visibleAccounts.length]);
 
   const getShadow = useCallback((_index: number) => (
@@ -101,8 +139,8 @@ export const CardStack: React.FC<CardStackProps> = ({
       <div
         ref={containerRef}
         data-testid="card-stack"
-        /* `pan-x` (not `pan-y`): the browser only handles horizontal panning;
-           vertical gestures are owned by framer-motion's drag. */
+        /* `touch-pan-x` (not `pan-y`): the browser only handles
+           horizontal panning; vertical gestures belong to framer's drag. */
         className="relative w-full touch-pan-x overflow-visible"
         style={{ height: stackHeight }}
       >
@@ -119,6 +157,7 @@ export const CardStack: React.FC<CardStackProps> = ({
             shadow={getShadow(i)}
             transitionDelay={getTransitionDelay(i)}
             cyclingDirection={cyclingDirection}
+            recentlyExited={recentlyExitedId === acc.id}
             dragY={dragY}
             onDrag={handleDrag}
             onDragEnd={handleDragEnd}
@@ -142,5 +181,5 @@ export const CardStack: React.FC<CardStackProps> = ({
   );
 };
 
-/* Re-export for any consumer that was importing AccountCard from CardStack. */
+/* Re-export for any consumer importing AccountCard from CardStack. */
 export { AccountCard };

@@ -1,22 +1,28 @@
 /**
  * StackCard — single card wrapper inside CardStack.
  *
- * Reads the shared `dragY` MotionValue and derives its own y transform
- * via `useTransform`, so dragging the front card does NOT trigger React
- * re-renders on the back cards. Springs settle naturally and the stack
- * tracks the finger smoothly.
+ * Smoothness comes from three things:
+ *   1. CSS `transition: top 320ms` so when the inline `top` changes
+ *      (slot reshuffle on commit) the card slides to its new resting
+ *      position instead of teleporting.
+ *   2. Front card binds `style.y = dragY` directly so framer-motion's
+ *      drag system writes into the shared MotionValue with zero React
+ *      renders.
+ *   3. Back cards use `useTransform(dragY, fn)` for damped follow.
+ *      No re-renders during drag → spring physics never restart.
  *
- * Extracted from CardStack so we can call `useTransform` per-card without
- * violating the rules-of-hooks loop restriction (ARCH-001 split).
+ * The formerly-front card is hidden via `recentlyExited` while the
+ * binding swap (raw dragY → factored) settles, so the user never sees
+ * the unavoidable internal pixel jump.
  */
 import React, { useMemo } from 'react';
 import { motion, useTransform, type MotionValue } from 'framer-motion';
 import { AccountCard } from './AccountCard';
 import type { AnchorAccount } from '../../types';
-import {
-  STACK_SPRING_STIFFNESS, STACK_SPRING_DAMPING,
-} from './cardConstants';
 import { SWIPE_EXIT_DISTANCE } from './useCardCycle';
+
+/** Easing tuned for layout reshuffle — gentle landing, no overshoot. */
+const SLOT_TRANSITION = 'top 320ms cubic-bezier(0.32, 0.72, 0, 1)';
 
 export interface StackCardProps {
   account: AnchorAccount;
@@ -29,9 +35,11 @@ export interface StackCardProps {
   shadow: string;
   transitionDelay: string;
   cyclingDirection: 'next' | 'previous' | null;
+  /** True for the card that just left the front position — hidden so
+   * the user does not see its binding swap (raw → factored dragY). */
+  recentlyExited: boolean;
   /** Shared drag offset of the front card (negative = up). */
   dragY: MotionValue<number>;
-  onDragStart?: () => void;
   onDrag?: Parameters<typeof motion.div>[0]['onDrag'];
   onDragEnd?: Parameters<typeof motion.div>[0]['onDragEnd'];
   onTap: () => void;
@@ -41,32 +49,24 @@ export interface StackCardProps {
 export const StackCard: React.FC<StackCardProps> = ({
   account, index, frontIdx, totalCards, isCollapsed,
   cardHeight, baseTop, shadow, transitionDelay,
-  cyclingDirection, dragY,
-  onDragStart, onDrag, onDragEnd, onTap, registerEl,
+  cyclingDirection, recentlyExited, dragY,
+  onDrag, onDragEnd, onTap, registerEl,
 }) => {
   const isFront = isCollapsed && index === frontIdx;
   const distFromFront = Math.max(frontIdx - index, 0);
 
-  /* Front card y: bound directly to dragY so framer's drag transform writes
-     into the motion value, and any external animate(dragY, ...) call drives
-     this card's exit smoothly without a state-roundtrip. */
-  const frontY = dragY;
-
-  /* Back cards: smoothly tail the front card by a damped fraction of dragY.
-     useTransform avoids React re-renders during drag — the springs settle. */
+  /* Back cards: tail the front card by a damped fraction of dragY.
+     Computed once via useTransform so dragging does not re-render React. */
   const backFactor = isCollapsed
     ? Math.max(0.24 - (distFromFront - 1) * 0.05, 0.08)
     : 0;
   const backY = useTransform(dragY, (v) => Math.round(v * backFactor));
 
-  /* When mid-swipe-commit, the front card animates to its exit target via
-     the parent's animate(dragY,...) call — no separate animate prop needed.
-     Back cards need NO animate during cycle: dragY stays at the exit value
-     until commit, then snaps to 0 (parent handles). */
-  const yMotion = isFront ? frontY : (isCollapsed ? backY : 0);
+  /* Pick the right motion source for this card. */
+  const yMotion: MotionValue<number> | number = isFront
+    ? dragY
+    : (isCollapsed ? backY : 0);
 
-  /* Style for the wrapping motion.div. `top` stays as a numeric pixel
-     so existing tests keep asserting on it; visual movement comes via y. */
   const wrapperStyle: React.CSSProperties = useMemo(() => ({
     position: 'absolute',
     left: 0,
@@ -75,21 +75,29 @@ export const StackCard: React.FC<StackCardProps> = ({
     height: cardHeight,
     transformOrigin: 'top center',
     zIndex: index,
-    transitionDelay,
-    /* CRITICAL: tell the browser this element handles its own touch.
-       Without this, `touch-pan-y` on the parent makes the browser scroll
-       fight framer-motion's vertical drag → 100-200ms of input lag. */
+    /* CSS transition on `top` so the inline top change (slot reshuffle
+       on commit) animates smoothly. Disabled for the recently-exited
+       card so it snaps to its new slot rather than sliding through view. */
+    transition: recentlyExited ? 'none' : SLOT_TRANSITION,
+    transitionDelay: recentlyExited ? '0ms' : transitionDelay,
+    /* Hide the formerly-front card while its y-binding swaps and dragY
+       springs back. Other cards stay visible and animate smoothly. */
+    visibility: recentlyExited ? 'hidden' : 'visible',
+    /* `touch-action: none` on the front card lets framer own the gesture
+       — without this, the browser fights for vertical scroll → input lag. */
     touchAction: isFront ? 'none' : 'pan-y',
-    /* Promote to its own layer so transforms don't reflow siblings. */
     willChange: isFront || cyclingDirection ? 'transform' : 'auto',
-  }), [baseTop, cardHeight, index, transitionDelay, isFront, cyclingDirection]);
+  }), [
+    baseTop, cardHeight, index, transitionDelay,
+    isFront, cyclingDirection, recentlyExited,
+  ]);
 
   return (
     <motion.div
       ref={registerEl}
       data-testid={`card-stack-item-${account.id}`}
       data-draggable={isFront ? 'true' : 'false'}
-      style={{ ...wrapperStyle, y: yMotion as MotionValue<number> | number }}
+      style={{ ...wrapperStyle, y: yMotion }}
       drag={isFront ? 'y' : false}
       dragMomentum={false}
       dragElastic={0.06}
@@ -97,20 +105,12 @@ export const StackCard: React.FC<StackCardProps> = ({
         top: -(cardHeight + SWIPE_EXIT_DISTANCE),
         bottom: Math.round(cardHeight * 0.5),
       }}
-      onDragStart={onDragStart}
       onDrag={isFront ? onDrag : undefined}
       onDragEnd={isFront ? onDragEnd : undefined}
-      /* No `animate` prop on collapsed cards — y is driven directly by the
-         shared MotionValue. For expanded mode, fall back to spring layout. */
       {...(!isCollapsed
         ? {
             animate: { y: 0 },
-            transition: {
-              type: 'spring',
-              stiffness: STACK_SPRING_STIFFNESS,
-              damping: STACK_SPRING_DAMPING,
-              mass: 1,
-            },
+            transition: { type: 'spring', stiffness: 320, damping: 30, mass: 1 },
           }
         : {})}
     >
