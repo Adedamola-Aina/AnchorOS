@@ -67,10 +67,25 @@ if (import.meta.env.VITE_APP_ENV === 'production') {
 initNativeBehavior();
 
 if ('serviceWorker' in navigator) {
+    // Guard against double-reload if controllerchange fires more than once
+    let swRefreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (swRefreshing) return;
+        swRefreshing = true;
+        window.location.reload();
+    });
+
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register(`/sw.js?v=${APP_VERSION}`).catch((error) => {
-            console.warn('SW registration failed:', error);
-        });
+        navigator.serviceWorker
+            .register(`/sw.js?v=${APP_VERSION}`)
+            .then((registration) => {
+                // Check for a new SW immediately, then every 60 s while the tab is open
+                registration.update();
+                setInterval(() => { registration.update(); }, 60_000);
+            })
+            .catch((error) => {
+                console.warn('SW registration failed:', error);
+            });
     });
 }
 

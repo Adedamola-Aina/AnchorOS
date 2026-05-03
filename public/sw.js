@@ -1,5 +1,5 @@
 // @ts-nocheck
-const CACHE_NAME = 'anchor-os-v1.19.0';
+const CACHE_NAME = 'anchor-os-v1.20.1';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
