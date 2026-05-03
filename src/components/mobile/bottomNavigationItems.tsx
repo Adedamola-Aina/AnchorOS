@@ -10,6 +10,10 @@ import {
 export interface BottomNavItem {
   to: string;
   label: string;
+  /**
+   * Kept for backward compatibility with existing tests / callers. Always
+   * `false` in the iOS 26 design — every tab carries a label.
+   */
   isIconOnly: boolean;
   renderIcon: (isAnimating: boolean, className: string) => React.ReactNode;
 }
@@ -47,11 +51,11 @@ export function buildBottomNavItems({
   if (anchorAIEnabled) {
     items.push({
       to: '/fabric',
-      label: 'Anchor AI',
-      isIconOnly: true,
+      label: 'Anchor',
+      isIconOnly: false,
       renderIcon: (isAnimating, className) => (
         <AnimatedAnchorAIIcon
-          className={`${className} w-6 h-6`}
+          className={className}
           isAnimating={isAnimating}
           isBreathing={true}
           isDisabled={false}

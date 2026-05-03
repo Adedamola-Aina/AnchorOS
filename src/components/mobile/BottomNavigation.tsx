@@ -1,20 +1,15 @@
 /**
- * BottomNavigation — iOS 26 "Liquid Glass" floating tab bar.
+ * BottomNavigation — iOS 26 floating glass tab bar.
  *
- * Floats above content with horizontal margin and clears the home indicator
- * via safe-area insets. Anchor AI is integrated as the center tab (when
- * enabled) — never a separate floating button.
- *
- * Visual model:
- *   ┌──────────────── safe area / page edge ────────────────┐
- *   │                                                       │
- *   │      ╭──────────── floating pill ───────────╮         │
- *   │      │  Home   Tasks   AI   Finance  Settings│         │
- *   │      ╰────────────────────────────────────╯           │
- *   │                                                       │
- *   └────────── home indicator / safe inset bottom ─────────┘
- *
- * Active tab gets a sliding pill indicator (framer-motion `layoutId`).
+ * Design intent (matches Bitwarden / Tiimo / Bevel iOS 26 patterns):
+ *   - Pill floats above content. Content scrolls visibly *through* the
+ *     glass — no solid strip painting, no safe-area blocker box.
+ *   - Active tab gets a soft NEUTRAL pill highlight (not branded blue).
+ *   - Glass = translucent + heavy blur + saturation + 1px hairline border.
+ *     No drop shadow stack, no top-edge gloss.
+ *   - Pill sits low — its body absorbs the home-indicator clearance so
+ *     there is no visible gap of body background beneath it.
+ *   - Anchor AI is just another tab inside the pill. Never a FAB.
  */
 // @ts-nocheck
 
@@ -40,6 +35,7 @@ export const BottomNavigation = ({
   const [animatingRoute, setAnimatingRoute] = useState<string | null>(null);
   const [celebrationColor, setCelebrationColor] = useState(CELEBRATION_COLORS[0]);
   const { trigger } = useHaptic();
+  const { isDirty, confirmDiscard } = useUnsavedChangesGuard();
 
   const [isDarkMode, setIsDarkMode] = useState(() =>
     typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
@@ -64,8 +60,6 @@ export const BottomNavigation = ({
     }
   }, []);
 
-  const { isDirty, confirmDiscard } = useUnsavedChangesGuard();
-
   const handleTap = useCallback((route: string, e: React.MouseEvent) => {
     if (isDirty && !confirmDiscard()) {
       e.preventDefault();
@@ -81,120 +75,84 @@ export const BottomNavigation = ({
     });
   }, [trigger, isDirty, confirmDiscard]);
 
-  const getIconColorClass = useCallback((route: string, isActive: boolean) => {
-    if (animatingRoute === route && route === '/commitments') {
-      return `${celebrationColor.light} ${celebrationColor.dark}`;
-    }
-    return isActive
-      ? 'text-primary-600 dark:text-primary-300'
-      : 'text-slate-500 dark:text-slate-400';
-  }, [animatingRoute, celebrationColor]);
-
   const navItems = useMemo(() => buildBottomNavItems({
     accountColors,
     anchorAIEnabled,
     isDarkMode,
   }), [accountColors, anchorAIEnabled, isDarkMode]);
 
-  const cols = anchorAIEnabled ? 'grid-cols-5' : 'grid-cols-4';
-
   return (
     <nav
       role="navigation"
       aria-label="Mobile navigation"
       data-bottom-nav
-      /* Outer wrapper: full-bleed, pointer-events disabled so taps fall
-         through the gutters to content. The pill inside re-enables them.
-         Anchored close to the screen bottom — the pill itself absorbs the
-         home-indicator safe-area internally so no "strip" of body bg is
-         visible beneath the pill. */
-      className="md:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none"
-      style={{
-        paddingLeft: 'max(env(safe-area-inset-left), 12px)',
-        paddingRight: 'max(env(safe-area-inset-right), 12px)',
-        paddingBottom: '8px',
-        paddingTop: '8px',
-        WebkitTapHighlightColor: 'transparent',
-      }}
+      className="md:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none flex justify-center"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
     >
-      {/* Floating pill — the liquid glass surface itself */}
       <div
         data-bottom-nav-items
         className={[
-          'pointer-events-auto mx-auto max-w-md',
-          'rounded-full relative overflow-hidden',
-          /* Liquid glass material: translucent base + heavy blur + saturation */
-          'bg-white/70 dark:bg-slate-900/65',
-          'backdrop-blur-2xl backdrop-saturate-150',
-          /* Hairline border gives the "lensed" edge */
-          'border border-white/40 dark:border-white/10',
-          /* Soft elevation — two-layer shadow for crispness */
-          'shadow-[0_8px_30px_rgba(2,6,23,0.18),0_2px_6px_rgba(2,6,23,0.10)]',
-          'transition-colors',
+          'pointer-events-auto',
+          /* Width: comfortable inset from screen edges. */
+          'mx-3 mb-2 w-[calc(100%-1.5rem)] max-w-md',
+          /* Glass material — translucent, blurred, hairline border. */
+          'rounded-full',
+          'bg-white/55 dark:bg-slate-900/45',
+          'backdrop-blur-2xl backdrop-saturate-[1.8]',
+          'border border-white/50 dark:border-white/10',
+          /* One soft shadow only — no stacked layers, no gloss. */
+          'shadow-[0_6px_24px_-8px_rgba(2,6,23,0.18)]',
         ].join(' ')}
         style={{
-          /* Reserve home-indicator clearance INSIDE the pill, so the pill
-             itself extends down to where the strip used to be. */
-          paddingBottom: 'max(calc(env(safe-area-inset-bottom) - 6px), 0px)',
+          /* Absorb the home-indicator clearance INSIDE the pill so no body
+             background strip is visible beneath it. */
+          paddingBottom: 'max(env(safe-area-inset-bottom), 6px)',
         }}
       >
-        {/* Top-edge gloss highlight (the "wet glass" sheen) */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-1/2 rounded-t-full pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.06) 70%, rgba(255,255,255,0) 100%)',
-          }}
-        />
+        <ul className="flex items-stretch h-14 list-none m-0 p-1">
+          {navItems.map(({ to, label, renderIcon }) => (
+            <li key={to} className="flex-1 flex">
+              <NavLink
+                to={to}
+                aria-label={label}
+                onClick={(e) => handleTap(to, e)}
+                className="relative flex-1 flex flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-150"
+              >
+                {({ isActive }) => {
+                  const isAnimating = animatingRoute === to;
+                  const animClass = isAnimating ? getAnimationClass(to) : '';
+                  const isCelebrate = isAnimating && to === '/commitments';
+                  const colorClass = isActive
+                    ? 'text-slate-900 dark:text-white'
+                    : 'text-slate-500 dark:text-slate-400';
+                  const iconClass = `w-[22px] h-[22px] transition-transform ${animClass} ${
+                    isCelebrate ? `${celebrationColor.light} ${celebrationColor.dark}` : ''
+                  }`;
 
-        <div className={`relative grid ${cols} h-14`}>
-          {navItems.map(({ to, label, isIconOnly, renderIcon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              aria-label={label}
-              onClick={(e) => handleTap(to, e)}
-              className={({ isActive }) =>
-                [
-                  'flex flex-col items-center justify-center relative',
-                  'transition-colors duration-150 h-full will-change-transform',
-                  'gap-0.5',
-                  isIconOnly ? '-mt-0.5' : '',
-                  getIconColorClass(to, isActive),
-                ].join(' ')
-              }
-            >
-              {({ isActive }) => {
-                const isAnimating = animatingRoute === to;
-                const animClass = isAnimating ? getAnimationClass(to) : '';
-                const iconClass = `${isIconOnly ? 'w-6 h-6' : 'w-[22px] h-[22px]'} transition-transform ${isActive ? 'scale-105' : ''} ${animClass}`;
-
-                return (
-                  <>
-                    {/* Sliding pill indicator behind the active tab. */}
-                    {isActive && (
-                      <motion.span
-                        layoutId="bottom-nav-active-pill"
-                        className="absolute inset-1.5 rounded-full bg-primary-500/15 dark:bg-primary-400/20 ring-1 ring-inset ring-primary-500/10 dark:ring-primary-400/10"
-                        transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.7 }}
-                        aria-hidden
-                      />
-                    )}
-                    <span className="relative z-10 flex flex-col items-center gap-0.5">
-                      {renderIcon(isAnimating, iconClass)}
-                      {isIconOnly ? (
-                        <span className="sr-only">{label}</span>
-                      ) : (
-                        <span className="text-[10px] font-medium leading-none">{label}</span>
+                  return (
+                    <>
+                      {/* Soft neutral pill behind the active tab. */}
+                      {isActive && (
+                        <motion.span
+                          layoutId="bottom-nav-active-pill"
+                          aria-hidden
+                          className="absolute inset-0 rounded-full bg-slate-900/[0.06] dark:bg-white/[0.10]"
+                          transition={{ type: 'spring', stiffness: 460, damping: 36, mass: 0.7 }}
+                        />
                       )}
-                    </span>
-                  </>
-                );
-              }}
-            </NavLink>
+                      <span className={`relative z-10 flex flex-col items-center gap-0.5 ${colorClass}`}>
+                        {renderIcon(isAnimating, iconClass)}
+                        <span className="text-[10px] font-medium leading-none tracking-tight">
+                          {label}
+                        </span>
+                      </span>
+                    </>
+                  );
+                }}
+              </NavLink>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </nav>
   );

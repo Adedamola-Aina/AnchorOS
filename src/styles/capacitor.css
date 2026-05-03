@@ -189,19 +189,9 @@ body.platform-android {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── Bottom navigation (iOS 26 floating pill) ──────────
-   The outer [data-bottom-nav] is a transparent wrapper that owns the
-   safe-area gutters; the visible pill is [data-bottom-nav-items]. */
-.platform-native [data-bottom-nav-items],
-.platform-pwa [data-bottom-nav-items] {
-  align-items: center;
-}
-
-/* Stronger frosted glass on iOS native (UIKit-grade saturation). */
-.platform-ios [data-bottom-nav] [data-bottom-nav-items] {
-  -webkit-backdrop-filter: saturate(180%) blur(28px);
-  backdrop-filter: saturate(180%) blur(28px);
-}
+/* ─── Bottom navigation (iOS 26 floating glass pill) ────
+   The component owns all its visual styling. We only stop the iOS Safari
+   document-level scrollbar from painting under the bar. */
 
 /* ─── Modal / dialog safe areas ─────────────────────────── */
 .platform-native [role="dialog"],
