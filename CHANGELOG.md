@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.1-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.0...v1.20.1-rc.0) (2026-05-03)
+
+
+### Bug Fixes
+
+* **mobile:** remove bottom nav bar, tighten avatar upload rules — BUG-134 ([a7b6278](https://github.com/Adedamola-Aina/AnchorOS/commit/a7b6278bebc380773ed74f7a6905cdf1c1f5e284))
+
 ## [1.20.1-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.0...v1.20.1-dev.0) (2026-05-03)
 
 
