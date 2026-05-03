@@ -94,7 +94,7 @@ export const BottomNavigation = ({
         className={[
           'pointer-events-auto',
           /* Width: comfortable inset from screen edges. */
-          'mx-3 mb-2 w-[calc(100%-1.5rem)] max-w-md',
+          'mx-3 mb-0 w-[calc(100%-1.5rem)] max-w-md',
           /* Glass material — translucent, blurred, hairline border. */
           'rounded-full',
           'bg-white/55 dark:bg-slate-900/45',
@@ -104,9 +104,9 @@ export const BottomNavigation = ({
           'shadow-[0_6px_24px_-8px_rgba(2,6,23,0.18)]',
         ].join(' ')}
         style={{
-          /* Absorb the home-indicator clearance INSIDE the pill so no body
-             background strip is visible beneath it. */
-          paddingBottom: 'max(env(safe-area-inset-bottom), 6px)',
+          /* Keep the pill low without letting iOS safe-area become a blank
+             static bar under the icons. */
+          paddingBottom: 'clamp(6px, calc(env(safe-area-inset-bottom) * 0.35), 14px)',
         }}
       >
         <ul className="flex items-stretch h-14 list-none m-0 p-1">

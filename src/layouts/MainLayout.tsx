@@ -108,9 +108,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </div>
             </aside>
 
-            <main className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0">
-                {/* Main Content - ADJUST padding for bottom nav per M3.2 */}
-                <div className={`p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto ${isMobile ? 'pb-[calc(4rem+env(safe-area-inset-bottom))]' : 'pb-8'}`}>
+            <main
+                data-scroll
+                className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0"
+                style={isMobile ? { scrollPaddingBottom: 'calc(6.75rem + env(safe-area-inset-bottom, 0px))' } : undefined}
+            >
+                {/* Mobile bottom nav floats over this content; do not reserve a solid strip beneath pages. */}
+                <div className={`p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto ${isMobile ? 'pb-6' : 'pb-8'}`}>
                     {children}
                 </div>
 
@@ -125,4 +129,3 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
 };
 
 export default MainLayout;
-
