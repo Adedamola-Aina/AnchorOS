@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.19.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.19.0...v1.19.1) (2026-05-03)
+
+
+### Bug Fixes
+
+* **mobile:** nav pill sits flush with ios home indicator — BUG-133 ([c0a3f81](https://github.com/Adedamola-Aina/AnchorOS/commit/c0a3f8136f298c48374a40870cf20648cb7c6455))
+
 ## [1.19.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.18.0...v1.19.0) (2026-05-03)
 
 
