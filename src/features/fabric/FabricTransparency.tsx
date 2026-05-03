@@ -32,7 +32,7 @@ const FabricTransparency: React.FC = () => {
 
   return (
     <FeatureErrorBoundary featureName="Anchor AI Transparency">
-      <div className="max-w-3xl mx-auto space-y-5 pb-20 animate-in fade-in duration-300">
+      <div className="max-w-3xl mx-auto space-y-5 pb-28 md:pb-20 animate-in fade-in duration-300">
         <header className="space-y-1">
           <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white">What Anchor AI Knows</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">Review and remove learned behavior patterns at any time. Your account data remains private to your workspace.</p>
