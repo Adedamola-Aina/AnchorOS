@@ -87,14 +87,20 @@ export const BottomNavigation = ({
       aria-label="Mobile navigation"
       data-bottom-nav
       className="md:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none flex justify-center"
-      style={{ WebkitTapHighlightColor: 'transparent' }}
+      style={{
+        /* Full safe-area clearance on the wrapper so the pill never
+           overlaps the home indicator — avoids iOS pushing the view up
+           and creating the visible blank strip below the bar. */
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        WebkitTapHighlightColor: 'transparent',
+      }}
     >
       <div
         data-bottom-nav-items
         className={[
           'pointer-events-auto',
-          /* Width: comfortable inset from screen edges. */
-          'mx-3 mb-0 w-[calc(100%-1.5rem)] max-w-md',
+          /* Float with a small gap above the home-indicator zone. */
+          'mx-3 mb-2 w-[calc(100%-1.5rem)] max-w-md',
           /* Glass material — translucent, blurred, hairline border. */
           'rounded-full',
           'bg-white/55 dark:bg-slate-900/45',
@@ -103,11 +109,6 @@ export const BottomNavigation = ({
           /* One soft shadow only — no stacked layers, no gloss. */
           'shadow-[0_6px_24px_-8px_rgba(2,6,23,0.18)]',
         ].join(' ')}
-        style={{
-          /* Keep the pill low without letting iOS safe-area become a blank
-             static bar under the icons. */
-          paddingBottom: 'clamp(6px, calc(env(safe-area-inset-bottom) * 0.35), 14px)',
-        }}
       >
         <ul className="flex items-stretch h-14 list-none m-0 p-1">
           {navItems.map(({ to, label, renderIcon }) => (
