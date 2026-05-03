@@ -151,7 +151,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
                                 </button>
                             )}
                         </div>
-                        <p className="text-[10px] text-slate-400">JPG, PNG or WebP · max 5 MB</p>
+                        <p className="text-[10px] text-slate-400">JPG or PNG only · max 2 MB</p>
                         {avatarError && (
                             <p className="text-[10px] text-rose-500">{avatarError}</p>
                         )}
@@ -159,7 +159,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png"
                         className="hidden"
                         onChange={handleAvatarChange}
                     />

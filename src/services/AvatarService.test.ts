@@ -42,15 +42,21 @@ describe('uploadAvatar', () => {
     expect(url).toBe('https://firebasestorage.example.com/avatar.jpg');
   });
 
-  it('throws if file exceeds 5 MB', async () => {
-    const big = new File([new ArrayBuffer(6 * 1024 * 1024)], 'big.png', { type: 'image/png' });
-    await expect(uploadAvatar('user123', big)).rejects.toThrow('Image must be under 5 MB');
+  it('throws if file exceeds 2 MB', async () => {
+    const big = new File([new ArrayBuffer(3 * 1024 * 1024)], 'big.png', { type: 'image/png' });
+    await expect(uploadAvatar('user123', big)).rejects.toThrow('Image must be under 2 MB');
     expect(firebaseStorage.uploadBytes).not.toHaveBeenCalled();
   });
 
-  it('throws if file type is not an image', async () => {
+  it('throws if file type is not JPG or PNG', async () => {
+    const webp = new File(['data'], 'photo.webp', { type: 'image/webp' });
+    await expect(uploadAvatar('user123', webp)).rejects.toThrow('Only JPG and PNG files are allowed');
+    expect(firebaseStorage.uploadBytes).not.toHaveBeenCalled();
+  });
+
+  it('throws if file is a PDF', async () => {
     const doc = new File(['data'], 'resume.pdf', { type: 'application/pdf' });
-    await expect(uploadAvatar('user123', doc)).rejects.toThrow('Only image files are supported');
+    await expect(uploadAvatar('user123', doc)).rejects.toThrow('Only JPG and PNG files are allowed');
     expect(firebaseStorage.uploadBytes).not.toHaveBeenCalled();
   });
 

@@ -1,16 +1,13 @@
 // @ts-nocheck
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { LayoutDashboard, CheckCircle2, CreditCard, Settings, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnchorLogo } from '../components/shared';
 import { CommandPalette } from '../components/shared/CommandPalette';
-import { useResponsive } from '../hooks/useResponsive';
 import { useKeyboardAvoidance } from '../hooks/useKeyboardAvoidance';
-import { BottomNavigation } from '../components/mobile/BottomNavigation';
-import { InstallPrompt } from '../components/pwa/InstallPrompt';
-import { useFinanceService } from '../hooks/useFinanceService';
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChanges';
+import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { useFabric } from '../hooks/useFabric';
 
 const AnchorAINavIcon = ({ className = '' }: { className?: string }) => (
@@ -22,7 +19,6 @@ interface MainLayoutProps {
     version: string;
 }
 
-// NavItem component moved outside to avoid recreation on every render
 interface NavItemProps {
     to: string;
     label: string;
@@ -56,21 +52,14 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon }) => {
 const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     const { user, profile, logout } = useAuth();
     const { isEnabled: anchorAIEnabled } = useFabric();
-    const { isMobile } = useResponsive(); // ← Per M3.2
 
-    // Get account colors for Home icon animation (UX-024)
-    const { accounts } = useFinanceService(user);
-    const accountColors = useMemo(() => accounts.map(a => a.color).filter(Boolean), [accounts]);
-
-    // BUG-002 Fix: Handle iOS keyboard covering inputs
-    // Hook auto-scrolls focused inputs into view when keyboard appears
     useKeyboardAvoidance();
 
     return (
-        <div className={`adaptive-layout bg-[var(--surface-1)] font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 h-full flex-1 w-full min-h-0`}>
+        <div className="adaptive-layout bg-[var(--surface-1)] font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 h-full flex-1 w-full min-h-0">
             <CommandPalette />
 
-            {/* Desktop Sidebar - UNCHANGED per M3.2 */}
+            {/* Desktop sidebar — hidden on mobile */}
             <aside className={`hidden md:flex flex-col bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 sticky ${import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production' ? 'top-6 h-[calc(100vh-24px)]' : 'top-0 h-screen'} min-h-0`}>
                 <div className="mb-8 px-4 py-2 shrink-0">
                     <h1 className="text-h2 lg:text-h2-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
@@ -111,19 +100,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
             <main
                 data-scroll
                 className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0"
-                style={isMobile ? { scrollPaddingBottom: 'calc(6.75rem + env(safe-area-inset-bottom, 0px))' } : undefined}
             >
-                {/* Mobile bottom nav floats over this content; do not reserve a solid strip beneath pages. */}
-                <div className={`p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto ${isMobile ? 'pb-6' : 'pb-8'}`}>
+                <div className="p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto pb-8">
                     {children}
                 </div>
-
-                {/* PWA Install Prompt */}
                 <InstallPrompt />
             </main>
-
-            {/* Keep mobile bottom nav outside the scrolling container to avoid iOS fixed-position drift */}
-            {isMobile && <BottomNavigation accountColors={accountColors} anchorAIEnabled={anchorAIEnabled} />}
         </div>
     );
 };

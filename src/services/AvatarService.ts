@@ -2,14 +2,15 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage
 import { getAppStorage } from '../config/firebase';
 import { updateUserProfile } from '../api/AuthProfileApi';
 
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 2 * 1024 * 1024;
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png']);
 
 export async function uploadAvatar(userId: string, file: File): Promise<string> {
-  if (!file.type.startsWith('image/')) {
-    throw new Error('Only image files are supported');
+  if (!ALLOWED_TYPES.has(file.type)) {
+    throw new Error('Only JPG and PNG files are allowed');
   }
   if (file.size > MAX_BYTES) {
-    throw new Error('Image must be under 5 MB');
+    throw new Error('Image must be under 2 MB');
   }
 
   const storage = getAppStorage();

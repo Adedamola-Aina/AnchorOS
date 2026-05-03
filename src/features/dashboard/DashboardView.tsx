@@ -60,7 +60,7 @@ const DashboardView = () => {
 
   const dashboardContent = (
     <FeatureErrorBoundary featureName="Dashboard">
-      <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 pb-28 md:pb-20 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
+      <div className={`animate-in fade-in slide-in-from-bottom-8 duration-500 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
         <div className="flex items-center justify-between gap-3 mb-6 animate-in fade-in slide-in-from-left-4 duration-700">
           <div className="min-w-0 flex-1">
             <p
