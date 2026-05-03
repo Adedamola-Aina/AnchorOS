@@ -104,12 +104,15 @@ export const BottomNavigation = ({
       aria-label="Mobile navigation"
       data-bottom-nav
       /* Outer wrapper: full-bleed, pointer-events disabled so taps fall
-         through the gutters to content. The pill inside re-enables them. */
+         through the gutters to content. The pill inside re-enables them.
+         Anchored close to the screen bottom — the pill itself absorbs the
+         home-indicator safe-area internally so no "strip" of body bg is
+         visible beneath the pill. */
       className="md:hidden fixed inset-x-0 bottom-0 z-40 pointer-events-none"
       style={{
         paddingLeft: 'max(env(safe-area-inset-left), 12px)',
         paddingRight: 'max(env(safe-area-inset-right), 12px)',
-        paddingBottom: 'max(env(safe-area-inset-bottom), 10px)',
+        paddingBottom: '8px',
         paddingTop: '8px',
         WebkitTapHighlightColor: 'transparent',
       }}
@@ -129,6 +132,11 @@ export const BottomNavigation = ({
           'shadow-[0_8px_30px_rgba(2,6,23,0.18),0_2px_6px_rgba(2,6,23,0.10)]',
           'transition-colors',
         ].join(' ')}
+        style={{
+          /* Reserve home-indicator clearance INSIDE the pill, so the pill
+             itself extends down to where the strip used to be. */
+          paddingBottom: 'max(calc(env(safe-area-inset-bottom) - 6px), 0px)',
+        }}
       >
         {/* Top-edge gloss highlight (the "wet glass" sheen) */}
         <div
