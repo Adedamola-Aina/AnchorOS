@@ -28,13 +28,13 @@ jobs:
           bash ./tools/ci/fetch_failed_logs.sh "${REPO_OWNER}" "${REPO_NAME}" "${HEAD_BRANCH}" 1 || true
 
       - name: Upload collected logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: failing-ci-logs-${{ github.event.workflow_run.id }}
           path: ./ci-logs
 
       - name: Send notification email
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@v16
         with:
           server_address: ${{ secrets.SMTP_HOST }}
           server_port: ${{ secrets.SMTP_PORT }}

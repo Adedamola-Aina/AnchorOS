@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: '20', cache: 'npm' }
       - run: npm ci
       - run: npm run build:staging
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: staging-dist
           path: dist/
@@ -44,14 +44,14 @@ jobs:
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: '20', cache: 'npm' }
       - run: npm ci
       - run: npx playwright install chromium --with-deps
       - run: npx playwright test --shard=${{ matrix.shard }}/4
         env:
           E2E_BASE_URL: ${{ secrets.STAGING_URL }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: e2e-shard-${{ matrix.shard }}
