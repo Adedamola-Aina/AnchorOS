@@ -3,6 +3,9 @@ on:
   pull_request:
     branches: [master, staging]
 
+permissions:
+  contents: read
+
 jobs:
   lint-types:
     name: Lint & Types
