@@ -17,7 +17,9 @@
       "Bash(rm -f .claude/gather.lock)",
       "Bash(rm -f .claude/plan.lock)",
       "Bash(rm -f .claude/gather.lock .claude/plan.lock)",
-      "Bash(echo \"Exit: $?\")"
+      "Bash(echo \"Exit: $?\")",
+      "Bash(curl -s \"http://localhost:3001/api/git/bugs\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(list\\(d.keys\\(\\)\\)[:5]\\); items=d.get\\('bugs', d.get\\('items',[]\\)\\); print\\([i.get\\('id'\\) for i in items[:5]]\\)\")"
     ],
     "deny": [
       "Bash(firebase deploy*)",

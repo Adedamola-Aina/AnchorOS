@@ -689,6 +689,72 @@
       "completedDate": "2026-04-13",
       "cycleTime": null,
       "recordedAt": "2026-04-20T10:00:00.034Z"
+    },
+    {
+      "itemId": "BUG-133",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T11:00:03.324Z"
+    },
+    {
+      "itemId": "0de0db6",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T11:00:03.325Z"
+    },
+    {
+      "itemId": "6e9a877",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T11:00:03.327Z"
+    },
+    {
+      "itemId": "02188fc",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T11:00:03.327Z"
+    },
+    {
+      "itemId": "2e2db49",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T11:00:03.327Z"
+    },
+    {
+      "itemId": "FIN-029",
+      "completedDate": "2026-04-21",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T11:00:03.327Z"
+    },
+    {
+      "itemId": "GAP-006",
+      "completedDate": "2026-04-20",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T11:00:03.327Z"
+    },
+    {
+      "itemId": "BUG-135",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T12:00:03.137Z"
+    },
+    {
+      "itemId": "BUG-134",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T12:00:03.138Z"
+    },
+    {
+      "itemId": "FEATURE-024",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T12:00:03.139Z"
+    },
+    {
+      "itemId": "BUG-136",
+      "completedDate": "2026-05-03",
+      "cycleTime": null,
+      "recordedAt": "2026-05-03T17:00:00.008Z"
     }
   ],
   "weeklyStats": [
@@ -724,8 +790,13 @@
     },
     {
       "week": "2026-W17",
-      "completed": 1,
-      "velocity": 15.25
+      "completed": 3,
+      "velocity": 22.25
+    },
+    {
+      "week": "2026-W18",
+      "completed": 9,
+      "velocity": 22.5
     }
   ],
   "_note": "Reset 2026-03-28. Previous data was bulk-hydrated at init and not real throughput. Rebuilds from git-deployed items going forward."
