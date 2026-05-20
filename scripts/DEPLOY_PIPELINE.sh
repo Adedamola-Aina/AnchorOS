@@ -37,6 +37,7 @@ DRY_RUN=false
 SKIP_E2E=false
 SKIP_TESTS=false
 SKIP_LINT=false
+SKIP_AUDIT=false
 SKIP_MUTATION=false
 SKIP_VERSION_BUMP=false
 YES=false
@@ -66,6 +67,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-lint)
             SKIP_LINT=true
+            shift
+            ;;
+        --skip-audit)
+            SKIP_AUDIT=true
             shift
             ;;
         --skip-version-bump)
@@ -141,18 +146,22 @@ fi
 
 # 1b. Security Audit
 echo -e "\n${YELLOW}🔒 Stage 1b: Security Audit (npm audit)${NC}"
-AUDIT_LEVEL="high"
-if [[ "$ENV" == "production" ]]; then
-    AUDIT_LEVEL="moderate"
-elif [[ "$ENV" == "development" ]]; then
-    AUDIT_LEVEL="critical"
-fi
-if npm audit --audit-level="$AUDIT_LEVEL" --omit=dev 2>/dev/null; then
-    echo -e "${GREEN}✅ No ${AUDIT_LEVEL}+ vulnerabilities found in production dependencies.${NC}"
+if [[ "$SKIP_AUDIT" == true ]]; then
+    echo -e "${YELLOW}⏭️  Stage 1b: Security Audit Skipped (--skip-audit)${NC}"
 else
-    echo -e "${RED}❌ npm audit found ${AUDIT_LEVEL}+ severity vulnerabilities. Deployment blocked.${NC}"
-    echo -e "${YELLOW}   Run 'npm audit' for details and 'npm audit fix' to resolve.${NC}"
-    exit 1
+    AUDIT_LEVEL="high"
+    if [[ "$ENV" == "production" ]]; then
+        AUDIT_LEVEL="moderate"
+    elif [[ "$ENV" == "development" ]]; then
+        AUDIT_LEVEL="critical"
+    fi
+    if npm audit --audit-level="$AUDIT_LEVEL" --omit=dev 2>/dev/null; then
+        echo -e "${GREEN}✅ No ${AUDIT_LEVEL}+ vulnerabilities found in production dependencies.${NC}"
+    else
+        echo -e "${RED}❌ npm audit found ${AUDIT_LEVEL}+ severity vulnerabilities. Deployment blocked.${NC}"
+        echo -e "${YELLOW}   Run 'npm audit' for details and 'npm audit fix' to resolve.${NC}"
+        exit 1
+    fi
 fi
 
 # 2. Automated Unit Testing
