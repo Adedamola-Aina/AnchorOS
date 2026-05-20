@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.6-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.5...v1.20.6-dev.0) (2026-05-20)
+
+
+### Bug Fixes
+
+* **mobile:** BUG-137 fix bottom navigation split color on iOS ([3421598](https://github.com/Adedamola-Aina/AnchorOS/commit/3421598612d4be3e9064e93b1cbcf0fc032d7645))
+
 ## [1.20.5](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.4...v1.20.5) (2026-05-20)
 
 ## [1.20.4](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.3...v1.20.4) (2026-05-20)
