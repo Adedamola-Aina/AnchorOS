@@ -5,6 +5,7 @@ import React from 'react';
 import { AssetAllocationWidget } from './AssetAllocationWidget';
 
 vi.mock('../../../utils/format', () => ({
+  formatCurrency: (a: number, c: string) => `${c}${a}`,
   formatCurrencyCompact: (a: number, c: string) => `${c}${a}`,
 }));
 
