@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.7-dev.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.6...v1.20.7-dev.0) (2026-05-20)
+
+
+### Bug Fixes
+
+* **mobile:** BUG-137 add dynamic height and padding safe area calculation to bottom nav ([c4c4a62](https://github.com/Adedamola-Aina/AnchorOS/commit/c4c4a620385c98d2275da9c707e6978c5418a050))
+
 ## [1.20.6](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.5...v1.20.6) (2026-05-20)
 
 
