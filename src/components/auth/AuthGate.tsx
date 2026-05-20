@@ -63,7 +63,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     }, []);
 
     React.useEffect(() => {
-        if (!user && !loading) { setEmail(''); setPassword(''); setAuthError(''); setMfaResolver(null); setAuthMode('login'); if (location.pathname !== '/' && location.pathname !== '/accept-invite') navigate('/', { replace: true }); }
+        if (!user && !loading) { setEmail(''); setPassword(''); setAuthError(''); setMfaResolver(null); setAuthMode('login'); if (location.pathname !== '/login' && location.pathname !== '/accept-invite') navigate('/login', { replace: true }); }
     }, [user, loading, location.pathname, navigate]);
 
     if (loading) return <AuthLoadingScreen />;

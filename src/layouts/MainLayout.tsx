@@ -106,12 +106,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
             <main
                 data-scroll
                 className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0"
-                style={isMobile ? { scrollPaddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px))' } : undefined}
+                style={isMobile ? { paddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px) + 1.5rem)', scrollPaddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px))' } : undefined}
             >
-                {/* On mobile, pad bottom so content isn't hidden behind the tab bar */}
+                {/* On mobile, pad bottom is now handled by parent main container */}
                 <div
                     className="p-4 sm:p-6 md:p-8 lg:p-12 w-full max-w-screen-2xl mx-auto"
-                    style={isMobile ? { paddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px) + 1.5rem)' } : { paddingBottom: '2rem' }}
+                    style={isMobile ? undefined : { paddingBottom: '2rem' }}
                 >
                     {children}
                 </div>

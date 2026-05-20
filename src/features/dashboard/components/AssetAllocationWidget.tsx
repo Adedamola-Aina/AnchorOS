@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState } from 'react';
 import { PieChart, ChevronDown, ChevronUp } from 'lucide-react';
-import { formatCurrencyCompact } from '../../../utils/format';
+import { formatCurrency } from '../../../utils/format';
 import type { AssetClass } from '../../../utils/financeInsights';
 import type { Currency } from '../../../types';
 
@@ -17,14 +17,14 @@ export const AssetAllocationWidget = ({ assets }: AssetAllocationWidgetProps) =>
 
     // Colors for visualization
     const COLORS = [
-        'bg-primary-500',
-        'bg-emerald-500',
-        'bg-blue-500',
-        'bg-task-500',
-        'bg-amber-500',
-        'bg-rose-500',
-        'bg-cyan-500',
-        'bg-slate-500'
+        'bg-primary-500', // Brand Blue
+        'bg-finance-500', // Brand Green
+        'bg-family-500',  // Brand Orange
+        'bg-task-500',    // Brand Purple
+        'bg-cyan-500',    // Supporting Cyan
+        'bg-amber-500',   // Supporting Amber
+        'bg-rose-500',    // Supporting Rose
+        'bg-slate-500'    // Supporting Slate
     ];
 
     const getColor = (i: number) => COLORS[i % COLORS.length];
@@ -71,7 +71,7 @@ export const AssetAllocationWidget = ({ assets }: AssetAllocationWidgetProps) =>
                         </div>
                         <div className="text-right">
                             <p className="text-xs font-bold font-mono text-slate-900 dark:text-white tabular-nums">
-                                {formatCurrencyCompact(asset.amount, asset.currency as Currency)}
+                                {formatCurrency(asset.amount, asset.currency as Currency)}
                             </p>
                             <p className="text-[10px] font-bold text-slate-400 tabular-nums">
                                 {asset.percent.toFixed(1)}%
