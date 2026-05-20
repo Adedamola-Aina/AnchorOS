@@ -78,7 +78,7 @@ export const BottomNavigation = ({
       role="navigation"
       aria-label="Mobile navigation"
       data-bottom-nav
-      className="md:hidden fixed inset-x-0 bottom-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl backdrop-saturate-[1.8] border-t border-slate-200/60 dark:border-white/[0.06]"
+      className="md:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200/60 dark:border-white/[0.06]"
       style={{
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         WebkitTapHighlightColor: 'transparent',
