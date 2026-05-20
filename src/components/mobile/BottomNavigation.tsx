@@ -80,6 +80,7 @@ export const BottomNavigation = ({
       data-bottom-nav
       className="md:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200/60 dark:border-white/[0.06]"
       style={{
+        height: 'calc(49px + env(safe-area-inset-bottom, 0px))',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         WebkitTapHighlightColor: 'transparent',
       }}
