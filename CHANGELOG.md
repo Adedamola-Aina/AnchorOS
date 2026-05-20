@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.4](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.3...v1.20.4) (2026-05-20)
+
+
+### Bug Fixes
+
+* **dashboard:** BUG-137 resolve asset colors, currency alignment, and tab bar overlap ([1022781](https://github.com/Adedamola-Aina/AnchorOS/commit/10227811780c6555d7b0cf5e3a1ef627c99e8f09))
+
 ## [1.20.4-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.3...v1.20.4-rc.0) (2026-05-20)
 
 
