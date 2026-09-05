@@ -6,6 +6,10 @@ on:
       - revival/sept-2026-hardening
   workflow_dispatch:
 
+concurrency:
+  group: revival-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -21,21 +25,29 @@ jobs:
       - name: Install root dependencies
         run: npm ci
       - name: Lint
+        if: always()
         run: npm run lint
       - name: Typecheck and build web app
+        if: always()
         run: npm run build
       - name: Unit tests
+        if: always()
         run: npm run test:run
       - name: Dead-code check
+        if: always()
         run: npm run check:dead-code
       - name: Index catalog check
+        if: always()
         run: npm run check:indexes
       - name: Install function dependencies
+        if: always()
         working-directory: functions
         run: npm ci
       - name: Build Cloud Functions
+        if: always()
         working-directory: functions
         run: npm run build
       - name: Test Cloud Functions
+        if: always()
         working-directory: functions
         run: npx vitest --run --config vitest.config.ts
