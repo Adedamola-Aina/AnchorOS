@@ -3,18 +3,15 @@ import React from 'react';
 import { AnchorLoadingSpinner } from './components/shared/AnchorLoadingSpinner';
 import { AppProvider } from './context/AnchorContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-
 import { lazyWithRetry } from './utils/lazyWithRetry';
 
 const AuthenticatedAppShell = lazyWithRetry(() => import('./components/app/AuthenticatedAppShell'));
 const AcceptInviteView = lazyWithRetry(() => import('./features/onboarding/AcceptInviteView').then(m => ({ default: m.AcceptInviteView })));
 const ServerErrorView = lazyWithRetry(() => import('./features/errors/ServerErrorView'));
-const MarketingLanding = lazyWithRetry(() => import('./features/marketing/MarketingLanding'));
 
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import AuthGate from './components/auth/AuthGate';
 import { getSystemTheme, subscribeToSystemTheme } from './utils/systemTheme';
-
 import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OfflineIndicator } from './components/shared/OfflineIndicator';
@@ -26,45 +23,26 @@ import { useAndroidBackButton } from './hooks/useAndroidBackButton';
 
 const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
-  const location = useLocation();
-  const isPublicMarketingRoute = location.pathname === '/';
   useAccessibility(profile?.accessibility);
   useIOSKeyboardFix();
   useAndroidBackButton();
 
-  // Sync theme to root element with System support (PWA-006)
   React.useEffect(() => {
-    // 1. Determine base preference
-    const userPref = profile?.theme; // 'light' | 'dark' | 'system' | undefined
-
-    // 2. Helper to apply theme
+    const userPref = profile?.theme;
     const applyTheme = (targetTheme: 'light' | 'dark') => {
       document.documentElement.classList.remove('dark');
-      if (targetTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
+      if (targetTheme === 'dark') document.documentElement.classList.add('dark');
     };
 
-    // 3. Handle 'system' or undefined preference
     if (!userPref || userPref === 'system') {
-      // Initial apply
       applyTheme(getSystemTheme());
-
-      // Subscribe to OS changes
-      const unsubscribe = subscribeToSystemTheme((newSystemTheme) => {
-        applyTheme(newSystemTheme);
-      });
-      return unsubscribe;
+      return subscribeToSystemTheme(applyTheme);
     }
 
-    // 4. Handle explicit 'light'/'dark' preference
     applyTheme(userPref);
-
   }, [profile?.theme]);
 
-  // Wait for auth AND profile to fully load before making onboarding decision
-  // This prevents flash of onboarding screen for users who have already completed it
-  if (!isPublicMarketingRoute && (loading || (user && !profileLoaded))) {
+  if (loading || (user && !profileLoaded)) {
     return (
       <div className="flex-1 h-full w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <AnchorLoadingSpinner size="lg" />
@@ -74,22 +52,6 @@ const AppContent = () => {
 
   return (
     <Routes>
-      <Route path="/" element={
-        <React.Suspense fallback={
-          <div className="flex items-center justify-center p-12 animate-in fade-in duration-300">
-            <AnchorLoadingSpinner message="Loading..." />
-          </div>
-        }>
-          <MarketingLanding />
-        </React.Suspense>
-      } />
-
-      <Route path="/login" element={
-        <AuthGate>
-          <Navigate to="/dashboard" replace />
-        </AuthGate>
-      } />
-
       <Route path="/500" element={<ServerErrorView />} />
 
       <Route path="/accept-invite" element={
@@ -122,18 +84,12 @@ import { createIndexedDBPersister } from './config/persister';
 
 const persister = createIndexedDBPersister();
 
-// Exclude real-time queries from persistence - they use onSnapshot for live updates
 const shouldDehydrateQuery = (query: { queryKey: readonly unknown[] }) => {
   const key = query.queryKey[0];
-  // Don't persist tasks or finance - they use real-time Firestore listeners
-  if (key === 'tasks' || key === 'finance') {
-    return false;
-  }
-  return true;
+  return key !== 'tasks' && key !== 'finance';
 };
 
 export default function App() {
-  // Auto-refresh when new version is deployed (production only)
   useVersionCheck();
 
   return (
@@ -144,9 +100,7 @@ export default function App() {
         client={queryClient}
         persistOptions={{
           persister,
-          dehydrateOptions: {
-            shouldDehydrateQuery,
-          },
+          dehydrateOptions: { shouldDehydrateQuery },
         }}
       >
         <NotificationProvider>
