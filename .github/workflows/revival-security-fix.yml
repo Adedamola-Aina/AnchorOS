@@ -1,0 +1,48 @@
+name: Revival Security Test Repair
+
+on:
+  push:
+    branches:
+      - revival/sept-2026-hardening
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ !contains(github.event.head_commit.message, '[security-test-repair]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: revival/sept-2026-hardening
+      - name: Make Firestore integration tests fail closed
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/services/__tests__/FinanceService.integration.test.tsx')
+          text = p.read_text()
+          old = '''        // Load Firestore rules
+        let rules: string;
+        try {
+            rules = readFileSync(resolve(__dirname, '../../../config/firestore.rules'), 'utf-8');
+        } catch {
+            console.log('Could not load firestore.rules, using permissive rules for testing');
+            rules = `rules_version = '2'; service cloud.firestore { match /{document=**} { allow read, write: if true; } }`;
+        }
+'''
+          new = '''        // Load the real Firestore rules. Security tests must fail closed if
+        // the rules file is missing instead of silently switching to allow-all.
+        const rules = readFileSync(resolve(__dirname, '../../../config/firestore.rules'), 'utf-8');
+'''
+          if old not in text:
+              raise SystemExit('expected permissive rules fallback not found')
+          p.write_text(text.replace(old, new))
+          PY
+      - name: Commit repair
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/services/__tests__/FinanceService.integration.test.tsx
+          git commit -m "fix(test): fail closed when Firestore rules are unavailable [security-test-repair]"
+          git push origin HEAD:revival/sept-2026-hardening
