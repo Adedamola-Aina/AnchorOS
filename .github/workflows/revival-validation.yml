@@ -1,0 +1,41 @@
+name: Revival Validation
+
+on:
+  push:
+    branches:
+      - revival/sept-2026-hardening
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install root dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck and build web app
+        run: npm run build
+      - name: Unit tests
+        run: npm run test:run
+      - name: Dead-code check
+        run: npm run check:dead-code
+      - name: Index catalog check
+        run: npm run check:indexes
+      - name: Install function dependencies
+        working-directory: functions
+        run: npm ci
+      - name: Build Cloud Functions
+        working-directory: functions
+        run: npm run build
+      - name: Test Cloud Functions
+        working-directory: functions
+        run: npx vitest --run --config vitest.config.ts
