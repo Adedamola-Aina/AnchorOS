@@ -1,16 +1,11 @@
 /**
  * Family Mode v2 - Invite Family Member Component
- * 
- * Orchestrates the multi-step family invitation flow:
- * 1. Enter invitee's email
- * 2. Re-enter password to confirm intent
- * 3. MFA verification (if enabled)
- * 4. Display verification code to share
- * 
- * Refactored per CLAUDE.md 200-line rule.
+ *
+ * Re-authentication stays client-side; the account password is never sent to
+ * the invitation Cloud Function. The function returns a manual verification
+ * code so invitations remain usable if transactional email is unavailable.
  */
 // @ts-nocheck
-
 
 import { useState } from 'react';
 import { useNotifications } from '../../../context/NotificationContext';
@@ -23,7 +18,6 @@ import {
 } from 'firebase/auth';
 import type { MultiFactorResolver } from 'firebase/auth';
 import { auth } from '../../../config/firebase';
-
 import { EmailVerificationWarning } from './EmailVerificationWarning';
 import { InviteEmailStep } from './InviteEmailStep';
 import { InvitePasswordStep } from './InvitePasswordStep';
@@ -43,6 +37,7 @@ interface CreateInvitationResult {
     success: boolean;
     verificationCode: string;
     inviteId: string;
+    emailDelivered: boolean;
 }
 
 export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }: InviteFamilyMemberProps) {
@@ -57,42 +52,39 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
     const [mfaCode, setMfaCode] = useState('');
     const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
 
-    if (!isEmailVerified) {
-        return <EmailVerificationWarning />;
-    }
+    if (!isEmailVerified) return <EmailVerificationWarning />;
 
     const handleEmailSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         const validationError = validateInviteeEmail(inviteeEmail, userEmail);
-        if (validationError) {
-            setError(validationError);
-            return;
-        }
+        if (validationError) { setError(validationError); return; }
         setStep('password');
     };
 
     const completeInvitation = async () => {
         const functions = getFunctions();
-        const createInvitation = httpsCallable<{ inviteeEmail: string; password: string }, CreateInvitationResult>(
+        const createInvitation = httpsCallable<{ inviteeEmail: string }, CreateInvitationResult>(
             functions, 'createFamilyInvitation'
         );
-        const result = await createInvitation({ inviteeEmail, password });
-        if (result.data.success) {
-            setVerificationCode(result.data.verificationCode);
-            setStep('code');
-            showToast('Invitation sent! Share the code below with your family member.', 'success');
-        }
+        const result = await createInvitation({ inviteeEmail });
+        if (!result.data.success) return;
+        setVerificationCode(result.data.verificationCode);
+        setPassword('');
+        setStep('code');
+        showToast(
+            result.data.emailDelivered
+                ? 'Invitation sent. You can also share the code below.'
+                : 'Invitation created. Email is unavailable, so share the code below.',
+            result.data.emailDelivered ? 'success' : 'info',
+        );
     };
 
     const handlePasswordSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
+        e.preventDefault(); setError(''); setLoading(true);
         try {
             const user = auth.currentUser;
             if (!user || !user.email) throw new Error('Not authenticated');
-
             const credential = EmailAuthProvider.credential(user.email, password);
             try {
                 await reauthenticateWithCredential(user, credential);
@@ -100,26 +92,18 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
                 const authError = authErr as { code?: string };
                 if (authError.code === 'auth/multi-factor-auth-required') {
                     const resolver = getMultiFactorResolver(auth, authErr as Parameters<typeof getMultiFactorResolver>[1]);
-                    setMfaResolver(resolver);
-                    setStep('mfa');
-                    setLoading(false);
-                    return;
+                    setMfaResolver(resolver); setStep('mfa'); setLoading(false); return;
                 }
                 throw authErr;
             }
             await completeInvitation();
         } catch (err) {
-            const error = err as Error & { code?: string };
-            setError(mapInvitationError(error));
-        } finally {
-            setLoading(false);
-        }
+            setError(mapInvitationError(err as Error & { code?: string }));
+        } finally { setLoading(false); }
     };
 
     const handleMfaSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
+        e.preventDefault(); setError(''); setLoading(true);
         try {
             if (!mfaResolver) throw new Error('MFA session expired. Please start over.');
             const totpHint = mfaResolver.hints.find(hint => hint.factorId === 'totp');
@@ -128,48 +112,19 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
             await mfaResolver.resolveSignIn(assertion);
             await completeInvitation();
         } catch (err) {
-            const error = err as Error & { code?: string };
-            setError(mapMfaError(error));
-        } finally {
-            setLoading(false);
-        }
+            setError(mapMfaError(err as Error & { code?: string }));
+        } finally { setLoading(false); }
     };
 
     const copyCode = async () => {
         await navigator.clipboard.writeText(verificationCode);
-        setCopied(true);
-        showToast('Code copied to clipboard', 'success');
+        setCopied(true); showToast('Code copied to clipboard', 'success');
         setTimeout(() => setCopied(false), 2000);
     };
 
-    if (step === 'email') {
-        return <InviteEmailStep inviteeEmail={inviteeEmail} setInviteeEmail={setInviteeEmail} error={error} onSubmit={handleEmailSubmit} />;
-    }
+    if (step === 'email') return <InviteEmailStep inviteeEmail={inviteeEmail} setInviteeEmail={setInviteeEmail} error={error} onSubmit={handleEmailSubmit} />;
+    if (step === 'password') return <InvitePasswordStep inviteeEmail={inviteeEmail} password={password} setPassword={setPassword} error={error} loading={loading} onSubmit={handlePasswordSubmit} onBack={() => { setStep('email'); setPassword(''); setError(''); }} />;
+    if (step === 'mfa') return <InviteMfaStep mfaCode={mfaCode} setMfaCode={setMfaCode} error={error} loading={loading} onSubmit={handleMfaSubmit} onBack={() => { setStep('password'); setMfaCode(''); setMfaResolver(null); setError(''); }} />;
 
-    if (step === 'password') {
-        return (
-            <InvitePasswordStep
-                inviteeEmail={inviteeEmail} password={password} setPassword={setPassword}
-                error={error} loading={loading} onSubmit={handlePasswordSubmit}
-                onBack={() => { setStep('email'); setPassword(''); setError(''); }}
-            />
-        );
-    }
-
-    if (step === 'mfa') {
-        return (
-            <InviteMfaStep
-                mfaCode={mfaCode} setMfaCode={setMfaCode} error={error} loading={loading}
-                onSubmit={handleMfaSubmit}
-                onBack={() => { setStep('password'); setMfaCode(''); setMfaResolver(null); setError(''); }}
-            />
-        );
-    }
-
-    return (
-        <InviteSuccessStep
-            inviteeEmail={inviteeEmail} verificationCode={verificationCode}
-            copied={copied} onCopyCode={copyCode} onDone={onInviteSent}
-        />
-    );
+    return <InviteSuccessStep inviteeEmail={inviteeEmail} verificationCode={verificationCode} copied={copied} onCopyCode={copyCode} onDone={onInviteSent} />;
 }
