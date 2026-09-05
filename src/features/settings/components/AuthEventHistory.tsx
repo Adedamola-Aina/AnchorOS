@@ -1,17 +1,11 @@
 /**
  * AuthEventHistory — unified Devices & Sessions panel
  * AUTH-003 / SEC-009
- *
- * Shows all recorded sign-in sessions. Current device (most recent) is pinned
- * at top with a "This device" badge and no action. All other sessions can be
- * individually signed out (removes the Firestore record via revokeSession).
- * "Sign out all other devices" revokes all refresh tokens and logs the user out.
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { Monitor, RefreshCw, LogOut } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
-import { Button } from '@anchor-os/ui';
+import { Card, CardHeader, CardTitle, CardContent, Button } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotifications } from '../../../context/NotificationContext';
 import {
@@ -44,11 +38,24 @@ export const AuthEventHistory: React.FC = () => {
         }
     }, [user]);
 
-    useEffect(() => { void loadSessions(); }, [loadSessions]);
+    useEffect(() => {
+        if (!user) return;
+        let cancelled = false;
+        void (async () => {
+            try {
+                const data = await getAuthEvents(user.uid);
+                if (!cancelled) setSessions(data.filter(e => !e.reported));
+            } catch (err) {
+                captureError(err, 'AuthEventHistory.load');
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [user]);
 
     const handleSignOut = async (event: AuthEvent) => {
         if (!event.id) return;
-        // Optimistic removal
         setSessions(prev => prev.filter(e => e.id !== event.id));
         setDismissing(event.id);
         try {
@@ -65,16 +72,12 @@ export const AuthEventHistory: React.FC = () => {
     const handleSignOutAll = async () => {
         const otherSession = sessions.find((_, i) => i > 0);
         if (!otherSession?.id) return;
-
         const confirmed = await confirm({
             title: 'Sign out all devices?',
             message: 'This will immediately sign out all sessions on every device, including this one. You will need to sign in again.',
-            type: 'danger',
-            confirmText: 'Sign out all devices',
-            cancelText: 'Cancel',
+            type: 'danger', confirmText: 'Sign out all devices', cancelText: 'Cancel',
         });
         if (!confirmed) return;
-
         try {
             setSigningOutAll(true);
             await reportUnrecognisedSignIn(otherSession.id);
@@ -102,14 +105,7 @@ export const AuthEventHistory: React.FC = () => {
                     </CardTitle>
                     <div className="flex items-center gap-2">
                         {otherSessions.length > 0 && (
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                className="text-rose-500 hover:text-white hover:bg-rose-500 border-rose-200 dark:border-rose-900 gap-2 min-h-[44px]"
-                                onClick={handleSignOutAll}
-                                isLoading={signingOutAll}
-                                aria-label="Sign out all other devices"
-                            >
+                            <Button variant="secondary" size="sm" className="text-rose-500 hover:text-white hover:bg-rose-500 border-rose-200 dark:border-rose-900 gap-2 min-h-[44px]" onClick={handleSignOutAll} isLoading={signingOutAll} aria-label="Sign out all other devices">
                                 <LogOut className="w-4 h-4" />
                                 <span className="hidden sm:inline text-xs font-medium">Sign out all other devices</span>
                             </Button>
@@ -121,23 +117,9 @@ export const AuthEventHistory: React.FC = () => {
                 </div>
             </CardHeader>
             <CardContent className="p-4">
-                {loading && (
-                    <div className="space-y-2">
-                        {[...Array(2)].map((_, i) => (
-                            <div key={i} className="h-10 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
-                        ))}
-                    </div>
-                )}
-                {!loading && sessions.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-3">No active sessions found.</p>
-                )}
-                {!loading && sessions.length > 0 && (
-                    <AuthSessionList
-                        sessions={sessions}
-                        dismissing={dismissing}
-                        onSignOut={handleSignOut}
-                    />
-                )}
+                {loading && <div className="space-y-2">{[...Array(2)].map((_, i) => <div key={i} className="h-10 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />)}</div>}
+                {!loading && sessions.length === 0 && <p className="text-xs text-slate-400 text-center py-3">No active sessions found.</p>}
+                {!loading && sessions.length > 0 && <AuthSessionList sessions={sessions} dismissing={dismissing} onSignOut={handleSignOut} />}
             </CardContent>
         </Card>
     );
