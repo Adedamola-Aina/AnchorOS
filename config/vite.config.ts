@@ -20,11 +20,11 @@ function buildEnvMarker(mode: string) {
   return {
     name: 'build-env-marker',
     closeBundle() {
-      // Map Vite mode to environment name
       const env = mode === 'staging' ? 'staging'
         : mode === 'production' ? 'production'
           : 'development';
       const markerPath = path.resolve(rootDir, 'dist/.build-env');
+      fs.mkdirSync(path.dirname(markerPath), { recursive: true });
       fs.writeFileSync(markerPath, env, 'utf-8');
       console.log(`\n✓ Build environment marker written: ${env}`);
     },
@@ -51,8 +51,6 @@ function generateFirebaseSwConfig() {
     const content = `// Auto-generated — do not edit. Built from .env variables.\nself.__FIREBASE_CONFIG = ${JSON.stringify(config, null, 2)};\n`;
     fs.writeFileSync(path.resolve(rootDir, 'public/__firebase-config.js'), content, 'utf-8');
 
-    // Patch sw.js cache name to use current package version
-    // This ensures returning users always get fresh assets after a deploy
     const swPath = path.resolve(rootDir, 'public/sw.js');
     if (fs.existsSync(swPath)) {
       const sw = fs.readFileSync(swPath, 'utf-8');
@@ -70,7 +68,6 @@ function generateFirebaseSwConfig() {
       writeConfig(config.envDir, config.mode);
     },
     closeBundle() {
-      // Also copy to dist/ since public/ is copied before plugin runs
       const src = path.resolve(rootDir, 'public/__firebase-config.js');
       const dest = path.resolve(rootDir, 'dist/__firebase-config.js');
       if (fs.existsSync(src) && fs.existsSync(path.resolve(rootDir, 'dist'))) {
@@ -80,10 +77,8 @@ function generateFirebaseSwConfig() {
   };
 }
 
-// Read version from package.json at build time
 const pkg = JSON.parse(fs.readFileSync(path.resolve(rootDir, 'package.json'), 'utf-8'));
 
-// https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
@@ -123,45 +118,20 @@ export default defineConfig(({ mode }) => ({
     postcss: __dirname,
   },
   build: {
-    sourcemap: 'hidden', // Source maps uploaded to Sentry but not publicly served
+    sourcemap: 'hidden',
     rollupOptions: {
       input: path.resolve(rootDir, 'index.html'),
       output: {
         manualChunks: (id) => {
-          // Only split in production to avoid duplicate React in dev
           if (id.includes('node_modules')) {
-            // Firebase - large, changes rarely
-            if (id.includes('firebase')) {
-              return 'firebase';
-            }
-            // Sentry - load after app is interactive
-            if (id.includes('@sentry')) {
-              return 'sentry';
-            }
-            // Charts - only loaded on dashboard/finance
-            if (id.includes('recharts')) {
-              return 'recharts';
-            }
-            // Radix UI components - commonly used across app
-            if (id.includes('@radix-ui')) {
-              return 'radix';
-            }
-            // Date utilities
-            if (id.includes('date-fns')) {
-              return 'date-fns';
-            }
-            // Icons - large but compressed well
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            // Data management
-            if (id.includes('@tanstack/react-query')) {
-              return 'query';
-            }
-            // React ecosystem - keep together to avoid duplicate instances
-            if (id.includes('react') || id.includes('@tanstack')) {
-              return 'vendor';
-            }
+            if (id.includes('firebase')) return 'firebase';
+            if (id.includes('@sentry')) return 'sentry';
+            if (id.includes('recharts')) return 'recharts';
+            if (id.includes('@radix-ui')) return 'radix';
+            if (id.includes('date-fns')) return 'date-fns';
+            if (id.includes('lucide-react')) return 'icons';
+            if (id.includes('@tanstack/react-query')) return 'query';
+            if (id.includes('react') || id.includes('@tanstack')) return 'vendor';
           }
         },
       },
