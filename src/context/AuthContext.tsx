@@ -55,7 +55,6 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
-    // PWA-006: Use system theme detection for initial value
     const initialTheme = typeof window !== 'undefined' ? getEffectiveTheme() : 'light';
     const [profile, setProfile] = useState<UserProfile>({ name: 'User', theme: initialTheme, familyMode: false, onboardingComplete: false });
     const [loading, setLoading] = useState(true);
@@ -72,16 +71,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await updateUserProfile(user.uid, updates);
     }, [user]);
 
-    // Use extracted MFA hook
     const mfaOps = useMfaOperations(user, updateProfile);
-
-    // ARCH-004: Store clearPendingSecret in ref to avoid mfaOps in useEffect deps
     const clearPendingSecretRef = useRef(mfaOps.clearPendingSecret);
-    clearPendingSecretRef.current = mfaOps.clearPendingSecret;
 
     useEffect(() => {
-        // PLT-001: Failsafe timeout for Capacitor WebView where Firebase Auth
-        // persistence may hang (capacitor:// origin blocks IndexedDB)
+        clearPendingSecretRef.current = mfaOps.clearPendingSecret;
+    }, [mfaOps.clearPendingSecret]);
+
+    useEffect(() => {
         const authTimeout = setTimeout(() => {
             setLoading(prev => {
                 if (prev) console.warn('[AuthContext] Auth state timeout — forcing login screen');
@@ -110,7 +107,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const alerts: string[] = [];
                     if (!u.emailVerified && import.meta.env.VITE_APP_ENV === 'production') alerts.push('verify_email');
                     if (!actualMfaEnrolled) alerts.push('enable_2fa');
-                    // Suppress nav-level notifications if user saw the security step during onboarding
                     const securitySeen = data.onboardingProgress?.securityStepSeen === true;
                     setAccountNotifications(securitySeen ? [] : alerts);
                     setProfileLoaded(true); setLoading(false);
@@ -123,14 +119,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
         });
         return () => { clearTimeout(authTimeout); unsubAuth(); if (unsubProfRef.current) unsubProfRef.current(); };
-    }, []); // ARCH-004: Stable deps — mfaOps accessed via ref to prevent re-subscription
+    }, []);
 
     const signIn = async (e: string, p: string) => {
         return authTracer.trace('signIn', async () => {
             await signInWithEmailAndPassword(auth, e, p);
-            // AUDIT: Log successful login
             auditAuth.loginSuccess('password');
-            // SEC-009: Record sign-in event with device context
             void recordAuthEvent(navigator.userAgent, 'password');
         });
     };
@@ -140,7 +134,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const cred = await createUserWithEmailAndPassword(auth, e, p);
             const name = e.split('@')[0];
             await createUserProfile(cred.user.uid, { name, theme: 'light', familyMode: false, onboardingComplete: false });
-            // SEC-009: Record first sign-in event
             void recordAuthEvent(navigator.userAgent, 'password');
             try { await queueWelcomeEmail(e, getWelcomeEmailHtml(name)); }
             catch (err) { captureError(err, 'Auth.welcomeEmail'); }
@@ -155,7 +148,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const logout = async () => {
         authTracer.logEvent('logout');
-        // AUDIT: Log logout
         auditAuth.logout();
         sessionStorage.removeItem('anchor_session_active');
         await signOut(auth);
