@@ -53,7 +53,10 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
         const handleExpiry = () => setAuthError('Session expired. Please sign in again.');
         window.addEventListener('anchor:session_expired', handleExpiry);
         const sessionActive = sessionStorage.getItem('anchor_session_active');
-        if (sessionActive === 'true' && !user && !loading) { setAuthError('Session expired. Please sign in again.'); sessionStorage.removeItem('anchor_session_active'); }
+        if (sessionActive === 'true' && !user && !loading) {
+            sessionStorage.removeItem('anchor_session_active');
+            queueMicrotask(() => setAuthError('Session expired. Please sign in again.'));
+        }
         return () => window.removeEventListener('anchor:session_expired', handleExpiry);
     }, [user, loading]);
 
@@ -63,7 +66,18 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     }, []);
 
     React.useEffect(() => {
-        if (!user && !loading) { setEmail(''); setPassword(''); setAuthError(''); setMfaResolver(null); setAuthMode('login'); if (location.pathname !== '/login' && location.pathname !== '/accept-invite') navigate('/login', { replace: true }); }
+        if (!user && !loading) {
+            queueMicrotask(() => {
+                setEmail('');
+                setPassword('');
+                setMfaResolver(null);
+                setMfaCode('');
+                setAuthMode('login');
+            });
+            if (location.pathname !== '/login' && location.pathname !== '/accept-invite') {
+                navigate('/login', { replace: true });
+            }
+        }
     }, [user, loading, location.pathname, navigate]);
 
     if (loading) return <AuthLoadingScreen />;
