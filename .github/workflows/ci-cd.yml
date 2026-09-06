@@ -719,6 +719,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install functions dependencies
+        run: npm ci
+        working-directory: functions
+
       - name: Write production env config
         run: |
           printf '%s\n' "$PRODUCTION_FRONTEND_ENV" > .env.production
