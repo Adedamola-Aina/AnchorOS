@@ -124,7 +124,14 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('firebase')) return 'firebase';
+            if (id.includes('firebase')) {
+              // Messaging/Storage are loaded on demand (push permission, media
+              // uploads) — keep them OUT of the eager 'firebase' chunk so they
+              // become async-only chunks and don't preload on first paint.
+              if (id.includes('firebase/messaging') || id.includes('firebase/installations')) return 'firebase-push';
+              if (id.includes('firebase/storage')) return 'firebase-storage';
+              return 'firebase';
+            }
             if (id.includes('@sentry')) return 'sentry';
             if (id.includes('recharts')) return 'recharts';
             if (id.includes('@radix-ui')) return 'radix';

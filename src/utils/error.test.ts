@@ -9,6 +9,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AnchorError, handleError, captureError } from './error';
 import type { ErrorCategory } from './error';
 
+// Mock Sentry — the app loads Sentry lazily via src/utils/lazySentry.ts, so
+// tests enable a DSN and flush a macrotask for the dynamic import to resolve.
+// @ts-expect-error test env wiring
+import.meta.env.VITE_SENTRY_DSN = 'test-dsn';
+
+const flushSentry = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
 // Mock Sentry
 vi.mock('@sentry/react', () => ({
     captureException: vi.fn(),
@@ -71,9 +78,10 @@ describe('handleError', () => {
         expect(result).toBe(original);
     });
 
-    it('reports AnchorError to Sentry with correct level', () => {
+    it('reports AnchorError to Sentry with correct level', async () => {
         const err = new AnchorError('validation issue', 'VALIDATION');
         handleError(err);
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             err,
             expect.objectContaining({
@@ -83,9 +91,10 @@ describe('handleError', () => {
         );
     });
 
-    it('reports PERMISSION errors with error level', () => {
+    it('reports PERMISSION errors with error level', async () => {
         const err = new AnchorError('no access', 'PERMISSION', new Error('denied'));
         handleError(err);
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({ level: 'error' })
@@ -110,8 +119,9 @@ describe('handleError', () => {
         expect(result.userMessage).toBe('An unexpected error occurred');
     });
 
-    it('reports plain errors to Sentry as UNKNOWN', () => {
+    it('reports plain errors to Sentry as UNKNOWN', async () => {
         handleError(new Error('test'));
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             expect.any(Error),
             expect.objectContaining({
@@ -121,7 +131,7 @@ describe('handleError', () => {
         );
     });
 
-    it('handles all error categories with correct Sentry levels', () => {
+    it('handles all error categories with correct Sentry levels', async () => {
         const expectations: [ErrorCategory, 'warning' | 'error'][] = [
             ['VALIDATION', 'warning'],
             ['RATE_LIMIT', 'warning'],
@@ -132,14 +142,15 @@ describe('handleError', () => {
             ['UNKNOWN', 'error'],
         ];
 
-        expectations.forEach(([category, level]) => {
+        for (const [category, level] of expectations) {
             vi.clearAllMocks();
             handleError(new AnchorError('test', category));
+            await flushSentry();
             expect(Sentry.captureException).toHaveBeenCalledWith(
                 expect.anything(),
                 expect.objectContaining({ level })
             );
-        });
+        }
     });
 });
 
@@ -148,9 +159,10 @@ describe('captureError', () => {
         vi.clearAllMocks();
     });
 
-    it('sends Error to Sentry with context tag', () => {
+    it('sends Error to Sentry with context tag', async () => {
         const err = new Error('fetch failed');
         captureError(err, 'TransactionForm.submit');
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             err,
             expect.objectContaining({
@@ -159,16 +171,18 @@ describe('captureError', () => {
         );
     });
 
-    it('wraps non-Error values in Error', () => {
+    it('wraps non-Error values in Error', async () => {
         captureError('string error', 'test-context');
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             expect.objectContaining({ message: 'string error' }),
             expect.anything()
         );
     });
 
-    it('passes extra data through', () => {
+    it('passes extra data through', async () => {
         captureError(new Error('e'), 'ctx', { accountId: 'abc' });
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             expect.any(Error),
             expect.objectContaining({
@@ -177,26 +191,29 @@ describe('captureError', () => {
         );
     });
 
-    it('uses warning level for AnchorError with VALIDATION category', () => {
+    it('uses warning level for AnchorError with VALIDATION category', async () => {
         const err = new AnchorError('bad input', 'VALIDATION');
         captureError(err, 'form');
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             err,
             expect.objectContaining({ level: 'warning' })
         );
     });
 
-    it('uses error level for regular Error', () => {
+    it('uses error level for regular Error', async () => {
         captureError(new Error('x'), 'ctx');
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             expect.any(Error),
             expect.objectContaining({ level: 'error' })
         );
     });
 
-    it('tags AnchorError category', () => {
+    it('tags AnchorError category', async () => {
         const err = new AnchorError('net', 'NETWORK');
         captureError(err, 'api');
+        await flushSentry();
         expect(Sentry.captureException).toHaveBeenCalledWith(
             err,
             expect.objectContaining({

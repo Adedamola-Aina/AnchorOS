@@ -76,8 +76,8 @@ describe('firebase config module', () => {
         mockState.initializeAppCheck.mockReturnValue(undefined);
     });
 
-    it('initializes core firebase services and exports messaging when supported', async () => {
-        setBaseEnv();
+    it('initializes core firebase services and lazily provides messaging when supported', async () => {
+        setBaseEnv({ VITE_FIREBASE_VAPID_KEY: 'vapid-key' });
 
         const module = await import('./firebase');
 
@@ -97,14 +97,16 @@ describe('firebase config module', () => {
             { localCache: { cache: 'memory' } },
         );
         expect(mockState.getFunctions).toHaveBeenCalledWith({ app: 'firebase-app' }, 'us-central1');
-        expect(mockState.getMessaging).toHaveBeenCalledWith({ app: 'firebase-app' });
+        // Messaging is lazy — not initialized at module load, only on demand
+        expect(mockState.getMessaging).not.toHaveBeenCalled();
         expect(mockState.initializeAppCheck).not.toHaveBeenCalled();
 
         expect(module.APP_ID).toBe('anchor-os');
         expect(module.auth).toEqual({ auth: 'firebase-auth' });
         expect(module.db).toEqual({ db: 'firestore' });
         expect(module.functions).toEqual({ functions: 'region' });
-        expect(module.messaging).toEqual({ messaging: 'instance' });
+        expect(await module.getMessagingInstance()).toEqual({ messaging: 'instance' });
+        expect(mockState.getMessaging).toHaveBeenCalledWith({ app: 'firebase-app' });
     });
 
     it('initializes App Check and writes debug token when site key is provided', async () => {
@@ -167,6 +169,7 @@ describe('firebase config module', () => {
     it('swallows App Check failures and falls back when messaging is unsupported', async () => {
         setBaseEnv({
             VITE_FIREBASE_APP_CHECK_SITE_KEY: 'site-key',
+            VITE_FIREBASE_VAPID_KEY: 'vapid-key',
             DEV: 'false',
         });
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -180,7 +183,16 @@ describe('firebase config module', () => {
         const module = await import('./firebase');
 
         expect(warnSpy).toHaveBeenCalledWith('[Firebase] App Check initialization failed');
+        expect(await module.getMessagingInstance()).toBeNull();
         expect(warnSpy).toHaveBeenCalledWith('[Firebase] Messaging not initialized (environment may not support it)');
-        expect(module.messaging).toBeUndefined();
+    });
+
+    it('resolves messaging to null when no VAPID key is configured', async () => {
+        setBaseEnv({ VITE_FIREBASE_VAPID_KEY: '' });
+
+        const module = await import('./firebase');
+
+        expect(await module.getMessagingInstance()).toBeNull();
+        expect(mockState.getMessaging).not.toHaveBeenCalled();
     });
 });

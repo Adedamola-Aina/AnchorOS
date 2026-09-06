@@ -4,15 +4,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockState = vi.hoisted(() => ({
     messaging: {},
+    getMessagingInstance: () => Promise.resolve({}),
     auth: { currentUser: { uid: 'user-1' } },
     onMessageCallback: undefined as ((payload: Record<string, unknown>) => void) | undefined,
     onMessageUnsubscribe: vi.fn(),
 }));
 
 vi.mock('../config/firebase', () => ({
-    get messaging() {
-        return mockState.messaging;
-    },
+    getMessagingInstance: () => Promise.resolve(mockState.messaging),
     auth: mockState.auth,
 }));
 

@@ -8,8 +8,7 @@
 
 
 import { useState, useCallback, useEffect } from 'react';
-import { messaging, auth } from '../config/firebase';
-import { onMessage, deleteToken } from 'firebase/messaging';
+import { auth, getMessagingInstance } from '../config/firebase';
 import { getFcmTokenWithRetry } from '../services/fcmTokenService';
 import { captureError } from '../utils/error';
 import type { NotificationType } from '../context/NotificationContextDefinition';
@@ -34,12 +33,14 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
     // Restore token on mount if already granted and not explicitly disabled
     useEffect(() => {
         const restoreToken = async () => {
-            if (typeof Notification === 'undefined' || !messaging) return;
+            if (typeof Notification === 'undefined') return;
             if (pushDisabled) return;
             if (!import.meta.env.VITE_FIREBASE_VAPID_KEY) return;
 
             if (Notification.permission === 'granted') {
                 try {
+                    const messaging = await getMessagingInstance();
+                    if (!messaging) return;
                     const token = await getFcmTokenWithRetry({
                         messaging: messaging!,
                         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
@@ -55,20 +56,32 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
 
     // Listen for foreground messages
     useEffect(() => {
-        if (!messaging) return;
+        let unsubscribe: (() => void) | undefined;
+        let cancelled = false;
 
-        const unsubscribe = onMessage(messaging, (payload) => {
-            if (import.meta.env.DEV) console.info('Foreground message received:', payload);
-            const badgeCountRaw = payload?.data?.badgeCount;
-            const badgeCount = badgeCountRaw != null ? Number.parseInt(String(badgeCountRaw), 10) : Number.NaN;
-            if (Number.isFinite(badgeCount)) {
-                void setAppBadgeCount(badgeCount);
-            }
-            if (payload.notification) {
-                showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
-            }
+        void getMessagingInstance().then(async (messaging) => {
+            if (!messaging || cancelled) return;
+
+            // PERFORMANCE: messaging SDK is loaded on demand
+            const { onMessage } = await import('firebase/messaging');
+            if (cancelled) return;
+
+            unsubscribe = onMessage(messaging, (payload) => {
+                if (import.meta.env.DEV) console.info('Foreground message received:', payload);
+                const badgeCountRaw = payload?.data?.badgeCount;
+                const badgeCount = badgeCountRaw != null ? Number.parseInt(String(badgeCountRaw), 10) : Number.NaN;
+                if (Number.isFinite(badgeCount)) {
+                    void setAppBadgeCount(badgeCount);
+                }
+                if (payload.notification) {
+                    showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
+                }
+            });
         });
-        return () => unsubscribe();
+        return () => {
+            cancelled = true;
+            unsubscribe?.();
+        };
     }, [showToast]);
 
     const requestPushPermission = useCallback(async () => {
@@ -80,9 +93,13 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
 
             // BUG-039: Toggle off when already granted
             if (pushPermissionStatus === 'granted' || pushDisabled) {
-                if (messaging && fcmToken) {
+                if (fcmToken) {
                     try {
-                        await deleteToken(messaging);
+                        const messaging = await getMessagingInstance();
+                        if (messaging) {
+                            const { deleteToken } = await import('firebase/messaging');
+                            await deleteToken(messaging);
+                        }
                         if (auth.currentUser) {
                             await deleteStoredPushToken(auth.currentUser.uid, fcmToken);
                         }
@@ -111,17 +128,18 @@ export function usePushNotifications({ showToast }: UsePushNotificationsOptions)
             if (permission === 'granted') {
                 showToast('Permission granted! Initializing...', 'success');
 
-                if (!messaging) {
-                    showToast('Messaging service not available', 'error');
-                    return null;
-                }
-
                 if (!import.meta.env.VITE_FIREBASE_VAPID_KEY) {
                     showToast('Push notifications not configured for this environment', 'error');
                     return null;
                 }
 
                 try {
+                    const messaging = await getMessagingInstance();
+                    if (!messaging) {
+                        showToast('Messaging service not available', 'error');
+                        return null;
+                    }
+
                     const token = await getFcmTokenWithRetry({
                         messaging: messaging!,
                         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,

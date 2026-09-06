@@ -3,14 +3,15 @@
  * and reports to Sentry as breadcrumbs for production monitoring.
  */
 
-import * as Sentry from '@sentry/react';
+import { getSentry } from './lazySentry';
 import { onCLS, onLCP, onINP, onTTFB } from 'web-vitals';
 import type { Metric } from 'web-vitals';
 
 function sendToSentry(metric: Metric): void {
     const level = metric.rating === 'good' ? 'info' : 'warning';
-    Sentry.addBreadcrumb({
-        category: 'web-vital',
+    void getSentry().then((Sentry) =>
+        Sentry?.addBreadcrumb({
+            category: 'web-vital',
         message: `${metric.name}: ${metric.value}`,
         level,
         data: {
@@ -18,7 +19,7 @@ function sendToSentry(metric: Metric): void {
             rating: metric.rating,
             id: metric.id,
         },
-    });
+    }));
 }
 
 export function reportWebVitals(): void {

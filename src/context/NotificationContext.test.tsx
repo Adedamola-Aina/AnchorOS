@@ -10,6 +10,7 @@ import { getFcmTokenWithRetry } from '../services/fcmTokenService';
 // Mock Firebase dependencies
 vi.mock('../config/firebase', () => ({
     messaging: {},
+    getMessagingInstance: () => Promise.resolve({}),
     db: {},
     auth: { currentUser: { uid: 'test-user-id' } },
     APP_ID: 'test-app-id'

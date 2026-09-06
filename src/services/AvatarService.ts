@@ -13,7 +13,7 @@ export async function uploadAvatar(userId: string, file: File): Promise<string> 
     throw new Error('Image must be under 2 MB');
   }
 
-  const storage = getAppStorage();
+  const storage = await getAppStorage();
   const storageRef = ref(storage, `avatars/${userId}/avatar`);
   await uploadBytes(storageRef, file);
   const url = await getDownloadURL(storageRef);
@@ -22,7 +22,7 @@ export async function uploadAvatar(userId: string, file: File): Promise<string> 
 }
 
 export async function deleteAvatar(userId: string): Promise<void> {
-  const storage = getAppStorage();
+  const storage = await getAppStorage();
   const storageRef = ref(storage, `avatars/${userId}/avatar`);
   try {
     await deleteObject(storageRef);

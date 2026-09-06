@@ -60,27 +60,45 @@ export const db = initializeFirestore(app, {
   localCache: memoryLocalCache()
 });
 
-import { getMessaging } from "firebase/messaging";
 import { getFunctions } from "firebase/functions";
-import { getStorage } from 'firebase/storage';
 
 // APP_ID is always 'anchor-os' for consistent Firestore data paths
 // The actual Firebase project is determined by projectId
 export const APP_ID = 'anchor-os';
 export const functions = getFunctions(app, 'us-central1'); // Region must match function deployment
-export function getAppStorage() {
-  return getStorage(app);
+
+// PERFORMANCE: Storage and Messaging SDKs are dynamically imported so they are
+// NOT part of the eagerly-loaded startup bundle. They are only needed on
+// authenticated screens (avatar/artwork upload) or after the user grants
+// notification permission, so loading them on demand keeps first paint fast.
+import type { Messaging } from 'firebase/messaging';
+import type { FirebaseStorage } from 'firebase/storage';
+
+let storagePromise: Promise<FirebaseStorage> | null = null;
+export function getAppStorage(): Promise<FirebaseStorage> {
+  if (!storagePromise) {
+    storagePromise = import('firebase/storage').then(({ getStorage }) => getStorage(app));
+  }
+  return storagePromise;
 }
+
 // Initialize Messaging only when VAPID key is configured.
 // Without a valid VAPID key, getToken() fails with 401 and also pollutes
 // httpsCallable context (Firebase SDK auto-fetches FCM token for callables).
-let messagingInstance;
-if (import.meta.env.VITE_FIREBASE_VAPID_KEY) {
-  try {
-    messagingInstance = getMessaging(app);
-  } catch (_e) {
-    console.warn('[Firebase] Messaging not initialized (environment may not support it)');
+let messagingPromise: Promise<Messaging | null> | null = null;
+export function getMessagingInstance(): Promise<Messaging | null> {
+  if (!messagingPromise) {
+    if (!import.meta.env.VITE_FIREBASE_VAPID_KEY) {
+      messagingPromise = Promise.resolve(null);
+    } else {
+      messagingPromise = import('firebase/messaging')
+        .then(({ getMessaging }) => getMessaging(app))
+        .catch(() => {
+          console.warn('[Firebase] Messaging not initialized (environment may not support it)');
+          return null;
+        });
+    }
   }
+  return messagingPromise;
 }
-export const messaging = messagingInstance;
 if (import.meta.env.DEV) console.info(`[Firebase] Connected to ${firebaseConfig.projectId}`);

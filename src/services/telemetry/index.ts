@@ -8,8 +8,13 @@
  */
 // @ts-nocheck
 
-import * as Sentry from '@sentry/react';
+import { getSentry } from '../../utils/lazySentry';
 import { validateAnalyticsEvent, type AnalyticsEventName } from '../../analytics/contract';
+
+/** Fire-and-forget breadcrumb — Sentry loads on demand, never blocks startup */
+function addBreadcrumb(breadcrumb: Parameters<typeof import('@sentry/react').addBreadcrumb>[0]): void {
+    void getSentry().then((Sentry) => Sentry?.addBreadcrumb(breadcrumb));
+}
 
 interface TraceOptions {
     attributes?: Record<string, string | number | boolean>;
@@ -48,7 +53,7 @@ export async function trace<T>(
         const duration = performance.now() - start;
 
         // Always add Sentry breadcrumb for failed operations
-        Sentry.addBreadcrumb({
+        addBreadcrumb({
             category: 'trace',
             message: `${name} failed (${duration.toFixed(0)}ms)`,
             level: 'error',
@@ -83,7 +88,7 @@ export function logEvent(
     }
 
     // Always send breadcrumb to Sentry (gives context before errors)
-    Sentry.addBreadcrumb({
+    addBreadcrumb({
         category: 'event',
         message: name,
         level: options?.level === 'error' ? 'error'
@@ -105,7 +110,7 @@ export function logProductEvent(name: AnalyticsEventName, payload: Record<string
     const event = validateAnalyticsEvent({ name, payload });
     logEvent(`product.${event.name}`, {
         level: 'info',
-        attributes: { ...event.payload, ...experimentContext },
+        attributes: { ...event.payload },
     });
 }
 
@@ -122,24 +127,3 @@ export function createTracer(featureName: string) {
     };
 }
 
-let experimentContext: Record<string, string> = {};
-
-export function setExperimentContext(assignments: Record<string, string>): void {
-    experimentContext = { ...assignments };
-    Sentry.setContext('experiments', experimentContext);
-}
-
-export function getExperimentContext(): Record<string, string> {
-    return { ...experimentContext };
-}
-
-export const TelemetryService = {
-    trace,
-    logEvent,
-    logProductEvent,
-    createTracer,
-    setExperimentContext,
-    getExperimentContext,
-};
-
-export default TelemetryService;
