@@ -47,6 +47,10 @@ jobs:
       - uses: actions/setup-node@v6
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
+      - name: Write E2E env config
+        run: printf '%s\n' "$E2E_VITE_ENV" > .env.development
+        env:
+          E2E_VITE_ENV: ${{ secrets.E2E_VITE_ENV }}
       - run: npx playwright install chromium --with-deps
       - run: npx playwright test --config config/playwright.config.ts --shard=${{ matrix.shard }}/4
         env:
