@@ -552,7 +552,7 @@ jobs:
       - name: Deploy hosting to dev
         run: firebase deploy --only hosting:dev --project anchor-os-dev-1c6ec --non-interactive
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.RUNNER_TEMP }}/sa-dev.json
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa-dev.json
 
   # Job 3: Build for staging
   build-staging:
