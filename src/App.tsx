@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { AnchorLoadingSpinner } from './components/shared/AnchorLoadingSpinner';
 import { AppProvider } from './context/AnchorContext';
@@ -8,8 +7,9 @@ import { lazyWithRetry } from './utils/lazyWithRetry';
 const AuthenticatedAppShell = lazyWithRetry(() => import('./components/app/AuthenticatedAppShell'));
 const AcceptInviteView = lazyWithRetry(() => import('./features/onboarding/AcceptInviteView').then(m => ({ default: m.AcceptInviteView })));
 const ServerErrorView = lazyWithRetry(() => import('./features/errors/ServerErrorView'));
+const MarketingLanding = lazyWithRetry(() => import('./features/marketing/MarketingLanding'));
 
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import AuthGate from './components/auth/AuthGate';
 import { getSystemTheme, subscribeToSystemTheme } from './utils/systemTheme';
 import { NotificationProvider } from './context/NotificationContext';
@@ -23,6 +23,8 @@ import { useAndroidBackButton } from './hooks/useAndroidBackButton';
 
 const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
+  const location = useLocation();
+  const isPublicMarketingRoute = location.pathname === '/';
   useAccessibility(profile?.accessibility);
   useIOSKeyboardFix();
   useAndroidBackButton();
@@ -42,7 +44,8 @@ const AppContent = () => {
     applyTheme(userPref);
   }, [profile?.theme]);
 
-  if (loading || (user && !profileLoaded)) {
+  // Public marketing renders immediately; private routes wait for auth + profile
+  if (!isPublicMarketingRoute && (loading || (user && !profileLoaded))) {
     return (
       <div className="flex-1 h-full w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <AnchorLoadingSpinner size="lg" />
@@ -52,6 +55,22 @@ const AppContent = () => {
 
   return (
     <Routes>
+      <Route path="/" element={
+        <React.Suspense fallback={
+          <div className="flex items-center justify-center p-12 animate-in fade-in duration-300">
+            <AnchorLoadingSpinner message="Loading..." />
+          </div>
+        }>
+          <MarketingLanding />
+        </React.Suspense>
+      } />
+
+      <Route path="/login" element={
+        <AuthGate>
+          <Navigate to="/dashboard" replace />
+        </AuthGate>
+      } />
+
       <Route path="/500" element={<ServerErrorView />} />
 
       <Route path="/accept-invite" element={
