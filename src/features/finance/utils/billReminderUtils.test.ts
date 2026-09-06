@@ -60,8 +60,10 @@ describe('getUpcomingBills', () => {
   });
 
   it('includes bills due today', () => {
-    const today = new Date();
-    const bills = [makeBill({ nextRunAt: today.toISOString() })];
+    // A bill "due today" must still be in the future relative to the
+    // function's own now — use +1 minute to avoid millisecond races.
+    const dueToday = new Date(Date.now() + 60_000);
+    const bills = [makeBill({ nextRunAt: dueToday.toISOString() })];
     const result = getUpcomingBills(bills, 7);
     expect(result).toHaveLength(1);
   });
