@@ -92,7 +92,7 @@ const DashboardView = () => {
               onClick={() => { haptic.trigger('light'); navigate('/settings'); }}
               aria-label="Settings"
               data-testid="settings-pill"
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
             >
               <Settings className="w-4 h-4" />
             </button>

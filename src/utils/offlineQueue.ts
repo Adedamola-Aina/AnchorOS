@@ -3,7 +3,7 @@ import { safeGet, safeSet, safeDel, type ProcessResult } from './offlineQueueSto
 
 const IDB_KEY = 'anchor_offline_queue';
 
-export interface QueueEntry {
+interface QueueEntry {
     id: string;
     userId: string;
     payload: CreateTransactionPayload;
@@ -95,4 +95,3 @@ export {
     processTaskQueueForUser,
     clearTaskQueue,
 } from './offlineTaskQueue';
-export type { TaskQueueEntry } from './offlineTaskQueue';

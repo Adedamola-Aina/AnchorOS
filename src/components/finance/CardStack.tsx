@@ -20,7 +20,7 @@ import {
   STACK_STAGGER_MS,
 } from './cardConstants';
 
-export const EXPANDED_STACK_GAP = 16;
+const EXPANDED_STACK_GAP = 16;
 const MAX_RENDERED_CARDS = 10;
 const SWIPE_THRESHOLD_RATIO = 0.32;
 const SWIPE_VELOCITY_THRESHOLD = 380;
@@ -28,7 +28,7 @@ const TAP_SUPPRESSION_OFFSET = 6;
 const APPLE_EASE: [number, number, number, number] = [0.32, 0.72, 0, 1];
 const SLOT_TRANSITION_S = 0.42;
 
-export interface CardStackProps {
+interface CardStackProps {
   accounts: AnchorAccount[];
   mode: 'collapsed' | 'expanded';
   onCardTap: (account: AnchorAccount, index: number, el: HTMLElement) => void;
@@ -190,4 +190,3 @@ export const CardStack: React.FC<CardStackProps> = ({
   );
 };
 
-export { AccountCard };

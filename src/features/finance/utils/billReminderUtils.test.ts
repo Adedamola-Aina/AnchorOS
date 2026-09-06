@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getUpcomingBills } from './billReminderUtils';
-import type { RecurringTransaction } from '../../types';
+import type { RecurringTransaction } from '../../../types';
 
 const makeBill = (overrides: Partial<RecurringTransaction> = {}): RecurringTransaction => ({
   id: 'rt-1',

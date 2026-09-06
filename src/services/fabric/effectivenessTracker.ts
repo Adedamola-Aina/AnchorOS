@@ -17,7 +17,7 @@ export interface InsightInteraction {
   actionedTransactionId: string | null;
 }
 
-export interface EffectivenessRate {
+interface EffectivenessRate {
   viewCount: number;
   dismissCount: number;
   actionCount: number;
@@ -95,18 +95,4 @@ export function calculateEffectivenessRate(
     actionRate: actionCount / viewCount,
     dismissRate: dismissCount / viewCount,
   };
-}
-
-/**
- * Get all tracked interactions for the current session.
- */
-export function getTrackedInteractions(): readonly InsightInteraction[] {
-  return Array.from(interactions.values());
-}
-
-/**
- * Clear tracked interactions (for testing or session reset).
- */
-export function clearTrackedInteractions(): void {
-  interactions.clear();
 }

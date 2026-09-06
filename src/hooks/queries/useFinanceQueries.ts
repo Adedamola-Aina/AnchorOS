@@ -12,7 +12,7 @@ import { financeApi } from '../../api/FinanceApi';
 import type { AnchorTransaction, AnchorAccount } from '../../types';
 import type { TransactionPageCursor } from '../../api/financePagination';
 
-export const FINANCE_KEYS = {
+const FINANCE_KEYS = {
     all: ['finance'] as const,
     transactions: (userId: string, start: string, end: string) =>
         [...FINANCE_KEYS.all, 'transactions', userId, { start, end }] as const,

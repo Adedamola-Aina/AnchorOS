@@ -15,12 +15,14 @@ service firebase.storage {
     }
 
     function hasSharedWithAccess(account) {
-      return account.data.sharedWith is map
+      return account.data.keys().hasAll(['sharedWith'])
+        && account.data.sharedWith is map
         && request.auth.uid in account.data.sharedWith;
     }
 
     function hasLegacyShareAccess(account) {
-      return account.data.shares is map
+      return account.data.keys().hasAll(['shares'])
+        && account.data.shares is map
         && request.auth.uid in account.data.shares;
     }
 

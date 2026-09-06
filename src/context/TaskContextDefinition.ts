@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 import type { AnchorTask } from '../types';
 
-export interface TaskContextType {
+interface TaskContextType {
     tasks: AnchorTask[];
     addTask: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>;
     toggleTask: (id: string, currentStatus: boolean) => Promise<void>;

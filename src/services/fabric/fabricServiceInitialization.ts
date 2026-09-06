@@ -9,7 +9,7 @@ import { secureDb } from '../../utils/secureDb';
 import { loadDismissedPredictionIds, loadFabricActivity } from './fabricPersistence';
 import type { BehavioralEngine } from './BehavioralEngine';
 
-export interface FabricInitializedState {
+interface FabricInitializedState {
   enabled: boolean;
   userTimezone: string | undefined;
   transactions: AnchorTransaction[];

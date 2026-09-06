@@ -8,7 +8,7 @@ import { httpsCallable } from 'firebase/functions';
 import { functions } from '../../config/firebase';
 
 export const RP_ID = typeof window !== 'undefined' ? window.location.hostname : 'anchor-os.web.app';
-export const RP_NAME = 'Anchor OS';
+const RP_NAME = 'Anchor OS';
 
 export function bufferToBase64url(buf: ArrayBuffer): string {
     return btoa(String.fromCharCode(...new Uint8Array(buf)))

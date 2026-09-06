@@ -280,6 +280,20 @@ describe('verifyPasskeyAssertion', () => {
         });
     });
 
+    it('rejects a challenge issued for passkey registration', async () => {
+        mockState.docs['passkey_challenges/chal-123'] = {
+            challenge: 'some-challenge',
+            expiresAt: { toMillis: () => Date.now() + 60_000 },
+            purpose: 'register',
+            userId: 'uid-xyz',
+        };
+
+        await expect(verifyPasskeyAssertion(validRequest)).rejects.toMatchObject({
+            code: 'invalid-argument',
+        });
+        expect(mockState.docDelete).toHaveBeenCalledWith('passkey_challenges/chal-123');
+    });
+
     it('rejects when no passkey credential is stored for the user', async () => {
         mockState.docs['passkey_challenges/chal-123'] = {
             challenge: 'some-challenge',

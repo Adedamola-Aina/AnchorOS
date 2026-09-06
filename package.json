@@ -64,6 +64,7 @@
     "ui:capture": "npx tsx tools/ui-capture/index.ts"
   },
   "dependencies": {
+    "@anchor-os/ui": "1.0.0",
     "@capacitor/android": "^8.3.0",
     "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.3.0",
@@ -82,8 +83,6 @@
     "@tanstack/react-virtual": "^3.13.23",
     "@testing-library/dom": "^10.4.1",
     "autoprefixer": "^10.4.27",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "firebase": "^12.12.1",
     "framer-motion": "^12.38.0",
@@ -94,8 +93,6 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.2",
-    "recharts": "^3.8.1",
-    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
     "tailwindcss-animate": "^1.0.7",
     "web-vitals": "^5.2.0",
@@ -136,6 +133,7 @@
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.0",
+    "tsx": "^4.23.13",
     "vite": "^8.0.3",
     "vitest": "4.1.2"
   },

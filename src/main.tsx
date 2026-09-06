@@ -69,8 +69,13 @@ initNativeBehavior();
 if ('serviceWorker' in navigator) {
     // Guard against double-reload if controllerchange fires more than once
     let swRefreshing = false;
+    // Only reload when an EXISTING controller is replaced (a version update).
+    // On a visitor's first activation there is no controller yet — reloading
+    // would wipe transient UI state (e.g. an in-flight login error) for no
+    // benefit, since the page content is already fresh.
+    const hadControllerAtLoad = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (swRefreshing) return;
+        if (swRefreshing || !hadControllerAtLoad) return;
         swRefreshing = true;
         window.location.reload();
     });

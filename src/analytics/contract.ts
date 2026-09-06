@@ -169,8 +169,3 @@ export type AnalyticsEventName = AnalyticsEvent['name'];
 export function validateAnalyticsEvent(event: unknown): AnalyticsEvent {
   return analyticsEventSchema.parse(event);
 }
-
-export const analyticsContract = {
-  version: '2026-02-14',
-  schema: analyticsEventSchema,
-};

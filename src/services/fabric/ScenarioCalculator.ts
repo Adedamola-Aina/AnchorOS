@@ -1,7 +1,7 @@
 import type { AnchorTransaction } from '../../types';
 import { getDateRange, withinRange } from './fabricUtils';
 
-export interface ScenarioInput {
+interface ScenarioInput {
   transactions: AnchorTransaction[];
   reduceCategory?: string;
   reducePercent: number;
@@ -9,7 +9,7 @@ export interface ScenarioInput {
   now: Date;
 }
 
-export interface ScenarioResult {
+interface ScenarioResult {
   baseline: {
     monthlyExpenseCents: number;
     monthlyIncomeCents: number;

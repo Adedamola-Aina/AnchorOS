@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type IllustrationKind = 'empty' | 'not-found' | 'error' | 'onboarding' | 'fabric';
+type IllustrationKind = 'empty' | 'not-found' | 'error' | 'onboarding' | 'fabric';
 
 interface StateIllustrationProps {
   kind: IllustrationKind;

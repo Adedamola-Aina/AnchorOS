@@ -8,7 +8,7 @@ import { useMemo, useCallback } from 'react';
 import { LayoutDashboard, CheckCircle2, CreditCard, Settings, Wallet, MinusCircle, PlusCircle, Plus } from 'lucide-react';
 import type { AnchorAccount, AnchorTask } from '../../types';
 
-export interface CommandResult {
+interface CommandResult {
     id: string;
     title: string;
     type: string;

@@ -115,5 +115,5 @@ export function validateDate(
 
 // Re-export entity schemas for backward compatibility
 export {
-    validateAccount, validateTransaction, validateProfileUpdate, formatValidationErrors
+    validateAccount, validateTransaction, formatValidationErrors
 } from './entityValidation';

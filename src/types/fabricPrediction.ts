@@ -74,20 +74,6 @@ export interface IntentEntities {
   page?: string;
 }
 
-export interface FabricQuery {
-  intent: IntentAction;
-  entities: IntentEntities;
-  domain: 'commitments' | 'finance' | 'general' | 'mixed';
-  firestoreQuery: {
-    collection: string;
-    filters: Record<string, unknown>;
-    dateRange?: {
-      start: string;
-      end: string;
-    };
-  };
-}
-
 export interface FabricQueryResult {
   data: unknown;
   summary: string;
@@ -121,17 +107,3 @@ export interface WeeklyReport {
   currency?: string;
 }
 
-export interface HouseholdInsight extends Insight {
-  householdId: string;
-  affectedMembers: string[];
-}
-
-export interface HouseholdPattern {
-  id: string;
-  householdId: string;
-  type: 'shared_expense' | 'coordinated_commitment' | 'split_pattern';
-  description: string;
-  involvedMembers: string[];
-  frequency: number;
-  lastOccurred: string;
-}

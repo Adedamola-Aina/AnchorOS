@@ -24,7 +24,7 @@ const getCapacitor = () => {
   return undefined;
 };
 
-export type Platform = 'web' | 'ios' | 'android';
+type Platform = 'web' | 'ios' | 'android';
 
 /**
  * Get the current platform the app is running on
@@ -40,13 +40,6 @@ export function getPlatform(): Platform {
 export function isNative(): boolean {
   const cap = getCapacitor();
   return cap?.isNativePlatform() ?? false;
-}
-
-/**
- * Check if running in a web browser
- */
-export function isWeb(): boolean {
-  return getPlatform() === 'web';
 }
 
 /**
@@ -86,28 +79,6 @@ export function isPWA(): boolean {
 export function isPluginAvailable(pluginName: string): boolean {
   const cap = getCapacitor();
   return cap?.isPluginAvailable(pluginName) ?? false;
-}
-
-/**
- * Get platform-specific configuration
- */
-export function getPlatformConfig() {
-  const platform = getPlatform();
-
-  return {
-    platform,
-    isNative: isNative(),
-    isWeb: isWeb(),
-    isIOS: isIOS(),
-    isAndroid: isAndroid(),
-    // Safe area insets (will be populated by CSS env() variables)
-    hasSafeArea: isNative(),
-    // Feature detection
-    hasHaptics: isPluginAvailable('Haptics'),
-    hasStatusBar: isPluginAvailable('StatusBar'),
-    hasKeyboard: isPluginAvailable('Keyboard'),
-    hasNetwork: isPluginAvailable('Network'),
-  };
 }
 
 /**

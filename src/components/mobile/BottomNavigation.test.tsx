@@ -11,12 +11,12 @@ const renderWithRouter = (ui: React.ReactElement, { route = '/dashboard' } = {})
 
 describe('BottomNavigation', () => {
     describe('rendering', () => {
-        it('renders Home, Tasks, and Finance tabs without Anchor AI', () => {
+        it('renders Home, Tasks, Finance, and Settings tabs without Anchor AI', () => {
             renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
             expect(screen.getByText('Home')).toBeInTheDocument();
             expect(screen.getByText('Tasks')).toBeInTheDocument();
             expect(screen.getByText('Finance')).toBeInTheDocument();
-            expect(screen.queryByText('Settings')).not.toBeInTheDocument();
+            expect(screen.getByText('Settings')).toBeInTheDocument();
         });
 
         it('renders Anchor tab when anchorAIEnabled is true', () => {
@@ -29,6 +29,7 @@ describe('BottomNavigation', () => {
             expect(screen.getByRole('link', { name: /home/i })).toHaveAttribute('href', '/dashboard');
             expect(screen.getByRole('link', { name: /tasks/i })).toHaveAttribute('href', '/commitments');
             expect(screen.getByRole('link', { name: /finance/i })).toHaveAttribute('href', '/finance');
+            expect(screen.getByRole('link', { name: /settings/i })).toHaveAttribute('href', '/settings');
         });
 
         it('has correct aria-label for accessibility', () => {

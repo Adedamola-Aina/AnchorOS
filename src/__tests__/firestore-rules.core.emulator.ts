@@ -2,7 +2,7 @@
  * Firestore Rules — Core collections (audit_log, users, feedback)
  *
  * Covers:
- * - SEC-6: legacy invitations (auth required for get)
+ * - SEC-6: retired legacy invitations (no client access)
  * - audit_log: no client access
  * - users: owner-only read/write
  * - feedback: Cloud Functions-only write, no client read
@@ -23,7 +23,7 @@ beforeEach(ctx.clearAll);
 describe('legacy invitations (SEC-6)', () => {
   const collPath = `${PREFIX}/invitations`;
 
-  it('authenticated user can get invitation by token', async () => {
+  it('authenticated user cannot get a retired invitation by token', async () => {
     await ctx.getEnv().withSecurityRulesDisabled(async (c) => {
       await setDoc(doc(c.firestore(), collPath, 'token123'), {
         senderUid: 'sender1',
@@ -32,10 +32,10 @@ describe('legacy invitations (SEC-6)', () => {
       });
     });
     const db = ctx.authedDb('anyuser');
-    await assertSucceeds(getDoc(doc(db, collPath, 'token123')));
+    await assertFails(getDoc(doc(db, collPath, 'token123')));
   });
 
-  it('unauthenticated user cannot get invitation token', async () => {
+  it('unauthenticated user cannot get a retired invitation token', async () => {
     await ctx.getEnv().withSecurityRulesDisabled(async (c) => {
       await setDoc(doc(c.firestore(), collPath, 'token456'), {
         senderUid: 'sender1',

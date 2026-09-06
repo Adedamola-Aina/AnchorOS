@@ -2,7 +2,7 @@
 import type { AnchorAccount } from '../../../types';
 
 // Permission levels for Family Mode
-export type AccountPermission = 'owner' | 'read' | 'transact' | 'manage' | null;
+type AccountPermission = 'owner' | 'read' | 'transact' | 'manage' | null;
 
 /**
  * Get the permission level for a user on a specific account

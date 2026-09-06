@@ -5,7 +5,7 @@
  * Uses prefers-color-scheme media query for cross-platform support.
  */
 
-export type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark';
 
 /**
  * Get the current system theme preference

@@ -12,7 +12,7 @@
 import { createHash } from '../utils/hashUtils';
 import { secureDb } from '../utils/secureDb';
 
-export type LedgerAction =
+type LedgerAction =
     | 'transaction_created'
     | 'transaction_updated'
     | 'transaction_deleted'
@@ -20,9 +20,9 @@ export type LedgerAction =
     | 'account_archived'
     | 'balance_changed';
 
-export type LedgerEntityType = 'transaction' | 'account';
+type LedgerEntityType = 'transaction' | 'account';
 
-export interface LedgerEntry {
+interface LedgerEntry {
     action: LedgerAction;
     entityId: string;
     entityType: LedgerEntityType;

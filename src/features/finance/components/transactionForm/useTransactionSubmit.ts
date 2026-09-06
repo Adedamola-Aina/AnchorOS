@@ -19,7 +19,7 @@ import { captureError } from '../../../../utils/error';
 import { containsDangerousPatterns } from '../../../../utils/validation';
 import type { AnchorTransaction, AnchorAccount, RecurringFrequency, TransactionType } from '../../../../types';
 
-export interface FormErrors {
+interface FormErrors {
     title?: string;
     amount?: string;
     destination?: string;

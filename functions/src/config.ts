@@ -1,14 +1,13 @@
 /**
  * Shared configuration for Cloud Functions
  * 
- * Firebase admin initialization, Firestore reference, Resend client,
- * and environment-aware URL resolution.
+ * Firebase admin initialization, Firestore reference, and environment-aware
+ * URL resolution.
  */
 
 
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { Resend } from 'resend';
 
 initializeApp();
 
@@ -16,20 +15,7 @@ export const db = getFirestore();
 export const APP_ID = 'anchor-os';
 export const BCRYPT_SALT_ROUNDS = 12;
 
-// Resend client — lazy initialized to avoid module-load errors
-let resendClient: Resend | null = null;
-export function getResend(): Resend {
-    if (!resendClient) {
-        const apiKey = process.env.RESEND_API_KEY;
-        if (!apiKey) {
-            throw new Error('RESEND_API_KEY environment variable is not set');
-        }
-        resendClient = new Resend(apiKey);
-    }
-    return resendClient;
-}
-
-// Email configuration from environment variables
+// Used by the Firebase Trigger Email extension's `mail` collection.
 export const EMAIL_FROM = process.env.EMAIL_FROM || 'Anchor OS <noreply@adedamola.us>';
 
 // Determine APP_URL based on Firebase project ID

@@ -14,7 +14,7 @@
 
 import { useState, useEffect } from 'react';
 
-export type Breakpoint = 'mobile' | 'tablet' | 'desktop';
+type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 
 interface ResponsiveState {
     breakpoint: Breakpoint;
@@ -99,4 +99,3 @@ function getResponsiveState(): ResponsiveState {
     };
 }
 
-export default useResponsive;

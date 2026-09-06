@@ -3,14 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 // Mock firebase-admin before config.ts is imported
 vi.mock('firebase-admin/app', () => ({ initializeApp: vi.fn() }));
 vi.mock('firebase-admin/firestore', () => ({ getFirestore: vi.fn(() => ({ mocked: true })) }));
-vi.mock('resend', () => ({
-  Resend: class MockResend {
-    apiKey: string;
-    constructor(key: string) {
-      this.apiKey = key;
-    }
-  },
-}));
 
 describe('config', () => {
   const originalEnv = { ...process.env };
@@ -19,35 +11,6 @@ describe('config', () => {
     // Restore env vars after each test
     process.env = { ...originalEnv };
     vi.resetModules();
-  });
-
-  describe('getResend', () => {
-    it('throws when RESEND_API_KEY is not set', async () => {
-      delete process.env.RESEND_API_KEY;
-      vi.resetModules();
-      const { getResend } = await import('./config');
-
-      expect(() => getResend()).toThrow('RESEND_API_KEY environment variable is not set');
-    });
-
-    it('returns a Resend client when RESEND_API_KEY is set', async () => {
-      process.env.RESEND_API_KEY = 'test-key-123';
-      vi.resetModules();
-      const { getResend } = await import('./config');
-
-      const client = getResend();
-      expect(client).toBeDefined();
-    });
-
-    it('returns the same singleton instance on repeated calls', async () => {
-      process.env.RESEND_API_KEY = 'test-key-123';
-      vi.resetModules();
-      const { getResend } = await import('./config');
-
-      const first = getResend();
-      const second = getResend();
-      expect(first).toBe(second);
-    });
   });
 
   describe('APP_URL / getAppUrl', () => {

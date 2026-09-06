@@ -37,7 +37,7 @@ interface CreateInvitationResult {
     success: boolean;
     verificationCode: string;
     inviteId: string;
-    emailDelivered: boolean;
+    emailQueued: boolean;
 }
 
 export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }: InviteFamilyMemberProps) {
@@ -46,6 +46,7 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
     const [inviteeEmail, setInviteeEmail] = useState('');
     const [password, setPassword] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
+    const [emailQueued, setEmailQueued] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [copied, setCopied] = useState(false);
@@ -70,13 +71,14 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
         const result = await createInvitation({ inviteeEmail });
         if (!result.data.success) return;
         setVerificationCode(result.data.verificationCode);
+        setEmailQueued(result.data.emailQueued);
         setPassword('');
         setStep('code');
         showToast(
-            result.data.emailDelivered
-                ? 'Invitation sent. You can also share the code below.'
-                : 'Invitation created. Email is unavailable, so share the code below.',
-            result.data.emailDelivered ? 'success' : 'info',
+            result.data.emailQueued
+                ? 'Invitation email queued. You can also share the code below.'
+                : 'Invitation created. Share the code below.',
+            result.data.emailQueued ? 'success' : 'info',
         );
     };
 
@@ -126,5 +128,5 @@ export function InviteFamilyMember({ userEmail, isEmailVerified, onInviteSent }:
     if (step === 'password') return <InvitePasswordStep inviteeEmail={inviteeEmail} password={password} setPassword={setPassword} error={error} loading={loading} onSubmit={handlePasswordSubmit} onBack={() => { setStep('email'); setPassword(''); setError(''); }} />;
     if (step === 'mfa') return <InviteMfaStep mfaCode={mfaCode} setMfaCode={setMfaCode} error={error} loading={loading} onSubmit={handleMfaSubmit} onBack={() => { setStep('password'); setMfaCode(''); setMfaResolver(null); setError(''); }} />;
 
-    return <InviteSuccessStep inviteeEmail={inviteeEmail} verificationCode={verificationCode} copied={copied} onCopyCode={copyCode} onDone={onInviteSent} />;
+    return <InviteSuccessStep inviteeEmail={inviteeEmail} verificationCode={verificationCode} emailQueued={emailQueued} copied={copied} onCopyCode={copyCode} onDone={onInviteSent} />;
 }

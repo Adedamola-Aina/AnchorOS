@@ -13,8 +13,6 @@ export const CARD_HEADER_LETTER_SPACING = '-0.3px';
 /** Height of the peek strip visible per card (~48px like Apple Wallet) */
 export const CARD_HEADER_REVEAL = 48;
 export const STACK_STAGGER_MS = 40;
-export const STACK_SPRING_STIFFNESS = 300;
-export const STACK_SPRING_DAMPING = 30;
 /** Account-type-based gradient colors (checking→slate, savings→emerald, etc.) */
 export const TYPE_COLORS: Record<string, string> = {
   checking: '#1E293B',
@@ -49,7 +47,7 @@ export const SHADOW_ACTIVE =
 export const SHADOW_DEFAULT =
   '0 4px 30px rgba(15,23,42,0.10), 0 12px 36px rgba(15,23,42,0.10)';
 
-export interface ArtworkPreset {
+interface ArtworkPreset {
   id: string;
   label: string;
   css: string;

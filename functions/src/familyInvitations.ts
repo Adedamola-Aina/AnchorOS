@@ -8,10 +8,11 @@
 import { HttpsError } from 'firebase-functions/v2/https';
 import { secureOnCall } from './callable';
 import * as bcrypt from 'bcrypt';
-import { db, APP_ID, BCRYPT_SALT_ROUNDS, getResend, EMAIL_FROM } from './config';
+import { db, APP_ID, BCRYPT_SALT_ROUNDS } from './config';
 import { enforceRateLimit } from './rateLimit';
 import { createAuditLog, getActiveConnection, generateVerificationCode } from './helpers';
 import { buildInvitationEmail } from './invitationEmailBuilder';
+import { queueEmail } from './emailQueue';
 import type { FamilyInvitation } from './types';
 
 export const createFamilyInvitation = secureOnCall(
@@ -61,26 +62,25 @@ export const createFamilyInvitation = secureOnCall(
         };
         await inviteRef.set(invitation);
 
-        let emailDelivered = false;
+        let emailQueued = false;
         try {
-            await getResend().emails.send({
-                from: EMAIL_FROM,
+            await queueEmail({
                 to: inviteeEmail,
                 subject: `${ownerDisplayName} invited you to join their family on Anchor`,
                 html: buildInvitationEmail(ownerDisplayName, inviteRef.id, verificationCode),
             });
-            emailDelivered = true;
+            emailQueued = true;
         } catch (emailError) {
-            console.error('Failed to send invitation email:', emailError);
+            console.error('Failed to queue invitation email:', emailError);
         }
 
-        await createAuditLog(emailDelivered ? 'invitation_sent' : 'invitation_created', ownerUid, {
+        await createAuditLog(emailQueued ? 'invitation_email_queued' : 'invitation_created', ownerUid, {
             inviteeEmail,
             inviteId: inviteRef.id,
-            emailDelivered,
+            emailQueued,
         });
 
-        return { success: true, inviteId: inviteRef.id, verificationCode, emailDelivered };
+        return { success: true, inviteId: inviteRef.id, verificationCode, emailQueued };
     }
 );
 

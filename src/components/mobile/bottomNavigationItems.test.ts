@@ -4,22 +4,21 @@ import { buildBottomNavItems } from './bottomNavigationItems';
 const base = { accountColors: [], isDarkMode: false };
 
 describe('buildBottomNavItems', () => {
-  it('returns 3 tabs without Anchor AI: Home, Tasks, Finance', () => {
+  it('returns 4 tabs without Anchor AI: Home, Tasks, Finance, Settings', () => {
     const items = buildBottomNavItems({ ...base, anchorAIEnabled: false });
-    expect(items.map(i => i.to)).toEqual(['/dashboard', '/commitments', '/finance']);
-    expect(items.find(i => i.to === '/settings')).toBeUndefined();
+    expect(items.map(i => i.to)).toEqual(['/dashboard', '/commitments', '/finance', '/settings']);
   });
 
-  it('returns 4 tabs with Anchor AI: Home, Tasks, Anchor, Finance', () => {
+  it('returns 5 tabs with Anchor AI: Home, Tasks, Anchor, Finance, Settings', () => {
     const items = buildBottomNavItems({ ...base, anchorAIEnabled: true });
-    expect(items.map(i => i.to)).toEqual(['/dashboard', '/commitments', '/fabric', '/finance']);
+    expect(items.map(i => i.to)).toEqual(['/dashboard', '/commitments', '/fabric', '/finance', '/settings']);
   });
 
-  it('never includes /settings regardless of anchorAIEnabled', () => {
+  it('always includes /settings so mobile users can reach sign-out, passkeys and Family Mode', () => {
     const withAI = buildBottomNavItems({ ...base, anchorAIEnabled: true });
     const withoutAI = buildBottomNavItems({ ...base, anchorAIEnabled: false });
-    expect(withAI.find(i => i.to === '/settings')).toBeUndefined();
-    expect(withoutAI.find(i => i.to === '/settings')).toBeUndefined();
+    expect(withAI.find(i => i.to === '/settings')).toBeDefined();
+    expect(withoutAI.find(i => i.to === '/settings')).toBeDefined();
   });
 
   it('each item has a label and renderIcon function', () => {

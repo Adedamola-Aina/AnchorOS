@@ -3,7 +3,7 @@ import { doc, setDoc, db } from '../utils/secureDb';
 import { httpsCallable } from 'firebase/functions';
 import { APP_ID, functions } from '../config/firebase';
 
-export interface MfaRecoveryPayload {
+interface MfaRecoveryPayload {
   hashedCodes: string[];
   generatedAt: string;
   codesRemaining: number;

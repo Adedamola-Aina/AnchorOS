@@ -4,7 +4,6 @@
  * Shared constants, types, Firestore refs, and pure helpers for
  * passkeyAuth.ts Cloud Functions. Extracted per ARCH-001 (200-line limit).
  */
-// @ts-nocheck
 
 // 
 

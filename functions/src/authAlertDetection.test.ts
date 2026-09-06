@@ -6,10 +6,9 @@ vi.mock('firebase-admin/auth', () => ({
 }));
 vi.mock('./helpers', () => ({ createAuditLog: vi.fn() }));
 vi.mock('./config', () => ({
-  getResend: () => ({ emails: { send: vi.fn().mockResolvedValue({ id: 'email-id' }) } }),
-  EMAIL_FROM: 'Anchor OS <noreply@example.com>',
   APP_URL: 'https://anchor-os.web.app',
 }));
+vi.mock('./emailQueue', () => ({ queueEmail: vi.fn().mockResolvedValue(undefined) }));
 
 describe('isNewDevice', () => {
   it('returns true for first-ever sign-in (no history)', () => {

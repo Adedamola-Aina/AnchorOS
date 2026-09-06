@@ -15,9 +15,6 @@ import { FieldEncryption, ENCRYPTED_ACCOUNT_FIELDS } from './FieldEncryption';
 import { updateAccountPersonalization as updatePersonalization } from './AccountPersonalizationService';
 import { enforceServerRateLimit } from './serverRateLimit';
 
-// Re-export types for backward compatibility
-export type { CreateAccountPayload } from './financeTypes';
-
 /**
  * AccountService providing account management operations
  */
@@ -193,4 +190,3 @@ export class AccountService {
     }
 }
 
-export const accountService = new AccountService();

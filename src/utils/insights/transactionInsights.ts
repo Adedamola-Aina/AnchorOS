@@ -1,7 +1,6 @@
 import type { AnchorTransaction } from '../../types';
 import { isExpense, getMonthKey } from './spendingInsights';
 
-export type { SpendingTrend, SourceBreakdown } from './spendingInsights';
 export { getSpendingTrend, getSourceBreakdown } from './spendingInsights';
 
 interface CategoryAverage {

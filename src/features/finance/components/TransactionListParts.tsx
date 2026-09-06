@@ -7,7 +7,7 @@
 
 
 import React from 'react';
-import { Search, Pencil } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface FilterHeaderProps { searchQuery: string; filterType: 'all' | 'income' | 'expense'; hasWeekFilter: boolean; onSearchChange: (q: string) => void; onFilterChange: (f: 'all' | 'income' | 'expense') => void; }
 export const TransactionFilterHeader: React.FC<FilterHeaderProps> = ({ searchQuery, filterType, hasWeekFilter, onSearchChange, onFilterChange }) => (
@@ -31,18 +31,5 @@ export const TransactionFilterHeader: React.FC<FilterHeaderProps> = ({ searchQue
     </div>
 );
 
-interface NameHistoryEntry { oldName: string; newName: string; date: string; actorName: string; }
-interface NameHistoryProps { entries: NameHistoryEntry[]; }
-export const AccountNameHistory: React.FC<NameHistoryProps> = ({ entries }) => (
-    <div className="border-b border-amber-100 dark:border-amber-900/30">
-        {entries.slice().reverse().map((entry, idx) => (
-            <div key={`rename-${idx}`} className="flex items-center gap-4 p-4 bg-amber-50/50 dark:bg-amber-900/10 text-sm">
-                <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-xl"><Pencil className="w-4 h-4 text-amber-600 dark:text-amber-400" /></div>
-                <div className="flex-1 min-w-0"><p className="font-medium text-amber-900 dark:text-amber-200">Account renamed</p><p className="text-xs text-amber-700/70 dark:text-amber-400/70"><span className="line-through">{entry.oldName}</span><span className="mx-2">→</span><span className="font-semibold">{entry.newName}</span></p></div>
-                <div className="text-right text-xs text-amber-600/60 dark:text-amber-400/60"><p>{new Date(entry.date).toLocaleDateString()}</p><p>by {entry.actorName}</p></div>
-            </div>
-        ))}
-    </div>
-);
 
 // TransactionRow removed - using unified TransactionItem/SwipeableTransactionItem instead

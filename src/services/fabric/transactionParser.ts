@@ -1,6 +1,6 @@
 import { parseAmount, parseTimePeriod, parseCategory } from './intentEntityParsers';
 
-export interface ParsedTransaction {
+interface ParsedTransaction {
   amount?: number;
   category?: string;
   title?: string;

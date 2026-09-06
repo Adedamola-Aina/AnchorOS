@@ -9,7 +9,7 @@ interface UseSwipeGestureOptions {
   disabled: boolean;
 }
 
-export interface UseSwipeGestureResult {
+interface UseSwipeGestureResult {
   translateX: number;
   isDragging: boolean;
   handleTouchStart: (e: React.TouchEvent) => void;

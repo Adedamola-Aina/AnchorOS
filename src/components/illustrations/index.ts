@@ -1,1 +1,1 @@
-export { StateIllustration, type IllustrationKind } from './StateIllustration';
+export { StateIllustration } from './StateIllustration';
