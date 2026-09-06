@@ -36,6 +36,8 @@ jobs:
       - run: npm ci
       - run: npm ci
         working-directory: functions
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
       - name: Write staging env config
         run: |
           printf '%s\n' "$STAGING_FRONTEND_ENV" > .env.staging
