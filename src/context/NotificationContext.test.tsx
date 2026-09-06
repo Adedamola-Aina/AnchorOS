@@ -58,6 +58,8 @@ const TestComponent = () => {
 describe('NotificationContext Token Management', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // Hermetic: CI has no .env file; usePushNotifications guards on this key
+        vi.stubEnv('VITE_FIREBASE_VAPID_KEY', 'test-vapid-key');
         requestPermissionMock.mockResolvedValue('granted');
         //  -- Mocking permission property
         global.Notification.permission = 'default';

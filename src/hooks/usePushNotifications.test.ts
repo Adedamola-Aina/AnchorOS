@@ -51,6 +51,8 @@ describe('usePushNotifications', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        // Hermetic: CI has no .env file; the hook guards on this key
+        vi.stubEnv('VITE_FIREBASE_VAPID_KEY', 'test-vapid-key');
         localStorage.clear();
         mockState.messaging = {};
         mockState.auth.currentUser = { uid: 'user-1' };
