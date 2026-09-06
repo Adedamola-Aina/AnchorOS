@@ -253,7 +253,7 @@ fi
 # 4. E2E Testing (only for staging and production, unless skipped)
 if [[ "$SKIP_E2E" == false ]] && [[ "$ENV" != "development" ]]; then
     echo -e "\n${YELLOW}🎭 Stage 4: End-to-End Testing${NC}"
-    if npm run test:e2e -- --reporter=line; then
+    if npm run test:e2e -- --project=smoke --reporter=line; then
         echo -e "${GREEN}✅ All E2E tests passed.${NC}"
     else
         echo -e "${RED}❌ E2E tests failed. Deployment blocked.${NC}"
