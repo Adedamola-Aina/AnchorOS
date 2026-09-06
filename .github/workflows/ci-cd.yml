@@ -79,7 +79,7 @@ jobs:
             ];
 
             const unchecked = requiredChecks.filter((item) => {
-              const checkedRegex = new RegExp(`-\\s*\\[x\\]\\s*${item.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`, 'i');
+              const checkedRegex = new RegExp(`-\\s*\\[x\\]\\s*${item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i');
               return !checkedRegex.test(body);
             });
 
@@ -249,6 +249,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install functions dependencies
+        run: npm ci
+        working-directory: functions
 
       - name: Run linting
         run: npm run lint
