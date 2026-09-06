@@ -498,6 +498,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Write dev env config
+        run: printf '%s\n' "$DEV_VITE_ENV" > .env.development
+        env:
+          DEV_VITE_ENV: ${{ secrets.DEV_VITE_ENV }}
+
       - name: Build for development
         run: npm run build:dev
 
@@ -624,6 +629,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Write production env config
+        run: printf '%s\n' "$PRODUCTION_FRONTEND_ENV" > .env.production
+        env:
+          PRODUCTION_FRONTEND_ENV: ${{ secrets.PRODUCTION_FRONTEND_ENV }}
+
       - name: Build for production
         run: npm run build:production
 
@@ -708,6 +718,14 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Write production env config
+        run: |
+          printf '%s\n' "$PRODUCTION_FRONTEND_ENV" > .env.production
+          printf '%s\n' "$PRODUCTION_FUNCTIONS_ENV" > functions/.env.production
+        env:
+          PRODUCTION_FRONTEND_ENV: ${{ secrets.PRODUCTION_FRONTEND_ENV }}
+          PRODUCTION_FUNCTIONS_ENV: ${{ secrets.PRODUCTION_FUNCTIONS_ENV }}
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
