@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: '22', cache: 'npm' }
       - run: npm ci
       - run: npm run build:staging
       - uses: actions/upload-artifact@v7
@@ -38,17 +38,21 @@ jobs:
     name: Post-Deploy E2E (non-blocking)
     runs-on: ubuntu-latest
     needs: [deploy]
-    continue-on-error: true   # ← CRITICAL: staging is already live, E2E results are informational
+    continue-on-error: true
     strategy:
       matrix:
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: '22', cache: 'npm' }
       - run: npm ci
+      - name: Write E2E env config
+        run: printf '%s\n' "$E2E_VITE_ENV" > .env.development
+        env:
+          E2E_VITE_ENV: ${{ secrets.E2E_VITE_ENV }}
       - run: npx playwright install chromium --with-deps
-      - run: npx playwright test --shard=${{ matrix.shard }}/4
+      - run: npx playwright test --config config/playwright.config.ts --shard=${{ matrix.shard }}/4
         env:
           E2E_BASE_URL: ${{ secrets.STAGING_URL }}
       - uses: actions/upload-artifact@v7

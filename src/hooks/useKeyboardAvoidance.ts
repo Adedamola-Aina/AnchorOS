@@ -88,4 +88,3 @@ export function useKeyboardAvoidance(): KeyboardAvoidanceState {
     };
 }
 
-export default useKeyboardAvoidance;

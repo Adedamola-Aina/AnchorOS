@@ -9,7 +9,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 
-export interface PopoverMenuItem {
+interface PopoverMenuItem {
   value: string;
   label: string;
   icon?: React.ReactNode;

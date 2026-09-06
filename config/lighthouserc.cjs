@@ -3,7 +3,10 @@
 module.exports = {
   ci: {
     collect: {
-      staticDistDir: 'dist',
+      // Serve the production build with vite preview (SPA fallback for
+      // deep routes). LHCI's static server 404s on client-side routes.
+      startServerCommand: 'npx vite preview --config config/vite.config.ts --port 4173 --strictPort',
+      startServerReadyPattern: 'Local:',
       numberOfRuns: 3,
       url: [
         'http://localhost:4173/',

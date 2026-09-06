@@ -10,10 +10,9 @@ import { fromCents } from './moneyUtils';
 
 // Re-export from extracted module
 export { getWeeklySpending, detectRecurring } from './financeInsightsWeekly';
-export type { WeeklySpendingData, RecurringTransactionGroup } from './financeInsightsWeekly';
 
 export interface AssetClass { id: string; name: string; amount: number; percent: number; currency: string; type?: string; }
-export interface CashFlowAnalysis { income: number; expense: number; net: number; prevNet: number; trend: 'better' | 'worse' | 'neutral'; diffPercent: number; }
+interface CashFlowAnalysis { income: number; expense: number; net: number; prevNet: number; trend: 'better' | 'worse' | 'neutral'; diffPercent: number; }
 
 export const getCashFlowAnalysis = (transactions: AnchorTransaction[]): CashFlowAnalysis => {
     const today = new Date();

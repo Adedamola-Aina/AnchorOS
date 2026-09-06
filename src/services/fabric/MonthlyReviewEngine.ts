@@ -1,7 +1,7 @@
 import type { AnchorTask, AnchorTransaction } from '../../types';
 import { getDateRange, sumByCategory, withinRange } from './fabricUtils';
 
-export interface MonthlyReviewInput {
+interface MonthlyReviewInput {
   transactions: AnchorTransaction[];
   commitments: AnchorTask[];
   now: Date;

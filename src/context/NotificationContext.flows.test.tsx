@@ -7,6 +7,7 @@ import { NotificationContext } from './NotificationContextDefinition';
 
 vi.mock('../config/firebase', () => ({
   messaging: {},
+    getMessagingInstance: () => Promise.resolve({}),
   db: {},
   auth: { currentUser: { uid: 'u1' } },
   APP_ID: 'test-app',

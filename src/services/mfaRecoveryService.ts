@@ -23,7 +23,7 @@ async function hashCode(code: string): Promise<string> {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-export interface RecoveryCodesResult {
+interface RecoveryCodesResult {
     /** Plain-text codes to show to user ONCE */
     plainCodes: string[];
     /** SHA-256 hashed codes for Firestore storage */
@@ -38,16 +38,4 @@ export async function generateRecoveryCodes(): Promise<RecoveryCodesResult> {
     const plainCodes = Array.from({ length: CODE_COUNT }, () => generateCode());
     const hashedCodes = await Promise.all(plainCodes.map(hashCode));
     return { plainCodes, hashedCodes };
-}
-
-/**
- * Verify a recovery code against stored hashes.
- * Returns the index of the matched code, or -1 if not found.
- */
-export async function verifyRecoveryCode(
-    code: string,
-    storedHashes: string[],
-): Promise<number> {
-    const hash = await hashCode(code);
-    return storedHashes.indexOf(hash);
 }

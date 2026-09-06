@@ -20,9 +20,6 @@ import { updateTransaction as updateTransactionOp } from './TransactionUpdateOps
 import type { CreateTransactionPayload, UpdateTransactionPayload } from './financeTypes';
 import { enforceServerRateLimit } from './serverRateLimit';
 
-// Re-export types for backward compatibility
-export type { CreateTransactionPayload, UpdateTransactionPayload } from './financeTypes';
-
 /**
  * TransactionService providing transaction management operations
  */
@@ -182,4 +179,3 @@ export class TransactionService {
     }
 }
 
-export const transactionService = new TransactionService();

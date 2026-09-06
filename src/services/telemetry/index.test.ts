@@ -15,6 +15,13 @@ vi.mock('@sentry/react', () => ({
 // We need to control import.meta.env.DEV
 // By default in vitest environment DEV=true
 
+// Sentry is lazy-loaded in the app — enable a test DSN and flush the
+// dynamic import before asserting on breadcrumbs.
+// @ts-expect-error test env wiring
+import.meta.env.VITE_SENTRY_DSN = 'test-dsn';
+
+const flushSentry = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
 import { trace, logEvent, logProductEvent, createTracer } from './index';
 
 describe('trace', () => {
@@ -43,6 +50,7 @@ describe('trace', () => {
         try {
             await trace('fail-op', () => { throw new Error('fail'); });
         } catch { /* expected */ }
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             category: 'trace',
@@ -55,6 +63,7 @@ describe('trace', () => {
         try {
             await trace('fail-op', () => { throw new Error('x'); }, { attributes: { key: 'val' } });
         } catch { /* expected */ }
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             data: expect.objectContaining({ key: 'val' }),
@@ -65,6 +74,7 @@ describe('trace', () => {
         try {
             await trace('fail-op', () => { throw 'string-error'; });
         } catch { /* expected */ }
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             data: expect.objectContaining({ error: 'Unknown error' }),
@@ -75,8 +85,9 @@ describe('trace', () => {
 describe('logEvent', () => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('sends Sentry breadcrumb for info event', () => {
+    it('sends Sentry breadcrumb for info event', async () => {
         logEvent('user.click', { level: 'info', attributes: { btn: 'save' } });
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             category: 'event',
@@ -86,24 +97,27 @@ describe('logEvent', () => {
         }));
     });
 
-    it('maps error level correctly', () => {
+    it('maps error level correctly', async () => {
         logEvent('crash', { level: 'error' });
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             level: 'error',
         }));
     });
 
-    it('maps warn level to warning', () => {
+    it('maps warn level to warning', async () => {
         logEvent('slow', { level: 'warn' });
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             level: 'warning',
         }));
     });
 
-    it('defaults to info level', () => {
+    it('defaults to info level', async () => {
         logEvent('plain');
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             level: 'info',
@@ -120,9 +134,10 @@ describe('createTracer', () => {
         expect(result).toBe('ok');
     });
 
-    it('prefixes event name with feature name', () => {
+    it('prefixes event name with feature name', async () => {
         const tracer = createTracer('Auth');
         tracer.logEvent('login');
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             message: 'Auth.login',
@@ -134,6 +149,7 @@ describe('createTracer', () => {
         try {
             await tracer.trace('save', () => { throw new Error('fail'); });
         } catch { /* expected */ }
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             message: expect.stringContaining('Tasks.save'),
@@ -144,8 +160,9 @@ describe('createTracer', () => {
 describe('logProductEvent', () => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('logs validated product events with product prefix', () => {
+    it('logs validated product events with product prefix', async () => {
         logProductEvent('onboarding_started', { source: 'new_user' });
+        await flushSentry();
 
         expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(expect.objectContaining({
             category: 'event',

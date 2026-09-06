@@ -1,13 +1,13 @@
 import { type ReactNode } from 'react';
 import { useSwipeGesture } from './useSwipeGesture';
 
-export interface SwipeAction {
+interface SwipeAction {
   label: string;
   color: 'blue' | 'red' | 'green' | 'gray';
   icon?: ReactNode;
 }
 
-export interface SwipeableRowProps {
+interface SwipeableRowProps {
   children: ReactNode;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;

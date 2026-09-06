@@ -72,7 +72,7 @@ We share data only with the following categories of service providers, strictly 
 |---|---|---|
 | Google Firebase | Database, Auth, Cloud Functions, Hosting | All app data (under your account) |
 | Sentry | Crash reporting | Anonymised error traces (no financial data) |
-| Resend | Transactional email (family invites, reminders) | Your email address only |
+| Firebase Trigger Email extension | Transactional email (family invites, reminders) | Your email address only |
 
 We do not share data with advertisers, data brokers, or analytics companies.
 

@@ -54,4 +54,3 @@ export function runFabricQuery(input: RunFabricQueryInput): FabricQueryResult {
   return fallbackQuery();
 }
 
-export type { RunFabricQueryInput };

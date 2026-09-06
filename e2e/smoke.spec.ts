@@ -11,13 +11,13 @@ import { TEST_USER } from './fixtures/test-data';
  */
 
 test.describe('Smoke Tests', () => {
-    test('Homepage loads', async ({ page }) => {
+    test('Homepage loads marketing landing', async ({ page }) => {
         await page.goto('/');
-        await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 10000 });
     });
 
     test('Login works', async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/login');
         await page.fill('input[type="email"]', TEST_USER.email);
         await page.fill('input[placeholder="••••••••"]', TEST_USER.password);
         await page.click('button[type="submit"]');
@@ -56,7 +56,7 @@ test.describe('Smoke Tests', () => {
         await loginOrSignup(page, TEST_USER, true);
         // Click System in sidebar
         await page.locator('aside').locator('text=System').click();
-        await expect(page.getByRole('heading', { name: 'System' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible({ timeout: 10000 });
     });
 
     test('Can create account (Finance)', async ({ page }) => {
@@ -92,22 +92,24 @@ test.describe('Smoke Tests', () => {
         await page.locator('aside').locator('text=System').click();
         await page.waitForTimeout(1000);
 
-        // Try to find sign out button with multiple selectors
-        const signOutBtn = page.locator('button[title="Sign Out"], button:has-text("Sign Out")');
-        const hasSignOut = await signOutBtn.first().isVisible().catch(() => false);
+        // Exact-match the standalone Sign Out button (not "Sign out all other devices")
+        const signOutBtn = page.getByRole('button', { name: 'Sign Out', exact: true }).last();
+        const hasSignOut = await signOutBtn.isVisible().catch(() => false);
 
         if (hasSignOut) {
-            await signOutBtn.first().click();
+            await signOutBtn.click();
             await page.waitForTimeout(2000);
 
-            // Should be back on auth page
-            const authPage = page.locator('input[type="email"]');
-            await expect(authPage).toBeVisible({ timeout: 10000 });
+            // After sign-out the app shows its public surface: either the
+            // marketing landing (h1) or the login form — never private UI.
+            const publicSurface = page.locator('h1').or(page.locator('input[type="email"]')).first();
+            await expect(publicSurface).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('aside')).toHaveCount(0);
             return;
         }
 
         // If sign-out action is unavailable, at minimum ensure settings screen is stable.
-        await expect(page.getByRole('heading', { name: 'System' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible({ timeout: 10000 });
     });
 
     test('No console errors on main pages', async ({ page }) => {

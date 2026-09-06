@@ -1,7 +1,7 @@
 
 import type { AnchorTask } from '../types';
 
-export interface ProductivityMetrics {
+interface ProductivityMetrics {
     score: number; // 0-100 percentage
     trend: 'improving' | 'declining' | 'stable';
     completedCount: number;

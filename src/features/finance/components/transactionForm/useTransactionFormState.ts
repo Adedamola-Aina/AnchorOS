@@ -28,62 +28,52 @@ export function useTransactionFormState({
         if (lastAccId && accounts.find(a => a.id === lastAccId)) return lastAccId;
         return accounts[0]?.id || '';
     });
-    const [destinationAccId, setDestinationAccId] = useState(initialData?.destinationAccountId || '');
+    const [destinationAccId, setDestinationAccIdState] = useState(() => (
+        initialData?.destinationAccountId
+        || accounts.find(a => a.id !== selectedAccId)?.id
+        || ''
+    ));
     const [type, setType] = useState<TransactionType>(initialData?.type || defaultType);
     const [category, setCategory] = useState(initialData?.category || prefillData?.category || 'General');
     const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
     const [exchangeRate, setExchangeRate] = useState('1.0');
     const [title, setTitle] = useState(initialData?.title || prefillData?.title || '');
 
-    // Initial destination setup (run once)
-    useEffect(() => {
-        if (accounts.length > 1 && !destinationAccId) {
-            const dest = accounts.find(a => a.id !== selectedAccId);
-            if (dest) setDestinationAccId(dest.id);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Prevent same-account transfer
-    useEffect(() => {
-        if (selectedAccId === destinationAccId && accounts.length > 1) {
-            const next = accounts.find(a => a.id !== selectedAccId);
-            if (next) setDestinationAccId(next.id);
-        }
-    }, [selectedAccId, destinationAccId, accounts]);
-
-    // Reset exchange rate on account change
-    useEffect(() => {
-        setExchangeRate('1.0');
-    }, [selectedAccId, destinationAccId]);
-
-    // Smart categorization with debounce
     const suggestionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     useEffect(() => {
         if (suggestionTimeoutRef.current) clearTimeout(suggestionTimeoutRef.current);
-        if (title.length >= 2 && type !== 'transfer') {
-            suggestionTimeoutRef.current = setTimeout(() => {
-                const suggestion = suggestCategory(title, transactions);
-                if (suggestion && suggestion !== category) {
-                    setSuggestedCategory(suggestion);
-                } else {
-                    setSuggestedCategory(null);
-                }
-            }, 300);
-        } else {
-            setSuggestedCategory(null);
-        }
+        const delay = title.length >= 2 && type !== 'transfer' ? 300 : 0;
+        suggestionTimeoutRef.current = setTimeout(() => {
+            if (title.length < 2 || type === 'transfer') {
+                setSuggestedCategory(null);
+                return;
+            }
+            const suggestion = suggestCategory(title, transactions);
+            setSuggestedCategory(suggestion && suggestion !== category ? suggestion : null);
+        }, delay);
         return () => { if (suggestionTimeoutRef.current) clearTimeout(suggestionTimeoutRef.current); };
     }, [title, transactions, category, type]);
 
     const handleSetAccount = (id: string) => {
         setSelectedAccId(id);
+        setExchangeRate('1.0');
+        if (destinationAccId === id && accounts.length > 1) {
+            setDestinationAccIdState(accounts.find(a => a.id !== id)?.id || '');
+        }
         localStorage.setItem('anchor_last_account_id', id);
+    };
+
+    const handleSetDestinationAccount = (id: string) => {
+        const nextId = id === selectedAccId && accounts.length > 1
+            ? accounts.find(a => a.id !== selectedAccId)?.id || ''
+            : id;
+        setDestinationAccIdState(nextId);
+        setExchangeRate('1.0');
     };
 
     return {
         selectedAccId, setSelectedAccId: handleSetAccount,
-        destinationAccId, setDestinationAccId,
+        destinationAccId, setDestinationAccId: handleSetDestinationAccount,
         type, setType,
         category, setCategory,
         suggestedCategory, setSuggestedCategory,

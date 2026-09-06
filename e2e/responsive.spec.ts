@@ -122,7 +122,7 @@ test.describe('Responsive Layout Tests', () => {
         // Direct navigation to settings works
         await page.goto('/settings');
         await page.waitForLoadState('domcontentloaded');
-        await expect(page.getByText('System Settings')).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
     });
 
     test('Bottom Navigation - All Links Present with Correct URLs', async ({ page }) => {

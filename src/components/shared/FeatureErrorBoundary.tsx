@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertCircle, RefreshCw, MessageCircle } from 'lucide-react';
-import * as Sentry from "@sentry/react";
+import { getSentry } from '../../utils/lazySentry';
 
 interface Props {
     featureName: string;
@@ -39,13 +39,15 @@ export class FeatureErrorBoundary extends Component<Props, State> {
         // Log error for debugging (dev mode only shows in console)
         console.error(`[${this.props.featureName}] Error caught by boundary:`, error);
 
-        // Send to Sentry
-        Sentry.captureException(error, {
-            extra: {
-                componentStack: errorInfo.componentStack,
-                feature: this.props.featureName
-            }
-        });
+        // Send to Sentry (SDK loads on demand; skipped if unavailable)
+        void getSentry().then((Sentry) =>
+            Sentry?.captureException(error, {
+                extra: {
+                    componentStack: errorInfo.componentStack,
+                    feature: this.props.featureName
+                }
+            }),
+        );
 
         if (import.meta.env.DEV) {
             console.error('Error Info:', errorInfo);

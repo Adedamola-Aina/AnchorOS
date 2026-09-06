@@ -16,7 +16,7 @@ import {
 
 export { CARD_ASPECT_RATIO } from './cardConstants';
 
-export interface AccountCardProps {
+interface AccountCardProps {
   account: AnchorAccount;
   index: number;
   totalCards: number;

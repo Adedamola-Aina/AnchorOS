@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/react';
+import { getSentry } from './lazySentry';
 
 /**
  * Custom error class for Anchor OS application
@@ -47,25 +47,29 @@ export const handleError = (error: unknown, fallbackMessage: string = 'An unexpe
     if (AnchorError.isAnchorError(error)) {
         console.error(`[${error.category}] ${error.message}`, error.originalError);
 
-        Sentry.captureException(error.originalError || error, {
-            level: SENTRY_LEVEL[error.category],
-            tags: { category: error.category },
-            extra: {
-                userMessage: error.userMessage,
-                originalError: error.originalError instanceof Error ? error.originalError.message : error.originalError,
-            },
-        });
+        void getSentry().then((Sentry) =>
+            Sentry?.captureException(error.originalError || error, {
+                level: SENTRY_LEVEL[error.category],
+                tags: { category: error.category },
+                extra: {
+                    userMessage: error.userMessage,
+                    originalError: error.originalError instanceof Error ? error.originalError.message : error.originalError,
+                },
+            }),
+        );
         return error;
     }
 
     console.error('[UNKNOWN]', error);
 
     const wrapped = new AnchorError(fallbackMessage, 'UNKNOWN', error);
-    Sentry.captureException(error, {
-        level: 'error',
-        tags: { category: 'UNKNOWN' },
-        extra: { fallbackMessage },
-    });
+    void getSentry().then((Sentry) =>
+        Sentry?.captureException(error, {
+            level: 'error',
+            tags: { category: 'UNKNOWN' },
+            extra: { fallbackMessage },
+        }),
+    );
     return wrapped;
 };
 
@@ -82,15 +86,17 @@ export const handleError = (error: unknown, fallbackMessage: string = 'An unexpe
  */
 export const captureError = (error: unknown, context: string, extra?: Record<string, unknown>): void => {
     const err = error instanceof Error ? error : new Error(String(error));
-    Sentry.captureException(err, {
-        level: AnchorError.isAnchorError(error) ? SENTRY_LEVEL[error.category] : 'error',
-        tags: {
-            context,
-            category: AnchorError.isAnchorError(error) ? error.category : 'UNKNOWN',
-        },
-        extra: {
-            ...extra,
-            originalMessage: err.message,
-        },
-    });
+    void getSentry().then((Sentry) =>
+        Sentry?.captureException(err, {
+            level: AnchorError.isAnchorError(error) ? SENTRY_LEVEL[error.category] : 'error',
+            tags: {
+                context,
+                category: AnchorError.isAnchorError(error) ? error.category : 'UNKNOWN',
+            },
+            extra: {
+                ...extra,
+                originalMessage: err.message,
+            },
+        }),
+    );
 };

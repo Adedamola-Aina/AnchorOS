@@ -2,16 +2,10 @@
  * AuthGate Loading & Gate Components
  * Extracted from AuthGate.tsx per CLAUDE.md §3.2
  */
-// @ts-nocheck
-
 
 import React from 'react';
 import { Mail } from 'lucide-react';
 import { AnchorLogo } from '../shared';
-
-const LazyOnboardingView = React.lazy(() =>
-    import('../../features/onboarding/OnboardingView').then((module) => ({ default: module.OnboardingView }))
-);
 
 export const AuthLoadingScreen: React.FC = () => (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 gap-6">
@@ -41,19 +35,4 @@ export const EmailVerificationGate: React.FC<EmailVerificationGateProps> = ({ em
     </div>
 );
 
-import { FinanceProvider } from '../../context/FinanceContext';
-import { TaskProvider } from '../../context/TaskContext';
 
-interface OnboardingGateProps { show: boolean; }
-export const OnboardingGate: React.FC<OnboardingGateProps> = ({ show }) => {
-    if (!show) return null;
-    return (
-        <FinanceProvider>
-            <TaskProvider>
-                <React.Suspense fallback={<AuthLoadingScreen />}>
-                    <LazyOnboardingView />
-                </React.Suspense>
-            </TaskProvider>
-        </FinanceProvider>
-    );
-};

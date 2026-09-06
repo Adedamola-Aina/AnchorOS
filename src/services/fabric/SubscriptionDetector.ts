@@ -13,9 +13,9 @@
 
 import type { AnchorTransaction } from '../../types';
 
-export type SubscriptionFrequency = 'monthly' | 'quarterly' | 'annual';
+type SubscriptionFrequency = 'monthly' | 'quarterly' | 'annual';
 
-export interface DetectedSubscription {
+interface DetectedSubscription {
     title: string;
     amountCents: number;
     frequency: SubscriptionFrequency;

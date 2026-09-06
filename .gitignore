@@ -65,3 +65,4 @@ Capacitor.asar
 stryker-setup-*.js
 stryker-setup-*.js.map
 reports/
+.lighthouseci/

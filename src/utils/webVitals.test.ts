@@ -4,8 +4,14 @@ describe('reportWebVitals', () => {
     let reportWebVitals: typeof import('./webVitals').reportWebVitals;
     let mockSentry: { addBreadcrumb: ReturnType<typeof vi.fn> };
 
+    // Sentry is lazy-loaded in the app — enable a test DSN so the SDK mock
+    // resolves, and flush a macrotask before asserting on breadcrumbs.
+    const flushSentry = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
     beforeEach(async () => {
         vi.resetModules();
+        // @ts-expect-error test env wiring
+        import.meta.env.VITE_SENTRY_DSN = 'test-dsn';
 
         mockSentry = { addBreadcrumb: vi.fn() };
         vi.doMock('@sentry/react', () => mockSentry);
@@ -36,8 +42,9 @@ describe('reportWebVitals', () => {
         expect(webVitals.onTTFB).toHaveBeenCalled();
     });
 
-    it('reports metrics as sentry breadcrumbs', () => {
+    it('reports metrics as sentry breadcrumbs', async () => {
         reportWebVitals();
+        await flushSentry();
 
         expect(mockSentry.addBreadcrumb).toHaveBeenCalledTimes(4);
         expect(mockSentry.addBreadcrumb).toHaveBeenCalledWith(
@@ -49,8 +56,9 @@ describe('reportWebVitals', () => {
         );
     });
 
-    it('sets warning level for needs-improvement metrics', () => {
+    it('sets warning level for needs-improvement metrics', async () => {
         reportWebVitals();
+        await flushSentry();
 
         const inpCall = mockSentry.addBreadcrumb.mock.calls.find(
             (c: unknown[]) => (c[0] as { message: string }).message.includes('INP')
@@ -59,8 +67,9 @@ describe('reportWebVitals', () => {
         expect(inpCall![0].level).toBe('warning');
     });
 
-    it('sets info level for good metrics', () => {
+    it('sets info level for good metrics', async () => {
         reportWebVitals();
+        await flushSentry();
 
         const clsCall = mockSentry.addBreadcrumb.mock.calls.find(
             (c: unknown[]) => (c[0] as { message: string }).message.includes('CLS')

@@ -8,22 +8,9 @@
  */
 
 import type { User } from 'firebase/auth';
-import type { AnchorTransaction } from '../types';
 import { useFinanceData } from './useFinanceData';
 import { useFinanceOperations } from './useFinanceOperations';
 
-/**
- * Extended transaction type with audit fields
- */
-export interface ExtendedTransaction extends AnchorTransaction {
-  createdBy?: string;
-  lastEditedBy?: string;
-  isSoftDeleted?: boolean;
-  deletedBy?: string;
-  deletedAt?: string;
-  linkId?: string;
-  accountOwnerId?: string;
-}
 
 /**
  * Combined finance service hook providing both data and operations

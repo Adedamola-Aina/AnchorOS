@@ -19,7 +19,6 @@
  *   - Rate limited: 5 challenge requests / 15 min; 5 verifies / 15 min
  *   - Audit log written on every attempt (success + failure)
  */
-// @ts-nocheck
 
 // 
 
@@ -112,6 +111,14 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
     if (chalData.expiresAt.toMillis() <= now) {
         await challengeRef(challengeId).delete();
         throw new HttpsError('deadline-exceeded', 'Challenge has expired. Please try again.');
+    }
+
+    // Registration challenges authenticate an already signed-in user and must
+    // never be usable to mint a custom token. Consume a mismatched challenge
+    // so it cannot be retried against another endpoint.
+    if (chalData.purpose !== 'authenticate') {
+        await challengeRef(challengeId).delete();
+        throw new HttpsError('invalid-argument', 'Challenge was not issued for authentication');
     }
 
     let credSnap = await credentialRef(userId, credentialId).get();

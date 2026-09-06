@@ -9,7 +9,8 @@
 import { createHash } from 'node:crypto';
 import { getAuth } from 'firebase-admin/auth';
 import { createAuditLog } from './helpers';
-import { getResend, EMAIL_FROM, APP_URL } from './config';
+import { APP_URL } from './config';
+import { queueEmail } from './emailQueue';
 
 /**
  * Hash a user-agent string to create a device fingerprint.
@@ -91,8 +92,7 @@ export async function checkNewDeviceAlert(
     await createAuditLog('security_alert_new_device', uid, { device, time });
 
     try {
-      await getResend().emails.send({
-        from: EMAIL_FROM,
+      await queueEmail({
         to: authUser.email,
         subject: 'New sign-in detected on your Anchor OS account',
         html: buildSecurityAlertEmail(authUser.email, device, time),

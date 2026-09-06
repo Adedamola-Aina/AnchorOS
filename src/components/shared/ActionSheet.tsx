@@ -7,7 +7,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
-export interface ActionSheetItem {
+interface ActionSheetItem {
   label: string;
   icon?: React.ReactNode;
   destructive?: boolean;

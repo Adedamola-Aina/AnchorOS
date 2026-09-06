@@ -103,15 +103,11 @@ export async function appendFabricConversation(userId: string, userMessage: stri
   });
 }
 
-export interface MonthlyReflection {
+interface MonthlyReflection {
   month: string;
   review: MonthlyReview;
   answers: Record<string, string>;
   savedAt: string;
-}
-
-export async function saveMonthlyReflection(userId: string, reflection: MonthlyReflection): Promise<void> {
-  await secureDb.setDocument(userId, ['fabric_monthly_reviews', reflection.month], reflection as unknown as Record<string, unknown>);
 }
 
 export async function loadMonthlyReflection(userId: string, month: string): Promise<MonthlyReflection | null> {

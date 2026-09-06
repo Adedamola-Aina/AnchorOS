@@ -8,7 +8,7 @@ import { expect, type Page } from '@playwright/test';
  */
 export async function loginOrSignup(page: Page, user: { email: string; password: string; name?: string }, skipNavigation = false) {
     console.log(`[E2E] Auth flow: ${user.email}`);
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.goto('/login', { waitUntil: 'domcontentloaded' });
 
     // Fill credentials
     await page.fill('input[name="email"]', user.email);

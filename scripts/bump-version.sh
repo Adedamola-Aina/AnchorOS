@@ -24,7 +24,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# Parse arguments
 ENV="development"
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -55,11 +54,11 @@ esac
 NEW_VERSION=$(node -p "require('./package.json').version")
 echo -e "${GREEN}✅ Bumped: ${OLD_VERSION} → ${NEW_VERSION}${NC}"
 
-# Commit the version bump
-git add package.json CHANGELOG.md 2>/dev/null || git add package.json
+# npm versioning tools can update both the manifest and lockfile. Commit them
+# together so clean `npm ci` installs remain reproducible after every release.
+git add package.json package-lock.json CHANGELOG.md 2>/dev/null || git add package.json package-lock.json
 git commit --no-verify -m "chore(release): ${ENV} v${NEW_VERSION}" || true
 
-# For production: create and push git tag
 if [[ "$ENV" == "production" ]]; then
     git tag "v${NEW_VERSION}"
     echo -e "${GREEN}🏷  Tagged: v${NEW_VERSION}${NC}"

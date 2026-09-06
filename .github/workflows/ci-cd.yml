@@ -14,7 +14,7 @@ permissions:
   actions: read
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
 
 jobs:
   governance-gates:
@@ -51,7 +51,7 @@ jobs:
               if (!match) return '';
 
               return match[1]
-                .replace(/<!--([\\s\\S]*?)-->/g, '')
+                .replace(/<!--([\s\S]*?)-->/g, '')
                 .replace(/\r/g, '')
                 .trim();
             }
@@ -66,7 +66,7 @@ jobs:
               if (!content) return false;
 
               if (content.length < 12) return false;
-              if (/^(tbd|todo|n\\/?a|none)$/i.test(content)) return false;
+              if (/^(tbd|todo|n\/?a|none)$/i.test(content)) return false;
               return true;
             }
 
@@ -79,7 +79,7 @@ jobs:
             ];
 
             const unchecked = requiredChecks.filter((item) => {
-              const checkedRegex = new RegExp(`-\\s*\\[x\\]\\s*${item.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`, 'i');
+              const checkedRegex = new RegExp(`-\\s*\\[x\\]\\s*${item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i');
               return !checkedRegex.test(body);
             });
 
@@ -250,6 +250,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install functions dependencies
+        run: npm ci
+        working-directory: functions
+
       - name: Run linting
         run: npm run lint
 
@@ -283,6 +287,7 @@ jobs:
     name: 🎭 E2E Tests
     runs-on: ubuntu-latest
     needs: test
+    timeout-minutes: 45
     
     steps:
       - name: Checkout code
@@ -297,11 +302,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Write E2E env config
+        run: printf '%s\n' "$E2E_VITE_ENV" > .env.development
+        env:
+          E2E_VITE_ENV: ${{ secrets.E2E_VITE_ENV }}
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit
 
-      - name: Run E2E tests
-        run: npm run test:e2e
+      - name: Run E2E tests (smoke gate)
+        # The smoke project is the PR gate (landing, login, core navigation).
+        # The full legacy suite is exercised post-deploy against staging by
+        # staging-deploy.yml, where shared dev-project state is available.
+        run: npm run test:e2e -- --project=smoke
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v7
@@ -394,6 +407,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install functions dependencies
+        run: npm ci
+        working-directory: functions
 
       - name: Setup Java (for Firebase Emulator)
         uses: actions/setup-java@v4

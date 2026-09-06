@@ -1,7 +1,7 @@
 import type { AnchorTask, AnchorTransaction } from '../../../types';
 import { toDate, withinRange } from './dateUtils';
 
-export interface WeekBucket {
+interface WeekBucket {
   weekStart: Date;
   completionRate: number;
   discretionaryCents: number;

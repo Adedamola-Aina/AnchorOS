@@ -2,7 +2,7 @@ import { safeGet, safeSet, safeDel, type ProcessResult } from './offlineQueueSto
 
 const TASK_QUEUE_KEY = 'anchor_task_offline_queue';
 
-export interface TaskQueueEntry {
+interface TaskQueueEntry {
     id: string;
     userId: string;
     taskId: string;

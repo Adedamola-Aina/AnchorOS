@@ -1,14 +1,9 @@
-export type ExperimentVariant = 'control' | 'treatment';
+type ExperimentVariant = 'control' | 'treatment';
 
 export interface ExperimentDefinition {
   id: string;
   enabled: boolean;
   trafficPercent: number; // 0–100
-}
-
-export interface ExperimentAssignment {
-  experimentId: string;
-  variant: ExperimentVariant;
 }
 
 function stableBucket(seed: string): number {

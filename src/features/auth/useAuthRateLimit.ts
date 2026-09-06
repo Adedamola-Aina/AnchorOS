@@ -25,7 +25,7 @@ interface RateLimitState {
     failures: number;
 }
 
-export interface AuthRateLimitResult {
+interface AuthRateLimitResult {
     isLocked: boolean;
     remainingSeconds: number;
     failures: number;

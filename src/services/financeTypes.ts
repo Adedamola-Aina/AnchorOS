@@ -56,18 +56,3 @@ export interface UpdateTransactionPayload {
   destinationAmountCents?: number;
   exchangeRate?: number;
 }
-
-/**
- * Payload for linking a bank account via Mono
- */
-export interface LinkBankAccountPayload {
-  code: string; // Auth code from Mono Connect widget
-}
-
-/**
- * Payload for re-categorizing a synced transaction
- */
-export interface RecategorizeSyncedPayload {
-  transactionId: string;
-  category: string;
-}

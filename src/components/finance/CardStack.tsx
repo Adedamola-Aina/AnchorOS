@@ -7,23 +7,6 @@
  *   - `<motion.div layout="position">` measures each card's current visual
  *     position before a state change and its new layout position after,
  *     then animates the delta with a single Apple-tuned ease curve.
- *   - On swipe up, framer animates the just-released card from its
- *     drag-displaced position straight to slot 0 (back of stack), while
- *     every other card slides forward by one slot position — all in one
- *     coherent motion.
- *
- * No motion-value sharing, no useTransform follow chain, no setTimeout,
- * no visibility hide. The swipe lifecycle is:
- *
- *   user drags front card → framer's drag transforms it
- *     → release crosses threshold
- *       → setRotationOffset(±1)
- *       → every card's `top`/`zIndex` change in one render
- *       → framer FLIP-animates each card from its previous visual
- *         position (including the drag transform) to its new slot
- *
- *   release without crossing threshold
- *     → dragSnapToOrigin springs the card back
  */
 import React, {
   useState, useRef, useCallback, useEffect, useMemo,
@@ -37,20 +20,15 @@ import {
   STACK_STAGGER_MS,
 } from './cardConstants';
 
-export const EXPANDED_STACK_GAP = 16;
+const EXPANDED_STACK_GAP = 16;
 const MAX_RENDERED_CARDS = 10;
-
 const SWIPE_THRESHOLD_RATIO = 0.32;
-const SWIPE_VELOCITY_THRESHOLD = 380; /* px/s — flick gesture short-circuit */
+const SWIPE_VELOCITY_THRESHOLD = 380;
 const TAP_SUPPRESSION_OFFSET = 6;
-
-/** Apple UIKit ease-out for purposeful, predictable motion. */
 const APPLE_EASE: [number, number, number, number] = [0.32, 0.72, 0, 1];
-/** Slot-transition duration. Long enough to feel deliberate, short enough
- *  to feel snappy. Matches Apple Wallet's perceived ~400ms. */
 const SLOT_TRANSITION_S = 0.42;
 
-export interface CardStackProps {
+interface CardStackProps {
   accounts: AnchorAccount[];
   mode: 'collapsed' | 'expanded';
   onCardTap: (account: AnchorAccount, index: number, el: HTMLElement) => void;
@@ -63,21 +41,16 @@ export const CardStack: React.FC<CardStackProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [cardWidth, setCardWidth] = useState(343);
-  const [orderedAccounts, setOrderedAccounts] = useState(accounts);
   const cardEls = useRef<(HTMLDivElement | null)[]>([]);
   const cardHeight = Math.round(cardWidth / CARD_ASPECT_RATIO);
   const suppressTapRef = useRef(false);
-
   const [rotationOffset, setRotationOffset] = useState(0);
 
   const visibleAccounts = useMemo(
-    () => orderedAccounts.slice(0, MAX_RENDERED_CARDS),
-    [orderedAccounts],
+    () => accounts.slice(0, MAX_RENDERED_CARDS),
+    [accounts],
   );
   const N = visibleAccounts.length;
-
-  useEffect(() => { setOrderedAccounts(accounts); }, [accounts]);
-  useEffect(() => { setRotationOffset(0); }, [accounts.length]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -94,11 +67,8 @@ export const CardStack: React.FC<CardStackProps> = ({
     ? (N - 1) * CARD_HEADER_REVEAL + cardHeight
     : cardHeight + (N - 1) * expandedStep;
 
-  /* rank = visual slot. 0 = back-most, N-1 = front.
-     Increment rotationOffset → front card's rank wraps to 0 (tucks behind).
-     Decrement rotationOffset → back-most card's rank wraps to N-1 (comes to front). */
   const rankFor = useCallback(
-    (i: number) => (N === 0 ? 0 : (i + rotationOffset) % N),
+    (i: number) => (N === 0 ? 0 : (i + (rotationOffset % N) + N) % N),
     [N, rotationOffset],
   );
 
@@ -108,19 +78,13 @@ export const CardStack: React.FC<CardStackProps> = ({
 
   const getShadow = useCallback((rank: number) => {
     if (!isCollapsed) return '0 1px 4px rgba(0,0,0,0.06)';
-    /* Back-most cards: very subtle shadow to suggest depth.
-       Front card: stronger shadow to lift it visually. */
     return rank === N - 1
       ? '0 4px 16px rgba(0,0,0,0.18), 0 -1px 3px rgba(0,0,0,0.06)'
       : '0 -1px 3px rgba(0,0,0,0.08)';
   }, [isCollapsed, N]);
 
-  /* Expanded-mode stagger delay — kept for backward-compat with the
-     transition-delay assertion in CardStack.test.tsx. */
   const getTransitionDelay = useCallback((arrayIndex: number) => (
-    !isCollapsed
-      ? `${arrayIndex * STACK_STAGGER_MS}ms`
-      : '0ms'
+    !isCollapsed ? `${arrayIndex * STACK_STAGGER_MS}ms` : '0ms'
   ), [isCollapsed]);
 
   const handleTap = useCallback((acc: AnchorAccount, i: number) => {
@@ -153,9 +117,7 @@ export const CardStack: React.FC<CardStackProps> = ({
       if (offset.y >= distanceThreshold || flickedDown) {
         haptic.selection();
         cyclePrevious();
-        return;
       }
-      /* Cancel — dragSnapToOrigin handles the spring back to rest. */
     },
     [cardHeight, cycleNext, cyclePrevious],
   );
@@ -167,7 +129,6 @@ export const CardStack: React.FC<CardStackProps> = ({
       <div
         ref={containerRef}
         data-testid="card-stack"
-        /* `pan-x` only — vertical gestures belong to framer's drag system. */
         className="relative w-full touch-pan-x overflow-visible"
         style={{ height: stackHeight }}
       >
@@ -181,45 +142,23 @@ export const CardStack: React.FC<CardStackProps> = ({
               ref={(el) => { cardEls.current[i] = el; }}
               data-testid={`card-stack-item-${acc.id}`}
               data-draggable={isFront ? 'true' : 'false'}
-              /* Position-only layout animation: framer measures each card's
-                 visual rect before a state change and animates the delta to
-                 its new layout. Includes any active drag transform — so the
-                 swipe gesture flows directly into the slot transition. */
               layout="position"
-              transition={{
-                layout: { duration: SLOT_TRANSITION_S, ease: APPLE_EASE },
-              }}
+              transition={{ layout: { duration: SLOT_TRANSITION_S, ease: APPLE_EASE } }}
               style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                top: `${top}px`,
-                height: cardHeight,
-                zIndex: rank,
-                transformOrigin: 'top center',
+                position: 'absolute', left: 0, right: 0, top: `${top}px`,
+                height: cardHeight, zIndex: rank, transformOrigin: 'top center',
                 transitionDelay: getTransitionDelay(i),
-                /* Front card owns its own touch — without this the browser
-                   pulls the gesture for vertical scroll → ~150ms input lag. */
                 touchAction: isFront ? 'none' : 'pan-y',
                 willChange: isFront ? 'transform' : 'auto',
               }}
               drag={isFront ? 'y' : false}
               dragMomentum={false}
               dragElastic={0.08}
-              dragConstraints={{
-                top: -cardHeight,
-                bottom: cardHeight,
-              }}
-              /* Cancel gesture springs back to origin via framer. */
+              dragConstraints={{ top: -cardHeight, bottom: cardHeight }}
               dragSnapToOrigin
-              dragTransition={{
-                bounceStiffness: 380,
-                bounceDamping: 34,
-              }}
+              dragTransition={{ bounceStiffness: 380, bounceDamping: 34 }}
               onDrag={(_, info) => {
-                if (Math.abs(info.offset.y) > TAP_SUPPRESSION_OFFSET) {
-                  suppressTapRef.current = true;
-                }
+                if (Math.abs(info.offset.y) > TAP_SUPPRESSION_OFFSET) suppressTapRef.current = true;
               }}
               onDragEnd={(_, info) => handleDragEnd(info)}
             >
@@ -251,5 +190,3 @@ export const CardStack: React.FC<CardStackProps> = ({
   );
 };
 
-/* Re-export for any consumer importing AccountCard from CardStack. */
-export { AccountCard };

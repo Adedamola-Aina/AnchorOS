@@ -135,5 +135,3 @@ export const BottomNavigation = ({
   );
 };
 
-export const BottomNav = BottomNavigation;
-export default BottomNavigation;

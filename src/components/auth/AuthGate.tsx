@@ -14,7 +14,13 @@ import AuthView from '../../features/auth/AuthView';
 import { getMultiFactorResolver, getRedirectResult, type MultiFactorResolver, type MultiFactorError } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 import { mapFirebaseError } from '../../utils/errorUtils';
-import { AuthLoadingScreen, EmailVerificationGate, OnboardingGate } from './AuthGateParts';
+import { AuthLoadingScreen, EmailVerificationGate } from './AuthGateParts';
+
+// PERFORMANCE: the onboarding shell pulls in Finance/Task/Fabric providers and
+// the onboarding feature bundle — load it lazily, only when onboarding shows.
+const LazyOnboardingShell = React.lazy(() =>
+    import('./OnboardingShell').then((module) => ({ default: module.OnboardingShell }))
+);
 import { consumeMfaRecoveryCode } from '../../api/MfaRecoveryApi';
 
 // PLT-001: Timeout wrapper for auth calls that may hang in Capacitor WebView
@@ -53,7 +59,10 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
         const handleExpiry = () => setAuthError('Session expired. Please sign in again.');
         window.addEventListener('anchor:session_expired', handleExpiry);
         const sessionActive = sessionStorage.getItem('anchor_session_active');
-        if (sessionActive === 'true' && !user && !loading) { setAuthError('Session expired. Please sign in again.'); sessionStorage.removeItem('anchor_session_active'); }
+        if (sessionActive === 'true' && !user && !loading) {
+            sessionStorage.removeItem('anchor_session_active');
+            queueMicrotask(() => setAuthError('Session expired. Please sign in again.'));
+        }
         return () => window.removeEventListener('anchor:session_expired', handleExpiry);
     }, [user, loading]);
 
@@ -63,7 +72,18 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     }, []);
 
     React.useEffect(() => {
-        if (!user && !loading) { setEmail(''); setPassword(''); setAuthError(''); setMfaResolver(null); setAuthMode('login'); if (location.pathname !== '/login' && location.pathname !== '/accept-invite') navigate('/login', { replace: true }); }
+        if (!user && !loading) {
+            queueMicrotask(() => {
+                setEmail('');
+                setPassword('');
+                setMfaResolver(null);
+                setMfaCode('');
+                setAuthMode('login');
+            });
+            if (location.pathname !== '/login' && location.pathname !== '/accept-invite') {
+                navigate('/login', { replace: true });
+            }
+        }
     }, [user, loading, location.pathname, navigate]);
 
     if (loading) return <AuthLoadingScreen />;
@@ -119,7 +139,11 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     if (!user.emailVerified && !isDevOrStaging && !isTestUser) return <EmailVerificationGate email={user.email!} onResend={async () => { await sendVerificationEmail(); showToast('Verification email sent!', 'success'); }} onRefresh={() => window.location.reload()} onLogout={logout} />;
 
     const showOnboarding = !isTestUser && profileLoaded && profile.onboardingComplete === false;
-    if (showOnboarding) return <OnboardingGate show={true} />;
+    if (showOnboarding) return (
+        <React.Suspense fallback={<AuthLoadingScreen />}>
+            <LazyOnboardingShell />
+        </React.Suspense>
+    );
 
     return <>{children}</>;
 };

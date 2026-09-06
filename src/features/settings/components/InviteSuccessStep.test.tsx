@@ -8,6 +8,7 @@ describe('InviteSuccessStep', () => {
   const defaultProps = {
     inviteeEmail: 'spouse@test.com',
     verificationCode: 'ABC123',
+    emailQueued: true,
     copied: false,
     onCopyCode: vi.fn(),
     onDone: vi.fn(),
@@ -15,9 +16,10 @@ describe('InviteSuccessStep', () => {
 
   beforeEach(() => vi.clearAllMocks());
 
-  it('shows invitation sent message', () => {
+  it('explains that delivery has been queued rather than claiming it was sent', () => {
     render(<InviteSuccessStep {...defaultProps} />);
-    expect(screen.getByText('Invitation Sent!')).toBeInTheDocument();
+    expect(screen.getByText('Invitation Created')).toBeInTheDocument();
+    expect(screen.getByText(/email has been queued/i)).toBeInTheDocument();
   });
 
   it('shows invitee email', () => {
@@ -32,10 +34,7 @@ describe('InviteSuccessStep', () => {
 
   it('calls onCopyCode when copy button clicked', () => {
     render(<InviteSuccessStep {...defaultProps} />);
-    // The copy button is a plain button element
-    const buttons = screen.getAllByRole('button');
-    const copyBtn = buttons.find(b => b.querySelector('svg'));
-    fireEvent.click(copyBtn!);
+    fireEvent.click(screen.getByRole('button', { name: /copy verification code/i }));
     expect(defaultProps.onCopyCode).toHaveBeenCalled();
   });
 

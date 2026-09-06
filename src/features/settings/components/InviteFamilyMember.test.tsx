@@ -85,7 +85,7 @@ describe('InviteFamilyMember', () => {
 
   it('completes full invitation flow', async () => {
     const mockCallable = vi.fn().mockResolvedValue({
-      data: { success: true, verificationCode: 'VER-123', inviteId: 'inv-1' },
+      data: { success: true, verificationCode: 'VER-123', inviteId: 'inv-1', emailQueued: true },
     });
     mockHttpsCallable.mockReturnValue(mockCallable);
 
@@ -108,7 +108,7 @@ describe('InviteFamilyMember', () => {
     await waitFor(() => {
       expect(screen.getByText('VER-123')).toBeInTheDocument();
     });
-    expect(mockShowToast).toHaveBeenCalledWith(expect.stringContaining('Invitation sent'), 'success');
+    expect(mockShowToast).toHaveBeenCalledWith(expect.stringContaining('email queued'), 'success');
   });
 
   it('shows error on wrong password', async () => {

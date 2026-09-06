@@ -116,6 +116,39 @@ describe('family_invitations (SEC-1)', () => {
   });
 });
 
+// ─── Legacy invitations ────────────────────────────────────────────────────
+// This retired collection has no client callers. It must remain inaccessible
+// so stale documents cannot expose recipient addresses or be tampered with.
+describe('legacy invitations', () => {
+  const collPath = `${PREFIX}/invitations`;
+
+  beforeEach(async () => {
+    await ctx.getEnv().withSecurityRulesDisabled(async (c) => {
+      await setDoc(doc(c.firestore(), collPath, 'legacy-invite'), {
+        senderUid: 'owner1',
+        recipientEmail: 'invitee@example.com',
+        status: 'pending',
+      });
+    });
+  });
+
+  it('denies authenticated users from reading retired invitations', async () => {
+    await assertFails(getDoc(doc(ctx.authedDb('owner1'), collPath, 'legacy-invite')));
+  });
+
+  it('denies authenticated users from creating, updating, or deleting retired invitations', async () => {
+    const db = ctx.authedDb('owner1', 'owner@example.com');
+
+    await assertFails(setDoc(doc(db, collPath, 'new-invite'), {
+      senderUid: 'owner1',
+      recipientEmail: 'invitee@example.com',
+      status: 'pending',
+    }));
+    await assertFails(updateDoc(doc(db, collPath, 'legacy-invite'), { status: 'accepted' }));
+    await assertFails(deleteDoc(doc(db, collPath, 'legacy-invite')));
+  });
+});
+
 // ─── SEC-2: family_connections ──────────────────────────────────────────────
 describe('family_connections (SEC-2)', () => {
   const collPath = `${PREFIX}/family_connections`;
@@ -192,4 +225,3 @@ describe('family_connections (SEC-2)', () => {
     );
   });
 });
-

@@ -11,7 +11,7 @@ export interface ConfirmOptions {
     type?: 'danger' | 'info';
 }
 
-export interface NotificationContextType {
+interface NotificationContextType {
     showToast: (message: string, type?: NotificationType) => void;
     confirm: (options: ConfirmOptions) => Promise<boolean>;
     requestPushPermission: () => Promise<string | null>;

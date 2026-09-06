@@ -5,7 +5,7 @@ import { logProductEvent } from '../../services/telemetry';
 import type { FabricQueryResult, TabView } from '../../types';
 import type { Currency } from '../../services/fabric/fabricUtils';
 
-export interface UseFabricViewResult {
+interface UseFabricViewResult {
   isEnabled: boolean;
   isReady: boolean;
   patterns: ReturnType<typeof useFabric>['patterns'];

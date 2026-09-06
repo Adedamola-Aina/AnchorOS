@@ -12,6 +12,7 @@ import { Button } from '@anchor-os/ui';
 interface InviteSuccessStepProps {
     inviteeEmail: string;
     verificationCode: string;
+    emailQueued: boolean;
     copied: boolean;
     onCopyCode: () => void;
     onDone: () => void;
@@ -20,6 +21,7 @@ interface InviteSuccessStepProps {
 export function InviteSuccessStep({
     inviteeEmail,
     verificationCode,
+    emailQueued,
     copied,
     onCopyCode,
     onDone,
@@ -30,9 +32,10 @@ export function InviteSuccessStep({
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-4">
                     <Check className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Invitation Sent!</h3>
+                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Invitation Created</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    An email has been sent to <span className="font-semibold">{inviteeEmail}</span>
+                    {emailQueued ? 'An invitation email has been queued for ' : 'Share this code with '}
+                    <span className="font-semibold">{inviteeEmail}</span>
                 </p>
             </div>
 
@@ -46,7 +49,8 @@ export function InviteSuccessStep({
                     </code>
                     <button
                         onClick={onCopyCode}
-                        className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        aria-label="Copy verification code"
+                        className="min-h-11 min-w-11 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                     >
                         {copied ? (
                             <Check className="w-5 h-5 text-emerald-600" />
@@ -56,7 +60,7 @@ export function InviteSuccessStep({
                     </button>
                 </div>
                 <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
-                    For convenience, this code has also been included in the invitation email.
+                    Share this code only with the invited, verified email account.
                 </p>
             </div>
 

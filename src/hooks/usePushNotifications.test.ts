@@ -4,15 +4,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockState = vi.hoisted(() => ({
     messaging: {},
+    getMessagingInstance: () => Promise.resolve({}),
     auth: { currentUser: { uid: 'user-1' } },
     onMessageCallback: undefined as ((payload: Record<string, unknown>) => void) | undefined,
     onMessageUnsubscribe: vi.fn(),
 }));
 
 vi.mock('../config/firebase', () => ({
-    get messaging() {
-        return mockState.messaging;
-    },
+    getMessagingInstance: () => Promise.resolve(mockState.messaging),
     auth: mockState.auth,
 }));
 
@@ -52,6 +51,8 @@ describe('usePushNotifications', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        // Hermetic: CI has no .env file; the hook guards on this key
+        vi.stubEnv('VITE_FIREBASE_VAPID_KEY', 'test-vapid-key');
         localStorage.clear();
         mockState.messaging = {};
         mockState.auth.currentUser = { uid: 'user-1' };

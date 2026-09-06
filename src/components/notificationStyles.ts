@@ -8,7 +8,7 @@
 
 import { Users, Bell } from 'lucide-react';
 
-export type NotificationType = 
+type NotificationType = 
     | 'family_connected' 
     | 'invitation_accepted' 
     | 'account_shared' 

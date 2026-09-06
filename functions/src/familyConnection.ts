@@ -51,6 +51,16 @@ export const acceptInvitation = secureOnCall(
             throw new HttpsError('failed-precondition', 'This invitation has expired');
         }
 
+        // An invite code alone is not authority to join a household. Bind the
+        // accepting Firebase account to the invited, verified email address.
+        // Normalize case because Firebase Auth email addresses are case
+        // insensitive while stored invitation values may predate normalization.
+        const authenticatedEmail = request.auth.token.email?.trim().toLowerCase();
+        const invitedEmail = invite.inviteeEmail.trim().toLowerCase();
+        if (!request.auth.token.email_verified || !authenticatedEmail || authenticatedEmail !== invitedEmail) {
+            throw new HttpsError('permission-denied', 'Sign in with the invited, verified email address');
+        }
+
         const codeMatch = await bcrypt.compare(verificationCode, invite.verificationCodeHash);
 
         if (!codeMatch) {

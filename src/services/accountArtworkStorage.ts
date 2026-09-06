@@ -32,7 +32,7 @@ export async function uploadAccountArtwork(
   validateArtworkFile(file);
 
   const artworkRef = ref(
-    getAppStorage(),
+    await getAppStorage(),
     `artifacts/anchor-os/users/${userId}/accounts/${accountId}/artwork/${Date.now()}-${sanitizeFileName(file.name)}`,
   );
 
@@ -49,7 +49,7 @@ export async function uploadAccountArtwork(
 
 export async function resolveAccountArtworkUrl(source: ArtworkSource): Promise<string | undefined> {
   if (source.cardArtworkPath) {
-    const bytes = await getBytes(ref(getAppStorage(), source.cardArtworkPath));
+    const bytes = await getBytes(ref(await getAppStorage(), source.cardArtworkPath));
     return URL.createObjectURL(new Blob([bytes]));
   }
 

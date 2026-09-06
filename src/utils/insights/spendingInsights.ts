@@ -1,13 +1,13 @@
 import type { AnchorTransaction } from '../../types';
 
-export interface SpendingTrend {
+interface SpendingTrend {
     direction: 'up' | 'down' | 'flat';
     percentChange: number;
     currentMonthCents: number;
     previousMonthCents: number;
 }
 
-export interface SourceBreakdown {
+interface SourceBreakdown {
     manualCents: number;
     syncedCents: number;
     totalCents: number;
@@ -17,7 +17,7 @@ export interface SourceBreakdown {
 
 const FLAT_THRESHOLD = 5;
 
-export function isTransfer(tx: AnchorTransaction): boolean {
+function isTransfer(tx: AnchorTransaction): boolean {
     return Boolean(tx.linkId) || tx.category?.toLowerCase() === 'transfer';
 }
 

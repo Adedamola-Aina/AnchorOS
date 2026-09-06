@@ -3,10 +3,11 @@ import {
   AnimatedAnchorAIIcon,
   AnimatedFinanceIcon,
   AnimatedHomeIcon,
+  AnimatedSettingsIcon,
   AnimatedTasksIcon,
 } from './AnimatedNavIcons';
 
-export interface BottomNavItem {
+interface BottomNavItem {
   to: string;
   label: string;
   /**
@@ -68,6 +69,18 @@ export function buildBottomNavItems({
     isIconOnly: false,
     renderIcon: (isAnimating, className) => (
       <AnimatedFinanceIcon className={className} isAnimating={isAnimating} />
+    ),
+  });
+
+  // Settings must stay reachable on mobile: it hosts sign-out, passkeys,
+  // security and Family Mode management. Without this tab a phone user has
+  // no path to any of them.
+  items.push({
+    to: '/settings',
+    label: 'Settings',
+    isIconOnly: false,
+    renderIcon: (isAnimating, className) => (
+      <AnimatedSettingsIcon className={className} isAnimating={isAnimating} />
     ),
   });
 

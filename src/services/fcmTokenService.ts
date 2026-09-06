@@ -5,7 +5,7 @@
  * Handles IDB timing issues that occur during PWA navigation.
  */
 
-import { getToken, type Messaging } from 'firebase/messaging';
+import type { Messaging } from 'firebase/messaging';
 
 interface FcmTokenOptions {
     messaging: Messaging;
@@ -28,6 +28,8 @@ export async function getFcmTokenWithRetry({
     const attempt = async (retries: number, delay: number): Promise<string | null> => {
         try {
             const registration = await navigator.serviceWorker.ready;
+            // PERFORMANCE: messaging SDK is loaded on demand
+            const { getToken } = await import('firebase/messaging');
             const token = await getToken(messaging, {
                 vapidKey,
                 serviceWorkerRegistration: registration,

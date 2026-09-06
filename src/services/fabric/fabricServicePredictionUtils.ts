@@ -1,6 +1,4 @@
 import type {
-  PatternAction,
-  PatternTrigger,
   Prediction,
   PredictionType,
   ProactiveQuestionType,
@@ -22,7 +20,7 @@ const PREDICTION_ID_TYPE_MAP: Array<[string, PredictionType]> = [
   ['pred-recurring-due', 'recurring_due'],
 ];
 
-export function inferPredictionType(predictionId: string): PredictionType | null {
+function inferPredictionType(predictionId: string): PredictionType | null {
   for (const [prefix, type] of PREDICTION_ID_TYPE_MAP) {
     if (predictionId.startsWith(prefix)) return type;
   }
@@ -61,8 +59,4 @@ function matchPatternForPredictionType(
     return patterns.find((p) => p.trigger.type === 'commitment_completed');
   }
   return undefined;
-}
-
-export function isPatternFeedbackEvent(trigger: PatternTrigger, action: PatternAction): boolean {
-  return trigger.type !== 'app_opened' || action.type !== 'view_page';
 }

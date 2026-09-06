@@ -6,8 +6,8 @@
 import type { AnchorTransaction } from '../types';
 import { fromCents } from './moneyUtils';
 
-export interface WeeklySpendingData { label: string; income: number; expense: number; net: number; weekStart: Date; }
-export interface RecurringTransactionGroup { id: string; title: string; amountCents: number; frequency: 'monthly' | 'weekly' | 'irregular'; lastDate: string; count: number; avgGapDays: number; }
+interface WeeklySpendingData { label: string; income: number; expense: number; net: number; weekStart: Date; }
+interface RecurringTransactionGroup { id: string; title: string; amountCents: number; frequency: 'monthly' | 'weekly' | 'irregular'; lastDate: string; count: number; avgGapDays: number; }
 
 const getStartOfWeek = (d: Date) => {
     const date = new Date(d);

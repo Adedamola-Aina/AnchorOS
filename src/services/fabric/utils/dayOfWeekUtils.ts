@@ -3,7 +3,7 @@ import { toDate, withinRange } from './dateUtils';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 
-export interface DayOfWeekSignal {
+interface DayOfWeekSignal {
   day: number;
   dayName: string;
   value: number;

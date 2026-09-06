@@ -13,7 +13,7 @@
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../config/firebase';
 
-export type AuditEventType =
+type AuditEventType =
     // Auth events
     | 'auth_login_success'
     | 'auth_login_failed'

@@ -96,18 +96,11 @@ export interface FabricQuickAction {
   payload: Record<string, unknown>;
 }
 
-export interface FabricConversation {
-  messages: FabricMessage[];
-  startedAt: string;
-}
-
 export interface FabricSettings {
   enabled: boolean;
   dataCollectionEnabled: boolean;
   lastCleared?: string;
 }
-
-export type AnchorAIIconState = 'resting' | 'breathing' | 'learning' | 'disabled';
 
 export type ProactiveQuestionType =
   | 'missed_habit'

@@ -10,6 +10,7 @@ import { getFcmTokenWithRetry } from '../services/fcmTokenService';
 // Mock Firebase dependencies
 vi.mock('../config/firebase', () => ({
     messaging: {},
+    getMessagingInstance: () => Promise.resolve({}),
     db: {},
     auth: { currentUser: { uid: 'test-user-id' } },
     APP_ID: 'test-app-id'
@@ -57,6 +58,8 @@ const TestComponent = () => {
 describe('NotificationContext Token Management', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // Hermetic: CI has no .env file; usePushNotifications guards on this key
+        vi.stubEnv('VITE_FIREBASE_VAPID_KEY', 'test-vapid-key');
         requestPermissionMock.mockResolvedValue('granted');
         //  -- Mocking permission property
         global.Notification.permission = 'default';

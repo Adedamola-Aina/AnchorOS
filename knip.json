@@ -2,14 +2,16 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": [
     "src/main.tsx",
-    "src/App.tsx"
+    "src/App.tsx",
+    "config/vitest.rules.config.ts",
+    "src/__tests__/*.emulator.ts",
+    "**/*.test.{ts,tsx}",
+    "**/*.spec.{ts,tsx}"
   ],
   "project": [
     "src/**/*.{ts,tsx}"
   ],
   "ignore": [
-    "**/*.test.{ts,tsx}",
-    "**/*.spec.{ts,tsx}",
     "src/test/**",
     "e2e/**",
     "functions/**",
@@ -17,8 +19,11 @@
     "ios/**",
     "packages/**",
     "tools/**",
-    "scripts/**",
-    "config/**"
+    "scripts/**"
+  ],
+  "ignoreBinaries": [
+    "firebase",
+    "open"
   ],
   "ignoreDependencies": [
     "@capacitor/*",
@@ -27,7 +32,9 @@
     "tailwindcss",
     "tailwindcss-animate",
     "autoprefixer",
-    "recharts",
-    "@commitlint/config-conventional"
+    "@commitlint/config-conventional",
+    "@stryker-mutator/typescript-checker",
+    "@stryker-mutator/vitest-runner",
+    "firebase-admin"
   ]
 }

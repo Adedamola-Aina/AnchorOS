@@ -6,11 +6,9 @@ export type TaskPriority = 'high' | 'medium' | 'low';
 export type {
   TransactionType,
   Currency,
-  ExternalConnection,
   AnchorAccount,
   AnchorTransaction,
   RecurringFrequency,
-  RecurringStatus,
   RecurringTransaction,
 } from './financeTypes';
 

@@ -98,19 +98,6 @@ service cloud.firestore {
       }
 
       // ======================================================================
-      // Legacy Invitations (kept for backwards compatibility)
-      // ======================================================================
-      match /invitations/{token} {
-        allow get: if request.auth != null;
-        allow list: if request.auth != null && 
-                      (request.query.senderUid == request.auth.uid || 
-                       request.query.recipientEmail == request.auth.token.email);
-        allow create: if request.auth != null && request.resource.data.senderUid == request.auth.uid;
-        allow delete: if request.auth != null && (request.auth.token.email == resource.data.recipientEmail || resource.data.senderUid == request.auth.uid);
-        allow update: if request.auth != null && (request.auth.token.email == resource.data.recipientEmail || resource.data.senderUid == request.auth.uid); 
-      }
-
-      // ======================================================================
       // Audit Log (no client access)
       // ======================================================================
       match /audit_log/{logId} {

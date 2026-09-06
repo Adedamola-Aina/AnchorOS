@@ -11,7 +11,7 @@
  */
 // @ts-nocheck
 
-import { doc, getDoc, setDoc, deleteDoc, describe, it, beforeAll, afterAll, beforeEach, assertSucceeds, assertFails, PREFIX, makeTestEnv } from './firestore-rules.helpers';
+import { doc, getDoc, setDoc, deleteDoc, describe, it, beforeAll, afterAll, beforeEach, assertFails, PREFIX, makeTestEnv } from './firestore-rules.helpers';
 
 const ctx = makeTestEnv();
 

@@ -6,12 +6,12 @@ interface FabricBehaviorState {
     patterns?: UserPattern[];
 }
 
-export interface PatternKnowledgeSummary {
+interface PatternKnowledgeSummary {
     patternCount: number;
     patternGroups: number;
 }
 
-export function summarizePatternKnowledge(behavior: FabricBehaviorState | null): PatternKnowledgeSummary {
+function summarizePatternKnowledge(behavior: FabricBehaviorState | null): PatternKnowledgeSummary {
     const confirmed = behavior?.confirmedPatterns ?? [];
     const pending = behavior?.patterns ?? [];
     const all = [...confirmed, ...pending];
@@ -32,7 +32,7 @@ export async function loadPatternKnowledge(userId: string): Promise<PatternKnowl
     return summarizePatternKnowledge(behavior);
 }
 
-export async function clearPatternKnowledge(userId: string, now: string): Promise<void> {
+async function clearPatternKnowledge(userId: string, now: string): Promise<void> {
     await secureDb.setDocument(userId, ['fabric_behavior', 'state'], {
         patterns: [],
         confirmedPatterns: [],

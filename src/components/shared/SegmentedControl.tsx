@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-export interface SegmentOption {
+interface SegmentOption {
   value: string;
   label: string;
 }

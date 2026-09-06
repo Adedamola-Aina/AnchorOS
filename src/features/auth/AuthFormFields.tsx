@@ -43,7 +43,7 @@ export function AuthFormFields({
     if (authMode === 'mfa') {
         return (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-center block">
+                <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] text-center block">
                     Verification Code
                 </label>
                 {/* Removed hidden fields that previously confused autofill heuristics */}
@@ -75,7 +75,7 @@ export function AuthFormFields({
                     />
                 </div>
                 <div className="text-center space-y-2">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Open Authenticator App</p>
+                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Open Authenticator App</p>
                     <p className="text-xs text-slate-500 max-w-xs mx-auto">Enter your 6-digit authenticator code, or an 8-character recovery code.</p>
                 </div>
             </div>
@@ -86,7 +86,7 @@ export function AuthFormFields({
         <>
             {/* Email Field */}
             <div className="space-y-2">
-                <label htmlFor="email" className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
+                <label htmlFor="email" className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
                 <div className="relative group">
                     <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${validationErrors.email ? 'text-red-400' : 'text-slate-300 group-focus-within:text-slate-600 dark:group-focus-within:text-slate-300'}`} />
                     <input
@@ -112,9 +112,9 @@ export function AuthFormFields({
             {authMode !== 'reset' && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-500">
                     <div className="flex justify-between items-center">
-                        <label htmlFor="password" className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Password</label>
+                        <label htmlFor="password" className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Password</label>
                         {authMode === 'login' && (
-                            <button type="button" onClick={() => setAuthMode('reset')} className="text-[11px] font-bold text-blue-500 hover:text-blue-600 uppercase tracking-wider transition-colors">
+                            <button type="button" onClick={() => setAuthMode('reset')} className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 uppercase tracking-wider transition-colors">
                                 Forgot?
                             </button>
                         )}

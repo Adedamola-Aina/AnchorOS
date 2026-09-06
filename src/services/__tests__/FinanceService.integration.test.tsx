@@ -35,14 +35,9 @@ describe('FinanceService Integration', () => {
             return;
         }
 
-        // Load Firestore rules
-        let rules: string;
-        try {
-            rules = readFileSync(resolve(__dirname, '../../../config/firestore.rules'), 'utf-8');
-        } catch {
-            console.log('Could not load firestore.rules, using permissive rules for testing');
-            rules = `rules_version = '2'; service cloud.firestore { match /{document=**} { allow read, write: if true; } }`;
-        }
+        // Load the real Firestore rules. Security tests must fail closed if
+        // the rules file is missing instead of silently switching to allow-all.
+        const rules = readFileSync(resolve(__dirname, '../../../config/firestore.rules'), 'utf-8');
 
         testEnv = await initializeTestEnvironment({
             projectId: 'anchor-os-test',

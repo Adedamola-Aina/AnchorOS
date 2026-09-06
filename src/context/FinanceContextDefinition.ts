@@ -3,7 +3,7 @@ import { createContext } from 'react';
 import type { AnchorTransaction, AnchorAccount, TransactionType } from '../types';
 import type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from '../services/FinanceService';
 
-export interface FinanceContextType {
+interface FinanceContextType {
     transactions: AnchorTransaction[];
     accounts: AnchorAccount[];
     loadingFinance: boolean;
