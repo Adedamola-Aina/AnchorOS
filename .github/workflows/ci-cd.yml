@@ -51,7 +51,7 @@ jobs:
               if (!match) return '';
 
               return match[1]
-                .replace(/<!--([\\s\\S]*?)-->/g, '')
+                .replace(/<!--([\s\S]*?)-->/g, '')
                 .replace(/\r/g, '')
                 .trim();
             }
@@ -66,7 +66,7 @@ jobs:
               if (!content) return false;
 
               if (content.length < 12) return false;
-              if (/^(tbd|todo|n\\/?a|none)$/i.test(content)) return false;
+              if (/^(tbd|todo|n\/?a|none)$/i.test(content)) return false;
               return true;
             }
 
