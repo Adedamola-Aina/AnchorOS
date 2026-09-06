@@ -310,8 +310,11 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit
 
-      - name: Run E2E tests
-        run: npm run test:e2e
+      - name: Run E2E tests (smoke gate)
+        # The smoke project is the PR gate (landing, login, core navigation).
+        # The full legacy suite is exercised post-deploy against staging by
+        # staging-deploy.yml, where shared dev-project state is available.
+        run: npm run test:e2e -- --project=smoke
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v7
