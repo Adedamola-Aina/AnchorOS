@@ -13,6 +13,9 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
     testDir: '../e2e',
     fullyParallel: true,
+    // Bound the whole E2E run so a broken environment fails fast with a
+    // partial report instead of hanging the CI job indefinitely.
+    globalTimeout: 30 * 60 * 1000,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
     // Use 50% of available CPUs in CI, auto-detect locally
