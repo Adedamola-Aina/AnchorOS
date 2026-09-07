@@ -1,0 +1,37 @@
+# Dependencies and generated output
+**/node_modules/
+dist/
+build/
+functions/lib/
+coverage/
+playwright-report/
+test-results/
+reports/
+.vite/
+.firebase/
+*.log
+*.map
+*.min.js
+
+# VCS internals
+.git/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Large/history-heavy material that should be pulled explicitly only when needed
+CHANGELOG.md
+**/package-lock.json
+docs/archive/
+
+# Internal dashboard is optional during normal app development.
+# Explicitly @-include it when the task is about the dashboard/MCP tooling.
+tools/dashboard/
+tools/mcp-server/
+
+# Native/generated caches
+ios/App/Pods/
+android/.gradle/
+android/build/
