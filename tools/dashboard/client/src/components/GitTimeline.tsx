@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { RefreshCw, GitCommit, GitBranch, Clock, Filter } from 'lucide-react';
 import type { FilterType } from './gitTimeline.types';
 import { filterLabels, formatDate, getTypeColor } from './gitTimeline.helpers';

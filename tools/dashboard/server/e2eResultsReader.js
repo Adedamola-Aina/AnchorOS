@@ -7,9 +7,6 @@
  *   - test-results/                — individual result directories (failure artifacts)
  *   - playwright-report/index.html — HTML report (scraped for summary stats)
  *
- * Known pre-existing failures are tracked in MEMORY.md and excluded from
- * "new failure" alerts so we don't spam on pre-existing issues.
- *
  * Returns a summary suitable for display and alerting.
  */
 
@@ -21,7 +18,6 @@ const path = require('path');
 const ROOT = path.join(__dirname, '../../..');
 const LAST_RUN_PATH = path.join(ROOT, 'test-results', '.last-run.json');
 const RESULTS_DIR = path.join(ROOT, 'test-results');
-const KNOWN_FAILURES_PATH = path.join(__dirname, '../data/e2e-known-failures.json');
 
 /**
  * Parse individual result directories.
@@ -68,18 +64,6 @@ function parseResultDirectories() {
     return { total: dirs.length, failed, passed };
 }
 
-/**
- * Load known pre-existing failures so we can exclude them from alerts.
- */
-function loadKnownFailures() {
-    try {
-        if (fs.existsSync(KNOWN_FAILURES_PATH)) {
-            return JSON.parse(fs.readFileSync(KNOWN_FAILURES_PATH, 'utf8'));
-        }
-    } catch { /* empty */ }
-    return { failures: [] };
-}
-
 function getE2EResults() {
     // 1. Last run status
     let lastRun = null;
@@ -92,12 +76,9 @@ function getE2EResults() {
     // 2. Parse result directories
     const dirResults = parseResultDirectories();
 
-    // 3. Identify new vs known failures
-    const knownData = loadKnownFailures();
-    const knownIds = new Set(knownData.failures.map((f) => f.id));
-
-    const newFailures = dirResults.failed.filter((f) => !knownIds.has(f.id));
-    const knownFailures = dirResults.failed.filter((f) => knownIds.has(f.id));
+    // 3. Failures (the read-only console reports every failing test;
+    // triage decisions stay with the owner, not the dashboard)
+    const failures = dirResults.failed;
 
     // 4. Last run age (to detect stale results)
     let lastRunAge = null;
@@ -110,7 +91,7 @@ function getE2EResults() {
     } catch { /* ignore */ }
 
     const status = lastRun?.status ?? 'unknown';
-    const hasNewFailures = newFailures.length > 0;
+    const hasNewFailures = failures.length > 0;
 
     return {
         available: lastRun !== null || dirResults.total > 0,
@@ -119,12 +100,9 @@ function getE2EResults() {
         summary: {
             total: dirResults.total,
             passed: dirResults.passed,
-            failed: dirResults.failed.length,
-            newFailures: newFailures.length,
-            knownFailures: knownFailures.length,
+            failed: failures.length,
         },
-        newFailures,
-        knownFailures,
+        failures,
         hasNewFailures,
         scannedAt: new Date().toISOString(),
     };
