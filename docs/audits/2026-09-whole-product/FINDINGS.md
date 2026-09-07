@@ -40,6 +40,16 @@ No product code was modified. All findings are documented, not fixed.
 - Evidence: Capacitor shells (`android/`, `ios/`, capacitor.config.ts) alongside `apps/ios-native/` SwiftUI app re-implementing Auth/MFA/passkeys, Fabric engines, and Finance natively (247 files).
 - Impact: web/native parity risk is structural; behavior drift between two Fabric/Finance implementations is likely. NEEDS DYNAMIC VERIFICATION on device.
 
+### F-09 · Dependencies · npm audit advisories; GitHub-reported Dependabot count not reproducible · P2 · confirmed (local) / UNVERIFIED (GitHub banner)
+- Evidence (local, reproducible): `npm audit` (read-only, no fix applied) against current master lockfiles (package-lock.json last touched 2026-09-06 on master) reports **19 moderate advisories, 0 high, 0 critical** — root workspace 11, functions workspace 8.
+- Affected packages: `qs` (remotely triggerable DoS; array-limit bypass), `uuid` (buffer bounds check v3/v5), `retry-request`, `teeny-request`, `google-gax`, `gaxios`, `@google-cloud/firestore`, `@google-cloud/storage`, `firebase-admin` (root + functions via the firebase-admin chain), plus `body-parser` (root) and `@lhci/cli` (root, dev tooling). All have `fixAvailable: true`. No upgrades performed per scope.
+- Production vs development relevance: the `firebase-admin → @google-cloud/{firestore,storage} → qs/uuid/retry-request` chain is the **production runtime** of the Functions codebase, so the qs DoS class is production-relevant (server-side DoS exposure). `@lhci/cli` (Lighthouse CI) and `body-parser` (check actual import surface) are tooling/dev-leaning. npm's dev/prod flag was inconclusive (`dev: null`) — exact classification NEEDS DYNAMIC VERIFICATION per package.
+- GitHub discrepancy: during Phase 0/1 the push output reported "GitHub found 67 vulnerabilities on Adedamola-Aina/AnchorOS's default branch (20 high, 40 moderate, 7 low)". This does **not** reproduce locally and the Dependabot alerts tab is not publicly accessible (HTTP 404 unauthenticated). The discrepancy may stem from Dependabot evaluating different lockfiles/workspaces (e.g., android/ios Gradle or CocoaPods ecosystems), different update states, or stale alerts. UNVERIFIED — not resolved by assumption.
+- Impact: confirmed moderate server-side DoS exposure in the Functions dependency chain (qs); possible larger unverified exposure per GitHub. Dependencies must not be treated as healthy merely because lint/tsc/knip pass.
+- Recommendation (for future remediation task, not this pass): run authenticated Dependabot review to reconcile the 67-alert count; prioritize `qs` in the Functions runtime chain; re-run `npm audit` after any lockfile change. No `npm audit fix`, no upgrades performed here.
+- Acceptance: authenticated Dependabot count reconciled with local audit; production-relevant advisories triaged with owner-approved remediation.
+- Status: CONFIRMED (local audit findings) + UNVERIFIED (GitHub 67/20-high banner).
+
 ## STRONG SUSPICIONS (not yet confirmed)
 
 - S-01 · AuthContext.tsx and FinanceContext.tsx under @ts-nocheck suggests fragile auth/finance state plumbing; quality unknown until typed review.

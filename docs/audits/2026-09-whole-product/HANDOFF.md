@@ -18,7 +18,9 @@ The default order is retained with one swap: **Commitments before Finance is rev
 ## Preconditions / inputs for next pass
 - Emulator seed fixtures needed to un-skip family/finance e2e (F-03) — small infra task, safe, does not touch product code paths.
 - Callable registry cross-map (UI consumer ↔ function) to be produced in pass 9.
-- No product remediation until domain audits confirm findings; F-01/F-02/F-04 are the first likely remediation candidates.
+- **Reachability caveat (§10):** independent whole-repository reachability/dead-code analysis remains outstanding. Knip's current clean result is not repository-wide evidence — knip.json ignores functions/**, packages/**, e2e/**, tools/**, scripts/**, android/**, ios/**.
+- Dependency reconciliation: authenticated Dependabot review required to reconcile the GitHub-reported 67-alert banner with the locally reproduced 19 moderate advisories (F-09) before any dependency remediation task.
+- No product remediation until domain audits confirm findings; F-01/F-02/F-04/F-09 are the first likely remediation candidates.
 
 ## Context control
 This pass consumed the inventory/static slice only. Deep domain audits must run in fresh sessions, one domain per session, per Runtime v4 discipline.

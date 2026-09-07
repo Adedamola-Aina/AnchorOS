@@ -19,7 +19,7 @@ This pass established a full structural map of the production system (see 02-ARC
 |---|---|
 | `npm run lint` | PASS (exit 0, no output) |
 | `npx tsc --noEmit -p config/tsconfig.app.json` | PASS (exit 0, no output) |
-| `npm run check:dead-code` (knip) | PASS exit 0, zero findings — **but knip.json ignores functions/, packages/, e2e/, tools/, scripts/**, so reachability of those surfaces is NOT covered by knip. See F-06. |
+| `npm run check:dead-code` (knip) | PASS exit 0, zero findings — **but knip.json ignores functions/, packages/, e2e/, tools/, scripts/**, so reachability of those surfaces is NOT covered by knip. See F-06. Independent whole-repository reachability/dead-code analysis remains outstanding; knip's clean result is not repository-wide evidence. |
 | `git diff --check` | PASS (clean) |
 
 ## Provisional health scorecard (first pass)
@@ -39,7 +39,7 @@ Most domains remain GREY by design: static inspection alone cannot confirm behav
 | Fabric/Anchor AI | GREY | Large engine estate (QueryEngine, insights, predictions, briefing) + query-coverage gate at 99%. Unverified behaviorally. |
 | Settings | GREY | Many panels; settings-with-no-consumer audit not yet done. |
 | Notifications | GREY | FCM SW, push tokens, reminders pipeline in functions, preference toggles. Delivery effect unverified. |
-| Design System | GREEN (static) | Shared components + docs/DESIGN_TOKENS.md + tailwind config; consistent conventions observed. |
+| Design System | AMBER (static) | Shared components + docs/DESIGN_TOKENS.md + tailwind config confirm structural presence and consistent naming conventions observed on read. This establishes design-system presence ONLY: token adherence, responsive consistency, accessibility, reduced-motion support, and cross-screen visual consistency have not yet been audited. |
 | UI/UX | GREY | Mobile-first shell, 44px targets claimed; unverified. |
 | Accessibility | GREY | AccessibilityControls + useAccessibility exist; unverified. |
 | Firebase/Data | AMBER | 392-line Firestore rules + 51-line storage rules + rules emulator test suites + index catalog checks. Rules content not yet semantically reviewed. |
@@ -48,6 +48,6 @@ Most domains remain GREY by design: static inspection alone cannot confirm behav
 | Native/Mobile | GREY | Full Capacitor android/ios trees AND a separate apps/ios-native SwiftUI app (parallel implementation — parity risk). Unverified. |
 | Performance | GREY | Lighthouse CI config + virtualized lists exist; unverified. |
 | Testing | AMBER | Extremely extensive unit/e2e/rules estate; but multiple hard `test.skip(true, …)` e2e families and skipped optimistic-update tests mean coverage claims need per-domain verification. |
-| Dependencies | GREEN (static) | lint/tsc/knip green. |
+| Dependencies | AMBER | lint/tsc/knip pass, but dependency health is NOT evidenced by those gates. Local `npm audit` on current master lockfiles reports 19 moderate advisories (11 root + 8 functions, 0 high/critical), concentrated in the firebase-admin → @google-cloud/{firestore,storage} transitive chain (qs DoS, uuid) — production-runtime relevant for Functions. GitHub's Dependabot banner reported "67 vulnerabilities (20 high)" during Phase 0/1; this is UNVERIFIED — the Dependabot tab is not publicly accessible (HTTP 404 unauthenticated) and local audit does not reproduce it. See F-09. |
 | Privacy | GREY | privacy-first claim; FieldEncryption service exists; verification pending. |
-| Error handling | GREEN (static) | ErrorBoundary, FeatureErrorBoundary, captureError convention, /500 route, e2e error specs. |
+| Error handling | AMBER | Structural mechanisms present (ErrorBoundary, FeatureErrorBoundary, captureError convention, /500 route, e2e error specs); semantic failure/recovery behavior (what users actually experience on partial failure, retries, offline, function errors) is unverified. |
