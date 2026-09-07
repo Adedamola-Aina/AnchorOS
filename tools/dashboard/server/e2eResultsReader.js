@@ -80,28 +80,6 @@ function loadKnownFailures() {
     return { failures: [] };
 }
 
-/**
- * Persist current failures as known (called when owner marks them as pre-existing).
- */
-function markAsKnown(failureIds) {
-    const data = loadKnownFailures();
-    const existing = new Set(data.failures.map((f) => f.id));
-    for (const id of failureIds) {
-        if (!existing.has(id)) {
-            data.failures.push({ id, markedAt: new Date().toISOString() });
-        }
-    }
-    try {
-        const dir = path.dirname(KNOWN_FAILURES_PATH);
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        fs.writeFileSync(KNOWN_FAILURES_PATH, JSON.stringify(data, null, 2));
-    } catch { /* non-fatal */ }
-    return data;
-}
-
-/**
- * Full E2E results summary.
- */
 function getE2EResults() {
     // 1. Last run status
     let lastRun = null;
@@ -152,4 +130,4 @@ function getE2EResults() {
     };
 }
 
-module.exports = { getE2EResults, markAsKnown };
+module.exports = { getE2EResults };

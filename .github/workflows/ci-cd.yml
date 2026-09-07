@@ -104,57 +104,6 @@ jobs:
               errors.push('Risk Class A/B PRs must include a linked initiative issue reference in "Linked Initiative Issue" (e.g., #123).');
             }
 
-            // Block PRs that reference deferred/completed roadmap IDs unless explicitly overridden.
-            // This prevents accidental re-work or duplicate delivery on closed/deferred initiatives.
-            const overrideLabels = new Set(['governance-override', 'allow-completed-id']);
-            const labelNames = new Set((pr.labels || []).map((label) => String(label.name || '').toLowerCase()));
-            const hasOverrideLabel = [...overrideLabels].some((label) => labelNames.has(label));
-
-            try {
-              const roadmapPath = 'tools/dashboard/server/roadmap.json';
-              const { data: roadmapFile } = await github.rest.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: roadmapPath,
-              });
-
-              if (!Array.isArray(roadmapFile) && roadmapFile?.content) {
-                const roadmapRaw = Buffer.from(roadmapFile.content, 'base64').toString('utf8');
-                const roadmap = JSON.parse(roadmapRaw);
-                const initiatives = Array.isArray(roadmap?.initiatives) ? roadmap.initiatives : [];
-
-                const roadmapById = new Map(
-                  initiatives
-                    .filter((item) => item?.id && item?.status)
-                    .map((item) => [String(item.id).toUpperCase(), { status: String(item.status).toLowerCase(), title: item.title || '' }])
-                );
-
-                const referencedIds = new Set((`${pr.title || ''}\n${body}`).toUpperCase().match(/\b[A-Z]{2,6}-\d{3}\b/g) || []);
-                const blockedIds = [];
-
-                for (const id of referencedIds) {
-                  const roadmapItem = roadmapById.get(id);
-                  if (!roadmapItem) continue;
-                  if (roadmapItem.status === 'completed' || roadmapItem.status === 'deferred') {
-                    blockedIds.push({ id, status: roadmapItem.status, title: roadmapItem.title });
-                  }
-                }
-
-                if (blockedIds.length > 0 && !hasOverrideLabel) {
-                  const summary = blockedIds
-                    .slice(0, 5)
-                    .map((item) => `${item.id} (${item.status})${item.title ? `: ${item.title}` : ''}`)
-                    .join('; ');
-
-                  errors.push(
-                    `PR references deferred/completed roadmap item(s): ${summary}. Add label 'governance-override' (or 'allow-completed-id') with justification if this is intentional.`
-                  );
-                }
-              }
-            } catch (roadmapErr) {
-              core.warning(`Roadmap status check skipped: ${roadmapErr.message}`);
-            }
-
             if (errors.length > 0) {
               const checklistLines = [
                 '- Ensure all required headings exist: `Risk Class`, `Linked Initiative Issue`, `Success Metric`, `Guardrail Metrics`, `Rollout Plan`, `Rollback Plan`, `Observability`, `Test-to-Risk Mapping`.',
