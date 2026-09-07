@@ -7,9 +7,40 @@ permissions:
   contents: read
 
 jobs:
+  # Deterministic change classification: engineering-only and CI-only master
+  # pushes must not deploy the AnchorOS product to staging. Mixed or unknown
+  # changes fail safe to the normal staging deployment.
+  classify:
+    name: 🔎 Classify Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.classify.outputs.release }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Classify changed files
+        id: classify
+        run: |
+          set -euo pipefail
+          if [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            FILES=$(git diff --name-only "${{ github.event.before }}" HEAD || true)
+          else
+            FILES=$(git diff --name-only "HEAD~1" HEAD || true)
+          fi
+          if [ -z "$FILES" ]; then
+            echo "Changed-file set undeterminable; failing safe to staging deployment."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/ci/classify-changes.js --files $FILES
+
   build:
     name: Build Staging
     runs-on: ubuntu-latest
+    needs: [classify]
+    if: needs.classify.outputs.release == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
@@ -56,6 +87,7 @@ jobs:
     name: Post-Deploy E2E (non-blocking)
     runs-on: ubuntu-latest
     needs: [deploy]
+    if: needs.deploy.result == 'success'
     continue-on-error: true
     strategy:
       matrix:
