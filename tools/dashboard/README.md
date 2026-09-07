@@ -1,17 +1,20 @@
-# AnchorOS Internal Engineering Dashboard
+# AnchorOS Engineering Console
 
-The dashboard is an optional, read-only engineering observability console. It is useful for seeing environment parity, recent Git/deployment activity, coverage/test snapshots, and release health in one place.
+The console (formerly the Internal PM Dashboard) is an optional, read-mostly engineering observability console. It answers: what code is where, what is deployed, what passed/failed, are environments in sync, and is a release healthy.
 
-It is **not** the source of truth for normal coding work and is no longer a mandatory agent bootstrap step. Git, the repository, tests, GitHub issues/PRs, and the deployed environments are authoritative. Agents should query the dashboard only when the current task needs its telemetry.
+It is **not** a project manager, task tracker, roadmap authority, agent orchestrator, or approval system. Git, GitHub Issues/PRs, tests, CI, and the deployed environments are authoritative. Agents should query the console only when a task needs its telemetry.
 
-## Useful roles
+## Tabs
 
-- Compare dev/staging/production environment state.
-- Inspect recent commit and deployment activity.
-- Surface test, coverage, bundle, dependency, and code-quality snapshots exposed by the server.
-- Provide a human-friendly release/engineering overview over Tailscale.
+- **Overview** — current git SHA/branch, environment versions, parity and quality summary.
+- **Environments** — dev/staging/production versions, SHAs, and git-ancestry parity/drift.
+- **Delivery** — recent git activity and deployment-relevant history.
+- **Quality** — coverage, dependency health, secureDb compliance, code quality, bundle size, E2E, Functions coverage. Missing reports show as unavailable.
+- **Release** — evidence-based release readiness (advisory only; no automatic deployment decisions).
 
-The historical PM/task-tracking and agent-orchestration features may remain for compatibility, but new engineering workflows should not depend on them.
+## API
+
+`GET /api/overview`, `/api/environment`, `/api/parity`, `/api/parity-git`, `/api/delivery`, `/api/git/commits|timeline|stats|search/:id`, `/api/quality`, `/api/code-health`, `/api/coverage`, `/api/dependencies`, `/api/health`. `POST /api/refresh` clears server caches (the only mutating endpoint).
 
 ## Start/stop
 
