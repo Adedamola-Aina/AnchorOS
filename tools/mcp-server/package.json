@@ -1,7 +1,7 @@
 {
-  "name": "anchor-dashboard-mcp",
-  "version": "1.0.0",
-  "description": "MCP server wrapping Anchor OS Internal PM Dashboard",
+  "name": "anchoros-engineering-console-mcp",
+  "version": "2.0.0",
+  "description": "Optional read-only telemetry tools wrapping the AnchorOS Engineering Console (environment parity, delivery, quality, release health)",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,6 @@
     "inspect": "npx @modelcontextprotocol/inspector node index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
-    "zod": "^3.24.0"
+    "@modelcontextprotocol/sdk": "^1.12.1"
   }
 }

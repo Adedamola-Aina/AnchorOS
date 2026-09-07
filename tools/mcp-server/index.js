@@ -1,23 +1,19 @@
 #!/usr/bin/env node
-// @ts-nocheck
 
 /**
- * Anchor OS Dashboard MCP Server
- * 
- * Wraps the Internal PM Dashboard (localhost:3001) as MCP tools
- * so AI agents can query project state natively instead of using curl.
- * 
- * Tools exposed:
- *   - get_project_state     → /api/command-center
- *   - get_bugs              → /api/git/bugs
- *   - get_roadmap           → /api/git/roadmap
- *   - get_environment_parity → /api/parity
- *   - get_features          → /api/git/features
- *   - search_git            → /api/git/search/:keyword
- *   - get_next_id           → /api/intake/next-id
- *   - get_kanban            → /api/git/kanban
- *   - get_velocity          → /api/velocity/stats
- *   - get_changelog         → /api/git/changelog
+ * AnchorOS Engineering Console MCP Server
+ *
+ * Optional, read-only telemetry tools for environment/release investigations.
+ * The dashboard is NOT the source of truth — Git, GitHub Issues/PRs, tests,
+ * CI and the deployed environments are authoritative. Do not use these tools
+ * as a mandatory step before coding work; query them only when a task needs
+ * environment parity, delivery, quality or release-health telemetry.
+ *
+ * Tools (read-only, no dashboard/project state is mutated):
+ *   - get_environment_state → /api/environment + /api/parity
+ *   - get_release_health    → /api/overview
+ *   - get_quality_health    → /api/quality
+ *   - get_recent_delivery   → /api/delivery + /api/git/timeline
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -29,7 +25,7 @@ import {
 
 const DASHBOARD_URL = process.env.DASHBOARD_URL || "http://localhost:3001";
 
-// Helper to fetch from dashboard
+// Helper to fetch from the dashboard (read-only GETs only)
 async function dashboardFetch(path) {
   try {
     const response = await fetch(`${DASHBOARD_URL}${path}`, {
@@ -47,85 +43,47 @@ async function dashboardFetch(path) {
   }
 }
 
-// Define all tools
+// Read-only telemetry tools. Optional: use only for release/environment work.
 const TOOLS = [
   {
-    name: "get_project_state",
-    description: "Get the full project state from the command center. Use this FIRST before any work to understand current bugs, roadmap, velocity, deployment status, and alerts. This is the single source of truth.",
+    name: "get_environment_state",
+    description:
+      "Optional telemetry: get deployed versions/SHAs and git-ancestry-based parity for development, staging, and production. Useful during environment-parity or deployment investigations. Read-only; not a source of truth.",
     inputSchema: { type: "object", properties: {}, required: [] },
-    handler: () => dashboardFetch("/api/command-center"),
+    handler: async () => ({
+      environment: await dashboardFetch("/api/environment"),
+      parity: await dashboardFetch("/api/parity"),
+    }),
   },
   {
-    name: "get_bugs",
-    description: "Get all tracked bugs from git history. Use to check for duplicates before logging new bugs, and to understand what's currently broken.",
+    name: "get_release_health",
+    description:
+      "Optional telemetry: get a concise evidence-based release-health summary (candidate version, environment versions, parity, quality signals). Advisory only — it does not approve or perform releases. Read-only; not a source of truth.",
     inputSchema: { type: "object", properties: {}, required: [] },
-    handler: () => dashboardFetch("/api/git/bugs"),
+    handler: () => dashboardFetch("/api/overview"),
   },
   {
-    name: "get_roadmap",
-    description: "Get the feature roadmap with auto-detected progress from git. Shows planned, in-progress, and completed work with priorities.",
+    name: "get_quality_health",
+    description:
+      "Optional telemetry: get quality snapshots (coverage, dependency health, secureDb compliance, code quality, bundle size, E2E, Functions coverage). Missing reports appear as unavailable. Read-only; not a source of truth.",
     inputSchema: { type: "object", properties: {}, required: [] },
-    handler: () => dashboardFetch("/api/git/roadmap"),
+    handler: () => dashboardFetch("/api/quality"),
   },
   {
-    name: "get_environment_parity",
-    description: "Check what's deployed to Dev, Staging, and Production. Shows git-ancestry-based parity to know which environments have which fixes.",
+    name: "get_recent_delivery",
+    description:
+      "Optional telemetry: get recent git activity and deployment-relevant delivery history (branch, pending changes, deployment summary). Read-only; not a source of truth.",
     inputSchema: { type: "object", properties: {}, required: [] },
-    handler: () => dashboardFetch("/api/parity"),
-  },
-  {
-    name: "get_features",
-    description: "Get all tracked features from git history. Use to check for duplicates before logging new feature requests.",
-    inputSchema: { type: "object", properties: {}, required: [] },
-    handler: () => dashboardFetch("/api/git/features"),
-  },
-  {
-    name: "search_git",
-    description: "Search git commit history for a keyword or bug ID. Use to check if something was already fixed or implemented.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        keyword: { type: "string", description: "Keyword or ID to search for (e.g., 'BUG-008', 'dark mode', 'transaction')" },
-      },
-      required: ["keyword"],
-    },
-    handler: (args) => dashboardFetch(`/api/git/search/${encodeURIComponent(args.keyword)}`),
-  },
-  {
-    name: "get_next_id",
-    description: "Get the next available ID for a given type (bug, feature, gap, ux, reg). Use when logging new items to avoid ID collisions.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        type: { type: "string", description: "Item type: bug, feature, gap, ux, or reg", enum: ["bug", "feature", "gap", "ux", "reg"] },
-      },
-      required: ["type"],
-    },
-    handler: (args) => dashboardFetch(`/api/intake/next-id?type=${args.type}`),
-  },
-  {
-    name: "get_kanban",
-    description: "Get the Kanban board view of all work items with their current status (planned, in-progress, completed, deferred).",
-    inputSchema: { type: "object", properties: {}, required: [] },
-    handler: () => dashboardFetch("/api/git/kanban"),
-  },
-  {
-    name: "get_velocity",
-    description: "Get development velocity statistics — items completed per week, cycle time, and trends.",
-    inputSchema: { type: "object", properties: {}, required: [] },
-    handler: () => dashboardFetch("/api/velocity/stats"),
-  },
-  {
-    name: "get_changelog",
-    description: "Get the auto-generated changelog from git history.",
-    inputSchema: { type: "object", properties: {}, required: [] },
-    handler: () => dashboardFetch("/api/git/changelog"),
+    handler: async () => ({
+      delivery: await dashboardFetch("/api/delivery"),
+      timeline: await dashboardFetch("/api/git/timeline?days=14"),
+    }),
   },
 ];
 
 // Create MCP server
 const server = new Server(
-  { name: "anchor-dashboard", version: "1.0.0" },
+  { name: "anchoros-engineering-console", version: "2.0.0" },
   { capabilities: { tools: {} } }
 );
 
@@ -149,7 +107,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   const result = await tool.handler(request.params.arguments || {});
-  
+
   return {
     content: [
       {
@@ -164,7 +122,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Anchor Dashboard MCP Server running on stdio");
+  console.error("AnchorOS Engineering Console MCP Server running on stdio");
 }
 
 main().catch((error) => {

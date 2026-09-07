@@ -10,7 +10,6 @@ const deploymentTracker = require('../deploymentTracker');
 const { classifyCommit } = require('../gitAnalyzer');
 const { classifyWorkItem, deriveLifecycle } = require('../workIntelligence');
 const { extractIds, detectType } = require('./constants');
-const { getInitiativeTitle } = require('./roadmap');
 
 const git = simpleGit(path.join(__dirname, '../../../..'));
 
@@ -66,13 +65,12 @@ async function getAllTrackedItems(limit = 200) {
 
             for (const idInfo of ids) {
                 if (!items.has(idInfo.id)) {
-                    const roadmapTitle = getInitiativeTitle(idInfo.id);
                     const bodyTitle = idTitleMap[idInfo.id.toUpperCase()];
                     const commitTitle = commit.message.split('\n')[0].substring(0, 100);
                     const intelligence = classifyWorkItem({ id: idInfo.id, type: idInfo.type, message: fullMessage, files: changedFiles, category });
                     items.set(idInfo.id, {
                         id: idInfo.id, type: idInfo.type,
-                        title: roadmapTitle || bodyTitle || commitTitle,
+                        title: bodyTitle || commitTitle,
                         commitMessage: commitTitle, hash: shortHash, fullHash: commit.hash,
                         date: commit.date, author: commit.author_name, commitCount: 1,
                         relatedCommits: [shortHash],
@@ -113,40 +111,12 @@ async function getAllTrackedItems(limit = 200) {
             const status = deploymentStatus.get(item.fullHash);
             if (status) {
                 item.environments = { dev: status.development, staging: status.staging, production: status.production };
-                // Kanban stage: maps directly to Jira/Asana-style columns
-                // backlog    → never reached dev
-                // todo       → tracked (has ID) but not yet in dev
-                // in-progress → on dev, not yet staging
-                // in-review  → on staging, not yet production
-                // done       → on production
                 item.status = status.production ? 'deployed'
                     : status.staging ? 'staging'
                     : status.development ? 'dev'
                     : 'pending';
-                item.kanbanStage = status.production ? 'done'
-                    : status.staging ? 'in-review'
-                    : status.development ? 'in-progress'
-                    : 'todo';
                 item.lifecycle = deriveLifecycle(item.status);
-            } else {
-                item.kanbanStage = 'todo';
             }
-
-            // Enrich with roadmap metadata if available (priority, team, effort)
-            try {
-                const roadmap = require('./roadmap');
-                const roadmapEntry = roadmap.getRoadmapEntry ? roadmap.getRoadmapEntry(item.id) : null;
-                if (roadmapEntry) {
-                    item.priority = roadmapEntry.priority || item.priority || 'P3';
-                    item.team = roadmapEntry.team || item.team;
-                    item.effort = roadmapEntry.effort || item.effort;
-                    item.impact = roadmapEntry.impact || item.impact;
-                    // Use roadmap title if richer than commit subject
-                    if (roadmapEntry.title && roadmapEntry.title.length > item.title.length) {
-                        item.title = roadmapEntry.title;
-                    }
-                }
-            } catch { /* roadmap enrichment is best-effort */ }
         }
 
         const result = Array.from(items.values());

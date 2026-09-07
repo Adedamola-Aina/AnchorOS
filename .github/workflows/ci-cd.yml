@@ -17,6 +17,50 @@ env:
   NODE_VERSION: '22'
 
 jobs:
+  # Job 0: Classify changed files (deterministic, repository-owned).
+  # Engineering-only and CI-only master pushes must not trigger product
+  # versioning/builds/deployments. Mixed or unknown changes fail safe to
+  # the normal release pipeline.
+  classify:
+    name: 🔎 Classify Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      category: ${{ steps.classify.outputs.category }}
+      release: ${{ steps.classify.outputs.release }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed files
+        id: classify
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags origin "${{ github.base_ref }}"
+            FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            FILES=$(git diff --name-only "${{ github.event.before }}" HEAD || true)
+          else
+            FILES=$(git diff --name-only "HEAD~1" HEAD || true)
+          fi
+          # Fail safe: if no diff can be determined, prefer release validation.
+          if [ -z "$FILES" ]; then
+            echo "Changed-file set undeterminable; failing safe to release pipeline."
+            echo "category=PRODUCT_RUNTIME" >> "$GITHUB_OUTPUT"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s\n' "$FILES" > /tmp/changed-files.txt
+          node scripts/ci/classify-changes.js --files $(cat /tmp/changed-files.txt)
+
+          # Run the classifier's own focused tests whenever CI infrastructure
+          # (including the classifier) changes.
+          if grep -q '^scripts/ci/' /tmp/changed-files.txt; then
+            node --test scripts/ci/classify-changes.node-suite.mjs
+          fi
+
   governance-gates:
     name: 🛡️ PR Governance Gates
     runs-on: ubuntu-latest
@@ -102,57 +146,6 @@ jobs:
 
             if ((riskClass === 'A' || riskClass === 'B') && !hasInitiativeReference) {
               errors.push('Risk Class A/B PRs must include a linked initiative issue reference in "Linked Initiative Issue" (e.g., #123).');
-            }
-
-            // Block PRs that reference deferred/completed roadmap IDs unless explicitly overridden.
-            // This prevents accidental re-work or duplicate delivery on closed/deferred initiatives.
-            const overrideLabels = new Set(['governance-override', 'allow-completed-id']);
-            const labelNames = new Set((pr.labels || []).map((label) => String(label.name || '').toLowerCase()));
-            const hasOverrideLabel = [...overrideLabels].some((label) => labelNames.has(label));
-
-            try {
-              const roadmapPath = 'tools/dashboard/server/roadmap.json';
-              const { data: roadmapFile } = await github.rest.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: roadmapPath,
-              });
-
-              if (!Array.isArray(roadmapFile) && roadmapFile?.content) {
-                const roadmapRaw = Buffer.from(roadmapFile.content, 'base64').toString('utf8');
-                const roadmap = JSON.parse(roadmapRaw);
-                const initiatives = Array.isArray(roadmap?.initiatives) ? roadmap.initiatives : [];
-
-                const roadmapById = new Map(
-                  initiatives
-                    .filter((item) => item?.id && item?.status)
-                    .map((item) => [String(item.id).toUpperCase(), { status: String(item.status).toLowerCase(), title: item.title || '' }])
-                );
-
-                const referencedIds = new Set((`${pr.title || ''}\n${body}`).toUpperCase().match(/\b[A-Z]{2,6}-\d{3}\b/g) || []);
-                const blockedIds = [];
-
-                for (const id of referencedIds) {
-                  const roadmapItem = roadmapById.get(id);
-                  if (!roadmapItem) continue;
-                  if (roadmapItem.status === 'completed' || roadmapItem.status === 'deferred') {
-                    blockedIds.push({ id, status: roadmapItem.status, title: roadmapItem.title });
-                  }
-                }
-
-                if (blockedIds.length > 0 && !hasOverrideLabel) {
-                  const summary = blockedIds
-                    .slice(0, 5)
-                    .map((item) => `${item.id} (${item.status})${item.title ? `: ${item.title}` : ''}`)
-                    .join('; ');
-
-                  errors.push(
-                    `PR references deferred/completed roadmap item(s): ${summary}. Add label 'governance-override' (or 'allow-completed-id') with justification if this is intentional.`
-                  );
-                }
-              }
-            } catch (roadmapErr) {
-              core.warning(`Roadmap status check skipped: ${roadmapErr.message}`);
             }
 
             if (errors.length > 0) {
@@ -286,8 +279,10 @@ jobs:
   e2e-tests:
     name: 🎭 E2E Tests
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, classify]
     timeout-minutes: 45
+    # Product smoke gate: not needed for engineering-only master pushes.
+    if: github.event_name == 'pull_request' || needs.classify.outputs.release == 'true'
     
     steps:
       - name: Checkout code
@@ -428,8 +423,11 @@ jobs:
   version-bump:
     name: 📦 Version Bump
     runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '[skip-version]')
+    needs: [test, classify]
+    if: >-
+      github.ref == 'refs/heads/master' &&
+      !contains(github.event.head_commit.message, '[skip-version]') &&
+      needs.classify.outputs.release == 'true'
     outputs:
       new_version: ${{ steps.bump.outputs.new_version }}
     
@@ -482,9 +480,9 @@ jobs:
   build-dev:
     name: 🏗️ Build Dev
     runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/master'
-    
+    needs: [test, classify]
+    if: github.ref == 'refs/heads/master' && needs.classify.outputs.release == 'true'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -558,9 +556,11 @@ jobs:
   build-staging:
     name: 🏗️ Build Staging
     runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
-    
+    needs: [test, classify]
+    if: >-
+      (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop') &&
+      needs.classify.outputs.release == 'true'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -621,9 +621,9 @@ jobs:
   build-production:
     name: 🏗️ Build Production
     runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/master'
-    
+    needs: [test, classify]
+    if: github.ref == 'refs/heads/master' && needs.classify.outputs.release == 'true'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -656,8 +656,10 @@ jobs:
     name: 🔦 Lighthouse CI
     runs-on: ubuntu-latest
     needs: build-production
-    if: github.ref == 'refs/heads/master'
-    
+    # Product-only performance gate: skipped when the product pipeline is
+    # skipped for engineering-only/CI-only changes (needs propagation).
+    if: github.ref == 'refs/heads/master' && needs.build-production.result == 'success'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -694,9 +696,9 @@ jobs:
     name: 🚀 Deploy to Production
     runs-on: ubuntu-latest
     needs: [build-production, lighthouse, e2e-tests, rules-tests]
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && needs.build-production.result == 'success'
     environment: production
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

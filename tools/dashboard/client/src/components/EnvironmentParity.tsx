@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CheckCircle, XCircle, RefreshCw, PartyPopper } from 'lucide-react';
