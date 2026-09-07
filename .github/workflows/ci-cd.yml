@@ -58,7 +58,7 @@ jobs:
           # Run the classifier's own focused tests whenever CI infrastructure
           # (including the classifier) changes.
           if grep -q '^scripts/ci/' /tmp/changed-files.txt; then
-            node --test scripts/ci/classify-changes.test.js
+            node --test scripts/ci/classify-changes.node-suite.mjs
           fi
 
   governance-gates:

@@ -2,8 +2,10 @@
 
 /**
  * Focused tests for the deterministic change classifier.
- * Run: node --test scripts/ci/classify-changes.test.js
- * (also executed by the CI classify job via `npm run ci:classify`)
+ * Run: node --test scripts/ci/classify-changes.node-suite.mjs
+ * (also executed by the CI classify job via `node --test` when CI
+ * infrastructure changes; intentionally NOT discoverable by Vitest so the
+ * Node-native node:test suite is not bundled by the root Vitest run).
  */
 
 import test from 'node:test';
@@ -99,4 +101,72 @@ test('engineering-only CI scripts and docs do not trigger release', () => {
     ]);
     assert.equal(r.category, 'ENGINEERING_ONLY');
     assert.equal(r.release, false);
+});
+
+
+// --- CTO review corrections (PR #110) --------------------------------------
+
+test('root application manifest is product runtime', () => {
+    const r = classifyFiles(['package.json']);
+    assert.equal(r.category, 'PRODUCT_RUNTIME');
+    assert.equal(r.release, true);
+});
+
+test('engineering-tool manifest is engineering-only (scope, not basename)', () => {
+    const r = classifyFiles(['tools/mcp-server/package.json']);
+    assert.equal(r.category, 'ENGINEERING_ONLY');
+    assert.equal(r.release, false);
+});
+
+test('engineering console lockfile is engineering-only', () => {
+    const r = classifyFiles(['tools/dashboard/client/package-lock.json']);
+    assert.equal(r.category, 'ENGINEERING_ONLY');
+    assert.equal(r.release, false);
+});
+
+test('functions dependency manifests are backend runtime', () => {
+    const r = classifyFiles(['functions/package.json', 'functions/package-lock.json']);
+    assert.equal(r.category, 'BACKEND_RUNTIME');
+    assert.equal(r.release, true);
+});
+
+test('packages workspace manifests stay product runtime', () => {
+    const r = classifyFiles(['packages/types/package.json']);
+    assert.equal(r.category, 'PRODUCT_RUNTIME');
+    assert.equal(r.release, true);
+});
+
+test('retired .anchor engineering paths are engineering-only', () => {
+    const r = classifyFiles(['.anchor/WORKFLOW.md']);
+    assert.equal(r.category, 'ENGINEERING_ONLY');
+    assert.equal(r.release, false);
+});
+
+test('retired .github/.agent paths are engineering-only', () => {
+    const r = classifyFiles(['.github/.agent/rules/00-WORKFLOW.md']);
+    assert.equal(r.category, 'ENGINEERING_ONLY');
+    assert.equal(r.release, false);
+});
+
+test('retired .github/agents, instructions, .claude/skills, tools/hooks are engineering-only', () => {
+    const r = classifyFiles([
+        '.github/agents/engineer.md',
+        '.github/instructions/typescript.md',
+        '.claude/skills/review/SKILL.md',
+        'tools/hooks/pre-commit.sh',
+    ]);
+    assert.equal(r.category, 'ENGINEERING_ONLY');
+    assert.equal(r.release, false);
+});
+
+test('config/firebase.json is backend runtime', () => {
+    const r = classifyFiles(['config/firebase.json']);
+    assert.equal(r.category, 'BACKEND_RUNTIME');
+    assert.equal(r.release, true);
+});
+
+test('empty changed-file set fails safe to product runtime', () => {
+    const r = classifyFiles([]);
+    assert.equal(r.category, 'PRODUCT_RUNTIME');
+    assert.equal(r.release, true);
 });

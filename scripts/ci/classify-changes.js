@@ -44,13 +44,13 @@ import fs from 'node:fs';
  */
 function classifyPath(file) {
     const f = file.replace(/\\/g, '/');
-    const base = f.split('/').pop() || f;
 
     // --- Backend runtime -------------------------------------------------
     if (
         f.startsWith('functions/') ||
         f === 'firestore.rules' || f === 'storage.rules' ||
         f === 'firestore.indexes.json' ||
+        f === 'config/firebase.json' ||
         f === 'config/firestore.rules' || f === 'config/storage.rules' ||
         f === 'config/firestore.indexes.json' ||
         f === 'firebase.json'
@@ -67,30 +67,18 @@ function classifyPath(file) {
         return 'CI_INFRA';
     }
 
-    // --- Product runtime ---------------------------------------------------
-    if (
-        f.startsWith('src/') ||
-        f.startsWith('public/') ||
-        f.startsWith('packages/') ||
-        f.startsWith('android/') ||
-        f.startsWith('ios/') ||
-        f === 'index.html' ||
-        f === 'vite.config.ts' ||
-        f === 'capacitor.config.ts' ||
-        f === 'config/tsconfig.app.json' ||
-        base === 'package.json' || base === 'package-lock.json' ||
-        base === '.npmrc' ||
-        base === '.env.production' || base === '.env.staging'
-    ) {
-        return 'PRODUCT_RUNTIME';
-    }
-
-    // --- Engineering-only --------------------------------------------------
+    // --- Engineering-only (checked before product manifest basename rules,
+    //     so engineering-tool package manifests never count as runtime) ------
     if (
         f === 'AGENTS.md' || f === 'CLAUDE.md' || f === 'CONTRIBUTING.md' ||
         f === '.clineignore' ||
         f.startsWith('.clinerules/') || f.startsWith('.claude/') ||
         f.startsWith('.cline/') ||
+        // Retired legacy engineering-system paths (PR #110 deletions).
+        f.startsWith('.anchor/') ||
+        f.startsWith('.github/.agent/') ||
+        f.startsWith('.github/agents/') ||
+        f.startsWith('.github/instructions/') ||
         f === '.github/copilot-instructions.md' ||
         f.startsWith('.github/ISSUE_TEMPLATE/') ||
         f === '.github/PULL_REQUEST_TEMPLATE.md' ||
@@ -109,6 +97,26 @@ function classifyPath(file) {
         return 'ENGINEERING_ONLY';
     }
 
+    // --- Product runtime ---------------------------------------------------
+    if (
+        f.startsWith('src/') ||
+        f.startsWith('public/') ||
+        f.startsWith('packages/') ||
+        f.startsWith('android/') ||
+        f.startsWith('ios/') ||
+        f === 'index.html' ||
+        f === 'vite.config.ts' ||
+        f === 'capacitor.config.ts' ||
+        f === 'config/tsconfig.app.json' ||
+        // Root application dependency manifests only. Engineering-tool
+        // manifests (tools/...) are matched above as ENGINEERING_ONLY.
+        f === 'package.json' || f === 'package-lock.json' ||
+        f === '.npmrc' ||
+        f === '.env.production' || f === '.env.staging'
+    ) {
+        return 'PRODUCT_RUNTIME';
+    }
+
     // Fail safe: unknown paths prefer normal release validation.
     return 'PRODUCT_RUNTIME';
 }
@@ -120,6 +128,12 @@ export { classifyPath };
  * @returns {{ category: string, release: boolean }}
  */
 function classifyFiles(files) {
+    // Fail safe: an empty/undeterminable changed-file set must never be
+    // silently treated as engineering-only (which would skip release work).
+    // Mirrors the workflow behavior of failing safe to release validation.
+    if (!Array.isArray(files) || files.length === 0) {
+        return { category: 'PRODUCT_RUNTIME', release: true };
+    }
     const categories = files.map(classifyPath);
     if (categories.includes('BACKEND_RUNTIME')) {
         return { category: 'BACKEND_RUNTIME', release: true };
