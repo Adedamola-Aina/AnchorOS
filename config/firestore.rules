@@ -44,11 +44,18 @@ service cloud.firestore {
           && data.createdAt is string && data.createdAt.size() > 0 && data.createdAt.size() <= 50;
     }
 
-    // Family Mode v2: Check if user is connected family member
-    // Checks for existence of deterministic connection document (uid1_uid2 or uid2_uid1)
+    // Family Mode v2: Check if user is currently an active family member.
+    // FS-01: authorization requires an applicable connection whose status is
+    // currently 'active' — mere existence of a connection document (including
+    // 'disconnected'/'revoking' history) no longer grants family access.
+    // exists() guards get() so missing documents short-circuit deterministically;
+    // rules evaluate both UID orderings (connection doc ids are uid1_uid2 or
+    // uid2_uid1). get() results are cached per request by the rules engine.
     function isConnectedFamilyMember(userId) {
-      return exists(/databases/$(database)/documents/artifacts/anchor-os/family_connections/$(userId + '_' + request.auth.uid)) ||
-             exists(/databases/$(database)/documents/artifacts/anchor-os/family_connections/$(request.auth.uid + '_' + userId));
+      return (exists(/databases/$(database)/documents/artifacts/anchor-os/family_connections/$(userId + '_' + request.auth.uid))
+              && get(/databases/$(database)/documents/artifacts/anchor-os/family_connections/$(userId + '_' + request.auth.uid)).data.get('status', '') == 'active')
+          || (exists(/databases/$(database)/documents/artifacts/anchor-os/family_connections/$(request.auth.uid + '_' + userId))
+              && get(/databases/$(database)/documents/artifacts/anchor-os/family_connections/$(request.auth.uid + '_' + userId)).data.get('status', '') == 'active');
     }
 
     match /artifacts/anchor-os {
@@ -293,9 +300,21 @@ service cloud.firestore {
             return request.auth.uid in account.data.get('sharedWith', {}).keys();
           }
 
-          // Read: owner, legacy shares, sharedWith, or family scope
+          // FS-01b: a row-embedded `accountShares` snapshot is historical and
+          // MUST NOT authorize by itself. It is only honored while the current
+          // authoritative account document still grants the requester access
+          // (modern sharedWith grant, legacy shares key — FS-02 surface left
+          // unchanged, or family scope backed by an ACTIVE connection).
+          function isRowShareGrantValid() {
+            let account = get(/databases/$(database)/documents/artifacts/anchor-os/users/$(userId)/accounts/$(resource.data.accountId)).data;
+            return account.get('sharedWith', {}).get(request.auth.uid) != null
+                || account.get('shares', {}).get(request.auth.uid) != null
+                || (account.get('scope', '') == 'family' && isConnectedFamilyMember(userId));
+          }
+
+          // Read: owner, stale-indexed row backed by a current grant, sharedWith, or family scope
           allow read: if request.auth.uid == userId 
-                        || resource.data.get('accountShares', {})[request.auth.uid] != null
+                        || (resource.data.get('accountShares', {})[request.auth.uid] != null && isRowShareGrantValid())
                         || isSharedAccountMember()
                         || (resource.data.scope == 'family' && isConnectedFamilyMember(userId));
           
@@ -353,10 +372,24 @@ service cloud.firestore {
 
     // ========================================================================
     // Collection Group Query: Transactions on Shared Accounts  
-    // Allows shared members to read transactions using collection group queries
+    // Allows shared members to read transactions using collection group queries.
+    // FS-01b: the row-embedded `accountShares` snapshot is historical and no
+    // longer authorizes by itself — the CURRENT authoritative account document
+    // (resolved via the row's embedded accountOwnerId/accountId) must still
+    // grant the requester access. Stale snapshots of revoked grants therefore
+    // cannot survive disconnect, while active sharing is preserved.
     // ========================================================================
     match /{path=**}/finance/{txId} {
-      allow read: if request.auth != null && request.auth.uid in resource.data.get('accountShares', {}).keys();
+      function isMirrorRowShareGrantValid() {
+        let account = get(/databases/$(database)/documents/artifacts/anchor-os/users/$(resource.data.get('accountOwnerId', ''))/accounts/$(resource.data.get('accountId', ''))).data;
+        return account.get('sharedWith', {}).get(request.auth.uid) != null
+            || account.get('shares', {}).get(request.auth.uid) != null
+            || (account.get('scope', '') == 'family' && isConnectedFamilyMember(resource.data.get('accountOwnerId', '')));
+      }
+
+      allow read: if request.auth != null
+                  && request.auth.uid in resource.data.get('accountShares', {}).keys()
+                  && isMirrorRowShareGrantValid();
     }
 
     // ========================================================================
