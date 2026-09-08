@@ -61,8 +61,17 @@ No product code was modified. All findings are documented, not fixed.
 ## NEEDS DYNAMIC VERIFICATION (recorded limitations)
 
 - Real push delivery, email delivery, billing-affected Functions, Mono bank webhooks, passkey ceremonies on real devices, iOS/Android behavior, production rules deployment parity, offline/install behavior of the SW.
+- 2026-09-08 finance-pass additions: webhook signature byte-correctness in production (UH-01 in 06), Mono page-size loss rate (UH-02), production secret state (UH-03), ownerless-account prevalence (UH-04).
 
 ## UNKNOWN
 
 - Semantic correctness of 392-line Firestore rules (rules tests exist but content review pending).
 - Whether every registered callable has a UI consumer and vice versa (functions registries not yet cross-mapped).
+
+## DOMAIN PASS INDEX (detailed findings live in the domain documents)
+
+### 2026-09-07 — Auth / Account Lifecycle / Security → `05-AUTH-SECURITY-DOMAIN.md`
+Findings A-01…A-08 (confirmed) and U-01…U-06 (unverified) — recorded there, not duplicated here. S-01/S-02 resolved (see header note above).
+
+### 2026-09-08 — Finance / Financial Integrity → `06-FINANCE-FINANCIAL-INTEGRITY.md`
+Confirmed findings FI-01…FI-18 and unverified UH-01…UH-06 — recorded there. Headline: **FI-01** webhook replay cache loses legitimate Mono retries (HIGH), **FI-02** webhook HMAC over re-serialized JSON instead of raw bytes (HIGH, fail-closed), **FI-03** no pagination/cursor in Mono sync — transactions beyond page 1 never imported (HIGH), **FI-05/FI-07** balance reversals/corrections computed from stale client data (MEDIUM), **FI-06/FI-18** no idempotency: offline-queue retries and concurrent syncs duplicate financial operations (MEDIUM), **FI-11** ARCH-022 ledger is not tamper-evident (MEDIUM), **FI-09** deleteMyAccount never revokes Mono (deepens A-04, MEDIUM). No stop condition triggered. Transfers/transactions are atomic at the batch level; cross-user finance access rules-proven denied.

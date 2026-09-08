@@ -34,7 +34,7 @@ Most domains remain GREY by design: static inspection alone cannot confirm behav
 | Identity/Security | AMBER (audited 2026-09-07 — see 05) | Only "Not me" revokes tokens; device attestation inert (A-08); auth-event spoofable (A-06). |
 | Home/Dashboard | GREY | Widgets (AssetAllocation, BeyondBasics, ProductivityScore, CompletionRing, RecentActivity) exist with unit tests; E2E coverage of dashboard exists. Unverified behaviorally. |
 | Commitments | AMBER | Full feature surface + tests; but "Focus mode" is a declared-coming-soon stub (F-01) and optimistic-update tests are skipped (F-02). |
-| Finance | AMBER | Very large surface (accounts, transactions, recurring, transfers, bank link via Mono, shared accounts) with tests; heavy @ts-nocheck concentration (67 files). Highest static-risk concentration in the product. |
+| Finance | AMBER (audited 2026-09-08 — see 06-FINANCE-FINANCIAL-INTEGRITY.md) | Full finance/mono/webhook forensic pass: 18 confirmed findings (3 HIGH: webhook replay-loss FI-01, webhook HMAC over re-serialized bytes FI-02, no sync pagination FI-03); no idempotency/reconciliation anywhere (FI-06/08/18); ledger not tamper-evident (FI-11); batch atomicity of transfers sound; cross-user access rules-proven denied; no stop condition. |
 | Family Mode | GREY | V2 functions, invitations, migrations, rules tests, e2e; many family e2e tests are hard-skipped pending fixtures (F-03). |
 | Fabric/Anchor AI | GREY | Large engine estate (QueryEngine, insights, predictions, briefing) + query-coverage gate at 99%. Unverified behaviorally. |
 | Settings | GREY | Many panels; settings-with-no-consumer audit not yet done. |
