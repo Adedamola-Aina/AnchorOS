@@ -2,6 +2,12 @@
 
 No product code was modified. All findings are documented, not fixed.
 
+## FINAL SYNTHESIS (2026-09-09) — read this first
+
+The audit program is **complete**. The canonical finding register is now `MASTER-FINDING-REGISTER.md` (105 raw findings → **89 canonical roots** after 15 dedup reclassifications; 87 open; **0 CRITICAL / 8 HIGH / 32 MEDIUM / 33 LOW / 14 INFO**; **2 release blockers: FS-01, SN-01**). Full synthesis, stop-condition re-evaluation, F-09 dependency reconciliation (**RESOLVED/EXPLAINED**), architectural decisions (AM-1..AM-13), invariants (INV-1..13), bundles (B1..B13), waves (W0..W6), and the release-readiness verdict: `12-FINAL-SYNTHESIS-REMEDIATION-PLAN.md`. Next step (remediation, not audit): `HANDOFF.md` — first task `remediation/wave1-family-revocation`.
+
+**Status of this file:** the F-*/S-* findings below remain the Phase 0/1 record; their canonical status, normalized severity, and dedup relations live in the register. F-06 is CLOSED (resolved by report 11). F-08 is PENDING APPROVED RETIREMENT (PR #111). F-02 is a DUPLICATE of C-01/C-02. Domain findings A-*/FI-*/FS-*/C-*/FB-*/SN-* are recorded in their reports and canonically in the register.
+
 ## CONFIRMED FINDINGS
 
 ### F-01 · Commitments/Finance · UI capability stubs presented as controls · P3 · high confidence

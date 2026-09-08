@@ -51,3 +51,18 @@ Most domains remain GREY by design: static inspection alone cannot confirm behav
 | Dependencies | AMBER | lint/tsc/knip pass, but dependency health is NOT evidenced by those gates. Local `npm audit` on current master lockfiles reports 19 moderate advisories (11 root + 8 functions, 0 high/critical), concentrated in the firebase-admin → @google-cloud/{firestore,storage} transitive chain (qs DoS, uuid) — production-runtime relevant for Functions. GitHub's Dependabot banner reported "67 vulnerabilities (20 high)" during Phase 0/1; this is UNVERIFIED — the Dependabot tab is not publicly accessible (HTTP 404 unauthenticated) and local audit does not reproduce it. See F-09. |
 | Privacy | GREY | privacy-first claim; FieldEncryption service exists; verification pending. |
 | Error handling | AMBER | Structural mechanisms present (ErrorBoundary, FeatureErrorBoundary, captureError convention, /500 route, e2e error specs); semantic failure/recovery behavior (what users actually experience on partial failure, retries, offline, function errors) is unverified. |
+
+## Phase 2 — Final synthesis (2026-09-09) — PROGRAM COMPLETE
+
+**AUDIT DISCOVERY PHASE: COMPLETE.** All domain audits (reports 00–11) are reconciled in `12-FINAL-SYNTHESIS-REMEDIATION-PLAN.md` with the canonical register in `MASTER-FINDING-REGISTER.md`.
+
+| Metric | Result |
+|---|---|
+| Raw findings | 105 confirmed (92 numbered + 13 reachability) + 34 unverified items |
+| Canonical roots | 89 (87 open) — 0 CRITICAL · 8 HIGH · 32 MEDIUM · 33 LOW · 14 INFO |
+| Release blockers (P0) | **FS-01** (family revocation leak) and **SN-01** (FCM token survives logout/account-switch) |
+| F-09 dependencies | **RESOLVED / EXPLAINED** — GitHub 67 alerts = 5 manifests (3 internal-tooling manifests hold all 20 highs); product manifests carry 3 open moderate alerts |
+| Verdict | **NOT production-ready.** Production gate = Wave 0 (land PR #111) → Wave 1 (P0 bundles) → Wave 2 (deletion/session/recovery) → Wave 3a (webhook/sync FI-01/02/03/18) |
+| Next action | Remediation Wave 1 — first branch `remediation/wave1-family-revocation` (see HANDOFF). No further audit discovery is justified. |
+
+Provisional scorecard deltas vs Phase 1: Sessions, Family/sharing, Notifications/devices, Firestore rules, Bank integration/webhooks now **RED** (confirmed stop conditions/broken channel); all others AMBER per report 12 §18.

@@ -1,6 +1,24 @@
 # HANDOFF — Next-pass plan
 
-## Recommended deep-audit order (evidence-adjusted)
+## ⛔ AUDIT DISCOVERY PHASE: COMPLETE (2026-09-09)
+
+The whole-product audit program is **finished**. All 11 domain/phase reports are complete, reconciled, and consolidated: see `12-FINAL-SYNTHESIS-REMEDIATION-PLAN.md` and `MASTER-FINDING-REGISTER.md` (105 raw findings → 89 canonical roots, 2 release blockers). **Do not start any further feature-domain audits.** The next work is remediation, beginning with the task below.
+
+### First remediation task (exact)
+
+- **Branch:** `remediation/wave1-family-revocation` — **forked from master AFTER PR #111 merges** (recommendation: **A — PR #111 must merge first**; see §Sequencing).
+- **Findings included:** FS-01, FS-01b, FS-04 (bundle B1). Core change: status-aware `isConnectedFamilyMember` (or connection-doc deletion — decision AM-3), one-way `scope:'family'` reset + stale `accountShares` index strip on disconnect, transactional/idempotent disconnect, one-time cleanup migration for existing disconnected pairs.
+- **Exclusions:** FS-02 (legacy `shares` — Wave 3, decision AM-2), FS-03 (dual households — Wave 3), all notification/device work (SN-* — parallel Wave 1 PR `remediation/wave1-token-lifecycle`), Fabric, CI cleanup. No unrelated cleanup.
+- **Expected changes:** `config/firestore.rules` (family predicates), `functions/src/familyDisconnect.ts`, `functions/src/familySharing.ts` (share-vs-disconnect race), cleanup migration module, `src/services/TransferOperations.ts` (stop embedding stale indexes), Tier-1 typing of `src/features/finance/utils/permissions.ts` as prerequisite.
+- **Test requirements (blocking):** extended rules-emulator post-disconnect suite seeding `scope`, `accountShares`, `dashboard`, family commitments — ex-member read DENIED on all branches, active member allowed; disconnect partial-failure leaves no orphaned grants; share-vs-disconnect race test; cleanup migration idempotency test.
+- **Rollout:** rules deploy first (staging → prod; this is the containment moment), then functions, then client; dry-run the migration count query (§17 V1–V3 of report 12) before the migration PR merges.
+- **Stop/rollback conditions:** if rules `get()` cost on `isConnectedFamilyMember` is unacceptable in the rules emulator/billing profile → switch to the AM-3(b) fallback (delete connection doc on disconnect) within the same PR scope; if production data shows zero `scope:'family'` docs (V1), ship the rules fix without the data migration but keep it available. Rules revert restores prior behavior; migration is idempotent/additive.
+- **Sequencing decision (PR #111):** recommend **A — merge PR #111 before remediation begins**. Rationale: PR #111 deletes 247 tracked files plus `ios-native.yml`, ios scripts, and the swift Dependabot ecosystem — concurrent remediation would create recurring integration conflicts and a moving base for no benefit. Remediation branches fork from post-#111 master; the audit documentation branch merges to master (docs-only) after CTO review so register IDs travel with the codebase. If #111 is unexpectedly blocked, Wave 1 B1 (family revocation) may start in parallel from current master (conflict surface is disjoint: rules + functions + finance/permissions files), but B2 (token lifecycle, touching `AuthContext`/Capacitor surfaces) must wait.
+- **CTO checkpoint:** review this synthesis + register before the first remediation PR.
+
+## Prior pass history (audit mode — closed)
+
+### Recommended deep-audit order (evidence-adjusted; now fully executed)
 
 The default order is retained with one swap: **Commitments before Finance is reversed** — the static pass shows the heaviest @ts-nocheck concentration (67 files) and the balance-mutation risk (LedgerService, transfers, bank sync) in Finance, and Finance also feeds Family shared-data risk. Auth stays first because 28 auth/security-path files are @ts-nocheck and MFA/sign-out e2e is skipped.
 
