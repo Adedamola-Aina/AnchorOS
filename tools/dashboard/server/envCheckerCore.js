@@ -25,7 +25,6 @@ const REPO_PATH = path.join(__dirname, '../../..');
 
 // Domain → human label mapping
 const DOMAIN_LABELS = {
-    'ios-native': 'iOS Native',
     'android-native': 'Android Native',
     'mobile': 'Mobile PWA',
     'finance': 'Finance',
@@ -63,7 +62,7 @@ function deriveFeatureLabel(workKind, domain, id = '') {
     if (prefix === 'BUG' || prefix === 'REG') return `Bug Fix · ${domainLabel}`;
     if (prefix === 'SEC') return `Security Fix · ${domainLabel}`;
     if (prefix === 'ARCH') return `Architecture · ${domainLabel}`;
-    if (prefix === 'FIN' && (domain === 'ios-native' || domain === 'android-native')) return `Native Feature · ${domainLabel}`;
+    if (prefix === 'FIN' && domain === 'android-native') return `Native Feature · ${domainLabel}`;
     return `${kindLabel} · ${domainLabel}`;
 }
 

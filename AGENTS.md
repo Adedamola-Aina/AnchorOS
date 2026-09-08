@@ -7,6 +7,8 @@ Provider-specific instruction files must stay small and point here instead of du
 
 AnchorOS is a privacy-first household finance and commitment platform built with React 19, TypeScript strict mode, Firebase, and Capacitor. Mobile is the primary experience; design for a 375px baseline and at least 44px touch targets.
 
+**One product implementation.** React + TypeScript is the sole canonical implementation, distributed as Web/PWA plus Capacitor iOS/Android shells. Native Swift/Kotlin may exist only for OS integration, Capacitor plugins/bridges, generated shell code, platform lifecycle, and permissions. Product/business logic stays in TypeScript unless a future explicit architecture decision says otherwise. Do not create or maintain duplicate product implementations.
+
 ## Non-negotiable engineering invariants
 
 - Keep TypeScript strict. Do not introduce `any` to bypass type design.
