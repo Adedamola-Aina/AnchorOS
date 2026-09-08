@@ -4,7 +4,7 @@
 
 The default order is retained with one swap: **Commitments before Finance is reversed** — the static pass shows the heaviest @ts-nocheck concentration (67 files) and the balance-mutation risk (LedgerService, transfers, bank sync) in Finance, and Finance also feeds Family shared-data risk. Auth stays first because 28 auth/security-path files are @ts-nocheck and MFA/sign-out e2e is skipped.
 
-1. **Auth / account lifecycle / identity / security** — verify session revoke actually revokes (server-side), MFA recovery, passkey ceremonies, email verification flows; review AuthContext under suppression.
+1. **Auth / account lifecycle / identity / security — DONE (2026-09-07, 05-AUTH-SECURITY-DOMAIN.md)** — Session "Revoke" is cosmetic (A-03); recovery consume is non-atomic/replayable under race (A-01); recovery codes generated client-side (A-02); deleteAccount is non-transactional with incomplete erasure and zero tests (A-04); only "Not me" revokes refresh tokens; password-change/reset session effects UNVERIFIED (U-01). S-02 resolved as CONFIRMED (A-04). S-01 resolved as confirmed @ts-nocheck exposure (§9 of 05).
 2. **Finance / financial integrity** — LedgerService invariants, transfer atomicity, delete-reverses-balance (skipped test), bank sync/webhook authorization (Mono), recurring engine.
 3. **Family permissions / shared data isolation** — rules semantic review (family sections), un-skip family e2e with emulator fixtures, invitation lifecycle, shared finance permissions.
 4. **Commitments/tasks** — BUG-023 optimistic updates, reminders scheduling, recurrence correctness.

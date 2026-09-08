@@ -52,6 +52,8 @@ No product code was modified. All findings are documented, not fixed.
 
 ## STRONG SUSPICIONS (not yet confirmed)
 
+> 2026-09-07 update: S-01 and S-02 have since been INVESTIGATED in the auth domain pass — see docs/audits/2026-09-whole-product/05-AUTH-SECURITY-DOMAIN.md (S-02 → CONFIRMED as A-04; S-01 → confirmed suppression exposure, §9). Findings A-01…A-08 and U-01…U-06 are recorded there and are not re-listed here.
+
 - S-01 · AuthContext.tsx and FinanceContext.tsx under @ts-nocheck suggests fragile auth/finance state plumbing; quality unknown until typed review.
 - S-02 · Account deletion completeness (Firestore subcollections, Storage artifacts, push tokens, third-party Mono links) unverified — classic incomplete-deletion risk.
 - S-03 · `src/utils/seeder.ts` reachable via settings DeveloperTools — verify it is dev-gated and cannot seed production accounts.

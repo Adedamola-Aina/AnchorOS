@@ -28,10 +28,10 @@ Most domains remain GREY by design: static inspection alone cannot confirm behav
 
 | Domain | Status | Rationale |
 |---|---|---|
-| Auth | AMBER | Large, layered implementation (AuthContext, MFA, passkeys, rate limit, social auth, recovery, functions-side sessionManagement/passkeyAuth) + rules/e2e/security tests. BUT 28 production auth/security-path files carry `@ts-nocheck` incl. AuthContext.tsx. Deep verification required. |
-| Account lifecycle | GREY | deleteAccount function + DangerZone exist; completeness of data deletion unverified. |
+| Auth | AMBER (audited 2026-09-07 — see 05-AUTH-SECURITY-DOMAIN.md) | 10 mechanisms mapped; sessions NOT revoked by "Revoke" (A-03), recovery consume non-atomic (A-01), client-side recovery material (A-02); deep findings documented, none remediated. |
+| Account lifecycle | AMBER (audited 2026-09-07 — see 05) | deleteAccount confirmed non-transactional with incomplete erasure and NO unit tests (A-04). |
 | Onboarding | GREY | OnboardingView, steps, invite acceptance exist with tests. Unverified. |
-| Identity/Security | AMBER | Sessions, auth-event history, device attestation present; revocation behavior unverified. |
+| Identity/Security | AMBER (audited 2026-09-07 — see 05) | Only "Not me" revokes tokens; device attestation inert (A-08); auth-event spoofable (A-06). |
 | Home/Dashboard | GREY | Widgets (AssetAllocation, BeyondBasics, ProductivityScore, CompletionRing, RecentActivity) exist with unit tests; E2E coverage of dashboard exists. Unverified behaviorally. |
 | Commitments | AMBER | Full feature surface + tests; but "Focus mode" is a declared-coming-soon stub (F-01) and optimistic-update tests are skipped (F-02). |
 | Finance | AMBER | Very large surface (accounts, transactions, recurring, transfers, bank link via Mono, shared accounts) with tests; heavy @ts-nocheck concentration (67 files). Highest static-risk concentration in the product. |
