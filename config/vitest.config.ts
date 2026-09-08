@@ -24,7 +24,7 @@ export default defineConfig({
     },
   },
   test: {
-    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '.stryker-tmp/**', 'tools/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '.stryker-tmp/**', 'tools/**', '**/*.emulator.test.ts', '**/*.emulator.ts'],
     globals: true,
     environment: 'jsdom',
     setupFiles: path.resolve(rootDir, 'src/test/setup.ts'),
