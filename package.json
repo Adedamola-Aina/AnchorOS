@@ -31,6 +31,7 @@
     "lighthouse:collect": "lhci collect",
     "test:integration": "./scripts/test-with-emulator.sh",
     "test:rules": "firebase emulators:exec --only firestore,storage 'npx vitest run --config config/vitest.rules.config.ts'",
+    "test:functions:emulator": "firebase emulators:exec --only firestore 'cd functions && npx vitest run --config vitest.emulator.config.ts'",
     "test:rules:ci": "firebase emulators:exec --only firestore,storage 'npx vitest run --config config/vitest.rules.config.ts && npx tsx tools/ci/check-rules-coverage.ts'",
     "check:rules-coverage": "npx tsx tools/ci/check-rules-coverage.ts",
     "check:indexes": "npx tsx tools/ci/check-index-catalog.ts",

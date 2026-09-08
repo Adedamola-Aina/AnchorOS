@@ -8,10 +8,12 @@
 
 import { MigrationRunner } from './migrationRunner';
 import { migration001FamilyV2 } from './migrations/001_family_v2';
+import { migration002FamilyRevocationCleanup } from './migrations/002_family_revocation_cleanup';
 
 const runner = new MigrationRunner();
 
 // Register all migrations in order
 runner.register(migration001FamilyV2);
+runner.register(migration002FamilyRevocationCleanup);
 
 export { runner };

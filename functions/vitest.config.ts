@@ -17,7 +17,7 @@ export default defineConfig({
         globals: true,
         environment: 'node',
         include: ['src/**/*.test.ts'],
-        exclude: ['**/node_modules/**', 'lib/**'],
+        exclude: ['**/node_modules/**', 'lib/**', 'src/**/*.emulator.test.ts'],
         coverage: {
             provider: 'v8',
             reporter: ['text', 'json', 'json-summary', 'html'],

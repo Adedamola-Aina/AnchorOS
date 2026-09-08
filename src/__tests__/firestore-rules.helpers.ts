@@ -20,7 +20,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 export { assertSucceeds, assertFails };
-export { doc, getDoc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+export { doc, getDoc, setDoc, deleteDoc, updateDoc, collectionGroup, getDocs, query, where } from 'firebase/firestore';
 export { describe, it, beforeAll, afterAll, beforeEach } from 'vitest';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
