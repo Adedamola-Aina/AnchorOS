@@ -35,6 +35,7 @@ import { disconnectFamilyCore } from './familyDisconnect';
 import { shareAccountCore } from './familySharing';
 import {
   cleanupFamilyGrants,
+  CLEANUP_BATCH_SIZE,
   type FamilyGrantCleanupCounts,
 } from './familyRevocationCleanup';
 import { migration002FamilyRevocationCleanup } from './migrations/migrations/002_family_revocation_cleanup';
@@ -299,6 +300,59 @@ describe('cleanupFamilyGrants idempotency', () => {
     expect(second.accountsUpdated).toBe(0);
     expect(second.accountScopesReset).toBe(0);
     expect(second.financeRowsUpdated).toBe(0);
+  });
+
+  it('rotates the account WriteBatch after each full commit (> CLEANUP_BATCH_SIZE accounts)', async () => {
+    // A Firestore WriteBatch is single-use after commit. Force MORE than one
+    // full account-cleanup chunk to prove a fresh batch is allocated after
+    // each commit — the second chunk must commit successfully, not throw on
+    // the reused batch.
+    const qualifyingAccounts = CLEANUP_BATCH_SIZE + 1; // 251
+
+    const seed = db.batch();
+    for (let i = 0; i < qualifyingAccounts; i++) {
+      seed.set(accountRef(OWNER, `acc-${i}`), {
+        name: `Account ${i}`,
+        balanceCents: i,
+        type: 'checking',
+        currency: 'NGN',
+        scope: 'family',
+        shares: {},
+        sharedWith: {
+          [MEMBER]: { grantedAt: '2026-01-01T00:00:00.000Z', grantedBy: OWNER, permission: 'transact' },
+        },
+      });
+    }
+    await seed.commit();
+
+    const counts: FamilyGrantCleanupCounts = await cleanupFamilyGrants(db, OWNER, MEMBER);
+
+    // First chunk (250) AND second chunk (1) both committed.
+    expect(counts.batchesCommitted).toBe(2);
+    expect(counts.accountsScanned).toBe(qualifyingAccounts);
+    expect(counts.accountsUpdated).toBe(qualifyingAccounts);
+    expect(counts.accountScopesReset).toBe(qualifyingAccounts);
+
+    // Every qualifying account — across BOTH chunks — was corrected.
+    const accountsSnap = await db
+      .collection(`artifacts/${APP_ID}/users/${OWNER}/accounts`)
+      .get();
+    let personal = 0;
+    let withGrant = 0;
+    accountsSnap.forEach((d: { data: () => Record<string, any> }) => {
+      const data = d.data();
+      if (data.scope === 'personal') personal += 1;
+      if (data.sharedWith?.[MEMBER] !== undefined) withGrant += 1;
+    });
+    expect(personal).toBe(qualifyingAccounts);
+    expect(withGrant).toBe(0);
+
+    // Rerun is a no-op (idempotent).
+    const second: FamilyGrantCleanupCounts = await cleanupFamilyGrants(db, OWNER, MEMBER);
+    expect(second.accountsUpdated).toBe(0);
+    expect(second.accountScopesReset).toBe(0);
+    expect(second.financeRowsUpdated).toBe(0);
+    expect(second.batchesCommitted).toBe(0);
   });
 });
 

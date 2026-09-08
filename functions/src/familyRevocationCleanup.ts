@@ -88,7 +88,7 @@ async function cleanupOwnerAccounts(
     options: CleanupOptions,
 ): Promise<void> {
     const accountsSnap = await usersRef(db).doc(ownerUid).collection('accounts').get();
-    const batch = db.batch();
+    let batch: FirebaseFirestore.WriteBatch = db.batch();
     let batchOps = 0;
     let batchIndex = 0;
 
@@ -135,6 +135,9 @@ async function cleanupOwnerAccounts(
             counts.batchesCommitted += 1;
             batchIndex += 1;
             batchOps = 0;
+            // A Firestore WriteBatch is single-use after commit — allocate a
+            // fresh one for the next chunk (mirrors the finance cleanup path).
+            batch = db.batch();
         }
     }
 
