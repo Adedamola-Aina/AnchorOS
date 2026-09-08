@@ -43,7 +43,7 @@ Most domains remain GREY by design: static inspection alone cannot confirm behav
 | UI/UX | GREY | Mobile-first shell, 44px targets claimed; unverified. |
 | Accessibility | GREY | AccessibilityControls + useAccessibility exist; unverified. |
 | Firebase/Data | AMBER | 392-line Firestore rules + 51-line storage rules + rules emulator test suites + index catalog checks. Family/shared sections semantically audited (07 §12): default-deny and party-isolation hold; family predicate is existence-only — drives FS-01. |
-| Functions | GREY | ~50 function modules incl. bank webhooks (Mono), MFA recovery, family, reminders, rate limiting. Reachability of every callable unverified. Family callables inventoried in 07 §13 (incl. orphaned `addTransactionToSharedAccount`, unauthenticated `validateInvitationToken`, un-admin-gated migration runner). |
+| Functions | AMBER (reachability verified 2026-09-08 — see 11-WHOLE-REPOSITORY-REACHABILITY-DEAD-CODE.md) | ~50 deployed functions; barrel-export matrix proves all 81 non-test Functions source files deployment-reachable (no orphaned Functions modules); 10 deployed callables have NO product caller (externally reachable orphan surfaces incl. `addTransactionToSharedAccount`, `migrateFamilyConnectionsV2`, migration admin verbs); registry/contract subsystem is TEST_ONLY. Family callables inventoried in 07 §13. |
 | PWA | AMBER | sw.js + manifest + InstallPrompt + messaging SW. Placeholder measurementId (F-04); minimal offline asset caching. |
 | Native/Mobile | GREY | Full Capacitor android/ios trees AND a separate apps/ios-native SwiftUI app (parallel implementation — parity risk). Unverified. |
 | Performance | GREY | Lighthouse CI config + virtualized lists exist; unverified. |
