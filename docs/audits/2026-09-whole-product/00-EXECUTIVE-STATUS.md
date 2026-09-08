@@ -42,8 +42,8 @@ Most domains remain GREY by design: static inspection alone cannot confirm behav
 | Design System | AMBER (static) | Shared components + docs/DESIGN_TOKENS.md + tailwind config confirm structural presence and consistent naming conventions observed on read. This establishes design-system presence ONLY: token adherence, responsive consistency, accessibility, reduced-motion support, and cross-screen visual consistency have not yet been audited. |
 | UI/UX | GREY | Mobile-first shell, 44px targets claimed; unverified. |
 | Accessibility | GREY | AccessibilityControls + useAccessibility exist; unverified. |
-| Firebase/Data | AMBER | 392-line Firestore rules + 51-line storage rules + rules emulator test suites + index catalog checks. Rules content not yet semantically reviewed. |
-| Functions | GREY | ~50 function modules incl. bank webhooks (Mono), MFA recovery, family, reminders, rate limiting. Reachability of every callable unverified. |
+| Firebase/Data | AMBER | 392-line Firestore rules + 51-line storage rules + rules emulator test suites + index catalog checks. Family/shared sections semantically audited (07 §12): default-deny and party-isolation hold; family predicate is existence-only — drives FS-01. |
+| Functions | GREY | ~50 function modules incl. bank webhooks (Mono), MFA recovery, family, reminders, rate limiting. Reachability of every callable unverified. Family callables inventoried in 07 §13 (incl. orphaned `addTransactionToSharedAccount`, unauthenticated `validateInvitationToken`, un-admin-gated migration runner). |
 | PWA | AMBER | sw.js + manifest + InstallPrompt + messaging SW. Placeholder measurementId (F-04); minimal offline asset caching. |
 | Native/Mobile | GREY | Full Capacitor android/ios trees AND a separate apps/ios-native SwiftUI app (parallel implementation — parity risk). Unverified. |
 | Performance | GREY | Lighthouse CI config + virtualized lists exist; unverified. |

@@ -23,6 +23,56 @@ Per the task's stop conditions: **documented exactly, not remediated.** The rest
 
 ## 1. Executive summary
 
+§2_PLACEHOLDER
+## 2. Family architecture / data-flow map
+
+### 2.1 Canonical V2 implementation (the live product)
+
+**Household shape**: exactly two parties. `family_connections/{ownerUid_memberUid}` (`functions/src/familyConnectionConfirm.ts:61-71`). One active connection per user is enforced only at invite-creation time (`familyInvitations.ts:40`) — **not** at confirm time (FS-03). Roles: connection `owner` and `member`; **no admin/manager roles exist** anywhere in the product.
+
+**Invitation flow (UI → Function → Firestore):**
+
+```
+InviteFamilyMember.tsx (Settings)                      [client, @ts-nocheck]
+  → reauthenticateWithCredential (client-side only)
+  → httpsCallable('createFamilyInvitation')
+    → familyInvitations.ts: pending-invite dedupe (same owner+invitee),
+      active-connection guard, getActiveConnection(ownerUid) check
+    → family_invitations/{autoId} = {ownerUid, ownerEmail, ownerDisplayName,
+      inviteeEmail, status:'pending', verificationCodeHash (bcrypt),
+      verificationAttempts:0, expiresAt:+7d}
+    → queueEmail(invite link /accept-invite?token={autoId} + 6-digit code)
+    → returns {inviteId, verificationCode} to the INVITER'S client (FS-12)
+
+AcceptInviteView.tsx (/accept-invite?token=)           [client, @ts-nocheck]
+  → httpsCallable('validateInvitationToken')  ← NO auth check (FS-07)
+  → user signs in/up; httpsCallable('acceptInvitation', {inviteId, code})
+    → familyConnection.ts: status/locked/expiry checks server-side,
+      verified-email == inviteeEmail binding (case-normalized), bcrypt compare,
+      5 failed attempts → status:'locked', success → status:'awaiting_confirmation'
+      + inviteeUid stamped on invite
+  → owner Settings → PendingConfirmation.tsx
+    → reauthenticate (client) → httpsCallable('confirmConnection', {confirmed})
+      → familyConnectionConfirm.ts: ownerUid match, status check,
+        connection set (id = ownerUid_inviteeUid, status:'active'),
+        invite → 'accepted', notifications to both parties
+```
+
+**Sharing flow:** owner Finance → AccountCard → `useFamilySharing.shareAccount` → `FamilyConnectionApi.shareFamilyAccount` → httpsCallable(`shareAccount`) → `familySharing.ts:22-82`: `getActiveConnection` (status=='active') + owner-side check → account `{sharedWith.{memberUid}:{grantedAt,grantedBy,permission:'transact'}}` **+ `scope:'family'` (never unset)** → notification + audit log.
+
+**Shared-finance read/write (member side):** `useSharedAccounts` → httpsCallable(`getSharedAccountsWithMe`) (collectionGroup over `sharedWith.{uid}.grantedAt`) → direct Firestore subscriptions to `users/{ownerUid}/finance` and `.../accounts/{id}` (`SharedAccountSubscriptionsApi.ts`) — authorized by rules' `sharedWith`/`accountShares`/`scope=='family'` predicates, **not** by any server filter. Writes go through the **plain client path** (`TransactionService.addTransaction` → rules `hasTransactPermission`), *not* through `addTransactionToSharedAccount` (no client caller found — grep across `src/`: only function registry/contracts/tests reference it). Disconnect/leave: `FamilySettingsV2.handleDisconnect` → `disconnectFamily` callable.
+
+### 2.2 Legacy / parallel mechanisms (all still wired)
+
+| Mechanism | Surface | Status |
+|---|---|---|
+| V1 `users/{uid}/family/config` (`spouseId`) | rules `:156-160` (owner RW), `seeder.ts:26-34`, `migrateFamilyConnectionsV2` + migration framework `001_family_v2` | Legacy; readable/writable by owner; feeds migration |
+| Legacy `shares` map on account docs | rules `hasLegacyPermission` (`:127-129`, `:134/:141-142`, `:241`), client `permissions.ts:19-22`, initialized `{}` by `AccountService.addAccount`, written only by seeder/dev-tools | **Live in authorization, dead in revocation (FS-02)** |
+| `addTransactionToSharedAccount` callable | `sharedTransactions.ts`, registered in finance registry, callable contracts test | **No client caller** — orphaned privileged path, still deployable (FS-05) |
+| `fixSharedAccountScopes` callable | dev-tools "Fix Now" button | Live, self-scoped |
+| DevTools family simulation | `SimulateFamilyAction` / `AutoAcceptInvitationAction` | `VITE_APP_ENV !== 'production'` gated (`SettingsView.tsx:196`); AutoAccept is **rules-impossible** client-side (orphaned) (FS-09) |
+| `migrateFamilyConnectionsV2` callable | registry marks `deprecated` → replaced by `runMigration('001')` | Legacy residue |
+
 AnchorOS "Family Mode" is **not a multi-member household**. It is a **pairwise 1:1 connection** (owner ↔ single member, V2 `family_connections`) with an invitation pipeline built on Firestore auto-ID "tokens" + a bcrypt-hashed 6-digit verification code, and an account-sharing overlay (`sharedWith` map on the owner's account docs) whose effective permission is **always `transact`**. A V1 model (`spouseId` + users-side `family/config` + legacy `shares` account map) still exists in rules, seeder, dev-tools, and two migration paths.
 
 The invitation/confirmation pipeline is **structurally sound** — server-side-only writes (rules deny all client writes to `family_invitations`/`family_connections`), email-binding of the accepting account (verified email must equal `inviteeEmail`), bcrypt-coded one-time secret with 5-attempt lock, owner-only confirm, server-side expiry/revocation/lock checks. **No realistic unauthorized family takeover was found.**
