@@ -323,3 +323,12 @@ test('classifier emits fail_closed and treats it as no-deployment for workflow g
     assert.match(classifierSrc, /ci_only=\$\{result\.failClosed \|\| result\.ciOnly\}/);
 });
 
+test('general E2E config excludes release-smoke specs (they need the release config auth state)', () => {
+    const cfg = fs.readFileSync('config/playwright.config.ts', 'utf8');
+    assert.match(cfg, /testIgnore:\s*\/release-\//);
+    // The release config still owns them.
+    const releaseCfg = fs.readFileSync('config/playwright.release-smoke.config.ts', 'utf8');
+    assert.match(releaseCfg, /release-smoke/);
+    assert.match(releaseCfg, /storageState/);
+});
+
