@@ -18,8 +18,10 @@ import { defineConfig, devices } from '@playwright/test';
  * reuses. No signup, no verification bypasses, no silent retry loops.
  *
  * Target: E2E_BASE_URL (e.g. https://anchor-os-staging.web.app).
- * Falls back to http://localhost:5173 for local runs (dev server must
- * already be running; the pipeline never uses this fallback).
+ * Falls back to http://localhost:5173 for bounded local/PR smoke runs: when
+ * E2E_BASE_URL is unset (the PR CI path), this config starts the Vite dev
+ * server itself. Deployment pipelines always set E2E_BASE_URL and therefore
+ * never start a local server.
  */
 const RELEASE_STATE = 'e2e/.auth/release-state.json';
 
@@ -33,6 +35,17 @@ export default defineConfig({
     workers: 2,
     timeout: 20000,
     reporter: [['list']],
+
+    // Bounded local PR smoke: only start a dev server when there is no
+    // deployed target URL (deployment pipelines set E2E_BASE_URL).
+    webServer: process.env.E2E_BASE_URL
+        ? undefined
+        : {
+              command: 'npm run dev',
+              url: 'http://localhost:5173',
+              timeout: 60 * 1000,
+              reuseExistingServer: !process.env.CI,
+          },
 
     use: {
         baseURL: process.env.E2E_BASE_URL || 'http://localhost:5173',

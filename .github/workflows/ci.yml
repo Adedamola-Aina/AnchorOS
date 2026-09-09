@@ -2,7 +2,10 @@ name: CI
 
 # Single authoritative PR CI + master validation workflow.
 # - pull_request: governance metadata check, classify, lint/types/unit, rules,
-#   integration, and the bounded smoke E2E path. No deploy jobs.
+#   integration, and — only for PRs that change product-runtime surfaces —
+#   ONE bounded Chromium smoke gate (retries 0, 20s/test, 3-minute global
+#   bound, deterministic login, no legacy smoke project). Engineering-only,
+#   CI-only, and backend-only PRs run zero Playwright. No deploy jobs.
 # - push to master: proves the merged SHA (consumed by staging.yml / production.yml).
 # - schedule: weekly full regression against staging (merged from weekly-health).
 on:
@@ -33,6 +36,10 @@ jobs:
     outputs:
       category: ${{ steps.classify.outputs.category }}
       release: ${{ steps.classify.outputs.release }}
+      frontend_changed: ${{ steps.classify.outputs.frontend_changed }}
+      backend_changed: ${{ steps.classify.outputs.backend_changed }}
+      ci_infra_changed: ${{ steps.classify.outputs.ci_infra_changed }}
+      engineering_only_changed: ${{ steps.classify.outputs.engineering_only_changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,6 +63,10 @@ jobs:
             echo "Changed-file set undeterminable; failing safe to release pipeline."
             echo "category=PRODUCT_RUNTIME" >> "$GITHUB_OUTPUT"
             echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "frontend_changed=true" >> "$GITHUB_OUTPUT"
+            echo "backend_changed=true" >> "$GITHUB_OUTPUT"
+            echo "ci_infra_changed=false" >> "$GITHUB_OUTPUT"
+            echo "engineering_only_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           printf '%s\n' "$FILES" > /tmp/changed-files.txt
@@ -282,15 +293,21 @@ jobs:
             coverage/module-coverage-summary.md
 
 
-  # Job 1.5: E2E Tests
+  # Job 1.5: Bounded PR Smoke (Chromium only)
   e2e-tests:
-    name: 🎭 E2E Tests
+    name: 🎭 Bounded Smoke (Chromium)
     runs-on: ubuntu-latest
     needs: [test, classify]
-    timeout-minutes: 45
-    # Product smoke gate: not needed for engineering-only master pushes.
-    if: github.event_name == 'pull_request'
-    
+    timeout-minutes: 10
+    # ONE bounded Chromium smoke gate for PRs that change product-runtime
+    # surfaces (frontend_changed is additive, so a mixed backend + frontend
+    # PR still runs it). Engineering-only / CI-only / backend-only PRs run
+    # zero Playwright: backend correctness is covered by the functions,
+    # rules, and integration jobs above.
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.classify.outputs.frontend_changed == 'true'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -309,14 +326,16 @@ jobs:
         env:
           E2E_VITE_ENV: ${{ secrets.E2E_VITE_ENV }}
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium webkit
+      - name: Install Playwright Chromium (bounded smoke only)
+        run: npx playwright install --with-deps chromium
 
-      - name: Run E2E tests (smoke gate)
-        # The smoke project is the PR gate (landing, login, core navigation).
-        # The full legacy suite is exercised post-deploy against staging by
-        # staging-deploy.yml, where shared dev-project state is available.
-        run: npm run test:e2e -- --project=smoke
+      - name: Run bounded smoke gate
+        # One bounded Chromium path (config/playwright.release-smoke.config.ts):
+        # deterministic single login (release-auth), retries 0, 20s per test,
+        # 3-minute global timeout, single browser engine, no signup heuristic,
+        # and never the legacy loginOrSignup-per-test smoke project. The full
+        # legacy suite is exercised post-deploy against staging by staging.yml.
+        run: npm run test:release-smoke
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v7
