@@ -20,7 +20,7 @@ Firebase remains the current backend during remediation.
 | Staging | Firebase project `anchor-os-staging` |
 | Production | Firebase project `anchor-os` |
 
-There is **no deployable Firebase dev cloud environment**. `anchor-os-dev-1c6ec` is retired and must never be targeted by deploys, scripts, or configuration. Legacy executable references to it still exist in scripts/config and are being removed under the Foundation Reset (Phase 2); developers must not use or extend them in the meantime.
+There is **no deployable Firebase dev cloud environment**. `anchor-os-dev-1c6ec` is retired and must never be targeted by deploys, scripts, or configuration. All executable references to it have been removed; development is the local Firebase Emulator Suite.
 
 ## Governance
 
@@ -74,13 +74,13 @@ Bug fixes should normally reproduce the failure with a test when practical. New 
 
 Only open references relevant to the current change. Useful entry points:
 
-- `docs/ARCHITECTURE_OVERVIEW.md` — architecture changes (future consolidation target: `docs/ARCHITECTURE.md`)
+- `docs/ARCHITECTURE.md` — architecture changes
 - `docs/FIRESTORE_SCHEMA.md` — schema/query changes
 - `docs/SECURITY.md` — auth/security/rules
 - `docs/TESTING_STRATEGY.md` — test strategy
 - `docs/DESIGN_PHILOSOPHY.md` and `docs/DESIGN_TOKENS.md` — UI work
 - `docs/ANCHOR_FINANCE_SPEC.md` — finance behavior
-- `docs/DEPLOYMENT_CHECKLIST.md` — releases (future consolidation target: `docs/OPERATIONS.md`)
+- `docs/OPERATIONS.md` — environments, releases, runbook
 - `docs/adr/` — decisions for the affected subsystem
 
 Do not read `CHANGELOG.md` during ordinary coding; use Git history or targeted searches instead.

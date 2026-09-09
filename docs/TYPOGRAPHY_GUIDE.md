@@ -380,7 +380,6 @@ fontSize: {
 
 - **UX-001**: [DESIGN_TOKENS.md](file:///root/anchor-os/docs/DESIGN_TOKENS.md) - Semantic color system
 - **UX-011**: [BUTTON_GUIDELINES.md](file:///root/anchor-os/docs/BUTTON_GUIDELINES.md) - Button variants
-- **Mobile**: [MOBILE_OPTIMIZATION_DIRECTIVE.md](file:///root/anchor-os/docs/architecture/mob_opt_phase2_task.md) - Responsive standards
 
 ---
 

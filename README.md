@@ -30,7 +30,7 @@ Anchor OS is a multi-tenant web application for managing shared household financ
 | Testing | Vitest (unit), Playwright (E2E), Stryker (mutation) |
 | CI/CD | GitHub Actions, Lighthouse CI gates |
 
-See [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md) for the full system architecture diagram.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the system architecture.
 
 ## Getting Started
 
@@ -111,7 +111,7 @@ Every push triggers: lint → type check → unit tests → E2E tests.
 
 Production deploys additionally require mutation tests, Firestore rules tests, Lighthouse CI, and manual approval.
 
-See [docs/CI_CD_TESTING.md](docs/CI_CD_TESTING.md) for pipeline details.
+See [docs/OPERATIONS.md](docs/OPERATIONS.md) for the release pipeline and environment model.
 
 ## Contributing
 

@@ -10,7 +10,7 @@ This is a short contributor guide. The engineering operating model lives in [`AG
    git switch -c <type>/<short-topic>
    ```
 2. Install dependencies: `npm install`.
-3. For local development, run the app (`npm run dev`, http://localhost:5173) against the **Firebase Emulator Suite** (`npm run emulator:start`) — see `docs/ENVIRONMENT_SETUP.md` for emulator details. There is no deployable development cloud environment; retired legacy dev-project references must not be targeted.
+3. For local development, run the app (`npm run dev`, http://localhost:5173) against the **Firebase Emulator Suite** (`npm run emulator:start`) — see [`docs/OPERATIONS.md`](docs/OPERATIONS.md) for the environment model. There is no deployable development cloud environment; retired legacy dev-project references must not be targeted.
 
 ## Commits
 
@@ -35,11 +35,11 @@ Targeted first: run the narrowest tests relevant to your change, then broader ch
 | Doc | Purpose |
 |---|---|
 | [`AGENTS.md`](AGENTS.md) | Canonical engineering contract |
-| [`docs/ARCHITECTURE_OVERVIEW.md`](docs/ARCHITECTURE_OVERVIEW.md) | System architecture |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Environments & release runbook |
 | [`docs/FIRESTORE_SCHEMA.md`](docs/FIRESTORE_SCHEMA.md) | Data model |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Security model |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Security model (reporting: [`.github/SECURITY.md`](.github/SECURITY.md)) |
 | [`docs/TESTING_STRATEGY.md`](docs/TESTING_STRATEGY.md) | Test strategy |
-| [`docs/DEPLOYMENT_CHECKLIST.md`](docs/DEPLOYMENT_CHECKLIST.md) | Release/runbook |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 
 ## Questions

@@ -812,9 +812,9 @@ await enforceRateLimit(uid, 'mfa-verify', { maxAttempts: 5, windowSeconds: 300 }
 ## Related Documentation
 
 - **FIRESTORE_SCHEMA.md** - Complete security rules
-- **ARCHITECTURE_OVERVIEW.md** - Security architecture layers
+- **ARCHITECTURE.md** - Security architecture layers
 - **TESTING_STRATEGY.md** - Security testing patterns
-- **ENVIRONMENT_SETUP.md** - Secure deployment practices
+- **OPERATIONS.md** - Secure deployment practices
 
 ---
 

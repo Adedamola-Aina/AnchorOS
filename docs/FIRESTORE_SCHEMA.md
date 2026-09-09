@@ -3,7 +3,7 @@
 **Version**: 2.0 (Family Mode v3)  
 **Last Updated**: January 26, 2026  
 **Status**: Authoritative Reference  
-**Firebase Projects**: anchor-os-dev-1c6ec (dev), anchor-os-staging (staging), anchor-os (production)
+**Firebase Projects**: anchor-os-staging (staging), anchor-os (production). Development uses the local Firebase Emulator Suite (the former dev cloud project is retired).
 
 ---
 
@@ -1194,14 +1194,13 @@ export const getSharedAccountTransactions = onCall(async (request) => {
 
 - **config/firestore.rules** - Full security rules implementation
 - **config/firestore.indexes.json** - Complete index definitions
-- **CLAUDE.md** - Development constitution
-- **FAMILY_SHARING_V3_IMPLEMENTATION.md** - Detailed Family Mode spec
+- **AGENTS.md** - Engineering contract
 
 ### Firebase Console Links
 
-- **Development**: https://console.firebase.google.com/project/anchor-os-dev-1c6ec
 - **Staging**: https://console.firebase.google.com/project/anchor-os-staging
 - **Production**: https://console.firebase.google.com/project/anchor-os
+- **Development**: local Firebase Emulator Suite (no cloud console; the former dev project is retired)
 
 ### Schema Maintenance
 

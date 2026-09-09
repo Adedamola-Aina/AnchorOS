@@ -21,9 +21,9 @@ const ENVIRONMENTS = {
         firebaseProject: 'anchor-os-staging'
     },
     development: {
-        name: 'Development',
+        name: 'Development (local emulators)',
         url: 'http://localhost:5173',
-        firebaseProject: 'anchor-os-dev-1c6ec'
+        firebaseProject: 'anchor-os (emulator)'
     }
 };
 

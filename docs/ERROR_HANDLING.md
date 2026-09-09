@@ -834,7 +834,7 @@ test('displays error when account creation fails', async ({ page }) => {
 - **ErrorBoundary.tsx** - Actual implementation
 - **TESTING_STRATEGY.md** - Testing error scenarios
 - **SECURITY.md** - Error handling security considerations
-- **ARCHITECTURE_OVERVIEW.md** - System error handling
+- **ARCHITECTURE.md** - System architecture
 
 ---
 
