@@ -90,7 +90,7 @@ test('docs-only change deploys nothing (ciOnly)', () => {
 });
 
 test('CI-only change deploys nothing (ciOnly)', () => {
-    const r = classifySurfaces(['.github/workflows/ci-cd.yml', 'scripts/ci/deploy-surface-classifier.js'], null);
+    const r = classifySurfaces(['.github/workflows/ci.yml', 'scripts/ci/deploy-surface-classifier.js'], null);
     assert.equal(r.ciOnly, true);
 });
 
@@ -145,8 +145,9 @@ test('a previously failed deployment yields no SHA, forcing FAIL CLOSED (bootstr
 // Workflow guardrails (static assertions on the workflow YAML text)
 // ---------------------------------------------------------------------------
 
-const STAGING_WORKFLOW = fs.readFileSync('.github/workflows/staging-deploy.yml', 'utf8');
-const CI_CD_WORKFLOW = fs.readFileSync('.github/workflows/ci-cd.yml', 'utf8');
+const STAGING_WORKFLOW = fs.readFileSync('.github/workflows/staging.yml', 'utf8');
+const CI_WORKFLOW = fs.readFileSync('.github/workflows/ci.yml', 'utf8');
+const PRODUCTION_WORKFLOW = fs.readFileSync('.github/workflows/production.yml', 'utf8');
 
 test('staging deploy waits for CI validation of the same SHA before deploying', () => {
     assert.match(STAGING_WORKFLOW, /await-validation/);
@@ -192,22 +193,22 @@ test('release smoke never signs up automatically', () => {
 });
 
 test('production remains approval-gated via the GitHub production environment', () => {
-    const deployBlock = CI_CD_WORKFLOW.slice(CI_CD_WORKFLOW.indexOf('deploy-production'));
+    const deployBlock = PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('deploy-production'));
     assert.match(deployBlock, /environment:\s*production/);
     assert.match(deployBlock, /needs:/);
 });
 
 test('backend-only changes are not blocked by Lighthouse', () => {
-    const lighthouseBlock = CI_CD_WORKFLOW.slice(
-        CI_CD_WORKFLOW.indexOf('lighthouse:'),
-        CI_CD_WORKFLOW.indexOf('deploy-production'),
+    const lighthouseBlock = PRODUCTION_WORKFLOW.slice(
+        PRODUCTION_WORKFLOW.indexOf('lighthouse:'),
+        PRODUCTION_WORKFLOW.indexOf('deploy-production'),
     );
     assert.match(lighthouseBlock, /category/);
     assert.match(lighthouseBlock, /BACKEND_RUNTIME/);
 });
 
 test('production pipeline skips rerunning CI validation inside deployment', () => {
-    const deployBlock = CI_CD_WORKFLOW.slice(CI_CD_WORKFLOW.indexOf('deploy-production'));
+    const deployBlock = PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('deploy-production'));
     assert.match(deployBlock, /--skip-tests/);
     assert.match(deployBlock, /--skip-lint/);
     assert.match(deployBlock, /--skip-e2e/);
@@ -262,10 +263,10 @@ test('seed script is hard-gated to the local emulators', () => {
     assert.match(seed, /Refusing to seed/);
 });
 
-test('ci-cd workflow has no dev-cloud deploy job', () => {
-    assert.doesNotMatch(CI_CD_WORKFLOW, /anchor-os-dev-1c6ec/);
-    assert.doesNotMatch(CI_CD_WORKFLOW, /FIREBASE_SERVICE_ACCOUNT_DEV/);
-    assert.doesNotMatch(CI_CD_WORKFLOW, /build-dev|deploy-dev/);
+test('ci workflow has no dev-cloud deploy job', () => {
+    assert.doesNotMatch(CI_WORKFLOW, /anchor-os-dev-1c6ec/);
+    assert.doesNotMatch(CI_WORKFLOW, /FIREBASE_SERVICE_ACCOUNT_DEV/);
+    assert.doesNotMatch(CI_WORKFLOW, /build-dev|deploy-dev/);
 });
 
 test('functions resolve CORS/RP origins without the retired dev cloud', () => {
@@ -332,3 +333,37 @@ test('general E2E config excludes release-smoke specs (they need the release con
     assert.match(releaseCfg, /storageState/);
 });
 
+
+// ---------------------------------------------------------------------------
+// Workflow topology (lean core)
+// ---------------------------------------------------------------------------
+
+const WORKFLOW_DIR = '.github/workflows';
+
+function workflowFiles() {
+    return fs.readdirSync(WORKFLOW_DIR).filter((f) => f.endsWith('.yml')).sort();
+}
+
+test('exactly three normal workflows: ci.yml, staging.yml, production.yml', () => {
+    assert.deepEqual(workflowFiles(), ['ci.yml', 'production.yml', 'staging.yml']);
+});
+
+test('merge gate, weekly health and failure-email workflows are deleted (no duplicate executors)', () => {
+    for (const gone of ['merge-gate.yml', 'weekly-health.yml', 'ci-failure-email.yml']) {
+        assert.ok(!fs.existsSync(`${WORKFLOW_DIR}/${gone}`), `${gone} must not exist`);
+    }
+});
+
+test('PR CI runs no deployments and no emulators for docs/CI-only changes', () => {
+    assert.doesNotMatch(CI_WORKFLOW, /firebase deploy|npm run deploy:|deploy-production|deploy-staging/);
+    assert.match(CI_WORKFLOW, /governance-gates/);
+    assert.match(CI_WORKFLOW, /scheduled-full-regression/);
+    assert.match(CI_WORKFLOW, /github.event_name == 'schedule'/);
+});
+
+test('production remains approval-gated and fail-closed on missing baseline', () => {
+    assert.match(PRODUCTION_WORKFLOW, /environment:\s*production/);
+    assert.match(PRODUCTION_WORKFLOW, /bootstrap_required/);
+    assert.match(PRODUCTION_WORKFLOW, /authorize_bootstrap/);
+    assert.match(PRODUCTION_WORKFLOW, /--workflow production\.yml \|\| true/);
+});

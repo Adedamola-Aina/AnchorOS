@@ -2,7 +2,7 @@
 /**
  * Resolve the last SHA successfully deployed to an environment.
  *
- * The deployment workflows (staging-deploy.yml / ci-cd.yml production job)
+ * The deployment workflows (staging.yml / production.yml)
  * are the single source of truth for "what is deployed": the most recent
  * *successful* run of the environment's deploy workflow on master carries
  * the last deployed head SHA.
@@ -13,7 +13,7 @@
  * surfaces.
  *
  * Usage:
- *   node scripts/ci/last-deployed-sha.js --workflow staging-deploy.yml
+ *   node scripts/ci/last-deployed-sha.js --workflow staging.yml
  *       [--runs '<json array of {conclusion, headSha, createdAt}>']
  *
  * Prints the SHA, or an empty line when none is known.

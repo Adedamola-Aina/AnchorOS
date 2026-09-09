@@ -26,7 +26,7 @@ There is **no deployable Firebase dev cloud environment**. `anchor-os-dev-1c6ec`
 
 - GitHub commits, Issues, and PRs are the authoritative engineering history.
 - GitHub Actions is the authoritative CI/release automation.
-- The internal PM dashboard (`tools/dashboard/`) is **not** an engineering source of truth. If retained temporarily, it is optional telemetry only — never a task tracker, approval authority, or session prerequisite.
+- The former internal PM dashboard/MCP tooling has been extracted from this repository; it is not an engineering source of truth and must not be reintroduced as one.
 
 ## Working method
 
@@ -75,12 +75,11 @@ Bug fixes should normally reproduce the failure with a test when practical. New 
 Only open references relevant to the current change. Useful entry points:
 
 - `docs/ARCHITECTURE.md` — architecture changes
-- `docs/FIRESTORE_SCHEMA.md` — schema/query changes
-- `docs/SECURITY.md` — auth/security/rules
-- `docs/TESTING_STRATEGY.md` — test strategy
-- `docs/DESIGN_PHILOSOPHY.md` and `docs/DESIGN_TOKENS.md` — UI work
-- `docs/ANCHOR_FINANCE_SPEC.md` — finance behavior
+- `docs/DATA_MODEL.md` — schema/query changes
+- `docs/SECURITY.md` (Git history) / `.github/SECURITY.md` — security reporting
 - `docs/OPERATIONS.md` — environments, releases, runbook
+- `docs/DESIGN_SYSTEM.md` — UI work
+- `docs/PRODUCT.md` — finance behavior/product semantics
 - `docs/adr/` — decisions for the affected subsystem
 
 Do not read `CHANGELOG.md` during ordinary coding; use Git history or targeted searches instead.

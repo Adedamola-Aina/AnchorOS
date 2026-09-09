@@ -86,7 +86,7 @@ jobs:
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do
-            STATE=$(gh run list --repo "$REPO" --workflow ci-cd.yml --json headSha,status,conclusion \
+            STATE=$(gh run list --repo "$REPO" --workflow ci.yml --json headSha,status,conclusion \
               --jq --arg sha "$SHA" '[.[] | select(.headSha == $sha)][0] | (if . == null then "none" else .status + ":" + (.conclusion // "pending") end)' \
               2>/dev/null || echo "none")
             echo "attempt ${i}: ${STATE}"
@@ -130,7 +130,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          BASE=$(node scripts/ci/last-deployed-sha.js --workflow staging-deploy.yml || true)
+          BASE=$(node scripts/ci/last-deployed-sha.js --workflow staging.yml || true)
           if [ -z "$BASE" ]; then
             if [ "${{ inputs.authorize_bootstrap }}" != "true" ]; then
               echo "❌ bootstrap_required"

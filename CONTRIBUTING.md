@@ -28,7 +28,7 @@ Every change lands through a PR — no direct pushes to `master`. PRs use `.gith
 
 ## Testing
 
-Targeted first: run the narrowest tests relevant to your change, then broader checks (typecheck, lint, unit/integration) as the touched surface warrants. See `docs/TESTING_STRATEGY.md`.
+Targeted first: run the narrowest tests relevant to your change, then broader checks (typecheck, lint, unit/integration) as the touched surface warrants. CI enforces this per changed surface — a docs/CI-only PR runs no browsers or emulators.
 
 ## Key documentation
 
@@ -37,9 +37,9 @@ Targeted first: run the narrowest tests relevant to your change, then broader ch
 | [`AGENTS.md`](AGENTS.md) | Canonical engineering contract |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture |
 | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Environments & release runbook |
-| [`docs/FIRESTORE_SCHEMA.md`](docs/FIRESTORE_SCHEMA.md) | Data model |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Security model (reporting: [`.github/SECURITY.md`](.github/SECURITY.md)) |
-| [`docs/TESTING_STRATEGY.md`](docs/TESTING_STRATEGY.md) | Test strategy |
+| [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) | Data model |
+| [`docs/PRODUCT.md`](docs/PRODUCT.md) | Product semantics |
+| [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Visual contract |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 
 ## Questions

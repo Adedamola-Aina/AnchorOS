@@ -21,29 +21,30 @@ There is **no deployable development cloud**. The former dev project is retired 
 ## Release pipeline (validate once, deploy that SHA)
 
 ```
-push to master
-  └─► CI/CD Pipeline (ci-cd.yml): lint → types → unit → rules → E2E smoke
-        │   (full certification: mutation, Lighthouse — once per SHA, surface-gated)
-        ▼
-Staging Deploy (staging-deploy.yml)
-  1. await-validation  — blocks until CI succeeded for THE SAME SHA
-  2. classify          — deploy-surface classifier vs the last SUCCESSFULLY
-                         DEPLOYED staging SHA (never HEAD~1); no successful
-                         deploy on record fails safe to ALL surfaces
-  3. deploy            — guarded pipeline with skip flags (SHA already proven);
-                         builds Hosting only if the hosting surface changed
-  4. release-smoke     — fail-fast Playwright gate against deployed staging
-                         (retries 0, 20s tests, 3-minute bound, chromium)
-  5. post-deploy E2E   — full sharded suite, non-blocking
+pull request → CI (ci.yml)
+  governance metadata check → classify changed surfaces → lint/types/unit →
+  rules tests → integration tests → bounded smoke E2E
+  (no deploy jobs; docs/CI-only PRs complete in minutes)
+
+push to master → CI (ci.yml) proves the merged SHA
+  ├─► Production Release (production.yml): awaits CI success for that exact SHA,
+  │     classifies surfaces vs the last successfully deployed production SHA
+  │     (fail closed: bootstrap_required), human approval via the `production`
+  │     environment, surface-aware guarded deploy, release smoke, GitHub Release.
+  └─► Staging Deploy (staging.yml): EXPLICIT operator workflow_dispatch for an
+        exact SHA only — a merge/push to master never mutates staging.
+        Gates: SHA is current master tip → CI success for that SHA → classify vs
+        last successfully deployed staging SHA (fail closed: bootstrap_required)
+        → surface-aware guarded deploy → fail-fast release smoke.
 ```
 
-Production (`ci-cd.yml deploy-production`) additionally requires: explicit GitHub-environment approval, staging verification, exact validated SHA, surface-aware deploy, post-deploy release smoke, and a GitHub Release.
+Workflow files: `.github/workflows/ci.yml`, `.github/workflows/staging.yml`, `.github/workflows/production.yml` — one responsibility each.
 
 ## Deployment surfaces
 
 `hosting` (frontend) · `rules` (Firestore + storage rules) · `indexes` · `functions` · `ci-only` (nothing deploys).
 
-Classification is computed by `scripts/ci/deploy-surface-classifier.js` from ALL changes since the last successful deployment, so a previously failed deployment never causes missed surfaces. B1-style ordered backend rollout: rules first, then an explicit functions allow-list (`--functions=disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus`).
+Classification is computed by `scripts/ci/deploy-surface-classifier.js` from ALL changes since the last successful deployment, so a previously failed deployment never causes missed surfaces. Missing provenance **fails closed** (`bootstrap_required`) — an unknown baseline is never treated as "deploy everything"; the first deployment requires explicit operator authorization (`authorize_bootstrap=true`). B1-style ordered backend rollout: rules first, then an explicit functions allow-list (`--functions=disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus`).
 
 ## Versions & releases
 
@@ -51,11 +52,22 @@ Classification is computed by `scripts/ci/deploy-surface-classifier.js` from ALL
 - **GitHub Releases are the authoritative full release history.** `CHANGELOG.md` is a small bounded pointer/recent-summary; version tooling appends only new release sections (never the full history). Do not let it grow unbounded.
 - Deploy provenance is the successful workflow run for a SHA (`scripts/ci/last-deployed-sha.js`) — no deploy-marker commits.
 
-## Health & rollback
+## Health, rollback & regression
 
 - Post-deploy health check with automated `firebase hosting:rollback` on failure (hosting surface only).
 - Release-smoke failures upload traces/screenshots as workflow artifacts.
-- Weekly health check workflow monitors repository hygiene.
+- Weekly scheduled full E2E regression runs against staging (sharded, in `ci.yml`).
+
+## Native shells (Capacitor)
+
+- Config: `capacitor.config.ts`; platforms under `ios/` and `android/` (generated shells — regenerated via `npx cap add/sync`, never hand-edited web assets).
+- Web build first (`npm run build:production`), then `npx cap sync`, then `npx cap open ios|android`.
+- iOS requires macOS + Xcode 15+; Android requires Android Studio (SDK 33+).
+- Product logic never moves into Swift/Kotlin — native code is shells/bridges only.
+
+## Developer tools (dev/staging builds only)
+
+In-app Settings → Developer Tools (`src/features/settings/components/DeveloperTools.tsx`): seed test data, simulate family data, fix shared-account scopes, auto-accept invitations. Local seeding from the CLI: `node scripts/seed-dev-data.cjs` (emulators only — hard-fails otherwise).
 
 ## Local development quick reference
 

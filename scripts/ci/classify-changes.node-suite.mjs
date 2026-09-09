@@ -46,7 +46,7 @@ test('CASE E: mixed docs + app change is treated as runtime', () => {
 });
 
 test('CASE F: CI-only change validates CI without product release', () => {
-    const r = classifyFiles(['.github/workflows/ci-cd.yml']);
+    const r = classifyFiles(['.github/workflows/ci.yml']);
     assert.equal(r.category, 'CI_INFRA');
     assert.equal(r.release, false);
 });
@@ -76,7 +76,7 @@ test('dependency changes are conservatively product runtime', () => {
 });
 
 test('CI change mixed with runtime change is classified as runtime', () => {
-    const r = classifyFiles(['.github/workflows/ci-cd.yml', 'src/main.tsx']);
+    const r = classifyFiles(['.github/workflows/ci.yml', 'src/main.tsx']);
     assert.equal(r.category, 'PRODUCT_RUNTIME');
     assert.equal(r.release, true);
 });
