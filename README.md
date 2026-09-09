@@ -48,14 +48,21 @@ git clone git@github.com:Adedamola-Aina/AnchorOS.git
 cd AnchorOS
 npm install
 
-# Copy environment config (get values from 1Password vault "AnchorOS")
+# Copy environment config (values are provided by the Product Owner)
 cp .env.example .env.development
 
-# Start dev server
+# Terminal 1 — start the Firebase Emulator Suite
+npm run emulator:start
+
+# Terminal 2 — start the dev server (uses the emulators)
 npm run dev
 ```
 
 Dev server runs at `http://localhost:5173`.
+
+### Development environment model
+
+Local development is **local app + Firebase Emulator Suite**. There is no deployable development cloud environment; the former dev cloud project is retired under the Foundation Reset, and legacy executable dev-project references are being retired (Foundation Phase 2) — developers must not target them.
 
 ### Testing
 
@@ -108,7 +115,7 @@ See [docs/CI_CD_TESTING.md](docs/CI_CD_TESTING.md) for pipeline details.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for branching strategy, code review requirements, and task linking.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branching strategy, commit conventions, and PR requirements, and [AGENTS.md](AGENTS.md) for the canonical engineering contract.
 
 ## Product Ownership & Support
 
