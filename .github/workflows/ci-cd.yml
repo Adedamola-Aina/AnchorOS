@@ -58,7 +58,7 @@ jobs:
           # Run the classifier's own focused tests whenever CI infrastructure
           # (including the classifier) changes.
           if grep -q '^scripts/ci/' /tmp/changed-files.txt; then
-            node --test scripts/ci/classify-changes.node-suite.mjs
+            node --test scripts/ci/*.node-suite.mjs
           fi
 
   governance-gates:
@@ -476,82 +476,6 @@ jobs:
         run: |
           git push origin master --follow-tags || echo "⚠️ Push failed — add CI_PAT secret (Settings → Secrets → Actions) with a PAT that has repo write access"
 
-  # Job 2.5: Auto-deploy to dev (dev always tracks master HEAD)
-  build-dev:
-    name: 🏗️ Build Dev
-    runs-on: ubuntu-latest
-    needs: [test, classify]
-    if: github.ref == 'refs/heads/master' && needs.classify.outputs.release == 'true'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Write dev env config
-        run: printf '%s\n' "$DEV_VITE_ENV" > .env.development
-        env:
-          DEV_VITE_ENV: ${{ secrets.DEV_VITE_ENV }}
-
-      - name: Build for development
-        run: npm run build:dev
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: dev-build
-          path: dist/
-
-  deploy-dev:
-    name: 🚀 Deploy to Dev
-    runs-on: ubuntu-latest
-    needs: build-dev
-    if: github.ref == 'refs/heads/master'
-    # No environment gate — dev auto-deploys on every push to master
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dev-build
-          path: dist/
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Write dev service account key
-        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT_DEV" > "$RUNNER_TEMP/sa-dev.json"
-        env:
-          FIREBASE_SERVICE_ACCOUNT_DEV: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      # Hosting-only deploy: dev Functions deploys require Secret Manager
-      # (billing-gated) on the dev project, and the legacy hosting action
-      # attempted every hosting target including the staging one.
-      - name: Deploy hosting to dev
-        run: firebase deploy --only hosting:dev --project anchor-os-dev-1c6ec --non-interactive
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa-dev.json
-
   # Job 3: Build for staging
   build-staging:
     name: 🏗️ Build Staging
@@ -655,10 +579,16 @@ jobs:
   lighthouse:
     name: 🔦 Lighthouse CI
     runs-on: ubuntu-latest
-    needs: build-production
+    needs: [build-production, classify]
     # Product-only performance gate: skipped when the product pipeline is
-    # skipped for engineering-only/CI-only changes (needs propagation).
-    if: github.ref == 'refs/heads/master' && needs.build-production.result == 'success'
+    # skipped for engineering-only/CI-only changes (needs propagation), and
+    # skipped for BACKEND_RUNTIME-only changes: Functions/rules/indexes
+    # deployments do not alter the served frontend, so a Lighthouse budget
+    # gate is not meaningful (and must not block B1 backend rollouts).
+    if: >
+      github.ref == 'refs/heads/master' &&
+      needs.build-production.result == 'success' &&
+      needs.classify.outputs.category != 'BACKEND_RUNTIME'
 
     steps:
       - name: Checkout code
@@ -691,23 +621,64 @@ jobs:
           name: lighthouse-report
           path: .lighthouseci/
 
-  # Job 5: Deploy to production (requires manual approval)
+  # Job 5: Deploy to production. Requires explicit owner approval via the
+  # GitHub `production` environment. Deploys ONLY surfaces classified as
+  # changed since the last successful production deploy; never reruns CI
+  # validation inside the deployment (CI validated this exact SHA).
   deploy-production:
     name: 🚀 Deploy to Production
     runs-on: ubuntu-latest
-    needs: [build-production, lighthouse, e2e-tests, rules-tests]
-    if: github.ref == 'refs/heads/master' && needs.build-production.result == 'success'
+    needs: [build-production, lighthouse, e2e-tests, rules-tests, classify]
+    if: >
+      github.ref == 'refs/heads/master' &&
+      !cancelled() &&
+      needs.build-production.result == 'success' &&
+      needs.e2e-tests.result == 'success' &&
+      needs.rules-tests.result == 'success' &&
+      (needs.lighthouse.result == 'success' || needs.lighthouse.result == 'skipped')
     environment: production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute deployment surfaces since last production deploy
+        id: surfaces
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          BASE=$(node scripts/ci/last-deployed-sha.js --workflow ci-cd.yml || true)
+          FN_ALLOW="disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
+          if [ -z "$BASE" ]; then
+            echo "No successful production deploy on record — failing safe to ALL surfaces."
+            RESULT=$(node scripts/ci/deploy-surface-classifier.js --from "$(git rev-list --max-parents=0 HEAD)" --functions "$FN_ALLOW")
+          else
+            RESULT=$(node scripts/ci/deploy-surface-classifier.js --from "$BASE" --functions "$FN_ALLOW")
+          fi
+          echo "$RESULT"
+          SURFACES=""
+          if jq -e '.hosting == true' <<< "$RESULT" > /dev/null; then SURFACES="${SURFACES}hosting,"; fi
+          if jq -e '.rules == true' <<< "$RESULT" > /dev/null; then SURFACES="${SURFACES}rules,"; fi
+          if jq -e '.indexes == true' <<< "$RESULT" > /dev/null; then SURFACES="${SURFACES}indexes,"; fi
+          if jq -e '.functions == true' <<< "$RESULT" > /dev/null; then SURFACES="${SURFACES}functions"; fi
+          SURFACES="${SURFACES%,}"
+          if [ -z "$SURFACES" ]; then
+            echo "❌ Nothing to deploy to production (no changed surfaces since last deploy)."
+            exit 1
+          fi
+          echo "prod_surfaces=$SURFACES" >> "$GITHUB_OUTPUT"
+          echo "prod_functions=$(jq -r '.functionsToDeploy // "" | join(",")' <<< "$RESULT")" >> "$GITHUB_OUTPUT"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: production-build
           path: dist/
+        if: contains(steps.surfaces.outputs.prod_surfaces, 'hosting')
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -733,10 +704,34 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Deploy via guarded pipeline (production)
-        run: npm run deploy:production -- --yes --skip-tests --skip-lint --skip-e2e --skip-mutation --skip-version-bump
+      - name: Deploy via guarded pipeline (production, surface-aware)
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          SURFACES: ${{ steps.surfaces.outputs.prod_surfaces }}
+          FUNCTIONS: ${{ steps.surfaces.outputs.prod_functions }}
+        run: |
+          set -euo pipefail
+          ARGS=(--yes --skip-tests --skip-lint --skip-audit --skip-e2e --skip-mutation --skip-version-bump --no-deploy-marker --surfaces="$SURFACES")
+          if [ -n "$FUNCTIONS" ]; then
+            ARGS+=(--functions="$FUNCTIONS")
+          fi
+          npm run deploy:production -- "${ARGS[@]}"
+
+      - name: Post-deploy release smoke (deployed production)
+        if: contains(steps.surfaces.outputs.prod_surfaces, 'hosting') || contains(steps.surfaces.outputs.prod_surfaces, 'functions')
+        env:
+          E2E_BASE_URL: https://anchor-os.web.app
+        run: npx playwright test --config config/playwright.release-smoke.config.ts
+
+      - name: Upload release smoke artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: production-release-smoke-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
 
       - name: Create GitHub Release
         env:

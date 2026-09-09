@@ -2,50 +2,119 @@ name: Staging Deploy
 on:
   push:
     branches: [master]
+  workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
+
+# Release-infra contract (make release pipeline incremental and fail-fast):
+#   1. `await-validation` blocks until the CI/CD Pipeline run for THE SAME SHA
+#      has completed successfully — staging can never deploy an unvalidated SHA.
+#   2. `classify` computes changed deployment surfaces since the last
+#      SUCCESSFULLY DEPLOYED staging SHA (not HEAD~1), so a previously failed
+#      deployment never causes undeployed surfaces to be skipped. No successful
+#      deploy on record fails safe to deploying all surfaces.
+#   3. `deploy` passes validated-SHA skip flags to the guarded pipeline (no
+#      lint/audit/tests/version-bump/E2E rerun inside deployment) and is
+#      surface-aware: backend-only changes never rebuild/redeploy Hosting,
+#      frontend-only changes never deploy Functions/rules.
+#   4. `release-smoke` is the fast fail-fast post-deploy gate against the
+#      deployed staging URL (retries 0, 20s tests, 3-minute bound, chromium).
 
 jobs:
-  # Deterministic change classification: engineering-only and CI-only master
-  # pushes must not deploy the AnchorOS product to staging. Mixed or unknown
-  # changes fail safe to the normal staging deployment.
-  classify:
-    name: 🔎 Classify Changed Files
+  await-validation:
+    name: ⏳ Await CI Validation (same SHA)
     runs-on: ubuntu-latest
+    steps:
+      - name: Await successful CI/CD Pipeline run for this SHA
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            STATE=$(gh run list --repo "$REPO" --workflow ci-cd.yml --json headSha,status,conclusion \
+              --jq --arg sha "$SHA" '[.[] | select(.headSha == $sha)][0] | (if . == null then "none" else .status + ":" + (.conclusion // "pending") end)' \
+              2>/dev/null || echo "none")
+            echo "attempt ${i}: ${STATE}"
+            case "$STATE" in
+              completed:success)
+                echo "✅ CI validation passed for ${SHA}"
+                exit 0
+                ;;
+              completed:*)
+                echo "❌ CI validation for ${SHA} did not pass: ${STATE}"
+                exit 1
+                ;;
+            esac
+            sleep 30
+          done
+          echo "❌ Timed out awaiting CI validation for ${SHA}"
+          exit 1
+
+  classify:
+    name: 🔎 Classify Deployment Surfaces
+    runs-on: ubuntu-latest
+    needs: [await-validation]
     outputs:
-      release: ${{ steps.classify.outputs.release }}
+      deploy_hosting: ${{ steps.surfaces.outputs.deploy_hosting }}
+      deploy_rules: ${{ steps.surfaces.outputs.deploy_rules }}
+      deploy_indexes: ${{ steps.surfaces.outputs.deploy_indexes }}
+      deploy_functions: ${{ steps.surfaces.outputs.deploy_functions }}
+      functions_to_deploy: ${{ steps.surfaces.outputs.functions_to_deploy }}
+      ci_only: ${{ steps.surfaces.outputs.ci_only }}
+      base_sha: ${{ steps.base.outputs.base_sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Classify changed files
-        id: classify
+
+      - name: Resolve last successfully deployed staging SHA
+        id: base
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          if [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            FILES=$(git diff --name-only "${{ github.event.before }}" HEAD || true)
+          BASE=$(node scripts/ci/last-deployed-sha.js --workflow staging-deploy.yml || true)
+          if [ -z "$BASE" ]; then
+            echo "No successful staging deploy on record — failing safe to ALL surfaces."
           else
-            FILES=$(git diff --name-only "HEAD~1" HEAD || true)
+            echo "Last successfully deployed staging SHA: $BASE"
           fi
-          if [ -z "$FILES" ]; then
-            echo "Changed-file set undeterminable; failing safe to staging deployment."
-            echo "release=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          node scripts/ci/classify-changes.js --files $FILES
+          echo "base_sha=$BASE" >> "$GITHUB_OUTPUT"
 
-  build:
-    name: Build Staging
+      - name: Classify deployment surfaces since base
+        id: surfaces
+        run: |
+          set -euo pipefail
+          BASE="${{ steps.base.outputs.base_sha }}"
+          # B1 ordered rollout: only these Functions may be deployed until the
+          # rollout is complete (Step A: rules, Step B: these functions).
+          FN_ALLOW="disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
+          if [ -z "$BASE" ]; then
+            node scripts/ci/deploy-surface-classifier.js --from "$(git rev-parse HEAD~40 2>/dev/null || git rev-list --max-parents=0 HEAD)" --functions "$FN_ALLOW"
+          else
+            node scripts/ci/deploy-surface-classifier.js --from "$BASE" --functions "$FN_ALLOW"
+          fi
+
+  build-hosting:
+    name: 🏗️ Build Staging Hosting (once)
     runs-on: ubuntu-latest
     needs: [classify]
-    if: needs.classify.outputs.release == 'true'
+    if: needs.classify.outputs.ci_only != 'true' && needs.classify.outputs.deploy_hosting == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
+      - name: Write staging frontend env config
+        run: printf '%s\n' "$STAGING_FRONTEND_ENV" > .env.staging
+        env:
+          STAGING_FRONTEND_ENV: ${{ secrets.STAGING_FRONTEND_ENV }}
       - run: npm run build:staging
       - uses: actions/upload-artifact@v7
         with:
@@ -53,13 +122,16 @@ jobs:
           path: dist/
 
   deploy:
-    name: Deploy to Staging
+    name: 🚀 Deploy Changed Surfaces to Staging
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [classify, build-hosting]
+    if: >
+      !cancelled() &&
+      needs.classify.outputs.ci_only != 'true' &&
+      needs.classify.result == 'success' &&
+      (needs.build-hosting.result == 'success' || needs.build-hosting.result == 'skipped')
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with: { name: staging-dist, path: dist/ }
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -67,27 +139,59 @@ jobs:
       - run: npm ci
       - run: npm ci
         working-directory: functions
-      - name: Install Playwright browsers
-        run: npx playwright install chromium --with-deps
       - name: Write staging env config
         run: |
           printf '%s\n' "$STAGING_FRONTEND_ENV" > .env.staging
           printf '%s\n' "$STAGING_FUNCTIONS_ENV" > functions/.env.staging
-          printf '%s\n' "$E2E_VITE_ENV" > .env.development
         env:
           STAGING_FRONTEND_ENV: ${{ secrets.STAGING_FRONTEND_ENV }}
           STAGING_FUNCTIONS_ENV: ${{ secrets.STAGING_FUNCTIONS_ENV }}
-          E2E_VITE_ENV: ${{ secrets.E2E_VITE_ENV }}
-      - run: npm install -g firebase-tools
-      - run: npm run deploy:staging
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      - name: Deploy validated surfaces
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          SURFACES: "${{ needs.classify.outputs.deploy_hosting == 'true' && 'hosting,' || '' }}${{ needs.classify.outputs.deploy_rules == 'true' && 'rules,' || '' }}${{ needs.classify.outputs.deploy_indexes == 'true' && 'indexes,' || '' }}${{ needs.classify.outputs.deploy_functions == 'true' && 'functions' || '' }}"
+          FUNCTIONS: ${{ needs.classify.outputs.functions_to_deploy }}
+        run: |
+          set -euo pipefail
+          SURFACES="${SURFACES%,}"
+          ARGS=(--yes --skip-tests --skip-lint --skip-audit --skip-e2e --skip-mutation --skip-version-bump --no-deploy-marker --surfaces="$SURFACES")
+          if [ -n "$FUNCTIONS" ]; then
+            ARGS+=(--functions="$FUNCTIONS")
+          fi
+          npm run deploy:staging -- "${ARGS[@]}"
+
+  release-smoke:
+    name: 🎯 Release Smoke (deployed staging)
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: "!cancelled() && needs.deploy.result == 'success'"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci
+      - run: npx playwright install chromium --with-deps
+      - name: Run release smoke against deployed staging
+        run: npx playwright test --config config/playwright.release-smoke.config.ts
+        env:
+          E2E_BASE_URL: ${{ secrets.STAGING_URL }}
+      - name: Upload release smoke artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-smoke-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
 
   post-deploy-e2e:
     name: Post-Deploy E2E (non-blocking)
     runs-on: ubuntu-latest
-    needs: [deploy]
-    if: needs.deploy.result == 'success'
+    needs: [release-smoke]
+    if: needs.release-smoke.result == 'success'
     continue-on-error: true
     strategy:
       matrix:

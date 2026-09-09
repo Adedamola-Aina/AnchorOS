@@ -6,19 +6,17 @@ set -e # Exit immediately if a command exits with a non-zero status.
 # ============================================================================
 #
 # USAGE:
-#   ./DEPLOY_PIPELINE.sh --env=development    # Deploy to dev
 #   ./DEPLOY_PIPELINE.sh --env=staging        # Deploy to staging
 #   ./DEPLOY_PIPELINE.sh --env=production     # Deploy to production
 #
-# FIREBASE HOSTING TARGETS (defined in firebase.json & .firebaserc):
-#   - dev        → anchor-os-dev-1c6ec.web.app
+# Environments (canonical):
 #   - staging    → anchor-os-staging.web.app
 #   - production → anchor-os.web.app
 #
-# ⚠️  IMPORTANT: Always use target names (dev/staging/production), NOT project IDs.
-#     ❌ WRONG:  firebase deploy --only hosting:anchor-os-dev-1c6ec
-#     ✅ RIGHT:  firebase deploy --only hosting:dev --project anchor-os-dev-1c6ec
+# There is NO deployable development cloud environment. Development is the
+# local Firebase Emulator Suite; the former dev project is retired forever.
 #
+# ⚠️  IMPORTANT: Always use target names (staging/production), NOT project IDs.
 # ============================================================================
 
 # Ensure we are running from the project root
@@ -41,11 +39,30 @@ SKIP_AUDIT=false
 SKIP_MUTATION=false
 SKIP_VERSION_BUMP=false
 YES=false
+# Deployment surfaces (comma-separated subset of: hosting,rules,indexes,functions).
+# Empty = deploy all surfaces (legacy behavior).
+SURFACES=""
+# Optional Cloud Functions allow-list (comma-separated). Empty = deploy the
+# functions surface as a whole.
+FUNCTIONS_FILTER=""
+NO_DEPLOY_MARKER=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --env=*)
             ENV="${1#*=}"
+            shift
+            ;;
+        --surfaces=*)
+            SURFACES="${1#*=}"
+            shift
+            ;;
+        --functions=*)
+            FUNCTIONS_FILTER="${1#*=}"
+            shift
+            ;;
+        --no-deploy-marker)
+            NO_DEPLOY_MARKER=true
             shift
             ;;
         --dry-run)
@@ -99,8 +116,50 @@ read_env_value() {
     grep -E "^${env_key}=" "$env_file" | tail -n 1 | cut -d '=' -f2- | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//"
 }
 
+# ---------------------------------------------------------------------------
+# Deployment surface selection
+# ---------------------------------------------------------------------------
+# SURFACES is a comma-separated subset of: hosting,rules,indexes,functions.
+# Empty means "all surfaces" (legacy full deployment). Unknown surface names
+# fail hard: a typo must never silently skip or add a deployment surface.
+DEPLOY_HOSTING=false
+DEPLOY_RULES=false
+DEPLOY_INDEXES=false
+DEPLOY_FUNCTIONS=false
+
+if [[ -z "$SURFACES" ]]; then
+    DEPLOY_HOSTING=true
+    DEPLOY_RULES=true
+    DEPLOY_INDEXES=true
+    DEPLOY_FUNCTIONS=true
+else
+    IFS=',' read -ra SURFACE_LIST <<< "$SURFACES"
+    for surface in "${SURFACE_LIST[@]}"; do
+        surface="$(echo "$surface" | tr -d '[:space:]')"
+        case "$surface" in
+            hosting)   DEPLOY_HOSTING=true ;;
+            rules)     DEPLOY_RULES=true ;;
+            indexes)   DEPLOY_INDEXES=true ;;
+            functions) DEPLOY_FUNCTIONS=true ;;
+            "")
+              ;;
+            *)
+                echo -e "${RED}❌ Unknown deployment surface: '$surface'. Allowed: hosting,rules,indexes,functions.${NC}"
+                exit 1
+                ;;
+        esac
+    done
+fi
+
+if [[ "$DEPLOY_HOSTING" == false && "$DEPLOY_RULES" == false && "$DEPLOY_INDEXES" == false && "$DEPLOY_FUNCTIONS" == false ]]; then
+    echo -e "${RED}❌ Empty deployment surface set — nothing to deploy.${NC}"
+    exit 1
+fi
+
+echo -e "Deployment surfaces: hosting=$DEPLOY_HOSTING rules=$DEPLOY_RULES indexes=$DEPLOY_INDEXES functions=$DEPLOY_FUNCTIONS${FUNCTIONS_FILTER:+ (functions: $FUNCTIONS_FILTER)}"
+
 # 0. Preflight: App Check guardrails for public environments
-if [[ "$ENV" != "development" ]]; then
+if [[ "$ENV" == "staging" || "$ENV" == "production" ]]; then
     echo -e "\n${YELLOW}🛡️  Stage 0: App Check Guardrails${NC}"
 
     FRONTEND_ENV_FILE=".env.${ENV}"
@@ -152,8 +211,6 @@ else
     AUDIT_LEVEL="high"
     if [[ "$ENV" == "production" ]]; then
         AUDIT_LEVEL="moderate"
-    elif [[ "$ENV" == "development" ]]; then
-        AUDIT_LEVEL="critical"
     fi
     if npm audit --audit-level="$AUDIT_LEVEL" --omit=dev 2>/dev/null; then
         echo -e "${GREEN}✅ No ${AUDIT_LEVEL}+ vulnerabilities found in production dependencies.${NC}"
@@ -190,12 +247,11 @@ else
     fi
 fi
 
-# 3. Build (with environment mode)
+# 3. Build (with environment mode) — only the Hosting surface needs a build
+if [[ "$DEPLOY_HOSTING" == true ]]; then
 echo -e "\n${YELLOW}🏗️  Stage 3: Build (${ENV})${NC}"
 BUILD_SCRIPT="build"
-if [[ "$ENV" == "development" ]]; then
-    BUILD_SCRIPT="build:dev"
-elif [[ "$ENV" == "staging" ]]; then
+if [[ "$ENV" == "staging" ]]; then
     BUILD_SCRIPT="build:staging"
 elif [[ "$ENV" == "production" ]]; then
     BUILD_SCRIPT="build:production"
@@ -215,6 +271,9 @@ else
     echo -e "${RED}❌ Build environment mismatch. Deployment blocked.${NC}"
     exit 1
 fi
+else
+    echo -e "\n${YELLOW}⏭️  Stage 3: Build Skipped (hosting surface not selected)${NC}"
+fi
 
 # 3c. Mutation Testing (production only - catches weak tests)
 if [[ "$SKIP_MUTATION" == true ]]; then
@@ -231,10 +290,12 @@ else
     echo -e "\n${YELLOW}⏭️  Stage 3c: Mutation Tests Skipped (${ENV} only)${NC}"
 fi
 
-# 3d. Firestore Rules Testing (staging + production)
+# 3d. Firestore Rules Testing (only when the rules surface is deployed)
 if [[ "$SKIP_TESTS" == true ]]; then
     echo -e "\n${YELLOW}⏭️  Stage 3d: Rules Tests Skipped (--skip-tests)${NC}"
-elif [[ "$ENV" != "development" ]]; then
+elif [[ "$DEPLOY_RULES" != true ]]; then
+    echo -e "\n${YELLOW}⏭️  Stage 3d: Rules Tests Skipped (rules surface not selected)${NC}"
+else
     echo -e "\n${YELLOW}🔒 Stage 3d: Firestore Rules Testing${NC}"
     if command -v firebase &> /dev/null; then
         if npm run test:rules; then
@@ -246,12 +307,11 @@ elif [[ "$ENV" != "development" ]]; then
     else
         echo -e "${YELLOW}⚠️  Firebase CLI not found — skipping rules tests.${NC}"
     fi
-else
-    echo -e "\n${YELLOW}⏭️  Stage 3d: Rules Tests Skipped (dev only)${NC}"
 fi
 
-# 4. E2E Testing (only for staging and production, unless skipped)
-if [[ "$SKIP_E2E" == false ]] && [[ "$ENV" != "development" ]]; then
+# 4. E2E Testing (only when not skipped — CI passes --skip-e2e after the
+#    same-SHA validation gate has already proven the commit)
+if [[ "$SKIP_E2E" == false ]]; then
     echo -e "\n${YELLOW}🎭 Stage 4: End-to-End Testing${NC}"
     if npm run test:e2e -- --project=smoke --reporter=line; then
         echo -e "${GREEN}✅ All E2E tests passed.${NC}"
@@ -273,11 +333,6 @@ fi
 
 # Environment-specific deployment targets
 case $ENV in
-    development)
-        FIREBASE_PROJECT="anchor-os-dev-1c6ec"
-        HOSTING_URL="anchor-os-dev-1c6ec.web.app"
-        HOSTING_TARGET="dev"
-        ;;
     staging)
         FIREBASE_PROJECT="anchor-os-staging"
         HOSTING_URL="anchor-os-staging.web.app"
@@ -287,6 +342,11 @@ case $ENV in
         FIREBASE_PROJECT="anchor-os"
         HOSTING_URL="anchor-os.web.app"
         HOSTING_TARGET="production"
+        ;;
+    *)
+        echo -e "${RED}❌ Unknown environment '$ENV'. Allowed: staging, production.${NC}"
+        echo -e "${RED}   There is no deployable development cloud; development is local emulators only.${NC}"
+        exit 1
         ;;
 esac
 
@@ -310,10 +370,47 @@ echo -e "\n${YELLOW}📸 Stage 6: Capturing rollback snapshot...${NC}"
 PRE_DEPLOY_VERSION=$(firebase hosting:channel:list --project "$FIREBASE_PROJECT" 2>/dev/null | head -1 || true)
 echo -e "${GREEN}✅ Rollback snapshot ready.${NC}"
 
-# 6a. Deployment
+# 6a. Deployment (surface-aware)
 echo -e "\n${YELLOW}🚀 Stage 6a: Deploying to ${ENV^}...${NC}"
-DEPLOY_TARGETS="hosting:${HOSTING_TARGET},firestore:rules,firestore:indexes,functions"
-if firebase deploy --only "$DEPLOY_TARGETS" --project "$FIREBASE_PROJECT"; then
+
+DEPLOY_TARGETS=()
+if [[ "$DEPLOY_HOSTING" == true ]]; then
+    DEPLOY_TARGETS+=("hosting:${HOSTING_TARGET}")
+fi
+if [[ "$DEPLOY_RULES" == true ]]; then
+    DEPLOY_TARGETS+=("firestore:rules")
+fi
+if [[ "$DEPLOY_INDEXES" == true ]]; then
+    DEPLOY_TARGETS+=("firestore:indexes")
+fi
+if [[ "$DEPLOY_FUNCTIONS" == true ]]; then
+    if [[ -n "$FUNCTIONS_FILTER" ]]; then
+        # Ordered/selective Functions rollout (e.g. B1 step B): deploy ONLY the
+        # functions named in the filter. firebase-tools accepts a comma list of
+        # functions:<name> targets.
+        IFS=',' read -ra FN_LIST <<< "$FUNCTIONS_FILTER"
+        for fn in "${FN_LIST[@]}"; do
+            fn="$(echo "$fn" | tr -d '[:space:]')"
+            [[ -z "$fn" ]] && continue
+            DEPLOY_TARGETS+=("functions:${fn}")
+        done
+        if [[ ${#DEPLOY_TARGETS[@]} -eq 0 ]]; then
+            echo -e "${RED}❌ Functions filter produced an empty deploy target list.${NC}"
+            exit 1
+        fi
+    else
+        DEPLOY_TARGETS+=("functions")
+    fi
+fi
+
+if [[ ${#DEPLOY_TARGETS[@]} -eq 0 ]]; then
+    echo -e "${RED}❌ No deployment surfaces selected — nothing to deploy.${NC}"
+    exit 1
+fi
+
+DEPLOY_ONLY="$(IFS=,; echo "${DEPLOY_TARGETS[*]}")"
+echo -e "Deploy targets: ${DEPLOY_ONLY}"
+if firebase deploy --only "$DEPLOY_ONLY" --project "$FIREBASE_PROJECT"; then
     echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL!${NC}"
     echo -e "🌍 Live at: https://${HOSTING_URL}"
 else
@@ -322,6 +419,8 @@ else
 fi
 
 # 6b. Post-deploy health check with automated rollback (SRE-002)
+# Hosting-only concern: backend-only deploys do not alter the served site.
+if [[ "$DEPLOY_HOSTING" == true ]]; then
 echo -e "\n${YELLOW}🏥 Stage 6b: Post-Deploy Health Check...${NC}"
 HEALTH_URL="https://${HOSTING_URL}"
 HEALTH_RETRIES=3
@@ -355,30 +454,17 @@ if [[ "$HEALTH_OK" == false ]]; then
     fi
     exit 1
 fi
-
-# 6c. Deploy Marker (git commit for dashboard tracking)
-echo -e "\n${YELLOW}📌 Stage 6c: Recording Deploy Marker...${NC}"
-DEPLOY_VERSION=$(node -p "require('./package.json').version")
-DEPLOY_HASH=$(git rev-parse --short HEAD)
-DEPLOY_MSG="deploy(${ENV}): v${DEPLOY_VERSION} @ ${DEPLOY_HASH}"
-
-# Create an empty commit as a deploy marker (no file changes needed)
-if git commit --allow-empty --no-verify -m "$DEPLOY_MSG"; then
-    git push --no-verify origin master 2>/dev/null || true
-    echo -e "${GREEN}✅ Deploy marker recorded: ${DEPLOY_MSG}${NC}"
 else
-    echo -e "${YELLOW}⚠️  Deploy marker commit failed (non-blocking).${NC}"
+    echo -e "\n${YELLOW}⏭️  Stage 6b: Health Check Skipped (hosting surface not selected)${NC}"
 fi
 
-# 7. Dashboard Sync
-echo -e "\n${YELLOW}🔄 Stage 7: Syncing Internal Dashboard...${NC}"
-# Dashboard URLs:
-#   - Local API: http://localhost:3001
-#   - Browser: https://anchor.tail2fa2e.ts.net:3443/
-# Use a timeout to prevent hanging if dashboard is down
-if curl -m 5 -X POST http://localhost:3001/api/refresh -s > /dev/null; then
-    echo -e "${GREEN}✅ Internal Dashboard updated.${NC}"
-    echo -e "   🌐 View at: https://anchor.tail2fa2e.ts.net:3443/"
+# 6c. Deploy Marker (legacy — disabled)
+# Deployment provenance is the successful workflow run for this SHA
+# (see scripts/ci/last-deployed-sha.js). Empty deploy-marker commits pushed
+# to master are no longer created. --no-deploy-marker remains an accepted
+# no-op flag for workflow argument compatibility.
+if [[ "$NO_DEPLOY_MARKER" == true ]]; then
+    echo -e "\n${YELLOW}⏭️  Stage 6c: Deploy Marker Skipped (--no-deploy-marker)${NC}"
 else
-    echo -e "${YELLOW}⚠️  Dashboard not responding (is it running at :3001?). Deployment successful otherwise.${NC}"
+    echo -e "\n${YELLOW}⏭️  Stage 6c: Deploy Marker Disabled (provenance = workflow run)${NC}"
 fi

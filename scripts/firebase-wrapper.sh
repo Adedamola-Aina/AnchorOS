@@ -35,7 +35,6 @@ if [[ "$1" == "deploy" ]]; then
         echo -e ""
         echo -e "  ${GREEN}USE THESE COMMANDS INSTEAD:${NC}"
         echo -e ""
-        echo -e "    ${GREEN}npm run deploy:dev${NC}        → Deploy to development"
         echo -e "    ${GREEN}npm run deploy:staging${NC}    → Deploy to staging"
         echo -e "    ${GREEN}npm run deploy:production${NC} → Deploy to production"
         echo -e ""

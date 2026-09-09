@@ -1,14 +1,17 @@
 /**
- * Seed Developer Data Script
- * 
- * Creates comprehensive test data for dev/staging environments that demonstrates
- * ALL app features and behaviors. This ensures test environments mirror production
- * capabilities for realistic testing.
- * 
- * Usage: 
- * 1. Authenticate: gcloud auth application-default login
- * 2. Run: node scripts/seed-dev-data.cjs dev|staging
- * 
+ * Seed Local Emulator Data Script
+ *
+ * Seeds deterministic development test data into the LOCAL Firebase Emulator
+ * Suite ONLY (Firestore + Auth emulators).
+ *
+ * Safety: this script CANNOT touch staging or production. It hard-fails
+ * unless both emulator hosts are configured, and it never accepts a cloud
+ * project ID.
+ *
+ * Usage:
+ *   1. Start emulators: npm run emulator:start
+ *   2. Run: node scripts/seed-dev-data.cjs
+ *
  * What this seeds:
  * - Test users (owner + member) with verified emails
  * - Multiple accounts (USD + NGN, checking + savings)
@@ -23,23 +26,24 @@
 const admin = require('firebase-admin');
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CONFIGURATION
+// EMULATOR-ONLY GUARD — a dev seed must never write staging or production.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const PROJECTS = {
-    dev: 'anchor-os-dev-1c6ec',
-    staging: 'anchor-os-staging'
-};
-
-const env = process.argv[2];
-if (!env || !PROJECTS[env]) {
-    console.error('❌ Please specify environment: dev or staging');
-    console.error('   Usage: node scripts/seed-dev-data.cjs dev');
+if (!process.env.FIRESTORE_EMULATOR_HOST || !process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+    console.error('❌ Refusing to seed: Firebase emulators are not active.');
+    console.error('   Start them first: npm run emulator:start');
+    console.error('   (FIRESTORE_EMULATOR_HOST and FIREBASE_AUTH_EMULATOR_HOST must be set.)');
     process.exit(1);
 }
 
-const projectId = PROJECTS[env];
-console.log(`\n🔌 Connecting to ${projectId}...\n`);
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIGURATION — local emulator project only, never a cloud project
+// ═══════════════════════════════════════════════════════════════════════════
+
+const projectId = 'anchor-os';
+console.log(`\n🔌 Connecting to LOCAL Firebase Emulator Suite (project: ${projectId})...\n`);
+console.log(`   Firestore emulator: ${process.env.FIRESTORE_EMULATOR_HOST}`);
+console.log(`   Auth emulator:      ${process.env.FIREBASE_AUTH_EMULATOR_HOST}\n`);
 
 admin.initializeApp({
     projectId: projectId,
@@ -353,7 +357,7 @@ async function seedActivityFeed() {
 async function main() {
     console.log('═══════════════════════════════════════════════════════════════');
     console.log('   ANCHOR OS - DEVELOPER DATA SEEDER');
-    console.log(`   Environment: ${env.toUpperCase()}`);
+    console.log('   Environment: LOCAL EMULATOR');
     console.log('═══════════════════════════════════════════════════════════════');
 
     try {
