@@ -1,63 +1,90 @@
 name: Production Release
-
-# Production release pipeline. Push to master OR explicit operator dispatch
-# for an exact SHA. Gates: resolve SHA -> await CI success for that SHA ->
-# classify surfaces vs the last SUCCESSFULLY deployed production SHA
-# (fail closed with bootstrap_required when none exists) -> human approval
-# via the `production` environment -> surface-aware guarded deploy ->
-# release smoke -> GitHub Release. Never reruns CI validation here.
+run-name: 'Production ${{ inputs.mode }} ${{ inputs.sha }}'
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
     inputs:
       sha:
-        description: 'Exact master commit SHA to deploy (must be the current origin/master tip)'
-        required: false
+        description: 'Exact master commit SHA to deploy (must be the current origin/master tip with successful CI)'
+        required: true
         type: string
+      mode:
+        description: 'Deployment mode: normal (surface-aware) or b1 (rules first, then the five allowed Functions; no Hosting/indexes)'
+        required: true
+        type: choice
+        default: 'normal'
+        options:
+          - normal
+          - b1
       authorize_bootstrap:
-        description: 'Explicit operator authorization for a FIRST deployment when no production baseline exists'
+        description: 'normal mode only: explicit operator authorization for a FIRST deployment when no normal production baseline exists'
         required: false
         type: boolean
         default: false
+
 permissions:
-  contents: write
-  pull-requests: write
-  checks: write
+  contents: read
   actions: read
 
-env:
-  NODE_VERSION: '22'
-
+# Production release model (run-name carries mode + SHA for provenance):
+#   0. MANUAL ONLY: no push trigger. Production is mutated exclusively by an
+#      operator workflow_dispatch for an EXACT SHA. This workflow NEVER pushes,
+#      commits, or version-bumps master.
+#   1. resolve-sha: requested SHA must be the current origin/master tip.
+#   2. await-validation: CI (ci.yml) must have succeeded for THAT EXACT SHA.
+#   3. await-staging: a successful STAGING deployment of the SAME SHA in the
+#      SAME mode must exist (run title "Staging <mode> <sha>").
+#   4. mode=normal: surface-aware deploy classified against the last successful
+#      *normal* production baseline (run names prefixed "Production normal").
+#      No baseline -> FAIL CLOSED with bootstrap_required unless the operator
+#      explicitly passed authorize_bootstrap=true. Lighthouse skipped for
+#      backend-only changes.
+#   5. mode=b1: Firestore rules deploy FIRST as a separate guarded invocation;
+#      only after success are exactly the five allowed Functions deployed as a
+#      SECOND invocation. No Hosting, no indexes, no version bump, no migration.
+#   6. Every mutation job enters the `production` environment (human approval).
+#   7. Normal baseline lookup ignores B1-mode runs (title-prefix filtering).
 
 jobs:
   resolve-sha:
-    name: 🔐 Resolve Requested SHA
+    name: 🔐 Resolve & Authorize Requested SHA
     runs-on: ubuntu-latest
     outputs:
-      sha: ${{ steps.resolve.outputs.sha }}
+      sha: ${{ steps.auth.outputs.sha }}
+      mode: ${{ steps.auth.outputs.mode }}
     steps:
-      - name: Resolve SHA
-        id: resolve
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify requested SHA is authorized master history
+        id: auth
         env:
           REQUESTED: ${{ inputs.sha }}
+          MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" == "push" ]; then
-            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
-          else
-            git fetch origin master
-            TIP=$(git rev-parse origin/master)
-            if [ -z "$REQUESTED" ]; then
-              echo "❌ Dispatch requires an exact master commit SHA."
-              exit 1
-            fi
-            if [ "$REQUESTED" != "$TIP" ]; then
-              echo "❌ Requested SHA $REQUESTED is not the current master tip ($TIP)."
-              exit 1
-            fi
-            echo "sha=$REQUESTED" >> "$GITHUB_OUTPUT"
+          git fetch origin master --tags
+          TIP=$(git rev-parse origin/master)
+          if [ -z "$REQUESTED" ]; then
+            echo "❌ No SHA supplied. Dispatch this workflow with the exact master commit SHA to deploy."
+            exit 1
           fi
+          if ! git merge-base --is-ancestor "$REQUESTED" "$TIP"; then
+            echo "❌ Requested SHA $REQUESTED is NOT part of master history. Refusing to deploy."
+            exit 1
+          fi
+          if [ "$REQUESTED" != "$TIP" ]; then
+            echo "❌ Requested SHA $REQUESTED is not the current master tip ($TIP)."
+            exit 1
+          fi
+          if [ "$MODE" != "normal" ] && [ "$MODE" != "b1" ]; then
+            echo "❌ Unknown mode '$MODE'. Allowed: normal, b1."
+            exit 1
+          fi
+          echo "✅ Requested SHA $REQUESTED is the current master tip (mode: $MODE)."
+          echo "sha=$REQUESTED" >> "$GITHUB_OUTPUT"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
 
   await-validation:
     name: ⏳ Await CI Validation (exact SHA)
@@ -91,13 +118,36 @@ jobs:
           echo "❌ Timed out awaiting CI validation for ${SHA}"
           exit 1
 
-  # Job 0: Classify changed files (deterministic, repository-owned).
-  # Engineering-only and CI-only master pushes must not trigger product
-  # versioning/builds/deployments. Mixed or unknown changes fail safe to
-  # the normal release pipeline.
+  await-staging:
+    name: ⏳ Await Same-Mode Staging Success (exact SHA)
+    runs-on: ubuntu-latest
+    needs: [resolve-sha, await-validation]
+    steps:
+      - name: Verify successful same-mode staging deployment of this SHA
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ needs.resolve-sha.outputs.sha }}
+          MODE: ${{ needs.resolve-sha.outputs.mode }}
+        run: |
+          set -euo pipefail
+          TITLE="Staging ${MODE} ${SHA}"
+          HIT=$(gh run list --repo "$REPO" --workflow staging.yml --json displayTitle,headSha,conclusion \
+            --jq --arg title "$TITLE" --arg sha "$SHA" \
+            '[.[] | select(.displayTitle == $title and .headSha == $sha and .conclusion == "success")] | length' \
+            2>/dev/null || echo 0)
+          if [ "$HIT" -lt 1 ]; then
+            echo "❌ No successful staging deployment recorded for this SHA in mode '${MODE}'."
+            echo "   Required run title: '${TITLE}'."
+            echo "   Production requires same-SHA, same-mode staging success before mutation."
+            exit 1
+          fi
+          echo "✅ Staging ${MODE} deployment verified for ${SHA}."
+
   classify:
     name: 🔎 Classify Changed Files
     runs-on: ubuntu-latest
+    needs: [resolve-sha, await-staging]
     outputs:
       category: ${{ steps.classify.outputs.category }}
       release: ${{ steps.classify.outputs.release }}
@@ -111,17 +161,10 @@ jobs:
         id: classify
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch --no-tags origin "${{ github.base_ref }}"
-            FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            FILES=$(git diff --name-only "${{ github.event.before }}" HEAD || true)
-          else
-            FILES=$(git diff --name-only "HEAD~1" HEAD || true)
-          fi
-          # Fail safe: if no diff can be determined, prefer release validation.
+          # Dispatch events carry no event.before; fail safe to release validation.
+          FILES=$(git diff --name-only "${{ needs.resolve-sha.outputs.sha }}" HEAD || true)
           if [ -z "$FILES" ]; then
-            echo "Changed-file set undeterminable; failing safe to release pipeline."
+            echo "No delta between requested SHA and HEAD; treating as release-relevant."
             echo "category=PRODUCT_RUNTIME" >> "$GITHUB_OUTPUT"
             echo "release=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -129,195 +172,94 @@ jobs:
           printf '%s\n' "$FILES" > /tmp/changed-files.txt
           node scripts/ci/classify-changes.js --files $(cat /tmp/changed-files.txt)
 
-          # Run the classifier's own focused tests whenever CI infrastructure
-          # (including the classifier) changes.
-          if grep -q '^scripts/ci/' /tmp/changed-files.txt; then
-            node --test scripts/ci/*.node-suite.mjs
-          fi
-
-
-  version-bump:
-    name: 📦 Version Bump
-    runs-on: ubuntu-latest
-    needs: [await-validation, classify]
-    if: >-
-      !contains(github.event.head_commit.message, '[skip-version]') &&
-      needs.classify.outputs.release == 'true'
-    outputs:
-      new_version: ${{ steps.bump.outputs.new_version }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.CI_PAT || secrets.GITHUB_TOKEN }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Determine version bump type
-        id: bump-type
-        run: |
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          if [[ "$COMMIT_MSG" == *"BREAKING CHANGE"* ]] || [[ "$COMMIT_MSG" == *"!"* ]]; then
-            echo "type=major" >> $GITHUB_OUTPUT
-          elif [[ "$COMMIT_MSG" == feat:* ]] || [[ "$COMMIT_MSG" == *"feat("* ]]; then
-            echo "type=minor" >> $GITHUB_OUTPUT
-          else
-            echo "type=patch" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Bump version
-        id: bump
-        run: |
-          npm version ${{ steps.bump-type.outputs.type }} --no-git-tag-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          
-          # Git commits are source of truth (no CHANGELOG.md)
-          git add package.json
-          git commit -m "chore: bump version to $NEW_VERSION [skip-version]" || echo "no changes to commit"
-          git tag "v$NEW_VERSION" || echo "tag already exists"
-
-      - name: Push version bump
-        run: |
-          git push origin master --follow-tags || echo "⚠️ Push failed — add CI_PAT secret (Settings → Secrets → Actions) with a PAT that has repo write access"
-
-
-  # Job 4: Build for production (only on master branch)
   build-production:
-    name: 🏗️ Build Production
+    name: 🏗️ Build Production (normal mode)
     runs-on: ubuntu-latest
-    needs: [await-validation, classify]
-    if: needs.classify.outputs.release == 'true'
-
+    needs: [classify]
+    if: needs.classify.outputs.release == 'true' && inputs.mode == 'normal'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci
       - name: Write production env config
         run: printf '%s\n' "$PRODUCTION_FRONTEND_ENV" > .env.production
         env:
           PRODUCTION_FRONTEND_ENV: ${{ secrets.PRODUCTION_FRONTEND_ENV }}
-
       - name: Build for production
         run: npm run build:production
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7
         with:
           name: production-build
           path: dist/
 
-
-  # Job 4.5: Lighthouse CI (performance gates)
   lighthouse:
-    name: 🔦 Lighthouse CI
+    name: 🔦 Lighthouse CI (normal mode)
     runs-on: ubuntu-latest
     needs: [build-production, classify]
-    # Product-only performance gate: skipped when the product pipeline is
-    # skipped for engineering-only/CI-only changes (needs propagation), and
-    # skipped for BACKEND_RUNTIME-only changes: Functions/rules/indexes
-    # deployments do not alter the served frontend, so a Lighthouse budget
-    # gate is not meaningful (and must not block B1 backend rollouts).
+    # Product-only performance gate, normal mode only. Skipped for
+    # BACKEND_RUNTIME-only changes: Functions/rules deployments do not alter
+    # the served frontend, so a Lighthouse budget gate must not block B1.
     if: >
+      inputs.mode == 'normal' &&
       needs.build-production.result == 'success' &&
       needs.classify.outputs.category != 'BACKEND_RUNTIME'
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: production-build
           path: dist/
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      # LHCI's startServerCommand boots vite preview on 4173 itself;
-      # pre-starting a second server collides on the port.
+      - uses: actions/setup-node@v6
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci
       - name: Run Lighthouse CI
         run: npm run lighthouse
-
-      - name: Upload Lighthouse report
-        uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: lighthouse-report
           path: .lighthouseci/
 
-
-  # Job 5: Deploy to production. Requires explicit owner approval via the
-  # GitHub `production` environment. Deploys ONLY surfaces classified as
-  # changed since the last successful production deploy; never reruns CI
-  # validation inside the deployment (CI validated this exact SHA).
-  # Job 5: Deploy to production. Requires explicit owner approval via the
-  # GitHub `production` environment. Deploys ONLY surfaces classified as
-  # changed since the last successful production deploy; never reruns CI
-  # validation inside the deployment (CI validated this exact SHA).
   deploy-production:
-    name: 🚀 Deploy to Production
+    name: 🚀 Deploy to Production (normal)
     runs-on: ubuntu-latest
-    needs: [build-production, lighthouse, await-validation, classify]
-    if: >
+    needs: [classify, build-production, lighthouse]
+    if: >-
       !cancelled() &&
+      inputs.mode == 'normal' &&
+      needs.classify.outputs.release == 'true' &&
       needs.build-production.result == 'success' &&
       (needs.lighthouse.result == 'success' || needs.lighthouse.result == 'skipped')
     environment: production
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Compute deployment surfaces since last production deploy
+      - name: Compute deployment surfaces since last NORMAL production deploy
         id: surfaces
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          BASE=$(node scripts/ci/last-deployed-sha.js --workflow production.yml || true)
+          BASE=$(node scripts/ci/last-deployed-sha.js --workflow production.yml --title-prefix "Production normal" || true)
           FN_ALLOW="disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
           if [ -z "$BASE" ]; then
             if [ "${{ inputs.authorize_bootstrap }}" != "true" ]; then
               echo "❌ bootstrap_required"
-              echo "   No trustworthy previous production deployment SHA exists."
+              echo "   No trustworthy previous NORMAL production deployment SHA exists."
               echo "   An unknown baseline is NEVER treated as 'deploy everything'."
               echo "   An operator must explicitly dispatch this workflow with"
               echo "   authorize_bootstrap=true to invoke the authorized first-deployment plan."
               exit 1
             fi
-            echo "⚠️ No baseline — operator EXPLICITLY authorized the bootstrap first-deployment plan."
+            echo "⚠️ No baseline — operator EXPLICITLY authorized the bootstrap first deployment."
             RESULT=$(node scripts/ci/deploy-surface-classifier.js --from "$(git rev-list --max-parents=0 HEAD)" --functions "$FN_ALLOW")
           else
+            echo "Last successfully deployed NORMAL production SHA: $BASE"
             RESULT=$(node scripts/ci/deploy-surface-classifier.js --from "$BASE" --functions "$FN_ALLOW")
           fi
           echo "$RESULT"
@@ -341,17 +283,12 @@ jobs:
           path: dist/
         if: contains(steps.surfaces.outputs.prod_surfaces, 'hosting')
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+      - uses: actions/setup-node@v6
+        with: { node-version: '22', cache: 'npm' }
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Install functions dependencies
-        run: npm ci
+      - run: npm ci
         working-directory: functions
 
       - name: Write production env config
@@ -394,14 +331,66 @@ jobs:
             playwright-report/
           retention-days: 14
 
-      - name: Create GitHub Release
+  deploy-b1-rules:
+    name: 🛡️ B1 Step A — Deploy Firestore Rules to Production (FIRST)
+    runs-on: ubuntu-latest
+    needs: [await-staging]
+    if: inputs.mode == 'b1'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - run: npm ci
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      - name: Deploy Firestore rules ONLY (containment first)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          # The tag was pushed in the version-bump job. 
-          # Now that production deploy succeeded, create the actual release.
-          gh release create "v$VERSION" \
-            --title "Release v$VERSION" \
-            --generate-notes \
-            --notes "Production deployment of Anchor OS v$VERSION. See CHANGELOG.md for full commit history." || echo "Release already exists or failed to create"
+          set -euo pipefail
+          npm run deploy:production -- --yes --skip-tests --skip-lint --skip-audit --skip-e2e --skip-mutation --skip-version-bump --no-deploy-marker --surfaces=rules
+
+  deploy-b1-functions:
+    name: 🔗 B1 Step B — Deploy the five B1 Functions to Production (only after rules succeed)
+    runs-on: ubuntu-latest
+    needs: [deploy-b1-rules]
+    if: >-
+      !cancelled() &&
+      inputs.mode == 'b1' &&
+      needs.deploy-b1-rules.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm ci
+        working-directory: functions
+      - name: Write production functions env config
+        run: printf '%s\n' "$PRODUCTION_FUNCTIONS_ENV" > functions/.env.production
+        env:
+          PRODUCTION_FUNCTIONS_ENV: ${{ secrets.PRODUCTION_FUNCTIONS_ENV }}
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      - name: Deploy exactly the five B1 Functions (second invocation)
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FN_ALLOW: "disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
+        run: |
+          set -euo pipefail
+          npm run deploy:production -- --yes --skip-tests --skip-lint --skip-audit --skip-e2e --skip-mutation --skip-version-bump --no-deploy-marker --surfaces=functions --functions="$FN_ALLOW"
+
+      - name: Post-deploy release smoke (deployed production)
+        env:
+          E2E_BASE_URL: https://anchor-os.web.app
+        run: npx playwright test --config config/playwright.release-smoke.config.ts
+
+      - name: Upload release smoke artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: production-b1-release-smoke-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14

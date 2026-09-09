@@ -1,4 +1,5 @@
 name: Staging Deploy
+run-name: 'Staging ${{ inputs.mode }} ${{ inputs.sha }}'
 on:
   workflow_dispatch:
     inputs:
@@ -6,8 +7,16 @@ on:
         description: 'Exact master commit SHA to deploy (must be the current origin/master tip with successful CI)'
         required: true
         type: string
+      mode:
+        description: 'Deployment mode: normal (surface-aware) or b1 (rules first, then the five allowed Functions; no Hosting/indexes)'
+        required: true
+        type: choice
+        default: 'normal'
+        options:
+          - normal
+          - b1
       authorize_bootstrap:
-        description: 'Explicit operator authorization for a FIRST deployment when no verified baseline exists (CI-gated, full surfaces)'
+        description: 'normal mode only: explicit operator authorization for a FIRST deployment when no normal staging baseline exists'
         required: false
         type: boolean
         default: false
@@ -16,26 +25,22 @@ permissions:
   contents: read
   actions: read
 
-# Release-infra contract (staging authorization model):
-#   0. MERGING/PUSHING TO MASTER NEVER MUTATES STAGING BY ITSELF. Staging is
-#      mutated only by an explicit operator workflow_dispatch for an EXACT SHA.
-#   1. resolve-sha verifies the requested SHA belongs to master history and is
-#      the current origin/master tip (keeps deployment provenance exact).
-#   2. await-validation blocks until the CI/CD Pipeline run for THAT EXACT SHA
-#      has completed successfully — an unvalidated commit can never deploy.
-#   3. classify computes changed deployment surfaces since the last
-#      SUCCESSFULLY DEPLOYED staging SHA (never HEAD~1). If no trustworthy
-#      baseline exists the workflow FAILS CLOSED with `bootstrap_required`;
-#      unknown baselines never mean "deploy everything". A first deployment
-#      requires the operator to explicitly pass authorize_bootstrap=true.
-#   4. deploy passes validated-SHA skip flags to the guarded pipeline (no
-#      lint/audit/tests/version-bump/E2E rerun inside deployment) and is
-#      surface-aware. B1 ordered rollout: rules first, then only the five
-#      allowed functions (never "all functions" during the B1 window).
-#   5. release-smoke is the fast fail-fast post-deploy gate against the
-#      deployed staging URL (retries 0, 20s tests, 3-minute bound, chromium).
-#   6. Deployment provenance = this workflow run (a successful run IS the
-#      record of the deployed SHA), consumed by scripts/ci/last-deployed-sha.js.
+# Staging authorization model (run-name carries mode + SHA for provenance):
+#   0. MERGING/PUSHING TO MASTER NEVER MUTATES STAGING. Staging is mutated only
+#      by an explicit operator workflow_dispatch for an EXACT SHA.
+#   1. resolve-sha: the requested SHA must be the current origin/master tip.
+#   2. await-validation: CI (ci.yml) must have succeeded for THAT EXACT SHA.
+#   3. mode=normal: surface-aware deploy classified against the last
+#      SUCCESSFUL *normal* staging baseline (run names prefixed "Staging normal").
+#      No baseline -> FAIL CLOSED with bootstrap_required unless the operator
+#      explicitly passed authorize_bootstrap=true.
+#   4. mode=b1: NO baseline required. Firestore rules deploy FIRST as a separate
+#      guarded invocation; only after rules succeed are exactly the five allowed
+#      Functions deployed as a SECOND invocation. Never Hosting, never indexes,
+#      never one combined firebase command for rules + Functions.
+#   5. A successful B1 run is a PARTIAL deployment: it is never treated as a
+#      whole-SHA normal baseline (last-deployed-sha.js filters by run-name).
+#   6. release smoke runs after every deployment (fail-fast, chromium).
 
 jobs:
   resolve-sha:
@@ -43,6 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.auth.outputs.sha }}
+      mode: ${{ steps.auth.outputs.mode }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,6 +59,7 @@ jobs:
         id: auth
         env:
           REQUESTED: ${{ inputs.sha }}
+          MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
           git fetch origin master --tags
@@ -70,15 +77,20 @@ jobs:
             echo "   Only the current master tip can be deployed to staging (keeps provenance exact)."
             exit 1
           fi
-          echo "✅ Requested SHA $REQUESTED is the current master tip."
+          if [ "$MODE" != "normal" ] && [ "$MODE" != "b1" ]; then
+            echo "❌ Unknown mode '$MODE'. Allowed: normal, b1."
+            exit 1
+          fi
+          echo "✅ Requested SHA $REQUESTED is the current master tip (mode: $MODE)."
           echo "sha=$REQUESTED" >> "$GITHUB_OUTPUT"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
 
   await-validation:
     name: ⏳ Await CI Validation (exact SHA)
     runs-on: ubuntu-latest
     needs: [resolve-sha]
     steps:
-      - name: Await successful CI/CD Pipeline run for this SHA
+      - name: Await successful CI run for this SHA
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -105,11 +117,12 @@ jobs:
           echo "❌ Timed out awaiting CI validation for ${SHA}"
           exit 1
 
-  classify:
-    name: 🔎 Classify Deployment Surfaces
+  plan:
+    name: 🧭 Plan Deployment (mode-aware)
     runs-on: ubuntu-latest
     needs: [resolve-sha, await-validation]
     outputs:
+      mode: ${{ steps.base.outputs.mode }}
       deploy_hosting: ${{ steps.surfaces.outputs.deploy_hosting }}
       deploy_rules: ${{ steps.surfaces.outputs.deploy_rules }}
       deploy_indexes: ${{ steps.surfaces.outputs.deploy_indexes }}
@@ -123,51 +136,56 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Resolve last successfully deployed staging SHA (fail closed)
+      - name: Resolve normal baseline (fail closed) / accept B1 without baseline
         id: base
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
+          MODE: ${{ needs.resolve-sha.outputs.mode }}
+          AUTHORIZE: ${{ inputs.authorize_bootstrap }}
         run: |
           set -euo pipefail
-          BASE=$(node scripts/ci/last-deployed-sha.js --workflow staging.yml || true)
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          if [ "$MODE" == "b1" ]; then
+            echo "B1 mode: no staging baseline required — this is a partial phased rollout."
+            echo "base_sha=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Normal mode: only successful NORMAL runs count as the whole-SHA baseline.
+          BASE=$(node scripts/ci/last-deployed-sha.js --workflow staging.yml --title-prefix "Staging normal" || true)
           if [ -z "$BASE" ]; then
-            if [ "${{ inputs.authorize_bootstrap }}" != "true" ]; then
+            if [ "$AUTHORIZE" != "true" ]; then
               echo "❌ bootstrap_required"
-              echo "   No trustworthy previous staging deployment SHA exists."
+              echo "   No trustworthy previous NORMAL staging deployment exists."
               echo "   An unknown baseline is NEVER treated as 'deploy everything',"
               echo "   and merging to master never mutates staging by itself."
               echo "   An operator must either establish a verified baseline (a previous"
-              echo "   successful staging deploy) or explicitly re-dispatch this workflow"
-              echo "   with authorize_bootstrap=true to invoke the authorized"
-              echo "   first-deployment plan (CI-verified SHA, full surfaces, release-smoke gated)."
+              echo "   successful normal staging deploy) or explicitly re-dispatch with"
+              echo "   authorize_bootstrap=true for the authorized first deployment."
               exit 1
             fi
-            echo "⚠️ No baseline — operator EXPLICITLY authorized the bootstrap first-deployment plan."
+            echo "⚠️ No baseline — operator EXPLICITLY authorized the bootstrap first deployment."
             echo "base_sha=" >> "$GITHUB_OUTPUT"
-            echo "bootstrap=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Last successfully deployed staging SHA: $BASE"
+            echo "Last successfully deployed NORMAL staging SHA: $BASE"
             echo "base_sha=$BASE" >> "$GITHUB_OUTPUT"
-            echo "bootstrap=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Classify deployment surfaces since base
+      - name: Compute deployment plan
         id: surfaces
+        env:
+          MODE: ${{ needs.resolve-sha.outputs.mode }}
+          BASE: ${{ steps.base.outputs.base_sha }}
         run: |
           set -euo pipefail
-          BASE="${{ steps.base.outputs.base_sha }}"
-          BOOTSTRAP="${{ steps.base.outputs.bootstrap }}"
-          # B1 ordered rollout: only these Functions may be deployed until the
-          # rollout is complete (Step A: rules, Step B: these functions).
+          # B1 ordered rollout allow-list: exactly these Functions, nothing else.
           FN_ALLOW="disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
-          if [ "$BOOTSTRAP" == "true" ]; then
-            # Explicitly authorized bootstrap: CI-verified SHA, full surfaces,
-            # still guarded by the pipeline and release smoke. Functions stay
-            # bounded by the B1 allow-list (never "all functions").
-            echo "deploy_hosting=true"    >> "$GITHUB_OUTPUT"
+          echo "fn_allow=$FN_ALLOW" >> "$GITHUB_OUTPUT"
+          if [ "$MODE" == "b1" ]; then
+            echo "B1 plan: rules surface only first; Functions second; NEVER Hosting/indexes."
+            echo "deploy_hosting=false"    >> "$GITHUB_OUTPUT"
             echo "deploy_rules=true"      >> "$GITHUB_OUTPUT"
-            echo "deploy_indexes=true"    >> "$GITHUB_OUTPUT"
+            echo "deploy_indexes=false"   >> "$GITHUB_OUTPUT"
             echo "deploy_functions=true"  >> "$GITHUB_OUTPUT"
             echo "functions_to_deploy=$FN_ALLOW" >> "$GITHUB_OUTPUT"
             echo "ci_only=false"          >> "$GITHUB_OUTPUT"
@@ -176,10 +194,10 @@ jobs:
           fi
 
   build-hosting:
-    name: 🏗️ Build Staging Hosting (once)
+    name: 🏗️ Build Staging Hosting (once, normal mode only)
     runs-on: ubuntu-latest
-    needs: [classify]
-    if: needs.classify.outputs.ci_only != 'true' && needs.classify.outputs.deploy_hosting == 'true'
+    needs: [plan]
+    if: needs.plan.outputs.mode == 'normal' && needs.plan.outputs.ci_only != 'true' && needs.plan.outputs.deploy_hosting == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
@@ -196,13 +214,14 @@ jobs:
           path: dist/
 
   deploy:
-    name: 🚀 Deploy Changed Surfaces to Staging
+    name: 🚀 Deploy Changed Surfaces to Staging (normal)
     runs-on: ubuntu-latest
-    needs: [classify, build-hosting]
-    if: >
+    needs: [plan, build-hosting]
+    if: >-
       !cancelled() &&
-      needs.classify.outputs.ci_only != 'true' &&
-      needs.classify.result == 'success' &&
+      needs.plan.outputs.mode == 'normal' &&
+      needs.plan.outputs.ci_only != 'true' &&
+      needs.plan.result == 'success' &&
       (needs.build-hosting.result == 'success' || needs.build-hosting.result == 'skipped')
     steps:
       - uses: actions/checkout@v4
@@ -225,8 +244,8 @@ jobs:
       - name: Deploy validated surfaces
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          SURFACES: "${{ needs.classify.outputs.deploy_hosting == 'true' && 'hosting,' || '' }}${{ needs.classify.outputs.deploy_rules == 'true' && 'rules,' || '' }}${{ needs.classify.outputs.deploy_indexes == 'true' && 'indexes,' || '' }}${{ needs.classify.outputs.deploy_functions == 'true' && 'functions' || '' }}"
-          FUNCTIONS: ${{ needs.classify.outputs.functions_to_deploy }}
+          SURFACES: "${{ needs.plan.outputs.deploy_hosting == 'true' && 'hosting,' || '' }}${{ needs.plan.outputs.deploy_rules == 'true' && 'rules,' || '' }}${{ needs.plan.outputs.deploy_indexes == 'true' && 'indexes,' || '' }}${{ needs.plan.outputs.deploy_functions == 'true' && 'functions' || '' }}"
+          FUNCTIONS: ${{ needs.plan.outputs.functions_to_deploy }}
         run: |
           set -euo pipefail
           SURFACES="${SURFACES%,}"
@@ -236,11 +255,62 @@ jobs:
           fi
           npm run deploy:staging -- "${ARGS[@]}"
 
-  release-smoke:
-    name: 🎯 Release Smoke (deployed staging)
+  deploy-b1-rules:
+    name: 🛡️ B1 Step A — Deploy Firestore Rules (FIRST)
     runs-on: ubuntu-latest
-    needs: [deploy]
-    if: "!cancelled() && needs.deploy.result == 'success'"
+    needs: [plan]
+    if: needs.plan.outputs.mode == 'b1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - run: npm ci
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      - name: Deploy Firestore rules ONLY (containment first)
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy:staging -- --yes --skip-tests --skip-lint --skip-audit --skip-e2e --skip-mutation --skip-version-bump --no-deploy-marker --surfaces=rules
+
+  deploy-b1-functions:
+    name: 🔗 B1 Step B — Deploy the five B1 Functions (only after rules succeed)
+    runs-on: ubuntu-latest
+    needs: [deploy-b1-rules]
+    if: >-
+      !cancelled() &&
+      needs.plan.outputs.mode == 'b1' &&
+      needs.deploy-b1-rules.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm ci
+        working-directory: functions
+      - name: Write staging functions env config
+        run: printf '%s\n' "$STAGING_FUNCTIONS_ENV" > functions/.env.staging
+        env:
+          STAGING_FUNCTIONS_ENV: ${{ secrets.STAGING_FUNCTIONS_ENV }}
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      - name: Deploy exactly the five B1 Functions (second invocation)
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FN_ALLOW: "disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
+        run: |
+          set -euo pipefail
+          npm run deploy:staging -- --yes --skip-tests --skip-lint --skip-audit --skip-e2e --skip-mutation --skip-version-bump --no-deploy-marker --surfaces=functions --functions="$FN_ALLOW"
+
+  release-smoke:
+    name: 🎯 Release Smoke (normal)
+    runs-on: ubuntu-latest
+    needs: [plan, deploy]
+    if: >-
+      !cancelled() &&
+      needs.plan.outputs.mode == 'normal' &&
+      needs.deploy.result == 'success'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
@@ -261,11 +331,42 @@ jobs:
             playwright-report/
           retention-days: 14
 
-  post-deploy-e2e:
-    name: Post-Deploy E2E (non-blocking)
+  release-smoke-b1:
+    name: 🎯 Release Smoke (B1)
     runs-on: ubuntu-latest
-    needs: [release-smoke]
-    if: needs.release-smoke.result == 'success'
+    needs: [plan, deploy-b1-functions]
+    if: >-
+      !cancelled() &&
+      needs.plan.outputs.mode == 'b1' &&
+      needs.deploy-b1-functions.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci
+      - run: npx playwright install chromium --with-deps
+      - name: Run release smoke against deployed staging
+        run: npx playwright test --config config/playwright.release-smoke.config.ts
+        env:
+          E2E_BASE_URL: ${{ secrets.STAGING_URL }}
+      - name: Upload release smoke artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-smoke-b1-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
+
+  post-deploy-e2e:
+    name: Post-Deploy E2E (non-blocking, normal mode)
+    runs-on: ubuntu-latest
+    needs: [plan, release-smoke]
+    if: >-
+      !cancelled() &&
+      needs.plan.outputs.mode == 'normal' &&
+      needs.release-smoke.result == 'success'
     continue-on-error: true
     strategy:
       matrix:

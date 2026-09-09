@@ -151,7 +151,7 @@ const PRODUCTION_WORKFLOW = fs.readFileSync('.github/workflows/production.yml', 
 
 test('staging deploy waits for CI validation of the same SHA before deploying', () => {
     assert.match(STAGING_WORKFLOW, /await-validation/);
-    assert.match(STAGING_WORKFLOW, /CI\/CD Pipeline/);
+    assert.match(STAGING_WORKFLOW, /--workflow ci\.yml/);
     assert.match(STAGING_WORKFLOW, /workflow_run\.head_sha|headSha/);
 });
 
@@ -299,7 +299,7 @@ test('requested SHA must be authorized master history and CI-validated for that 
     assert.match(STAGING_WORKFLOW, /is not the current master tip/);
     assert.match(STAGING_WORKFLOW, /needs: \[resolve-sha\]/);
     assert.match(STAGING_WORKFLOW, /needs\.resolve-sha\.outputs\.sha/);
-    assert.match(STAGING_WORKFLOW, /CI\/CD Pipeline/);
+    assert.match(STAGING_WORKFLOW, /--workflow ci\.yml/);
 });
 
 test('missing staging baseline FAILS CLOSED with bootstrap_required (never ALL surfaces)', () => {
@@ -311,11 +311,14 @@ test('missing staging baseline FAILS CLOSED with bootstrap_required (never ALL s
     assert.doesNotMatch(STAGING_WORKFLOW, /failing safe to ALL surfaces/);
 });
 
-test('explicitly authorized bootstrap keeps Functions bounded by the B1 allow-list', () => {
-    const bootstrapBlock = STAGING_WORKFLOW.slice(STAGING_WORKFLOW.indexOf('FN_ALLOW='));
-    assert.match(bootstrapBlock, /functions_to_deploy=\$FN_ALLOW/);
-    assert.match(bootstrapBlock, /never "all functions"/);
-    assert.match(bootstrapBlock, /disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus/);
+test('Functions deployments are always bounded by the exact B1 allow-list', () => {
+    const list = /disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus/;
+    assert.match(STAGING_WORKFLOW, list);
+    assert.match(PRODUCTION_WORKFLOW, list);
+    assert.match(STAGING_WORKFLOW, /functions_to_deploy=\$FN_ALLOW/);
+    for (const wf of [STAGING_WORKFLOW, PRODUCTION_WORKFLOW]) {
+        assert.match(wf, /--functions="\$FN_ALLOW"/);
+    }
 });
 
 test('classifier emits fail_closed and treats it as no-deployment for workflow gating', () => {
@@ -365,5 +368,115 @@ test('production remains approval-gated and fail-closed on missing baseline', ()
     assert.match(PRODUCTION_WORKFLOW, /environment:\s*production/);
     assert.match(PRODUCTION_WORKFLOW, /bootstrap_required/);
     assert.match(PRODUCTION_WORKFLOW, /authorize_bootstrap/);
-    assert.match(PRODUCTION_WORKFLOW, /--workflow production\.yml \|\| true/);
+    assert.match(PRODUCTION_WORKFLOW, /--workflow production\.yml/);
+    assert.match(PRODUCTION_WORKFLOW, /--title-prefix "Production normal"/);
+});
+
+// ---------------------------------------------------------------------------
+// Release-safety correction: phased B1 + manual production
+// ---------------------------------------------------------------------------
+
+test('production is manual only: no push trigger', () => {
+    const trigger = PRODUCTION_WORKFLOW.slice(0, PRODUCTION_WORKFLOW.indexOf('permissions:'));
+    assert.match(PRODUCTION_WORKFLOW, /workflow_dispatch:/);
+    assert.doesNotMatch(trigger, /push:/);
+    assert.match(PRODUCTION_WORKFLOW, /run-name: 'Production/);
+});
+
+test('production workflow can never push, commit, or version-bump master', () => {
+    assert.doesNotMatch(PRODUCTION_WORKFLOW, /git push origin master/);
+    assert.doesNotMatch(PRODUCTION_WORKFLOW, /npm version/);
+    assert.doesNotMatch(PRODUCTION_WORKFLOW, /version-bump:/);
+    assert.doesNotMatch(PRODUCTION_WORKFLOW, /git commit/);
+    assert.match(PRODUCTION_WORKFLOW, /permissions:/);
+    assert.match(PRODUCTION_WORKFLOW.slice(0, PRODUCTION_WORKFLOW.indexOf('jobs:')), /contents: read/);
+});
+
+test('staging B1 deploys rules FIRST, then exactly the five Functions as a second invocation', () => {
+    const rulesIdx = STAGING_WORKFLOW.indexOf('--surfaces=rules');
+    const fnIdx = STAGING_WORKFLOW.indexOf('--surfaces=functions --functions="\$FN_ALLOW"');
+    assert.ok(rulesIdx !== -1 && fnIdx !== -1, 'both B1 invocations must exist');
+    assert.ok(rulesIdx < fnIdx, 'rules must be deployed before Functions');
+    const b1Block = STAGING_WORKFLOW.slice(STAGING_WORKFLOW.indexOf('deploy-b1-rules:'));
+    assert.match(b1Block, /deploy-b1-functions/);
+    assert.match(b1Block, /needs: \[deploy-b1-rules\]/);
+});
+
+test('production B1 deploys rules FIRST, then exactly the five Functions as a second invocation', () => {
+    const rulesIdx = PRODUCTION_WORKFLOW.indexOf('--surfaces=rules');
+    const fnIdx = PRODUCTION_WORKFLOW.indexOf('--surfaces=functions --functions="\$FN_ALLOW"');
+    assert.ok(rulesIdx !== -1 && fnIdx !== -1, 'both B1 invocations must exist');
+    assert.ok(rulesIdx < fnIdx, 'rules must be deployed before Functions');
+    const b1Block = PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('deploy-b1-rules:'));
+    assert.match(b1Block, /deploy-b1-functions/);
+    assert.match(b1Block, /needs: \[deploy-b1-rules\]/);
+});
+
+test('B1 mode never deploys Hosting or indexes', () => {
+    const stagingB1 = STAGING_WORKFLOW.slice(
+        STAGING_WORKFLOW.indexOf('deploy-b1-rules:'),
+        STAGING_WORKFLOW.indexOf('post-deploy-e2e:'),
+    );
+    // The only B1 firebase invocations are rules-only and functions-only.
+    assert.match(stagingB1, /--surfaces=rules/);
+    assert.match(stagingB1, /--surfaces=functions --functions="\$FN_ALLOW"/);
+    assert.doesNotMatch(stagingB1, /--surfaces=hosting|--surfaces=.*indexes/);
+    const productionB1 = PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('deploy-b1-rules:'));
+    assert.match(productionB1, /--surfaces=rules/);
+    assert.match(productionB1, /--surfaces=functions --functions="\$FN_ALLOW"/);
+    assert.doesNotMatch(productionB1, /--surfaces=hosting|--surfaces=.*indexes/);
+    // The B1 plan explicitly disables the Hosting and index surfaces.
+    const stagingB1Plan = STAGING_WORKFLOW.slice(
+        STAGING_WORKFLOW.indexOf('Compute deployment plan'),
+        STAGING_WORKFLOW.indexOf('deploy-surface-classifier.js'),
+    );
+    assert.match(stagingB1Plan, /deploy_hosting=false/);
+    assert.match(stagingB1Plan, /deploy_indexes=false/);
+    assert.match(stagingB1Plan, /NEVER Hosting\/indexes/);
+});
+
+test('B1 successful runs never become normal deployment baselines (unit)', () => {
+    const sha = pickLastDeployedSha([
+        { conclusion: 'success', headSha: 'b1partial', createdAt: '2026-09-10T12:00:00Z', displayTitle: 'Staging b1 abc1234' },
+        { conclusion: 'success', headSha: 'normgood', createdAt: '2026-09-09T09:00:00Z', displayTitle: 'Staging normal def5678' },
+    ], { titlePrefix: 'Staging normal' });
+    assert.equal(sha, 'normgood');
+    // Without the prefix filter the newer B1 run would (incorrectly) win.
+    assert.equal(pickLastDeployedSha([
+        { conclusion: 'success', headSha: 'b1partial', createdAt: '2026-09-10T12:00:00Z', displayTitle: 'Staging b1 abc1234' },
+        { conclusion: 'success', headSha: 'normgood', createdAt: '2026-09-09T09:00:00Z', displayTitle: 'Staging normal def5678' },
+    ]), 'b1partial');
+});
+
+test('normal baseline lookups filter by run-name prefix in both workflows', () => {
+    assert.match(STAGING_WORKFLOW, /--title-prefix "Staging normal"/);
+    assert.match(PRODUCTION_WORKFLOW, /--title-prefix "Production normal"/);
+    const lds = fs.readFileSync('scripts/ci/last-deployed-sha.js', 'utf8');
+    assert.match(lds, /--title-prefix/);
+    assert.match(lds, /displayTitle/);
+});
+
+test('run names carry mode + SHA for provenance', () => {
+    assert.match(STAGING_WORKFLOW, /run-name: 'Staging \$\{\{ inputs\.mode \}\} \$\{\{ inputs\.sha \}\}'/);
+    assert.match(PRODUCTION_WORKFLOW, /run-name: 'Production \$\{\{ inputs\.mode \}\} \$\{\{ inputs\.sha \}\}'/);
+});
+
+test('production exact SHA requires same-mode staging success for the same SHA', () => {
+    assert.match(PRODUCTION_WORKFLOW, /--workflow staging\.yml/);
+    assert.match(PRODUCTION_WORKFLOW, /Staging \$\{MODE\} \$\{SHA\}/);
+    assert.match(PRODUCTION_WORKFLOW, /same-mode staging success|same-SHA, same-mode staging success/);
+    assert.match(PRODUCTION_WORKFLOW, /needs: \[resolve-sha, await-validation\]/);
+});
+
+test('every production mutation enters the production approval environment', () => {
+    const deployBlock = PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('deploy-production'));
+    assert.match(deployBlock, /environment:\s*production/);
+    const b1Block = PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('deploy-b1-rules:'));
+    assert.match(b1Block, /environment:\s*production/);
+});
+
+test('production normal bootstrap still fails closed with bootstrap_required', () => {
+    assert.match(PRODUCTION_WORKFLOW, /bootstrap_required/);
+    assert.match(PRODUCTION_WORKFLOW, /inputs\.authorize_bootstrap/);
+    assert.match(PRODUCTION_WORKFLOW, /An unknown baseline is NEVER treated as/);
 });
