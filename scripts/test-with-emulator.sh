@@ -21,7 +21,7 @@ fi
 
 if [ "$EMULATOR_ALREADY_RUNNING" = false ]; then
     # Start emulators in background
-    firebase emulators:start --config config/firebase.json --only auth,firestore,functions &
+    firebase emulators:start --project demo-anchor-os --only auth,firestore,functions &
     EMULATOR_PID=$!
     
     # Wait for emulators to be ready

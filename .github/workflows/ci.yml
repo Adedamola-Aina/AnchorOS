@@ -321,10 +321,40 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Write E2E env config
-        run: printf '%s\n' "$E2E_VITE_ENV" > .env.development
+      - name: Copy safe emulator env template (no cloud secrets in PR smoke)
+        # .env.example contains ONLY non-secret local emulator values
+        # (demo-anchor-os). PR smoke never depends on any cloud-secret env
+        # variable or cloud development Firebase configuration.
+        run: cp .env.example .env.development
+
+      - name: Setup Java (Firebase Emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          # Firebase Emulator vX requires Java 21+; use 21 to match local dev
+          java-version: '21'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Start Firebase emulators (local demo project only)
+        run: |
+          nohup firebase emulators:start --project demo-anchor-os --only auth,firestore > emulator.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -s -o /dev/null http://127.0.0.1:9099; then break; fi
+            sleep 1
+          done
+          curl -s -o /dev/null http://127.0.0.1:9099 || { tail -50 emulator.log; exit 1; }
+
+      - name: Seed deterministic local smoke user
+        # Seeds the known fixture identity (e2e/fixtures/test-data.ts) into the
+        # LOCAL emulators only. The script refuses non-loopback hosts and any
+        # non-demo project ID, and never prints credentials.
+        run: node scripts/ci/seed-release-emulator.mjs
         env:
-          E2E_VITE_ENV: ${{ secrets.E2E_VITE_ENV }}
+          FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+          FIREBASE_PROJECT_ID: demo-anchor-os
 
       - name: Install Playwright Chromium (bounded smoke only)
         run: npx playwright install --with-deps chromium

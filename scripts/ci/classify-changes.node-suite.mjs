@@ -159,8 +159,8 @@ test('retired .github/agents, instructions, .claude/skills, tools/hooks are engi
     assert.equal(r.release, false);
 });
 
-test('config/firebase.json is backend runtime', () => {
-    const r = classifyFiles(['config/firebase.json']);
+test('firebase.json (canonical root config) is backend runtime', () => {
+    const r = classifyFiles(['firebase.json']);
     assert.equal(r.category, 'BACKEND_RUNTIME');
     assert.equal(r.release, true);
 });

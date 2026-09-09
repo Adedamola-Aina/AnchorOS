@@ -1,6 +1,6 @@
 # AnchorOS Operations
 
-Environment model, release pipeline, and operational runbook. Executable truth: `.firebaserc`, `config/firebase.json`, `scripts/DEPLOY_PIPELINE.sh`, `.github/workflows/`.
+Environment model, release pipeline, and operational runbook. Executable truth: `.firebaserc`, `firebase.json`, `scripts/DEPLOY_PIPELINE.sh`, `.github/workflows/`.
 
 ## Environments (canonical)
 

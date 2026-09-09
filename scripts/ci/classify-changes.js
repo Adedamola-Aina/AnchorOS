@@ -58,10 +58,9 @@ function classifyPath(file) {
         f.startsWith('functions/') ||
         f === 'firestore.rules' || f === 'storage.rules' ||
         f === 'firestore.indexes.json' ||
-        f === 'config/firebase.json' ||
+        f === 'firebase.json' ||
         f === 'config/firestore.rules' || f === 'config/storage.rules' ||
-        f === 'config/firestore.indexes.json' ||
-        f === 'firebase.json'
+        f === 'config/firestore.indexes.json'
     ) {
         return 'BACKEND_RUNTIME';
     }

@@ -27,9 +27,12 @@ test.describe('Release Smoke — authenticated shell', () => {
 
     test('Commitments reachable', async ({ page }) => {
         await page.goto('/commitments');
+        // .first(): the nav link and the page heading can both match — the
+        // assertion only requires the surface to be reachable.
         await expect(
             page.getByRole('heading', { name: 'Commitments', exact: true })
-                .or(page.locator('text=Commitments').first())
+                .or(page.locator('text=Commitments'))
+                .first()
         ).toBeVisible({ timeout: 10000 });
     });
 
@@ -37,7 +40,8 @@ test.describe('Release Smoke — authenticated shell', () => {
         await page.goto('/settings');
         await expect(
             page.getByRole('heading', { name: 'Settings' })
-                .or(page.locator('text=System').first())
+                .or(page.locator('text=System'))
+                .first()
         ).toBeVisible({ timeout: 10000 });
     });
 
@@ -73,7 +77,8 @@ test.describe('Release Smoke — logout (isolated session)', () => {
         await page.goto('/settings');
         await expect(
             page.getByRole('heading', { name: 'Settings' })
-                .or(page.locator('text=System').first())
+                .or(page.locator('text=System'))
+                .first()
         ).toBeVisible({ timeout: 10000 });
 
         const signOutBtn = page.getByRole('button', { name: 'Sign Out', exact: true }).last();
