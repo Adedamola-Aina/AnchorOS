@@ -68,9 +68,22 @@ function setBaseEnv(overrides: Record<string, string> = {}) {
     vi.stubEnv('VITE_FIREBASE_APP_CHECK_SITE_KEY', '');
     vi.stubEnv('VITE_APP_CHECK_DEBUG_TOKEN', '');
 
+    // Deterministic browser hostname (the app derives the emulator host from
+    // window.location.hostname in development). happy-dom defaults to
+    // 'localhost'; individual tests override via setBrowserHostname.
+    setBrowserHostname('localhost');
+
     for (const [key, value] of Object.entries(overrides)) {
         vi.stubEnv(key, value);
     }
+}
+
+function setBrowserHostname(hostname: string) {
+    Object.defineProperty(window, 'location', {
+        value: { hostname },
+        configurable: true,
+        writable: true,
+    });
 }
 
 describe('firebase config module', () => {
@@ -313,5 +326,78 @@ describe('firebase config module', () => {
         expect(mockState.connectFunctionsEmulator).not.toHaveBeenCalled();
         expect(mockState.connectStorageEmulator).not.toHaveBeenCalled();
         expect(mockState.initializeAppCheck).toHaveBeenCalled();
+    });
+
+    // --- Emulator host selection (simple Tailscale dev access) -----------------
+
+    it('resolveEmulatorHost maps loopback browser hostnames to 127.0.0.1', async () => {
+        setBaseEnv();
+        const { resolveEmulatorHost } = await import('./firebase');
+
+        expect(resolveEmulatorHost('localhost')).toBe('127.0.0.1');
+        expect(resolveEmulatorHost('127.0.0.1')).toBe('127.0.0.1');
+        expect(resolveEmulatorHost('::1')).toBe('127.0.0.1');
+        expect(resolveEmulatorHost('[::1]')).toBe('127.0.0.1');
+        expect(resolveEmulatorHost('LOCALHOST')).toBe('127.0.0.1');
+        expect(resolveEmulatorHost(undefined)).toBe('127.0.0.1');
+        expect(resolveEmulatorHost(null)).toBe('127.0.0.1');
+        expect(resolveEmulatorHost('')).toBe('127.0.0.1');
+    });
+
+    it('resolveEmulatorHost passes remote hostnames (e.g. Tailscale) through unchanged', async () => {
+        setBaseEnv();
+        const { resolveEmulatorHost } = await import('./firebase');
+
+        expect(resolveEmulatorHost('anchor.tail2fa2e.ts.net')).toBe('anchor.tail2fa2e.ts.net');
+        expect(resolveEmulatorHost('Anchor.Tail2fa2e.TS.net')).toBe('anchor.tail2fa2e.ts.net');
+        expect(resolveEmulatorHost('mybox.example.com')).toBe('mybox.example.com');
+    });
+
+    it('dials the emulators at the Tailscale hostname when the page is loaded over Tailscale', async () => {
+        setBaseEnv();
+        setBrowserHostname('anchor.tail2fa2e.ts.net');
+
+        const module = await import('./firebase');
+
+        // Project identity stays hard-locked to the demo project
+        expect(mockState.initializeApp).toHaveBeenCalledWith(
+            expect.objectContaining({ projectId: 'demo-anchor-os' }),
+        );
+        // ...while every emulator client dials the Tailscale hostname
+        expect(mockState.connectAuthEmulator).toHaveBeenCalledWith(
+            { auth: 'firebase-auth' },
+            'http://anchor.tail2fa2e.ts.net:9099',
+            { disableWarnings: true },
+        );
+        expect(mockState.connectFirestoreEmulator).toHaveBeenCalledWith(
+            { db: 'firestore' }, 'anchor.tail2fa2e.ts.net', 8080,
+        );
+        expect(mockState.connectFunctionsEmulator).toHaveBeenCalledWith(
+            { functions: 'region' }, 'anchor.tail2fa2e.ts.net', 5001,
+        );
+        const storage = await module.getAppStorage();
+        expect(mockState.connectStorageEmulator).toHaveBeenCalledWith(
+            storage, 'anchor.tail2fa2e.ts.net', 9199,
+        );
+    });
+
+    it('staging/production NEVER use the browser hostname for emulator wiring', async () => {
+        setBaseEnv({
+            VITE_APP_ENV: 'staging',
+            VITE_FIREBASE_PROJECT_ID: 'anchor-os-staging',
+            VITE_FIREBASE_APP_CHECK_SITE_KEY: 'site-key',
+        });
+        setBrowserHostname('anchor.tail2fa2e.ts.net');
+
+        const module = await import('./firebase');
+
+        expect(mockState.initializeApp).toHaveBeenCalledWith(
+            expect.objectContaining({ projectId: 'anchor-os-staging' }),
+        );
+        expect(mockState.connectAuthEmulator).not.toHaveBeenCalled();
+        expect(mockState.connectFirestoreEmulator).not.toHaveBeenCalled();
+        expect(mockState.connectFunctionsEmulator).not.toHaveBeenCalled();
+        await module.getAppStorage();
+        expect(mockState.connectStorageEmulator).not.toHaveBeenCalled();
     });
 });

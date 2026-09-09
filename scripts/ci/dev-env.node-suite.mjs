@@ -89,6 +89,7 @@ test('every emulator CLI command uses --project demo-anchor-os', () => {
         PKG.scripts['test:release-smoke:local'],
         TEST_WITH_EMULATOR,
         CI_WORKFLOW,
+        DEV_LOCAL,
     ].join('\n');
     const uses = emulatorCommands.match(/firebase emulators:(start|exec)[^\n'"]*/g) || [];
     assert.ok(uses.length >= 6, `expected several emulator invocations, found ${uses.length}`);
@@ -259,4 +260,44 @@ test('no local emulator command relies on the .firebaserc default project', () =
         PKG.scripts['test:functions:emulator'],
     ].join('\n');
     assert.doesNotMatch(emulatorCommands, /emulators:(start|exec)(?![^\n]*--project)/);
+});
+
+// --- 7. Simple remote (Tailscale) dev access ----------------------------------
+
+const VITE_CONFIG = fs.readFileSync('config/vite.config.ts', 'utf8');
+const DEV_LOCAL = fs.readFileSync('scripts/dev-local.sh', 'utf8');
+const FIREBASE_JSON_CONFIG = JSON.parse(FIREBASE_JSON);
+
+test('Vite dev server binds 0.0.0.0 and accepts the Tailscale hostname', () => {
+    const serverBlock = VITE_CONFIG.slice(VITE_CONFIG.indexOf('server:'));
+    assert.match(serverBlock, /host:\s*'0\.0\.0\.0'/);
+    assert.match(serverBlock, /allowedHosts:/);
+    assert.match(serverBlock, /anchor\.tail2fa2e\.ts\.net/);
+    // 5173 stays the canonical dev port (Vite default; no port override)
+    assert.doesNotMatch(serverBlock, /port:\s*\d+/);
+});
+
+test('dev:local is one command and the emulator suite listens on all interfaces', () => {
+    assert.equal(PKG.scripts['dev:local'], 'bash scripts/dev-local.sh');
+    assert.equal(PKG.scripts['emulator:start'], 'firebase emulators:start --project demo-anchor-os');
+    // All four emulator ports from the contract stay pinned, and every
+    // emulator listens on 0.0.0.0 so the Tailscale hostname can reach it.
+    for (const [name, port] of [['auth', 9099], ['firestore', 8080], ['functions', 5001], ['storage', 9199]]) {
+        assert.equal(FIREBASE_JSON_CONFIG.emulators[name].port, port);
+        assert.equal(FIREBASE_JSON_CONFIG.emulators[name].host, '0.0.0.0');
+    }
+});
+
+test('dev:local runner: demo project only, all interfaces, never kills anything', () => {
+    assert.match(DEV_LOCAL, /firebase emulators:start --project demo-anchor-os/);
+    assert.match(DEV_LOCAL, /CANONICAL_PORT=5173/);
+    assert.match(DEV_LOCAL, /FALLBACK_PORT=5199/);
+    // Reports the owner of an occupied 5173 and falls back — never destructive
+    assert.match(DEV_LOCAL, /lsof[^\n]*5173|lsof[^\n]*CANONICAL_PORT/);
+    assert.doesNotMatch(DEV_LOCAL, /pkill|fuser|pm2 (delete|stop|kill)/);
+});
+
+test('emulator host selection exists and is development-only', () => {
+    assert.match(FIREBASE_TS, /export function resolveEmulatorHost/);
+    assert.match(FIREBASE_TS, /isEmulatorDevelopment \? resolveEmulatorHost\(currentBrowserHostname\(\)\) : '127\.0\.0\.1'/);
 });

@@ -59,6 +59,7 @@ export default defineConfig({
                   'VITE_FIREBASE_API_KEY=demo-api-key ' +
                   'VITE_FIREBASE_APP_CHECK_SITE_KEY= ' +
                   'VITE_FIREBASE_VAPID_KEY= ' +
+                  'VITE_SENTRY_DSN= ' +
                   'npm run dev -- --port 5199 --strictPort',
               url: LOCAL_SMOKE_URL,
               timeout: 60 * 1000,
