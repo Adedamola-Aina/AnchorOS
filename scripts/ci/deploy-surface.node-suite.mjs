@@ -212,6 +212,60 @@ test('backend-only normal production: no Hosting build and no Lighthouse', () =>
     assert.match(lighthouseBlock, /needs.build-production.result == 'success'/);
 });
 
+test('backend-only normal production still reaches deploy-production when build/lighthouse are skipped', () => {
+    const deployBlock = PRODUCTION_WORKFLOW.slice(
+        PRODUCTION_WORKFLOW.indexOf('  deploy-production:'),
+        PRODUCTION_WORKFLOW.indexOf('  deploy-b1:'),
+    );
+    const gate = deployBlock.slice(deployBlock.indexOf('if: >-'), deployBlock.indexOf('environment:'));
+
+    // Plan must have succeeded and the run must not be CI-only.
+    assert.match(gate, /needs\.plan\.result == 'success'/);
+    assert.match(gate, /ci_only != 'true'/);
+
+    // THE FIX: a skipped Hosting build (backend-only plan) must not block the
+    // normal production deploy — success OR skipped is accepted.
+    assert.match(
+        gate,
+        /\(needs\.build-production\.result == 'success' \|\| needs\.build-production\.result == 'skipped'\)/,
+    );
+    assert.match(
+        gate,
+        /\(needs\.lighthouse\.result == 'success' \|\| needs\.lighthouse\.result == 'skipped'\)/,
+    );
+    // No regression: build/lighthouse must remain skipped (not run) for
+    // backend-only changes — the fix only opens the deploy gate.
+    const buildBlock = PRODUCTION_WORKFLOW.slice(
+        PRODUCTION_WORKFLOW.indexOf('  build-production:'),
+        PRODUCTION_WORKFLOW.indexOf('  lighthouse:'),
+    );
+    assert.match(buildBlock, /deploy_hosting == 'true'/);
+    const lighthouseBlock = PRODUCTION_WORKFLOW.slice(
+        PRODUCTION_WORKFLOW.indexOf('  lighthouse:'),
+        PRODUCTION_WORKFLOW.indexOf('  deploy-production:'),
+    );
+    assert.match(lighthouseBlock, /deploy_hosting == 'true'/);
+    assert.match(lighthouseBlock, /needs\.build-production\.result == 'success'/);
+});
+
+test('both production smoke paths install Chromium before invoking the release-smoke config', () => {
+    // Exactly two production release-smoke invocations (normal + B1).
+    const smokeInvocations = PRODUCTION_WORKFLOW.match(
+        /npx playwright test --config config\/playwright\.release-smoke\.config\.ts/g,
+    ) || [];
+    assert.equal(smokeInvocations.length, 2, 'expected exactly two production release-smoke invocations');
+
+    // Each invocation must be immediately preceded by an explicit Chromium
+    // install (matches staging's deterministic behavior).
+    const pairs = PRODUCTION_WORKFLOW.match(
+        /npx playwright install chromium --with-deps[\s\S]*?npx playwright test --config config\/playwright\.release-smoke\.config\.ts/g,
+    ) || [];
+    assert.equal(pairs.length, 2, 'each production release-smoke invocation must be preceded by a Chromium install');
+
+    // Chromium only — no browser expansion.
+    assert.doesNotMatch(PRODUCTION_WORKFLOW, /webkit|firefox/i);
+});
+
 test('production pipeline skips rerunning CI validation inside deployment', () => {
     const deployBlock = PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('deploy-production'));
     assert.match(deployBlock, /--skip-tests/);
