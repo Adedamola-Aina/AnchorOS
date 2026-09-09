@@ -88,3 +88,89 @@ test('classifier emits the additive frontend_changed output for the workflow gat
     // Mixed backend+frontend keeps frontend_changed=true (additive, not precedence).
     assert.match(src, /frontend_changed: categories\.includes\('PRODUCT_RUNTIME'\)/);
 });
+
+// ---------------------------------------------------------------------------
+// Surface-gated emulator jobs (final CI surface-gating fix)
+// ---------------------------------------------------------------------------
+
+function ciJob(name) {
+    const start = CI_WORKFLOW.indexOf(`  ${name}:`);
+    assert.ok(start !== -1, `job ${name} must exist in ci.yml`);
+    // A job ends at the next line indented by exactly two spaces followed by
+    // a non-space character (deeper indentation belongs to this job's body).
+    const after = CI_WORKFLOW.slice(start + 2);
+    const rel = after.search(/\n {2}(?=\S)/);
+    return CI_WORKFLOW.slice(start, rel === -1 ? undefined : start + 2 + rel);
+}
+
+const RULES_JOB = () => ciJob('rules-tests');
+const INTEGRATION_JOB = () => ciJob('integration-tests');
+const E2E_JOB = () => ciJob('e2e-tests');
+
+test('rules-tests and integration-tests depend on [test, classify]', () => {
+    assert.match(RULES_JOB(), /needs:\s*\[test,\s*classify\]/);
+    assert.match(INTEGRATION_JOB(), /needs:\s*\[test,\s*classify\]/);
+});
+
+test('emulator jobs are surface-gated on backend_changed for PRs, master push keeps validation', () => {
+    const expectedCondition =
+        /\(github\.event_name == 'push' && github\.ref == 'refs\/heads\/master'\)\s*\|\|\s*\n\s*\(github\.event_name == 'pull_request' &&\s*\n\s*needs\.classify\.outputs\.backend_changed == 'true'\)/;
+    assert.match(RULES_JOB(), expectedCondition, 'rules-tests if-condition mismatch');
+    assert.match(INTEGRATION_JOB(), expectedCondition, 'integration-tests if-condition mismatch');
+});
+
+test('engineering-only PR -> no E2E, no Rules, no Integration (only Test/Governance/Classify)', () => {
+    // Each PR-gated job requires its surface boolean; engineering-only sets
+    // frontend_changed=false AND backend_changed=false, so all three skip.
+    for (const job of [E2E_JOB(), RULES_JOB(), INTEGRATION_JOB()]) {
+        assert.match(job, /github\.event_name == 'pull_request'/);
+    }
+    assert.match(E2E_JOB(), /needs\.classify\.outputs\.frontend_changed == 'true'/);
+    assert.match(RULES_JOB(), /needs\.classify\.outputs\.backend_changed == 'true'/);
+    assert.match(INTEGRATION_JOB(), /needs\.classify\.outputs\.backend_changed == 'true'/);
+});
+
+test('CI-only PR -> no E2E, no Rules, no Integration (same gates as engineering-only)', () => {
+    // Structural: the only PR-path E2E/emulator triggers are the surface
+    // booleans, so a CI_INFRA PR (both booleans false) runs none of them.
+    const prGatedConditions = CI_WORKFLOW.match(
+        /github\.event_name == 'pull_request' &&\s*\n\s*needs\.classify\.outputs\.\w+_changed == 'true'/g,
+    ) || [];
+    assert.equal(prGatedConditions.length, 3, 'exactly three PR surface gates expected');
+    assert.match(prGatedConditions.join('\n'), /frontend_changed == 'true'/);
+    assert.match(prGatedConditions.join('\n'), /backend_changed == 'true'/);
+});
+
+test('backend-only PR -> Rules + Integration run, no E2E', () => {
+    assert.match(RULES_JOB(), /needs\.classify\.outputs\.backend_changed == 'true'/);
+    assert.match(INTEGRATION_JOB(), /needs\.classify\.outputs\.backend_changed == 'true'/);
+    assert.doesNotMatch(E2E_JOB(), /backend_changed == 'true'/);
+});
+
+test('frontend-only PR -> bounded E2E runs, no Rules/Integration', () => {
+    assert.match(E2E_JOB(), /github\.event_name == 'pull_request' &&\s*\n\s*needs\.classify\.outputs\.frontend_changed == 'true'/);
+    // Emulator jobs trigger ONLY on backend_changed, never frontend_changed.
+    assert.doesNotMatch(RULES_JOB(), /frontend_changed/);
+    assert.doesNotMatch(INTEGRATION_JOB(), /frontend_changed/);
+});
+
+test('mixed frontend + backend PR -> Test, Rules, Integration, and bounded smoke all run', () => {
+    // Additive booleans: mixed PR sets frontend_changed=true AND
+    // backend_changed=true, satisfying all three PR gates simultaneously.
+    assert.match(E2E_JOB(), /needs\.classify\.outputs\.frontend_changed == 'true'/);
+    assert.match(RULES_JOB(), /needs\.classify\.outputs\.backend_changed == 'true'/);
+    assert.match(INTEGRATION_JOB(), /needs\.classify\.outputs\.backend_changed == 'true'/);
+});
+
+test('master push preserves required Rules/Integration validation', () => {
+    for (const job of [RULES_JOB(), INTEGRATION_JOB()]) {
+        assert.match(job, /github\.event_name == 'push' && github\.ref == 'refs\/heads\/master'/);
+    }
+});
+
+test('weekly scheduled regression remains independent of the surface gates', () => {
+    const weekly = ciJob('scheduled-full-regression');
+    assert.match(weekly, /if: github\.event_name == 'schedule'/);
+    assert.match(weekly, /playwright test --shard/);
+    assert.doesNotMatch(weekly, /needs\.classify/);
+});
