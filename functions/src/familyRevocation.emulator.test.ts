@@ -51,6 +51,19 @@ const OWNER = 'fn-owner';
 const MEMBER = 'fn-member';
 const connId = `${OWNER}_${MEMBER}`;
 
+/**
+ * B1 rollout-safety: migration apply mode is fail-closed. The existing
+ * migration apply tests set a valid bound; the dedicated fail-closed suite
+ * below manipulates the bound directly to prove the invariant.
+ */
+const APPLY_BOUND = '10';
+function enableApplyBound(): void {
+  process.env.FS01_CLEANUP_MAX_CONNECTIONS = APPLY_BOUND;
+}
+function disableApplyBound(): void {
+  delete process.env.FS01_CLEANUP_MAX_CONNECTIONS;
+}
+
 async function seedActivePair({ withStaleRow = true } = {}) {
   await connRef(connId).set({
     ownerUid: OWNER,
@@ -362,7 +375,12 @@ describe('migration 002 — family revocation cleanup', () => {
   const activeConn = `${ACTIVE_OWNER}_${ACTIVE_MEMBER}`;
 
   beforeEach(async () => {
+    enableApplyBound();
     await db.recursiveDelete(db.doc(`artifacts/${APP_ID}`));
+  });
+
+  afterAll(() => {
+    disableApplyBound();
   });
 
   it('dry-run reports counts without mutation', async () => {
@@ -447,6 +465,178 @@ describe('migration 002 — family revocation cleanup', () => {
     expect(second.processed).toBe(1);
     expect(second.modified).toBe(0);
     expect(second.skipped).toBe(1);
+  });
+});
+
+/**
+ * B1 rollout-safety (initiative #118): the per-invocation connection bound
+ * `FS01_CLEANUP_MAX_CONNECTIONS` must be fail-closed in apply mode. Every
+ * invalid configuration aborts BEFORE processing/mutating any connection;
+ * a valid bound caps the number of connections processed per invocation;
+ * dry-run intentionally remains unbounded when the bound is absent.
+ */
+describe('migration 002 connection bound (fail-closed apply)', () => {
+  beforeEach(async () => {
+    disableApplyBound();
+    await db.recursiveDelete(db.doc(`artifacts/${APP_ID}`));
+  });
+  afterAll(() => {
+    disableApplyBound();
+  });
+
+  const BOUND_OWNER = 'b1-owner';
+  const BOUND_MEMBER = 'b1-member';
+  const pairConnId = (owner: string, member: string) => `${owner}_${member}`;
+
+  /** Seed `count` DISCONNECTED pairs, each with stale grant state. */
+  async function seedDisconnectedPairs(count: number): Promise<void> {
+    for (let i = 0; i < count; i += 1) {
+      const owner = `${BOUND_OWNER}-${i}`;
+      const member = `${BOUND_MEMBER}-${i}`;
+      await connRef(pairConnId(owner, member)).set({
+        ownerUid: owner, memberUid: member, status: 'disconnected',
+        ownerDisplayName: `O-${i}`, memberDisplayName: `M-${i}`,
+      });
+      await accountRef(owner, `acc-${i}`).set({
+        name: `Joint ${i}`, balanceCents: 100 + i, type: 'checking',
+        currency: 'NGN', scope: 'family', shares: {},
+        sharedWith: {
+          [member]: { grantedAt: '2026-01-01T00:00:00.000Z', grantedBy: owner, permission: 'transact' },
+        },
+      });
+      await financeRef(owner, `tx-${i}`).set({
+        title: `stale row ${i}`, amountCents: 10 + i, type: 'expense',
+        date: '2026-01-02', accountId: `acc-${i}`, accountOwnerId: owner,
+        isSoftDeleted: false, accountShares: { [member]: true },
+      });
+    }
+  }
+
+  const pairAccount = (i: number) => accountRef(`${BOUND_OWNER}-${i}`, `acc-${i}`);
+  const pairRow = (i: number) => financeRef(`${BOUND_OWNER}-${i}`, `tx-${i}`);
+
+  async function expectUntouched(i: number): Promise<void> {
+    const account = (await pairAccount(i).get()).data() ?? {};
+    expect(account.sharedWith?.[`${BOUND_MEMBER}-${i}`]).toBeDefined();
+    expect(account.scope).toBe('family');
+    expect(((await pairRow(i).get()).data() ?? {}).accountShares?.[`${BOUND_MEMBER}-${i}`]).toBe(true);
+  }
+
+  async function expectCleaned(i: number): Promise<void> {
+    const account = (await pairAccount(i).get()).data() ?? {};
+    expect(account.sharedWith?.[`${BOUND_MEMBER}-${i}`]).toBeUndefined();
+    expect(account.scope).toBe('personal');
+    expect(((await pairRow(i).get()).data() ?? {}).accountShares?.[`${BOUND_MEMBER}-${i}`]).toBeUndefined();
+  }
+
+  async function runBound(dryRun: boolean) {
+    return migration002FamilyRevocationCleanup.up({
+      db, appId: APP_ID, dryRun, callerUid: 'b1-bound-test',
+    });
+  }
+
+  const EXPECTED_BOUND_ERROR = 'FS01_CLEANUP_MAX_CONNECTIONS must be a positive integer for apply mode';
+
+  async function expectApplyFailsBeforeMutation(boundValue: string | undefined): Promise<void> {
+    await seedDisconnectedPairs(1);
+
+    if (boundValue === undefined) {
+      delete process.env.FS01_CLEANUP_MAX_CONNECTIONS;
+    } else {
+      process.env.FS01_CLEANUP_MAX_CONNECTIONS = boundValue;
+    }
+
+    await expect(runBound(false)).rejects.toThrow(EXPECTED_BOUND_ERROR);
+
+    // Fail-closed proof: product data is EXACTLY as seeded — the run aborted
+    // before processing/mutating any connection.
+    await expectUntouched(0);
+  }
+
+  it('apply + missing bound fails before mutation', async () => {
+    await expectApplyFailsBeforeMutation(undefined);
+  });
+
+  it('apply + non-numeric bound fails before mutation', async () => {
+    await expectApplyFailsBeforeMutation('12abc');
+  });
+
+  it('apply + non-integer bound fails before mutation', async () => {
+    await expectApplyFailsBeforeMutation('2.5');
+  });
+
+  it('apply + zero bound fails before mutation', async () => {
+    await expectApplyFailsBeforeMutation('0');
+  });
+
+  it('apply + negative bound fails before mutation', async () => {
+    await expectApplyFailsBeforeMutation('-3');
+  });
+
+  it('apply + whitespace-only bound fails before mutation', async () => {
+    await expectApplyFailsBeforeMutation('   ');
+  });
+
+  it('apply + numeric-injection bound fails before mutation', async () => {
+    await expectApplyFailsBeforeMutation('1e2');
+  });
+
+  it('apply + valid bound processes at most that many connections', async () => {
+    await seedDisconnectedPairs(2);
+    process.env.FS01_CLEANUP_MAX_CONNECTIONS = '1';
+
+    const result = await runBound(false);
+
+    // Exactly one connection processed — the second is out of scope.
+    expect(result.processed).toBe(1);
+    expect(result.errors).toEqual([]);
+    await expectCleaned(0);
+    await expectUntouched(1);
+  });
+
+  it('apply + bound larger than the target set cleans everything', async () => {
+    await seedDisconnectedPairs(2);
+    process.env.FS01_CLEANUP_MAX_CONNECTIONS = '10';
+
+    const result = await runBound(false);
+
+    expect(result.processed).toBe(2);
+    expect(result.errors).toEqual([]);
+    await expectCleaned(0);
+    await expectCleaned(1);
+  });
+
+  it('dry-run without a bound remains intentionally unbounded (full counting, no mutation)', async () => {
+    await seedDisconnectedPairs(2);
+
+    const result = await runBound(true);
+
+    // Both pairs counted — dry-run counting is intentionally unbounded.
+    expect(result.processed).toBe(2);
+    expect(result.errors).toEqual([]);
+
+    // Nothing mutated.
+    await expectUntouched(0);
+    await expectUntouched(1);
+  });
+
+  it('dry-run honors a present valid bound without mutation', async () => {
+    await seedDisconnectedPairs(2);
+    process.env.FS01_CLEANUP_MAX_CONNECTIONS = '1';
+
+    const result = await runBound(true);
+
+    expect(result.processed).toBe(1);
+    await expectUntouched(0);
+    await expectUntouched(1);
+  });
+
+  it('dry-run with an invalid bound fails (bound must be valid whenever present)', async () => {
+    await seedDisconnectedPairs(1);
+    process.env.FS01_CLEANUP_MAX_CONNECTIONS = 'abc';
+
+    await expect(runBound(true)).rejects.toThrow(EXPECTED_BOUND_ERROR);
+    await expectUntouched(0);
   });
 });
 
