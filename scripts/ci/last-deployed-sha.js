@@ -7,6 +7,11 @@
  * *successful* run of the environment's deploy workflow on master carries
  * the last deployed head SHA.
  *
+ * Bounded history: the gh query fetches --limit 1000 successful runs so the
+ * title/mode filter operates over a sufficiently complete set BEFORE selecting
+ * the newest eligible run (never --limit 1, which could miss the newest normal
+ * baseline hidden behind newer B1 runs).
+ *
  * Mode-aware baselines: B1 runs (run titles "Staging b1 <sha>" /
  * "Production b1 <sha>") are PARTIAL phased rollouts. A successful B1 run
  * must never be treated as a whole-SHA normal baseline, so callers pass
@@ -74,7 +79,7 @@ function main(argv) {
         '--workflow', workflow,
         '--branch', 'master',
         '--status', 'success',
-        '--limit', '1',
+        '--limit', '1000',
         '--json', 'conclusion,headSha,createdAt,displayTitle',
     ], { encoding: 'utf8' });
     process.stdout.write(pickLastDeployedSha(JSON.parse(out || '[]'), { titlePrefix }) + '\n');

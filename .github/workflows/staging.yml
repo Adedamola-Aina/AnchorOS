@@ -26,21 +26,22 @@ permissions:
   actions: read
 
 # Staging authorization model (run-name carries mode + SHA for provenance):
-#   0. MERGING/PUSHING TO MASTER NEVER MUTATES STAGING. Staging is mutated only
-#      by an explicit operator workflow_dispatch for an EXACT SHA.
-#   1. resolve-sha: the requested SHA must be the current origin/master tip.
+#   0. MERGING/PUSHING TO MASTER NEVER MUTATES STAGING. Dispatch only, and only
+#      from a master workflow ref (resolve-sha rejects anything else).
+#   1. resolve-sha: requested SHA must be the current origin/master tip.
 #   2. await-validation: CI (ci.yml) must have succeeded for THAT EXACT SHA.
-#   3. mode=normal: surface-aware deploy classified against the last
-#      SUCCESSFUL *normal* staging baseline (run names prefixed "Staging normal").
+#   3. mode=normal: surface-aware deploy classified against the last successful
+#      *normal* staging baseline (run names prefixed "Staging normal"; B1 runs
+#      are excluded from the baseline by last-deployed-sha.js --title-prefix).
 #      No baseline -> FAIL CLOSED with bootstrap_required unless the operator
-#      explicitly passed authorize_bootstrap=true.
-#   4. mode=b1: NO baseline required. Firestore rules deploy FIRST as a separate
-#      guarded invocation; only after rules succeed are exactly the five allowed
-#      Functions deployed as a SECOND invocation. Never Hosting, never indexes,
-#      never one combined firebase command for rules + Functions.
-#   5. A successful B1 run is a PARTIAL deployment: it is never treated as a
-#      whole-SHA normal baseline (last-deployed-sha.js filters by run-name).
-#   6. release smoke runs after every deployment (fail-fast, chromium).
+#      explicitly passed authorize_bootstrap=true, which runs the explicit FIRST
+#      NORMAL deployment plan (all four surfaces, unfiltered Functions surface).
+#   4. mode=b1: NO baseline required. ONE mutation job with TWO SEQUENTIAL
+#      steps: Firestore rules FIRST, then exactly the five allowed Functions.
+#      Never Hosting, never indexes, never one combined firebase command.
+#   5. A successful B1 run is a PARTIAL deployment and never becomes a normal
+#      whole-SHA baseline.
+#   6. All build/plan/mutate jobs check out the authorized exact SHA explicitly.
 
 jobs:
   resolve-sha:
@@ -50,6 +51,13 @@ jobs:
       sha: ${{ steps.auth.outputs.sha }}
       mode: ${{ steps.auth.outputs.mode }}
     steps:
+      - name: Reject non-master workflow refs
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/master" ]; then
+            echo "❌ Dispatch rejected: this workflow may only run from refs/heads/master (got ${{ github.ref }})."
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -122,21 +130,23 @@ jobs:
     runs-on: ubuntu-latest
     needs: [resolve-sha, await-validation]
     outputs:
+      sha: ${{ needs.resolve-sha.outputs.sha }}
       mode: ${{ steps.base.outputs.mode }}
-      deploy_hosting: ${{ steps.surfaces.outputs.deploy_hosting }}
-      deploy_rules: ${{ steps.surfaces.outputs.deploy_rules }}
-      deploy_indexes: ${{ steps.surfaces.outputs.deploy_indexes }}
-      deploy_functions: ${{ steps.surfaces.outputs.deploy_functions }}
-      functions_to_deploy: ${{ steps.surfaces.outputs.functions_to_deploy }}
-      ci_only: ${{ steps.surfaces.outputs.ci_only }}
+      deploy_hosting: ${{ steps.plan.outputs.deploy_hosting }}
+      deploy_rules: ${{ steps.plan.outputs.deploy_rules }}
+      deploy_indexes: ${{ steps.plan.outputs.deploy_indexes }}
+      deploy_functions: ${{ steps.plan.outputs.deploy_functions }}
+      functions_to_deploy: ${{ steps.plan.outputs.functions_to_deploy }}
+      ci_only: ${{ steps.plan.outputs.ci_only }}
       base_sha: ${{ steps.base.outputs.base_sha }}
     steps:
-      - name: Checkout code
+      - name: Checkout authorized exact SHA
         uses: actions/checkout@v4
         with:
+          ref: ${{ needs.resolve-sha.outputs.sha }}
           fetch-depth: 0
 
-      - name: Resolve normal baseline (fail closed) / accept B1 without baseline
+      - name: Resolve normal baseline (fail closed) / B1 requires none
         id: base
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -152,6 +162,7 @@ jobs:
             exit 0
           fi
           # Normal mode: only successful NORMAL runs count as the whole-SHA baseline.
+          # last-deployed-sha.js fetches a bounded run history and filters by title.
           BASE=$(node scripts/ci/last-deployed-sha.js --workflow staging.yml --title-prefix "Staging normal" || true)
           if [ -z "$BASE" ]; then
             if [ "$AUTHORIZE" != "true" ]; then
@@ -161,10 +172,10 @@ jobs:
               echo "   and merging to master never mutates staging by itself."
               echo "   An operator must either establish a verified baseline (a previous"
               echo "   successful normal staging deploy) or explicitly re-dispatch with"
-              echo "   authorize_bootstrap=true for the authorized first deployment."
+              echo "   authorize_bootstrap=true for the authorized FIRST NORMAL deployment."
               exit 1
             fi
-            echo "⚠️ No baseline — operator EXPLICITLY authorized the bootstrap first deployment."
+            echo "⚠️ No baseline — operator EXPLICITLY authorized the FIRST NORMAL deployment."
             echo "base_sha=" >> "$GITHUB_OUTPUT"
           else
             echo "Last successfully deployed NORMAL staging SHA: $BASE"
@@ -172,13 +183,15 @@ jobs:
           fi
 
       - name: Compute deployment plan
-        id: surfaces
+        id: plan
         env:
           MODE: ${{ needs.resolve-sha.outputs.mode }}
           BASE: ${{ steps.base.outputs.base_sha }}
         run: |
           set -euo pipefail
-          # B1 ordered rollout allow-list: exactly these Functions, nothing else.
+          # B1-mode-only allow-list: exactly these Functions, nothing else.
+          # mode=normal NEVER passes this filter to the classifier — an empty
+          # functions filter means the NORMAL Functions surface.
           FN_ALLOW="disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
           echo "fn_allow=$FN_ALLOW" >> "$GITHUB_OUTPUT"
           if [ "$MODE" == "b1" ]; then
@@ -189,8 +202,20 @@ jobs:
             echo "deploy_functions=true"  >> "$GITHUB_OUTPUT"
             echo "functions_to_deploy=$FN_ALLOW" >> "$GITHUB_OUTPUT"
             echo "ci_only=false"          >> "$GITHUB_OUTPUT"
+          elif [ -z "$BASE" ]; then
+            # Explicitly authorized FIRST NORMAL deployment: whole-environment
+            # baseline. All four surfaces; EMPTY functions filter = the NORMAL
+            # Functions surface (never the B1 five).
+            echo "Authorized normal bootstrap plan: full environment."
+            echo "deploy_hosting=true"    >> "$GITHUB_OUTPUT"
+            echo "deploy_rules=true"      >> "$GITHUB_OUTPUT"
+            echo "deploy_indexes=true"    >> "$GITHUB_OUTPUT"
+            echo "deploy_functions=true"  >> "$GITHUB_OUTPUT"
+            echo "functions_to_deploy="    >> "$GITHUB_OUTPUT"
+            echo "ci_only=false"          >> "$GITHUB_OUTPUT"
           else
-            node scripts/ci/deploy-surface-classifier.js --from "$BASE" --functions "$FN_ALLOW"
+            # Normal mode: classify vs the normal baseline WITHOUT the B1 filter.
+            node scripts/ci/deploy-surface-classifier.js --from "$BASE"
           fi
 
   build-hosting:
@@ -199,7 +224,10 @@ jobs:
     needs: [plan]
     if: needs.plan.outputs.mode == 'normal' && needs.plan.outputs.ci_only != 'true' && needs.plan.outputs.deploy_hosting == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout authorized exact SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
       - uses: actions/setup-node@v6
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
@@ -224,7 +252,10 @@ jobs:
       needs.plan.result == 'success' &&
       (needs.build-hosting.result == 'success' || needs.build-hosting.result == 'skipped')
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout authorized exact SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -255,53 +286,68 @@ jobs:
           fi
           npm run deploy:staging -- "${ARGS[@]}"
 
-  deploy-b1-rules:
-    name: 🛡️ B1 Step A — Deploy Firestore Rules (FIRST)
+  deploy-b1:
+    name: 🛡️ B1 Phased Deployment — rules FIRST, then the five Functions (ONE mutation job)
     runs-on: ubuntu-latest
     needs: [plan]
     if: needs.plan.outputs.mode == 'b1'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout authorized exact SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-      - run: npm ci
+      - name: Setup dependencies (once)
+        run: npm ci
+      - name: Install functions dependencies
+        run: npm ci
+        working-directory: functions
+      - name: Write BOTH staging env configs (app + Functions)
+        run: |
+          printf '%s\n' "$STAGING_FRONTEND_ENV" > .env.staging
+          printf '%s\n' "$STAGING_FUNCTIONS_ENV" > functions/.env.staging
+        env:
+          STAGING_FRONTEND_ENV: ${{ secrets.STAGING_FRONTEND_ENV }}
+          STAGING_FUNCTIONS_ENV: ${{ secrets.STAGING_FUNCTIONS_ENV }}
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
-      - name: Deploy Firestore rules ONLY (containment first)
+
+      - name: 'B1 Step A: deploy Firestore rules ONLY (containment first)'
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           set -euo pipefail
-          npm run deploy:staging -- --yes --skip-tests --skip-lint --skip-audit --skip-e2e --skip-mutation --skip-version-bump --no-deploy-marker --surfaces=rules
+          npm run deploy:staging -- \
+            --yes \
+            --skip-tests \
+            --skip-lint \
+            --skip-audit \
+            --skip-e2e \
+            --skip-mutation \
+            --skip-version-bump \
+            --no-deploy-marker \
+            --surfaces=rules
 
-  deploy-b1-functions:
-    name: 🔗 B1 Step B — Deploy the five B1 Functions (only after rules succeed)
-    runs-on: ubuntu-latest
-    needs: [deploy-b1-rules]
-    if: >-
-      !cancelled() &&
-      needs.plan.outputs.mode == 'b1' &&
-      needs.deploy-b1-rules.result == 'success'
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci
-      - run: npm ci
-        working-directory: functions
-      - name: Write staging functions env config
-        run: printf '%s\n' "$STAGING_FUNCTIONS_ENV" > functions/.env.staging
-        env:
-          STAGING_FUNCTIONS_ENV: ${{ secrets.STAGING_FUNCTIONS_ENV }}
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-      - name: Deploy exactly the five B1 Functions (second invocation)
+      - name: 'B1 Step B: deploy exactly the five B1 Functions (only after rules succeed)'
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FN_ALLOW: "disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
         run: |
           set -euo pipefail
-          npm run deploy:staging -- --yes --skip-tests --skip-lint --skip-audit --skip-e2e --skip-mutation --skip-version-bump --no-deploy-marker --surfaces=functions --functions="$FN_ALLOW"
+          npm run deploy:staging -- \
+            --yes \
+            --skip-tests \
+            --skip-lint \
+            --skip-audit \
+            --skip-e2e \
+            --skip-mutation \
+            --skip-version-bump \
+            --no-deploy-marker \
+            --surfaces=functions \
+            --functions="$FN_ALLOW"
 
   release-smoke:
     name: 🎯 Release Smoke (normal)
@@ -312,7 +358,10 @@ jobs:
       needs.plan.outputs.mode == 'normal' &&
       needs.deploy.result == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout authorized exact SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
       - uses: actions/setup-node@v6
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
@@ -334,13 +383,16 @@ jobs:
   release-smoke-b1:
     name: 🎯 Release Smoke (B1)
     runs-on: ubuntu-latest
-    needs: [plan, deploy-b1-functions]
+    needs: [plan, deploy-b1]
     if: >-
       !cancelled() &&
       needs.plan.outputs.mode == 'b1' &&
-      needs.deploy-b1-functions.result == 'success'
+      needs.deploy-b1.result == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout authorized exact SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
       - uses: actions/setup-node@v6
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
