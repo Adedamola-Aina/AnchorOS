@@ -36,6 +36,8 @@ public/__firebase-config.js
 test-results/
 coverage/
 playwright-report/
+# Playwright storageState (Firebase Auth session/refresh tokens) — never commit
+e2e/.auth/
 functions/lib/
 src/.claude/
 .firebase/
