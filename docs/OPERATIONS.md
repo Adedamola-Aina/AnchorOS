@@ -48,7 +48,7 @@ Classification is computed by `scripts/ci/deploy-surface-classifier.js` from ALL
 ## Versions & releases
 
 - `commit-and-tag-version` via `npm run version:{dev|staging|production}`; version bumps and tags are CI-driven on master.
-- **GitHub Releases are the authoritative release history.** `CHANGELOG.md` is a bounded recent-summary; the complete generated history lives in `docs/history/CHANGELOG-full.md` and in tags/releases. Do not let it grow unbounded.
+- **GitHub Releases are the authoritative full release history.** `CHANGELOG.md` is a small bounded pointer/recent-summary; version tooling appends only new release sections (never the full history). Do not let it grow unbounded.
 - Deploy provenance is the successful workflow run for a SHA (`scripts/ci/last-deployed-sha.js`) — no deploy-marker commits.
 
 ## Health & rollback
