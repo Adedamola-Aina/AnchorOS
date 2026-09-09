@@ -305,7 +305,7 @@ jobs:
       needs.plan.outputs.mode == 'normal' &&
       needs.plan.outputs.ci_only != 'true' &&
       needs.plan.result == 'success' &&
-      needs.build-production.result == 'success' &&
+      (needs.build-production.result == 'success' || needs.build-production.result == 'skipped') &&
       (needs.lighthouse.result == 'success' || needs.lighthouse.result == 'skipped')
     environment: production
     steps:
@@ -346,6 +346,8 @@ jobs:
             ARGS+=(--functions="$FUNCTIONS")
           fi
           npm run deploy:production -- "${ARGS[@]}"
+      - name: Install Playwright Chromium (bounded smoke only)
+        run: npx playwright install chromium --with-deps
       - name: Post-deploy release smoke (deployed production)
         if: needs.plan.outputs.deploy_hosting == 'true' || needs.plan.outputs.deploy_functions == 'true'
         env:
@@ -425,6 +427,8 @@ jobs:
             --surfaces=functions \
             --functions="$FN_ALLOW"
 
+      - name: Install Playwright Chromium (bounded smoke only)
+        run: npx playwright install chromium --with-deps
       - name: Post-deploy release smoke (deployed production)
         env:
           E2E_BASE_URL: https://anchor-os.web.app
