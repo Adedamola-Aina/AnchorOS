@@ -1,37 +1,88 @@
 name: Staging Deploy
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Exact master commit SHA to deploy (must be the current origin/master tip with successful CI)'
+        required: true
+        type: string
+      authorize_bootstrap:
+        description: 'Explicit operator authorization for a FIRST deployment when no verified baseline exists (CI-gated, full surfaces)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
   actions: read
 
-# Release-infra contract (make release pipeline incremental and fail-fast):
-#   1. `await-validation` blocks until the CI/CD Pipeline run for THE SAME SHA
-#      has completed successfully — staging can never deploy an unvalidated SHA.
-#   2. `classify` computes changed deployment surfaces since the last
-#      SUCCESSFULLY DEPLOYED staging SHA (not HEAD~1), so a previously failed
-#      deployment never causes undeployed surfaces to be skipped. No successful
-#      deploy on record fails safe to deploying all surfaces.
-#   3. `deploy` passes validated-SHA skip flags to the guarded pipeline (no
+# Release-infra contract (staging authorization model):
+#   0. MERGING/PUSHING TO MASTER NEVER MUTATES STAGING BY ITSELF. Staging is
+#      mutated only by an explicit operator workflow_dispatch for an EXACT SHA.
+#   1. resolve-sha verifies the requested SHA belongs to master history and is
+#      the current origin/master tip (keeps deployment provenance exact).
+#   2. await-validation blocks until the CI/CD Pipeline run for THAT EXACT SHA
+#      has completed successfully — an unvalidated commit can never deploy.
+#   3. classify computes changed deployment surfaces since the last
+#      SUCCESSFULLY DEPLOYED staging SHA (never HEAD~1). If no trustworthy
+#      baseline exists the workflow FAILS CLOSED with `bootstrap_required`;
+#      unknown baselines never mean "deploy everything". A first deployment
+#      requires the operator to explicitly pass authorize_bootstrap=true.
+#   4. deploy passes validated-SHA skip flags to the guarded pipeline (no
 #      lint/audit/tests/version-bump/E2E rerun inside deployment) and is
-#      surface-aware: backend-only changes never rebuild/redeploy Hosting,
-#      frontend-only changes never deploy Functions/rules.
-#   4. `release-smoke` is the fast fail-fast post-deploy gate against the
+#      surface-aware. B1 ordered rollout: rules first, then only the five
+#      allowed functions (never "all functions" during the B1 window).
+#   5. release-smoke is the fast fail-fast post-deploy gate against the
 #      deployed staging URL (retries 0, 20s tests, 3-minute bound, chromium).
+#   6. Deployment provenance = this workflow run (a successful run IS the
+#      record of the deployed SHA), consumed by scripts/ci/last-deployed-sha.js.
 
 jobs:
-  await-validation:
-    name: ⏳ Await CI Validation (same SHA)
+  resolve-sha:
+    name: 🔐 Resolve & Authorize Requested SHA
     runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.auth.outputs.sha }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify requested SHA is authorized master history
+        id: auth
+        env:
+          REQUESTED: ${{ inputs.sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin master --tags
+          TIP=$(git rev-parse origin/master)
+          if [ -z "$REQUESTED" ]; then
+            echo "❌ No SHA supplied. Dispatch this workflow with the exact master commit SHA to deploy."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$REQUESTED" "$TIP"; then
+            echo "❌ Requested SHA $REQUESTED is NOT part of master history. Refusing to deploy."
+            exit 1
+          fi
+          if [ "$REQUESTED" != "$TIP" ]; then
+            echo "❌ Requested SHA $REQUESTED is not the current master tip ($TIP)."
+            echo "   Only the current master tip can be deployed to staging (keeps provenance exact)."
+            exit 1
+          fi
+          echo "✅ Requested SHA $REQUESTED is the current master tip."
+          echo "sha=$REQUESTED" >> "$GITHUB_OUTPUT"
+
+  await-validation:
+    name: ⏳ Await CI Validation (exact SHA)
+    runs-on: ubuntu-latest
+    needs: [resolve-sha]
     steps:
       - name: Await successful CI/CD Pipeline run for this SHA
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          SHA: ${{ needs.resolve-sha.outputs.sha }}
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do
@@ -57,7 +108,7 @@ jobs:
   classify:
     name: 🔎 Classify Deployment Surfaces
     runs-on: ubuntu-latest
-    needs: [await-validation]
+    needs: [resolve-sha, await-validation]
     outputs:
       deploy_hosting: ${{ steps.surfaces.outputs.deploy_hosting }}
       deploy_rules: ${{ steps.surfaces.outputs.deploy_rules }}
@@ -72,7 +123,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Resolve last successfully deployed staging SHA
+      - name: Resolve last successfully deployed staging SHA (fail closed)
         id: base
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -81,22 +132,45 @@ jobs:
           set -euo pipefail
           BASE=$(node scripts/ci/last-deployed-sha.js --workflow staging-deploy.yml || true)
           if [ -z "$BASE" ]; then
-            echo "No successful staging deploy on record — failing safe to ALL surfaces."
+            if [ "${{ inputs.authorize_bootstrap }}" != "true" ]; then
+              echo "❌ bootstrap_required"
+              echo "   No trustworthy previous staging deployment SHA exists."
+              echo "   An unknown baseline is NEVER treated as 'deploy everything',"
+              echo "   and merging to master never mutates staging by itself."
+              echo "   An operator must either establish a verified baseline (a previous"
+              echo "   successful staging deploy) or explicitly re-dispatch this workflow"
+              echo "   with authorize_bootstrap=true to invoke the authorized"
+              echo "   first-deployment plan (CI-verified SHA, full surfaces, release-smoke gated)."
+              exit 1
+            fi
+            echo "⚠️ No baseline — operator EXPLICITLY authorized the bootstrap first-deployment plan."
+            echo "base_sha=" >> "$GITHUB_OUTPUT"
+            echo "bootstrap=true" >> "$GITHUB_OUTPUT"
           else
             echo "Last successfully deployed staging SHA: $BASE"
+            echo "base_sha=$BASE" >> "$GITHUB_OUTPUT"
+            echo "bootstrap=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "base_sha=$BASE" >> "$GITHUB_OUTPUT"
 
       - name: Classify deployment surfaces since base
         id: surfaces
         run: |
           set -euo pipefail
           BASE="${{ steps.base.outputs.base_sha }}"
+          BOOTSTRAP="${{ steps.base.outputs.bootstrap }}"
           # B1 ordered rollout: only these Functions may be deployed until the
           # rollout is complete (Step A: rules, Step B: these functions).
           FN_ALLOW="disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus"
-          if [ -z "$BASE" ]; then
-            node scripts/ci/deploy-surface-classifier.js --from "$(git rev-parse HEAD~40 2>/dev/null || git rev-list --max-parents=0 HEAD)" --functions "$FN_ALLOW"
+          if [ "$BOOTSTRAP" == "true" ]; then
+            # Explicitly authorized bootstrap: CI-verified SHA, full surfaces,
+            # still guarded by the pipeline and release smoke. Functions stay
+            # bounded by the B1 allow-list (never "all functions").
+            echo "deploy_hosting=true"    >> "$GITHUB_OUTPUT"
+            echo "deploy_rules=true"      >> "$GITHUB_OUTPUT"
+            echo "deploy_indexes=true"    >> "$GITHUB_OUTPUT"
+            echo "deploy_functions=true"  >> "$GITHUB_OUTPUT"
+            echo "functions_to_deploy=$FN_ALLOW" >> "$GITHUB_OUTPUT"
+            echo "ci_only=false"          >> "$GITHUB_OUTPUT"
           else
             node scripts/ci/deploy-surface-classifier.js --from "$BASE" --functions "$FN_ALLOW"
           fi

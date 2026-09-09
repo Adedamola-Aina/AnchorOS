@@ -52,15 +52,18 @@ function classifySurfaces(files, functionsAllowList) {
         ? functionsAllowList.slice().sort()
         : null;
 
-    // Fail safe: an undeterminable changed-file set deploys every surface.
+    // Fail CLOSED: an undeterminable changed-file set is never an automatic
+    // mutation plan. The caller must fail with bootstrap_required instead of
+    // deploying everything.
     if (!Array.isArray(files) || files.length === 0) {
         return {
-            hosting: true,
-            rules: true,
-            indexes: true,
-            functions: true,
+            hosting: false,
+            rules: false,
+            indexes: false,
+            functions: false,
             functionsToDeploy: null,
             ciOnly: false,
+            failClosed: true,
         };
     }
 
@@ -185,7 +188,8 @@ function main(argv) {
             `deploy_indexes=${result.indexes}`,
             `deploy_functions=${result.functions}`,
             `functions_to_deploy=${result.functionsToDeploy ? result.functionsToDeploy.join(',') : ''}`,
-            `ci_only=${result.ciOnly}`,
+            `ci_only=${result.failClosed || result.ciOnly}`,
+            `fail_closed=${result.failClosed || false}`,
         ];
         fs.appendFileSync(process.env.GITHUB_OUTPUT, `${lines.join('\n')}\n`);
     }

@@ -94,12 +94,13 @@ test('CI-only change deploys nothing (ciOnly)', () => {
     assert.equal(r.ciOnly, true);
 });
 
-test('unknown/empty changed set fails safe to deploying all surfaces', () => {
+test('missing/undeterminable changed set FAILS CLOSED (never an automatic mutation plan)', () => {
     const r = classifySurfaces([], null);
-    assert.equal(r.hosting, true);
-    assert.equal(r.rules, true);
-    assert.equal(r.indexes, true);
-    assert.equal(r.functions, true);
+    assert.equal(r.failClosed, true);
+    assert.deepEqual(
+        { hosting: r.hosting, rules: r.rules, indexes: r.indexes, functions: r.functions },
+        { hosting: false, rules: false, indexes: false, functions: false },
+    );
     assert.equal(r.ciOnly, false);
 });
 
@@ -132,7 +133,7 @@ test('last successful run wins regardless of list order', () => {
     assert.equal(sha, 'cccc3333');
 });
 
-test('a previously failed deployment yields no SHA, forcing a full-surface deploy', () => {
+test('a previously failed deployment yields no SHA, forcing FAIL CLOSED (bootstrap_required)', () => {
     const sha = pickLastDeployedSha([
         { conclusion: 'failure', headSha: 'aaaa1111', createdAt: '2026-09-09T10:00:00Z' },
         { conclusion: 'cancelled', headSha: 'bbbb2222', createdAt: '2026-09-09T11:00:00Z' },
@@ -277,5 +278,48 @@ test('functions resolve CORS/RP origins without the retired dev cloud', () => {
     // Local emulator origins remain allowed.
     assert.match(callable, /http:\/\/localhost:5173/);
     assert.match(passkey, /http:\/\/localhost:5173/);
+});
+
+// ---------------------------------------------------------------------------
+// Staging authorization model
+// ---------------------------------------------------------------------------
+
+test('staging deploy is triggered ONLY by explicit operator dispatch (push/merge cannot mutate staging)', () => {
+    const trigger = STAGING_WORKFLOW.slice(0, STAGING_WORKFLOW.indexOf('permissions:'));
+    assert.match(STAGING_WORKFLOW, /workflow_dispatch:/);
+    assert.doesNotMatch(trigger, /push:/);
+    assert.match(STAGING_WORKFLOW, /required: true/); // exact SHA input is mandatory
+    assert.match(STAGING_WORKFLOW, /authorize_bootstrap/);
+});
+
+test('requested SHA must be authorized master history and CI-validated for that exact SHA', () => {
+    assert.match(STAGING_WORKFLOW, /resolve-sha/);
+    assert.match(STAGING_WORKFLOW, /merge-base --is-ancestor/);
+    assert.match(STAGING_WORKFLOW, /is not the current master tip/);
+    assert.match(STAGING_WORKFLOW, /needs: \[resolve-sha\]/);
+    assert.match(STAGING_WORKFLOW, /needs\.resolve-sha\.outputs\.sha/);
+    assert.match(STAGING_WORKFLOW, /CI\/CD Pipeline/);
+});
+
+test('missing staging baseline FAILS CLOSED with bootstrap_required (never ALL surfaces)', () => {
+    assert.match(STAGING_WORKFLOW, /bootstrap_required/);
+    assert.match(STAGING_WORKFLOW, /inputs\.authorize_bootstrap/);
+    assert.match(STAGING_WORKFLOW, /An unknown baseline is NEVER treated as/);
+    // No hidden baseline guessing remains (only the documented "never HEAD~1" contract).
+    assert.doesNotMatch(STAGING_WORKFLOW, /rev-parse HEAD~|rev-list --max-parents=0/);
+    assert.doesNotMatch(STAGING_WORKFLOW, /failing safe to ALL surfaces/);
+});
+
+test('explicitly authorized bootstrap keeps Functions bounded by the B1 allow-list', () => {
+    const bootstrapBlock = STAGING_WORKFLOW.slice(STAGING_WORKFLOW.indexOf('FN_ALLOW='));
+    assert.match(bootstrapBlock, /functions_to_deploy=\$FN_ALLOW/);
+    assert.match(bootstrapBlock, /never "all functions"/);
+    assert.match(bootstrapBlock, /disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus/);
+});
+
+test('classifier emits fail_closed and treats it as no-deployment for workflow gating', () => {
+    const classifierSrc = fs.readFileSync('scripts/ci/deploy-surface-classifier.js', 'utf8');
+    assert.match(classifierSrc, /failClosed: true/);
+    assert.match(classifierSrc, /ci_only=\$\{result\.failClosed \|\| result\.ciOnly\}/);
 });
 
