@@ -1,0 +1,482 @@
+name: CI
+
+# Single authoritative PR CI + master validation workflow.
+# - pull_request: governance metadata check, classify, lint/types/unit, rules,
+#   integration, and — only for PRs that change product-runtime surfaces —
+#   ONE bounded Chromium smoke gate (retries 0, 20s/test, 3-minute global
+#   bound, deterministic login, no legacy smoke project). Engineering-only,
+#   CI-only, and backend-only PRs run zero Playwright. No deploy jobs.
+# - push to master: proves the merged SHA (consumed by staging.yml / production.yml).
+# - schedule: weekly full regression against staging (merged from weekly-health).
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  schedule:
+    - cron: '0 22 * * 0'
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+  actions: read
+
+env:
+  NODE_VERSION: '22'
+
+
+jobs:
+  # Job 0: Classify changed files (deterministic, repository-owned).
+  # Engineering-only and CI-only master pushes must not trigger product
+  # versioning/builds/deployments. Mixed or unknown changes fail safe to
+  # the normal release pipeline.
+  classify:
+    name: 🔎 Classify Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      category: ${{ steps.classify.outputs.category }}
+      release: ${{ steps.classify.outputs.release }}
+      frontend_changed: ${{ steps.classify.outputs.frontend_changed }}
+      backend_changed: ${{ steps.classify.outputs.backend_changed }}
+      ci_infra_changed: ${{ steps.classify.outputs.ci_infra_changed }}
+      engineering_only_changed: ${{ steps.classify.outputs.engineering_only_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed files
+        id: classify
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags origin "${{ github.base_ref }}"
+            FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            FILES=$(git diff --name-only "${{ github.event.before }}" HEAD || true)
+          else
+            FILES=$(git diff --name-only "HEAD~1" HEAD || true)
+          fi
+          # Fail safe: if no diff can be determined, prefer release validation.
+          if [ -z "$FILES" ]; then
+            echo "Changed-file set undeterminable; failing safe to release pipeline."
+            echo "category=PRODUCT_RUNTIME" >> "$GITHUB_OUTPUT"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "frontend_changed=true" >> "$GITHUB_OUTPUT"
+            echo "backend_changed=true" >> "$GITHUB_OUTPUT"
+            echo "ci_infra_changed=false" >> "$GITHUB_OUTPUT"
+            echo "engineering_only_changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s\n' "$FILES" > /tmp/changed-files.txt
+          node scripts/ci/classify-changes.js --files $(cat /tmp/changed-files.txt)
+
+          # Run the classifier's own focused tests whenever CI infrastructure
+          # (including the classifier) changes.
+          if grep -q '^scripts/ci/' /tmp/changed-files.txt; then
+            node --test scripts/ci/*.node-suite.mjs
+          fi
+
+  governance-gates:
+    name: 🛡️ PR Governance Gates
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Validate PR template governance sections
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.info('Not a pull request event. Skipping governance gate.');
+              return;
+            }
+
+            const body = pr.body || '';
+            const marker = '<!-- governance-gate-feedback -->';
+            const requiredHeadings = [
+              'Risk Class',
+              'Success Metric',
+              'Guardrail Metrics',
+              'Rollout Plan',
+              'Rollback Plan',
+              'Observability',
+              'Test-to-Risk Mapping'
+            ];
+
+            function getSectionContent(heading) {
+              const sectionRegex = new RegExp(`###\\s+${heading}\\s*([\\s\\S]*?)(?=\\n###\\s+|$)`, 'i');
+              const match = body.match(sectionRegex);
+              if (!match) return '';
+
+              return match[1]
+                .replace(/<!--([\s\S]*?)-->/g, '')
+                .replace(/\r/g, '')
+                .trim();
+            }
+
+            const missingHeadings = requiredHeadings.filter((heading) => {
+              const headingRegex = new RegExp(`^###\\s+${heading}\\s*$`, 'im');
+              return !headingRegex.test(body);
+            });
+
+            function hasMeaningfulContent(heading) {
+              const content = getSectionContent(heading);
+              if (!content) return false;
+
+              if (content.length < 12) return false;
+              if (/^(tbd|todo|n\/?a|none)$/i.test(content)) return false;
+              return true;
+            }
+
+            const emptySections = requiredHeadings.filter((heading) => !hasMeaningfulContent(heading));
+
+            const requiredChecks = [
+              'I defined success + guardrail metrics',
+              'I defined rollout + rollback plan',
+              'I mapped tests to risk/failure modes'
+            ];
+
+            const unchecked = requiredChecks.filter((item) => {
+              const checkedRegex = new RegExp(`-\\s*\\[x\\]\\s*${item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i');
+              return !checkedRegex.test(body);
+            });
+
+            const errors = [];
+            if (missingHeadings.length) errors.push(`Missing headings: ${missingHeadings.join(', ')}`);
+            if (emptySections.length) errors.push(`Sections need meaningful content: ${emptySections.join(', ')}`);
+            if (unchecked.length) errors.push(`Required checklist items must be checked: ${unchecked.join(', ')}`);
+
+            const riskClassContent = getSectionContent('Risk Class');
+            const riskMatch = riskClassContent.match(/\b([ABC])\b/i);
+            const riskClass = riskMatch ? riskMatch[1].toUpperCase() : null;
+
+            if (!riskClass) {
+              errors.push('Risk Class must explicitly include one of: A, B, or C.');
+            }
+
+            const linkedInitiativeContent = getSectionContent('Linked Initiative Issue');
+            const issueReferenceRegex = /#\d+\b|https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/\d+/i;
+            const hasInitiativeReference = issueReferenceRegex.test(linkedInitiativeContent);
+
+            if ((riskClass === 'A' || riskClass === 'B') && !hasInitiativeReference) {
+              errors.push('Risk Class A/B PRs must include a linked initiative issue reference in "Linked Initiative Issue" (e.g., #123).');
+            }
+
+            if (errors.length > 0) {
+              const checklistLines = [
+                '- Ensure all required headings exist: `Risk Class`, `Linked Initiative Issue`, `Success Metric`, `Guardrail Metrics`, `Rollout Plan`, `Rollback Plan`, `Observability`, `Test-to-Risk Mapping`.',
+                '- Add meaningful content in each required section (not `TBD`, `TODO`, `N/A`, or very short placeholders).',
+                '- Check required checklist items in PR body:',
+                '  - `I defined success + guardrail metrics`',
+                '  - `I defined rollout + rollback plan`',
+                '  - `I mapped tests to risk/failure modes`',
+                '- Set `Risk Class` explicitly to `A`, `B`, or `C`.',
+                '- If risk is `A` or `B`, add a linked initiative issue reference in `Linked Initiative Issue` (example: `#123`).'
+              ];
+
+              const body = [
+                marker,
+                '## 🛡️ PR Governance Gate Failed',
+                '',
+                'The governance check found the following issues:',
+                ...errors.map((error) => `- ${error}`),
+                '',
+                '### How to fix',
+                ...checklistLines,
+                '',
+                '_This comment is automatically updated by CI._'
+              ].join('\n');
+
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                per_page: 100,
+              });
+
+              const existing = comments.find((comment) =>
+                comment.user?.type === 'Bot' && comment.body?.includes(marker)
+              );
+
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body,
+                });
+              }
+
+              core.setFailed(`PR governance gate failed. ${errors.join(' | ')}`);
+              return;
+            }
+
+            const { data: passComments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
+
+            const stale = passComments.find((comment) =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+
+            if (stale) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: stale.id,
+              });
+            }
+
+            core.info('PR governance gate passed.');
+
+  # Job 1: Run linting and unit tests
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install functions dependencies
+        run: npm ci
+        working-directory: functions
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm run test -- --run
+
+      - name: Enforce query-layer coverage gate
+        run: npm run test:coverage:query-gate
+
+      - name: Generate module coverage report
+        run: npm run test:coverage:modules
+
+      - name: Publish module coverage summary
+        run: |
+          if [ -f coverage/module-coverage-summary.md ]; then
+            cat coverage/module-coverage-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            coverage/coverage-summary.json
+            coverage/module-coverage-summary.json
+            coverage/module-coverage-summary.md
+
+
+  # Job 1.5: Bounded PR Smoke (Chromium only)
+  e2e-tests:
+    name: 🎭 Bounded Smoke (Chromium)
+    runs-on: ubuntu-latest
+    needs: [test, classify]
+    timeout-minutes: 10
+    # ONE bounded Chromium smoke gate for PRs that change product-runtime
+    # surfaces (frontend_changed is additive, so a mixed backend + frontend
+    # PR still runs it). Engineering-only / CI-only / backend-only PRs run
+    # zero Playwright: backend correctness is covered by the functions,
+    # rules, and integration jobs above.
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.classify.outputs.frontend_changed == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Copy safe emulator env template (no cloud secrets in PR smoke)
+        # .env.example contains ONLY non-secret local emulator values
+        # (demo-anchor-os). PR smoke never depends on any cloud-secret env
+        # variable or cloud development Firebase configuration.
+        run: cp .env.example .env.development
+
+      - name: Setup Java (Firebase Emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          # Firebase Emulator vX requires Java 21+; use 21 to match local dev
+          java-version: '21'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Start Firebase emulators (local demo project only)
+        run: |
+          nohup firebase emulators:start --project demo-anchor-os --only auth,firestore > emulator.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -s -o /dev/null http://127.0.0.1:9099; then break; fi
+            sleep 1
+          done
+          curl -s -o /dev/null http://127.0.0.1:9099 || { tail -50 emulator.log; exit 1; }
+
+      - name: Seed deterministic local smoke user
+        # Seeds the known fixture identity (e2e/fixtures/test-data.ts) into the
+        # LOCAL emulators only. The script refuses non-loopback hosts and any
+        # non-demo project ID, and never prints credentials.
+        run: node scripts/ci/seed-release-emulator.mjs
+        env:
+          FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+          FIREBASE_PROJECT_ID: demo-anchor-os
+
+      - name: Install Playwright Chromium (bounded smoke only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run bounded smoke gate
+        # One bounded Chromium path (config/playwright.release-smoke.config.ts):
+        # deterministic single login (release-auth), retries 0, 20s per test,
+        # 3-minute global timeout, single browser engine, no signup heuristic,
+        # and never the legacy loginOrSignup-per-test smoke project. The full
+        # legacy suite is exercised post-deploy against staging by staging.yml.
+        run: npm run test:release-smoke
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+
+  # Job 1.7: Firestore Rules Tests (security gates)
+  rules-tests:
+    name: 🔒 Rules Tests
+    runs-on: ubuntu-latest
+    needs: [test, classify]
+    # Surface-gated: PRs only pay the Firebase-emulator cost when the backend
+    # surface actually changed. Master pushes keep full required validation.
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'pull_request' &&
+       needs.classify.outputs.backend_changed == 'true')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Java (for Firebase Emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          # Firebase Emulator vX requires Java 21+; use 21 to match local dev
+          java-version: '21'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Run Firestore rules tests
+        run: npm run test:rules
+
+
+  # Job 1.8: Integration Tests (FinanceService + emulator)
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [test, classify]
+    # Surface-gated: PRs only pay the Firebase-emulator cost when the backend
+    # surface actually changed. Master pushes keep full required validation.
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'pull_request' &&
+       needs.classify.outputs.backend_changed == 'true')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install functions dependencies
+        run: npm ci
+        working-directory: functions
+
+      - name: Setup Java (for Firebase Emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Run integration tests with emulator
+        run: npm run test:integration
+
+
+  # Weekly full regression (merged from weekly-health.yml). Runs only on the
+  # scheduled event against staging; never part of the PR path.
+  scheduled-full-regression:
+    name: 📅 Full E2E Regression (weekly)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright install chromium --with-deps
+      - run: npx playwright test --shard=${{ matrix.shard }}/4
+        env:
+          E2E_BASE_URL: ${{ secrets.STAGING_URL }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: regression-shard-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 30

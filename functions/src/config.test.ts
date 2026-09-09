@@ -41,13 +41,13 @@ describe('config', () => {
       expect(APP_URL).toBe('https://anchor-os-staging.web.app');
     });
 
-    it('resolves to dev URL when project id contains "dev"', async () => {
+    it('falls back to production URL for retired dev-style project ids', async () => {
       delete process.env.APP_URL;
       process.env.GCLOUD_PROJECT = 'anchor-os-dev-1c6ec';
       vi.resetModules();
       const { APP_URL } = await import('./config');
 
-      expect(APP_URL).toBe('https://anchor-os-dev-1c6ec.web.app');
+      expect(APP_URL).toBe('https://anchor-os.web.app');
     });
 
     it('falls back to production URL for unknown project id', async () => {

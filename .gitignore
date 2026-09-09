@@ -36,13 +36,12 @@ public/__firebase-config.js
 test-results/
 coverage/
 playwright-report/
+# Playwright storageState (Firebase Auth session/refresh tokens) — never commit
+e2e/.auth/
 functions/lib/
 src/.claude/
-tools/dashboard/firebase-debug.log
-tools/dashboard/logs/
 .firebase/
 firestore-debug.log
-tools/dashboard/data/doc_sync_log.json
 
 # UI Capture output
 .ui-captures/

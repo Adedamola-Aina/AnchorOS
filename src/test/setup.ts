@@ -47,6 +47,7 @@ vi.mock('firebase/auth', () => ({
     EmailAuthProvider: {
         credential: vi.fn(() => ({})),
     },
+    connectAuthEmulator: vi.fn(),
     sendPasswordResetEmail: vi.fn(() => Promise.resolve()),
 }));
 
@@ -113,6 +114,7 @@ vi.mock('firebase/firestore', () => ({
         return callback(tx);
     }),
     serverTimestamp: vi.fn(() => ({ _serverTimestamp: true })),
+    connectFirestoreEmulator: vi.fn(),
 }));
 
 // Mock ResizeObserver for @tanstack/react-virtual

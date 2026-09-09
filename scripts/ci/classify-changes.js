@@ -16,9 +16,13 @@
  *                        test configuration/documentation).
  *
  * Rules:
- *  - Mixed sets are conservative: any BACKEND_RUNTIME file -> backend; else
- *    any PRODUCT_RUNTIME file -> product; else any CI_INFRA file -> ci_infra;
- *    else engineering_only.
+ *  - `category` is a single conservative label used by release logic: any
+ *    BACKEND_RUNTIME file -> backend; else any PRODUCT_RUNTIME file ->
+ *    product; else any CI_INFRA file -> ci_infra; else engineering_only.
+ *  - In addition, `frontend_changed` / `backend_changed` /
+ *    `ci_infra_changed` / `engineering_only_changed` are ADDITIVE surface
+ *    booleans (not precedence-based). A mixed backend + frontend PR keeps
+ *    frontend_changed=true so the PR bounded-smoke gate still runs.
  *  - Unknown/ambiguous paths default to PRODUCT_RUNTIME (fail safe: prefer
  *    normal release validation over silently skipping release work).
  *
@@ -29,8 +33,12 @@
  *   node scripts/ci/classify-changes.js --from <git-rev> [--repo <path>]
  *   node scripts/ci/classify-changes.js --files <file> [<file> ...]
  *
- * Emits a JSON object to stdout: { "category": "...", "release": true|false }
- * When GITHUB_OUTPUT is set, also writes `category=` and `release=` outputs.
+ * Emits a JSON object to stdout:
+ *   { "category": "...", "release": true|false,
+ *     "frontend_changed": bool, "backend_changed": bool,
+ *     "ci_infra_changed": bool, "engineering_only_changed": bool }
+ * When GITHUB_OUTPUT is set, also writes `category=`, `release=` and the
+ * four `*_changed=` outputs.
  */
 
 'use strict';
@@ -50,10 +58,9 @@ function classifyPath(file) {
         f.startsWith('functions/') ||
         f === 'firestore.rules' || f === 'storage.rules' ||
         f === 'firestore.indexes.json' ||
-        f === 'config/firebase.json' ||
+        f === 'firebase.json' ||
         f === 'config/firestore.rules' || f === 'config/storage.rules' ||
-        f === 'config/firestore.indexes.json' ||
-        f === 'firebase.json'
+        f === 'config/firestore.indexes.json'
     ) {
         return 'BACKEND_RUNTIME';
     }
@@ -74,6 +81,9 @@ function classifyPath(file) {
         f === '.clineignore' ||
         f.startsWith('.clinerules/') || f.startsWith('.claude/') ||
         f.startsWith('.cline/') ||
+        // Playwright/vitest test configuration is test infra, not runtime:
+        // CI-only PRs touching these must run zero Playwright.
+        f.startsWith('config/playwright.') ||
         // Retired legacy engineering-system paths (PR #110 deletions).
         f.startsWith('.anchor/') ||
         f.startsWith('.github/.agent/') ||
@@ -125,26 +135,44 @@ export { classifyPath };
 
 /**
  * @param {string[]} files
- * @returns {{ category: string, release: boolean }}
+ * @returns {{ category: string, release: boolean,
+ *            frontend_changed: boolean, backend_changed: boolean,
+ *            ci_infra_changed: boolean, engineering_only_changed: boolean }}
  */
 function classifyFiles(files) {
     // Fail safe: an empty/undeterminable changed-file set must never be
     // silently treated as engineering-only (which would skip release work).
-    // Mirrors the workflow behavior of failing safe to release validation.
+    // Mirrors the workflow behavior of failing safe to release validation,
+    // including running the bounded PR smoke gate.
     if (!Array.isArray(files) || files.length === 0) {
-        return { category: 'PRODUCT_RUNTIME', release: true };
+        return {
+            category: 'PRODUCT_RUNTIME',
+            release: true,
+            frontend_changed: true,
+            backend_changed: true,
+            ci_infra_changed: false,
+            engineering_only_changed: false,
+        };
     }
     const categories = files.map(classifyPath);
+    // Additive surface booleans: never collapse via category precedence, so a
+    // mixed backend + frontend change still sets frontend_changed=true.
+    const surfaces = {
+        frontend_changed: categories.includes('PRODUCT_RUNTIME'),
+        backend_changed: categories.includes('BACKEND_RUNTIME'),
+        ci_infra_changed: categories.includes('CI_INFRA'),
+        engineering_only_changed: categories.includes('ENGINEERING_ONLY'),
+    };
     if (categories.includes('BACKEND_RUNTIME')) {
-        return { category: 'BACKEND_RUNTIME', release: true };
+        return { category: 'BACKEND_RUNTIME', release: true, ...surfaces };
     }
     if (categories.includes('PRODUCT_RUNTIME')) {
-        return { category: 'PRODUCT_RUNTIME', release: true };
+        return { category: 'PRODUCT_RUNTIME', release: true, ...surfaces };
     }
     if (categories.includes('CI_INFRA')) {
-        return { category: 'CI_INFRA', release: false };
+        return { category: 'CI_INFRA', release: false, ...surfaces };
     }
-    return { category: 'ENGINEERING_ONLY', release: false };
+    return { category: 'ENGINEERING_ONLY', release: false, ...surfaces };
 }
 export { classifyFiles };
 
@@ -180,7 +208,12 @@ function main(argv) {
     if (process.env.GITHUB_OUTPUT) {
         fs.appendFileSync(
             process.env.GITHUB_OUTPUT,
-            `category=${result.category}\nrelease=${String(result.release)}\n`
+            `category=${result.category}\n` +
+            `release=${String(result.release)}\n` +
+            `frontend_changed=${String(result.frontend_changed)}\n` +
+            `backend_changed=${String(result.backend_changed)}\n` +
+            `ci_infra_changed=${String(result.ci_infra_changed)}\n` +
+            `engineering_only_changed=${String(result.engineering_only_changed)}\n`
         );
     }
 }

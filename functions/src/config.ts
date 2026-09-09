@@ -28,8 +28,6 @@ function getAppUrl(): string {
         return 'https://anchor-os.web.app';
     } else if (projectId === 'anchor-os-staging') {
         return 'https://anchor-os-staging.web.app';
-    } else if (projectId.includes('dev')) {
-        return 'https://anchor-os-dev-1c6ec.web.app';
     }
 
     return 'https://anchor-os.web.app';

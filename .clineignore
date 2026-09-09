@@ -28,8 +28,6 @@ docs/archive/
 
 # Internal dashboard is optional during normal app development.
 # Explicitly @-include it when the task is about the dashboard/MCP tooling.
-tools/dashboard/
-tools/mcp-server/
 
 # Native/generated caches
 ios/App/Pods/

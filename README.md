@@ -30,7 +30,7 @@ Anchor OS is a multi-tenant web application for managing shared household financ
 | Testing | Vitest (unit), Playwright (E2E), Stryker (mutation) |
 | CI/CD | GitHub Actions, Lighthouse CI gates |
 
-See [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md) for the full system architecture diagram.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the system architecture.
 
 ## Getting Started
 
@@ -48,14 +48,21 @@ git clone git@github.com:Adedamola-Aina/AnchorOS.git
 cd AnchorOS
 npm install
 
-# Copy environment config (get values from 1Password vault "AnchorOS")
+# Copy environment config (values are provided by the Product Owner)
 cp .env.example .env.development
 
-# Start dev server
+# Terminal 1 — start the Firebase Emulator Suite
+npm run emulator:start
+
+# Terminal 2 — start the dev server (uses the emulators)
 npm run dev
 ```
 
 Dev server runs at `http://localhost:5173`.
+
+### Development environment model
+
+Local development is **local app + Firebase Emulator Suite**. There is no deployable development cloud environment; the former dev cloud project is retired under the Foundation Reset, and legacy executable dev-project references are being retired (Foundation Phase 2) — developers must not target them.
 
 ### Testing
 
@@ -104,11 +111,11 @@ Every push triggers: lint → type check → unit tests → E2E tests.
 
 Production deploys additionally require mutation tests, Firestore rules tests, Lighthouse CI, and manual approval.
 
-See [docs/CI_CD_TESTING.md](docs/CI_CD_TESTING.md) for pipeline details.
+See [docs/OPERATIONS.md](docs/OPERATIONS.md) for the release pipeline and environment model.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for branching strategy, code review requirements, and task linking.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branching strategy, commit conventions, and PR requirements, and [AGENTS.md](AGENTS.md) for the canonical engineering contract.
 
 ## Product Ownership & Support
 

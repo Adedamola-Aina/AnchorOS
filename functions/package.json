@@ -6,7 +6,7 @@
     "build": "tsc",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
-    "deploy": "echo \"Use root deploy pipeline: npm run deploy:dev|deploy:staging|deploy:production\" && exit 1"
+    "deploy": "echo \"Use root deploy pipeline: npm run deploy:staging|deploy:production\" && exit 1"
   },
   "engines": {
     "node": "22"

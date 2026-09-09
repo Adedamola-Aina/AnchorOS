@@ -18,7 +18,10 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { beforeAll, afterAll, beforeEach, describe, it } from 'vitest';
 
-const PROJECT_ID = 'anchor-os';
+// All local/CI emulator execution is deliberately scoped to the demo project
+// identity (see firebase.json / test:rules --project). Cloud projects are
+// never used by local emulator tests.
+const PROJECT_ID = 'demo-anchor-os';
 const FIRESTORE_RULES_PATH = resolve(__dirname, '../../config/firestore.rules');
 const RULES_PATH = resolve(__dirname, '../../config/storage.rules');
 const BUCKET = `gs://${PROJECT_ID}`;

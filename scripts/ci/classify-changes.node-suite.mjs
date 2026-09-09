@@ -46,7 +46,7 @@ test('CASE E: mixed docs + app change is treated as runtime', () => {
 });
 
 test('CASE F: CI-only change validates CI without product release', () => {
-    const r = classifyFiles(['.github/workflows/ci-cd.yml']);
+    const r = classifyFiles(['.github/workflows/ci.yml']);
     assert.equal(r.category, 'CI_INFRA');
     assert.equal(r.release, false);
 });
@@ -76,7 +76,7 @@ test('dependency changes are conservatively product runtime', () => {
 });
 
 test('CI change mixed with runtime change is classified as runtime', () => {
-    const r = classifyFiles(['.github/workflows/ci-cd.yml', 'src/main.tsx']);
+    const r = classifyFiles(['.github/workflows/ci.yml', 'src/main.tsx']);
     assert.equal(r.category, 'PRODUCT_RUNTIME');
     assert.equal(r.release, true);
 });
@@ -159,8 +159,8 @@ test('retired .github/agents, instructions, .claude/skills, tools/hooks are engi
     assert.equal(r.release, false);
 });
 
-test('config/firebase.json is backend runtime', () => {
-    const r = classifyFiles(['config/firebase.json']);
+test('firebase.json (canonical root config) is backend runtime', () => {
+    const r = classifyFiles(['firebase.json']);
     assert.equal(r.category, 'BACKEND_RUNTIME');
     assert.equal(r.release, true);
 });
@@ -168,5 +168,69 @@ test('config/firebase.json is backend runtime', () => {
 test('empty changed-file set fails safe to product runtime', () => {
     const r = classifyFiles([]);
     assert.equal(r.category, 'PRODUCT_RUNTIME');
+    assert.equal(r.release, true);
+});
+
+// --- PR CI bounded-smoke gate surface booleans (PR #122) --------------------
+
+test('docs-only change runs no PR E2E (frontend_changed=false)', () => {
+    const r = classifyFiles(['docs/architecture.md', 'README.md']);
+    assert.equal(r.category, 'ENGINEERING_ONLY');
+    assert.equal(r.frontend_changed, false);
+    assert.equal(r.release, false);
+});
+
+test('CI-only change runs no PR E2E (frontend_changed=false)', () => {
+    const r = classifyFiles([
+        '.github/workflows/ci.yml',
+        'scripts/ci/classify-changes.js',
+        'scripts/ci/pr-ci-gate.node-suite.mjs',
+    ]);
+    assert.equal(r.category, 'CI_INFRA');
+    assert.equal(r.frontend_changed, false);
+    assert.equal(r.ci_infra_changed, true);
+    assert.equal(r.release, false);
+});
+
+test('backend-only change runs no PR E2E (frontend_changed=false)', () => {
+    const r = classifyFiles(['functions/src/index.ts', 'config/firestore.rules']);
+    assert.equal(r.category, 'BACKEND_RUNTIME');
+    assert.equal(r.backend_changed, true);
+    assert.equal(r.frontend_changed, false);
+    // Functions/rules/integration tests are sufficient for backend-only PRs.
+    assert.equal(r.release, true);
+});
+
+test('frontend-only change runs the bounded smoke (frontend_changed=true)', () => {
+    const r = classifyFiles(['src/App.tsx']);
+    assert.equal(r.category, 'PRODUCT_RUNTIME');
+    assert.equal(r.frontend_changed, true);
+    assert.equal(r.backend_changed, false);
+    assert.equal(r.release, true);
+});
+
+test('mixed backend + frontend change still runs the bounded smoke (frontend_changed=true)', () => {
+    const r = classifyFiles(['functions/src/index.ts', 'src/App.tsx']);
+    // Single-category precedence is preserved for release logic, but the
+    // surface booleans are additive: frontend must stay true.
+    assert.equal(r.category, 'BACKEND_RUNTIME');
+    assert.equal(r.backend_changed, true);
+    assert.equal(r.frontend_changed, true);
+    assert.equal(r.release, true);
+});
+
+test('playwright test configs are engineering-only (zero Playwright on CI-only PRs)', () => {
+    const r = classifyFiles([
+        'config/playwright.release-smoke.config.ts',
+        'config/playwright.config.ts',
+    ]);
+    assert.equal(r.category, 'ENGINEERING_ONLY');
+    assert.equal(r.frontend_changed, false);
+    assert.equal(r.release, false);
+});
+
+test('fail-safe empty set still runs the bounded smoke (frontend_changed=true)', () => {
+    const r = classifyFiles([]);
+    assert.equal(r.frontend_changed, true);
     assert.equal(r.release, true);
 });

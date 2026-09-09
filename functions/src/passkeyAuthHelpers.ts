@@ -24,18 +24,16 @@ export function getAllowedOrigins(): string[] {
     const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
     if (projectId === 'anchor-os') return ['https://anchor-os.web.app', 'https://anchor-os.firebaseapp.com'];
     if (projectId === 'anchor-os-staging') return ['https://anchor-os-staging.web.app', 'https://anchor-os-staging.firebaseapp.com'];
-    return [
-        'https://anchor-os-dev-1c6ec.web.app',
-        'http://localhost:5173',
-        'http://localhost:4173',
-    ];
+    // Local emulator development — localhost origins only.
+    return ['http://localhost:5173', 'http://localhost:4173'];
 }
 
 export function getRpId(): string {
     const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
     if (projectId === 'anchor-os') return 'anchor-os.web.app';
     if (projectId === 'anchor-os-staging') return 'anchor-os-staging.web.app';
-    return 'anchor-os-dev-1c6ec.web.app';
+    // Local emulator development (WebAuthn against localhost).
+    return 'localhost';
 }
 
 // ── Pure helpers ─────────────────────────────────────────────────────────────

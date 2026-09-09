@@ -12,6 +12,10 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
     testDir: '../e2e',
+    // Release-smoke specs belong to config/playwright.release-smoke.config.ts
+    // (they require the release-auth storage state); never collect them here —
+    // the unanchored `smoke` testMatch would otherwise match release-smoke.spec.ts.
+    testIgnore: /release-/,
     fullyParallel: true,
     // Bound the whole E2E run so a broken environment fails fast with a
     // partial report instead of hanging the CI job indefinitely.

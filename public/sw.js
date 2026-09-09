@@ -13,18 +13,9 @@ importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
 // Initialize Firebase in SW (Dynamic Config)
-// This ensures correct keys are used for Dev, Staging, and Production.
+// Staging and Production only. Local development runs against the Firebase
+// Emulator Suite, where FCM background messaging is not available.
 const firebaseConfig = {
-    // Development (localhost, anchor.tail2fa2e.ts.net)
-    development: {
-        apiKey: "AIzaSyDoQevJKyequof4p1XdIXCPz3hE3QaKSUc",
-        authDomain: "anchor-os-development.firebaseapp.com",
-        projectId: "anchor-os-development",
-        storageBucket: "anchor-os-development.firebasestorage.app",
-        messagingSenderId: "251281982839",
-        appId: "1:251281982839:web:5317769996520d0432cd72",
-        measurementId: "G-MEASUREMENT_ID"
-    },
     // Staging (anchor-os-staging.web.app)
     staging: {
         apiKey: "AIzaSyDoQevJKyequof4p1XdIXCPz3hE3QaKSUc",
@@ -47,35 +38,38 @@ const firebaseConfig = {
     }
 };
 
-// Determine environment based on hostname
+// Determine environment based on hostname. Default to production for safety.
 const hostname = self.location.hostname;
-let env = 'production'; // Default to production for safety
+const isLocalDev = hostname === 'localhost' || hostname === '127.0.0.1';
 
-if (hostname === 'localhost' || hostname.endsWith('.tail2fa2e.ts.net') || hostname === 'tail2fa2e.ts.net') {
-    env = 'development';
-} else if (hostname === 'anchor-os-staging.web.app' || hostname === 'anchor-os-staging.firebaseapp.com') {
-    env = 'staging';
+if (isLocalDev) {
+    console.log('[sw.js] Local development (Firebase Emulator Suite) — background messaging disabled.');
+} else {
+    let env = 'production';
+    if (hostname === 'anchor-os-staging.web.app' || hostname === 'anchor-os-staging.firebaseapp.com') {
+        env = 'staging';
+    }
+
+    console.log(`[sw.js] Initializing Firebase for environment: ${env}`);
+    firebase.initializeApp(firebaseConfig[env]);
+
+    const messaging = firebase.messaging();
+
+    // Handle background messages
+    messaging.onBackgroundMessage((payload) => {
+        console.log('[firebase-messaging-sw.js] Received background message ', payload);
+
+        // Customize notification here
+        const notificationTitle = payload.notification.title;
+        const notificationOptions = {
+            body: payload.notification.body,
+            icon: '/favicon.svg',
+            badge: '/favicon.svg'
+        };
+
+        self.registration.showNotification(notificationTitle, notificationOptions);
+    });
 }
-
-console.log(`[sw.js] Initializing Firebase for environment: ${env}`);
-firebase.initializeApp(firebaseConfig[env]);
-
-const messaging = firebase.messaging();
-
-// Handle background messages
-messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
-
-    // Customize notification here
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/favicon.svg',
-        badge: '/favicon.svg'
-    };
-
-    self.registration.showNotification(notificationTitle, notificationOptions);
-});
 
 // Install: Cache core assets
 self.addEventListener('install', (event) => {

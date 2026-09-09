@@ -52,7 +52,7 @@ assert_passes "allows src + spec change" \
 # Test 4: Only non-src files changed (docs, config, tools) → should PASS (no gate)
 echo "Test 4: non-src change → no gate applied"
 assert_passes "allows docs-only change" \
-    bash "$GUARD_SCRIPT" "docs/README.md tools/dashboard/server/index.js"
+    bash "$GUARD_SCRIPT" "docs/ARCHITECTURE.md docs/OPERATIONS.md"
 
 # Test 5: Only test files changed → should PASS
 echo "Test 5: test-only change → allows"
