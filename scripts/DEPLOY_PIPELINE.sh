@@ -386,18 +386,18 @@ fi
 if [[ "$DEPLOY_FUNCTIONS" == true ]]; then
     if [[ -n "$FUNCTIONS_FILTER" ]]; then
         # Ordered/selective Functions rollout (e.g. B1 step B): deploy ONLY the
-        # functions named in the filter. firebase-tools accepts a comma list of
-        # functions:<name> targets.
-        IFS=',' read -ra FN_LIST <<< "$FUNCTIONS_FILTER"
-        for fn in "${FN_LIST[@]}"; do
-            fn="$(echo "$fn" | tr -d '[:space:]')"
-            [[ -z "$fn" ]] && continue
-            DEPLOY_TARGETS+=("functions:${fn}")
-        done
-        if [[ ${#DEPLOY_TARGETS[@]} -eq 0 ]]; then
+        # functions named in the filter. firebase-tools scopes a bare
+        # `functions:<name>` filter to the DEFAULT codebase; because
+        # firebase.json declares a NAMED functions codebase, the filter must be
+        # qualified as `functions:<codebase>:<name>`, otherwise firebase aborts
+        # with "No function matches given --only filters."
+        FN_TARGETS_JOINED="$(node scripts/ci/deploy-targets.js --functions "$FUNCTIONS_FILTER")"
+        if [[ -z "$FN_TARGETS_JOINED" ]]; then
             echo -e "${RED}❌ Functions filter produced an empty deploy target list.${NC}"
             exit 1
         fi
+        IFS=',' read -ra FN_TARGET_ARRAY <<< "$FN_TARGETS_JOINED"
+        DEPLOY_TARGETS+=("${FN_TARGET_ARRAY[@]}")
     else
         DEPLOY_TARGETS+=("functions")
     fi

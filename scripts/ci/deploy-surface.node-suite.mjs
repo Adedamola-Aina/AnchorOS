@@ -20,6 +20,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { classifySurfaces, FUNCTIONS_ALLOW_LIST_DEFAULT } from './deploy-surface-classifier.js';
 import { pickLastDeployedSha } from './last-deployed-sha.js';
+import { buildFunctionsTargets, resolveFunctionsCodebase } from './deploy-targets.js';
 
 const B1_ALLOW_LIST = [...FUNCTIONS_ALLOW_LIST_DEFAULT];
 
@@ -676,4 +677,70 @@ test('production normal plan classifies from the normal baseline, never requeste
     assert.match(planStep, /deploy-surface-classifier\.js --from "\$BASE"/);
     // The baseline itself is resolved from the normal production run titles.
     assert.match(PRODUCTION_WORKFLOW, /--title-prefix "Production normal"/);
+});
+
+// ---------------------------------------------------------------------------
+// Deploy-target builder — B1 selective Functions (staging run 34530005849).
+// firebase-tools scopes a bare `functions:<name>` --only filter to the DEFAULT
+// codebase. AnchorOS declares codebase "anchor-os-functions", so the bare
+// filter matched nothing and the B1 Functions step aborted with
+// "No function matches given --only filters." AFTER the rules step succeeded.
+// ---------------------------------------------------------------------------
+
+test('bare function names are qualified with the configured codebase', () => {
+    const targets = buildFunctionsTargets(
+        'disconnectFamily,shareAccount,runMigration,listMigrations,getMigrationStatus',
+        'anchor-os-functions',
+    );
+    assert.deepEqual(targets, [
+        'functions:anchor-os-functions:disconnectFamily',
+        'functions:anchor-os-functions:shareAccount',
+        'functions:anchor-os-functions:runMigration',
+        'functions:anchor-os-functions:listMigrations',
+        'functions:anchor-os-functions:getMigrationStatus',
+    ]);
+});
+
+test('without a configured codebase, bare names target the default codebase', () => {
+    assert.deepEqual(
+        buildFunctionsTargets('disconnectFamily', ''),
+        ['functions:disconnectFamily'],
+    );
+});
+
+test('already-qualified names are preserved, not double-qualified', () => {
+    assert.deepEqual(
+        buildFunctionsTargets('anchor-os-functions:disconnectFamily', 'anchor-os-functions'),
+        ['functions:anchor-os-functions:disconnectFamily'],
+    );
+});
+
+test('blank entries are dropped and never produce a phantom target', () => {
+    assert.deepEqual(buildFunctionsTargets(' , disconnectFamily , ,', 'cb'), [
+        'functions:cb:disconnectFamily',
+    ]);
+    assert.deepEqual(buildFunctionsTargets('', 'cb'), []);
+});
+
+test('firebase.json declares the functions codebase the builder reads', () => {
+    assert.equal(resolveFunctionsCodebase('firebase.json'), 'anchor-os-functions');
+});
+
+test('B1 allow-list never emits a bare (default-codebase) functions target', () => {
+    const targets = buildFunctionsTargets(
+        [...FUNCTIONS_ALLOW_LIST_DEFAULT],
+        resolveFunctionsCodebase('firebase.json'),
+    );
+    assert.equal(targets.length, FUNCTIONS_ALLOW_LIST_DEFAULT.length);
+    for (const target of targets) {
+        assert.match(target, /^functions:anchor-os-functions:/);
+    }
+});
+
+test('deploy pipeline qualifies Functions filters via the deploy-targets builder', () => {
+    const pipeline = fs.readFileSync('scripts/DEPLOY_PIPELINE.sh', 'utf8');
+    assert.match(pipeline, /node scripts\/ci\/deploy-targets\.js --functions/);
+    // Never re-introduce the bare `functions:<name>` form that targeted the
+    // default codebase and aborted the B1 rollout.
+    assert.doesNotMatch(pipeline, /DEPLOY_TARGETS\+=\("functions:\$\{fn\}"\)/);
 });
