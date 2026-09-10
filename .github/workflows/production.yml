@@ -355,10 +355,16 @@ jobs:
           npm run deploy:production -- "${ARGS[@]}"
       - name: Install Playwright Chromium (bounded smoke only)
         run: npx playwright install chromium --with-deps
-      - name: Post-deploy release smoke (deployed production)
+      - name: Post-deploy release smoke (deployed production, dedicated canary)
         if: needs.plan.outputs.deploy_hosting == 'true' || needs.plan.outputs.deploy_functions == 'true'
+        # Deployed smoke FAILS CLOSED without the production canary secrets
+        # (scripts/ci/release-identity.mjs). The repository fixture identity is
+        # never used against a cloud project.
         env:
           E2E_BASE_URL: https://anchor-os.web.app
+          E2E_SMOKE_TARGET: production
+          PRODUCTION_SMOKE_EMAIL: ${{ secrets.PRODUCTION_SMOKE_EMAIL }}
+          PRODUCTION_SMOKE_PASSWORD: ${{ secrets.PRODUCTION_SMOKE_PASSWORD }}
         run: npx playwright test --config config/playwright.release-smoke.config.ts
       - name: Upload release smoke artifacts
         if: failure()
@@ -436,9 +442,15 @@ jobs:
 
       - name: Install Playwright Chromium (bounded smoke only)
         run: npx playwright install chromium --with-deps
-      - name: Post-deploy release smoke (deployed production)
+      - name: Post-deploy release smoke (deployed production, dedicated canary)
+        # Deployed smoke FAILS CLOSED without the production canary secrets
+        # (scripts/ci/release-identity.mjs). The repository fixture identity is
+        # never used against a cloud project.
         env:
           E2E_BASE_URL: https://anchor-os.web.app
+          E2E_SMOKE_TARGET: production
+          PRODUCTION_SMOKE_EMAIL: ${{ secrets.PRODUCTION_SMOKE_EMAIL }}
+          PRODUCTION_SMOKE_PASSWORD: ${{ secrets.PRODUCTION_SMOKE_PASSWORD }}
         run: npx playwright test --config config/playwright.release-smoke.config.ts
 
       - name: Upload release smoke artifacts
