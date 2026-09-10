@@ -40,7 +40,15 @@ if (!process.env.FIRESTORE_EMULATOR_HOST || !process.env.FIREBASE_AUTH_EMULATOR_
 // CONFIGURATION — local emulator project only, never a cloud project
 // ═══════════════════════════════════════════════════════════════════════════
 
-const projectId = 'anchor-os';
+// The demo emulator identity (VITE_FIREBASE_PROJECT_ID=demo-anchor-os). The
+// emulator namespaces data per project ID, so seeding under any other ID would
+// write to a namespace the app never reads.
+const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'demo-anchor-os';
+if (projectId !== 'demo-anchor-os') {
+    console.error(`❌ Refusing to seed: project ID "${projectId}" is not the demo identity "demo-anchor-os".`);
+    console.error('   This seeder only ever targets the local emulator suite.');
+    process.exit(1);
+}
 console.log(`\n🔌 Connecting to LOCAL Firebase Emulator Suite (project: ${projectId})...\n`);
 console.log(`   Firestore emulator: ${process.env.FIRESTORE_EMULATOR_HOST}`);
 console.log(`   Auth emulator:      ${process.env.FIREBASE_AUTH_EMULATOR_HOST}\n`);

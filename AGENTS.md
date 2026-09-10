@@ -50,6 +50,19 @@ Small/obvious changes (copy, isolated styling, narrow bug with obvious cause) go
 - Never commit secrets or real production data; do not read `.env*` files unless the owner explicitly asks for a specific environment investigation.
 - Never run raw `firebase deploy`; use the repository's environment-specific deploy scripts.
 
+## Minimum machinery
+
+Prefer the smallest architecture that stays correct. Default order of preference is **DELETE → CONSOLIDATE → SIMPLIFY → ADD**.
+
+- **One canonical path per engineering operation** (dev, test, build, deploy, release). No duplicate sources of truth for deploy-target selection, environment identity, Firebase project selection, CI change classification, release provenance, release-smoke identity, test commands, or app configuration.
+- **No speculative abstractions**: no one-step service layers, generic repository/event-bus frameworks, internal platforms, microservices, plugin systems, or extra state frameworks. A new abstraction must remove more complexity than it adds, and any addition must justify its recurring operational/maintenance cost.
+- **Delete obsolete code instead of preserving it** — Git history is the archive. Do not keep code "for the future".
+- **Cohesion over file size**: there is no line-count gate. Decompose a touched file only around real domain boundaries; a large but cohesive file stays.
+- **Thin entry points orchestrate**: workflow YAML, shell scripts, route/page roots, and Function exports coordinate; policy/validation lives in small, testable modules.
+- **Errors fail safe at trust boundaries**: authentication, environment/project identity, deployment, security policy, migration, and persistence must fail closed, never silently fall back.
+- **Firebase Functions are thin adapters**: validate/auth → domain operation → persistence/integration; keep security-sensitive primitives shared, not duplicated.
+- **Migrations are explicit and separately authorized** — never run implicitly during deployment.
+
 ## Source-of-truth rule
 
 When documentation disagrees with executable code:
@@ -61,7 +74,7 @@ When documentation disagrees with executable code:
 
 ## Testing
 
-Bug fixes should normally reproduce the failure with a test when practical. New domain/business logic needs focused unit/integration coverage. Security rules and auth paths require dedicated tests. UI changes should be checked at mobile width with accessibility considerations. Do not create low-value tests solely to satisfy a universal TDD ritual. Use the existing deterministic gates: TypeScript, lint, unit/integration tests, Playwright, Firebase emulator/rules tests, and CI as applicable.
+Test by **risk**, not by ritual: every change is validated, but not every change runs every test. Keep many cheap domain/unit tests, fewer integration/security tests, a very small release smoke, and full E2E only where high-value or scheduled. Do not regenerate broad coverage for unrelated changes; keep strict, targeted coverage where it protects critical logic. Bug fixes should normally reproduce the failure with a test when practical. New domain/business logic needs focused unit/integration coverage. Security rules and auth paths require dedicated tests. UI changes should be checked at mobile width with accessibility considerations. Do not create low-value tests solely to satisfy a universal TDD ritual. Use the existing deterministic gates: TypeScript, lint, unit/integration tests, Playwright, Firebase emulator/rules tests, and CI as applicable.
 
 ## Non-negotiable engineering invariants
 
@@ -91,3 +104,5 @@ One task should have one goal. After a goal is complete and committed, start a f
 ## Commits and deployment
 
 Use focused conventional commits (`fix:`, `feat:`, `refactor:`, `test:`, `docs:`, `chore:`). Keep unrelated work out of the same commit/PR. Staging precedes production for release-sensitive changes.
+
+One release model: **CI proves the SHA → staging deploys → smoke verifies → production promotes.** Workflows orchestrate; `.github/workflows/` calls the guarded environment deploy scripts (`scripts/DEPLOY_PIPELINE.sh`). Never raw `firebase deploy`, never a deploy on merge. A deployed release smoke uses a dedicated per-environment canary supplied only as secrets and **fails closed** without it (never the committed fixture identity); local/PR smoke uses the disposable `demo-anchor-os` fixture. Production requires staging evidence and the `production` environment approval.

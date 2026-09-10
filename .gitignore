@@ -65,3 +65,8 @@ stryker-setup-*.js
 stryker-setup-*.js.map
 reports/
 .lighthouseci/
+
+# Retired internal PM dashboard / MCP tooling — extracted from the repository.
+# Must never be re-tracked as an engineering source of truth.
+tools/dashboard/
+tools/mcp-server/

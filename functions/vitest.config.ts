@@ -4,7 +4,7 @@
  *
  * Runs vitest against functions/src only.
  * Output: functions/coverage/coverage-final.json
- * Run: npm run test:coverage:functions (from workspace root)
+ * Run: npx vitest --coverage --run --config vitest.config.ts (from functions/)
  */
 import { defineConfig } from 'vitest/config';
 import path from 'path';
