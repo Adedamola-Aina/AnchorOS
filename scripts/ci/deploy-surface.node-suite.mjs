@@ -155,6 +155,65 @@ test('staging deploy waits for CI validation of the same SHA before deploying', 
     assert.match(STAGING_WORKFLOW, /workflow_run\.head_sha|headSha/);
 });
 
+// ---------------------------------------------------------------------------
+// Release provenance lookup (gh JSON -> real jq) — B1 staging run 34444297749
+// exposed `gh run list --jq --arg ...` misuse: the lookup failed silently and
+// every gate read "none" until timeout. These tests lock the corrected shape.
+// ---------------------------------------------------------------------------
+
+test('staging exact-SHA CI lookup pipes gh JSON into the real jq binary with --arg', () => {
+    const block = STAGING_WORKFLOW.slice(
+        STAGING_WORKFLOW.indexOf('  await-validation:'),
+        STAGING_WORKFLOW.indexOf('  plan:'),
+    );
+    // gh produces bounded JSON; the real jq does the exact-SHA selection.
+    assert.match(block, /gh run list --repo "\$REPO" --workflow ci\.yml --json headSha,status,conclusion --limit 100/);
+    assert.match(block, /\|\s*jq -r --arg sha "\$SHA"/);
+    // Behavior preserved: exact SHA, completed success passes, completed
+    // non-success fails, pending keeps waiting, timeout stays bounded.
+    assert.match(block, /select\(\.headSha == \$sha\)/);
+    assert.match(block, /completed:success\)/);
+    assert.match(block, /completed:\*\)/);
+    assert.match(block, /seq 1 60/);
+    assert.match(block, /sleep 30/);
+});
+
+test('production exact-SHA CI lookup pipes gh JSON into the real jq binary with --arg', () => {
+    const block = PRODUCTION_WORKFLOW.slice(
+        PRODUCTION_WORKFLOW.indexOf('  await-validation:'),
+        PRODUCTION_WORKFLOW.indexOf('  await-staging:'),
+    );
+    assert.match(block, /gh run list --repo "\$REPO" --workflow ci\.yml --json headSha,status,conclusion --limit 100/);
+    assert.match(block, /\|\s*jq -r --arg sha "\$SHA"/);
+    assert.match(block, /select\(\.headSha == \$sha\)/);
+    assert.match(block, /completed:success\)/);
+    assert.match(block, /completed:\*\)/);
+    assert.match(block, /seq 1 60/);
+});
+
+test('production same-mode staging lookup pipes gh JSON into the real jq binary with --arg title/sha', () => {
+    const block = PRODUCTION_WORKFLOW.slice(
+        PRODUCTION_WORKFLOW.indexOf('  await-staging:'),
+        PRODUCTION_WORKFLOW.indexOf('  plan:'),
+    );
+    assert.match(block, /gh run list --repo "\$REPO" --workflow staging\.yml --json displayTitle,headSha,conclusion --limit 100/);
+    assert.match(block, /jq -r --arg title "\$TITLE" --arg sha "\$SHA"/);
+    // Behavior preserved: same SHA, same mode/title, success required.
+    assert.match(block, /select\(\.displayTitle == \$title and \.headSha == \$sha and \.conclusion == "success"\)/);
+    assert.match(block, /\[ "\$HIT" -lt 1 \]/);
+});
+
+test('release provenance gates never use gh --jq --arg and never swallow lookup errors into none/0', () => {
+    for (const wf of [STAGING_WORKFLOW, PRODUCTION_WORKFLOW]) {
+        assert.doesNotMatch(wf, /--jq --arg/, 'gh --jq must not receive jq --arg parameters');
+    }
+    // A real lookup failure must fail visibly — not become "none"/0 that
+    // spins the poller to its timeout.
+    assert.doesNotMatch(STAGING_WORKFLOW, /2>\/dev\/null \|\| echo "none"/);
+    assert.doesNotMatch(PRODUCTION_WORKFLOW, /2>\/dev\/null \|\| echo "none"/);
+    assert.doesNotMatch(PRODUCTION_WORKFLOW, /\|\| echo 0\)/);
+});
+
 test('staging deploy does not rerun the full validation suite inside the pipeline', () => {
     assert.match(STAGING_WORKFLOW, /--skip-lint/);
     assert.match(STAGING_WORKFLOW, /--skip-audit/);

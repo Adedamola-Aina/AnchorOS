@@ -107,9 +107,13 @@ jobs:
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do
-            STATE=$(gh run list --repo "$REPO" --workflow ci.yml --json headSha,status,conclusion \
-              --jq --arg sha "$SHA" '[.[] | select(.headSha == $sha)][0] | (if . == null then "none" else .status + ":" + (.conclusion // "pending") end)' \
-              2>/dev/null || echo "none")
+            # Release provenance lookup: `gh run list` emits JSON and the real
+            # `jq` binary extracts the state for the EXACT SHA. gh's --jq flag
+            # cannot take jq --arg parameters — passing them that way failed
+            # silently and every lookup became "none". Lookup errors are NOT
+            # suppressed: a real gh/jq failure fails this gate visibly.
+            STATE=$(gh run list --repo "$REPO" --workflow ci.yml --json headSha,status,conclusion --limit 100 \
+              | jq -r --arg sha "$SHA" '[.[] | select(.headSha == $sha)][0] | (if . == null then "none" else .status + ":" + (.conclusion // "pending") end)')
             echo "attempt ${i}: ${STATE}"
             case "$STATE" in
               completed:success)
@@ -140,10 +144,13 @@ jobs:
         run: |
           set -euo pipefail
           TITLE="Staging ${MODE} ${SHA}"
-          HIT=$(gh run list --repo "$REPO" --workflow staging.yml --json displayTitle,headSha,conclusion \
-            --jq --arg title "$TITLE" --arg sha "$SHA" \
-            '[.[] | select(.displayTitle == $title and .headSha == $sha and .conclusion == "success")] | length' \
-            2>/dev/null || echo 0)
+          # Release provenance lookup (same-SHA, same-mode staging success):
+          # `gh run list` emits JSON and the real `jq` binary matches on title,
+          # SHA and conclusion. No gh --jq/--arg misuse; lookup errors are NOT
+          # suppressed into 0 — a real gh/jq failure fails this gate visibly.
+          HIT=$(gh run list --repo "$REPO" --workflow staging.yml --json displayTitle,headSha,conclusion --limit 100 \
+            | jq -r --arg title "$TITLE" --arg sha "$SHA" \
+              '[.[] | select(.displayTitle == $title and .headSha == $sha and .conclusion == "success")] | length')
           if [ "$HIT" -lt 1 ]; then
             echo "❌ No successful staging deployment recorded for this SHA in mode '${MODE}'."
             echo "   Required run title: '${TITLE}'."
