@@ -744,3 +744,28 @@ test('deploy pipeline qualifies Functions filters via the deploy-targets builder
     // default codebase and aborted the B1 rollout.
     assert.doesNotMatch(pipeline, /DEPLOY_TARGETS\+=\("functions:\$\{fn\}"\)/);
 });
+
+// ---------------------------------------------------------------------------
+// Staging release-smoke target URL. `secrets.STAGING_URL` was never created in
+// the repository, so E2E_BASE_URL resolved empty and every staging release
+// smoke fell back to the local dev-server path (run 34534881504: the B1 smoke
+// loaded http://127.0.0.1:5199 with no emulators and failed on
+// auth/network-request-failed). The deterministic staging host is used as the
+// default while the secret remains an optional override.
+// ---------------------------------------------------------------------------
+
+test('staging release-smoke URL defaults to the deterministic staging host', () => {
+    const expected = /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \|\| 'https:\/\/anchor-os-staging\.web\.app' \}\}/g;
+    const matches = STAGING_WORKFLOW.match(expected) || [];
+    assert.equal(matches.length, 3, 'all three staging smoke/regression targets must set the fallback');
+    // The bare reference (empty because the secret does not exist) must be gone.
+    assert.doesNotMatch(STAGING_WORKFLOW, /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \}\}/);
+});
+
+test('ci scheduled regression uses the same staging host fallback', () => {
+    assert.match(
+        CI_WORKFLOW,
+        /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \|\| 'https:\/\/anchor-os-staging\.web\.app' \}\}/,
+    );
+    assert.doesNotMatch(CI_WORKFLOW, /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \}\}/);
+});
