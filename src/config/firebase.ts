@@ -21,8 +21,38 @@ import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-ch
 /** The ONLY project identity allowed in emulator development. */
 export const DEMO_PROJECT_ID = 'demo-anchor-os';
 
-const EMULATOR_HOST = '127.0.0.1';
 const EMULATOR_PORTS = { auth: 9099, firestore: 8080, functions: 5001, storage: 9199 } as const;
+
+/**
+ * Development-only emulator host selection.
+ *
+ * The Firebase emulators listen on 0.0.0.0, so the app can reach them by
+ * whatever hostname the browser used to load the page:
+ *   - localhost / 127.0.0.1 / ::1   ->  127.0.0.1 (loopback)
+ *   - anchor.tail2fa2e.ts.net       ->  the Tailscale hostname itself
+ *
+ * Any other hostname passes through unchanged. This only decides which
+ * interface the EMULATOR clients dial in development — the project identity
+ * stays hard-locked to demo-anchor-os, the fail-closed checks below are
+ * unaffected, and staging/production never use this path.
+ */
+export function resolveEmulatorHost(browserHostname?: string | null): string {
+  if (!browserHostname) return '127.0.0.1';
+  const host = String(browserHostname).trim().toLowerCase();
+  if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]') {
+    return '127.0.0.1';
+  }
+  return host;
+}
+
+function currentBrowserHostname(): string | null {
+  try {
+    if (typeof window === 'undefined') return null;
+    return window.location?.hostname ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // Environment-based Firebase configuration
 // All values come from .env.development, .env.staging, or .env.production
@@ -54,6 +84,11 @@ if (isEmulatorDevelopment && firebaseConfig.projectId !== DEMO_PROJECT_ID) {
 }
 
 if (import.meta.env.DEV) console.info(`[Firebase] Initializing for ${env} environment (${firebaseConfig.projectId})...`);
+
+// Emulator host follows the browser hostname (see resolveEmulatorHost) so the
+// same dev server works locally (localhost) and over Tailscale. Cloud
+// environments (staging/production) never use this value.
+const EMULATOR_HOST = isEmulatorDevelopment ? resolveEmulatorHost(currentBrowserHostname()) : '127.0.0.1';
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);

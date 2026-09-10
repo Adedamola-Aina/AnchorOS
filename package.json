@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev": "vite --config config/vite.config.ts",
+    "dev:local": "bash scripts/dev-local.sh",
     "build": "tsc -b config/tsconfig.app.json config/tsconfig.node.json && vite build --config config/vite.config.ts",
     "build:staging": "tsc -b config/tsconfig.app.json config/tsconfig.node.json && vite build --mode staging --config config/vite.config.ts",
     "build:production": "tsc -b config/tsconfig.app.json config/tsconfig.node.json && vite build --mode production --config config/vite.config.ts",
