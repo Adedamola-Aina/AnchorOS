@@ -9,6 +9,7 @@ import { getAuth, signInWithCustomToken } from 'firebase/auth';
 import { app, functions } from '../../config/firebase';
 import { bufferToBase64url, base64urlToBuffer, performPasskeyRegistration, RP_ID } from './passkeyUtils';
 import { recordAuthEvent } from '../../services/authEventService';
+import { deregisterDevicePushToken } from '../../services/pushTokenLifecycle';
 
 interface IssueChallengeResult {
     challengeId: string;
@@ -103,6 +104,10 @@ export function usePasskeyAuth(): PasskeyAuthResult {
 
             // 4. Sign in with the server-issued custom token
             const auth = getAuth(app);
+            // SN-01: passkey sign-in bypasses AuthContext's sign-in wrappers, so
+            // revoke the departing account's device registration here — before
+            // the auth transition, while it can still write its own documents.
+            await deregisterDevicePushToken(auth.currentUser?.uid);
             const credential = await signInWithCustomToken(auth, customToken);
             void recordAuthEvent(navigator.userAgent, 'passkey');
             return credential;

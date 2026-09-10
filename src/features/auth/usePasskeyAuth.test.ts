@@ -14,10 +14,16 @@ vi.mock('firebase/functions', () => ({
 // Mock Firebase Auth signInWithCustomToken
 vi.mock('firebase/auth', () => ({
     signInWithCustomToken: vi.fn(),
-    getAuth: vi.fn(() => ({})),
+    getAuth: vi.fn(() => ({ currentUser: { uid: 'previous-user' } })),
 }));
 
 vi.mock('../../config/firebase', () => ({ auth: {}, app: {}, functions: {} }));
+
+// SN-01: passkey sign-in revokes the departing account's device registration.
+const mockDeregisterDevicePushToken = vi.fn(async () => false);
+vi.mock('../../services/pushTokenLifecycle', () => ({
+    deregisterDevicePushToken: (...a: any[]) => mockDeregisterDevicePushToken(...a),
+}));
 
 // Mock Web Authentication API
 const mockCredential = {
@@ -225,6 +231,11 @@ describe('usePasskeyAuth', () => {
             await result.current.authenticateWithPasskey();
         });
         expect(signInWithCustomToken).toHaveBeenCalledWith(expect.anything(), 'firebase-custom-token');
+        // SN-01: the departing account's device registration is revoked BEFORE
+        // the auth transition, while it is still the authenticated user.
+        expect(mockDeregisterDevicePushToken).toHaveBeenCalledWith('previous-user');
+        expect(mockDeregisterDevicePushToken.mock.invocationCallOrder.at(-1)!)
+            .toBeLessThan(vi.mocked(signInWithCustomToken).mock.invocationCallOrder.at(-1)!);
     });
 
     it('authenticateWithPasskey returns UserCredential from signInWithCustomToken', async () => {

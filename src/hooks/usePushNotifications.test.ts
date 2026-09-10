@@ -82,6 +82,32 @@ describe('usePushNotifications', () => {
 
         expect(getFcmTokenWithRetry).toHaveBeenCalledTimes(1);
         expect(onMessage).toHaveBeenCalledTimes(1);
+        // SN-03: restoring must RE-PERSIST the token so UI ON == delivery ON.
+        await waitFor(() => {
+            expect(upsertPushToken).toHaveBeenCalledWith('user-1', 'restored-token', navigator.userAgent, 'web');
+        });
+    });
+
+    it('does not re-persist a restore that resolves after the user changed (SN-01)', async () => {
+        const showToast = vi.fn();
+        globalThis.Notification.permission = 'granted';
+        let resolveToken: (value: string) => void = () => undefined;
+        vi.mocked(getFcmTokenWithRetry).mockReturnValue(
+            new Promise<string>((resolve) => { resolveToken = resolve; }) as never,
+        );
+
+        const { result } = renderHook(() => usePushNotifications({ showToast }));
+
+        // The account changes while token retrieval is still in flight.
+        mockState.auth.currentUser = null;
+        await act(async () => {
+            resolveToken('late-token');
+            await Promise.resolve();
+        });
+
+        // A restore from the previous account must not resurrect ownership.
+        expect(upsertPushToken).not.toHaveBeenCalled();
+        expect(result.current.fcmToken).toBeNull();
     });
 
     it('shows toast for foreground notification payloads', async () => {
@@ -139,11 +165,44 @@ describe('usePushNotifications', () => {
         });
 
         expect(deleteToken).toHaveBeenCalledTimes(1);
+        // SN-01: revoke only THIS device's registration, not the account's others.
         expect(deleteStoredPushToken).toHaveBeenCalledWith('user-1', 'existing-token');
-        expect(localStorage.getItem('anchor_push_disabled')).toBe('true');
+        // SN-03: per-account disabled flag (not device-global).
+        expect(localStorage.getItem('anchor_push_disabled:user-1')).toBe('true');
         expect(result.current.pushPermissionStatus).toBe('default');
         expect(result.current.fcmToken).toBeNull();
         expect(showToast).toHaveBeenCalledWith('Push Notifications Disabled', 'info');
+    });
+
+    it('re-enables after disabling (SN-03 toggle state machine)', async () => {
+        const showToast = vi.fn();
+        globalThis.Notification.permission = 'granted';
+        vi.mocked(getFcmTokenWithRetry).mockResolvedValue('existing-token');
+
+        const { result } = renderHook(() => usePushNotifications({ showToast }));
+
+        await waitFor(() => {
+            expect(result.current.fcmToken).toBe('existing-token');
+        });
+
+        // Toggle OFF.
+        await act(async () => {
+            await result.current.requestPushPermission();
+        });
+        expect(result.current.fcmToken).toBeNull();
+        expect(localStorage.getItem('anchor_push_disabled:user-1')).toBe('true');
+
+        // Toggle back ON — a previously-disabled user must be able to re-enable.
+        vi.mocked(getFcmTokenWithRetry).mockResolvedValue('new-token');
+        await act(async () => {
+            await result.current.requestPushPermission();
+        });
+
+        await waitFor(() => {
+            expect(result.current.fcmToken).toBe('new-token');
+        });
+        expect(localStorage.getItem('anchor_push_disabled:user-1')).toBeNull();
+        expect(upsertPushToken).toHaveBeenCalledWith('user-1', 'new-token', navigator.userAgent, 'web');
     });
 
     it('shows error when permission granted but messaging is unavailable', async () => {
@@ -177,7 +236,7 @@ describe('usePushNotifications', () => {
             expect(result.current.fcmToken).toBe('new-token');
         });
 
-        expect(upsertPushToken).toHaveBeenCalledWith('user-1', 'new-token', navigator.userAgent);
+        expect(upsertPushToken).toHaveBeenCalledWith('user-1', 'new-token', navigator.userAgent, 'web');
         expect(showToast).toHaveBeenCalledWith('Push Notifications Enabled!', 'success');
     });
 

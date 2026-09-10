@@ -89,6 +89,11 @@ vi.mock('../services/AuditService', () => ({
     },
 }));
 
+const mockDeregisterDevicePushToken = vi.fn(async () => false);
+vi.mock('../services/pushTokenLifecycle', () => ({
+    deregisterDevicePushToken: (...a: any[]) => mockDeregisterDevicePushToken(...a),
+}));
+
 // ── Import after mocks ─────────────────────────────────────────────────────
 import { AuthProvider, useAuth } from './AuthContext';
 
@@ -240,6 +245,36 @@ describe('AuthContext', () => {
     });
 
     it('logout signs out Firebase, audits, and navigates home', async () => {
+        mockSignOut.mockResolvedValueOnce(undefined);
+        const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+
+        await act(async () => {
+            await result.current.logout();
+        });
+
+        // SN-01: the departing account's push authority is revoked before signOut.
+        expect(mockDeregisterDevicePushToken).toHaveBeenCalledWith('user-1');
+        expect(mockDeregisterDevicePushToken.mock.invocationCallOrder[0])
+            .toBeLessThan(mockSignOut.mock.invocationCallOrder[0]);
+        expect(mockSignOut).toHaveBeenCalled();
+        expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
+    });
+
+    it('signIn revokes the previous account push token before switching (SN-01)', async () => {
+        mockSignInWithEmailAndPassword.mockResolvedValueOnce({ user: { uid: 'user-2' } });
+        const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
+
+        await act(async () => {
+            await result.current.signIn('other@test.com', 'pass123');
+        });
+
+        expect(mockDeregisterDevicePushToken).toHaveBeenCalledWith('user-1');
+        expect(mockDeregisterDevicePushToken.mock.invocationCallOrder[0])
+            .toBeLessThan(mockSignInWithEmailAndPassword.mock.invocationCallOrder[0]);
+    });
+
+    it('logout still completes when push deregistration fails', async () => {
+        mockDeregisterDevicePushToken.mockRejectedValueOnce(new Error('network'));
         mockSignOut.mockResolvedValueOnce(undefined);
         const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
 

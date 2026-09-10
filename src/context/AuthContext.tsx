@@ -25,6 +25,7 @@ import { createTracer } from '../services/telemetry';
 import { getEffectiveTheme } from '../utils/systemTheme';
 import { auditAuth } from '../services/AuditService';
 import { recordAuthEvent } from '../services/authEventService';
+import { deregisterDevicePushToken } from '../services/pushTokenLifecycle';
 
 const authTracer = createTracer('Auth');
 
@@ -123,8 +124,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => { clearTimeout(authTimeout); unsubAuth(); if (unsubProfRef.current) unsubProfRef.current(); };
     }, []);
 
+    /**
+     * SN-01: before a session transition (logout or account switch), remove the
+     * departing account's authoritative push-token association while it is
+     * still authenticated. Failure is non-fatal — a logout must never be
+     * blocked by push cleanup.
+     */
+    const deregisterPreviousAccountPushToken = async () => {
+        const previousUid = auth.currentUser?.uid;
+        if (!previousUid) return;
+        try {
+            await deregisterDevicePushToken(previousUid);
+        } catch (err) {
+            captureError(err, 'Auth.deregisterPushToken');
+        }
+    };
+
     const signIn = async (e: string, p: string) => {
         return authTracer.trace('signIn', async () => {
+            await deregisterPreviousAccountPushToken();
             await signInWithEmailAndPassword(auth, e, p);
             auditAuth.loginSuccess('password');
             void recordAuthEvent(navigator.userAgent, 'password');
@@ -133,6 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signUp = async (e: string, p: string) => {
         return authTracer.trace('signUp', async () => {
+            await deregisterPreviousAccountPushToken();
             const cred = await createUserWithEmailAndPassword(auth, e, p);
             const name = e.split('@')[0];
             await createUserProfile(cred.user.uid, { name, theme: 'light', familyMode: false, onboardingComplete: false });
@@ -142,16 +161,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     };
 
-    const signInWithGoogle = (): Promise<UserCredential | null> =>
-        doSocialSignIn(makeGoogleProvider(), 'google');
+    const signInWithGoogle = async (): Promise<UserCredential | null> => {
+        await deregisterPreviousAccountPushToken();
+        return doSocialSignIn(makeGoogleProvider(), 'google');
+    };
 
-    const signInWithApple = (): Promise<UserCredential | null> =>
-        doSocialSignIn(makeAppleProvider(), 'apple');
+    const signInWithApple = async (): Promise<UserCredential | null> => {
+        await deregisterPreviousAccountPushToken();
+        return doSocialSignIn(makeAppleProvider(), 'apple');
+    };
 
     const logout = async () => {
         authTracer.logEvent('logout');
         auditAuth.logout();
         sessionStorage.removeItem('anchor_session_active');
+        // SN-01: revoke this device's push authority BEFORE sign-out, while the
+        // account can still write its own token documents.
+        await deregisterPreviousAccountPushToken();
         await signOut(auth);
         navigate('/', { replace: true });
     };
