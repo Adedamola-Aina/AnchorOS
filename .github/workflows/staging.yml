@@ -106,9 +106,13 @@ jobs:
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do
-            STATE=$(gh run list --repo "$REPO" --workflow ci.yml --json headSha,status,conclusion \
-              --jq --arg sha "$SHA" '[.[] | select(.headSha == $sha)][0] | (if . == null then "none" else .status + ":" + (.conclusion // "pending") end)' \
-              2>/dev/null || echo "none")
+            # Release provenance lookup: `gh run list` emits JSON and the real
+            # `jq` binary extracts the state for the EXACT SHA. gh's --jq flag
+            # cannot take jq --arg parameters — passing them that way failed
+            # silently and every lookup became "none". Lookup errors are NOT
+            # suppressed: a real gh/jq failure fails this gate visibly.
+            STATE=$(gh run list --repo "$REPO" --workflow ci.yml --json headSha,status,conclusion --limit 100 \
+              | jq -r --arg sha "$SHA" '[.[] | select(.headSha == $sha)][0] | (if . == null then "none" else .status + ":" + (.conclusion // "pending") end)')
             echo "attempt ${i}: ${STATE}"
             case "$STATE" in
               completed:success)
