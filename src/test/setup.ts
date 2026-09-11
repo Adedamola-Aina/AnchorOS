@@ -4,18 +4,6 @@
 // (jest-dom matchers, ResizeObserver, matchMedia, ...) lives in setup.jsdom.ts
 // and is loaded exclusively by the jsdom project.
 import { vi } from 'vitest';
-import pkg from '../../package.json';
-
-// ----------------------------------------------------------------------------
-// Build-time constants.
-// config/vitest.config.ts declares these via Vite `define`, but Vite's define
-// substitution does not survive the @vitejs/plugin-react + test.projects
-// transform, so mirror them as runtime globals (unqualified identifiers fall
-// back to the global object). Values match config/vite.config.ts:
-// __APP_VERSION__ = package version, __APP_ENV__ = 'development' in tests.
-// ----------------------------------------------------------------------------
-(globalThis as any).__APP_VERSION__ = pkg.version;
-(globalThis as any).__APP_ENV__ = 'development';
 
 // ============================================================================
 // GLOBAL FIREBASE MOCKS FOR ALL TESTS

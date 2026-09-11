@@ -97,27 +97,22 @@ const sharedRuntime = {
   forks: { maxForks: 2 },
 }
 
-/** Vite-level options shared by the root config and every project. */
-const sharedPlugins = [react()]
-const sharedDefine = {
-  __APP_VERSION__: JSON.stringify(pkg.version),
-  __APP_ENV__: JSON.stringify('development'),
-}
-const sharedResolve = {
-  alias: {
-    '@': path.resolve(rootDir, 'src'),
-    '@anchor-os/ui': path.resolve(rootDir, 'packages/ui/src/index.ts'),
-    '@anchor-os/types': path.resolve(rootDir, 'packages/types/src/index.ts'),
-  },
-}
-
 const sharedSetup = path.resolve(rootDir, 'src/test/setup.ts')
 const jsdomSetup = path.resolve(rootDir, 'src/test/setup.jsdom.ts')
 
 export default defineConfig({
-  plugins: sharedPlugins,
-  define: sharedDefine,
-  resolve: sharedResolve,
+  plugins: [react()],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __APP_ENV__: JSON.stringify('development'),
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(rootDir, 'src'),
+      '@anchor-os/ui': path.resolve(rootDir, 'packages/ui/src/index.ts'),
+      '@anchor-os/types': path.resolve(rootDir, 'packages/types/src/index.ts'),
+    },
+  },
   test: {
     coverage: {
       provider: 'v8',
@@ -141,26 +136,32 @@ export default defineConfig({
     },
     projects: [
       {
-        plugins: sharedPlugins,
-        define: sharedDefine,
-        resolve: sharedResolve,
+        // Inherit root `plugins` (react), `define` and `resolve` via Vitest's
+        // supported project-inheritance mechanism instead of duplicating them.
+        extends: true,
         test: {
           ...sharedRuntime,
           name: 'node',
           environment: 'node',
+          // Run this project's group before the jsdom group (groupOrder 1) so
+          // node and jsdom never execute simultaneously on a 6 GiB VM.
+          sequence: { groupOrder: 0 },
           include: NODE_INCLUDE,
           exclude: [...FOREIGN_EXCLUDE, ...NODE_EXCLUDE],
           setupFiles: [sharedSetup],
         },
       },
       {
-        plugins: sharedPlugins,
-        define: sharedDefine,
-        resolve: sharedResolve,
+        extends: true,
         test: {
           ...sharedRuntime,
           name: 'jsdom',
           environment: 'jsdom',
+          // Distinct groupOrder => runs sequentially after the node group.
+          // setupFiles: 'list' guarantees src/test/setup.ts (shared Firebase
+          // mocks) is fully evaluated before src/test/setup.jsdom.ts (DOM
+          // globals + jest-dom matchers).
+          sequence: { groupOrder: 1, setupFiles: 'list' },
           include: JSDOM_INCLUDE,
           exclude: FOREIGN_EXCLUDE,
           setupFiles: [sharedSetup, jsdomSetup],
