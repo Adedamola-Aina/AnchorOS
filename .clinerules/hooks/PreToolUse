@@ -1,0 +1,273 @@
+#!/usr/bin/env node
+'use strict';
+
+/**
+ * Workhorse v1 — Cline PreToolUse safety hook (project-local).
+ *
+ * Contract: Cline invokes this executable with a single JSON payload on stdin
+ * (see @cline/shared HookEventPayloadBase). We inspect `preToolUse.toolName`
+ * and `preToolUse.parameters` and fail closed for dangerous operations while
+ * allowing ordinary development work.
+ *
+ * Output: one line of JSON on stdout. Blocked -> { cancel: true, errorMessage }.
+ * Allowed -> {}. Diagnostics go to stderr only.
+ *
+ * Explicit, small checks — not a general policy engine.
+ */
+
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import process from 'node:process';
+
+function readStdin() {
+    try {
+        return fs.readFileSync(0, 'utf8');
+    } catch {
+        return '';
+    }
+}
+
+function parsePayload(raw) {
+    try {
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+        return {};
+    }
+}
+
+function emit(obj) {
+    process.stdout.write(`${JSON.stringify(obj)}\n`);
+}
+
+function block(reason) {
+    process.stderr.write(`[PreToolUse] BLOCK: ${reason}\n`);
+    emit({ cancel: true, errorMessage: reason });
+    process.exit(0);
+}
+
+function allow() {
+    emit({});
+    process.exit(0);
+}
+
+const payload = parsePayload(readStdin());
+const preToolUse = payload.preToolUse || {};
+const toolName = String(preToolUse.toolName || payload.tool_call?.name || '');
+const parameters =
+    preToolUse.parameters && typeof preToolUse.parameters === 'object'
+        ? preToolUse.parameters
+        : {};
+const workspace =
+    (Array.isArray(payload.workspaceRoots) && payload.workspaceRoots[0]) ||
+    payload.workspaceInfo?.rootPath ||
+    process.cwd();
+
+// ---------------------------------------------------------------------------
+// Forbidden paths: .env, .env.*, e2e/.auth/**
+// ---------------------------------------------------------------------------
+
+const ENV_BASENAME = /^\.env($|\.)/;
+
+function isForbiddenToken(token) {
+    if (!token) {
+        return false;
+    }
+    const normalized = token.replace(/\\/g, '/');
+    if (normalized.includes('e2e/.auth')) {
+        return true;
+    }
+    const base = normalized.split('/').pop();
+    return ENV_BASENAME.test(base);
+}
+
+function tokensOf(value) {
+    return String(value)
+        .split(/\s+/)
+        .map((token) => token.replace(/^[>&<|`"']+/, '').replace(/["'`,;:]+$/, ''))
+        .filter(Boolean);
+}
+
+function containsForbiddenPath(value) {
+    return tokensOf(value).some(isForbiddenToken);
+}
+
+function scanParameters() {
+    for (const [key, value] of Object.entries(parameters)) {
+        if (typeof value === 'string') {
+            if (containsForbiddenPath(value)) {
+                return key;
+            }
+        } else if (value && typeof value === 'object') {
+            if (containsForbiddenPath(JSON.stringify(value))) {
+                return key;
+            }
+        }
+    }
+    return null;
+}
+
+const forbiddenKey = scanParameters();
+if (forbiddenKey) {
+    block(
+        `Blocked: reading or writing a forbidden path (.env / .env.* / e2e/.auth/**) via parameter "${forbiddenKey}".`
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Shell command checks (the execute_command tool)
+// ---------------------------------------------------------------------------
+
+function currentBranch() {
+    try {
+        return execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+            cwd: workspace,
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'],
+        }).trim();
+    } catch {
+        return '';
+    }
+}
+
+const KNOWN_GIT_SUBCOMMANDS = new Set([
+    'push',
+    'add',
+    'reset',
+    'clean',
+    'commit',
+    'merge',
+    'rebase',
+    'checkout',
+    'switch',
+    'restore',
+    'stash',
+    'cherry-pick',
+]);
+
+function analyzeGitSegment(segment, onMaster) {
+    const tokens = segment.trim().split(/\s+/);
+    const gitIndex = tokens.indexOf('git');
+    if (gitIndex === -1) {
+        return;
+    }
+    const after = tokens.slice(gitIndex + 1);
+
+    let subIndex = -1;
+    let sub = '';
+    for (let i = 0; i < after.length; i += 1) {
+        if (KNOWN_GIT_SUBCOMMANDS.has(after[i])) {
+            subIndex = i;
+            sub = after[i];
+            break;
+        }
+    }
+    if (subIndex === -1) {
+        return; // read-only or unrecognised git command
+    }
+
+    const args = after.slice(subIndex + 1);
+
+    if (sub === 'push') {
+        const forced = args.some(
+            (arg) => arg === '-f' || arg.startsWith('--force') || /^\+/.test(arg)
+        );
+        if (forced) {
+            block('Blocked: git push --force / -f (force push).');
+        }
+        const toMaster = args.some(
+            (arg) =>
+                arg === 'master' ||
+                arg === 'refs/heads/master' ||
+                arg.endsWith(':master') ||
+                arg.endsWith(':refs/heads/master')
+        );
+        if (toMaster) {
+            block('Blocked: push directly to master.');
+        }
+        if (onMaster) {
+            block('Blocked: git push while the workspace branch is master.');
+        }
+        return;
+    }
+
+    if (sub === 'add') {
+        const stagesEverything = args.some(
+            (arg) => arg === '.' || arg === '-A' || arg === '--all' || arg === '-a' || arg === '*'
+        );
+        if (stagesEverything) {
+            block('Blocked: git add . / -A / --all. Stage explicit paths only.');
+        }
+        if (onMaster) {
+            block('Blocked: git add while the workspace branch is master.');
+        }
+        return;
+    }
+
+    if (sub === 'reset' && args.includes('--hard')) {
+        block('Blocked: git reset --hard.');
+    }
+
+    if (sub === 'clean') {
+        const destructive = args.some(
+            (arg) => arg.startsWith('--force') || (/^-[a-z]+$/.test(arg) && arg.includes('f'))
+        );
+        if (destructive) {
+            block('Blocked: destructive git clean.');
+        }
+    }
+
+    // Re-check the branch so Cline cannot start safely and then mutate master.
+    if (onMaster) {
+        block(`Blocked: mutating git ${sub} while the workspace branch is master.`);
+    }
+}
+
+function analyzeCommand(command) {
+    const onMaster = currentBranch() === 'master';
+    const segments = command.split(/&&|\|\||;|\n/);
+
+    for (const segment of segments) {
+        const raw = segment.trim();
+        if (!raw) {
+            continue;
+        }
+        const lower = raw.toLowerCase();
+
+        if (/\bgh\b\s+pr\s+merge\b/.test(lower)) {
+            block('Blocked: gh pr merge (PR merge is not allowed from the harness).');
+        }
+        if (/\bfirebase\b[^\n]*\bdeploy\b/.test(lower)) {
+            block('Blocked: raw firebase deploy. Use the repository deploy pipeline with approval.');
+        }
+        if (/\bdeploy:(staging|production|prod)\b/.test(lower)) {
+            block('Blocked: staging/production deployment command.');
+        }
+        if (/deploy_pipeline\.sh/.test(lower)) {
+            block('Blocked: direct invocation of scripts/DEPLOY_PIPELINE.sh.');
+        }
+        if (/\brunmigration\b/.test(lower)) {
+            block('Blocked: runMigration execution.');
+        }
+        if (/\bmigrations?:(apply|run)\b/.test(lower)) {
+            block('Blocked: migration application.');
+        }
+        if (/firestore:delete|functions:delete/.test(lower)) {
+            block('Blocked: destructive production operation.');
+        }
+        if (/\bgcloud\b[^\n]*\bdelete\b/.test(lower)) {
+            block('Blocked: destructive gcloud delete operation.');
+        }
+
+        analyzeGitSegment(raw, onMaster);
+    }
+}
+
+if (toolName === 'execute_command') {
+    const command = typeof parameters.command === 'string' ? parameters.command : '';
+    if (command) {
+        analyzeCommand(command);
+    }
+}
+
+allow();
