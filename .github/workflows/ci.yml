@@ -242,11 +242,15 @@ jobs:
 
             core.info('PR governance gate passed.');
 
-  # Job 1: Run linting and unit tests
+  # Job 1: Lint always; product unit tests + targeted query coverage only when
+  # the frontend surface changed (or on the scheduled regression). Full-repo
+  # module coverage is a scheduled regression signal, not a per-PR ritual
+  # (it dominated PR wall-clock: ~8 min of a ~16 min job).
   test:
     name: 🧪 Test
     runs-on: ubuntu-latest
-    
+    needs: [classify]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -268,23 +272,32 @@ jobs:
         run: npm run lint
 
       - name: Run unit tests
+        # Product unit suite is only relevant to the product runtime surface.
+        if: >-
+          github.event_name == 'schedule' ||
+          needs.classify.outputs.frontend_changed == 'true'
         run: npm run test -- --run
 
       - name: Enforce query-layer coverage gate
+        if: >-
+          github.event_name == 'schedule' ||
+          needs.classify.outputs.frontend_changed == 'true'
         run: npm run test:coverage:query-gate
 
-      - name: Generate module coverage report
+      - name: Generate module coverage report (scheduled regression only)
+        if: github.event_name == 'schedule'
         run: npm run test:coverage:modules
 
       - name: Publish module coverage summary
+        if: github.event_name == 'schedule'
         run: |
           if [ -f coverage/module-coverage-summary.md ]; then
             cat coverage/module-coverage-summary.md >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload coverage artifacts
+        if: github.event_name == 'schedule'
         uses: actions/upload-artifact@v7
-        if: always()
         with:
           name: coverage-report
           path: |

@@ -198,10 +198,13 @@ test('seed refuses non-loopback emulator hosts', () => {
     assert.match(r.stderr, /loopback/);
 });
 
-test('seed reuses the canonical TEST_USER fixture (no invented credential set)', () => {
-    assert.match(SEED_SCRIPT, /fixtures', 'test-data\.ts/);
-    // The credentials come from parsing the fixture file, not duplicated literals here
-    assert.match(SEED_SCRIPT, /loadFixtureUser/);
+test('seed reuses the canonical TEST_USER fixture (single source of truth)', () => {
+    // The identity is parsed in exactly one place: scripts/ci/release-identity.mjs.
+    assert.match(SEED_SCRIPT, /readFixtureIdentity/);
+    assert.doesNotMatch(SEED_SCRIPT, /TEST_USER = |loadFixtureUser/);
+    // The canonical parser reads the fixture file (not duplicated literals here).
+    const identityModule = fs.readFileSync('scripts/ci/release-identity.mjs', 'utf8');
+    assert.match(identityModule, /e2e\/fixtures\/test-data\.ts|'fixtures', 'test-data\.ts/);
     assert.doesNotMatch(SEED_SCRIPT, /TestPass123!/);
     // Never prints credentials or tokens
     assert.doesNotMatch(SEED_SCRIPT, /console\.(log|error)[^;]*(password|idToken|refreshToken)/);

@@ -15,7 +15,12 @@ updates:
       tanstack:
         patterns: ["@tanstack/*"]
       capacitor:
-        patterns: ["@capacitor/*"]
+        patterns: ["@capacitor/*", "@capawesome/*"]
+      # Everything else: ONE grouped PR for routine minor/patch updates so
+      # dependency automation never floods the queue with low-value PRs.
+      routine-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
@@ -27,6 +32,13 @@ updates:
       day: monday
       time: "09:00"
     open-pull-requests-limit: 3
+    groups:
+      functions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
@@ -35,3 +47,9 @@ updates:
       day: monday
       time: "09:00"
     open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

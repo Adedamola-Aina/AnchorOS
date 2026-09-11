@@ -370,10 +370,16 @@ jobs:
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
       - run: npx playwright install chromium --with-deps
-      - name: Run release smoke against deployed staging
+      - name: Run release smoke against deployed staging (dedicated staging canary)
+        # Deployed smoke FAILS CLOSED without the staging canary secrets
+        # (scripts/ci/release-identity.mjs). The committed repository fixture
+        # identity is never used against a cloud project.
         run: npx playwright test --config config/playwright.release-smoke.config.ts
         env:
           E2E_BASE_URL: ${{ secrets.STAGING_URL || 'https://anchor-os-staging.web.app' }}
+          E2E_SMOKE_TARGET: staging
+          STAGING_SMOKE_EMAIL: ${{ secrets.STAGING_SMOKE_EMAIL }}
+          STAGING_SMOKE_PASSWORD: ${{ secrets.STAGING_SMOKE_PASSWORD }}
       - name: Upload release smoke artifacts
         if: failure()
         uses: actions/upload-artifact@v7
@@ -401,10 +407,16 @@ jobs:
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
       - run: npx playwright install chromium --with-deps
-      - name: Run release smoke against deployed staging
+      - name: Run release smoke against deployed staging (dedicated staging canary)
+        # Deployed smoke FAILS CLOSED without the staging canary secrets
+        # (scripts/ci/release-identity.mjs). The committed repository fixture
+        # identity is never used against a cloud project.
         run: npx playwright test --config config/playwright.release-smoke.config.ts
         env:
           E2E_BASE_URL: ${{ secrets.STAGING_URL || 'https://anchor-os-staging.web.app' }}
+          E2E_SMOKE_TARGET: staging
+          STAGING_SMOKE_EMAIL: ${{ secrets.STAGING_SMOKE_EMAIL }}
+          STAGING_SMOKE_PASSWORD: ${{ secrets.STAGING_SMOKE_PASSWORD }}
       - name: Upload release smoke artifacts
         if: failure()
         uses: actions/upload-artifact@v7
