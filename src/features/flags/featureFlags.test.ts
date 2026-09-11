@@ -4,7 +4,7 @@ import { evaluateFeatureFlag } from './featureFlags';
 
 describe('featureFlags', () => {
     it('honors global disable kill switch', () => {
-        const enabled = evaluateFeatureFlag('fabric_suggestions', {
+        const enabled = evaluateFeatureFlag('anchor_ai_enabled', {
             userId: 'user-1',
             env: 'production',
             envVars: {
@@ -16,19 +16,19 @@ describe('featureFlags', () => {
     });
 
     it('honors explicit per-flag override', () => {
-        const disabled = evaluateFeatureFlag('fabric_suggestions', {
+        const disabled = evaluateFeatureFlag('anchor_ai_enabled', {
             userId: 'user-1',
             env: 'production',
             envVars: {
-                VITE_FLAG_FABRIC_SUGGESTIONS: 'false',
+                VITE_FLAG_ANCHOR_AI_ENABLED: 'false',
             },
         });
 
-        const enabled = evaluateFeatureFlag('fabric_suggestions', {
+        const enabled = evaluateFeatureFlag('anchor_ai_enabled', {
             userId: 'user-1',
             env: 'production',
             envVars: {
-                VITE_FLAG_FABRIC_SUGGESTIONS: 'true',
+                VITE_FLAG_ANCHOR_AI_ENABLED: 'true',
             },
         });
 
@@ -38,16 +38,16 @@ describe('featureFlags', () => {
 
     it('applies deterministic progressive rollout by user id', () => {
         const envVars = {
-            VITE_FLAG_FABRIC_SUGGESTIONS_ROLLOUT: '25',
+            VITE_FLAG_ANCHOR_AI_ROLLOUT: '25',
         };
 
-        const first = evaluateFeatureFlag('fabric_suggestions', {
+        const first = evaluateFeatureFlag('anchor_ai_enabled', {
             userId: 'stable-user-42',
             env: 'production',
             envVars,
         });
 
-        const second = evaluateFeatureFlag('fabric_suggestions', {
+        const second = evaluateFeatureFlag('anchor_ai_enabled', {
             userId: 'stable-user-42',
             env: 'production',
             envVars,
@@ -57,19 +57,19 @@ describe('featureFlags', () => {
     });
 
     it('clamps rollout values to valid range', () => {
-        const alwaysOn = evaluateFeatureFlag('fabric_suggestions', {
+        const alwaysOn = evaluateFeatureFlag('anchor_ai_enabled', {
             userId: 'user-1',
             env: 'production',
             envVars: {
-                VITE_FLAG_FABRIC_SUGGESTIONS_ROLLOUT: '500',
+                VITE_FLAG_ANCHOR_AI_ROLLOUT: '500',
             },
         });
 
-        const alwaysOff = evaluateFeatureFlag('fabric_suggestions', {
+        const alwaysOff = evaluateFeatureFlag('anchor_ai_enabled', {
             userId: 'user-1',
             env: 'production',
             envVars: {
-                VITE_FLAG_FABRIC_SUGGESTIONS_ROLLOUT: '-10',
+                VITE_FLAG_ANCHOR_AI_ROLLOUT: '-10',
             },
         });
 
