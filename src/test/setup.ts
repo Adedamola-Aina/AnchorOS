@@ -1,6 +1,21 @@
 // @ts-nocheck
-import '@testing-library/jest-dom';
+// Shared setup for ALL frontend tests (both `node` and `jsdom` projects).
+// Contains only genuinely shared mocks (Firebase). DOM/browser-only setup
+// (jest-dom matchers, ResizeObserver, matchMedia, ...) lives in setup.jsdom.ts
+// and is loaded exclusively by the jsdom project.
 import { vi } from 'vitest';
+import pkg from '../../package.json';
+
+// ----------------------------------------------------------------------------
+// Build-time constants.
+// config/vitest.config.ts declares these via Vite `define`, but Vite's define
+// substitution does not survive the @vitejs/plugin-react + test.projects
+// transform, so mirror them as runtime globals (unqualified identifiers fall
+// back to the global object). Values match config/vite.config.ts:
+// __APP_VERSION__ = package version, __APP_ENV__ = 'development' in tests.
+// ----------------------------------------------------------------------------
+(globalThis as any).__APP_VERSION__ = pkg.version;
+(globalThis as any).__APP_ENV__ = 'development';
 
 // ============================================================================
 // GLOBAL FIREBASE MOCKS FOR ALL TESTS
@@ -117,24 +132,6 @@ vi.mock('firebase/firestore', () => ({
     connectFirestoreEmulator: vi.fn(),
 }));
 
-// Mock ResizeObserver for @tanstack/react-virtual
-global.ResizeObserver = class ResizeObserver {
-    observe() { }
-    unobserve() { }
-    disconnect() { }
-};
-
-// Mock window.matchMedia for responsive tests
-Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-    })),
-});
+// NOTE: browser-only globals (ResizeObserver, window.matchMedia) and the
+// @testing-library/jest-dom matchers intentionally live in setup.jsdom.ts so
+// the `node` project never initialises DOM runtime.
