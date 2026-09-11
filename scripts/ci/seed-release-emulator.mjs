@@ -24,16 +24,11 @@
  *   node scripts/ci/seed-release-emulator.mjs
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFixtureIdentity } from './release-identity.mjs';
 
 const DEMO_PROJECT_ID = 'demo-anchor-os';
 const APP_ID = 'anchor-os';
 const REQUEST_TIMEOUT_MS = 5000;
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, '..', '..');
 
 function fail(message) {
     console.error(`seed-release-emulator: REFUSED — ${message}`);
@@ -62,18 +57,8 @@ if (projectId !== DEMO_PROJECT_ID) {
 }
 
 // --- Reuse the canonical fixture identity (single source of truth) ---------
-function loadFixtureUser() {
-    const fixturePath = path.join(repoRoot, 'e2e', 'fixtures', 'test-data.ts');
-    const source = fs.readFileSync(fixturePath, 'utf8');
-    const block = source.match(/export const TEST_USER = \{([\s\S]*?)\}/);
-    if (!block) fail('could not find TEST_USER in e2e/fixtures/test-data.ts');
-    const field = (name) => {
-        const m = block[1].match(new RegExp(`${name}\\s*:\\s*'([^']*)'`));
-        if (!m) fail(`could not read TEST_USER.${name} from e2e/fixtures/test-data.ts`);
-        return m[1];
-    };
-    return { email: field('email'), password: field('password'), name: field('name') };
-}
+// The fixture identity is parsed by scripts/ci/release-identity.mjs so the
+// seed script and the release smoke can never disagree on the account.
 
 async function post(url, body) {
     const res = await fetch(url, {
@@ -137,7 +122,7 @@ async function ensureProfileDoc(localId, idToken, user) {
 }
 
 async function main() {
-    const user = loadFixtureUser();
+    const user = readFixtureIdentity();
     let auth;
     try {
         auth = await ensureAuthUser(user);
