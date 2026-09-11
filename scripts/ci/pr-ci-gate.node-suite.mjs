@@ -174,3 +174,38 @@ test('weekly scheduled regression remains independent of the surface gates', () 
     assert.match(weekly, /playwright test --shard/);
     assert.doesNotMatch(weekly, /needs\.classify/);
 });
+
+// ---------------------------------------------------------------------------
+// Risk-based test execution (test job is surface-aware)
+// ---------------------------------------------------------------------------
+
+const TEST_JOB = () => ciJob('test');
+
+test('Test job always lints and depends on classify', () => {
+    const job = TEST_JOB();
+    assert.match(job, /needs:\s*\[classify\]/);
+    assert.match(job, /run: npm run lint/);
+});
+
+test('unit tests + query coverage are gated on frontend_changed / schedule', () => {
+    const job = TEST_JOB();
+    const gated = job.match(/needs\.classify\.outputs\.frontend_changed == 'true'/g) || [];
+    // Both the unit-test step and the targeted query-coverage step must be
+    // surface-gated so engineering-only/CI-only PRs skip the product suite.
+    assert.ok(gated.length >= 2, `expected >=2 frontend_changed gates, found ${gated.length}`);
+    assert.match(job, /github\.event_name == 'schedule'/);
+});
+
+test('expensive full-repo module coverage runs only on the scheduled regression', () => {
+    const job = TEST_JOB();
+    const idx = job.indexOf('Generate module coverage report');
+    assert.ok(idx !== -1, 'module coverage step must exist');
+    const step = job.slice(idx);
+    assert.match(step, /if: github\.event_name == 'schedule'/);
+    // It must never be an unconditional PR step.
+    assert.doesNotMatch(job, /- name: Generate module coverage report\n\s+run:/);
+});
+
+test('Test job keeps the shared toolchain (functions deps) available', () => {
+    assert.match(TEST_JOB(), /working-directory: functions/);
+});

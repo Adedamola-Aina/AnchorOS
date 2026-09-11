@@ -1,6 +1,6 @@
 // NOTE: This file is a plain service worker served from /public — it is not
 // part of any TypeScript compilation, so no suppression directive is needed.
-const CACHE_NAME = 'anchor-os-v1.20.7-dev.0';
+const CACHE_NAME = 'anchor-os-v1.20.16';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
