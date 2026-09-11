@@ -116,7 +116,18 @@ function classifyFiles(files) {
 
     const functionsChanged = normalized.some(isFunctionsPath);
     const rulesChanged = normalized.some(isRulesPath);
-    const frontendChanged = normalized.some((f) => isProductPath(f) && !isFunctionsPath(f) && !isRulesPath(f));
+    // Unknown paths classify as PRODUCT_RUNTIME by design. Treat them as a
+    // frontend/runtime surface too so fail-safe classification cannot select
+    // release eligibility while accidentally skipping runtime validation.
+    const unknownRuntimeChanged = normalized.some((f) =>
+        classifyPath(f) === 'PRODUCT_RUNTIME' &&
+        !isProductPath(f) &&
+        !isFunctionsPath(f) &&
+        !isRulesPath(f)
+    );
+    const frontendChanged =
+        normalized.some((f) => isProductPath(f) && !isFunctionsPath(f) && !isRulesPath(f)) ||
+        unknownRuntimeChanged;
     const ciChanged = normalized.some(isCiPath);
     const engineeringOnlyChanged = normalized.some(isEngineeringOnlyPath);
     const engineeringCodeChanged = normalized.some(isEngineeringCodePath);
@@ -130,6 +141,7 @@ function classifyFiles(files) {
         if (f.startsWith('src/') && !isTestFile(f)) return true;
         if (f === 'config/playwright.release-smoke.config.ts') return true;
         if (/^e2e\/release-(auth|smoke)\./.test(f)) return true;
+        if (unknownRuntimeChanged) return true;
         return false;
     });
 
