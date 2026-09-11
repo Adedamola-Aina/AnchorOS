@@ -32,9 +32,9 @@ function readStdin() {
 function parsePayload(raw) {
     try {
         const parsed = JSON.parse(raw);
-        return parsed && typeof parsed === 'object' ? parsed : {};
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
     } catch {
-        return {};
+        return null;
     }
 }
 
@@ -69,6 +69,9 @@ function cancel(message) {
 }
 
 const payload = parsePayload(readStdin());
+if (!payload) {
+    cancel('Workhorse TaskStart: malformed hook payload (stdin was not a JSON object).');
+}
 const workspace =
     (Array.isArray(payload.workspaceRoots) && payload.workspaceRoots[0]) ||
     payload.workspaceInfo?.rootPath ||
@@ -83,11 +86,9 @@ try {
     head = git(workspace, ['rev-parse', 'HEAD']);
 } catch (error) {
     debug(`not a git workspace: ${String(error)}`);
-    emit({
-        contextModification:
-            'Workhorse TaskStart: workspace is not a git repository; no harness context available.',
-    });
-    process.exit(0);
+    cancel(
+        'AnchorOS coding sessions must run in a linked Workhorse worktree created by scripts/agent/start-task.sh (the workspace is not a git repository).'
+    );
 }
 
 // Safety 1: never start a coding task on master.
@@ -115,12 +116,19 @@ const linkedWorktree = (() => {
     }
 })();
 
-// Safety 2: an implementation worktree created through the harness must carry
-// its recorded base SHA. Plain (non-linked) working trees are not treated as
-// harness-created and are exempt.
-if (linkedWorktree && !baseSha) {
+// Safety 2: AnchorOS coding sessions are only accepted in a linked Workhorse
+// worktree. The primary working tree is rejected even on a feature branch,
+// because it carries unrelated in-progress work and no recorded base.
+if (!linkedWorktree) {
     cancel(
-        'Workhorse base metadata is missing for this implementation worktree. Create the task with scripts/agent/start-task.sh so the base SHA is recorded.'
+        'Refusing to start an AnchorOS coding session in the primary working tree. Create an isolated Workhorse worktree with scripts/agent/start-task.sh <branch>.'
+    );
+}
+
+// Safety 3: a linked Workhorse worktree must carry its recorded base SHA.
+if (!baseSha) {
+    cancel(
+        'Workhorse base metadata is missing for this linked worktree. Create the task with scripts/agent/start-task.sh so the base SHA is recorded.'
     );
 }
 

@@ -24,6 +24,11 @@ BRANCH="$(workhorse_branch "$ROOT")"
 HEAD_SHA="$(git -C "$ROOT" rev-parse HEAD)"
 BASE_SHA="$(workhorse_read_base_sha "$ROOT")"
 
+BASE_ANCESTOR=0
+if [ -n "$BASE_SHA" ] && git -C "$ROOT" merge-base --is-ancestor "$BASE_SHA" HEAD 2>/dev/null; then
+    BASE_ANCESTOR=1
+fi
+
 UPSTREAM_REF="$(git -C "$ROOT" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
 UPSTREAM_SHA=""
 HAS_UPSTREAM=0
@@ -73,7 +78,7 @@ printf '%s' "$VERIFICATION_JSON" > "$VERIFICATION_FILE"
 
 node --input-type=module -e '
 import fs from "node:fs";
-const [compactOut, changedPath, forbiddenPath, verificationPath, base, head, branch, upstreamRef, upstreamSha, hasUpstream, headEqualsUpstream, clean] = process.argv.slice(1);
+const [compactOut, changedPath, forbiddenPath, verificationPath, base, head, branch, upstreamRef, upstreamSha, hasUpstream, headEqualsUpstream, clean, baseAncestor] = process.argv.slice(1);
 const changed = fs.readFileSync(changedPath, "utf8").split("\n").filter(Boolean);
 const violations = fs.readFileSync(forbiddenPath, "utf8").split("\n").filter(Boolean);
 const rawVerification = fs.readFileSync(verificationPath, "utf8");
@@ -83,6 +88,11 @@ const checks = verification && Array.isArray(verification.checks) ? verification
 const unverified = verification && Array.isArray(verification.unverified) ? verification.unverified : [];
 const failedChecks = checks.filter((c) => c.status === "fail");
 const unverifiedWithoutReason = unverified.filter((u) => !u.reason || !String(u.reason).trim());
+const setEqual = (a, b) => {
+    const sa = [...new Set(a)].sort();
+    const sb = [...new Set(b)].sort();
+    return sa.length === sb.length && sa.every((value, index) => value === sb[index]);
+};
 const conditions = {
     non_master_branch: branch !== "master",
     base_recorded: Boolean(base),
@@ -90,6 +100,10 @@ const conditions = {
     no_forbidden_paths: violations.length === 0,
     verification_available: verification !== null,
     verification_ok: verification !== null && failedChecks.length === 0 && unverifiedWithoutReason.length === 0,
+    verification_base_matches: verification !== null && verification.base_sha === base,
+    verification_head_matches: verification !== null && verification.head_sha === head,
+    base_is_ancestor: baseAncestor === "1",
+    changed_files_match: verification !== null && Array.isArray(verification.changed_files) && setEqual(verification.changed_files, changed),
     has_upstream: hasUpstream === "1",
     head_equals_upstream: headEqualsUpstream === "1"
 };
@@ -104,6 +118,8 @@ const receipt = {
     worktree_status: clean === "1" ? "clean" : "dirty",
     verification: checks,
     unverified,
+    verification_base_sha: verification ? verification.base_sha ?? null : null,
+    verification_head_sha: verification ? verification.head_sha ?? null : null,
     failed_verification: failedChecks.map((c) => ({ name: c.name, command: c.command, exit_code: c.exit_code })),
     forbidden_path_violations: violations,
     head_equals_upstream: headEqualsUpstream === "1",
@@ -115,7 +131,7 @@ fs.writeFileSync(compactOut, JSON.stringify(receipt));
 console.log(JSON.stringify(receipt, null, 2));
 ' "$RECEIPT_COMPACT_FILE" "$CHANGED_FILE" "$FORBIDDEN_FILE" "$VERIFICATION_FILE" \
     "$BASE_SHA" "$HEAD_SHA" "$BRANCH" "$UPSTREAM_REF" "$UPSTREAM_SHA" \
-    "$HAS_UPSTREAM" "$HEAD_EQUALS_UPSTREAM" "$CLEAN"
+    "$HAS_UPSTREAM" "$HEAD_EQUALS_UPSTREAM" "$CLEAN" "$BASE_ANCESTOR"
 
 RECEIPT_JSON="$(cat "$RECEIPT_COMPACT_FILE")"
 workhorse_write_meta "$ROOT" "$WORKHORSE_RECEIPT_KEY" "$RECEIPT_JSON"

@@ -4,15 +4,15 @@
 /**
  * Workhorse v1 — Cline PreToolUse safety hook (project-local).
  *
- * Contract: Cline invokes this executable with a single JSON payload on stdin
- * (see @cline/shared HookEventPayloadBase). We inspect `preToolUse.toolName`
- * and `preToolUse.parameters` and fail closed for dangerous operations while
- * allowing ordinary development work.
+ * Contract: Cline invokes this executable with one JSON payload on stdin
+ * (hookName: "PreToolUse", preToolUse.toolName, preToolUse.parameters,
+ * workspaceRoots). We fail closed for dangerous operations and structural
+ * payload errors, while allowing ordinary development work.
  *
  * Output: one line of JSON on stdout. Blocked -> { cancel: true, errorMessage }.
  * Allowed -> {}. Diagnostics go to stderr only.
  *
- * Explicit, small checks — not a general policy engine.
+ * Explicit, small checks — not a shell parser and not a policy engine.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -24,15 +24,6 @@ function readStdin() {
         return fs.readFileSync(0, 'utf8');
     } catch {
         return '';
-    }
-}
-
-function parsePayload(raw) {
-    try {
-        const parsed = JSON.parse(raw);
-        return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch {
-        return {};
     }
 }
 
@@ -51,86 +42,101 @@ function allow() {
     process.exit(0);
 }
 
-const payload = parsePayload(readStdin());
-const preToolUse = payload.preToolUse || {};
-const toolName = String(preToolUse.toolName || payload.tool_call?.name || '');
+// ---------------------------------------------------------------------------
+// Structural validation — fail closed on malformed or missing input.
+// ---------------------------------------------------------------------------
+
+let payload;
+try {
+    payload = JSON.parse(readStdin());
+} catch {
+    block('Blocked: malformed hook payload (stdin was not valid JSON).');
+}
+
+if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    block('Blocked: malformed hook payload (expected a JSON object).');
+}
+
+const preToolUse = payload.preToolUse;
+if (
+    !preToolUse ||
+    typeof preToolUse !== 'object' ||
+    Array.isArray(preToolUse) ||
+    typeof preToolUse.toolName !== 'string' ||
+    preToolUse.toolName.length === 0
+) {
+    block('Blocked: missing or invalid preToolUse payload (a string toolName is required).');
+}
+
+const toolName = preToolUse.toolName;
 const parameters =
-    preToolUse.parameters && typeof preToolUse.parameters === 'object'
+    preToolUse.parameters && typeof preToolUse.parameters === 'object' && !Array.isArray(preToolUse.parameters)
         ? preToolUse.parameters
         : {};
 const workspace =
-    (Array.isArray(payload.workspaceRoots) && payload.workspaceRoots[0]) ||
+    (Array.isArray(payload.workspaceRoots) && typeof payload.workspaceRoots[0] === 'string' && payload.workspaceRoots[0]) ||
     payload.workspaceInfo?.rootPath ||
     process.cwd();
 
 // ---------------------------------------------------------------------------
-// Forbidden paths: .env, .env.*, e2e/.auth/**
+// Forbidden paths: .env, .env.*, e2e/.auth/**  (narrow: path targets only)
 // ---------------------------------------------------------------------------
 
 const ENV_BASENAME = /^\.env($|\.)/;
+const PATH_KEYS = ['path', 'file_path', 'filepath', 'target_file', 'relative_path', 'filename'];
 
-function isForbiddenToken(token) {
-    if (!token) {
+function isForbiddenPath(value) {
+    if (typeof value !== 'string' || value.trim() === '') {
         return false;
     }
-    const normalized = token.replace(/\\/g, '/');
+    const normalized = value.replace(/\\/g, '/').trim();
     if (normalized.includes('e2e/.auth')) {
         return true;
     }
-    const base = normalized.split('/').pop();
-    return ENV_BASENAME.test(base);
+    return ENV_BASENAME.test(normalized.split('/').pop());
 }
 
-function tokensOf(value) {
-    return String(value)
-        .split(/\s+/)
-        .map((token) => token.replace(/^[>&<|`"']+/, '').replace(/["'`,;:]+$/, ''))
-        .filter(Boolean);
-}
-
-function containsForbiddenPath(value) {
-    return tokensOf(value).some(isForbiddenToken);
-}
-
-function scanParameters() {
-    for (const [key, value] of Object.entries(parameters)) {
-        if (typeof value === 'string') {
-            if (containsForbiddenPath(value)) {
-                return key;
-            }
-        } else if (value && typeof value === 'object') {
-            if (containsForbiddenPath(JSON.stringify(value))) {
-                return key;
+function forbiddenPathParameter() {
+    for (const key of PATH_KEYS) {
+        if (isForbiddenPath(parameters[key])) {
+            return key;
+        }
+    }
+    // apply_patch targets appear as file headers, not as a path parameter.
+    const patchText =
+        typeof parameters.input === 'string'
+            ? parameters.input
+            : typeof parameters.patch === 'string'
+              ? parameters.patch
+              : '';
+    if (patchText) {
+        for (const line of patchText.split('\n')) {
+            const match = line.match(/^\*\*\*\s+(?:Update|Add|Delete)\s+File:\s*(.+?)\s*$/);
+            if (match && isForbiddenPath(match[1])) {
+                return 'input';
             }
         }
     }
     return null;
 }
 
-const forbiddenKey = scanParameters();
+const forbiddenKey = forbiddenPathParameter();
 if (forbiddenKey) {
-    block(
-        `Blocked: reading or writing a forbidden path (.env / .env.* / e2e/.auth/**) via parameter "${forbiddenKey}".`
-    );
+    block(`Blocked: accessing a forbidden path (.env / .env.* / e2e/.auth/**) via parameter "${forbiddenKey}".`);
+}
+
+function commandMentionsForbiddenPath(command) {
+    return command
+        .split(/\s+/)
+        .map((token) => token.replace(/^[>&<|`"']+/, '').replace(/["'`,;:]+$/, ''))
+        .some(isForbiddenPath);
 }
 
 // ---------------------------------------------------------------------------
 // Shell command checks (the execute_command tool)
 // ---------------------------------------------------------------------------
 
-function currentBranch() {
-    try {
-        return execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
-            cwd: workspace,
-            encoding: 'utf8',
-            stdio: ['ignore', 'pipe', 'ignore'],
-        }).trim();
-    } catch {
-        return '';
-    }
-}
-
-const KNOWN_GIT_SUBCOMMANDS = new Set([
+const MUTATING_GIT = new Set([
     'push',
     'add',
     'reset',
@@ -145,9 +151,27 @@ const KNOWN_GIT_SUBCOMMANDS = new Set([
     'cherry-pick',
 ]);
 
-function analyzeGitSegment(segment, onMaster) {
+function currentBranch() {
+    try {
+        return execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+            cwd: workspace,
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'],
+        }).trim();
+    } catch {
+        return null;
+    }
+}
+
+function findGitTokenIndex(tokens) {
+    return tokens.findIndex(
+        (token) => token === 'git' || (token.includes('/') && token.split('/').pop() === 'git')
+    );
+}
+
+function analyzeGitSegment(segment, context) {
     const tokens = segment.trim().split(/\s+/);
-    const gitIndex = tokens.indexOf('git');
+    const gitIndex = findGitTokenIndex(tokens);
     if (gitIndex === -1) {
         return;
     }
@@ -156,7 +180,7 @@ function analyzeGitSegment(segment, onMaster) {
     let subIndex = -1;
     let sub = '';
     for (let i = 0; i < after.length; i += 1) {
-        if (KNOWN_GIT_SUBCOMMANDS.has(after[i])) {
+        if (MUTATING_GIT.has(after[i])) {
             subIndex = i;
             sub = after[i];
             break;
@@ -166,12 +190,31 @@ function analyzeGitSegment(segment, onMaster) {
         return; // read-only or unrecognised git command
     }
 
+    const before = after.slice(0, subIndex);
     const args = after.slice(subIndex + 1);
 
+    // Fail closed when the target checkout cannot be trusted.
+    if (context.branch === null) {
+        block('Blocked: cannot determine the current branch for a mutating git command.');
+    }
+    const crossRepo =
+        before.some(
+            (token) =>
+                token === '-C' ||
+                token === '--git-dir' ||
+                token === '--work-tree' ||
+                token.startsWith('--git-dir=') ||
+                token.startsWith('--work-tree=')
+        ) || context.hasCd;
+    if (crossRepo) {
+        block('Blocked: mutating git targeting another checkout (git -C / --git-dir / preceding cd).');
+    }
+    if (context.branch === 'master') {
+        block(`Blocked: mutating git ${sub} while the workspace branch is master.`);
+    }
+
     if (sub === 'push') {
-        const forced = args.some(
-            (arg) => arg === '-f' || arg.startsWith('--force') || /^\+/.test(arg)
-        );
+        const forced = args.some((arg) => arg === '-f' || arg.startsWith('--force') || /^\+/.test(arg));
         if (forced) {
             block('Blocked: git push --force / -f (force push).');
         }
@@ -185,23 +228,21 @@ function analyzeGitSegment(segment, onMaster) {
         if (toMaster) {
             block('Blocked: push directly to master.');
         }
-        if (onMaster) {
-            block('Blocked: git push while the workspace branch is master.');
-        }
         return;
     }
 
     if (sub === 'add') {
-        const stagesEverything = args.some(
-            (arg) => arg === '.' || arg === '-A' || arg === '--all' || arg === '-a' || arg === '*'
+        const stagesEverything = args.some((arg) =>
+            ['.', './', '..', '-A', '--all', '-a', '-u', '--update', '*'].includes(arg)
         );
         if (stagesEverything) {
-            block('Blocked: git add . / -A / --all. Stage explicit paths only.');
-        }
-        if (onMaster) {
-            block('Blocked: git add while the workspace branch is master.');
+            block('Blocked: broad staging (git add . / ./- / -A / --all / -u / --update). Stage explicit paths only.');
         }
         return;
+    }
+
+    if ((sub === 'checkout' || sub === 'switch') && args.some((arg) => arg === 'master' || arg === 'refs/heads/master')) {
+        block('Blocked: checking out or switching to master from a Workhorse session.');
     }
 
     if (sub === 'reset' && args.includes('--hard')) {
@@ -216,15 +257,14 @@ function analyzeGitSegment(segment, onMaster) {
             block('Blocked: destructive git clean.');
         }
     }
-
-    // Re-check the branch so Cline cannot start safely and then mutate master.
-    if (onMaster) {
-        block(`Blocked: mutating git ${sub} while the workspace branch is master.`);
-    }
 }
 
 function analyzeCommand(command) {
-    const onMaster = currentBranch() === 'master';
+    const branch = currentBranch();
+    const context = {
+        branch,
+        hasCd: /(?:^|[;&|()]|\n)\s*cd\s/.test(command),
+    };
     const segments = command.split(/&&|\|\||;|\n/);
 
     for (const segment of segments) {
@@ -259,13 +299,16 @@ function analyzeCommand(command) {
             block('Blocked: destructive gcloud delete operation.');
         }
 
-        analyzeGitSegment(raw, onMaster);
+        analyzeGitSegment(raw, context);
     }
 }
 
 if (toolName === 'execute_command') {
     const command = typeof parameters.command === 'string' ? parameters.command : '';
     if (command) {
+        if (commandMentionsForbiddenPath(command)) {
+            block('Blocked: accessing a forbidden path (.env / .env.* / e2e/.auth/**) in a shell command.');
+        }
         analyzeCommand(command);
     }
 }
