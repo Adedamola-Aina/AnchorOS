@@ -24,6 +24,11 @@ permissions:
 env:
   NODE_VERSION: '22'
 
+# A newer PR event supersedes older work for the same PR. Master validation is
+# never cancelled because staging/production consume the exact completed SHA.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Job 0: Classify changed files (deterministic, repository-owned).
@@ -38,8 +43,13 @@ jobs:
       release: ${{ steps.classify.outputs.release }}
       frontend_changed: ${{ steps.classify.outputs.frontend_changed }}
       backend_changed: ${{ steps.classify.outputs.backend_changed }}
+      functions_changed: ${{ steps.classify.outputs.functions_changed }}
+      rules_changed: ${{ steps.classify.outputs.rules_changed }}
+      query_changed: ${{ steps.classify.outputs.query_changed }}
+      smoke_required: ${{ steps.classify.outputs.smoke_required }}
       ci_infra_changed: ${{ steps.classify.outputs.ci_infra_changed }}
       engineering_only_changed: ${{ steps.classify.outputs.engineering_only_changed }}
+      engineering_code_changed: ${{ steps.classify.outputs.engineering_code_changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,11 +82,6 @@ jobs:
           printf '%s\n' "$FILES" > /tmp/changed-files.txt
           node scripts/ci/classify-changes.js --files $(cat /tmp/changed-files.txt)
 
-          # Run the classifier's own focused tests whenever CI infrastructure
-          # (including the classifier) changes.
-          if grep -q '^scripts/ci/' /tmp/changed-files.txt; then
-            node --test scripts/ci/*.node-suite.mjs
-          fi
 
   governance-gates:
     name: 🛡️ PR Governance Gates
@@ -242,115 +247,150 @@ jobs:
 
             core.info('PR governance gate passed.');
 
-  # Job 1: Lint always; product unit tests + targeted query coverage only when
-  # the frontend surface changed (or on the scheduled regression). Full-repo
-  # module coverage is a scheduled regression signal, not a per-PR ritual
-  # (it dominated PR wall-clock: ~8 min of a ~16 min job).
-  test:
-    name: 🧪 Test
+
+  # CI/workflow implementation: Node-native invariant tests only. No product
+  # dependencies, browser, emulators, Functions install or application suite.
+  ci-infra:
+    name: ⚙️ CI Infrastructure
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [classify]
-
+    if: needs.classify.outputs.ci_infra_changed == 'true'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with: { node-version: '${{ env.NODE_VERSION }}' }
+      - name: Run CI/release invariant tests
+        run: node --test scripts/ci/*.node-suite.mjs
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+  # Non-runtime engineering code (scripts/tools/e2e/config) gets a normal lint
+  # pass, but docs/contracts alone do not install the application dependency tree.
+  engineering-checks:
+    name: 🧰 Engineering Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    needs: [classify]
+    if: needs.classify.outputs.engineering_code_changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install functions dependencies
-        run: npm ci
-        working-directory: functions
-
-      - name: Run linting
-        run: npm run lint
-
-      - name: Run unit tests
-        # Product unit suite is only relevant to the product runtime surface.
-        if: >-
-          github.event_name == 'schedule' ||
-          needs.classify.outputs.frontend_changed == 'true'
-        run: npm run test -- --run
-
-      - name: Enforce query-layer coverage gate
-        if: >-
-          github.event_name == 'schedule' ||
-          needs.classify.outputs.frontend_changed == 'true'
+  frontend-checks:
+    name: 🖥️ Frontend Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: [classify]
+    if: needs.classify.outputs.frontend_changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Lint + typecheck
+        run: |
+          npm run lint
+          npx tsc -b config/tsconfig.app.json config/tsconfig.node.json
+      - name: Product unit tests
+        run: npm run test:run
+      - name: Query-layer coverage gate
+        if: needs.classify.outputs.query_changed == 'true'
         run: npm run test:coverage:query-gate
 
-      - name: Generate module coverage report (scheduled regression only)
-        if: github.event_name == 'schedule'
-        run: npm run test:coverage:modules
-
-      - name: Publish module coverage summary
-        if: github.event_name == 'schedule'
-        run: |
-          if [ -f coverage/module-coverage-summary.md ]; then
-            cat coverage/module-coverage-summary.md >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      - name: Upload coverage artifacts
-        if: github.event_name == 'schedule'
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage-report
-          path: |
-            coverage/coverage-summary.json
-            coverage/module-coverage-summary.json
-            coverage/module-coverage-summary.md
-
-
-  # Job 1.5: Bounded PR Smoke (Chromium only)
-  e2e-tests:
-    name: 🎭 Bounded Smoke (Chromium)
+  backend-checks:
+    name: 🔧 Functions Checks
     runs-on: ubuntu-latest
-    needs: [test, classify]
-    timeout-minutes: 10
-    # ONE bounded Chromium smoke gate for PRs that change product-runtime
-    # surfaces (frontend_changed is additive, so a mixed backend + frontend
-    # PR still runs it). Engineering-only / CI-only / backend-only PRs run
-    # zero Playwright: backend correctness is covered by the functions,
-    # rules, and integration jobs above.
-    if: >-
-      github.event_name == 'pull_request' &&
-      needs.classify.outputs.frontend_changed == 'true'
-
+    timeout-minutes: 12
+    needs: [classify]
+    if: needs.classify.outputs.functions_changed == 'true'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: npm
+      - run: npm ci
+      - run: npm ci
+        working-directory: functions
+      - name: Build Functions
+        run: npm run build
+        working-directory: functions
+      - name: Functions unit tests
+        run: npx vitest run --config vitest.config.ts
+        working-directory: functions
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Copy safe emulator env template (no cloud secrets in PR smoke)
-        # .env.example contains ONLY non-secret local emulator values
-        # (demo-anchor-os). PR smoke never depends on any cloud-secret env
-        # variable or cloud development Firebase configuration.
-        run: cp .env.example .env.development
-
-      - name: Setup Java (Firebase Emulator)
-        uses: actions/setup-java@v4
+  rules-tests:
+    name: 🔒 Rules Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: [classify]
+    if: needs.classify.outputs.rules_changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
         with:
-          distribution: 'temurin'
-          # Firebase Emulator vX requires Java 21+; use 21 to match local dev
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
           java-version: '21'
+      - run: npm install -g firebase-tools
+      - run: npm run test:rules:ci
 
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
+  integration-tests:
+    name: 🔗 Backend Integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [classify]
+    if: >-
+      needs.classify.outputs.functions_changed == 'true' ||
+      needs.classify.outputs.rules_changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm ci
+        working-directory: functions
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm install -g firebase-tools
+      - run: npm run test:integration
 
-      - name: Start Firebase emulators (local demo project only)
+  e2e-tests:
+    name: 🎭 Bounded Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [classify]
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.classify.outputs.smoke_required == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: cp .env.example .env.development
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm install -g firebase-tools
+      - name: Start local smoke emulators
         run: |
           nohup firebase emulators:start --project demo-anchor-os --only auth,firestore > emulator.log 2>&1 &
           for i in $(seq 1 60); do
@@ -358,116 +398,57 @@ jobs:
             sleep 1
           done
           curl -s -o /dev/null http://127.0.0.1:9099 || { tail -50 emulator.log; exit 1; }
-
-      - name: Seed deterministic local smoke user
-        # Seeds the known fixture identity (e2e/fixtures/test-data.ts) into the
-        # LOCAL emulators only. The script refuses non-loopback hosts and any
-        # non-demo project ID, and never prints credentials.
+      - name: Seed deterministic local smoke identity
         run: node scripts/ci/seed-release-emulator.mjs
         env:
           FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
           FIREBASE_PROJECT_ID: demo-anchor-os
-
-      - name: Install Playwright Chromium (bounded smoke only)
-        run: npx playwright install --with-deps chromium
-
-      - name: Run bounded smoke gate
-        # One bounded Chromium path (config/playwright.release-smoke.config.ts):
-        # deterministic single login (release-auth), retries 0, 20s per test,
-        # 3-minute global timeout, single browser engine, no signup heuristic,
-        # and never the legacy loginOrSignup-per-test smoke project. The full
-        # legacy suite is exercised post-deploy against staging by staging.yml.
-        run: npm run test:release-smoke
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v7
-        if: always()
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:release-smoke
+      - uses: actions/upload-artifact@v7
+        if: failure()
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: bounded-smoke-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
 
-
-  # Job 1.7: Firestore Rules Tests (security gates)
-  rules-tests:
-    name: 🔒 Rules Tests
+  # Expensive breadth belongs on the schedule, not ordinary PR/master events.
+  scheduled-quality:
+    name: 📊 Scheduled Quality
     runs-on: ubuntu-latest
-    needs: [test, classify]
-    # Surface-gated: PRs only pay the Firebase-emulator cost when the backend
-    # surface actually changed. Master pushes keep full required validation.
-    if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-      (github.event_name == 'pull_request' &&
-       needs.classify.outputs.backend_changed == 'true')
-    
+    if: github.event_name == 'schedule'
+    timeout-minutes: 30
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Setup Java (for Firebase Emulator)
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          # Firebase Emulator vX requires Java 21+; use 21 to match local dev
-          java-version: '21'
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Run Firestore rules tests
-        run: npm run test:rules
-
-
-  # Job 1.8: Integration Tests (FinanceService + emulator)
-  integration-tests:
-    name: 🔗 Integration Tests
-    runs-on: ubuntu-latest
-    needs: [test, classify]
-    # Surface-gated: PRs only pay the Firebase-emulator cost when the backend
-    # surface actually changed. Master pushes keep full required validation.
-    if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-      (github.event_name == 'pull_request' &&
-       needs.classify.outputs.backend_changed == 'true')
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install functions dependencies
-        run: npm ci
+          cache: npm
+      - run: npm ci
+      - run: npm ci
         working-directory: functions
-
-      - name: Setup Java (for Firebase Emulator)
-        uses: actions/setup-java@v4
+      - run: npm run lint
+      - run: npm run test:run
+      - run: npm run test:coverage:query-gate
+      - run: npx vitest run --config vitest.config.ts
+        working-directory: functions
+      - run: npm run test:coverage:modules
+      - name: Publish module coverage summary
+        run: |
+          if [ -f coverage/module-coverage-summary.md ]; then
+            cat coverage/module-coverage-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v7
         with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Run integration tests with emulator
-        run: npm run test:integration
-
+          name: coverage-report
+          path: |
+            coverage/coverage-summary.json
+            coverage/module-coverage-summary.json
+            coverage/module-coverage-summary.md
+          retention-days: 14
 
   # Weekly full regression (merged from weekly-health.yml). Runs only on the
   # scheduled event against staging; never part of the PR path.
