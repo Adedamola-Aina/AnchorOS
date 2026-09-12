@@ -5,9 +5,11 @@
  * Workhorse v1 — Cline PreToolUse safety hook (project-local).
  *
  * Contract: Cline invokes this executable with one JSON payload on stdin
- * (hookName: "PreToolUse", preToolUse.toolName, preToolUse.parameters,
- * workspaceRoots). We fail closed for dangerous operations and structural
- * payload errors, while allowing ordinary development work.
+ * (hookName: "PreToolUse", preToolUse.toolName | preToolUse.tool,
+ * preToolUse.parameters, workspaceRoots). We fail closed for dangerous
+ * operations and structural payload errors, while allowing ordinary
+ * development work. Both Cline shell surfaces are guarded: execute_command
+ * (parameters.command string) and run_commands (parameters.commands array).
  *
  * Output: one line of JSON on stdout. Blocked -> { cancel: true, errorMessage }.
  * Allowed -> {}. Diagnostics go to stderr only.
@@ -58,17 +60,21 @@ if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
 }
 
 const preToolUse = payload.preToolUse;
-if (
-    !preToolUse ||
-    typeof preToolUse !== 'object' ||
-    Array.isArray(preToolUse) ||
-    typeof preToolUse.toolName !== 'string' ||
-    preToolUse.toolName.length === 0
-) {
-    block('Blocked: missing or invalid preToolUse payload (a string toolName is required).');
+if (!preToolUse || typeof preToolUse !== 'object' || Array.isArray(preToolUse)) {
+    block('Blocked: missing or invalid preToolUse payload (a JSON object is required).');
 }
 
-const toolName = preToolUse.toolName;
+// Cline exposes the tool name as `toolName`; some CLI versions use `tool`.
+// Accept either (preferring toolName) so both execution surfaces are covered.
+const toolName =
+    typeof preToolUse.toolName === 'string' && preToolUse.toolName.length > 0
+        ? preToolUse.toolName
+        : typeof preToolUse.tool === 'string' && preToolUse.tool.length > 0
+          ? preToolUse.tool
+          : null;
+if (toolName === null) {
+    block('Blocked: missing or invalid preToolUse payload (a string toolName or tool is required).');
+}
 const parameters =
     preToolUse.parameters && typeof preToolUse.parameters === 'object' && !Array.isArray(preToolUse.parameters)
         ? preToolUse.parameters
@@ -303,9 +309,58 @@ function analyzeCommand(command) {
     }
 }
 
-if (toolName === 'execute_command') {
-    const command = typeof parameters.command === 'string' ? parameters.command : '';
-    if (command) {
+const SHELL_TOOLS = new Set(['execute_command', 'run_commands']);
+
+/**
+ * Collect the shell commands carried by a shell-tool payload.
+ *
+ * execute_command: a single `parameters.command` string.
+ * run_commands: `parameters.commands` as an array of command strings, with a
+ * conservative fallback to a single `parameters.command` if a CLI version
+ * supplies that form.
+ *
+ * Returns an array of command strings, or null when the payload exists but its
+ * command shape cannot be understood (the caller must fail closed).
+ */
+function collectShellCommands(name, parameters) {
+    if (name === 'run_commands') {
+        if (Array.isArray(parameters.commands)) {
+            if (parameters.commands.length === 0) {
+                return [];
+            }
+            return parameters.commands.every((entry) => typeof entry === 'string')
+                ? parameters.commands
+                : null;
+        }
+        if (parameters.commands !== undefined && parameters.commands !== null) {
+            return null;
+        }
+        if (typeof parameters.command === 'string') {
+            return [parameters.command];
+        }
+        // Neither a command array nor a string command: fail closed.
+        return null;
+    }
+
+    // execute_command: the existing single `command` string surface.
+    if (typeof parameters.command === 'string') {
+        return [parameters.command];
+    }
+    if (parameters.command === undefined || parameters.command === null) {
+        return [];
+    }
+    return null;
+}
+
+if (SHELL_TOOLS.has(toolName)) {
+    const commands = collectShellCommands(toolName, parameters);
+    if (commands === null) {
+        block('Blocked: shell tool payload has an unrecognised command shape.');
+    }
+    for (const command of commands) {
+        if (!command) {
+            continue;
+        }
         if (commandMentionsForbiddenPath(command)) {
             block('Blocked: accessing a forbidden path (.env / .env.* / e2e/.auth/**) in a shell command.');
         }
