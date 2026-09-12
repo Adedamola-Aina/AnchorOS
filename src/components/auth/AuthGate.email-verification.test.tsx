@@ -24,6 +24,10 @@ vi.mock('./AuthGateParts', () => ({
   EmailVerificationGate: () => <div data-testid="email-verification-gate">Verify your email</div>,
 }));
 
+vi.mock('./OnboardingShell', () => ({
+  OnboardingShell: () => <div data-testid="onboarding">Onboarding</div>,
+}));
+
 vi.mock('../../api/MfaRecoveryApi', () => ({
   consumeMfaRecoveryCode: vi.fn(),
 }));
@@ -37,7 +41,7 @@ vi.mock('../../config/firebase', () => ({
   auth: {},
 }));
 
-function setUser(overrides = {}) {
+function setUser(overrides = {}, authOverrides = {}) {
   mockUseAuth.mockReturnValue({
     user: { uid: 'u1', email: 'person@example.com', emailVerified: false, ...overrides },
     loading: false,
@@ -50,6 +54,7 @@ function setUser(overrides = {}) {
     logout: vi.fn(),
     sendVerificationEmail: vi.fn(),
     sendPasswordReset: vi.fn(),
+    ...authOverrides,
   });
 }
 
@@ -105,11 +110,60 @@ describe('AuthGate email-verification parity', () => {
     }
   });
 
-  it('preserves the explicit @anchor-os.com repository fixture exception', () => {
+  it('blocks an unverified @anchor-os.com fixture account in staging', () => {
+    vi.stubEnv('VITE_APP_ENV', 'staging');
+    setUser({ email: 'ci-canary@anchor-os.com', emailVerified: false });
+    renderGate();
+    expect(screen.getByTestId('email-verification-gate')).toBeInTheDocument();
+    expect(screen.queryByTestId('app-content')).not.toBeInTheDocument();
+  });
+
+  it('blocks an unverified @anchor-os.com fixture account in production', () => {
     vi.stubEnv('VITE_APP_ENV', 'production');
-    setUser({ email: 'ci-canary@anchor-os.com' });
+    setUser({ email: 'ci-canary@anchor-os.com', emailVerified: false });
+    renderGate();
+    expect(screen.getByTestId('email-verification-gate')).toBeInTheDocument();
+    expect(screen.queryByTestId('app-content')).not.toBeInTheDocument();
+  });
+
+  it('preserves verified-user behavior for @anchor-os.com fixture accounts in cloud environments', () => {
+    for (const env of ['staging', 'production']) {
+      vi.stubEnv('VITE_APP_ENV', env);
+      setUser({ email: 'ci-canary@anchor-os.com', emailVerified: true });
+      const { unmount } = renderGate();
+      expect(screen.queryByTestId('email-verification-gate')).not.toBeInTheDocument();
+      expect(screen.getByTestId('app-content')).toBeInTheDocument();
+      unmount();
+    }
+  });
+
+  it('bypasses email verification for fixture accounts only in local development', () => {
+    vi.stubEnv('VITE_APP_ENV', 'development');
+    setUser({ email: 'ci-canary@anchor-os.com', emailVerified: false });
     renderGate();
     expect(screen.queryByTestId('email-verification-gate')).not.toBeInTheDocument();
     expect(screen.getByTestId('app-content')).toBeInTheDocument();
+  });
+
+  it('keeps the fixture onboarding exception separate from email verification', async () => {
+    vi.stubEnv('VITE_APP_ENV', 'production');
+    // Fixture account skips onboarding while verified, but the onboarding
+    // exception is independent of the email-verification gate.
+    setUser(
+      { email: 'ci-canary@anchor-os.com', emailVerified: true },
+      { profileLoaded: true, profile: { theme: 'light', onboardingComplete: false } },
+    );
+    const first = renderGate();
+    expect(screen.queryByTestId('onboarding')).not.toBeInTheDocument();
+    expect(screen.getByTestId('app-content')).toBeInTheDocument();
+    first.unmount();
+
+    // A non-fixture account with the same onboarding state DOES get onboarding.
+    setUser(
+      { email: 'person@example.com', emailVerified: true },
+      { profileLoaded: true, profile: { theme: 'light', onboardingComplete: false } },
+    );
+    renderGate();
+    expect(await screen.findByTestId('onboarding')).toBeInTheDocument();
   });
 });
