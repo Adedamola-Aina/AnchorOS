@@ -321,6 +321,110 @@ for (const command of ALLOWED_COMMANDS) {
 }
 
 // ---------------------------------------------------------------------------
+// PreToolUse — Cline CLI shell surfaces (run_commands array payloads + tool key)
+// ---------------------------------------------------------------------------
+
+function shellToolResult(workspace, parameters, { toolKey = 'toolName', toolName = 'run_commands' } = {}) {
+    const payload = toolPayload(workspace, toolName, parameters);
+    if (toolKey === 'tool') {
+        delete payload.preToolUse.toolName;
+        payload.preToolUse.tool = toolName;
+    }
+    return runHook(PRETOOL_HOOK, payload, workspace);
+}
+
+const RUN_COMMANDS_BLOCKED = [
+    ['git add .'],
+    ['git status --short', 'git add .'],
+    ['git push --force'],
+    ['git switch master'],
+];
+
+for (const commands of RUN_COMMANDS_BLOCKED) {
+    test(`PreToolUse blocks run_commands: ${JSON.stringify(commands)}`, () => {
+        const repo = makeRepo();
+        try {
+            assertBlocked(shellToolResult(repo, { commands }), `run_commands ${JSON.stringify(commands)}`);
+        } finally {
+            removeRepo(repo);
+        }
+    });
+}
+
+const RUN_COMMANDS_ALLOWED = [['git status --short'], ['git diff', 'git log --oneline -5']];
+
+for (const commands of RUN_COMMANDS_ALLOWED) {
+    test(`PreToolUse allows run_commands: ${JSON.stringify(commands)}`, () => {
+        const repo = makeRepo();
+        try {
+            assertAllowed(shellToolResult(repo, { commands }), `run_commands ${JSON.stringify(commands)}`);
+        } finally {
+            removeRepo(repo);
+        }
+    });
+}
+
+test('PreToolUse run_commands honours the preToolUse.tool field', () => {
+    const repo = makeRepo();
+    try {
+        assertBlocked(
+            shellToolResult(repo, { commands: ['git add .'] }, { toolKey: 'tool' }),
+            'run_commands via tool key'
+        );
+        assertAllowed(
+            shellToolResult(repo, { commands: ['git status --short'] }, { toolKey: 'tool' }),
+            'run_commands via tool key (safe)'
+        );
+    } finally {
+        removeRepo(repo);
+    }
+});
+
+test('PreToolUse execute_command honours the preToolUse.tool field', () => {
+    const repo = makeRepo();
+    try {
+        assertBlocked(
+            shellToolResult(repo, { command: 'git add .' }, { toolKey: 'tool', toolName: 'execute_command' }),
+            'execute_command via tool key'
+        );
+        assertAllowed(
+            shellToolResult(repo, { command: 'git status --short' }, { toolKey: 'tool', toolName: 'execute_command' }),
+            'execute_command via tool key (safe)'
+        );
+    } finally {
+        removeRepo(repo);
+    }
+});
+
+test('PreToolUse run_commands supports a single parameters.command string', () => {
+    const repo = makeRepo();
+    try {
+        assertBlocked(shellToolResult(repo, { command: 'git add .' }), 'run_commands single command blocked');
+        assertAllowed(shellToolResult(repo, { command: 'git status --short' }), 'run_commands single command allowed');
+    } finally {
+        removeRepo(repo);
+    }
+});
+
+const RUN_COMMANDS_MALFORMED = [
+    { commands: 'git status --short' },
+    { commands: ['git status --short', 42] },
+    { commands: {} },
+    {},
+];
+
+for (const parameters of RUN_COMMANDS_MALFORMED) {
+    test(`PreToolUse fails closed on malformed run_commands: ${JSON.stringify(parameters)}`, () => {
+        const repo = makeRepo();
+        try {
+            assertBlocked(shellToolResult(repo, parameters), `malformed run_commands ${JSON.stringify(parameters)}`);
+        } finally {
+            removeRepo(repo);
+        }
+    });
+}
+
+// ---------------------------------------------------------------------------
 // TaskStart — accept only a linked Workhorse worktree with valid metadata
 // ---------------------------------------------------------------------------
 
