@@ -24,6 +24,13 @@ export default defineConfig({
     },
   },
   test: {
+    // Explicit ownership: the root/frontend Vitest config discovers only
+    // product tests under src/. Functions tests are owned by
+    // functions/vitest.config.ts, emulator tests by functions/vitest.emulator.config.ts
+    // and config/vitest.rules.config.ts, and E2E by config/playwright.config.ts.
+    // Without an explicit include, Vitest falls back to `**/*.{test,spec}…` and
+    // leaks functions/** into this run.
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '.stryker-tmp/**', 'tools/**', '**/*.emulator.test.ts', '**/*.emulator.ts'],
     globals: true,
     environment: 'jsdom',
