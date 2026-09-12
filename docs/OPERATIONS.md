@@ -18,6 +18,16 @@ There is **no deployable development cloud**. The former dev project is retired 
 - CI/CD uses GitHub Environment secrets: `STAGING_FRONTEND_ENV`, `STAGING_FUNCTIONS_ENV`, `PRODUCTION_FRONTEND_ENV`, `PRODUCTION_FUNCTIONS_ENV`, `FIREBASE_TOKEN`.
 - Never commit secrets. Never print env contents.
 
+## Release-smoke identity (canary accounts)
+
+Identity selection is owned by ONE module: `scripts/ci/release-identity.mjs`.
+
+- **Local / PR emulator** (`E2E_BASE_URL` unset): the bounded smoke uses the disposable repository fixture identity (`e2e/fixtures/test-data.ts`) seeded into `demo-anchor-os`.
+- **Deployed staging** (`E2E_BASE_URL` set, `E2E_SMOKE_TARGET=staging`): requires the dedicated staging canary secrets `STAGING_SMOKE_EMAIL` / `STAGING_SMOKE_PASSWORD`.
+- **Deployed production** (`E2E_SMOKE_TARGET=production`): requires `PRODUCTION_SMOKE_EMAIL` / `PRODUCTION_SMOKE_PASSWORD`.
+
+A deployed smoke **fails closed** when its canary credentials are absent; the repository fixture is never used against a cloud project. The canary accounts are ordinary AnchorOS accounts (verified email) provisioned per environment; their passwords live only in GitHub Environment secrets and are never committed or printed.
+
 ## Release pipeline (validate once, deploy that SHA)
 
 ```
