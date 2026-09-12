@@ -53,20 +53,20 @@ export async function sendReminderNotification({
         return true;
     } catch (error: unknown) {
         const err = error as { code?: string; message?: string };
+        const disposition = classifyTokenSendError(err.code);
         const removed = await removeTokenIfStale(err.code, token, tokenDocRef);
         if (!removed) {
-            // SN-08: distinguish retryable failures from configuration faults
-            // so an operator can act on the latter instead of it being
-            // silently retried forever.
-            if (classifyTokenSendError(err.code) === 'transient') {
-                logger.warn(
-                    `[Reminders] Transient send failure for ${token.substring(0, 10)}... code=${err.code ?? 'unknown'}; will retry on a later run.`,
-                );
+            // SN-08: distinguish retryable failures from configuration faults so
+            // an operator can act on the latter instead of it being silently
+            // retried forever or mistaken for a stale token.
+            const prefix =
+                `[Reminders] Failed to send to ${token.substring(0, 10)}... code=${err.code ?? 'unknown'}`;
+            if (disposition === 'transient') {
+                logger.warn(`${prefix}: transient failure; will retry on a later run.`);
+            } else if (disposition === 'configuration') {
+                logger.error(`${prefix}: configuration fault (operator action required):`, err.message);
             } else {
-                console.error(
-                    `[Reminders] Failed to send to ${token.substring(0, 10)}... code=${err.code ?? 'unknown'}:`,
-                    err.message,
-                );
+                logger.error(`${prefix}: unknown failure:`, err.message);
             }
         }
         return false;

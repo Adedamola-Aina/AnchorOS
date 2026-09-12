@@ -3,38 +3,71 @@ export interface TokenDocumentRef {
 }
 
 /**
- * FCM Admin SDK error codes that mean the *token itself* is permanently
- * invalid. These are terminal token-lifecycle states: the device
- * uninstalled/cleared the app, the registration was revoked, or the token
- * rotated to a new value. The stored token document must be deleted so
- * producers stop targeting it.
+ * FCM send-error classification for the firebase-admin version AnchorOS ships
+ * (13.10.0, see functions/package-lock.json).
  *
- * SN-08: the previous implementation only recognised two of these codes
- * (`registration-token-not-registered`, `invalid-registration-token`). Every
- * other permanent failure — notably `unregistered` (APNs) and
- * `invalid-recipient` — was retried forever on each scheduler run, so a dead
- * token stayed authoritative indefinitely and masked real delivery gaps.
+ * firebase-admin normalises FCM v1 / legacy backend errors through
+ * `MESSAGING_SERVER_TO_CLIENT_CODE` before application code observes them
+ * (node_modules/firebase-admin/lib/utils/error.js), so the live
+ * `getMessaging().send()` surface is the `messaging/<code>` form of
+ * `MessagingClientErrorCode`:
+ *
+ *   UNREGISTERED / NOT_FOUND              -> messaging/registration-token-not-registered
+ *   QUOTA_EXCEEDED / RESOURCE_EXHAUSTED   -> messaging/message-rate-exceeded
+ *   APNS_AUTH_ERROR / UNAUTHENTICATED / InvalidApnsCredential
+ *                                         -> messaging/third-party-auth-error
+ *   SENDER_ID_MISMATCH / PERMISSION_DENIED-> messaging/mismatched-credential
+ *
+ * Raw backend/legacy aliases are therefore NOT part of the live surface; they
+ * are normalised defensively below so an unexpected alias can never be
+ * mistaken for a stale token.
+ */
+
+/**
+ * Permanent-invalid token codes: the registration can never succeed again, so
+ * the stored token document is deleted (ends ownership).
  */
 export const PERMANENT_INVALID_TOKEN_ERROR_CODES = [
+    // UNREGISTERED / NOT_FOUND — device unregistered or token rotated.
     'messaging/registration-token-not-registered',
+    // Legacy invalid registration-token format. Cannot ever succeed.
     'messaging/invalid-registration-token',
-    'messaging/invalid-recipient',
-    'messaging/unregistered',
 ] as const;
 
 /**
- * FCM error codes that are transient/retryable. The token remains
- * authoritative and a later scheduler run may succeed, so the token document
- * is retained (ownership is NOT ended by a transient failure).
+ * Configuration / operator-actionable faults. The token is not at fault, so it
+ * is retained and the fault is surfaced. `messaging/third-party-auth-error` is
+ * the APNs/third-party credential failure the Admin SDK emits — an operator
+ * fix, not a retryable token condition.
+ */
+export const CONFIGURATION_ERROR_CODES = [
+    // APNs/third-party credential/authentication fault (APNS_AUTH_ERROR,
+    // UNAUTHENTICATED, InvalidApnsCredential).
+    'messaging/third-party-auth-error',
+    // Credential/project mismatch (SENDER_ID_MISMATCH, PERMISSION_DENIED).
+    'messaging/mismatched-credential',
+    'messaging/authentication-error',
+    // Message/payload construction faults — never the token's fault.
+    'messaging/invalid-argument',
+    'messaging/invalid-package-name',
+    'messaging/payload-size-limit-exceeded',
+    'messaging/invalid-payload',
+    'messaging/invalid-data-payload-key',
+    'messaging/invalid-options',
+    'messaging/too-many-topics',
+] as const;
+
+/**
+ * Transient/retryable codes. The token remains authoritative and a later
+ * scheduler run may succeed. `message-rate-exceeded` is the normalised form of
+ * both QUOTA_EXCEEDED and RESOURCE_EXHAUSTED.
  */
 export const TRANSIENT_TOKEN_ERROR_CODES = [
     'messaging/internal-error',
     'messaging/server-unavailable',
-    'messaging/quota-exceeded',
     'messaging/message-rate-exceeded',
     'messaging/device-message-rate-exceeded',
     'messaging/topics-message-rate-exceeded',
-    'messaging/third-party-auth-error',
     'messaging/unknown-error',
 ] as const;
 
@@ -45,32 +78,59 @@ export type TokenSendErrorDisposition =
     | 'unknown';
 
 const PERMANENT_INVALID = new Set<string>(PERMANENT_INVALID_TOKEN_ERROR_CODES);
+const CONFIGURATION = new Set<string>(CONFIGURATION_ERROR_CODES);
 const TRANSIENT = new Set<string>(TRANSIENT_TOKEN_ERROR_CODES);
+
+/**
+ * Legacy/raw backend aliases that firebase-admin normalises before app code
+ * sees them. Kept ONLY as a defensive map (never as the live surface) so an
+ * alias cannot be misclassified — in particular so a raw quota/unregistered
+ * alias is not treated as a new, unhandled token state.
+ */
+const RAW_BACKEND_ALIAS_TO_ADMIN_CODE: Readonly<Record<string, string>> = {
+    'messaging/unregistered': 'messaging/registration-token-not-registered',
+    'messaging/not-registered': 'messaging/registration-token-not-registered',
+    'messaging/quota-exceeded': 'messaging/message-rate-exceeded',
+    'messaging/resource-exhausted': 'messaging/message-rate-exceeded',
+    'messaging/invalid-apns-credentials': 'messaging/third-party-auth-error',
+    'messaging/apns-auth-error': 'messaging/third-party-auth-error',
+};
+
+/** Normalise a possibly-raw alias to the Admin SDK code it maps to. */
+export function normalizeTokenSendErrorCode(code?: string): string | undefined {
+    if (!code) {
+        return undefined;
+    }
+    return RAW_BACKEND_ALIAS_TO_ADMIN_CODE[code] ?? code;
+}
 
 /**
  * Classify an FCM send error into the disposition that governs whether the
  * token document may be deleted.
  *
- *  - `permanent-invalid` — the token can never succeed again: delete the
- *                          stored token document (ends ownership).
+ *  - `permanent-invalid` — delete the stored registration (ends ownership).
  *  - `transient`         — keep the token; a later run may succeed.
- *  - `configuration`     — credential/project/payload misconfiguration. The
- *                          token is not at fault, so it must NOT be deleted;
- *                          this needs operator action.
- *  - `unknown`           — unrecognised or absent code; keep the token and
- *                          surface it in logs.
+ *  - `configuration`     — credential/project/payload fault; keep the token and
+ *                          surface the fault for operator action.
+ *  - `unknown`           — unrecognised or absent code; keep the token.
  */
 export function classifyTokenSendError(code?: string): TokenSendErrorDisposition {
-    if (!code) {
+    const canonical = normalizeTokenSendErrorCode(code);
+    if (!canonical) {
         return 'unknown';
     }
-    if (PERMANENT_INVALID.has(code)) {
+    if (PERMANENT_INVALID.has(canonical)) {
         return 'permanent-invalid';
     }
-    if (TRANSIENT.has(code)) {
+    if (TRANSIENT.has(canonical)) {
         return 'transient';
     }
-    if (code.startsWith('messaging/')) {
+    if (CONFIGURATION.has(canonical)) {
+        return 'configuration';
+    }
+    // Any other Firebase Messaging namespace error is operator-actionable, never
+    // a stale token.
+    if (canonical.startsWith('messaging/')) {
         return 'configuration';
     }
     return 'unknown';
@@ -83,8 +143,8 @@ export function isStaleTokenError(code?: string): boolean {
 /**
  * Idempotently delete a token document when the send failure proves the token
  * is permanently invalid. Deleting an already-deleted document is a no-op, so
- * retries and repeated scheduler runs cannot double-apply — there is no way
- * for a stale token to be re-registered by a cleanup retry (SN-01/SN-08).
+ * retries and repeated scheduler runs cannot double-apply — a stale token
+ * cannot be re-registered by a cleanup retry (SN-01/SN-08).
  */
 export async function removeTokenIfStale(
     code: string | undefined,
