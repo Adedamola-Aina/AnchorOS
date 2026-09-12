@@ -93,19 +93,22 @@ const EMULATOR_HOST = isEmulatorDevelopment ? resolveEmulatorHost(currentBrowser
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 
+// App Check debug tokens are a LOCAL DEVELOPMENT / TEST-INFRASTRUCTURE
+// convenience only. A normal staging or production release must never depend
+// on one, so the token is honoured only in emulator development. Staging and
+// production always rely on real reCAPTCHA Enterprise attestation.
+const appCheckDebugToken = import.meta.env.VITE_APP_CHECK_DEBUG_TOKEN as string | undefined;
+if (isEmulatorDevelopment && appCheckDebugToken && typeof window !== 'undefined' && window.location.protocol !== 'capacitor:') {
+  (window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN =
+    appCheckDebugToken === 'true' ? true : appCheckDebugToken;
+}
+
 // Initialize App Check when a site key is configured — but NEVER in emulator
 // development: the emulator does not validate App Check assertions and there
 // is no real site key locally.
 // This protects Firestore/Functions from scripted abuse in web environments.
 const appCheckSiteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY as string | undefined;
 if (!isEmulatorDevelopment && appCheckSiteKey && typeof window !== 'undefined' && window.location.protocol !== 'capacitor:') {
-  const debugToken = import.meta.env.VITE_APP_CHECK_DEBUG_TOKEN as string | undefined;
-  // Allow debug token in dev and staging — never in production (VITE_APP_ENV=production)
-  if (debugToken && import.meta.env.VITE_APP_ENV !== 'production') {
-    (window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN =
-      debugToken === 'true' ? true : debugToken;
-  }
-
   try {
     initializeAppCheck(app, {
       provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),

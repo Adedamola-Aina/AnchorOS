@@ -101,7 +101,8 @@ export const DataManagement: React.FC<DataManagementProps> = ({
                     </div>
                 </div>
 
-                {import.meta.env.MODE !== 'production' && (
+                {/* Destructive reset control — local development only; never staging/production */}
+                {import.meta.env.VITE_APP_ENV === 'development' && (
                     <div className="border-t border-slate-100 dark:border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-6">
                         <div>
                             <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Wipe All Data (Dev Only)</p>

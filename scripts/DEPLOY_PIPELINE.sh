@@ -174,9 +174,24 @@ if [[ "$ENV" == "staging" || "$ENV" == "production" ]]; then
         exit 1
     fi
 
-    FUNCTIONS_ENV_FILE="functions/.env.${ENV}"
+    # Single source of truth: firebase-tools loads functions/.env.<projectId>
+    # for a `--project <projectId>` deploy (lib/functions/env.js findEnvfiles).
+    # The guard MUST validate that exact file, never an alias-style file the CLI
+    # does not consume. scripts/ci/functions-env-file.js owns the mapping.
+    FUNCTIONS_ENV_FILE="$(node scripts/ci/functions-env-file.js --env "$ENV")"
     if [[ ! -f "$FUNCTIONS_ENV_FILE" ]]; then
         echo -e "${RED}❌ Missing ${FUNCTIONS_ENV_FILE}. Deployment blocked.${NC}"
+        exit 1
+    fi
+
+    # firebase-tools refuses to deploy when both .env.<projectId> and
+    # .env.<alias> exist. Fail closed on a stale alias file so the file the
+    # guard validates is unambiguously the file Firebase consumes.
+    LEGACY_FUNCTIONS_ENV_FILE="functions/.env.${ENV}"
+    if [[ -f "$LEGACY_FUNCTIONS_ENV_FILE" ]]; then
+        echo -e "${RED}❌ Conflicting legacy Functions env file ${LEGACY_FUNCTIONS_ENV_FILE}.${NC}"
+        echo -e "${RED}   firebase-tools cannot load both .env.<projectId> and .env.<alias>.${NC}"
+        echo -e "${RED}   Remove ${LEGACY_FUNCTIONS_ENV_FILE}; use ${FUNCTIONS_ENV_FILE}.${NC}"
         exit 1
     fi
 

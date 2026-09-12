@@ -83,6 +83,7 @@ import SettingsView from './SettingsView';
 describe('SettingsView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it('renders all major settings sections', () => {
@@ -121,9 +122,19 @@ describe('SettingsView', () => {
     expect(mockLogout).toHaveBeenCalledOnce();
   });
 
-  it('renders developer tools in non-production env', () => {
+  it('renders developer tools in local development only', () => {
+    vi.stubEnv('VITE_APP_ENV', 'development');
     render(<SettingsView />);
     expect(screen.getByTestId('dev-tools')).toBeInTheDocument();
+  });
+
+  it('never renders developer tools in staging or production', () => {
+    for (const env of ['staging', 'production']) {
+      vi.stubEnv('VITE_APP_ENV', env);
+      const { unmount } = render(<SettingsView />);
+      expect(screen.queryByTestId('dev-tools')).not.toBeInTheDocument();
+      unmount();
+    }
   });
 
   it('wraps content in FeatureErrorBoundary', () => {

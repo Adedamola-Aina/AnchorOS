@@ -132,11 +132,14 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
             }} />
     );
 
-    // Gates
+    // Gates — email verification is bypassed ONLY in local emulator
+    // development. Staging and production enforce the identical gate.
+    // The @anchor-os.com fixture accounts are an explicit repository test
+    // exception used by seeded release-smoke identities.
     const env = import.meta.env.VITE_APP_ENV;
-    const isDevOrStaging = env === 'development' || env === 'staging';
+    const isLocalDevelopment = env === 'development';
     const isTestUser = user.email === 'test@anchor-os.com' || user.email?.endsWith('@anchor-os.com');
-    if (!user.emailVerified && !isDevOrStaging && !isTestUser) return <EmailVerificationGate email={user.email!} onResend={async () => { await sendVerificationEmail(); showToast('Verification email sent!', 'success'); }} onRefresh={() => window.location.reload()} onLogout={logout} />;
+    if (!user.emailVerified && !isLocalDevelopment && !isTestUser) return <EmailVerificationGate email={user.email!} onResend={async () => { await sendVerificationEmail(); showToast('Verification email sent!', 'success'); }} onRefresh={() => window.location.reload()} onLogout={logout} />;
 
     const showOnboarding = !isTestUser && profileLoaded && profile.onboardingComplete === false;
     if (showOnboarding) return (

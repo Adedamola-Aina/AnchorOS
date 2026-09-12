@@ -105,7 +105,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     if (!actualMfaEnrolled && data.mfaEnabled) { await updateUserProfile(u.uid, { mfaEnabled: false }); return; }
                     setProfile(data);
                     const alerts: string[] = [];
-                    if (!u.emailVerified && import.meta.env.VITE_APP_ENV === 'production') alerts.push('verify_email');
+                    // Staging and production share email-verification semantics;
+                    // only local emulator development omits the nudge.
+                    if (!u.emailVerified && import.meta.env.VITE_APP_ENV !== 'development') alerts.push('verify_email');
                     if (!actualMfaEnrolled) alerts.push('enable_2fa');
                     const securitySeen = data.onboardingProgress?.securityStepSeen === true;
                     setAccountNotifications(securitySeen ? [] : alerts);
