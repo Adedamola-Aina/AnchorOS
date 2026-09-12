@@ -1,7 +1,7 @@
 import { logger } from 'firebase-functions';
 import { type DocumentReference } from 'firebase-admin/firestore';
 import { getMessaging, type Message } from 'firebase-admin/messaging';
-import { removeTokenIfStale } from './reminderTokenCleanup';
+import { classifyTokenSendError, removeTokenIfStale } from './reminderTokenCleanup';
 
 interface SendReminderParams {
     token: string;
@@ -53,9 +53,21 @@ export async function sendReminderNotification({
         return true;
     } catch (error: unknown) {
         const err = error as { code?: string; message?: string };
+        const disposition = classifyTokenSendError(err.code);
         const removed = await removeTokenIfStale(err.code, token, tokenDocRef);
         if (!removed) {
-            console.error(`[Reminders] Failed to send to ${token.substring(0, 10)}...:`, err.message);
+            // SN-08: distinguish retryable failures from configuration faults so
+            // an operator can act on the latter instead of it being silently
+            // retried forever or mistaken for a stale token.
+            const prefix =
+                `[Reminders] Failed to send to ${token.substring(0, 10)}... code=${err.code ?? 'unknown'}`;
+            if (disposition === 'transient') {
+                logger.warn(`${prefix}: transient failure; will retry on a later run.`);
+            } else if (disposition === 'configuration') {
+                logger.error(`${prefix}: configuration fault (operator action required):`, err.message);
+            } else {
+                logger.error(`${prefix}: unknown failure:`, err.message);
+            }
         }
         return false;
     }

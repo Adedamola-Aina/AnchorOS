@@ -66,6 +66,9 @@ export const NODE_EXCLUDE = [
   'src/config/firebase.test.ts',
   'src/services/fabric/SubscriptionDetector.test.ts',
   'src/services/fcmTokenService.test.ts',
+  // Push-token lifecycle covers the per-account localStorage flag + the
+  // persisted device registration, so it needs the browser storage API.
+  'src/services/pushTokenLifecycle.test.ts',
   'src/utils/__tests__/nativeBehavior.test.ts',
   'src/utils/accountExport.test.ts',
   'src/utils/csvExport.test.ts',

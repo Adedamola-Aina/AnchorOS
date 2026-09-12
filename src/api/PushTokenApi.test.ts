@@ -27,8 +27,8 @@ describe('PushTokenApi', () => {
     setDoc.mockResolvedValue(undefined);
   });
 
-  describe('deleteStoredPushToken', () => {
-    it('calls deleteDoc on the fcmTokens document', async () => {
+  describe('deleteStoredPushToken (per-registration revocation)', () => {
+    it('calls deleteDoc on the single fcmTokens document for that token', async () => {
       await deleteStoredPushToken('user-1', 'token-abc');
 
       expect(doc).toHaveBeenCalledWith(
@@ -36,6 +36,17 @@ describe('PushTokenApi', () => {
         'artifacts', 'test-app-id', 'users', 'user-1', 'fcmTokens', 'token-abc',
       );
       expect(deleteDoc).toHaveBeenCalledTimes(1);
+    });
+
+    it('never deletes an otherwise unspecified token for the account', async () => {
+      await deleteStoredPushToken('user-1', 'token-abc');
+
+      // The token document id is the registration token, so a different device's
+      // token document is never referenced.
+      expect(doc).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'artifacts', 'test-app-id', 'users', 'user-1', 'fcmTokens', 'other-device-token',
+      );
     });
   });
 
