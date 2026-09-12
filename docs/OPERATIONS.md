@@ -17,6 +17,7 @@ There is **no deployable development cloud**. The former dev project is retired 
 - Only `.env.example` is tracked. Real `.env*` files are git-ignored local overrides.
 - CI/CD uses GitHub Environment secrets: `STAGING_FRONTEND_ENV`, `STAGING_FUNCTIONS_ENV`, `PRODUCTION_FRONTEND_ENV`, `PRODUCTION_FUNCTIONS_ENV`, `FIREBASE_TOKEN`.
 - Never commit secrets. Never print env contents.
+- Functions env files follow the firebase-tools convention: the CLI loads `functions/.env`, then `functions/.env.<projectId>` (and `.env.<alias>`, which cannot coexist with the project-ID file). AnchorOS deploys with `--project <projectId>`, so `scripts/ci/functions-env-file.js` is the single source of truth for the Functions env path, and the deploy guard validates exactly that file.
 
 ## Release-smoke identity (canary accounts)
 

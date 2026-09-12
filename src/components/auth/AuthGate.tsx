@@ -132,13 +132,18 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
             }} />
     );
 
-    // Gates
+    // Gates — email verification is bypassed ONLY in local emulator
+    // development. Staging and production enforce the identical gate; no
+    // email-domain exemption applies to cloud authentication.
     const env = import.meta.env.VITE_APP_ENV;
-    const isDevOrStaging = env === 'development' || env === 'staging';
-    const isTestUser = user.email === 'test@anchor-os.com' || user.email?.endsWith('@anchor-os.com');
-    if (!user.emailVerified && !isDevOrStaging && !isTestUser) return <EmailVerificationGate email={user.email!} onResend={async () => { await sendVerificationEmail(); showToast('Verification email sent!', 'success'); }} onRefresh={() => window.location.reload()} onLogout={logout} />;
+    const isLocalDevelopment = env === 'development';
+    if (!user.emailVerified && !isLocalDevelopment) return <EmailVerificationGate email={user.email!} onResend={async () => { await sendVerificationEmail(); showToast('Verification email sent!', 'success'); }} onRefresh={() => window.location.reload()} onLogout={logout} />;
 
-    const showOnboarding = !isTestUser && profileLoaded && profile.onboardingComplete === false;
+    // Repository fixture accounts (@anchor-os.com) skip the onboarding wizard
+    // in automated journeys. This is an ONBOARDING-only exception, kept
+    // separate from — and never weakening — email verification.
+    const isFixtureAccount = user.email === 'test@anchor-os.com' || user.email?.endsWith('@anchor-os.com');
+    const showOnboarding = !isFixtureAccount && profileLoaded && profile.onboardingComplete === false;
     if (showOnboarding) return (
         <React.Suspense fallback={<AuthLoadingScreen />}>
             <LazyOnboardingShell />

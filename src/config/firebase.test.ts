@@ -195,11 +195,11 @@ describe('firebase config module', () => {
         expect(mockState.ReCaptchaEnterpriseProvider).not.toHaveBeenCalled();
     });
 
-    it('initializes App Check and writes debug token when site key is provided (staging-like non-emulator env)', async () => {
+    it('initializes App Check but never writes a debug token in staging', async () => {
         setBaseEnv({
             VITE_FIREBASE_APP_CHECK_SITE_KEY: 'site-key',
             VITE_APP_CHECK_DEBUG_TOKEN: 'true',
-            DEV: 'true',
+            DEV: 'false',
             VITE_APP_ENV: 'staging',
         });
 
@@ -216,10 +216,10 @@ describe('firebase config module', () => {
                 isTokenAutoRefreshEnabled: true,
             },
         );
-        expect(tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN).toBe(true);
+        expect(tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN).toBeUndefined();
     });
 
-    it('activates debug token in staging builds (DEV=false, APP_ENV=staging)', async () => {
+    it('never activates a debug token in staging builds (DEV=false, APP_ENV=staging)', async () => {
         setBaseEnv({
             VITE_FIREBASE_APP_CHECK_SITE_KEY: 'site-key',
             VITE_APP_CHECK_DEBUG_TOKEN: 'my-staging-token',
@@ -232,8 +232,26 @@ describe('firebase config module', () => {
 
         await import('./firebase');
 
-        expect(tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN).toBe('my-staging-token');
+        expect(tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN).toBeUndefined();
         expect(mockState.initializeAppCheck).toHaveBeenCalled();
+    });
+
+    it('honours a debug token only in emulator development (local/test infrastructure)', async () => {
+        setBaseEnv({
+            VITE_FIREBASE_APP_CHECK_SITE_KEY: 'site-key',
+            VITE_APP_CHECK_DEBUG_TOKEN: 'local-dev-token',
+            DEV: 'true',
+            VITE_APP_ENV: 'development',
+        });
+
+        const tokenWindow = window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean };
+        delete tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN;
+
+        await import('./firebase');
+
+        expect(tokenWindow.FIREBASE_APPCHECK_DEBUG_TOKEN).toBe('local-dev-token');
+        // App Check itself stays disabled in emulator development.
+        expect(mockState.initializeAppCheck).not.toHaveBeenCalled();
     });
 
     it('suppresses debug token in production builds', async () => {

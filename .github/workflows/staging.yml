@@ -270,7 +270,7 @@ jobs:
       - name: Write staging env config
         run: |
           printf '%s\n' "$STAGING_FRONTEND_ENV" > .env.staging
-          printf '%s\n' "$STAGING_FUNCTIONS_ENV" > functions/.env.staging
+          printf '%s\n' "$STAGING_FUNCTIONS_ENV" > "$(node scripts/ci/functions-env-file.js --env staging)"
         env:
           STAGING_FRONTEND_ENV: ${{ secrets.STAGING_FRONTEND_ENV }}
           STAGING_FUNCTIONS_ENV: ${{ secrets.STAGING_FUNCTIONS_ENV }}
@@ -312,7 +312,7 @@ jobs:
       - name: Write BOTH staging env configs (app + Functions)
         run: |
           printf '%s\n' "$STAGING_FRONTEND_ENV" > .env.staging
-          printf '%s\n' "$STAGING_FUNCTIONS_ENV" > functions/.env.staging
+          printf '%s\n' "$STAGING_FUNCTIONS_ENV" > "$(node scripts/ci/functions-env-file.js --env staging)"
         env:
           STAGING_FRONTEND_ENV: ${{ secrets.STAGING_FRONTEND_ENV }}
           STAGING_FUNCTIONS_ENV: ${{ secrets.STAGING_FUNCTIONS_ENV }}

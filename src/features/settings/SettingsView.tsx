@@ -192,8 +192,8 @@ const SettingsView = () => {
           <SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} />
         </div>
 
-        {/* Advanced */}
-        {import.meta.env.VITE_APP_ENV !== 'production' && (
+        {/* Advanced — local development only; never rendered in staging or production */}
+        {import.meta.env.VITE_APP_ENV === 'development' && (
           <>
             <SettingsSectionHeader label="Advanced" />
             <DeveloperTools userUid={user?.uid || ''} />

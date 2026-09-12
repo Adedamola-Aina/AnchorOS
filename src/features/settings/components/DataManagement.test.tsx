@@ -37,6 +37,7 @@ describe('DataManagement', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
     URL.createObjectURL = vi.fn(() => 'blob:test');
     URL.revokeObjectURL = vi.fn();
   });
@@ -47,9 +48,19 @@ describe('DataManagement', () => {
     expect(screen.getByRole('button', { name: /csv/i })).toBeInTheDocument();
   });
 
-  it('shows wipe data in non-production', () => {
+  it('shows the destructive wipe control in local development only', () => {
+    vi.stubEnv('VITE_APP_ENV', 'development');
     render(<DataManagement {...defaultProps} />);
     expect(screen.getByText('Wipe All Data (Dev Only)')).toBeInTheDocument();
+  });
+
+  it('never shows the destructive wipe control in staging or production', () => {
+    for (const env of ['staging', 'production']) {
+      vi.stubEnv('VITE_APP_ENV', env);
+      const { unmount } = render(<DataManagement {...defaultProps} />);
+      expect(screen.queryByText('Wipe All Data (Dev Only)')).not.toBeInTheDocument();
+      unmount();
+    }
   });
 
   it('renders data management heading', () => {
@@ -95,6 +106,7 @@ describe('DataManagement', () => {
   });
 
   it('calls onWipeData when wipe button clicked', async () => {
+    vi.stubEnv('VITE_APP_ENV', 'development');
     render(<DataManagement {...defaultProps} />);
     fireEvent.click(screen.getByRole('button', { name: /wipe data/i }));
     expect(defaultProps.onWipeData).toHaveBeenCalled();

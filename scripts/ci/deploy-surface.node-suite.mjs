@@ -660,14 +660,14 @@ test('B1 mutation job writes BOTH env files before the first deploy invocation',
     const stagingB1 = STAGING_WORKFLOW.slice(STAGING_WORKFLOW.indexOf('  deploy-b1:'));
     const rulesIdx = stagingB1.indexOf('--surfaces=rules');
     assert.ok(stagingB1.indexOf('> .env.staging') !== -1, 'app env file must be written');
-    const fnEnvIdx = stagingB1.indexOf('functions/.env.staging');
-    assert.ok(fnEnvIdx !== -1, 'functions env file must be written');
+    const fnEnvIdx = stagingB1.indexOf('node scripts/ci/functions-env-file.js --env staging');
+    assert.ok(fnEnvIdx !== -1, 'functions env file must be written from the shared resolver');
     assert.ok(stagingB1.indexOf('> .env.staging') < rulesIdx && fnEnvIdx < rulesIdx, 'env files must precede deployment');
     const productionB1 = PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('  deploy-b1:'));
     const pRulesIdx = productionB1.indexOf('--surfaces=rules');
     assert.ok(productionB1.indexOf('> .env.production') !== -1, 'app env file must be written');
-    const pFnEnvIdx = productionB1.indexOf('functions/.env.production');
-    assert.ok(pFnEnvIdx !== -1, 'functions env file must be written');
+    const pFnEnvIdx = productionB1.indexOf('node scripts/ci/functions-env-file.js --env production');
+    assert.ok(pFnEnvIdx !== -1, 'functions env file must be written from the shared resolver');
     assert.ok(productionB1.indexOf('> .env.production') < pRulesIdx && pFnEnvIdx < pRulesIdx, 'env files must precede deployment');
 });
 
