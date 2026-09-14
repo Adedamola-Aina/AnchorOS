@@ -4,7 +4,7 @@
  * Layout: X/... header → Card → Balance strip → Monthly chart → Transaction history.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import type { AnchorAccount, AnchorTransaction } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
@@ -62,7 +62,15 @@ export const AccountDetailsView = ({
   const [isUploadingArtwork, setIsUploadingArtwork] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [renameName, setRenameName] = useState('');
+  // Name captured when the rename UI was opened. The unchanged-name check compares
+  // against this, not the live account.name: AccountService.renameAccount commits the
+  // account name before completing all transaction-update batches, so a partial
+  // failure can leave the account snapshot already showing the submitted name. Comparing
+  // against the live name would then reject the retry as "No changes to save" and leave
+  // the transaction updates incomplete. The retry reuses the existing service path.
+  const [renameOriginalName, setRenameOriginalName] = useState('');
   const [isRenaming, setIsRenaming] = useState(false);
+  const optionsButtonRef = useRef<HTMLButtonElement | null>(null);
   const { syncNow, isSyncing } = useBankConnection();
 
   const isOwner = !account.ownerId || account.ownerId === user?.uid;
@@ -118,8 +126,17 @@ export const AccountDetailsView = ({
 
   const openRename = useCallback(() => {
     setRenameName(account.name);
+    setRenameOriginalName(account.name);
     setIsRenameOpen(true);
   }, [account.name]);
+
+  const closeRename = useCallback(() => {
+    if (isRenaming) return;
+    setIsRenameOpen(false);
+    // The action-sheet trigger that opened this flow unmounts, so the shared Modal
+    // cannot restore focus itself. Return focus to the mounted options button.
+    optionsButtonRef.current?.focus();
+  }, [isRenaming]);
 
   const handleRenameSubmit = async () => {
     if (!isOwner) { showToast('Only the account owner can rename this account', 'error'); return; }
@@ -127,12 +144,13 @@ export const AccountDetailsView = ({
     const trimmed = renameName.trim();
     const normalize = (value: string) => value.trim().replace(/\s+/g, ' ');
     if (!trimmed) { showToast('Account name cannot be empty', 'error'); return; }
-    if (normalize(trimmed) === normalize(account.name)) { showToast('No changes to save', 'info'); return; }
+    if (normalize(trimmed) === normalize(renameOriginalName)) { showToast('No changes to save', 'info'); return; }
     setIsRenaming(true);
     try {
       await renameAccount(account.id, trimmed);
       showToast(`Account renamed to "${trimmed}"`, 'success');
       setIsRenameOpen(false);
+      optionsButtonRef.current?.focus();
     } catch (err) {
       captureError(err, 'AccountDetails.renameAccount');
       showToast('Unable to rename account right now', 'error');
@@ -157,7 +175,7 @@ export const AccountDetailsView = ({
         {isOwner && <NotificationBanner accountId={account.id} />}
         {isSharedAccount && <FamilyNotificationBanner accountId={account.id} />}
 
-        <AccountDetailHeader accountName={account.name} onBack={onBack} onOpenOptions={() => setIsActionsOpen(true)} />
+        <AccountDetailHeader accountName={account.name} onBack={onBack} onOpenOptions={() => setIsActionsOpen(true)} optionsButtonRef={optionsButtonRef} />
 
         <div className="px-1">
           <AccountCard account={account} index={0} totalCards={1} mode="expanded" isActive={false} onTap={() => {}} skipViewTransition />
@@ -207,7 +225,7 @@ export const AccountDetailsView = ({
       <Modal isOpen={isArtworkPickerOpen} onClose={() => setIsArtworkPickerOpen(false)} title="Choose Card Artwork" maxWidth="max-w-md">
         <CardArtworkPicker currentPreset={account.cardArtworkPreset} cardColor={account.cardColor || '#3D52D5'} onSelect={handleArtworkSelect} onUploadCustom={handleArtworkUpload} onClose={() => setIsArtworkPickerOpen(false)} isUploading={isUploadingArtwork} />
       </Modal>
-      <Modal isOpen={isRenameOpen} onClose={() => { if (!isRenaming) setIsRenameOpen(false); }} title="Rename Account" maxWidth="max-w-md">
+      <Modal isOpen={isRenameOpen} onClose={closeRename} title="Rename Account" maxWidth="max-w-md">
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void handleRenameSubmit(); }}>
           <div className="space-y-2">
             <label htmlFor="rename-account-input" className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Account name</label>
@@ -224,7 +242,7 @@ export const AccountDetailsView = ({
           <div className="flex gap-3 pt-2">
             <button
               type="button"
-              onClick={() => setIsRenameOpen(false)}
+              onClick={closeRename}
               disabled={isRenaming}
               className="flex-1 min-h-[44px] rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm transition hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
