@@ -138,16 +138,16 @@ export class AccountService {
                 chunks.push(txDocs.slice(i, i + BATCH_CHUNK_SIZE));
             }
 
-            const firstBatch = writeBatch(this.firestore);
-            firstBatch.update(accRef, { name: newName, nameHistory: [...currentHistory, historyEntry] });
-            if (chunks.length > 0) {
-                chunks[0].forEach(d => firstBatch.update(d.ref, { accountName: newName }));
-            }
-            await firstBatch.commit();
-
-            for (let i = 1; i < chunks.length; i++) {
+            // Recovery-safe ordering (FEAT-142): update ALL denormalized transaction
+            // names first and commit the account document (name + history) LAST.
+            // A failure in any transaction batch therefore leaves the account with its
+            // original name, so the rename can be retried (same path) with the submitted
+            // name or any other name, remains recoverable across reloads, never appends
+            // a duplicate/self-referential history entry, and never reports success
+            // while required updates are incomplete.
+            for (const chunk of chunks) {
                 const batch = writeBatch(this.firestore);
-                chunks[i].forEach(d => batch.update(d.ref, { accountName: newName }));
+                chunk.forEach(d => batch.update(d.ref, { accountName: newName }));
                 await batch.commit();
             }
 
@@ -166,6 +166,12 @@ export class AccountService {
                     }
                 }
             }
+
+            // Final commit: account name + rename history, only after every required
+            // transaction update above has succeeded.
+            const accountBatch = writeBatch(this.firestore);
+            accountBatch.update(accRef, { name: newName, nameHistory: [...currentHistory, historyEntry] });
+            await accountBatch.commit();
 
             // AUDIT: Log account rename
             auditFinance.accountRenamed(account.id, account.name, newName);

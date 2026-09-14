@@ -62,13 +62,11 @@ export const AccountDetailsView = ({
   const [isUploadingArtwork, setIsUploadingArtwork] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [renameName, setRenameName] = useState('');
-  // Name captured when the rename UI was opened. The unchanged-name check compares
-  // against this, not the live account.name: AccountService.renameAccount commits the
-  // account name before completing all transaction-update batches, so a partial
-  // failure can leave the account snapshot already showing the submitted name. Comparing
-  // against the live name would then reject the retry as "No changes to save" and leave
-  // the transaction updates incomplete. The retry reuses the existing service path.
-  const [renameOriginalName, setRenameOriginalName] = useState('');
+  // The unchanged-name check compares against the live account.name. That is safe:
+  // AccountService.renameAccount commits the account document (name + history) LAST,
+  // after all transaction-update batches, so a partial failure never changes the
+  // account snapshot and retrying any name (including the original) always goes
+  // through the service path.
   const [isRenaming, setIsRenaming] = useState(false);
   const optionsButtonRef = useRef<HTMLButtonElement | null>(null);
   const { syncNow, isSyncing } = useBankConnection();
@@ -126,7 +124,6 @@ export const AccountDetailsView = ({
 
   const openRename = useCallback(() => {
     setRenameName(account.name);
-    setRenameOriginalName(account.name);
     setIsRenameOpen(true);
   }, [account.name]);
 
@@ -144,7 +141,7 @@ export const AccountDetailsView = ({
     const trimmed = renameName.trim();
     const normalize = (value: string) => value.trim().replace(/\s+/g, ' ');
     if (!trimmed) { showToast('Account name cannot be empty', 'error'); return; }
-    if (normalize(trimmed) === normalize(renameOriginalName)) { showToast('No changes to save', 'info'); return; }
+    if (normalize(trimmed) === normalize(account.name)) { showToast('No changes to save', 'info'); return; }
     setIsRenaming(true);
     try {
       await renameAccount(account.id, trimmed);

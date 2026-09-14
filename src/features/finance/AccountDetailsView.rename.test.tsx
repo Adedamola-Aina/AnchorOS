@@ -1,20 +1,23 @@
-// @ts-nocheck
-
 /**
  * AccountDetailsView rename regression tests (Issue #142 follow-up).
  *
  * These tests deliberately use the REAL shared Modal (no vi.mock) so keyboard
  * handling (Escape, Tab focus trap, disabled exclusion, focus restore) is
- * exercised against the same component the app renders. The partial-failure
- * sequence is injected deterministically: the account prop is updated while the
- * rename promise is pending (simulating the accounts onSnapshot listener
- * delivering the account-document batch) and the operation then rejects
- * (simulating a later transaction-batch failure).
+ * exercised against the same component the app renders.
+ *
+ * Recovery semantics are guaranteed by AccountService.renameAccount, which
+ * commits the account document (name + history) LAST, after every
+ * transaction-update batch. A partial failure therefore never changes the
+ * account snapshot, so retrying the submitted name — or choosing any other
+ * name, including the original — always re-runs the service path. The UI
+ * tests here assert the contract: failure keeps the modal open with the
+ * entered text and never reports success; retry reuses the same service call.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ComponentProps } from 'react';
 import { AccountDetailsView } from './AccountDetailsView';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppContext } from '../../context/AnchorContext';
@@ -22,6 +25,12 @@ import { FinanceContext } from '../../context/FinanceContext';
 import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import type { AnchorAccount, AnchorTransaction, UserProfile } from '../../types';
+
+type FinanceValue = NonNullable<ComponentProps<typeof FinanceContext.Provider>['value']>;
+type AppValue = NonNullable<ComponentProps<typeof AppContext.Provider>['value']>;
+type AuthValue = NonNullable<ComponentProps<typeof AuthContext.Provider>['value']>;
+type NotificationValue = NonNullable<ComponentProps<typeof NotificationContext.Provider>['value']>;
+type RenameFn = FinanceValue['renameAccount'];
 
 const mockAccount: AnchorAccount = {
     id: 'acc-1',
@@ -54,64 +63,91 @@ const mockProfile: UserProfile = {
     theme: 'light',
 };
 
+const noopAsync = (): Promise<void> => Promise.resolve();
+
 interface Harness {
-    renameAccount: ReturnType<typeof vi.fn>;
-    showToast: ReturnType<typeof vi.fn>;
-    rerenderWith: (account: AnchorAccount) => void;
+    renameAccount: ReturnType<typeof vi.fn<RenameFn>>;
+    showToast: ReturnType<typeof vi.fn<NotificationValue['showToast']>>;
 }
 
-const renderView = (account: AnchorAccount = mockAccount, overrides: { renameAccount?: ReturnType<typeof vi.fn> } = {}): Harness => {
-    const renameAccount = overrides.renameAccount ?? vi.fn().mockResolvedValue(undefined);
-    const showToast = vi.fn();
-    const finance = {
+const renderView = (account: AnchorAccount = mockAccount, overrides: { renameAccount?: RenameFn } = {}): Harness => {
+    const renameAccount = vi.fn<RenameFn>(overrides.renameAccount ?? ((): Promise<void> => Promise.resolve()));
+    const showToast = vi.fn<NotificationValue['showToast']>();
+    const finance: FinanceValue = {
         transactions: mockTransactions,
         accounts: [account],
-        addAccount: vi.fn(),
-        deleteAccount: vi.fn(),
-        addTransaction: vi.fn(),
-        deleteTransaction: vi.fn(),
-        updateAccountPersonalization: vi.fn(),
+        loadingFinance: false,
+        addAccount: noopAsync,
+        deleteAccount: noopAsync,
+        updateAccountPersonalization: noopAsync,
+        addTransaction: noopAsync,
+        deleteTransaction: noopAsync,
+        restoreTransaction: noopAsync,
+        convertCurrency: noopAsync,
         renameAccount,
-        shareAccount: vi.fn(),
+        updateTransaction: noopAsync,
         currentMonth: new Date(),
         nextMonth: vi.fn(),
         prevMonth: vi.fn(),
         jumpToMonth: vi.fn(),
-        loadingFinance: false,
+        netWorth: { NGN: 0, USD: 0 },
+        recentActivity: [],
+        cashFlow: { income: 0, expense: 0, net: 0, trend: 'neutral' },
+        refetch: noopAsync,
     };
-    const app = { navigateTo: vi.fn(), activeTab: 'finance' };
-    const auth = { user: { uid: 'test-user' }, profile: mockProfile };
-    const notifications = { showToast, confirm: vi.fn().mockResolvedValue(true) };
+    const app: AppValue = { navigateTo: vi.fn(), activeTab: 'finance' };
+    const auth: AuthValue = {
+        user: null,
+        profile: mockProfile,
+        loading: false,
+        profileLoaded: true,
+        updateProfile: noopAsync,
+        signIn: noopAsync,
+        signUp: noopAsync,
+        signInWithGoogle: () => Promise.resolve(null),
+        signInWithApple: () => Promise.resolve(null),
+        logout: noopAsync,
+        sendVerificationEmail: noopAsync,
+        accountNotifications: [],
+        verifyMfa: noopAsync,
+        generateMfaSecret: () => Promise.resolve({ qrCodeUrl: '', manualKey: '' }),
+        enrollMfa: noopAsync,
+        unenrollMfa: noopAsync,
+        reauthenticate: noopAsync,
+        reauthenticateWithProvider: noopAsync,
+        sendPasswordReset: noopAsync,
+    };
+    const notifications: NotificationValue = {
+        showToast,
+        confirm: () => Promise.resolve(true),
+        requestPushPermission: () => Promise.resolve(null),
+        fcmToken: null,
+        pushPermissionStatus: 'default',
+    };
 
-    const wrap = (acc: AnchorAccount) => (
+    render(
         <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
             <AuthContext.Provider value={auth}>
                 <AppContext.Provider value={app}>
                     <FinanceContext.Provider value={finance}>
                         <NotificationContext.Provider value={notifications}>
-                            <AccountDetailsView account={acc} onBack={vi.fn()} />
+                            <AccountDetailsView account={account} onBack={vi.fn()} />
                         </NotificationContext.Provider>
                     </FinanceContext.Provider>
                 </AppContext.Provider>
             </AuthContext.Provider>
         </QueryClientProvider>
     );
-
-    const view = render(wrap(account));
-    return {
-        renameAccount,
-        showToast,
-        rerenderWith: (acc: AnchorAccount) => view.rerender(wrap(acc)),
-    };
+    return { renameAccount, showToast };
 };
 
-const openRenameModal = async (user) => {
+const openRenameModal = async (user: ReturnType<typeof userEvent.setup>) => {
     await user.click(screen.getByLabelText('Account options'));
     await user.click(screen.getByText('Edit Account'));
     return screen.getByRole('dialog');
 };
 
-describe('AccountDetailsView rename — partial failure recovery', () => {
+describe('AccountDetailsView rename — failure recovery', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, value: 600 });
@@ -119,11 +155,13 @@ describe('AccountDetailsView rename — partial failure recovery', () => {
         Object.defineProperty(HTMLElement.prototype, 'scrollHeight', { configurable: true, value: 600 });
     });
 
-    it('partial snapshot success + later batch failure does not block retry', async () => {
-        let rejectFirst: (reason?: unknown) => void = () => {};
-        const renameAccount = vi.fn()
-            .mockImplementationOnce(() => new Promise<void>((_, reject) => { rejectFirst = reject; }))
-            .mockResolvedValueOnce(undefined);
+    it('a failed rename never reports success and the same name can be retried', async () => {
+        // First attempt rejects (e.g. a transaction batch failed); because the
+        // service commits the account document last, the live snapshot still
+        // shows the original name, so this UI must allow the retry.
+        const renameAccount = vi.fn<RenameFn>()
+            .mockImplementationOnce(() => Promise.reject(new Error('batch failed')))
+            .mockImplementation((): Promise<void> => Promise.resolve());
         const harness = renderView(mockAccount, { renameAccount });
         const user = userEvent.setup();
         await openRenameModal(user);
@@ -133,34 +171,44 @@ describe('AccountDetailsView rename — partial failure recovery', () => {
         await user.type(input, 'Main Checking');
         await user.click(screen.getByRole('button', { name: 'Save' }));
 
-        // While pending, the accounts onSnapshot listener delivers the applied
-        // account-document batch (AccountService commits the name before the
-        // transaction batches).
-        await waitFor(() => expect(renameAccount).toHaveBeenCalledTimes(1));
-        harness.rerenderWith({ ...mockAccount, name: 'Main Checking' });
-
-        // A later transaction batch fails.
-        rejectFirst(new Error('batch failed'));
-
         await waitFor(() => expect(harness.showToast).toHaveBeenCalledWith('Unable to rename account right now', 'error'));
-        // No success is claimed while transaction updates remain incomplete.
+        // No success is claimed while required updates are incomplete.
         expect(harness.showToast).not.toHaveBeenCalledWith('Account renamed to "Main Checking"', 'success');
         // Modal stays open with the entered text preserved.
         expect(screen.getByText('Rename Account')).toBeInTheDocument();
-        expect(screen.getByLabelText('Account name')).toHaveValue('Main Checking');
+        expect(input).toHaveValue('Main Checking');
 
-        // Retry the same entered name: must NOT be rejected as unchanged even though
-        // the account snapshot already shows the submitted name.
+        // Retry the same entered name through the same service path.
         await user.click(screen.getByRole('button', { name: 'Save' }));
         await waitFor(() => expect(renameAccount).toHaveBeenCalledTimes(2));
-        // The retry reuses the existing service path with the account id and the same
-        // (trimmed) name so the remaining transaction batches are completed.
-        expect(renameAccount).toHaveBeenLastCalledWith('acc-1', 'Main Checking');
+        expect(harness.renameAccount).toHaveBeenLastCalledWith('acc-1', 'Main Checking');
         await waitFor(() => expect(screen.queryByText('Rename Account')).not.toBeInTheDocument());
         expect(harness.showToast).toHaveBeenCalledWith('Account renamed to "Main Checking"', 'success');
     });
 
-    it('still rejects an ordinary unchanged name while the snapshot has not changed', async () => {
+    it('after a failure, choosing a different name also retries', async () => {
+        const renameAccount = vi.fn<RenameFn>()
+            .mockImplementationOnce(() => Promise.reject(new Error('batch failed')))
+            .mockImplementation((): Promise<void> => Promise.resolve());
+        const harness = renderView(mockAccount, { renameAccount });
+        const user = userEvent.setup();
+        await openRenameModal(user);
+
+        const input = screen.getByLabelText('Account name');
+        await user.clear(input);
+        await user.type(input, 'Main Checking');
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(harness.showToast).toHaveBeenCalledWith('Unable to rename account right now', 'error'));
+
+        await user.clear(input);
+        await user.type(input, 'Everyday Checking');
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(renameAccount).toHaveBeenCalledTimes(2));
+        expect(harness.renameAccount).toHaveBeenLastCalledWith('acc-1', 'Everyday Checking');
+        expect(harness.showToast).toHaveBeenCalledWith('Account renamed to "Everyday Checking"', 'success');
+    });
+
+    it('rejects an ordinary unchanged name without calling the service', async () => {
         const harness = renderView();
         const user = userEvent.setup();
         await openRenameModal(user);
@@ -221,7 +269,7 @@ describe('AccountDetailsView rename — keyboard handling with the real shared M
 
     it('disabled controls are excluded from focus traversal while saving', async () => {
         let resolveRename: (value: void) => void = () => {};
-        const renameAccount = vi.fn().mockImplementation(() => new Promise<void>((resolve) => { resolveRename = resolve; }));
+        const renameAccount = vi.fn<RenameFn>().mockImplementation(() => new Promise<void>((resolve) => { resolveRename = resolve; }));
         renderView(mockAccount, { renameAccount });
         const user = userEvent.setup();
         await openRenameModal(user);
@@ -254,7 +302,7 @@ describe('AccountDetailsView rename — keyboard handling with the real shared M
 
     it('Enter submits exactly once; pending protections remain intact', async () => {
         let resolveRename: (value: void) => void = () => {};
-        const renameAccount = vi.fn().mockImplementation(() => new Promise<void>((resolve) => { resolveRename = resolve; }));
+        const renameAccount = vi.fn<RenameFn>().mockImplementation(() => new Promise<void>((resolve) => { resolveRename = resolve; }));
         const harness = renderView(mockAccount, { renameAccount });
         const user = userEvent.setup();
         await openRenameModal(user);
