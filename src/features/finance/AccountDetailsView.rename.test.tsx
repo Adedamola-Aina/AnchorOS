@@ -565,4 +565,3 @@ describe('AccountDetailsView rename — UI-to-service recovery (persisted state)
         expect(docs.get(ACC_PATH)?.name).toBe('Checking');
     });
 });
-
