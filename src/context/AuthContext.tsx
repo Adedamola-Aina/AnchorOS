@@ -25,6 +25,7 @@ import { createTracer } from '../services/telemetry';
 import { getEffectiveTheme } from '../utils/systemTheme';
 import { auditAuth } from '../services/AuditService';
 import { recordAuthEvent } from '../services/authEventService';
+import { clearClientCache } from '../config/queryCache';
 import { deregisterDevicePushToken } from '../services/pushTokenLifecycle';
 
 const authTracer = createTracer('Auth');
@@ -144,6 +145,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return authTracer.trace('signIn', async () => {
             await deregisterPreviousAccountPushToken();
             await signInWithEmailAndPassword(auth, e, p);
+            // RA-05 (#149): drop cached data belonging to any previous account.
+            await clearClientCache();
             auditAuth.loginSuccess('password');
             void recordAuthEvent(navigator.userAgent, 'password');
         });
@@ -152,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signUp = async (e: string, p: string) => {
         return authTracer.trace('signUp', async () => {
             await deregisterPreviousAccountPushToken();
+            await clearClientCache(); // RA-05 (#149)
             const cred = await createUserWithEmailAndPassword(auth, e, p);
             const name = e.split('@')[0];
             await createUserProfile(cred.user.uid, { name, theme: 'light', familyMode: false, onboardingComplete: false });
@@ -163,12 +167,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signInWithGoogle = async (): Promise<UserCredential | null> => {
         await deregisterPreviousAccountPushToken();
-        return doSocialSignIn(makeGoogleProvider(), 'google');
+        const credential = await doSocialSignIn(makeGoogleProvider(), 'google');
+        await clearClientCache(); // RA-05 (#149)
+        return credential;
     };
 
     const signInWithApple = async (): Promise<UserCredential | null> => {
         await deregisterPreviousAccountPushToken();
-        return doSocialSignIn(makeAppleProvider(), 'apple');
+        const credential = await doSocialSignIn(makeAppleProvider(), 'apple');
+        await clearClientCache(); // RA-05 (#149)
+        return credential;
     };
 
     const logout = async () => {
@@ -179,6 +187,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // account can still write its own token documents.
         await deregisterPreviousAccountPushToken();
         await signOut(auth);
+        // RA-05 (#149): remove the persisted client cache so a shared device
+        // cannot hydrate this account's data after sign-out.
+        await clearClientCache();
         navigate('/', { replace: true });
     };
     const sendVerificationEmail = async () => { if (auth.currentUser) await sendEmailVerification(auth.currentUser); };

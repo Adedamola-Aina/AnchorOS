@@ -21,3 +21,10 @@ export function createIndexedDBPersister(idbKey: string = 'react-query-cache'): 
         },
     };
 }
+
+/**
+ * RA-05 (#149): single shared persister instance. The app provider and
+ * `clearClientCache()` must operate on the same IndexedDB key so that clearing
+ * on an auth transition actually removes the persisted cache.
+ */
+export const queryPersister: Persister = createIndexedDBPersister();

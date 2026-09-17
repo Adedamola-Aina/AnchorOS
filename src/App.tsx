@@ -99,9 +99,9 @@ const AppContent = () => {
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from './config/queryClient';
-import { createIndexedDBPersister } from './config/persister';
+import { queryPersister } from './config/persister';
 
-const persister = createIndexedDBPersister();
+const persister = queryPersister;
 
 const shouldDehydrateQuery = (query: { queryKey: readonly unknown[] }) => {
   const key = query.queryKey[0];
