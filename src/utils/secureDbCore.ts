@@ -16,11 +16,38 @@ export const logOp = (_operation: string, _path: string, _data?: unknown) => {
 };
 
 /**
- * Wrap a Firestore operation with timeout handling
+ * RA-06 (#152): a timeout does NOT cancel the underlying Firestore write, so the
+ * operation may still succeed after this error is thrown. Callers must not treat
+ * it as a definitive failure and blindly retry — that is how the same
+ * balance-affecting write gets applied twice.
+ */
+export class OperationTimeoutError extends Error {
+    public readonly operation: string;
+    public readonly timeoutMs: number;
+
+    constructor(operation: string, timeoutMs: number) {
+        super(`Operation timed out: ${operation}`);
+        this.name = 'OperationTimeoutError';
+        this.operation = operation;
+        this.timeoutMs = timeoutMs;
+    }
+}
+
+/** RA-06 (#152): identify an uncertain (not definitively failed) write. */
+export const isOperationTimeoutError = (error: unknown): error is OperationTimeoutError =>
+    error instanceof OperationTimeoutError ||
+    (error instanceof Error && error.name === 'OperationTimeoutError');
+
+/**
+ * Wrap a Firestore operation with timeout handling.
+ *
+ * NOTE: the wrapped promise is intentionally NOT cancelled — Firestore writes
+ * are not cancellable. A late settlement after this timeout is ignored here, but
+ * the write itself may still have been applied (see OperationTimeoutError).
  */
 export const withTimeout = <T>(promise: Promise<T>, timeoutMs: number = DEFAULT_TIMEOUT_MS, operation: string): Promise<T> => {
     return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error(`Operation timed out: ${operation}`)), timeoutMs);
+        const timer = setTimeout(() => reject(new OperationTimeoutError(operation, timeoutMs)), timeoutMs);
         promise
             .then((result) => { clearTimeout(timer); resolve(result); })
             .catch((error) => { clearTimeout(timer); reject(error); });

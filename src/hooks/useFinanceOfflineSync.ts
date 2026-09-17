@@ -11,6 +11,8 @@ import type { CreateTransactionPayload } from '../services/FinanceService';
 import { withTimeout } from '../utils/secureDb';
 import { logTransactionAdded } from './financeActivityLogging';
 import { enqueueTransaction, processQueueForUser } from '../utils/offlineQueue';
+import { isOperationTimeoutError } from '../utils/secureDbCore';
+import { captureError } from '../utils/error';
 
 const OPERATION_TIMEOUT = 10000;
 
@@ -22,11 +24,22 @@ export function useFinanceOfflineSync(
     const flushOfflineQueue = useCallback(async () => {
         if (!user || !navigator.onLine) return;
         await processQueueForUser(user.uid, async (entry) => {
-            await withTimeout(
-                financeService.addTransaction(user.uid, entry.payload as CreateTransactionPayload, accounts),
-                OPERATION_TIMEOUT,
-                'syncOfflineTransaction',
-            );
+            try {
+                await withTimeout(
+                    financeService.addTransaction(user.uid, entry.payload as CreateTransactionPayload, accounts),
+                    OPERATION_TIMEOUT,
+                    'syncOfflineTransaction',
+                );
+            } catch (err) {
+                if (isOperationTimeoutError(err)) {
+                    // RA-06 (#152): the write is not cancellable and may already have
+                    // been applied. Re-queueing would double-apply it (two balance
+                    // deltas), so drop the entry and surface the uncertainty instead.
+                    captureError(err, 'Finance.offlineSync.timeout');
+                    return;
+                }
+                throw err;
+            }
             const account = accounts.find(a => a.id === (entry.payload as CreateTransactionPayload).accountId);
             if (account) logTransactionAdded(user, userName, account, entry.payload as CreateTransactionPayload);
         });

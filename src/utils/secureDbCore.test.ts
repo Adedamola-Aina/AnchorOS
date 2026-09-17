@@ -6,7 +6,7 @@
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { withTimeout, mapSecureDbError, logOp, getUserDocRef, getUserCollectionPath } from './secureDbCore';
+import { withTimeout, mapSecureDbError, logOp, getUserDocRef, getUserCollectionPath, OperationTimeoutError, isOperationTimeoutError } from './secureDbCore';
 
 // Re-mock firebase to ensure our calls work
 vi.mock('../config/firebase', () => ({
@@ -47,6 +47,36 @@ describe('secureDbCore', () => {
             // Just verifying it doesn't throw for a fast promise with default timeout
             const result = await withTimeout(Promise.resolve(42), undefined as any, 'op');
             expect(result).toBe(42);
+        });
+
+        it('rejects with an OperationTimeoutError so callers can tell uncertainty from failure (RA-06)', async () => {
+            vi.useFakeTimers();
+            const timeoutPromise = withTimeout(new Promise(() => {}), 50, 'finance-write');
+
+            vi.advanceTimersByTime(51);
+
+            await expect(timeoutPromise).rejects.toBeInstanceOf(OperationTimeoutError);
+            vi.useRealTimers();
+        });
+    });
+
+    // ── isOperationTimeoutError (RA-06, #152) ───────────────────────
+    describe('isOperationTimeoutError', () => {
+        it('recognises an OperationTimeoutError', () => {
+            expect(isOperationTimeoutError(new OperationTimeoutError('op', 1000))).toBe(true);
+        });
+
+        it('recognises an error carrying the timeout name (cross-module instances)', () => {
+            const lookalike = new Error('Operation timed out: op');
+            lookalike.name = 'OperationTimeoutError';
+            expect(isOperationTimeoutError(lookalike)).toBe(true);
+        });
+
+        it('does not match other errors or non-errors', () => {
+            expect(isOperationTimeoutError(new Error('Operation timed out: op'))).toBe(false);
+            expect(isOperationTimeoutError(new Error('nope'))).toBe(false);
+            expect(isOperationTimeoutError(null)).toBe(false);
+            expect(isOperationTimeoutError('timeout')).toBe(false);
         });
     });
 
