@@ -396,7 +396,7 @@ GREEN = material blockers resolved, not merely audited. This task remediates not
 
 ## 20. Re-audit addendum (2026-09-17)
 
-A post-remediation re-audit discovered nine additional canonical roots (RA-01…RA-09) that were absent from reports 00–11. They are recorded in `MASTER-FINDING-REGISTER.md` under the `RA-*` addendum and were remediated immediately (squash-merged to `master`) rather than scheduled into a wave.
+A post-remediation re-audit discovered ten additional canonical roots (RA-01…RA-10) that were absent from reports 00–11. They are recorded in `MASTER-FINDING-REGISTER.md` under the `RA-*` addendum and were remediated immediately (squash-merged to `master`) rather than scheduled into a wave.
 
 The §19 verdict for the 2026-09 corpus is **unchanged**: these additions clear no Wave 0–3 blocker, and the production gate remains Wave 0 → Wave 1 (FS-01/SN-01) → Wave 2 → the Wave 3a finance webhook/sync bundle.
 
@@ -411,3 +411,4 @@ The §19 verdict for the 2026-09 corpus is **unchanged**: these additions clear 
 | RA-07 | LOW | Functions / notifications | W6 | PR #154 (issue #151) |
 | RA-08 | LOW | PWA service worker | W6 (F-04/F-05/R-08 surface) | PR #159 (issue #153) |
 | RA-09 | HIGH | Onboarding / provider tree | W2 (identity/onboarding) | PR #164 (issue #163) |
+| RA-10 | HIGH | Firestore rules / onboarding | W2 (identity/onboarding) | PR #166 (issue #165) |
