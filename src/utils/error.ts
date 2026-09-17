@@ -60,6 +60,17 @@ export const handleError = (error: unknown, fallbackMessage: string = 'An unexpe
         return error;
     }
 
+    // RA-06 (#152): an operation timeout is not a clean failure — the underlying
+    // write may still have completed. Do not present it as a plain failure that
+    // invites a blind retry.
+    if (error instanceof Error && (error.name === 'OperationTimeoutError' || error.message.startsWith('Operation timed out:'))) {
+        return new AnchorError(
+            'This is taking longer than expected. It may still have completed — refresh to confirm before retrying.',
+            'NETWORK',
+            error,
+        );
+    }
+
     console.error('[UNKNOWN]', error);
 
     const wrapped = new AnchorError(fallbackMessage, 'UNKNOWN', error);
