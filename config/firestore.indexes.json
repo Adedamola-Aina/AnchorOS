@@ -195,6 +195,18 @@
       "indexes": []
     },
     {
+      "collectionGroup": "webhook_events",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "passkey_challenges",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
       "collectionGroup": "passkeys",
       "fieldPath": "credentialId",
       "indexes": [
