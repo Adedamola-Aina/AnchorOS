@@ -1,11 +1,22 @@
 // @ts-nocheck
 import { expect, type Page } from '@playwright/test';
+import { assertLoopbackTarget } from '../scripts/ci/emulator-harness.mjs';
 
 /** How long a deterministic login may take before it is a setup failure. */
 const LOGIN_TIMEOUT_MS = 20000;
 
 /** The emulator endpoint a local emulator-mode login MUST reach. */
 export const EMULATOR_AUTH_ORIGIN = 'http://127.0.0.1:9099';
+
+/**
+ * The seeded authenticated suites use the disposable repository fixture
+ * identity, which is emulator-only. Refuse a non-loopback target before any
+ * credential is submitted (fail closed), so an `E2E_BASE_URL` pointed at a
+ * deployed project can never receive repository fixture credentials.
+ */
+export function assertFixtureTargetIsLocal(env: NodeJS.ProcessEnv = process.env): void {
+    assertLoopbackTarget(env.E2E_BASE_URL, { what: 'E2E_BASE_URL' });
+}
 
 /**
  * Text the app renders when authentication fails. Used to fail a seeded login
@@ -66,6 +77,9 @@ export async function loginWithSeededIdentity(
     user: { email: string; password: string },
     options: { attach?: (name: string, body: string, contentType: string) => Promise<void> } = {},
 ): Promise<void> {
+    // Fail closed BEFORE submitting anything: the fixture identity is
+    // emulator-only and must never be sent to a deployed project.
+    assertFixtureTargetIsLocal();
     const traffic = observeAuthTraffic(page);
 
     await page.goto('/login', { waitUntil: 'domcontentloaded' });

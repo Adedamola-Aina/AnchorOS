@@ -259,6 +259,31 @@ export function resolveLocalOrigin(env = process.env) {
     return { origin: url.origin, host, port: url.port || (url.protocol === 'https:' ? '443' : '80') };
 }
 
+/**
+ * Refuse a non-loopback target origin.
+ *
+ * Repository fixture credentials (e2e/fixtures/test-data.ts) are disposable and
+ * emulator-only: they must never be submitted to a deployed project. Returns the
+ * normalized origin, or null when no target was provided.
+ */
+export function assertLoopbackTarget(rawTarget, { what = 'target' } = {}) {
+    const value = String(rawTarget ?? '').trim();
+    if (!value) return null;
+    let url;
+    try {
+        url = new URL(value);
+    } catch {
+        throw new HarnessError(`${what} "${value}" is not a valid URL.`);
+    }
+    if (!LOOPBACK_HOSTS.includes(url.hostname.toLowerCase())) {
+        throw new HarnessError(
+            `${what} "${value}" is not a loopback origin. The repository fixture identity ` +
+                '(e2e/fixtures/test-data.ts) is emulator-only and is never sent to a cloud project.',
+        );
+    }
+    return url.origin;
+}
+
 /** POSIX shell quoting for values forwarded to `sh -c` (Playwright args, paths). */
 export function shellQuote(value) {
     return `'${String(value).replace(/'/g, `'\\''`)}'`;

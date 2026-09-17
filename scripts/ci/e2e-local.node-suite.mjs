@@ -18,6 +18,7 @@ import {
     DEFAULT_LOCAL_ORIGIN,
     DEMO_PROJECT_ID,
     HarnessError,
+    assertLoopbackTarget,
     describePortOccupant,
     requireDemoProjectId,
     requireLoopbackHostEnv,
@@ -70,6 +71,17 @@ test('only the disposable demo project id is accepted', () => {
     assert.throws(() => requireDemoProjectId({}), HarnessError);
     assert.throws(() => requireDemoProjectId({ FIREBASE_PROJECT_ID: 'anchor-os-staging' }), HarnessError);
     assert.throws(() => requireDemoProjectId({ FIREBASE_PROJECT_ID: 'anchor-os' }), HarnessError);
+});
+
+test('fixture credentials are refused against non-loopback targets', () => {
+    assert.equal(assertLoopbackTarget(''), null);
+    assert.equal(assertLoopbackTarget(undefined), null);
+    assert.equal(assertLoopbackTarget('http://localhost:5199'), 'http://localhost:5199');
+    assert.equal(assertLoopbackTarget('http://127.0.0.1:5273'), 'http://127.0.0.1:5273');
+    for (const target of ['https://anchor-os-staging.web.app', 'https://anchor-os.web.app', 'http://10.0.0.5:5173']) {
+        assert.throws(() => assertLoopbackTarget(target, { what: 'E2E_BASE_URL' }), HarnessError, target);
+    }
+    assert.throws(() => assertLoopbackTarget('not a url'), HarnessError);
 });
 
 test('run ids are shell/firestore safe and unique', () => {
