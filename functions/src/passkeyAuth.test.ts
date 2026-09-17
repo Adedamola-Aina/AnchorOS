@@ -230,7 +230,17 @@ describe('issuePasskeyChallenge', () => {
             data: { purpose: 'authenticate' },
             rawRequest: { ip: '1.2.3.4' },
         });
-        expect(mockState.enforceRateLimit).toHaveBeenCalledWith('passkeyChallenge', '1.2.3.4');
+        // RA-03 (#150): anonymous callers are keyed by IP so they do not all share
+        // one bucket.
+        expect(mockState.enforceRateLimit).toHaveBeenCalledWith('passkeyChallenge', 'ip:1.2.3.4');
+    });
+
+    it('prefers the first x-forwarded-for hop for anonymous callers (RA-03)', async () => {
+        await issuePasskeyChallenge({
+            data: { purpose: 'authenticate' },
+            rawRequest: { headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.1' } },
+        });
+        expect(mockState.enforceRateLimit).toHaveBeenCalledWith('passkeyChallenge', 'ip:203.0.113.9');
     });
 });
 
