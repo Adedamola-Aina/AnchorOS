@@ -26,7 +26,13 @@ export const Modal: React.FC<ModalProps> = ({
     // Use React.useId for stable SSR-compatible unique IDs
     const modalId = React.useId();
 
-    // Focus trap and keyboard handling
+    // Focus trap and keyboard handling.
+    // Shared by the document-level listener (focus outside modal content) and the
+    // React onKeyDown handler on the modal content (focus inside modal content).
+    // The content-level React handler is required: the content div stops native
+    // propagation, so the document listener never receives keys typed inside the
+    // modal — Escape/Tab must be handled there directly.
+    const FOCUSABLE_SELECTOR = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         // Stop propagation to prevent global handlers (CommandPalette, search shortcuts) from intercepting modal input
         e.stopPropagation();
@@ -39,7 +45,7 @@ export const Modal: React.FC<ModalProps> = ({
         // Focus trap
         if (e.key === 'Tab' && modalRef.current) {
             const focusableElements = modalRef.current.querySelectorAll(
-                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                FOCUSABLE_SELECTOR
             );
             const firstElement = focusableElements[0] as HTMLElement;
             const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
@@ -68,8 +74,15 @@ export const Modal: React.FC<ModalProps> = ({
             document.body.style.overflow = 'unset';
             document.removeEventListener('keydown', handleKeyDown);
 
-            // Restore focus to previous element
-            previousActiveElement.current?.focus();
+            // Restore focus to the previous element, but only when it is still
+            // mounted and can meaningfully hold focus. Trigger elements often
+            // unmount with the action sheet that opened the modal (activeElement
+            // falls back to <body>); restoring focus to <body> would steal focus
+            // from any control the close handler focused.
+            const previous = previousActiveElement.current;
+            if (previous && previous !== document.body && previous.isConnected) {
+                previous.focus();
+            }
         }
 
         return () => {
@@ -98,7 +111,7 @@ export const Modal: React.FC<ModalProps> = ({
             {/* Content - Full screen on mobile, centered modal on desktop */}
             <div
                 ref={modalRef}
-                onKeyDown={(e) => e.stopPropagation()}
+                onKeyDown={(e) => handleKeyDown(e)}
                 className={`relative z-10 pointer-events-auto bg-white dark:bg-slate-800 shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden ${fullScreenMobile
                     ? `w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:${maxWidth} sm:rounded-2xl`
                     : `w-full ${maxWidth} max-h-[90vh] rounded-2xl`

@@ -500,8 +500,8 @@ describe('AccountService', () => {
             await service.renameAccount(userId, 'User', account, 'New Big Account');
 
             // Assert
-            // Should commit 3 batches total (first batch has account + 400 txs, then 2 more batches)
-            expect(mockBatch.commit).toHaveBeenCalledTimes(3);
+            // 3 transaction chunks (400/400/50), then the account document committed last.
+            expect(mockBatch.commit).toHaveBeenCalledTimes(4);
         });
 
         it('syncs shared account transactions across spouse users', async () => {

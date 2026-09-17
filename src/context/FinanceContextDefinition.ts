@@ -14,7 +14,7 @@ interface FinanceContextType {
     deleteTransaction: (id: string, accountId: string) => Promise<void>;
     restoreTransaction: (id: string, accountId: string, amountCents: number, type: TransactionType) => Promise<void>;
     convertCurrency: (fromAccountId: string, toAccountId: string, amountCents: number, rate: number) => Promise<void>;
-    renameAccount: (id: string, newName: string) => Promise<void>;
+    renameAccount: (id: string, newName: string) => Promise<{ labelsRepaired: boolean }>;
     updateTransaction: (id: string, accountId: string, updates: UpdateTransactionPayload) => Promise<void>;
     currentMonth: Date;
     nextMonth: () => void;

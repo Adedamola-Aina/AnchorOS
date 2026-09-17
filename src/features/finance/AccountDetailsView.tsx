@@ -4,7 +4,7 @@
  * Layout: X/... header → Card → Balance strip → Monthly chart → Transaction history.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import type { AnchorAccount, AnchorTransaction } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
@@ -49,7 +49,7 @@ interface AccountDetailsViewProps {
 export const AccountDetailsView = ({
   account, onBack, onDelete, onShare: _onShare, onAddTransaction, onEdit, familyMemberId: _familyMemberId,
 }: AccountDetailsViewProps) => {
-  const { transactions, deleteTransaction, updateAccountPersonalization, currentMonth } = useFinance();
+  const { transactions, deleteTransaction, updateAccountPersonalization, renameAccount, currentMonth } = useFinance();
   const { user } = useAuth();
   const { showToast } = useNotifications();
   const { searchQuery, setSearchQuery, filterType, setFilterType } = useFilterPersistence(`account-${account.id}`);
@@ -60,6 +60,10 @@ export const AccountDetailsView = ({
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [isArtworkPickerOpen, setIsArtworkPickerOpen] = useState(false);
   const [isUploadingArtwork, setIsUploadingArtwork] = useState(false);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [renameName, setRenameName] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
+  const optionsButtonRef = useRef<HTMLButtonElement | null>(null);
   const { syncNow, isSyncing } = useBankConnection();
 
   const isOwner = !account.ownerId || account.ownerId === user?.uid;
@@ -113,15 +117,64 @@ export const AccountDetailsView = ({
     } catch { showToast('Bank sync failed — try again later', 'error'); }
   }, [account.id, showToast, syncNow]);
 
+  const openRename = useCallback(() => {
+    setRenameName(account.name);
+    setIsRenameOpen(true);
+  }, [account.name]);
+
+  const closeRename = useCallback(() => {
+    if (isRenaming) return;
+    setIsRenameOpen(false);
+    // The action-sheet trigger that opened this flow unmounts, so the shared Modal
+    // cannot restore focus itself. Return focus to the mounted options button.
+    optionsButtonRef.current?.focus();
+  }, [isRenaming]);
+
+  const handleRenameSubmit = async () => {
+    if (!isOwner) { showToast('Only the account owner can rename this account', 'error'); return; }
+    if (isRenaming) return;
+    const trimmed = renameName.trim();
+    const normalize = (value: string) => value.trim().replace(/\s+/g, ' ');
+    if (!trimmed) { showToast('Account name cannot be empty', 'error'); return; }
+    // Submitting the current (normalized) name requests a label repair. The
+    // decision is delegated to AccountService, which inspects Firestore for
+    // divergent transaction labels — not the date-filtered view here — so
+    // recovery survives closing/reopening the dialog, reloads, and stale labels
+    // on transactions outside the visible month. A genuine rename keeps the
+    // same service path. `labelsRepaired` distinguishes a real repair from a
+    // no-op so nothing reports a false success.
+    const isLabelRepair = normalize(trimmed) === normalize(account.name);
+    setIsRenaming(true);
+    try {
+      const result = await renameAccount(account.id, trimmed);
+      if (isLabelRepair) {
+        if (result?.labelsRepaired) {
+          showToast(`Transaction labels restored to "${account.name}"`, 'success');
+        } else {
+          showToast('No changes to save', 'info');
+        }
+      } else {
+        showToast(`Account renamed to "${trimmed}"`, 'success');
+      }
+      setIsRenameOpen(false);
+      optionsButtonRef.current?.focus();
+    } catch (err) {
+      captureError(err, 'AccountDetails.renameAccount');
+      showToast(isLabelRepair ? 'Unable to restore transaction labels right now' : 'Unable to rename account right now', 'error');
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
   const actionItems = useMemo(() => {
     const items = [];
-    if (isOwner) items.push({ label: 'Edit Account', icon: <Pencil className="w-5 h-5" />, onPress: () => showToast('Rename coming soon', 'info') });
+    if (isOwner) items.push({ label: 'Edit Account', icon: <Pencil className="w-5 h-5" />, onPress: openRename });
     if (isOwner) items.push({ label: 'Customize Card', icon: <Palette className="w-5 h-5" />, onPress: () => setIsCustomizeOpen(true) });
     items.push({ label: 'Export Transactions', icon: <Download className="w-5 h-5" />, onPress: handleExportCsv });
     if (account.source === 'linked') items.push({ label: isSyncing ? 'Syncing...' : 'Sync Now', icon: <RefreshCw className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />, onPress: handleSyncNow });
     if (onDelete && isOwner) items.push({ label: 'Delete Account', icon: <Trash2 className="w-5 h-5" />, destructive: true, onPress: onDelete });
     return items;
-  }, [isOwner, account.source, isSyncing, onDelete, handleExportCsv, handleSyncNow, showToast]);
+  }, [isOwner, account.source, isSyncing, onDelete, handleExportCsv, handleSyncNow, openRename]);
 
   return (
     <>
@@ -129,7 +182,7 @@ export const AccountDetailsView = ({
         {isOwner && <NotificationBanner accountId={account.id} />}
         {isSharedAccount && <FamilyNotificationBanner accountId={account.id} />}
 
-        <AccountDetailHeader accountName={account.name} onBack={onBack} onOpenOptions={() => setIsActionsOpen(true)} />
+        <AccountDetailHeader accountName={account.name} onBack={onBack} onOpenOptions={() => setIsActionsOpen(true)} optionsButtonRef={optionsButtonRef} />
 
         <div className="px-1">
           <AccountCard account={account} index={0} totalCards={1} mode="expanded" isActive={false} onTap={() => {}} skipViewTransition />
@@ -178,6 +231,39 @@ export const AccountDetailsView = ({
       </Modal>
       <Modal isOpen={isArtworkPickerOpen} onClose={() => setIsArtworkPickerOpen(false)} title="Choose Card Artwork" maxWidth="max-w-md">
         <CardArtworkPicker currentPreset={account.cardArtworkPreset} cardColor={account.cardColor || '#3D52D5'} onSelect={handleArtworkSelect} onUploadCustom={handleArtworkUpload} onClose={() => setIsArtworkPickerOpen(false)} isUploading={isUploadingArtwork} />
+      </Modal>
+      <Modal isOpen={isRenameOpen} onClose={closeRename} title="Rename Account" maxWidth="max-w-md">
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void handleRenameSubmit(); }}>
+          <div className="space-y-2">
+            <label htmlFor="rename-account-input" className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Account name</label>
+            <input
+              id="rename-account-input"
+              type="text"
+              value={renameName}
+              onChange={(e) => setRenameName(e.target.value)}
+              disabled={isRenaming}
+              className="w-full px-4 py-3 min-h-[44px] rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-60"
+              autoFocus
+            />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={closeRename}
+              disabled={isRenaming}
+              className="flex-1 min-h-[44px] rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm transition hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isRenaming}
+              className="flex-1 min-h-[44px] rounded-xl bg-slate-900 dark:bg-white px-5 text-sm font-semibold text-white dark:text-slate-900 transition hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isRenaming ? 'Renaming...' : 'Save'}
+            </button>
+          </div>
+        </form>
       </Modal>
     </>
   );

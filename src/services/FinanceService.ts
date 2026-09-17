@@ -37,7 +37,12 @@ export class FinanceService {
         return this.accountService.deleteAccount(userId, userName, account);
     }
 
-    async renameAccount(userId: string, userName: string, account: AnchorAccount, newName: string): Promise<void> {
+    async renameAccount(
+        userId: string,
+        userName: string,
+        account: AnchorAccount,
+        newName: string
+    ): Promise<{ labelsRepaired: boolean }> {
         return this.accountService.renameAccount(userId, userName, account, newName);
     }
 
