@@ -31,7 +31,7 @@ describe('callableContracts', () => {
     });
 
     it('fails validation when payloads are non-objects', () => {
-        const errors = validateCallableContract('resetRateLimit', 'bad-request', null);
+        const errors = validateCallableContract('checkRateLimit', 'bad-request', null);
         expect(errors).toEqual(expect.arrayContaining([
             'request: Payload must be an object',
             'response: Payload must be an object',

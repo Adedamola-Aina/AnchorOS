@@ -32,16 +32,6 @@ export const infraRegistry: ReadonlyArray<CallableRegistryEntry> = [
         status: 'stable',
         domain: 'infra',
     },
-    {
-        name: 'resetRateLimit',
-        version: 1,
-        description: 'Reset a rate limit bucket (admin)',
-        trigger: 'callable',
-        auth: 'required',
-        rateLimit: null,
-        status: 'internal',
-        domain: 'infra',
-    },
 
     // ── Migration Framework ──────────────────────
     {

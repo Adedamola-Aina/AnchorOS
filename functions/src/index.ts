@@ -9,7 +9,8 @@
 
 
 // Rate limiting
-export { checkRateLimit, resetRateLimit } from './rateLimitCallables';
+// RA-01 (#147): `resetRateLimit` retired — it allowed a client to clear its own block.
+export { checkRateLimit } from './rateLimitCallables';
 
 // Audit logging
 export { logAuditEvent } from './audit';

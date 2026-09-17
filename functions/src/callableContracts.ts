@@ -45,7 +45,6 @@ export const CALLABLE_CONTRACTS: Readonly<Record<string, CallableContract>> = {
     recordAuthEvent: objectContract(),
     recoverMfaWithCode: objectContract(),
     reportUnrecognisedSignIn: objectContract(),
-    resetRateLimit: objectContract(['bucket']),
     revokeInvitation: objectContract(),
     revokeSession: objectContract(),
     rollbackMigration: objectContract(),
