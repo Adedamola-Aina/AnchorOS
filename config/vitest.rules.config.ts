@@ -14,5 +14,9 @@ export default defineConfig({
     include: ['src/__tests__/*.emulator.ts'],
     environment: 'node',
     testTimeout: 30_000,
+    // RA-15 (#169): suites share one deterministic Firestore project id so rule
+    // coverage aggregates (and is visible to check-rules-coverage). Running them
+    // in parallel would let one suite's clearFirestore() wipe another's fixtures.
+    fileParallelism: false,
   },
 });

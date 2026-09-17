@@ -262,6 +262,32 @@ service cloud.firestore {
         }
 
         // ====================================================================
+        // Custom transaction categories (PRD-010)
+        //
+        // `CategoryService` reads and writes here from the client, but no rule
+        // existed, so every call was permission-denied (found by RA-15's static
+        // client-write -> rule gate). Owner-only, name validated.
+        // ====================================================================
+        match /categories/{categoryId} {
+          function isValidCategory(data) {
+            return data.name is string && data.name.size() > 0 && data.name.size() <= 50;
+          }
+
+          allow read: if request.auth.uid == userId;
+          allow create: if request.auth.uid == userId && isValidCategory(request.resource.data);
+          allow delete: if request.auth.uid == userId;
+        }
+
+        // ====================================================================
+        // Monthly Fabric reflections — owner-readable; written by Cloud
+        // Functions (Admin SDK) only, like the other server-owned fabric_* docs.
+        // ====================================================================
+        match /fabric_monthly_reviews/{monthKey} {
+          allow read: if request.auth.uid == userId;
+          allow write: if false;
+        }
+
+        // ====================================================================
         // Accounts: Owner or shared member can read
         // ====================================================================
         match /accounts/{accountId} {

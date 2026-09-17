@@ -24,7 +24,16 @@ export { doc, getDoc, setDoc, deleteDoc, updateDoc, collectionGroup, getDocs, qu
 export { describe, it, beforeAll, afterAll, beforeEach } from 'vitest';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ID_BASE = 'rules-test';
+/**
+ * RA-15 (#169): deterministic project id so rule coverage aggregates across
+ * suites and `check-rules-coverage` can actually see it. It must stay distinct
+ * from the dev project (`demo-anchor-os`) so `clearFirestore()` can never wipe
+ * local development data. Override with RULES_TEST_PROJECT_ID if needed.
+ *
+ * Suites must run sequentially (see config/vitest.rules.config.ts
+ * `fileParallelism: false`) because they now share one project namespace.
+ */
+const PROJECT_ID_BASE = process.env.RULES_TEST_PROJECT_ID ?? 'anchor-os-test';
 export const PREFIX = 'artifacts/anchor-os';
 
 export function makeTestEnv(): {
@@ -36,7 +45,7 @@ export function makeTestEnv(): {
   clearAll: () => Promise<void>;
 } {
   let testEnv: RulesTestEnvironment;
-  const projectId = `${PROJECT_ID_BASE}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const projectId = PROJECT_ID_BASE;
   const RULES_PATH = resolve(__dirname, '../../config/firestore.rules');
 
   return {

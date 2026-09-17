@@ -98,6 +98,22 @@ async function main(): Promise<void> {
     }
   }
 
+  // RA-15 (#169): an empty report must not read as success. NOTE: the emulator
+  // (v1.20.2) does not expose expression-level coverage for rulesets loaded via
+  // rules-unit-testing, so this check currently has no data to enforce. It is
+  // kept as a diagnostic and the real guard is the static client-write -> rule
+  // check in scripts/ci/check-client-collection-rules.mjs.
+  if (total === 0) {
+    console.warn(
+      `\n⚠️  ARCH-026: Firestore rule coverage data unavailable for project "${PROJECT_ID}" ` +
+        `(${COVERAGE_URL}).\n` +
+        `   The emulator did not report expression-level coverage, so this gate cannot ` +
+        `enforce anything here.\n` +
+        `   Enforcing guard: node scripts/ci/check-client-collection-rules.mjs`
+    );
+    return;
+  }
+
   if (uncovered.length > 0) {
     console.error(
       `\n❌ ARCH-026: ${uncovered.length}/${total} Firestore rule expression(s) have 0 test hits:\n`
