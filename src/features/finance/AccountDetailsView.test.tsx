@@ -299,8 +299,8 @@ describe('AccountDetailsView rename (Issue #142)', () => {
         expect(showToast).toHaveBeenCalledWith('Account name cannot be empty', 'error');
     });
 
-    it('does not submit when the normalized name is unchanged', async () => {
-        const renameAccount = vi.fn().mockResolvedValue(undefined);
+    it('an unchanged normalized name delegates to the service and reports no changes when nothing diverged', async () => {
+        const renameAccount = vi.fn().mockResolvedValue({ labelsRepaired: false });
         const showToast = vi.fn();
         const user = userEvent.setup();
         renderWithContext(
@@ -312,8 +312,10 @@ describe('AccountDetailsView rename (Issue #142)', () => {
         await user.clear(input);
         await user.type(input, 'Checking   Account'); // identical after whitespace normalization
         await user.click(screen.getByRole('button', { name: 'Save' }));
-        expect(renameAccount).not.toHaveBeenCalled();
+        // The authoritative divergence check runs in AccountService.
+        await waitFor(() => expect(renameAccount).toHaveBeenCalledWith('acc-1', 'Checking   Account'));
         expect(showToast).toHaveBeenCalledWith('No changes to save', 'info');
+        expect(showToast).not.toHaveBeenCalledWith(expect.stringContaining('Transaction labels restored'), 'success');
     });
 
     it('non-owner (shared viewer) cannot access or submit rename', async () => {

@@ -62,11 +62,6 @@ export const AccountDetailsView = ({
   const [isUploadingArtwork, setIsUploadingArtwork] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [renameName, setRenameName] = useState('');
-  // The unchanged-name check compares against the live account.name. That is safe:
-  // AccountService.renameAccount commits the account document (name + history) LAST,
-  // after all transaction-update batches, so a partial failure never changes the
-  // account snapshot and retrying any name (including the original) always goes
-  // through the service path.
   const [isRenaming, setIsRenaming] = useState(false);
   const optionsButtonRef = useRef<HTMLButtonElement | null>(null);
   const { syncNow, isSyncing } = useBankConnection();
@@ -141,16 +136,31 @@ export const AccountDetailsView = ({
     const trimmed = renameName.trim();
     const normalize = (value: string) => value.trim().replace(/\s+/g, ' ');
     if (!trimmed) { showToast('Account name cannot be empty', 'error'); return; }
-    if (normalize(trimmed) === normalize(account.name)) { showToast('No changes to save', 'info'); return; }
+    // Submitting the current (normalized) name requests a label repair. The
+    // decision is delegated to AccountService, which inspects Firestore for
+    // divergent transaction labels — not the date-filtered view here — so
+    // recovery survives closing/reopening the dialog, reloads, and stale labels
+    // on transactions outside the visible month. A genuine rename keeps the
+    // same service path. `labelsRepaired` distinguishes a real repair from a
+    // no-op so nothing reports a false success.
+    const isLabelRepair = normalize(trimmed) === normalize(account.name);
     setIsRenaming(true);
     try {
-      await renameAccount(account.id, trimmed);
-      showToast(`Account renamed to "${trimmed}"`, 'success');
+      const result = await renameAccount(account.id, trimmed);
+      if (isLabelRepair) {
+        if (result?.labelsRepaired) {
+          showToast(`Transaction labels restored to "${account.name}"`, 'success');
+        } else {
+          showToast('No changes to save', 'info');
+        }
+      } else {
+        showToast(`Account renamed to "${trimmed}"`, 'success');
+      }
       setIsRenameOpen(false);
       optionsButtonRef.current?.focus();
     } catch (err) {
       captureError(err, 'AccountDetails.renameAccount');
-      showToast('Unable to rename account right now', 'error');
+      showToast(isLabelRepair ? 'Unable to restore transaction labels right now' : 'Unable to rename account right now', 'error');
     } finally {
       setIsRenaming(false);
     }
