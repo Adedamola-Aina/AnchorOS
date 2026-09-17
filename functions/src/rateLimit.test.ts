@@ -40,7 +40,7 @@ vi.mock('./helpers', () => ({
   createAuditLog: (...args: unknown[]) => mockState.createAuditLog(...args),
 }));
 
-import { checkRateLimit, enforceRateLimit, RATE_LIMITS, resetRateLimit } from './rateLimit';
+import { checkRateLimit, enforceRateLimit, RATE_LIMITS } from './rateLimit';
 
 describe('rateLimit', () => {
   beforeEach(() => {
@@ -209,22 +209,5 @@ describe('rateLimit', () => {
       code: 'internal',
     });
     expect(errorSpy).toHaveBeenCalled();
-  });
-
-  it('resetRateLimit validates auth, input and ownership', async () => {
-    await expect(resetRateLimit({ auth: null, data: {} })).rejects.toMatchObject({ code: 'unauthenticated' });
-    await expect(resetRateLimit({ auth: { uid: 'u1' }, data: {} })).rejects.toMatchObject({ code: 'invalid-argument' });
-    await expect(resetRateLimit({ auth: { uid: 'u1' }, data: { action: 'unknown', identifier: 'u1' } })).rejects.toMatchObject({ code: 'invalid-argument' });
-    await expect(resetRateLimit({ auth: { uid: 'u1' }, data: { action: 'auth', identifier: 'u2' } })).rejects.toMatchObject({ code: 'permission-denied' });
-  });
-
-  it('resetRateLimit deletes key and returns success', async () => {
-    const result = await resetRateLimit({
-      auth: { uid: 'u1' },
-      data: { action: 'auth', identifier: 'u1' },
-    });
-
-    expect(mockState.deleteDoc).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ success: true });
   });
 });

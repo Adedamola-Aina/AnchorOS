@@ -11,7 +11,7 @@ import { CALLABLE_REGISTRY, getCallableEntry, getCallablesByDomain, getCallableD
 // All named exports from index.ts + wildcard exports
 const ALL_EXPORTS: string[] = [
     // Rate limiting
-    'checkRateLimit', 'resetRateLimit',
+    'checkRateLimit',
     // Audit
     'logAuditEvent',
     // Family — invitations

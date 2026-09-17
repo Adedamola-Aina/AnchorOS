@@ -160,4 +160,4 @@ export async function enforceRateLimit(action: string, identifier: string): Prom
     }
 }
 
-export { checkRateLimit, resetRateLimit } from './rateLimitCallables';
+export { checkRateLimit } from './rateLimitCallables';
