@@ -29,7 +29,10 @@ async function isReplayEvent(fingerprint: string): Promise<boolean> {
     const isReplay = await db.runTransaction(async (txn) => {
         const snap = await txn.get(ref);
         if (snap.exists) return true;
-        const expiresAt = new Date(Date.now() + REPLAY_CACHE_TTL_MS).toISOString();
+        // RA-04 (#148): a Firestore TTL policy only expires timestamp fields, so
+        // this must be a Date (converted to a Timestamp by the Admin SDK) rather
+        // than an ISO string. See config/firestore.indexes.json -> webhook_events.
+        const expiresAt = new Date(Date.now() + REPLAY_CACHE_TTL_MS);
         txn.set(ref, { processedAt: new Date().toISOString(), expiresAt });
         return false;
     });
