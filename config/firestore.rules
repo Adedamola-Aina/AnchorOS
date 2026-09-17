@@ -240,6 +240,28 @@ service cloud.firestore {
         }
 
         // ====================================================================
+        // Financial goals (PRD-007)
+        //
+        // Onboarding step 3 ("Set a Goal") writes here, but no rule existed, so
+        // every goal save fell through to the default deny and surfaced as
+        // "Failed to save goal." Owner-only, validated on write.
+        // ====================================================================
+        match /goals/{goalId} {
+          function isValidGoal(data) {
+            return data.title is string && data.title.size() > 0 && data.title.size() <= 120
+                && data.targetAmountCents is int && data.targetAmountCents > 0
+                && data.currentAmountCents is int && data.currentAmountCents >= 0
+                && (data.currency == 'NGN' || data.currency == 'USD')
+                && data.goalType in ['savings', 'debt_payoff', 'investment', 'emergency_fund', 'other'];
+          }
+
+          allow read: if request.auth.uid == userId;
+          allow create: if request.auth.uid == userId && isValidGoal(request.resource.data);
+          allow update: if request.auth.uid == userId && isValidGoal(request.resource.data);
+          allow delete: if request.auth.uid == userId;
+        }
+
+        // ====================================================================
         // Accounts: Owner or shared member can read
         // ====================================================================
         match /accounts/{accountId} {
