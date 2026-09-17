@@ -6,19 +6,24 @@
  * exercised against the same component the app renders.
  *
  * Recovery semantics are guaranteed by AccountService.renameAccount, which
- * commits the account document (name + history) LAST, after every
- * transaction-update batch. A partial failure therefore never changes the
- * account snapshot, so retrying the submitted name — or choosing any other
- * name, including the original — always re-runs the service path. The UI
- * tests here assert the contract: failure keeps the modal open with the
- * entered text and never reports success; retry reuses the same service call.
+ * commits the account document LAST, after every transaction-update batch.
+ * A partial failure leaves the account name unchanged, but transaction
+ * accountName labels may already have moved to the new name — durable partial
+ * state. Retrying the submitted name finishes the rename; re-submitting the
+ * current account name runs the service's label-repair path (no history
+ * entry), which the UI offers when it detects stale labels from live data.
+ * The UI tests here assert the contract: failure keeps the modal open with
+ * the entered text and never reports success; retry reuses the same service
+ * call; an unchanged name with no stale labels still short-circuits.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ComponentProps } from 'react';
+import * as firestore from 'firebase/firestore';
 import { AccountDetailsView } from './AccountDetailsView';
+import { AccountService } from '../../services/AccountService';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppContext } from '../../context/AnchorContext';
 import { FinanceContext } from '../../context/FinanceContext';
@@ -68,13 +73,19 @@ const noopAsync = (): Promise<void> => Promise.resolve();
 interface Harness {
     renameAccount: ReturnType<typeof vi.fn<RenameFn>>;
     showToast: ReturnType<typeof vi.fn<NotificationValue['showToast']>>;
+    unmount: () => void;
 }
 
-const renderView = (account: AnchorAccount = mockAccount, overrides: { renameAccount?: RenameFn } = {}): Harness => {
-    const renameAccount = vi.fn<RenameFn>(overrides.renameAccount ?? ((): Promise<void> => Promise.resolve()));
+const renderView = (
+    account: AnchorAccount = mockAccount,
+    overrides: { renameAccount?: RenameFn; transactions?: AnchorTransaction[]; userId?: string } = {},
+): Harness => {
+    const renameAccount = vi.fn<RenameFn>(
+        overrides.renameAccount ?? ((): Promise<{ labelsRepaired: boolean }> => Promise.resolve({ labelsRepaired: false })),
+    );
     const showToast = vi.fn<NotificationValue['showToast']>();
     const finance: FinanceValue = {
-        transactions: mockTransactions,
+        transactions: overrides.transactions ?? mockTransactions,
         accounts: [account],
         loadingFinance: false,
         addAccount: noopAsync,
@@ -97,7 +108,7 @@ const renderView = (account: AnchorAccount = mockAccount, overrides: { renameAcc
     };
     const app: AppValue = { navigateTo: vi.fn(), activeTab: 'finance' };
     const auth: AuthValue = {
-        user: null,
+        user: overrides.userId ? ({ uid: overrides.userId } as unknown as AuthValue['user']) : null,
         profile: mockProfile,
         loading: false,
         profileLoaded: true,
@@ -125,7 +136,7 @@ const renderView = (account: AnchorAccount = mockAccount, overrides: { renameAcc
         pushPermissionStatus: 'default',
     };
 
-    render(
+    const rendered = render(
         <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
             <AuthContext.Provider value={auth}>
                 <AppContext.Provider value={app}>
@@ -138,7 +149,7 @@ const renderView = (account: AnchorAccount = mockAccount, overrides: { renameAcc
             </AuthContext.Provider>
         </QueryClientProvider>
     );
-    return { renameAccount, showToast };
+    return { renameAccount, showToast, unmount: rendered.unmount };
 };
 
 const openRenameModal = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -161,7 +172,7 @@ describe('AccountDetailsView rename — failure recovery', () => {
         // shows the original name, so this UI must allow the retry.
         const renameAccount = vi.fn<RenameFn>()
             .mockImplementationOnce(() => Promise.reject(new Error('batch failed')))
-            .mockImplementation((): Promise<void> => Promise.resolve());
+            .mockImplementation((): Promise<{ labelsRepaired: boolean }> => Promise.resolve({ labelsRepaired: false }));
         const harness = renderView(mockAccount, { renameAccount });
         const user = userEvent.setup();
         await openRenameModal(user);
@@ -189,7 +200,7 @@ describe('AccountDetailsView rename — failure recovery', () => {
     it('after a failure, choosing a different name also retries', async () => {
         const renameAccount = vi.fn<RenameFn>()
             .mockImplementationOnce(() => Promise.reject(new Error('batch failed')))
-            .mockImplementation((): Promise<void> => Promise.resolve());
+            .mockImplementation((): Promise<{ labelsRepaired: boolean }> => Promise.resolve({ labelsRepaired: false }));
         const harness = renderView(mockAccount, { renameAccount });
         const user = userEvent.setup();
         await openRenameModal(user);
@@ -208,7 +219,7 @@ describe('AccountDetailsView rename — failure recovery', () => {
         expect(harness.showToast).toHaveBeenCalledWith('Account renamed to "Everyday Checking"', 'success');
     });
 
-    it('rejects an ordinary unchanged name without calling the service', async () => {
+    it('an ordinary unchanged name delegates to the service and reports no changes when nothing diverged', async () => {
         const harness = renderView();
         const user = userEvent.setup();
         await openRenameModal(user);
@@ -216,8 +227,78 @@ describe('AccountDetailsView rename — failure recovery', () => {
         await user.clear(input);
         await user.type(input, 'Checking   Account'); // unchanged after normalization
         await user.click(screen.getByRole('button', { name: 'Save' }));
-        expect(harness.renameAccount).not.toHaveBeenCalled();
+        // The authoritative "is anything divergent?" check lives in the service.
+        await waitFor(() => expect(harness.renameAccount).toHaveBeenCalledWith('acc-1', 'Checking   Account'));
         expect(harness.showToast).toHaveBeenCalledWith('No changes to save', 'info');
+        expect(harness.showToast).not.toHaveBeenCalledWith(expect.stringContaining('Transaction labels restored'), 'success');
+    });
+
+    // A partial rename failure leaves transaction accountName labels ahead of the
+    // persisted account name. The UI delegates the unchanged name to
+    // AccountService, which detects divergence in Firestore and reports whether
+    // it repaired anything — so recovery works on a freshly mounted view
+    // (close/reopen and full reload), independent of which transactions the
+    // date-filtered context happens to hold.
+    it('submitting the current name repairs stale labels through the service', async () => {
+        const renameAccount = vi.fn<RenameFn>().mockResolvedValue({ labelsRepaired: true });
+        const harness = renderView(mockAccount, { renameAccount });
+        const user = userEvent.setup();
+        await openRenameModal(user);
+
+        // Input is prefilled with the current account name — submit as-is.
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(harness.renameAccount).toHaveBeenCalledTimes(1));
+        expect(harness.renameAccount).toHaveBeenCalledWith('acc-1', 'Checking Account');
+        await waitFor(() => expect(screen.queryByText('Rename Account')).not.toBeInTheDocument());
+        expect(harness.showToast).toHaveBeenCalledWith('Transaction labels restored to "Checking Account"', 'success');
+        expect(harness.showToast).not.toHaveBeenCalledWith('No changes to save', 'info');
+    });
+
+    it('repair is offered after a remount (no reliance on component memory)', async () => {
+        const first = renderView(mockAccount, {
+            renameAccount: vi.fn<RenameFn>().mockResolvedValue({ labelsRepaired: true }),
+        });
+        expect(first.renameAccount).not.toHaveBeenCalled();
+        // Unmount the whole tree and mount a completely fresh one, as after a reload.
+        first.unmount();
+        const second = renderView(mockAccount, {
+            renameAccount: vi.fn<RenameFn>().mockResolvedValue({ labelsRepaired: true }),
+        });
+        const user = userEvent.setup();
+        await openRenameModal(user);
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(second.renameAccount).toHaveBeenCalledWith('acc-1', 'Checking Account'));
+        expect(second.showToast).toHaveBeenCalledWith('Transaction labels restored to "Checking Account"', 'success');
+    });
+
+    it('a failed repair never reports success and can be retried', async () => {
+        const renameAccount = vi.fn<RenameFn>()
+            .mockImplementationOnce(() => Promise.reject(new Error('batch failed')))
+            .mockImplementation((): Promise<{ labelsRepaired: boolean }> => Promise.resolve({ labelsRepaired: true }));
+        const harness = renderView(mockAccount, { renameAccount });
+        const user = userEvent.setup();
+        await openRenameModal(user);
+
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(harness.showToast).toHaveBeenCalledWith('Unable to restore transaction labels right now', 'error'));
+        expect(harness.showToast).not.toHaveBeenCalledWith('Transaction labels restored to "Checking Account"', 'success');
+        expect(screen.getByText('Rename Account')).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(harness.showToast).toHaveBeenCalledWith('Transaction labels restored to "Checking Account"', 'success'));
+        expect(renameAccount).toHaveBeenCalledTimes(2);
+    });
+
+    it('the intended rename can still finish after labels diverged', async () => {
+        const harness = renderView(mockAccount);
+        const user = userEvent.setup();
+        await openRenameModal(user);
+        const input = screen.getByLabelText('Account name');
+        await user.clear(input);
+        await user.type(input, 'Main Checking');
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(harness.renameAccount).toHaveBeenCalledWith('acc-1', 'Main Checking'));
+        expect(harness.showToast).toHaveBeenCalledWith('Account renamed to "Main Checking"', 'success');
     });
 });
 
@@ -268,8 +349,10 @@ describe('AccountDetailsView rename — keyboard handling with the real shared M
     });
 
     it('disabled controls are excluded from focus traversal while saving', async () => {
-        let resolveRename: (value: void) => void = () => {};
-        const renameAccount = vi.fn<RenameFn>().mockImplementation(() => new Promise<void>((resolve) => { resolveRename = resolve; }));
+        let resolveRename: (value: { labelsRepaired: boolean }) => void = () => {};
+        const renameAccount = vi.fn<RenameFn>().mockImplementation(
+            () => new Promise<{ labelsRepaired: boolean }>((resolve) => { resolveRename = resolve; }),
+        );
         renderView(mockAccount, { renameAccount });
         const user = userEvent.setup();
         await openRenameModal(user);
@@ -296,13 +379,15 @@ describe('AccountDetailsView rename — keyboard handling with the real shared M
         expect(document.activeElement).toBe(closeButton);
         expect(dialog.contains(document.activeElement)).toBe(true);
 
-        resolveRename();
+        resolveRename({ labelsRepaired: false });
         await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     });
 
     it('Enter submits exactly once; pending protections remain intact', async () => {
-        let resolveRename: (value: void) => void = () => {};
-        const renameAccount = vi.fn<RenameFn>().mockImplementation(() => new Promise<void>((resolve) => { resolveRename = resolve; }));
+        let resolveRename: (value: { labelsRepaired: boolean }) => void = () => {};
+        const renameAccount = vi.fn<RenameFn>().mockImplementation(
+            () => new Promise<{ labelsRepaired: boolean }>((resolve) => { resolveRename = resolve; }),
+        );
         const harness = renderView(mockAccount, { renameAccount });
         const user = userEvent.setup();
         await openRenameModal(user);
@@ -319,7 +404,7 @@ describe('AccountDetailsView rename — keyboard handling with the real shared M
         await user.keyboard('{Enter}');
         expect(renameAccount).toHaveBeenCalledTimes(1);
 
-        resolveRename();
+        resolveRename({ labelsRepaired: false });
         await waitFor(() => expect(screen.queryByText('Rename Account')).not.toBeInTheDocument());
         expect(harness.showToast).toHaveBeenCalledWith('Account renamed to "Main Checking"', 'success');
     });
@@ -336,3 +421,148 @@ describe('AccountDetailsView rename — keyboard handling with the real shared M
         await waitFor(() => expect(screen.getByLabelText('Account options')).toHaveFocus());
     });
 });
+
+/**
+ * UI-to-service recovery, end to end through the real AccountService and a
+ * deterministic in-memory Firestore double.
+ *
+ * Regression for the demonstrated defect: a rename that failed after at least
+ * one transaction batch committed leaves the account name unchanged
+ * ("Checking") while some transaction labels already say the new name
+ * ("Household"). The visible (current-month) transaction list here is EMPTY, so
+ * the fix cannot rely on client-side detection — AccountService must detect the
+ * divergence in Firestore and the UI must delegate the unchanged name to it.
+ */
+describe('AccountDetailsView rename — UI-to-service recovery (persisted state)', () => {
+    const OWNER = 'owner-1';
+    const ACC = 'acc-1';
+    const APP = 'anchor-os';
+    const ACC_PATH = `artifacts/${APP}/users/${OWNER}/accounts/${ACC}`;
+    const txPath = (index: number) => `artifacts/${APP}/users/${OWNER}/finance/tx-${index}`;
+
+    type StoredDoc = Record<string, unknown>;
+    interface FakeDoc { ref: { path: string }; data: () => StoredDoc }
+
+    const installStore = () => {
+        const docs = new Map<string, StoredDoc>();
+        docs.set(ACC_PATH, { name: 'Checking', nameHistory: [] });
+        // Durable partial state: labels moved to "Household", account did not.
+        docs.set(txPath(0), { accountId: ACC, accountName: 'Household', amountCents: 1234 });
+        docs.set(txPath(1), { accountId: ACC, accountName: 'Household', amountCents: 5678 });
+
+        vi.mocked(firestore.doc).mockImplementation((_db, ...segments: string[]) =>
+            ({ path: segments.join('/') }) as unknown as ReturnType<typeof firestore.doc>);
+        vi.mocked(firestore.collection).mockImplementation((_db, ...segments: string[]) =>
+            ({ path: segments.join('/') }) as unknown as ReturnType<typeof firestore.collection>);
+        vi.mocked(firestore.query).mockImplementation((ref, ...constraints) =>
+            ({ ...(ref as object), constraints }) as unknown as ReturnType<typeof firestore.query>);
+        vi.mocked(firestore.where).mockImplementation((field, _op, value) =>
+            ({ field, value }) as unknown as ReturnType<typeof firestore.where>);
+        vi.mocked(firestore.getDocs).mockImplementation(async (rawQuery) => {
+            const { path: prefix, constraints = [] } = rawQuery as unknown as {
+                path: string;
+                constraints: { field: string; value: unknown }[];
+            };
+            const matches: FakeDoc[] = [];
+            for (const [path, data] of docs) {
+                if (!path.startsWith(prefix + '/')) continue;
+                if (!constraints.every(c => data[c.field] === c.value)) continue;
+                matches.push({ ref: { path }, data: () => data });
+            }
+            return { docs: matches, empty: matches.length === 0 } as unknown as Awaited<ReturnType<typeof firestore.getDocs>>;
+        });
+        vi.mocked(firestore.writeBatch).mockImplementation(() => {
+            const staged: { path: string; data: StoredDoc }[] = [];
+            return {
+                update: (ref: { path: string }, data: StoredDoc) => { staged.push({ path: ref.path, data }); },
+                set: () => {},
+                delete: () => {},
+                commit: async () => {
+                    for (const stagedUpdate of staged) {
+                        docs.set(stagedUpdate.path, { ...docs.get(stagedUpdate.path), ...stagedUpdate.data });
+                    }
+                },
+            } as unknown as ReturnType<typeof firestore.writeBatch>;
+        });
+        return docs;
+    };
+
+    const ownerAccount: AnchorAccount = {
+        id: ACC,
+        name: 'Checking',
+        type: 'checking',
+        currency: 'USD',
+        balanceCents: 500000,
+        color: 'bg-blue-500',
+        scope: 'personal',
+        ownerId: OWNER,
+    };
+
+    const wire = () => {
+        const service = new AccountService();
+        return renderView(ownerAccount, {
+            userId: OWNER,
+            transactions: [], // divergence is NOT visible in the date-filtered context
+            renameAccount: (id: string, newName: string) => service.renameAccount(OWNER, 'Test User', ownerAccount, newName),
+        });
+    };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, value: 600 });
+        Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, value: 600 });
+        Object.defineProperty(HTMLElement.prototype, 'scrollHeight', { configurable: true, value: 600 });
+    });
+
+    it('repairs divergent labels through the real service even when none are in the loaded view', async () => {
+        const docs = installStore();
+        const harness = wire();
+
+        const user = userEvent.setup();
+        await openRenameModal(user);
+        await user.click(screen.getByRole('button', { name: 'Save' })); // submit the unchanged name
+
+        await waitFor(() => expect(docs.get(txPath(0))?.accountName).toBe('Checking'));
+        expect(docs.get(txPath(1))?.accountName).toBe('Checking');
+        // Account name unchanged, and NO self-referential "Checking -> Checking" history.
+        expect(docs.get(ACC_PATH)?.name).toBe('Checking');
+        expect(docs.get(ACC_PATH)?.nameHistory).toEqual([]);
+        // Amounts (and permissions) untouched by a label repair.
+        expect(docs.get(txPath(0))?.amountCents).toBe(1234);
+        expect(docs.get(txPath(1))?.amountCents).toBe(5678);
+        await waitFor(() =>
+            expect(harness.showToast).toHaveBeenCalledWith('Transaction labels restored to "Checking"', 'success'));
+    });
+
+    it('recovery survives a full remount (reload) with the same persisted state', async () => {
+        const docs = installStore();
+
+        const first = wire();
+        first.unmount();
+        const second = wire();
+
+        const user = userEvent.setup();
+        await openRenameModal(user);
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+
+        await waitFor(() => expect(docs.get(txPath(0))?.accountName).toBe('Checking'));
+        expect(docs.get(ACC_PATH)?.name).toBe('Checking');
+        expect(docs.get(ACC_PATH)?.nameHistory).toEqual([]);
+        await waitFor(() =>
+            expect(second.showToast).toHaveBeenCalledWith('Transaction labels restored to "Checking"', 'success'));
+    });
+
+
+
+
+    it('a non-owner cannot reach the repair path (permissions preserved)', async () => {
+        const docs = installStore();
+        const service = new AccountService();
+        await expect(
+            service.renameAccount('intruder', 'Intruder', ownerAccount, 'Checking')
+        ).rejects.toThrow('Permission denied');
+        expect(docs.get(txPath(0))?.accountName).toBe('Household');
+        expect(docs.get(ACC_PATH)?.name).toBe('Checking');
+    });
+});
+

@@ -109,10 +109,32 @@ export class AccountService {
     }
 
     /**
-     * Rename an account and track history.
-     * Handles large transaction sets by chunking batch writes (Firestore limit: 500 ops).
+     * Rename an account, or repair transaction labels left divergent by an
+     * earlier partial failure. Handles large transaction sets by chunking batch
+     * writes (Firestore limit: 500 ops).
+     *
+     * Recovery-safe ordering (FEAT-142): every divergent transaction label is
+     * committed BEFORE the account document (name + history). A failure in any
+     * transaction batch therefore leaves the account name unchanged, so the
+     * operation can be retried — with the intended name, or, to roll labels back
+     * to the persisted name, by re-submitting the current account name.
+     *
+     * Two intents, distinguished by the whitespace-normalized submitted name:
+     * - Genuine rename: commits the new name plus exactly one history entry LAST.
+     * - Label repair (normalized equal to the account name): converges divergent
+     *   labels onto the persisted name and appends no history entry (no rename
+     *   occurred, so a "Checking -> Checking" entry is impossible). Divergence is
+     *   detected in Firestore, not from a date-filtered client view, so recovery
+     *   works after a reload and for transactions outside the visible month.
+     *   Returns { labelsRepaired: false } without writing when nothing diverged,
+     *   so callers can avoid reporting a false success.
      */
-    async renameAccount(userId: string, userName: string, account: AnchorAccount, newName: string): Promise<void> {
+    async renameAccount(
+        userId: string,
+        userName: string,
+        account: AnchorAccount,
+        newName: string
+    ): Promise<{ labelsRepaired: boolean }> {
         if (!canManageAccount(account, userId)) {
             throw new AnchorError('Permission denied: You cannot rename this account.', 'PERMISSION');
         }
@@ -120,36 +142,37 @@ export class AccountService {
             throw new AnchorError('Account name cannot be empty.', 'VALIDATION');
         }
 
+        const normalize = (value: string) => value.trim().replace(/\s+/g, ' ');
+        const isLabelRepair = normalize(newName) === normalize(account.name);
+        // A repair converges labels onto the PERSISTED account name; a rename
+        // writes the submitted name.
+        const targetName = isLabelRepair ? account.name : newName;
+
         try {
             const timestamp = new Date().toISOString();
             const ownerId = account.ownerId || userId;
             const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', ownerId, 'accounts', account.id);
-
             const historyEntry = { date: timestamp, oldName: account.name, newName, actorId: userId, actorName: userName };
             const currentHistory = account.nameHistory || [];
 
             const txQuery = query(collection(this.firestore, 'artifacts', APP_ID, 'users', ownerId, 'finance'), where('accountId', '==', account.id));
             const txSnap = await getDocs(txQuery);
-            const txDocs = txSnap.docs;
 
             const BATCH_CHUNK_SIZE = 400;
-            const chunks: typeof txDocs[] = [];
-            for (let i = 0; i < txDocs.length; i += BATCH_CHUNK_SIZE) {
-                chunks.push(txDocs.slice(i, i + BATCH_CHUNK_SIZE));
-            }
 
-            // Recovery-safe ordering (FEAT-142): update ALL denormalized transaction
-            // names first and commit the account document (name + history) LAST.
-            // A failure in any transaction batch therefore leaves the account with its
-            // original name, so the rename can be retried (same path) with the submitted
-            // name or any other name, remains recoverable across reloads, never appends
-            // a duplicate/self-referential history entry, and never reports success
-            // while required updates are incomplete.
-            for (const chunk of chunks) {
-                const batch = writeBatch(this.firestore);
-                chunk.forEach(d => batch.update(d.ref, { accountName: newName }));
-                await batch.commit();
-            }
+            // Rewrite only documents whose label actually differs from the target.
+            // A repair with nothing to fix therefore performs no writes.
+            const convergeLabels = async (txDocs: typeof txSnap.docs): Promise<number> => {
+                const divergent = txDocs.filter(d => d.data()?.accountName !== targetName);
+                for (let i = 0; i < divergent.length; i += BATCH_CHUNK_SIZE) {
+                    const batch = writeBatch(this.firestore);
+                    divergent.slice(i, i + BATCH_CHUNK_SIZE).forEach(d => batch.update(d.ref, { accountName: targetName }));
+                    await batch.commit();
+                }
+                return divergent.length;
+            };
+
+            let labelsRepaired = await convergeLabels(txSnap.docs);
 
             // Sync shared account transactions
             if (account.shares) {
@@ -157,26 +180,30 @@ export class AccountService {
                     const spouseTxQuery = query(collection(this.firestore, 'artifacts', APP_ID, 'users', spouseId, 'finance'), where('accountId', '==', account.id));
                     const spouseTxSnap = await getDocs(spouseTxQuery);
                     if (!spouseTxSnap.empty) {
-                        const spouseTxDocs = spouseTxSnap.docs;
-                        for (let i = 0; i < spouseTxDocs.length; i += BATCH_CHUNK_SIZE) {
-                            const spouseBatch = writeBatch(this.firestore);
-                            spouseTxDocs.slice(i, i + BATCH_CHUNK_SIZE).forEach(d => spouseBatch.update(d.ref, { accountName: newName }));
-                            await spouseBatch.commit();
-                        }
+                        labelsRepaired += await convergeLabels(spouseTxSnap.docs);
                     }
                 }
             }
 
-            // Final commit: account name + rename history, only after every required
-            // transaction update above has succeeded.
+            if (isLabelRepair) {
+                // The account name is already correct; only labels needed work.
+                if (labelsRepaired === 0) {
+                    return { labelsRepaired: false };
+                }
+                auditFinance.accountLabelsRepaired(account.id, account.name);
+                return { labelsRepaired: true };
+            }
+
+            // Genuine rename: commit the account name + history LAST, only after
+            // every required transaction update above has succeeded.
             const accountBatch = writeBatch(this.firestore);
             accountBatch.update(accRef, { name: newName, nameHistory: [...currentHistory, historyEntry] });
             await accountBatch.commit();
 
-            // AUDIT: Log account rename
             auditFinance.accountRenamed(account.id, account.name, newName);
+            return { labelsRepaired: false };
         } catch (error) {
-            void auditFinance.operationFailed('account_rename', {
+            void auditFinance.operationFailed(isLabelRepair ? 'account_label_repair' : 'account_rename', {
                 accountId: account.id,
                 oldName: account.name,
                 newName,

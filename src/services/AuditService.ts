@@ -26,6 +26,7 @@ type AuditEventType =
     | 'account_created'
     | 'account_archived'
     | 'account_renamed'
+    | 'account_labels_repaired'
     | 'transaction_created'
     | 'transaction_deleted'
     | 'transaction_updated'
@@ -93,6 +94,8 @@ export const auditFinance = {
         logAuditEvent('account_archived', { accountId, accountName }),
     accountRenamed: (accountId: string, oldName: string, newName: string) =>
         logAuditEvent('account_renamed', { accountId, oldName, newName }),
+    accountLabelsRepaired: (accountId: string, accountName: string) =>
+        logAuditEvent('account_labels_repaired', { accountId, accountName }),
     transactionCreated: (transactionId: string, accountId: string, amountCents: number, type: string) =>
         logAuditEvent('transaction_created', { transactionId, accountId, amountCents, type }),
     transactionDeleted: (transactionId: string, accountId: string) =>

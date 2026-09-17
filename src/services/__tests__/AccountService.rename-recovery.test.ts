@@ -11,7 +11,9 @@
  * LAST, after every transaction-update batch. Therefore any failure leaves
  * the original account name persisted, recovery survives reload, retries with
  * any name (including the original) work, and history entries append exactly
- * once on success.
+ * once on success. Submitting the CURRENT account name is a label repair:
+ * it converges divergent transaction accountName labels back to the account
+ * name without appending a history entry.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -135,8 +137,9 @@ describe('AccountService.renameAccount recovery', () => {
     it('renames with zero transactions and appends exactly one history entry', async () => {
         store = makeStore();
         const account = seedAccount(store);
-        await new AccountService().renameAccount(OWNER, 'Owner User', account, 'Main Checking');
+        const result = await new AccountService().renameAccount(OWNER, 'Owner User', account, 'Main Checking');
 
+        expect(result).toEqual({ labelsRepaired: false });
         expect(store.docs.get(ACC_PATH)?.name).toBe('Main Checking');
         const history = store.docs.get(ACC_PATH)?.nameHistory as { oldName: string; newName: string }[];
         expect(history).toHaveLength(1);
@@ -246,5 +249,123 @@ describe('AccountService.renameAccount recovery', () => {
 
         await new AccountService().renameAccount(OWNER, 'Owner User', account, 'Renamed');
         expect(store.docs.get(`${OWNER_TX}/tx-0`)?.amountCents).toBe(100);
+    });
+
+    it('a failure at the final account commit leaves labels ahead of the account name; retry completes with one history entry', async () => {
+        // 1 tx → owner tx batch is commit #1; the account commit (#2) rejects.
+        store = makeStore([2]);
+        const account = seedAccount(store);
+        seedTransactions(store, 1);
+
+        await expect(
+            new AccountService().renameAccount(OWNER, 'Owner User', account, 'Main Checking')
+        ).rejects.toThrow('Failed to rename account');
+
+        // Durable partial state: label moved, account name and history did not.
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.accountName).toBe('Main Checking');
+        expect(store.docs.get(ACC_PATH)?.name).toBe('Checking Account');
+        expect(store.docs.get(ACC_PATH)?.nameHistory).toEqual([]);
+
+        // Retry via a FRESH service instance (models close/reopen/reload).
+        await new AccountService().renameAccount(OWNER, 'Owner User', account, 'Main Checking');
+
+        expect(store.docs.get(ACC_PATH)?.name).toBe('Main Checking');
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.accountName).toBe('Main Checking');
+        const history = store.docs.get(ACC_PATH)?.nameHistory as { oldName: string; newName: string }[];
+        expect(history).toHaveLength(1);
+        expect(history[0]).toMatchObject({ oldName: 'Checking Account', newName: 'Main Checking', actorId: OWNER });
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.amountCents).toBe(100);
+    });
+
+    it('after partial failure, submitting the current account name repairs labels without a history entry', async () => {
+        // Failure at the account commit (#2): the owner label moved, the account
+        // name and history did not — durable divergence.
+        store = makeStore([2]);
+        const account = seedAccount(store);
+        seedTransactions(store, 1);
+
+        await expect(
+            new AccountService().renameAccount(OWNER, 'Owner User', account, 'Main Checking')
+        ).rejects.toThrow('Failed to rename account');
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.accountName).toBe('Main Checking');
+
+        // Label repair via a FRESH service instance: submit the persisted name.
+        const repair = await new AccountService().renameAccount(OWNER, 'Owner User', account, 'Checking Account');
+        expect(repair).toEqual({ labelsRepaired: true });
+
+        expect(store.docs.get(ACC_PATH)?.name).toBe('Checking Account');
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.accountName).toBe('Checking Account');
+        expect(store.docs.get(ACC_PATH)?.nameHistory).toEqual([]);
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.amountCents).toBe(100);
+
+        // The intended rename is still possible afterwards and records history once.
+        await new AccountService().renameAccount(OWNER, 'Owner User', account, 'Main Checking');
+        const history = store.docs.get(ACC_PATH)?.nameHistory as { oldName: string; newName: string }[];
+        expect(history).toHaveLength(1);
+        expect(history[0]).toMatchObject({ oldName: 'Checking Account', newName: 'Main Checking' });
+    });
+
+    it('label repair restores shared-account labels for every household member without history', async () => {
+        const shared = makeAccount({ shares: { 'spouse-1': 'read' } });
+        store = makeStore([2]); // owner tx batch ok; spouse batch rejects
+        seedAccount(store, shared);
+        seedTransactions(store, 1);
+        seedTransactions(store, 1, SPOUSE_TX);
+
+        await expect(
+            new AccountService().renameAccount(OWNER, 'Owner User', shared, 'Main Checking')
+        ).rejects.toThrow('Failed to rename account');
+        expect(store.docs.get(`${SPOUSE_TX}/tx-0`)?.accountName).toBe('Checking Account');
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.accountName).toBe('Main Checking');
+
+        // Repair via a fresh instance converges BOTH members' labels to the current name.
+        await new AccountService().renameAccount(OWNER, 'Owner User', shared, 'Checking Account');
+
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.accountName).toBe('Checking Account');
+        expect(store.docs.get(`${SPOUSE_TX}/tx-0`)?.accountName).toBe('Checking Account');
+        expect(store.docs.get(ACC_PATH)?.name).toBe('Checking Account');
+        expect(store.docs.get(ACC_PATH)?.nameHistory).toEqual([]);
+        // Financial amounts untouched on both sides.
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.amountCents).toBe(100);
+        expect(store.docs.get(`${SPOUSE_TX}/tx-0`)?.amountCents).toBe(100);
+    });
+
+    it('a failed label repair can itself be retried and still appends no history', async () => {
+        // 801 divergent tx (simulating prior partial failure state), so the
+        // repair spans multiple chunks: chunk #1 (400) commits, chunk #2 rejects.
+        store = makeStore([2]);
+        const account = seedAccount(store);
+        seedTransactions(store, 801);
+        for (const path of txPaths(store)) {
+            store.docs.set(path, { ...store.docs.get(path), accountName: 'Main Checking' });
+        }
+
+        await expect(
+            new AccountService().renameAccount(OWNER, 'Owner User', account, 'Checking Account')
+        ).rejects.toThrow('Failed to rename account');
+        expect(store.docs.get(ACC_PATH)?.nameHistory).toEqual([]);
+
+        // Retry repair via a fresh instance completes; still no history entry.
+        await new AccountService().renameAccount(OWNER, 'Owner User', account, 'Checking Account');
+        const names = new Set(txPaths(store).map(p => store.docs.get(p)?.accountName));
+        expect([...names]).toEqual(['Checking Account']);
+        expect(store.docs.get(ACC_PATH)?.name).toBe('Checking Account');
+        expect(store.docs.get(ACC_PATH)?.nameHistory).toEqual([]);
+    });
+
+    it('a clean repair with no divergent labels is a harmless no-op with no history', async () => {
+        store = makeStore();
+        const account = seedAccount(store, makeAccount({
+            nameHistory: [{ date: '2026-01-01T00:00:00Z', oldName: 'Old', newName: 'Checking Account', actorId: OWNER, actorName: 'Owner User' }],
+        }));
+        seedTransactions(store, 1);
+
+        const result = await new AccountService().renameAccount(OWNER, 'Owner User', account, 'Checking Account');
+
+        expect(result).toEqual({ labelsRepaired: false });
+        expect(store.docs.get(ACC_PATH)?.name).toBe('Checking Account');
+        const history = store.docs.get(ACC_PATH)?.nameHistory as unknown[];
+        expect(history).toHaveLength(1); // pre-existing entry preserved, nothing appended
+        expect(store.docs.get(`${OWNER_TX}/tx-0`)?.accountName).toBe('Checking Account');
     });
 });

@@ -58,14 +58,18 @@ export const useFinanceOperations = (
     }, [user, userName, accounts]);
 
     const renameAccount = useCallback(async (id: string, newName: string) => {
-        if (!user) return;
+        if (!user) return { labelsRepaired: false };
         const account = accounts.find(a => a.id === id);
-        if (!account) return;
+        if (!account) return { labelsRepaired: false };
         if (account.ownerId && account.ownerId !== user.uid) {
             throw new Error('Only the account owner can rename this account');
         }
         try {
-            await withTimeout(financeService.renameAccount(user.uid, userName, account, newName), OPERATION_TIMEOUT, 'renameAccount');
+            return await withTimeout(
+                financeService.renameAccount(user.uid, userName, account, newName),
+                OPERATION_TIMEOUT,
+                'renameAccount'
+            );
         } catch (err) {
             throw handleError(err);
         }
