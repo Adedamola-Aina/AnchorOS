@@ -90,9 +90,15 @@ export const OnboardingView = () => {
     try {
       const uid = user?.uid;
       if (!uid) throw new Error('User not authenticated');
+      // RA-13 (#171): guard the write too — the rules reject non-positive targets.
+      const targetAmountCents = toCents(goalAmount);
+      if (targetAmountCents <= 0) {
+        showToast('Enter a target amount greater than zero.', 'error');
+        return;
+      }
       await secureDb.addDocument(uid, 'goals', {
         title: goalTitle,
-        targetAmountCents: toCents(goalAmount),
+        targetAmountCents,
         currentAmountCents: 0,
         currency,
         goalType,
