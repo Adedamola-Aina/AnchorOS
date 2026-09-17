@@ -53,6 +53,35 @@ export function generateChallengeId(): string {
     return generateBase64urlChallenge(16);
 }
 
+/**
+ * RA-03 (#150): resolve a stable rate-limit identifier for challenge issuance.
+ *
+ * Prefer the authenticated uid. For anonymous (pre-auth) challenge requests the
+ * client IP is the only available discriminator, and Cloud Functions delivers it
+ * in `x-forwarded-for`. Falling straight through to a literal 'anon' collapses
+ * every anonymous caller into one bucket, so a single attacker can exhaust the
+ * limit — and therefore passkey login/registration availability — for everyone.
+ */
+export function resolveChallengeRateLimitId(input: {
+    uid?: string | null;
+    forwardedFor?: string | string[] | undefined;
+    remoteIp?: string | undefined;
+}): string {
+    const uid = input.uid?.trim();
+    if (uid) return uid;
+
+    const forwarded = Array.isArray(input.forwardedFor)
+        ? input.forwardedFor[0]
+        : input.forwardedFor;
+    const firstForwarded = forwarded?.split(',')[0]?.trim();
+    if (firstForwarded) return `ip:${firstForwarded}`;
+
+    const remoteIp = input.remoteIp?.trim();
+    if (remoteIp) return `ip:${remoteIp}`;
+
+    return 'anon';
+}
+
 // ── Firestore references ────────────────────────────────────────────────────
 
 export function challengeRef(challengeId: string) {

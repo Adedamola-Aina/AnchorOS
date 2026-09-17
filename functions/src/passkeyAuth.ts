@@ -39,6 +39,7 @@ import {
     getRpId,
     generateBase64urlChallenge,
     generateChallengeId,
+    resolveChallengeRateLimitId,
     challengeRef,
     credentialRef,
     findCredentialByCredentialId,
@@ -62,7 +63,12 @@ export const issuePasskeyChallenge = secureOnCall(async (request) => {
         throw new HttpsError('unauthenticated', 'You must be signed in to register a passkey');
     }
 
-    const rateLimitId = request.auth?.uid ?? request.rawRequest?.ip ?? 'anon';
+    const forwardedFor = request.rawRequest?.headers?.['x-forwarded-for'] as string | string[] | undefined;
+    const rateLimitId = resolveChallengeRateLimitId({
+        uid: request.auth?.uid,
+        forwardedFor,
+        remoteIp: request.rawRequest?.ip,
+    });
     await enforceRateLimit('passkeyChallenge', rateLimitId);
 
     const challengeId = generateChallengeId();
@@ -128,7 +134,20 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
         // userHandle may have been absent on the client; try collection-group fallback
         const fallback = await findCredentialByCredentialId(credentialId);
         if (!fallback) {
+            // RA-03 (#150): consume the challenge on every failure path so a failed
+            // attempt cannot be retried against another endpoint.
+            await challengeRef(challengeId).delete();
             throw new HttpsError('not-found', 'No passkey credential found for this user');
+        }
+        if (fallback.userId !== userId) {
+            // The credential is owned by a different account than the client hinted.
+            // This is legitimate for discoverable credentials, but it must be
+            // observable because the resolved user is who the token is minted for.
+            await createAuditLog('passkey_verify_user_mismatch', fallback.userId, {
+                suppliedUserId: userId,
+                credentialId,
+                severity: 'medium',
+            });
         }
         credSnap = { exists: true, data: () => fallback.data } as unknown as typeof credSnap;
         resolvedUserId = fallback.userId;
@@ -138,6 +157,7 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
 
     // Defensive: ensure publicKey is a proper base64url string before conversion
     if (!credData.publicKey || typeof credData.publicKey !== 'string') {
+        await challengeRef(challengeId).delete();
         throw new HttpsError('internal', 'Stored credential has an invalid public key format');
     }
 
@@ -171,6 +191,8 @@ export const verifyPasskeyAssertion = secureOnCall(async (request) => {
             reason: (err as { message?: string }).message ?? 'verification error',
             severity: 'high',
         });
+        // RA-03 (#150): a failed assertion consumes the challenge (single-use).
+        await challengeRef(challengeId).delete();
         throw new HttpsError('permission-denied', 'Passkey verification failed');
     }
 
