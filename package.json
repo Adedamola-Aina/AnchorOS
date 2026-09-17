@@ -21,6 +21,7 @@
     "coverage:modules": "node scripts/generate-module-coverage.mjs",
     "test:coverage:modules": "npm run test:coverage:collect && npm run coverage:modules",
     "test:e2e": "npx playwright test --config config/playwright.config.ts",
+    "test:e2e:local": "node scripts/ci/run-e2e-local.mjs",
     "test:release-smoke": "npx playwright test --config config/playwright.release-smoke.config.ts",
     "test:release-smoke:local": "firebase emulators:exec --project demo-anchor-os --only auth,firestore 'FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_PROJECT_ID=demo-anchor-os node scripts/ci/seed-release-emulator.mjs && npm run test:release-smoke'",
     "test:ci-infra": "node --test scripts/ci/*.node-suite.mjs",
