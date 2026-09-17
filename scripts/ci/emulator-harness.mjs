@@ -284,6 +284,119 @@ export function assertLoopbackTarget(rawTarget, { what = 'target' } = {}) {
     return url.origin;
 }
 
+/**
+ * Credential-bearing cloud Firebase Auth endpoints.
+ *
+ * A loopback page URL does NOT prove the Firebase backend is local: a stale
+ * checkout can be served from loopback while its Firebase config still points
+ * at a cloud project. Development must only ever talk to the local emulator, so
+ * anything on these hosts is a cloud auth request that must be blocked before
+ * fixture credentials are transmitted.
+ */
+export function isCloudFirebaseAuthUrl(rawUrl) {
+    let url;
+    try {
+        url = new URL(String(rawUrl));
+    } catch {
+        return false;
+    }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    const host = url.hostname.toLowerCase();
+    // Loopback auth requests are the local emulator (or a local stub), never cloud.
+    if (LOOPBACK_HOSTS.includes(host)) return false;
+    if (host === 'identitytoolkit.googleapis.com' || host.endsWith('.identitytoolkit.googleapis.com')) return true;
+    if (host === 'securetoken.googleapis.com' || host.endsWith('.securetoken.googleapis.com')) return true;
+    return url.pathname.includes('/identitytoolkit/');
+}
+
+/**
+ * Emulator-only Vite environment pinned inline for the local dev server.
+ * Shell env overrides Vite's .env files, so a developer's local configuration
+ * can never leak cloud credentials into a local E2E run.
+ */
+export const PINNED_LOCAL_VITE_ENV = Object.freeze({
+    VITE_APP_ENV: 'development',
+    VITE_FIREBASE_PROJECT_ID: DEMO_PROJECT_ID,
+    VITE_FIREBASE_API_KEY: 'demo-api-key',
+    VITE_FIREBASE_AUTH_DOMAIN: `${DEMO_PROJECT_ID}.firebaseapp.com`,
+    VITE_FIREBASE_STORAGE_BUCKET: `${DEMO_PROJECT_ID}.appspot.com`,
+    VITE_FIREBASE_MESSAGING_SENDER_ID: '000000000000',
+    VITE_FIREBASE_APP_ID: `1:000000000000:web:${DEMO_PROJECT_ID}`,
+    VITE_FIREBASE_APP_CHECK_SITE_KEY: '',
+    VITE_FIREBASE_VAPID_KEY: '',
+    VITE_SENTRY_DSN: '',
+});
+
+/** The pinned local dev-server command that serves THIS worktree on host:port. */
+export function buildLocalDevCommand(host, port) {
+    const bindHost = host === '[::1]' ? '::1' : host;
+    const pinned = Object.entries(PINNED_LOCAL_VITE_ENV)
+        .map(([key, value]) => `${key}=${value}`)
+        .join(' ');
+    return `${pinned} npm run dev -- --host ${bindHost} --port ${port} --strictPort`;
+}
+
+function localWebServerPlan(host, port, origin) {
+    return {
+        command: buildLocalDevCommand(host, port),
+        url: origin,
+        timeout: 60 * 1000,
+        // Never reuse a process this command did not start: an unrelated dev
+        // server could silently serve a different (stale) checkout.
+        reuseExistingServer: false,
+    };
+}
+
+/**
+ * Resolve the Playwright server plan for one target.
+ *
+ * The canonical local runner ALWAYS starts its own app server from the current
+ * worktree. A loopback `E2E_BASE_URL` only chooses the host/port the server is
+ * started on — it never disables startup and never allows reuse. A non-loopback
+ * `E2E_BASE_URL` is a deployed target (the staging/release workflows invoke
+ * config/playwright.config.ts directly) and must never start a local server.
+ *
+ * @returns {{mode: 'local'|'deployed', origin: string, host: string, port: string,
+ *   baseURL: string, webServer: object|null}}
+ */
+export function resolvePlaywrightServerPlan(env = process.env) {
+    const raw = String(env.E2E_BASE_URL ?? '').trim();
+    if (!raw) {
+        const url = new URL(DEFAULT_LOCAL_ORIGIN);
+        return {
+            mode: 'local',
+            origin: url.origin,
+            host: url.hostname,
+            port: url.port,
+            baseURL: url.origin,
+            webServer: localWebServerPlan(url.hostname, url.port, url.origin),
+        };
+    }
+    let url;
+    try {
+        url = new URL(raw);
+    } catch {
+        throw new HarnessError(`E2E_BASE_URL="${raw}" is not a valid URL.`);
+    }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        throw new HarnessError(`E2E_BASE_URL="${raw}" must use http or https.`);
+    }
+    const host = url.hostname.toLowerCase();
+    if (!LOOPBACK_HOSTS.includes(host)) {
+        // Deployed target: the invoking workflow owns the origin; no local server.
+        return { mode: 'deployed', origin: url.origin, host, port: url.port || '', baseURL: url.origin, webServer: null };
+    }
+    const port = url.port || (url.protocol === 'https:' ? '443' : '80');
+    return {
+        mode: 'local',
+        origin: url.origin,
+        host,
+        port,
+        baseURL: url.origin,
+        webServer: localWebServerPlan(host, port, url.origin),
+    };
+}
+
 /** POSIX shell quoting for values forwarded to `sh -c` (Playwright args, paths). */
 export function shellQuote(value) {
     return `'${String(value).replace(/'/g, `'\\''`)}'`;

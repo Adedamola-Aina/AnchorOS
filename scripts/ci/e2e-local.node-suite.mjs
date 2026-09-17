@@ -20,9 +20,11 @@ import {
     HarnessError,
     assertLoopbackTarget,
     describePortOccupant,
+    isCloudFirebaseAuthUrl,
     requireDemoProjectId,
     requireLoopbackHostEnv,
     resolveLocalOrigin,
+    resolvePlaywrightServerPlan,
     shellQuote,
 } from './emulator-harness.mjs';
 import {
@@ -30,6 +32,8 @@ import {
     buildInnerCommand,
     buildPlaywrightCommand,
     createRunId,
+    findOriginOccupant,
+    occupiedOriginRefusal,
     planEmulatorExecution,
 } from './run-e2e-local.mjs';
 import { resolveFinanceFixture, sanitizeRunId } from '../../e2e/fixtures/financeFixture.mjs';
@@ -153,4 +157,81 @@ test('port occupants are described without assuming privileges', async () => {
     } finally {
         await new Promise((resolve) => server.close(resolve));
     }
+});
+
+test('an occupied target is refused even when explicitly configured', async () => {
+    const server = net.createServer();
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address();
+    try {
+        // The caller explicitly configured this loopback origin via E2E_BASE_URL.
+        const origin = resolveLocalOrigin({ E2E_BASE_URL: `http://127.0.0.1:${port}` });
+        const occupant = await findOriginOccupant(origin);
+        assert.ok(occupant, 'an occupied explicit target must be detected');
+        assert.match(occupant, new RegExp(String(port)));
+        assert.match(occupiedOriginRefusal(), /FREE loopback origin via E2E_BASE_URL/);
+    } finally {
+        await new Promise((resolve) => server.close(resolve));
+    }
+    // The same explicit origin is accepted once it is free.
+    const freed = resolveLocalOrigin({ E2E_BASE_URL: `http://127.0.0.1:${port}` });
+    assert.equal(await findOriginOccupant(freed), null);
+});
+
+test('the local plan ALWAYS starts a fresh, pinned server for this worktree', () => {
+    const defaultPlan = resolvePlaywrightServerPlan({});
+    assert.equal(defaultPlan.mode, 'local');
+    assert.equal(defaultPlan.baseURL, DEFAULT_LOCAL_ORIGIN);
+    assert.equal(defaultPlan.webServer.url, DEFAULT_LOCAL_ORIGIN);
+    assert.equal(defaultPlan.webServer.reuseExistingServer, false);
+    assert.match(defaultPlan.webServer.command, /--host 127\.0\.0\.1 --port 5273 --strictPort/);
+});
+
+test('a free custom loopback port starts the correct worktree server', () => {
+    const plan = resolvePlaywrightServerPlan({ E2E_BASE_URL: 'http://127.0.0.1:5291' });
+    assert.equal(plan.mode, 'local');
+    // One resolved origin drives bind host/port, readiness URL and baseURL.
+    assert.equal(plan.baseURL, 'http://127.0.0.1:5291');
+    assert.equal(plan.webServer.url, 'http://127.0.0.1:5291');
+    assert.equal(plan.webServer.reuseExistingServer, false);
+    assert.match(plan.webServer.command, /--host 127\.0\.0\.1 --port 5291 --strictPort/);
+    assert.match(plan.webServer.command, /VITE_FIREBASE_PROJECT_ID=demo-anchor-os/);
+    assert.match(plan.webServer.command, /VITE_APP_ENV=development/);
+    assert.match(plan.webServer.command, /npm run dev/);
+});
+
+test('a deployed target never starts a local server', () => {
+    const plan = resolvePlaywrightServerPlan({ E2E_BASE_URL: 'https://anchor-os-staging.web.app' });
+    assert.equal(plan.mode, 'deployed');
+    assert.equal(plan.baseURL, 'https://anchor-os-staging.web.app');
+    assert.equal(plan.webServer, null);
+    // The canonical local runner still refuses a non-loopback target outright.
+    assert.throws(
+        () => resolveLocalOrigin({ E2E_BASE_URL: 'https://anchor-os-staging.web.app' }),
+        HarnessError,
+    );
+});
+
+test('cloud Firebase Auth classification covers credentials but not loopback', () => {
+    for (const target of [
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-api-key',
+        'https://securetoken.googleapis.com/v1/token?key=demo-api-key',
+        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=demo-api-key',
+    ]) {
+        assert.equal(isCloudFirebaseAuthUrl(target), true, target);
+    }
+    assert.equal(
+        isCloudFirebaseAuthUrl(
+            'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',
+        ),
+        false,
+    );
+    assert.equal(
+        isCloudFirebaseAuthUrl(
+            'http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',
+        ),
+        false,
+    );
+    assert.equal(isCloudFirebaseAuthUrl('http://127.0.0.1:5273/assets/index.js'), false);
+    assert.equal(isCloudFirebaseAuthUrl('not a url'), false);
 });

@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { expect, type Page } from '@playwright/test';
-import { assertLoopbackTarget } from '../scripts/ci/emulator-harness.mjs';
+import { assertLoopbackTarget, isCloudFirebaseAuthUrl } from '../scripts/ci/emulator-harness.mjs';
+
+export { isCloudFirebaseAuthUrl };
 
 /** How long a deterministic login may take before it is a setup failure. */
 const LOGIN_TIMEOUT_MS = 20000;
@@ -16,6 +18,37 @@ export const EMULATOR_AUTH_ORIGIN = 'http://127.0.0.1:9099';
  */
 export function assertFixtureTargetIsLocal(env: NodeJS.ProcessEnv = process.env): void {
     assertLoopbackTarget(env.E2E_BASE_URL, { what: 'E2E_BASE_URL' });
+}
+
+/** Init-script flag proving the guarded fixture installed the cloud guard. */
+export const CLOUD_AUTH_GUARD_FLAG = '__E2E_CLOUD_AUTH_GUARD__';
+
+/**
+ * Browser-level fail-closed guard for the seeded authenticated path.
+ *
+ * A loopback PAGE URL does not prove the Firebase BACKEND is local: the page
+ * can be served locally while the app's Firebase config still points sign-in at
+ * a cloud project. This installs a route that ABORTS every credential-bearing
+ * cloud Firebase Auth request in-browser, so repository fixture credentials can
+ * never be transmitted to a cloud service even if the app is mis-wired.
+ *
+ * Returns the (non-secret) list of attempted cloud auth URLs that were blocked.
+ * Playwright aborts at the browser boundary, so the request never leaves the
+ * machine; no credential is sent.
+ */
+export async function installCloudFirebaseAuthGuard(page: Page): Promise<{ blocked: string[] }> {
+    const blocked: string[] = [];
+    await page.addInitScript((flag: string) => {
+        window[flag] = true;
+    }, CLOUD_AUTH_GUARD_FLAG);
+    await page.route(
+        (url: URL) => isCloudFirebaseAuthUrl(url.toString()),
+        async (route) => {
+            blocked.push(route.request().url());
+            await route.abort('blockedbyclient');
+        },
+    );
+    return { blocked };
 }
 
 /**
@@ -80,6 +113,11 @@ export async function loginWithSeededIdentity(
     // Fail closed BEFORE submitting anything: the fixture identity is
     // emulator-only and must never be sent to a deployed project.
     assertFixtureTargetIsLocal();
+    // A loopback page URL alone is not proof the Firebase backend is local.
+    // Abort any credential-bearing cloud auth request in-browser, so the
+    // fixture identity can never leave the machine even if the app is wired to
+    // a cloud project.
+    const cloudGuard = await installCloudFirebaseAuthGuard(page);
     const traffic = observeAuthTraffic(page);
 
     await page.goto('/login', { waitUntil: 'domcontentloaded' });
@@ -99,7 +137,17 @@ export async function loginWithSeededIdentity(
         failureText.waitFor({ state: 'visible', timeout: LOGIN_TIMEOUT_MS }),
     ]).catch(() => undefined);
 
-    if (await shell.isVisible().catch(() => false)) return;
+    if (await shell.isVisible().catch(() => false)) {
+        if (cloudGuard.blocked.length) {
+            // Defensive: a visible shell must never coexist with a blocked cloud
+            // credential request on the emulator-only seeded path.
+            throw new Error(
+                `E2E login reached the app shell but the fixture blocked ${cloudGuard.blocked.length} ` +
+                    `cloud Firebase Auth request(s): ${cloudGuard.blocked.join(' | ')}`,
+            );
+        }
+        return;
+    }
 
     let targetOrigin = page.url();
     try {
@@ -116,6 +164,7 @@ export async function loginWithSeededIdentity(
         finalUrl: page.url(),
         emulatorExpected: EMULATOR_AUTH_ORIGIN,
         emulatorReached,
+        cloudAuthBlocked: cloudGuard.blocked,
         authRequests: traffic.requests.slice(0, 10),
         consoleErrors: traffic.consoleErrors.slice(0, 10),
         visibleText,
@@ -132,6 +181,11 @@ export async function loginWithSeededIdentity(
             `  final URL:       ${diagnostics.finalUrl}\n` +
             `  emulator login:  ${emulatorReached ? `reached ${EMULATOR_AUTH_ORIGIN}` : `NOT reached (expected ${EMULATOR_AUTH_ORIGIN} in emulator development)`}\n` +
             `  auth requests:   ${diagnostics.authRequests.length ? diagnostics.authRequests.join(' | ') : '(none)'}\n` +
+            `  cloud blocked:   ${
+                cloudGuard.blocked.length
+                    ? `BLOCKED ${cloudGuard.blocked.length} cloud Firebase Auth request(s) before credentials were sent: ${cloudGuard.blocked.join(' | ')}`
+                    : 'none (backend is local)'
+            }\n` +
             `  visible text:    ${visibleText || '(none)'}\n` +
             `  console errors:  ${diagnostics.consoleErrors.join(' | ') || '(none)'}\n` +
             `  Run this suite with \`npm run test:e2e:local\` so the demo-anchor-os emulators and the seeded ` +

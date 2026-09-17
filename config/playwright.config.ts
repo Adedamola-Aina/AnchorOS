@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { defineConfig, devices } from '@playwright/test';
+import { resolvePlaywrightServerPlan } from '../scripts/ci/emulator-harness.mjs';
 
 /**
  * Authenticated local E2E configuration (general suite).
@@ -13,30 +14,28 @@ import { defineConfig, devices } from '@playwright/test';
  * supported local entry point. It verifies (or starts and cleans up) the
  * demo-anchor-os Firebase emulator suite (auth 9099 + firestore 8080), seeds
  * the disposable fixture identity plus run-scoped finance fixtures, and then
- * runs this config — whose webServer starts a FRESH Vite dev server below.
+ * runs this config — whose webServer ALWAYS starts a FRESH Vite dev server.
  *
  * Hermetic local startup (why this config owns it):
- *   - ONE resolved origin is used for the webServer readiness URL, the browser
- *     `baseURL` and (in the harness) the seeded emulator data. `E2E_BASE_URL`
- *     overrides it; otherwise the dedicated strict port 5273 is used. A fixed
- *     localhost:5173 readiness URL could point at a different origin than the
- *     origin the browser navigates to.
+ *   - ONE resolved origin drives the webServer bind host/port, the readiness
+ *     URL and the browser `baseURL`. A loopback `E2E_BASE_URL` only chooses
+ *     the host/port (default 127.0.0.1:5273); it never disables startup, so
+ *     the run can never attach to a server this command did not start.
  *   - `reuseExistingServer: false` + `--strictPort`: a long-lived dev server on
  *     the target port makes the run FAIL ("port already in use") instead of
  *     silently serving whatever checkout that process was started from. A
  *     stale checkout without emulator wiring produces exactly the misleading
- *     `auth/api-key-not-valid` failure this guards against.
+ *     `auth/api-key-not-valid` failure this guards against. run-e2e-local.mjs
+ *     refuses an occupied port up front with the same intent.
  *   - Emulator-only Firebase env is pinned inline for the local server, so a
  *     developer's local `.env.development` can never leak real cloud
  *     credentials into a test run (shell env wins over .env files in Vite).
- *   - When `E2E_BASE_URL` is set (an already-running target), no local server is
- *     started. The deployed release path is
+ *   - A non-loopback `E2E_BASE_URL` is a deployed target (the staging/release
+ *     workflows run this config directly): no local server is started and the
+ *     origin is owned by the caller. The deployed release path is
  *     config/playwright.release-smoke.config.ts.
  */
-const LOCAL_ORIGIN = 'http://127.0.0.1:5273';
-const BASE_URL = process.env.E2E_BASE_URL || LOCAL_ORIGIN;
-const IS_LOCAL_TARGET = !process.env.E2E_BASE_URL;
-const LOCAL_PORT = new URL(LOCAL_ORIGIN).port;
+const TARGET = resolvePlaywrightServerPlan(process.env);
 
 export default defineConfig({
     testDir: '../e2e',
@@ -69,7 +68,7 @@ export default defineConfig({
 
     use: {
         // The SAME resolved origin as the webServer readiness URL below.
-        baseURL: BASE_URL,
+        baseURL: TARGET.baseURL,
         // Auth/setup failures keep a trace + screenshot so the browser state at
         // the moment of failure stays inspectable.
         trace: 'retain-on-failure',
@@ -97,29 +96,8 @@ export default defineConfig({
         },
     ],
 
-    // Start a fresh dev server before running tests (local targets only).
-    webServer: IS_LOCAL_TARGET
-        ? {
-              // Emulator-only development configuration is pinned inline (shell
-              // env overrides .env files in Vite), mirroring the release-smoke
-              // local path, so no cloud Firebase configuration can leak in.
-              command:
-                  'VITE_APP_ENV=development ' +
-                  'VITE_FIREBASE_PROJECT_ID=demo-anchor-os ' +
-                  'VITE_FIREBASE_API_KEY=demo-api-key ' +
-                  'VITE_FIREBASE_AUTH_DOMAIN=demo-anchor-os.firebaseapp.com ' +
-                  'VITE_FIREBASE_STORAGE_BUCKET=demo-anchor-os.appspot.com ' +
-                  'VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000 ' +
-                  'VITE_FIREBASE_APP_ID=1:000000000000:web:demo-anchor-os ' +
-                  'VITE_FIREBASE_APP_CHECK_SITE_KEY= ' +
-                  'VITE_FIREBASE_VAPID_KEY= ' +
-                  'VITE_SENTRY_DSN= ' +
-                  `npm run dev -- --port ${LOCAL_PORT} --strictPort`,
-              url: BASE_URL,
-              timeout: 60 * 1000,
-              // Never reuse whatever process happens to be on this port: an
-              // unrelated dev server would silently change the code under test.
-              reuseExistingServer: false,
-          }
-        : undefined,
+    // ALWAYS start a fresh, emulator-pinned dev server for a local target.
+    // A deployed target (non-loopback E2E_BASE_URL) is owned by its workflow
+    // and starts no local server. See resolvePlaywrightServerPlan.
+    webServer: TARGET.webServer || undefined,
 });

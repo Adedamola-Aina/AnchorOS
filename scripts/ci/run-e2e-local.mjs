@@ -10,16 +10,20 @@
  *
  * ONE documented command that:
  *   1. resolves ONE local origin (default http://127.0.0.1:5273, overridable
- *      with a loopback E2E_BASE_URL) used for server readiness, browser
- *      navigation and the seeded data;
- *   2. fails clearly if that origin's port is already occupied by another
- *      process — it never reuses a server it did not start;
- *   3. verifies the local Firebase emulator suite serves demo-anchor-os, or
+ *      with a loopback E2E_BASE_URL) used for server bind host/port, readiness,
+ *      browser navigation and the seeded data;
+ *   2. ALWAYS starts its own app server from this worktree — a loopback
+ *      E2E_BASE_URL only chooses the host/port, it never attaches to a running
+ *      server;
+ *   3. fails clearly if that origin's port is already occupied, even when the
+ *      origin was explicitly configured — it never reuses a server it did not
+ *      start;
+ *   4. verifies the local Firebase emulator suite serves demo-anchor-os, or
  *      starts its own emulators (auth + firestore) and shuts them down again;
- *   4. seeds the disposable fixture identity plus a run-scoped finance account;
- *   5. runs Playwright, which starts a fresh Vite dev server on the strict
- *      origin port with emulator-only configuration pinned inline;
- *   6. cleans up only the processes it started (emulators via
+ *   5. seeds the disposable fixture identity plus a run-scoped finance account;
+ *   6. runs Playwright, which starts the fresh Vite dev server on the strict
+ *      origin host/port with emulator-only configuration pinned inline;
+ *   7. cleans up only the processes it started (emulators via
  *      `firebase emulators:exec`, the dev server via Playwright's webServer).
  *
  * It never kills or restarts processes it did not start, never wipes emulator
@@ -61,6 +65,28 @@ export function buildPlaywrightCommand(playwrightArgs = []) {
 /** Seed first, then run Playwright (both inside the emulator window). */
 export function buildInnerCommand(playwrightArgs = []) {
     return `${buildSeedCommand()} && ${buildPlaywrightCommand(playwrightArgs)}`;
+}
+
+/**
+ * Detect anything already listening on the resolved origin's port.
+ *
+ * Applied to the DEFAULT port and to an explicitly configured loopback origin
+ * alike: this command always starts its own server, so a pre-occupied port must
+ * never be silently reused. Returns a human description, or null when free.
+ */
+export async function findOriginOccupant(origin) {
+    if (!(await probePort(origin.host, Number(origin.port)))) return null;
+    return describePortOccupant(origin.port);
+}
+
+/** Why a pre-occupied target origin is never reused. */
+export function occupiedOriginRefusal() {
+    return (
+        'Refusing to reuse a server this command did not start: it may be serving a different ' +
+        'checkout (a stale dev server without emulator wiring is exactly what produces the ' +
+        'misleading auth/api-key-not-valid failure).\n' +
+        '  Stop that process, or pass a FREE loopback origin via E2E_BASE_URL.'
+    );
 }
 
 /** Map the observed emulator state onto what the runner should do. */
@@ -137,14 +163,11 @@ async function main() {
     );
 
     // Never silently share a server with another process (or another checkout).
-    if (!explicitTarget && (await probePort(origin.host, Number(origin.port)))) {
-        return fail(
-            `${describePortOccupant(origin.port)}\n` +
-                '  Refusing to reuse a server this command did not start: it may be serving a different ' +
-                'checkout (a stale dev server without emulator wiring is exactly what produces the ' +
-                'misleading auth/api-key-not-valid failure).\n' +
-                '  Stop that process, or pass a free loopback origin via E2E_BASE_URL.',
-        );
+    // This applies to the default port AND to an explicitly configured loopback
+    // origin: the command always starts its own server below.
+    const occupant = await findOriginOccupant(origin);
+    if (occupant) {
+        return fail(`${occupant}\n  ${occupiedOriginRefusal()}`);
     }
 
     const suite = await readEmulatorSuite();
