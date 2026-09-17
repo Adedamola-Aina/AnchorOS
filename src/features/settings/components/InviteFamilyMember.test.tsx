@@ -9,6 +9,15 @@ vi.mock('../../../context/NotificationContext', () => ({
   useNotifications: () => ({ showToast: mockShowToast }),
 }));
 
+// RA-11 (#167): EmailVerificationWarning now offers a resend action backed by
+// the auth context.
+vi.mock('../../../context/AuthContext', () => ({
+  useAuth: () => ({
+    user: { email: 'owner@test.com', emailVerified: false, reload: vi.fn() },
+    sendVerificationEmail: vi.fn(),
+  }),
+}));
+
 const mockReauthenticate = vi.fn();
 vi.mock('firebase/auth', () => ({
   EmailAuthProvider: { credential: vi.fn((email: string, pw: string) => ({ email, password: pw })) },

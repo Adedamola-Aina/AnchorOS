@@ -17,6 +17,7 @@ import { PasswordChange } from './PasswordChange';
 import { PasskeySection } from './PasskeySection';
 import { AuthEventHistory } from './AuthEventHistory';
 import { EmailChangeForm } from './EmailChangeForm';
+import { EmailVerificationCard } from './EmailVerificationCard';
 
 interface SecuritySettingsProps {
     mfaEnabled?: boolean; isEnrolling: boolean; show2FASetup: boolean; mfaQrUrl: string; mfaManualKey: string; mfaCode: string; mfaError: string;
@@ -93,6 +94,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
                     </div>
                 )}
                 <PasswordChange />
+                <EmailVerificationCard />
                 <EmailChangeForm />
                 <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
                     <PasskeySection />

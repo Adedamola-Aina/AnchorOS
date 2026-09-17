@@ -27,6 +27,20 @@ vi.mock('./SessionManagement', () => ({
 vi.mock('../../../context/NotificationContext', () => ({
   useNotifications: () => ({ showToast: vi.fn(), confirm: vi.fn().mockResolvedValue(true) }),
 }));
+// RA-11 (#167): SecuritySettings now renders EmailVerificationCard, which reads
+// the auth context; the card itself is covered by EmailVerificationCard.test.tsx.
+vi.mock('../../context/AuthContext', () => ({
+  useAuth: () => ({
+    user: { email: 'owner@test.com', emailVerified: true, reload: vi.fn() },
+    sendVerificationEmail: vi.fn(),
+  }),
+}));
+vi.mock('../../context/NotificationContext', () => ({
+  useNotifications: () => ({ showToast: vi.fn() }),
+}));
+vi.mock('./EmailVerificationCard', () => ({
+  EmailVerificationCard: () => <div data-testid="email-verification-card">EmailVerificationCard</div>,
+}));
 vi.mock('../../../utils/error', () => ({
   captureError: vi.fn(),
 }));
