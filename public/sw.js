@@ -50,14 +50,14 @@ if (isLocalDev) {
         env = 'staging';
     }
 
-    console.log(`[sw.js] Initializing Firebase for environment: ${env}`);
+    // RA-08 (#153): environment name is not logged in production.
     firebase.initializeApp(firebaseConfig[env]);
 
     const messaging = firebase.messaging();
 
     // Handle background messages
+    // RA-08 (#153): do not log message payloads in production.
     messaging.onBackgroundMessage((payload) => {
-        console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
         // Customize notification here
         const notificationTitle = payload.notification.title;
@@ -71,12 +71,34 @@ if (isLocalDev) {
     });
 }
 
-// Install: Cache core assets
+// RA-08 (#153): only same-origin, successful, non-opaque responses are
+// cacheable. Writing an opaque/cross-origin response into the cache can throw
+// inside cache.put and break the fetch handler, and it stores third-party
+// content this app does not control.
+function isCacheableResponse(request, response) {
+    try {
+        const url = new URL(request.url);
+        return response.ok
+            && url.origin === self.location.origin
+            && (response.type === 'basic' || response.type === 'default');
+    } catch {
+        return false;
+    }
+}
+
+// Install: Cache core assets. RA-08 (#153): tolerate a missing individual asset
+// so one renamed file cannot block activation/updates for every client.
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS_TO_CACHE);
-        })
+        caches.open(CACHE_NAME).then((cache) =>
+            Promise.allSettled(
+                ASSETS_TO_CACHE.map((asset) =>
+                    cache.add(asset).catch((error) => {
+                        console.warn('[sw.js] Failed to precache', asset, error);
+                    })
+                )
+            )
+        )
     );
     self.skipWaiting();
 });
@@ -146,8 +168,14 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(event.request)
                 .then((networkResponse) => {
-                    const clone = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                    // RA-08 (#153): only cache a successful same-origin response, and
+                    // never let a cache failure reject the fetch handler.
+                    if (isCacheableResponse(event.request, networkResponse)) {
+                        const clone = networkResponse.clone();
+                        caches.open(CACHE_NAME)
+                            .then((cache) => cache.put(event.request, clone))
+                            .catch((error) => console.warn('[sw.js] cache.put failed', error));
+                    }
                     return networkResponse;
                 })
                 .catch(async () => {
@@ -168,7 +196,15 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => {
             return cache.match(event.request).then((cachedResponse) => {
                 const fetchPromise = fetch(event.request).then((networkResponse) => {
-                    cache.put(event.request, networkResponse.clone());
+                    // RA-08 (#153): guard cross-origin/opaque writes; a cache failure
+                    // must never reject this handler.
+                    if (isCacheableResponse(event.request, networkResponse)) {
+                        try {
+                            cache.put(event.request, networkResponse.clone());
+                        } catch (error) {
+                            console.warn('[sw.js] cache.put failed', error);
+                        }
+                    }
                     return networkResponse;
                 }).catch(() => {
                     return cachedResponse || new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
