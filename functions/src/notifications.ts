@@ -21,9 +21,19 @@ export const getNotifications = secureOnCall(
         const userId = request.auth.uid;
         await enforceRateLimit('getNotifications', userId);
 
-        const data = request.data as { limit?: number; includeRead?: boolean };
-        const limit = data?.limit || 50;
-        const includeRead = data?.includeRead ?? false;
+        const data = request.data as { limit?: unknown; includeRead?: unknown; startAfterId?: unknown };
+
+        // RA-07 (#151): never trust an unbounded client-supplied page size.
+        const DEFAULT_LIMIT = 50;
+        const MAX_LIMIT = 100;
+        const requested = typeof data?.limit === 'number' && Number.isFinite(data.limit)
+            ? Math.floor(data.limit)
+            : DEFAULT_LIMIT;
+        const limit = Math.min(Math.max(requested, 1), MAX_LIMIT);
+        const includeRead = data?.includeRead === true;
+        const startAfterId = typeof data?.startAfterId === 'string' && data.startAfterId
+            ? data.startAfterId
+            : null;
 
         let query = db.collection('artifacts').doc(APP_ID)
             .collection('users').doc(userId)
@@ -36,8 +46,21 @@ export const getNotifications = secureOnCall(
             query = query.where('read', '==', false);
         }
 
+        if (startAfterId) {
+            const cursorDoc = await db.collection('artifacts').doc(APP_ID)
+                .collection('users').doc(userId)
+                .collection('notifications').doc(startAfterId).get();
+            if (cursorDoc.exists) {
+                query = query.startAfter(cursorDoc);
+            }
+        }
+
         const snapshot = await query.get();
-        return { notifications: snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) };
+        return {
+            notifications: snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+            limit,
+            hasMore: snapshot.size === limit,
+        };
     }
 );
 
