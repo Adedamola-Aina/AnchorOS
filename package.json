@@ -34,7 +34,7 @@
     "check:indexes": "npx tsx tools/ci/check-index-catalog.ts",
     "check:index-usage": "npx tsx tools/ci/check-index-usage.ts",
     "check:dead-code": "knip",
-    "emulator:start": "firebase emulators:start --project demo-anchor-os",
+    "emulator:start": "firebase emulators:start --project demo-anchor-os --only auth,firestore,functions,storage",
     "build:dev": "tsc -b config/tsconfig.app.json config/tsconfig.node.json && vite build --mode development --config config/vite.config.ts",
     "deploy:staging": "./scripts/DEPLOY_PIPELINE.sh --env=staging",
     "deploy:production": "./scripts/DEPLOY_PIPELINE.sh --env=production",
