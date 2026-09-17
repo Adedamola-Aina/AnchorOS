@@ -1,6 +1,12 @@
 // @ts-nocheck
 import { test, expect } from './fixtures/base';
 import { TEST_ACCOUNT } from './fixtures/test-data';
+import { resolveFinanceFixture } from './fixtures/financeFixture.mjs';
+
+/** Escape a literal string so it can be embedded in a RegExp. */
+function escapeRegExp(value: string): string {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 // Helper: Navigate to Finance page (Login handled by fixture)
 async function goToFinance(page: any) {
@@ -82,31 +88,67 @@ test.describe('Finance - Accounts', () => {
         await assertFinanceHasRenderableState(page);
     });
 
-    test('Edit account name (rename)', async ({ page }) => {
-        const hasAccount = await openFirstAccount(page);
-        if (hasAccount) {
-            const editBtn = page.locator('button:has(svg.lucide-pencil)').first();
+    test('Edit account name (rename)', async ({ page }, testInfo) => {
+        // The account under test is seeded per invocation by
+        // scripts/ci/seed-e2e-finance.mjs and named from E2E_RUN_ID, so this
+        // test never collides with a parallel run or another agent's data.
+        // Missing fixture data is a FAILURE here, never a skip/fallback.
+        expect(process.env.E2E_RUN_ID, 'run this spec with `npm run test:e2e:local`').toBeTruthy();
+        const fixture = resolveFinanceFixture(process.env.E2E_RUN_ID);
+        // Retry-safe names: attempt N renames the account to a new value, and
+        // the pre-rename value is whatever the previous attempt left behind.
+        const attemptName = (attempt: number) => `E2E Renamed ${fixture.runId}${attempt === 0 ? '' : ` r${attempt}`}`;
+        const preRenameName = testInfo.retry === 0 ? fixture.accountName : attemptName(testInfo.retry - 1);
+        const renamedName = attemptName(testInfo.retry);
+        const accountRowName = new RegExp(`E2E (Rename|Renamed) ${escapeRegExp(fixture.runId)}`);
 
-            if (await editBtn.isVisible()) {
-                await editBtn.click();
-                await page.waitForTimeout(500);
+        // Log in through the real UI (fixture), then open the known account.
+        await page.goto('/finance/accounts', { waitUntil: 'domcontentloaded' });
+        await expect(page.getByRole('heading', { name: 'All Accounts' })).toBeVisible({ timeout: 10000 });
+        const accountRow = page.getByRole('button', { name: accountRowName }).first();
+        await expect(accountRow).toBeVisible({ timeout: 10000 });
+        await accountRow.click();
 
-                // Input should appear for editing
-                const input = page.locator('input').first();
-                await expect(input).toBeVisible();
-                return;
-            }
-            const hasHistory = await page.locator('text=History').first().isVisible().catch(() => false);
-            const hasTransactions = await page.locator('text=Transactions').first().isVisible().catch(() => false);
-            const hasFinanceHeading = await page.getByRole('heading', { name: 'Finance' }).first().isVisible().catch(() => false);
-            expect(hasHistory || hasTransactions || hasFinanceHeading).toBe(true);
-            return;
-        }
+        // Account Details shows the known account.
+        await expect(page.getByRole('heading', { name: preRenameName })).toBeVisible({ timeout: 10000 });
 
-        await expect(
-            page.locator('button:has-text("Add Account")').or(page.locator('button:has-text("Create your first account")')).first()
-                .or(page.getByRole('heading', { name: 'Finance' }).first())
-        ).toBeVisible({ timeout: 10000 });
+        // Account options → Edit Account.
+        await page.getByRole('button', { name: 'Account options' }).click();
+        await page.getByRole('button', { name: 'Edit Account' }).click();
+
+        // Rename dialog with the current name pre-filled.
+        const dialog = page.getByRole('dialog').filter({ hasText: 'Rename Account' }).first();
+        await expect(dialog).toBeVisible({ timeout: 5000 });
+        await expect(dialog.getByRole('heading', { name: 'Rename Account' })).toBeVisible();
+        const nameInput = dialog.getByLabel('Account name');
+        await expect(nameInput).toHaveValue(preRenameName);
+
+        // Save the new name.
+        await nameInput.fill(renamedName);
+        await dialog.getByRole('button', { name: 'Save' }).click();
+
+        // Success feedback, dialog closed, Account Details shows the new name.
+        await expect(page.getByText(`Account renamed to "${renamedName}"`)).toBeVisible({ timeout: 10000 });
+        await expect(dialog).toBeHidden({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: renamedName })).toBeVisible({ timeout: 10000 });
+
+        // Navigate back and assert the updated name on the Finance overview.
+        await page.getByRole('button', { name: 'Close account details' }).click();
+        await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByText(renamedName).first()).toBeVisible({ timeout: 10000 });
+
+        // The accounts list shows the updated name and no longer the old one.
+        await page.goto('/finance/accounts', { waitUntil: 'domcontentloaded' });
+        await expect(page.getByRole('button', { name: new RegExp(escapeRegExp(renamedName)) })).toBeVisible({
+            timeout: 10000,
+        });
+        await expect(page.getByText(preRenameName, { exact: true })).toHaveCount(0);
+
+        // Reload and assert the rename persisted.
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await expect(page.getByRole('button', { name: new RegExp(escapeRegExp(renamedName)) })).toBeVisible({
+            timeout: 10000,
+        });
     });
 
     test('Account balance displays correctly', async ({ page }) => {

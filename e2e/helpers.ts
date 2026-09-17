@@ -1,6 +1,130 @@
 // @ts-nocheck
 import { expect, type Page } from '@playwright/test';
 
+/** How long a deterministic login may take before it is a setup failure. */
+const LOGIN_TIMEOUT_MS = 20000;
+
+/** The emulator endpoint a local emulator-mode login MUST reach. */
+export const EMULATOR_AUTH_ORIGIN = 'http://127.0.0.1:9099';
+
+/**
+ * Text the app renders when authentication fails. Used to fail a seeded login
+ * as soon as the real cause is visible instead of waiting for the test timeout.
+ */
+const AUTH_ERROR_PATTERN =
+    /Error \(auth\/|api-key-not-valid|Incorrect email or password|No account found|Invalid API key|auth\/network-request-failed/i;
+
+/**
+ * Record (redacted) auth-relevant network traffic and console errors so a
+ * failed login can report WHY it failed: which origin the credentials were
+ * sent to, and whether the emulator was reached at all.
+ */
+export function observeAuthTraffic(page: Page): { requests: string[]; consoleErrors: string[] } {
+    const requests: string[] = [];
+    const consoleErrors: string[] = [];
+    const interesting = (url: string) => /identitytoolkit|securetoken|firebaseapp\.com|googleapis\.com/i.test(url);
+
+    page.on('request', (request) => {
+        const url = request.url();
+        if (!interesting(url)) return;
+        try {
+            const parsed = new URL(url);
+            for (const key of [...parsed.searchParams.keys()]) {
+                if (/key|token/i.test(key)) parsed.searchParams.set(key, '<redacted>');
+            }
+            requests.push(`${request.method()} ${parsed.origin}${parsed.pathname}`);
+        } catch {
+            requests.push(`${request.method()} ${url.split('?')[0]}`);
+        }
+    });
+    page.on('console', (msg) => {
+        if (msg.type() !== 'error') return;
+        consoleErrors.push(msg.text().slice(0, 300));
+    });
+    page.on('pageerror', (err) => consoleErrors.push(`pageerror: ${String(err.message).slice(0, 300)}`));
+
+    return { requests, consoleErrors };
+}
+
+/**
+ * Deterministic login for the seeded authenticated suites.
+ *
+ * Contract (deliberately different from loginOrSignup below):
+ *   - exactly ONE attempt: no signup fallback, no verification bypass, no
+ *     onboarding skip, no re-submitting credentials, no navigating elsewhere;
+ *   - bounded waits only (no fixed sleeps), and the first meaningful outcome —
+ *     authenticated shell or visible auth error — ends the wait;
+ *   - a failure throws immediately with non-secret diagnostics (target origin,
+ *     recorded auth request origins, whether the emulator was reached, console
+ *     errors), so a broken environment never surfaces as a 60s timeout.
+ *
+ * `loginOrSignup` is kept for the specs that intentionally exercise
+ * signup/onboarding; this helper is the authenticated-fixture path only.
+ */
+export async function loginWithSeededIdentity(
+    page: Page,
+    user: { email: string; password: string },
+    options: { attach?: (name: string, body: string, contentType: string) => Promise<void> } = {},
+): Promise<void> {
+    const traffic = observeAuthTraffic(page);
+
+    await page.goto('/login', { waitUntil: 'domcontentloaded' });
+    const emailInput = page.locator('input[name="email"], input[type="email"]').first();
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
+
+    const passwordInput = page.locator('input[name="password"], input[type="password"]').first();
+    await expect(passwordInput).toBeVisible({ timeout: 5000 });
+    await emailInput.fill(user.email);
+    await passwordInput.fill(user.password);
+    await page.locator('button:has-text("Sign In"), button[type="submit"]').first().click();
+
+    const shell = page.locator('aside').or(page.locator('nav[aria-label="Mobile navigation"]')).first();
+    const failureText = page.locator('body').getByText(AUTH_ERROR_PATTERN).first();
+    await Promise.race([
+        shell.waitFor({ state: 'visible', timeout: LOGIN_TIMEOUT_MS }),
+        failureText.waitFor({ state: 'visible', timeout: LOGIN_TIMEOUT_MS }),
+    ]).catch(() => undefined);
+
+    if (await shell.isVisible().catch(() => false)) return;
+
+    let targetOrigin = page.url();
+    try {
+        targetOrigin = new URL(page.url()).origin;
+    } catch {
+        /* keep the raw URL */
+    }
+    const visibleText = (await page.locator('body').innerText({ timeout: 3000 }).catch(() => ''))
+        .replace(/\s+/g, ' ')
+        .slice(0, 500);
+    const emulatorReached = traffic.requests.some((entry) => entry.includes('127.0.0.1:9099'));
+    const diagnostics = {
+        targetOrigin,
+        finalUrl: page.url(),
+        emulatorExpected: EMULATOR_AUTH_ORIGIN,
+        emulatorReached,
+        authRequests: traffic.requests.slice(0, 10),
+        consoleErrors: traffic.consoleErrors.slice(0, 10),
+        visibleText,
+    };
+    if (options.attach) {
+        await options
+            .attach('e2e-auth-diagnostics', JSON.stringify(diagnostics, null, 2), 'application/json')
+            .catch(() => undefined);
+    }
+
+    throw new Error(
+        `E2E login failed for the seeded identity.\n` +
+            `  target origin:   ${targetOrigin}\n` +
+            `  final URL:       ${diagnostics.finalUrl}\n` +
+            `  emulator login:  ${emulatorReached ? `reached ${EMULATOR_AUTH_ORIGIN}` : `NOT reached (expected ${EMULATOR_AUTH_ORIGIN} in emulator development)`}\n` +
+            `  auth requests:   ${diagnostics.authRequests.length ? diagnostics.authRequests.join(' | ') : '(none)'}\n` +
+            `  visible text:    ${visibleText || '(none)'}\n` +
+            `  console errors:  ${diagnostics.consoleErrors.join(' | ') || '(none)'}\n` +
+            `  Run this suite with \`npm run test:e2e:local\` so the demo-anchor-os emulators and the seeded ` +
+            `fixture identity are in place.`,
+    );
+}
+
 /**
  * Robust Auth flow: Login, and if user doesn't exist, Signup.
  * Then bypass verification and navigate to Finance/Dashboard.
