@@ -437,9 +437,20 @@ export async function createFirestoreDoc(host, collectionPath, fields, idToken) 
     return { status: res.status, json: await res.json().catch(() => ({})) };
 }
 
-/** Overwrite a document (Firestore emulator REST PATCH, idempotent). */
-export async function patchFirestoreDoc(host, docPath, fields, idToken) {
-    const res = await fetch(`${firestoreBaseUrl(host)}/${docPath}`, {
+/**
+ * Write a document (Firestore emulator REST PATCH, idempotent).
+ *
+ * Without a mask this writes the given fields as the whole document (used for
+ * full seeds). Pass `{ updateMask: ['field', ...] }` to change only those field
+ * paths while keeping the rest of the document — required for updates that must
+ * still satisfy document-validity rules (an unmasked partial PATCH would blank
+ * every other field).
+ */
+export async function patchFirestoreDoc(host, docPath, fields, idToken, { updateMask } = {}) {
+    const params = new URLSearchParams();
+    for (const fieldPath of updateMask ?? []) params.append('updateMask.fieldPaths', fieldPath);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const res = await fetch(`${firestoreBaseUrl(host)}/${docPath}${query}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
         body: JSON.stringify({ fields }),
