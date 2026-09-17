@@ -7,7 +7,8 @@
 // @ts-nocheck
 
 
-import { Target } from 'lucide-react';
+import { Target, AlertCircle } from 'lucide-react';
+import { toCents } from '../../../utils/moneyUtils';
 
 interface OnboardingGoalStepProps {
     goalTitle: string;
@@ -41,6 +42,16 @@ export function OnboardingGoalStep({
     goalTitle, setGoalTitle, goalAmount, setGoalAmount,
     goalType, setGoalType, loading, onSubmit, onSkip, onBack,
 }: OnboardingGoalStepProps) {
+    // RA-13 (#171): `toCents` returns 0 for unparseable input, and the rules
+    // require a positive target, so validate here instead of letting the write
+    // fail with a generic toast.
+    const trimmedAmount = goalAmount.trim();
+    const amountCents = toCents(trimmedAmount);
+    const amountError = trimmedAmount.length > 0 && amountCents <= 0
+        ? 'Enter a valid amount greater than zero.'
+        : null;
+    const canSubmit = goalTitle.trim().length > 0 && trimmedAmount.length > 0 && amountCents > 0 && !loading;
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="flex items-center gap-4 mb-8">
@@ -84,9 +95,20 @@ export function OnboardingGoalStep({
                         inputMode="decimal"
                         value={goalAmount}
                         onChange={(e) => setGoalAmount(e.target.value)}
-                        className="w-full p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                        aria-invalid={amountError ? true : undefined}
+                        className={`w-full p-4 bg-white dark:bg-slate-900 border rounded-xl font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-all ${
+                            amountError
+                                ? 'border-rose-300 dark:border-rose-800 focus:ring-rose-500'
+                                : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500'
+                        }`}
                         placeholder="e.g. 500,000"
                     />
+                    {amountError && (
+                        <p role="alert" className="mt-2 flex items-center gap-2 text-xs font-medium text-rose-600 dark:text-rose-400">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            {amountError}
+                        </p>
+                    )}
                 </div>
 
                 <div>
@@ -111,7 +133,7 @@ export function OnboardingGoalStep({
 
                 <button
                     onClick={onSubmit}
-                    disabled={!goalTitle.trim() || !goalAmount || loading}
+                    disabled={!canSubmit}
                     className="w-full mt-6 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
                 >
                     {loading ? 'Saving...' : 'Set Goal & Continue'}
