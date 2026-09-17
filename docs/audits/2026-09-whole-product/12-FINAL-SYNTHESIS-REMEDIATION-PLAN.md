@@ -391,3 +391,22 @@ GREEN = material blockers resolved, not merely audited. This task remediates not
 ---
 
 *End of 12-FINAL-SYNTHESIS-REMEDIATION-PLAN.md — AUDIT DISCOVERY PHASE: COMPLETE.*
+
+---
+
+## 20. Re-audit addendum (2026-09-17)
+
+A post-remediation re-audit discovered eight additional canonical roots (RA-01…RA-08) that were absent from reports 00–11. They are recorded in `MASTER-FINDING-REGISTER.md` under the `RA-*` addendum and were remediated immediately (squash-merged to `master`) rather than scheduled into a wave.
+
+The §19 verdict for the 2026-09 corpus is **unchanged**: these additions clear no Wave 0–3 blocker, and the production gate remains Wave 0 → Wave 1 (FS-01/SN-01) → Wave 2 → the Wave 3a finance webhook/sync bundle.
+
+| ID | Norm | Subsystem | Closest existing wave/bundle | Remediation |
+|---|---|---|---|---|
+| RA-01 | MEDIUM | Functions / rate limit | W6·B10 (orphan/dead surface — R-03, AM-12) | PR #155 (issue #147) |
+| RA-02 | MEDIUM | Email / Family invitations | W3 (invitation surface — FS-12/FS-07) | PR #157 (issue #146) |
+| RA-03 | MEDIUM | Auth / passkeys | W2·B11 (session semantics) | PR #160 (issue #150) |
+| RA-04 | LOW | Retention / infra config | W6 | PR #156 (issue #148) |
+| RA-05 | MEDIUM | Client cache / sessions | W2·B11 (session semantics) | PR #161 (issue #149) |
+| RA-06 | MEDIUM | Finance offline | W3·B7 (balance-mutation correctness) | PR #158 (issue #152) — mechanism fixed; idempotency remains FI-06 |
+| RA-07 | LOW | Functions / notifications | W6 | PR #154 (issue #151) |
+| RA-08 | LOW | PWA service worker | W6 (F-04/F-05/R-08 surface) | PR #159 (issue #153) |
