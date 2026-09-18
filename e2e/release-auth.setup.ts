@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { resolveReleaseIdentity } from '../scripts/ci/release-identity.mjs';
+import { installAppCheckDebugToken } from './release-appcheck';
 
 /**
  * Release smoke auth setup.
@@ -36,6 +37,9 @@ test('authenticate release-smoke identity', async ({ page, context }) => {
         if (msg.type() === 'error') consoleErrors.push(msg.text());
     });
     page.on('pageerror', (err) => consoleErrors.push(`pageerror: ${err.message}`));
+
+    // Deployed targets enforce App Check; let the smoke attest (no-op locally).
+    await installAppCheckDebugToken(page);
 
     await page.goto('/login', { waitUntil: 'domcontentloaded' });
 

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { test, expect } from '@playwright/test';
+import { installAppCheckDebugToken } from './release-appcheck';
 
 /**
  * Release Smoke (authenticated) — fast post-deploy verification.
@@ -9,6 +10,11 @@ import { test, expect } from '@playwright/test';
  * config's 20s timeout; the whole gate is bounded by a 3-minute global
  * timeout. A failure here means the DEPLOYED environment is broken.
  */
+
+// Deployed targets enforce App Check; let the smoke attest (no-op locally).
+test.beforeEach(async ({ page }) => {
+    await installAppCheckDebugToken(page);
+});
 
 test.describe('Release Smoke — authenticated shell', () => {
     test('Dashboard renders', async ({ page }) => {
@@ -57,6 +63,11 @@ test.describe('Release Smoke — authenticated shell', () => {
                 'React will try to recreate', 'firestore', 'Firestore',
                 'firebase', 'CORS', 'Access-Control', 'status of 429',
                 'ERR_FAILED', 'net::', 'chunk', 'ResizeObserver',
+                // Browser/SDK noise, not app defects: the Storage Access API
+                // warning comes from the browser, and Sentry's own internal
+                // logger is verbose on staging (debug:true) — transport
+                // beacons aborted by test navigation are logged there.
+                'requestStorageAccess', 'Sentry Logger',
             ];
             if (!ignored.some((token) => text.includes(token))) errors.push(text);
         });

@@ -380,6 +380,7 @@ jobs:
           E2E_SMOKE_TARGET: staging
           STAGING_SMOKE_EMAIL: ${{ secrets.STAGING_SMOKE_EMAIL }}
           STAGING_SMOKE_PASSWORD: ${{ secrets.STAGING_SMOKE_PASSWORD }}
+          APP_CHECK_DEBUG_TOKEN: ${{ secrets.STAGING_APP_CHECK_DEBUG_TOKEN }}
       - name: Upload release smoke artifacts
         if: failure()
         uses: actions/upload-artifact@v7
@@ -417,6 +418,7 @@ jobs:
           E2E_SMOKE_TARGET: staging
           STAGING_SMOKE_EMAIL: ${{ secrets.STAGING_SMOKE_EMAIL }}
           STAGING_SMOKE_PASSWORD: ${{ secrets.STAGING_SMOKE_PASSWORD }}
+          APP_CHECK_DEBUG_TOKEN: ${{ secrets.STAGING_APP_CHECK_DEBUG_TOKEN }}
       - name: Upload release smoke artifacts
         if: failure()
         uses: actions/upload-artifact@v7
