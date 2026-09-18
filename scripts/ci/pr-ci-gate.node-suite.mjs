@@ -88,7 +88,11 @@ test('full module coverage runs only in scheduled-quality', () => {
 test('weekly full E2E regression remains scheduled', () => {
     const weekly = job('scheduled-full-regression');
     assert.match(weekly, /github\.event_name == 'schedule'/);
-    assert.match(weekly, /playwright test --shard/);
+    // Hermetic + canonical (issue #143): the local runner always passes the
+    // explicit Playwright --config, so the run can never fall back to default
+    // discovery and collect the Vitest suites.
+    assert.match(weekly, /npm run test:e2e:local -- --shard=/);
+    assert.doesNotMatch(weekly, /E2E_BASE_URL/);
 });
 
 test('CI contains no deployment command', () => {

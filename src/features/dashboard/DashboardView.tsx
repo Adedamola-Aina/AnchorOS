@@ -24,6 +24,8 @@ import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBounda
 import { PullToRefresh } from '../../components/mobile/PullToRefresh';
 import { BeyondBasicsChecklist } from './components/BeyondBasicsChecklist';
 import { useBeyondBasics } from './hooks/useBeyondBasics';
+import { GoalProgressCard } from './components/GoalProgressCard';
+import { useGoalsQuery } from '../../hooks/queries/useGoalsQuery';
 
 const getTimeGreeting = () => {
   const hour = new Date().getHours();
@@ -34,7 +36,7 @@ const getTimeGreeting = () => {
 
 const DashboardView = () => {
   const { navigateTo } = useApp();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { tasks } = useTasks();
   const { accounts, recentActivity, cashFlow, refetch } = useFinance();
   const { isMobile } = useResponsive();
@@ -43,6 +45,7 @@ const DashboardView = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
   const beyondBasics = useBeyondBasics();
+  const { data: goals = [], isLoading: goalsLoading } = useGoalsQuery(user?.uid);
 
   const productivity = getProductivityMetrics(tasks);
   const hasCommitments = tasks.length > 0;
@@ -116,6 +119,7 @@ const DashboardView = () => {
           <div className="space-y-5">
             <PortfolioWidget assets={assets} onNavigate={() => navigateTo('finance')} accountCount={accounts.length} isMobile={isMobile} />
             {accounts.length > 1 && <AssetAllocationWidget assets={assets} />}
+            <GoalProgressCard goals={goals} isLoading={goalsLoading} />
           </div>
 
           {/* Column 2: Activity */}

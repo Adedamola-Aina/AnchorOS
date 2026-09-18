@@ -64,7 +64,7 @@
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
     "@capawesome/capacitor-badge": "^8.0.1",
-    "@sentry/react": "^10.51.0",
+    "@sentry/react": "^10.74.0",
     "@tailwindcss/postcss": "^4.2.4",
     "@tanstack/react-query": "^5.100.9",
     "@tanstack/react-query-devtools": "^5.100.9",
@@ -73,7 +73,7 @@
     "@testing-library/dom": "^10.4.1",
     "autoprefixer": "^10.4.27",
     "date-fns": "^4.1.0",
-    "firebase": "^12.12.1",
+    "firebase": "^12.19.0",
     "framer-motion": "^12.38.0",
     "idb-keyval": "^6.2.2",
     "lucide-react": "^1.8.0",
@@ -92,10 +92,10 @@
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint/js": "^10.0.1",
-    "@firebase/rules-unit-testing": "^5.0.0",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.59.1",
-    "@sentry/vite-plugin": "^5.2.1",
+    "@sentry/vite-plugin": "^5.4.0",
     "@stryker-mutator/core": "^9.6.0",
     "@stryker-mutator/typescript-checker": "^9.6.0",
     "@stryker-mutator/vitest-runner": "^9.6.0",
@@ -106,8 +106,8 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/coverage-v8": "4.1.2",
-    "@vitest/ui": "4.1.2",
+    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/ui": "4.1.11",
     "commit-and-tag-version": "^12.7.1",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -125,7 +125,7 @@
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.0",
     "vite": "^8.0.3",
-    "vitest": "4.1.2"
+    "vitest": "4.1.11"
   },
   "overrides": {
     "@tootallnate/once": "3.0.1",
@@ -133,6 +133,7 @@
     "inquirer": ">=10.0.0",
     "@xmldom/xmldom": ">=0.9.10",
     "lodash-es": ">=4.18.0",
-    "@puppeteer/browsers": "^3.2.2"
+    "@puppeteer/browsers": "^3.2.2",
+    "uuid": "^11.1.1"
   }
 }

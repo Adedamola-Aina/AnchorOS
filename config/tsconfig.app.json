@@ -34,9 +34,6 @@
       ],
       "@anchor-os/ui": [
         "../packages/ui/src/index.ts"
-      ],
-      "@anchor-os/types": [
-        "../packages/types/src/index.ts"
       ]
     }
   },
