@@ -767,10 +767,16 @@ test('staging release-smoke URL defaults to the deterministic staging host', () 
     assert.doesNotMatch(STAGING_WORKFLOW, /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \}\}/);
 });
 
-test('ci scheduled regression uses the same staging host fallback', () => {
-    assert.match(
-        CI_WORKFLOW,
-        /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \|\| 'https:\/\/anchor-os-staging\.web\.app' \}\}/,
-    );
-    assert.doesNotMatch(CI_WORKFLOW, /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \}\}/);
+test('ci scheduled regression is hermetic and never targets a cloud origin', () => {
+    // The general suite fail-closes on a non-loopback E2E_BASE_URL and its
+    // fixture identity only exists in the emulators, so the weekly regression
+    // must run against the local emulator suite. It also goes through the
+    // canonical local runner, which always passes the explicit Playwright
+    // --config — a bare `playwright test` collects the Vitest suites and dies
+    // on Symbol($$jest-matchers-object) (issue #143).
+    const weekly = CI_WORKFLOW.slice(CI_WORKFLOW.indexOf('scheduled-full-regression:'));
+    assert.doesNotMatch(weekly, /E2E_BASE_URL/);
+    assert.match(weekly, /npm run test:e2e:local -- --shard=/);
+    // The obsolete staging fallback must be gone from ci.yml entirely.
+    assert.doesNotMatch(CI_WORKFLOW, /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL/);
 });
