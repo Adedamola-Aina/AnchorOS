@@ -282,7 +282,16 @@ test('Vite dev server binds 0.0.0.0 and accepts the Tailscale hostname', () => {
 
 test('dev:local is one command and the emulator suite listens on all interfaces', () => {
     assert.equal(PKG.scripts['dev:local'], 'bash scripts/dev-local.sh');
-    assert.equal(PKG.scripts['emulator:start'], 'firebase emulators:start --project demo-anchor-os');
+    // RA-14 / PR #173: the one-command path must scope the suite to the four local
+    // services. Without --only the CLI also boots hosting, which fails closed
+    // because firebase.json hosting targets are not configured for the demo
+    // project — so the script never worked. Assert the contract (project + scoped
+    // services) rather than an exact flag string, which rots silently: this
+    // assertion is only executed when CI infrastructure files change.
+    assert.match(PKG.scripts['emulator:start'], /^firebase emulators:start --project demo-anchor-os /);
+    const scoped = PKG.scripts['emulator:start'].match(/--only ([a-z,]+)/);
+    assert.ok(scoped, 'emulator:start must scope the suite with --only');
+    assert.deepEqual(scoped[1].split(',').sort(), ['auth', 'firestore', 'functions', 'storage']);
     // All four emulator ports from the contract stay pinned, and every
     // emulator listens on 0.0.0.0 so the Tailscale hostname can reach it.
     for (const [name, port] of [['auth', 9099], ['firestore', 8080], ['functions', 5001], ['storage', 9199]]) {
