@@ -59,7 +59,8 @@ export const confirmConnection = secureOnCall(
         const memberDisplayName = inviteeProfile.data()?.name || invite.inviteeEmail.split('@')[0];
 
         const connectionId = `${ownerUid}_${invite.inviteeUid}`;
-        const connectionRef = db.collection('artifacts').doc(APP_ID).collection('family_connections').doc(connectionId);
+        const connectionsRef = db.collection('artifacts').doc(APP_ID).collection('family_connections');
+        const connectionRef = connectionsRef.doc(connectionId);
         const connection: FamilyConnection = {
             id: connectionRef.id,
             ownerUid,
@@ -70,8 +71,36 @@ export const confirmConnection = secureOnCall(
             connectedAt: new Date().toISOString(),
         };
 
-        await connectionRef.set(connection);
-        await inviteRef.update({ status: 'accepted', confirmedAt: new Date().toISOString() });
+        // FS-03 (decision AM-1 option a): enforce ONE active household per side.
+        // Without this guard an owner — or an invitee — can hold two active
+        // connections, and the family predicate then treats both as authoritative
+        // grants. Atomic so two concurrent confirms cannot both pass the check;
+        // the (ownerUid,status) and (memberUid,status) composite indexes already
+        // exist for these queries.
+        await db.runTransaction(async (transaction) => {
+            const [activeAsOwner, activeAsMember] = await Promise.all([
+                transaction.get(connectionsRef.where('ownerUid', '==', ownerUid).where('status', '==', 'active')),
+                transaction.get(connectionsRef.where('memberUid', '==', invite.inviteeUid).where('status', '==', 'active')),
+            ]);
+
+            // A retry after a successful confirm must stay idempotent, so ignore
+            // the connection this call is about to (re)write.
+            if (activeAsOwner.docs.some((d) => d.id !== connectionId)) {
+                throw new HttpsError(
+                    'failed-precondition',
+                    'You already have an active family connection. Disconnect it before connecting to someone else.'
+                );
+            }
+            if (activeAsMember.docs.some((d) => d.id !== connectionId)) {
+                throw new HttpsError(
+                    'failed-precondition',
+                    'That person is already connected to another household.'
+                );
+            }
+
+            transaction.set(connectionRef, connection);
+            transaction.update(inviteRef, { status: 'accepted', confirmedAt: new Date().toISOString() });
+        });
 
         await createNotification(
             ownerUid, 'family_connected', '🎉 Family Connected!',
