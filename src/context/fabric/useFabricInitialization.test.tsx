@@ -181,7 +181,7 @@ describe('useFabricInitialization', () => {
 
     const { unmount } = renderHook(() => useFabricInitialization(args));
     unmount();
-    resolveInit?.();
+    (resolveInit as (() => void) | null)?.();
 
     await Promise.resolve();
 

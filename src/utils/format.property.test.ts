@@ -6,7 +6,7 @@ describe('format property tests (QA-004)', () => {
   it('compact format always includes magnitude suffix when forced', () => {
     fc.assert(
       fc.property(
-        fc.double({ min: -10_000_000_000, max: 10_000_000_000, noNaN: true, noInfinity: true }),
+        fc.double({ min: -10_000_000_000, max: 10_000_000_000, noNaN: true }),
         fc.constantFrom<'USD' | 'NGN'>('USD', 'NGN'),
         (amount, currency) => {
           const compact = formatCurrencyCompact(amount, currency, { forceCompact: true });
@@ -19,7 +19,7 @@ describe('format property tests (QA-004)', () => {
   it('below-threshold values match full format with default options', () => {
     fc.assert(
       fc.property(
-        fc.double({ min: -9999.99, max: 9999.99, noNaN: true, noInfinity: true }),
+        fc.double({ min: -9999.99, max: 9999.99, noNaN: true }),
         fc.constantFrom<'USD' | 'NGN'>('USD', 'NGN'),
         (amount, currency) => {
           const compact = formatCurrencyCompact(amount, currency);

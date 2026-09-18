@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.anchor.app',
   appName: 'Anchor',
   webDir: 'dist',
-  bundledWebRuntime: false,
   // No `server.hostname` — load bundled `dist/` assets so the app runs as a
   // true native shell (offline-capable, native navigation, plugin-mediated
   // network). Use `androidScheme: 'https'` so localStorage/IndexedDB/cookies

@@ -28,7 +28,11 @@ vi.mock('./rateLimit', () => ({
     enforceRateLimit: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { getNotifications } from './notifications';
+import { getNotifications as getNotificationsCallable } from './notifications';
+
+const getNotifications = getNotificationsCallable as unknown as (
+    request: { auth: { uid: string } | null; data: Record<string, unknown> },
+) => Promise<unknown>;
 
 /**
  * RA-07 (#151): the client-supplied page size must be clamped.

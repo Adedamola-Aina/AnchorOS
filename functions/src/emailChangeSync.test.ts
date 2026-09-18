@@ -34,7 +34,11 @@ vi.mock('./callable', () => ({
   secureOnCall: (handler: Function) => handler,
 }));
 
-import { syncEmailToProfile } from './emailChangeSync';
+import { syncEmailToProfile as syncEmailToProfileCallable } from './emailChangeSync';
+
+const syncEmailToProfile = syncEmailToProfileCallable as unknown as (
+  request: { auth: { uid: string } | null; data: Record<string, unknown> },
+) => Promise<Record<string, unknown>>;
 
 describe('syncEmailToProfile', () => {
   beforeEach(() => {

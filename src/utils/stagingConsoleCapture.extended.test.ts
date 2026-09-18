@@ -4,7 +4,6 @@ import { initStagingConsoleCapture } from './stagingConsoleCapture';
 describe('stagingConsoleCapture — extended coverage', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    // @ts-expect-error cleanup
     delete window.__ANCHOR_CONSOLE_CAPTURE__;
   });
 

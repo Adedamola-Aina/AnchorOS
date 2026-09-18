@@ -89,7 +89,7 @@ afterAll(cleanup);
 describe('emulator test isolation', () => {
     it('is pinned to its own project rather than the ambient one', () => {
         expect(process.env.GCLOUD_PROJECT).toBe(ISOLATED_PROJECT);
-        expect(db.projectId).toBe(ISOLATED_PROJECT);
+        expect((db as unknown as { projectId: string }).projectId).toBe(ISOLATED_PROJECT);
     });
 
     it('only removes documents it owns', async () => {

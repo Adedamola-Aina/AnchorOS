@@ -13,7 +13,11 @@ vi.mock('./callable', () => ({
   secureOnCall: (handler: Function) => handler,
 }));
 
-import { verifyDeviceAttestation } from './deviceAttestation';
+import { verifyDeviceAttestation as verifyDeviceAttestationCallable } from './deviceAttestation';
+
+const verifyDeviceAttestation = verifyDeviceAttestationCallable as unknown as (
+  request: { auth: { uid: string } | null; data: Record<string, unknown> },
+) => Promise<{ trusted: boolean; method: string }>;
 
 describe('verifyDeviceAttestation', () => {
   beforeEach(() => {

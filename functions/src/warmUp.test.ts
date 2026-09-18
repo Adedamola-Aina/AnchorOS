@@ -32,7 +32,9 @@ vi.mock('./config', () => ({
   APP_ID: 'anchor-os',
 }));
 
-import { WARM_TARGETS, getWarmTargets, warmUpFunctions } from './warmUp';
+import { WARM_TARGETS, getWarmTargets, warmUpFunctions as warmUpFunctionsCallable } from './warmUp';
+
+const warmUpFunctions = warmUpFunctionsCallable as unknown as () => Promise<void>;
 
 describe('warmUp', () => {
   beforeEach(() => {

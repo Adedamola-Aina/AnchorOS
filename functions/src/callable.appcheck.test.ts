@@ -13,11 +13,11 @@ const mockOnCall = vi.hoisted(() => vi.fn((options, handler) => ({ options, hand
 const mockWithTracing = vi.hoisted(() => vi.fn((_name, handler) => handler));
 
 vi.mock('firebase-functions/v2/https', () => ({
-    onCall: (...args: unknown[]) => mockOnCall(...args),
+    onCall: (options: unknown, handler: unknown) => mockOnCall(options, handler),
 }));
 
 vi.mock('./tracing', () => ({
-    withTracing: (...args: unknown[]) => mockWithTracing(...args),
+    withTracing: (name: unknown, handler: unknown) => mockWithTracing(name, handler),
 }));
 
 const ENV_KEYS = ['GCLOUD_PROJECT', 'GCP_PROJECT', 'ENFORCE_APPCHECK'] as const;

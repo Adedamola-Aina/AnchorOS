@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { BehavioralEngine } from '../BehavioralEngine';
 import type {
   AnchorAccount,
   AnchorTask,
   AnchorTransaction,
   ProactiveQuestionState,
-  UserPattern,
 } from '../../../types';
 import {
   getProactiveQuestionText,
@@ -18,7 +18,7 @@ vi.mock('../ProactiveQuestionEngine', () => ({
 }));
 
 interface TestInput {
-  engine: { getPatterns: () => UserPattern[] };
+  engine: BehavioralEngine;
   transactions: AnchorTransaction[];
   commitments: AnchorTask[];
   accounts: AnchorAccount[];
@@ -26,7 +26,7 @@ interface TestInput {
 
 function makeInput(overrides: Partial<TestInput> = {}): TestInput {
   return {
-    engine: { getPatterns: () => [] },
+    engine: { getPatterns: () => [] } as unknown as BehavioralEngine,
     transactions: [],
     commitments: [],
     accounts: [],
