@@ -2,11 +2,16 @@ import { logger } from 'firebase-functions';
 import { db, APP_ID } from './config';
 import { getAccountDetails, getAllTransactions } from './mono/monoClient';
 import { financeDocId, mapAndDeduplicate } from './mono/transactionMapper';
+import { applyObservedBalance } from './accountBalance';
 import type { BankConnectionDoc, MonoWebhookEvent } from './mono/monoTypes';
 
 const BATCH_CHUNK_SIZE = 400;
 
-export async function handleAccountUpdated(monoAccountId: string, eventId?: string): Promise<void> {
+export async function handleAccountUpdated(
+    monoAccountId: string,
+    eventId?: string,
+    observedAtMs: number = Date.now(),
+): Promise<void> {
     const connSnap = await db.collectionGroup('bankConnections')
         .where('monoAccountId', '==', monoAccountId)
         .where('status', '==', 'active')
@@ -85,11 +90,8 @@ export async function handleAccountUpdated(monoAccountId: string, eventId?: stri
         await batch.commit();
     }
 
-    await accountRef.update({
-        balanceCents: Math.round(details.account.balance * 100),
-        'externalConnection.lastSyncedAt': new Date().toISOString(),
-        'externalConnection.syncStatus': 'active',
-    });
+    // FI-04: order-preserving, transactional application of the provider balance.
+    await applyObservedBalance(accountRef, Math.round(details.account.balance * 100), observedAtMs);
 
     await connDoc.ref.update({
         lastSyncAt: new Date().toISOString(),

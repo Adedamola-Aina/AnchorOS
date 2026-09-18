@@ -47,6 +47,12 @@ vi.mock('./config', () => {
         collection: () => ({ doc: () => artifactsDoc }),
         collectionGroup: () => connQuery,
         batch: () => ({ set: vi.fn(), commit: async () => undefined }),
+        // FI-04: the balance is applied through a transaction (account snapshot).
+        runTransaction: async (fn: (txn: unknown) => unknown) =>
+            fn({
+                get: async () => ({ exists: true, data: () => ({ externalConnection: {} }) }),
+                update: mockState.accountUpdate,
+            }),
     };
 
     return { db, APP_ID: 'anchor-os' };

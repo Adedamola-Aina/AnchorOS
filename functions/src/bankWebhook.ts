@@ -3,6 +3,7 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { db } from './config';
 import { handleAccountUpdated, handleReauthorisation } from './webhookHandlers';
+import { observedAtFrom } from './accountBalance';
 import type { MonoWebhookEvent } from './mono/monoTypes';
 
 const EVENTS_COLLECTION = 'webhook_events';
@@ -258,7 +259,7 @@ export const monoWebhook = onRequest(
 
         try {
             if (payload.event === 'mono.events.account_updated' || payload.event === 'account_updated') {
-                await handleAccountUpdated(monoAccountId, payload.event_id);
+                await handleAccountUpdated(monoAccountId, payload.event_id, observedAtFrom(payload.timestamp));
             } else if (payload.event === 'mono.events.reauthorisation_required' || payload.event === 'reauthorisation_required') {
                 await handleReauthorisation(monoAccountId);
             }
