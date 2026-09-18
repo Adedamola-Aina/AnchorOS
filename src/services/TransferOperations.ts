@@ -44,6 +44,8 @@ export function processTransferTransaction(
     createdAt: string,
     isBackdated: boolean
 ): void {
+    // FI-06: the payload's idempotency key (when present) becomes the document id.
+    const requestId = payload.requestId;
     if (!payload.destinationAccountId) {
         throw new AnchorError('Transfer missing destination account', 'VALIDATION');
     }
@@ -61,8 +63,13 @@ export function processTransferTransaction(
     }
 
     const linkId = crypto.randomUUID().slice(0, 12);
-    const sourceTxRef = doc(collection(firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'finance'));
-    const destTxRef = doc(collection(firestore, 'artifacts', APP_ID, 'users', destAccount.ownerId || userId, 'finance'));
+    // FI-06: when the write carries an idempotency key the twin documents get
+    // deterministic ids, so a replay targets the same docs instead of minting
+    // a fresh pair.
+    const sourceCollection = collection(firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'finance');
+    const destCollection = collection(firestore, 'artifacts', APP_ID, 'users', destAccount.ownerId || userId, 'finance');
+    const sourceTxRef = requestId ? doc(sourceCollection, requestId) : doc(sourceCollection);
+    const destTxRef = requestId ? doc(destCollection, `${requestId}-in`) : doc(destCollection);
 
     const destAmount = payload.destinationAmountCents ?? payload.amountCents;
 
@@ -133,6 +140,8 @@ export async function processStandardTransaction(
     createdAt: string,
     isBackdated: boolean
 ): Promise<void> {
+    // FI-06: the payload's idempotency key (when present) becomes the document id.
+    const requestId = payload.requestId;
     // Exclude destinationAccountId (only for transfers) - explicitly omit with rest
     const { destinationAccountId: _ignored, ...transactionData } = payload;
     void _ignored; // Explicitly discard to satisfy linter
@@ -144,7 +153,10 @@ export async function processStandardTransaction(
         ? await enc.encryptFields(transactionData, ENCRYPTED_TRANSACTION_FIELDS)
         : transactionData;
 
-    const txRef = doc(collection(firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'finance'));
+    // FI-06: a keyed write reuses the key as the document id so the replay
+    // targets the document it already created.
+    const txCollection = collection(firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'finance');
+    const txRef = requestId ? doc(txCollection, requestId) : doc(txCollection);
 
     batch.set(txRef, {
         ...dataToStore,

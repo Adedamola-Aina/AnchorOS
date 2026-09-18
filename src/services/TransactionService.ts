@@ -7,7 +7,7 @@
  * @module services/TransactionService
  */
 
-import { doc, increment, writeBatch, runTransaction, type Firestore } from '../utils/secureDb';
+import { collection, doc, increment, writeBatch, runTransaction, type Firestore, type WriteBatch } from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
@@ -50,18 +50,40 @@ export class TransactionService {
         }
 
         try {
-            const batch = writeBatch(this.firestore);
             const now = new Date();
             const createdAt = now.toISOString();
             const transactionDate = payload.date || createdAt;
             const isBackdated = payload.date ? new Date(payload.date).toDateString() !== now.toDateString() : false;
 
-            if (payload.type === 'transfer') {
-                processTransferTransaction(this.firestore, batch, userId, payload, sourceAccount, accounts, transactionDate, createdAt, isBackdated);
+            const writeInto = async (writer: WriteBatch) => {
+                if (payload.type === 'transfer') {
+                    processTransferTransaction(this.firestore, writer, userId, payload, sourceAccount, accounts, transactionDate, createdAt, isBackdated);
+                } else {
+                    await processStandardTransaction(this.firestore, writer, userId, payload, sourceAccount, transactionDate, createdAt, isBackdated);
+                }
+            };
+
+            if (payload.requestId) {
+                // FI-06: the offline queue is at-least-once, so a keyed write must
+                // apply exactly once. The key IS the document id (TransferOperations
+                // reuses it), and this transaction refuses to apply it again when
+                // that document already exists — atomically with the balance delta,
+                // so a concurrent replay cannot slip through.
+                const applied = await runTransaction(this.firestore, async (transaction) => {
+                    const txCollection = collection(this.firestore, 'artifacts', APP_ID, 'users', sourceAccount.ownerId || userId, 'finance');
+                    const existing = await transaction.get(doc(txCollection, payload.requestId as string));
+                    if (existing.exists()) return false;
+                    await writeInto(transaction as unknown as WriteBatch);
+                    return true;
+                });
+
+                // Duplicate replay: nothing was written, so nothing to audit.
+                if (!applied) return;
             } else {
-                await processStandardTransaction(this.firestore, batch, userId, payload, sourceAccount, transactionDate, createdAt, isBackdated);
+                const batch = writeBatch(this.firestore);
+                await writeInto(batch);
+                await batch.commit();
             }
-            await batch.commit();
 
             // AUDIT: Log transaction creation
             auditFinance.transactionCreated(
