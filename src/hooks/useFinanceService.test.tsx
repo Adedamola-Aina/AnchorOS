@@ -86,7 +86,17 @@ const firestoreMocks = vi.hoisted(() => {
     serverTimestamp: vi.fn(() => ({ _serverTimestamp: true })),
     collection: vi.fn((db, ...paths) => ({ path: paths.join('/'), type: 'collection' })),
     doc: vi.fn((db, ...paths) => ({ path: paths.join('/'), type: 'doc' })),
-    getDocs: vi.fn(async () => ({ docs: [] })),
+    // RA-24: transactions are fetched through financeApi.fetchTransactionsPage
+    // (a getDocs query), not onSnapshot — serve them from the same snapshot map
+    // so transaction-path tests can populate `transactions`.
+    getDocs: vi.fn(async (q: any) => ({
+      docs: snapshots.get(typeof q?.path === 'string' ? q.path : 'unknown') || [],
+    })),
+    // RA-24: seed a collection before render (no listener needed). Accepts the
+    // same `{ id, data: () => ({...}) }` document shape triggerSnapshot uses.
+    seedCollection: (path: string, docs: any[]) => {
+      snapshots.set(path, docs);
+    },
   };
 });
 
@@ -123,6 +133,10 @@ vi.mock('firebase/firestore', () => ({
   where: vi.fn((...args) => ({ type: 'where', args })),
   orderBy: vi.fn((...args) => ({ type: 'orderBy', args })),
   limit: vi.fn((n) => ({ type: 'limit', n })),
+  // RA-24: financePagination builds its cursor constraints with these; without
+  // them the paginated transactions query throws before it ever calls getDocs.
+  documentId: vi.fn(() => ({ type: 'documentId' })),
+  startAfter: vi.fn((...args) => ({ type: 'startAfter', args })),
 }));
 
 // Mock related hooks to avoid Context dependency errors
@@ -228,24 +242,22 @@ describe('useFinanceService', () => {
   });
 
   describe('Data Fetching and Sorting', () => {
-    it.skip('should fetch and sort transactions by date (newest first)', async () => {
+    it('should fetch and sort transactions by date (newest first)', async () => {
+      // RA-24: seed through getDocs (fetchTransactionsPage) before render.
+      firestoreMocks.seedCollection('artifacts/anchor-os-test/users/test-user-123/finance', [
+        { id: 'tx1', data: () => ({ title: 'Old Transaction', date: '2024-01-01', type: 'expense', amountCents: 10000, currency: 'USD' }) },
+        { id: 'tx2', data: () => ({ title: 'New Transaction', date: '2024-01-15', type: 'expense', amountCents: 20000, currency: 'USD' }) },
+        { id: 'tx3', data: () => ({ title: 'Middle Transaction', date: '2024-01-10', type: 'expense', amountCents: 15000, currency: 'USD' }) },
+      ]);
+
       const { result } = renderHook(() => useFinanceService(mockUser), { wrapper: createWrapper() });
 
-      const mockTransactions = [
-        { id: 'tx1', data: () => ({ title: 'Old Transaction', date: '2024-01-01', amountCents: 10000 }) },
-        { id: 'tx2', data: () => ({ title: 'New Transaction', date: '2024-01-15', amountCents: 20000 }) },
-        { id: 'tx3', data: () => ({ title: 'Middle Transaction', date: '2024-01-10', amountCents: 15000 }) },
-      ];
-
-      await waitFor(() => {
-        firestoreMocks.triggerSnapshot('artifacts/anchor-os-test/users/test-user-123/finance', mockTransactions);
-      });
-
-      await waitFor(() => {
-        expect(result.current.transactions).toHaveLength(3);
-        expect(result.current.transactions[0].title).toBe('New Transaction');
-        expect(result.current.transactions[2].title).toBe('Old Transaction');
-      });
+      await waitFor(() => expect(result.current.transactions).toHaveLength(3));
+      expect(result.current.transactions.map(t => t.title)).toEqual([
+        'New Transaction',
+        'Middle Transaction',
+        'Old Transaction',
+      ]);
     });
 
     it('should fetch accounts correctly', async () => {
@@ -444,14 +456,39 @@ describe('useFinanceService', () => {
       );
     });
 
-    // FI-05: this harness cannot populate `transactions` — they come from
-    // useTransactionsQuery scoped to the current month, which the snapshot mocks
-    // here do not drive (that is why this test was skipped for so long). The
-    // reversal-from-persisted-document behaviour is proven deterministically in
-    // src/services/TransactionService.delete.test.ts; the harness gap is tracked as
-    // its own finding rather than papered over.
-    it.skip('should delete transaction and reverse account balance correctly', async () => {
-      expect(true).toBe(true);
+    // RA-24: with the harness driving useTransactionsQuery, this transaction-path
+    // test runs unskipped and proves FI-05 — the reversal amount comes from the
+    // PERSISTED document, not the (stale) client-memory row.
+    it('should delete transaction and reverse the persisted balance, not the stale row', async () => {
+      // Client memory is stale: it claims 99999, the persisted doc says 15000.
+      firestoreMocks.seedCollection('artifacts/anchor-os-test/users/test-user-123/finance', [
+        { id: 'tx-1', data: () => ({ title: 'Groceries', type: 'expense', amountCents: 99999, accountId: 'acc-123', currency: 'USD' }) },
+      ]);
+      firestoreMocks.triggerSnapshot('artifacts/anchor-os-test/users/test-user-123/accounts', [
+        {
+          id: 'acc-123',
+          data: () => ({ name: 'Checking', balanceCents: 100000, currency: 'USD', type: 'checking', scope: 'personal', color: 'blue', ownerId: 'test-user-123' })
+        }
+      ]);
+      firestoreMocks.mockTransaction.get.mockResolvedValue({
+        exists: () => true,
+        data: () => ({ id: 'tx-1', type: 'expense', amountCents: 15000, accountId: 'acc-123', isSoftDeleted: false }),
+      });
+
+      const { result } = renderHook(() => useFinanceService(mockUser), { wrapper: createWrapper() });
+      await waitFor(() => expect(result.current.accounts).toHaveLength(1));
+      await waitFor(() => expect(result.current.transactions).toHaveLength(1));
+
+      await result.current.deleteTransaction('tx-1', 'acc-123');
+
+      expect(firestoreMocks.mockTransaction.update).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'artifacts/anchor-os-test/users/test-user-123/finance/tx-1' }),
+        expect.objectContaining({ isSoftDeleted: true })
+      );
+      expect(firestoreMocks.mockTransaction.update).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'artifacts/anchor-os-test/users/test-user-123/accounts/acc-123' }),
+        expect.objectContaining({ balanceCents: { _increment: 15000 } })
+      );
     });
 
     it('should not add transaction when user is null', async () => {
