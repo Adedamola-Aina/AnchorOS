@@ -57,6 +57,10 @@ export interface MonoTransactionsResponse {
 
 export interface MonoWebhookEvent {
   event: string;
+  /** Mono's documented unique event identifier — used for deduplication. */
+  event_id?: string;
+  /** ISO timestamp Mono includes with the event. */
+  timestamp?: string;
   data: {
     account: { _id: string };
     [key: string]: unknown;
@@ -72,4 +76,7 @@ export interface BankConnectionDoc {
   linkedAt: string;
   status: 'active' | 'reconnect_required' | 'revoked';
   lastSyncAt?: string;
+  /** Mono `event_id` of the most recently applied webhook — idempotency guard so
+   *  a retry after a successful-but-unrecorded completion cannot reapply work. */
+  lastProcessedEventId?: string;
 }

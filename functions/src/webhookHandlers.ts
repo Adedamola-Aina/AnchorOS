@@ -6,7 +6,7 @@ import type { BankConnectionDoc, MonoWebhookEvent } from './mono/monoTypes';
 
 const BATCH_CHUNK_SIZE = 400;
 
-export async function handleAccountUpdated(monoAccountId: string): Promise<void> {
+export async function handleAccountUpdated(monoAccountId: string, eventId?: string): Promise<void> {
     const connSnap = await db.collectionGroup('bankConnections')
         .where('monoAccountId', '==', monoAccountId)
         .where('status', '==', 'active')
@@ -20,6 +20,14 @@ export async function handleAccountUpdated(monoAccountId: string): Promise<void>
 
     const connDoc = connSnap.docs[0];
     const connection = connDoc.data() as BankConnectionDoc;
+
+    // FI-01: idempotency guard. A redelivery after the handler succeeded but the
+    // completion record failed must not reapply financial changes.
+    if (eventId && connection.lastProcessedEventId === eventId) {
+        logger.info(`[Webhook] Event ${eventId} already applied for ${connection.anchorAccountId}; skipping`);
+        return;
+    }
+
     const { userId, anchorAccountId } = connection;
     const userRef = db.collection('artifacts').doc(APP_ID).collection('users').doc(userId);
     const accountRef = userRef.collection('accounts').doc(anchorAccountId);
@@ -67,7 +75,10 @@ export async function handleAccountUpdated(monoAccountId: string): Promise<void>
         'externalConnection.syncStatus': 'active',
     });
 
-    await connDoc.ref.update({ lastSyncAt: new Date().toISOString() });
+    await connDoc.ref.update({
+        lastSyncAt: new Date().toISOString(),
+        ...(eventId ? { lastProcessedEventId: eventId } : {}),
+    });
 
     if (newTxns.length > 0) {
         logger.info(`[Webhook] Synced ${newTxns.length} txns for ${anchorAccountId}`);
