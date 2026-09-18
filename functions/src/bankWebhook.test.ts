@@ -195,7 +195,7 @@ describe('monoWebhook processing lifecycle', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toMatchObject({ received: true });
-        expect(mockState.handleAccountUpdated).toHaveBeenCalledWith(ACCOUNT_ID, EVENT_ID);
+        expect(mockState.handleAccountUpdated).toHaveBeenCalledWith(ACCOUNT_ID, EVENT_ID, expect.any(Number));
         expect(mockState.store.get(keyFor())).toMatchObject({ status: 'completed' });
     });
 
@@ -236,7 +236,7 @@ describe('monoWebhook processing lifecycle', () => {
         const res = await invoke();
 
         expect(res.statusCode).toBe(200);
-        expect(mockState.handleAccountUpdated).toHaveBeenCalledWith(ACCOUNT_ID, EVENT_ID);
+        expect(mockState.handleAccountUpdated).toHaveBeenCalledWith(ACCOUNT_ID, EVENT_ID, expect.any(Number));
         expect(mockState.store.get(keyFor())).toMatchObject({ status: 'completed' });
     });
 

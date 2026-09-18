@@ -2,6 +2,7 @@ import { logger } from 'firebase-functions';
 import { db, APP_ID } from './config';
 import { getAccountDetails, getAllTransactions } from './mono/monoClient';
 import { mapAndDeduplicate, financeDocId } from './mono/transactionMapper';
+import { applyObservedBalance } from './accountBalance';
 import type { BankConnectionDoc } from './mono/monoTypes';
 
 const BATCH_CHUNK_SIZE = 400;
@@ -91,13 +92,10 @@ export async function syncConnection(
         await batch.commit();
     }
 
-    // Update balance
+    // FI-04: order-preserving balance application — a fresher observation may already
+    // have been written by a webhook while this sync was in flight.
     const newBalanceCents = Math.round(details.account.balance * 100);
-    await accountRef.update({
-        balanceCents: newBalanceCents,
-        'externalConnection.lastSyncedAt': new Date().toISOString(),
-        'externalConnection.syncStatus': 'active',
-    });
+    await applyObservedBalance(accountRef, newBalanceCents, Date.now());
 
     await connectionRef.update({ lastSyncAt: new Date().toISOString(), status: 'active' });
 
