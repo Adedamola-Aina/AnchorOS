@@ -5,6 +5,7 @@
  * Includes auto-categorization based on narration keywords.
  */
 
+import { createHash } from 'node:crypto';
 import type { MonoTransaction } from './monoTypes';
 
 export interface MappedTransaction {
@@ -77,7 +78,9 @@ export function mapMonoTransaction(
   };
 }
 
-/** Map a batch, deduplicating against known external IDs. */
+/**
+ * Map a batch, deduplicating against known external IDs.
+ */
 export function mapAndDeduplicate(
   monoTransactions: MonoTransaction[],
   accountId: string,
@@ -87,4 +90,16 @@ export function mapAndDeduplicate(
   return monoTransactions
     .filter((tx) => !existingExternalIds.has(tx._id))
     .map((tx) => mapMonoTransaction(tx, accountId, currency));
+}
+
+/**
+ * FI-18: deterministic, document-id-safe id for a synced finance document.
+ *
+ * The same provider transaction always maps to the same document, so a concurrent
+ * sync (manual sync racing a scheduled run, or a webhook refresh) overwrites
+ * rather than inserting a second copy. This is the durable idempotency guarantee
+ * for imports; the check against existing external ids stays as an optimisation.
+ */
+export function financeDocId(anchorAccountId: string, externalTransactionId: string): string {
+  return createHash('sha256').update(`${anchorAccountId}:${externalTransactionId}`).digest('hex');
 }
