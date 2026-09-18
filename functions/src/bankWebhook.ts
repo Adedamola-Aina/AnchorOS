@@ -49,16 +49,31 @@ export function verifyWebhookSecret(
 }
 
 /**
- * Deduplication key. Mono's documented `event_id` is authoritative; a body hash
- * is used only when the provider omits or malforms it.
+ * Firestore document ids cover exactly this character set. Ids outside it must be
+ * hashed rather than character-stripped: stripping can map two distinct event ids
+ * onto one key, which would be read as a false duplicate and silently drop a real
+ * event.
+ */
+const DOC_SAFE_EVENT_ID = /^[A-Za-z0-9_-]{8,200}$/;
+
+/**
+ * Deduplication key derived losslessly from Mono's documented `event_id`.
+ *
+ * - doc-id-safe id → used verbatim (no transformation)
+ * - any other id   → sha256 of the *raw* id, so distinct ids stay distinct
+ * - no id at all   → sha256 of the raw body, namespaced apart from id-bearing
+ *                    events so the two forms can never collide
  */
 export function eventKey(payload: MonoWebhookEvent, rawFallback: string): string {
     const rawId = typeof payload.event_id === 'string' ? payload.event_id : '';
-    const safeId = rawId.replace(/[^A-Za-z0-9_-]/g, '');
-    if (safeId.length >= 8) return `evt_${safeId}`;
 
-    const digest = createHash('sha256').update(rawFallback).digest('hex').slice(0, 40);
-    return `body_${digest}`;
+    if (rawId.length === 0) {
+        return `body_${createHash('sha256').update(rawFallback).digest('hex')}`;
+    }
+    if (DOC_SAFE_EVENT_ID.test(rawId)) {
+        return `evt_${rawId}`;
+    }
+    return `evt_${createHash('sha256').update(rawId).digest('hex')}`;
 }
 
 function eventRef(key: string) {

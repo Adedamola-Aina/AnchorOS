@@ -76,7 +76,10 @@ export interface BankConnectionDoc {
   linkedAt: string;
   status: 'active' | 'reconnect_required' | 'revoked';
   lastSyncAt?: string;
-  /** Mono `event_id` of the most recently applied webhook — idempotency guard so
-   *  a retry after a successful-but-unrecorded completion cannot reapply work. */
+  /** Mono `event_id` of the most recently applied webhook for this connection.
+   *  Fast path only (it avoids a redundant re-sync). It is NOT the idempotency
+   *  guarantee: any later event overwrites it, so a retry of an earlier event
+   *  still reaches the handler. Durable idempotency comes from the deterministic
+   *  id of each finance document derived from the provider transaction id. */
   lastProcessedEventId?: string;
 }

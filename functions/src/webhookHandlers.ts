@@ -1,10 +1,23 @@
 import { logger } from 'firebase-functions';
+import { createHash } from 'node:crypto';
 import { db, APP_ID } from './config';
 import { getAccountDetails, getTransactions } from './mono/monoClient';
 import { mapAndDeduplicate } from './mono/transactionMapper';
 import type { BankConnectionDoc, MonoWebhookEvent } from './mono/monoTypes';
 
 const BATCH_CHUNK_SIZE = 400;
+
+/**
+ * Deterministic, document-id-safe id for a synced finance document.
+ *
+ * The same provider transaction always maps to the same document, so a redelivery
+ * or a concurrent duplicate delivery overwrites rather than inserting a second
+ * copy. This is the durable idempotency guarantee for financial writes; the
+ * connection's `lastProcessedEventId` marker is only a re-sync fast path.
+ */
+export function financeDocId(anchorAccountId: string, externalTransactionId: string): string {
+    return createHash('sha256').update(`${anchorAccountId}:${externalTransactionId}`).digest('hex');
+}
 
 export async function handleAccountUpdated(monoAccountId: string, eventId?: string): Promise<void> {
     const connSnap = await db.collectionGroup('bankConnections')
@@ -21,8 +34,9 @@ export async function handleAccountUpdated(monoAccountId: string, eventId?: stri
     const connDoc = connSnap.docs[0];
     const connection = connDoc.data() as BankConnectionDoc;
 
-    // FI-01: idempotency guard. A redelivery after the handler succeeded but the
-    // completion record failed must not reapply financial changes.
+    // FI-01: fast path only. A retry of an event that is not the most recently
+    // applied one still reaches the sync below, where per-transaction identity
+    // (deterministic finance doc ids + the existing-id filter) keeps it idempotent.
     if (eventId && connection.lastProcessedEventId === eventId) {
         logger.info(`[Webhook] Event ${eventId} already applied for ${connection.anchorAccountId}; skipping`);
         return;
@@ -59,12 +73,20 @@ export async function handleAccountUpdated(monoAccountId: string, eventId?: stri
     for (let i = 0; i < newTxns.length; i += BATCH_CHUNK_SIZE) {
         const chunk = newTxns.slice(i, i + BATCH_CHUNK_SIZE);
         const batch = db.batch();
+        const financeCollection = userRef.collection('finance');
         for (const tx of chunk) {
-            batch.set(userRef.collection('finance').doc(), {
-                ...tx,
-                createdAt: new Date().toISOString(),
-                isSoftDeleted: false,
-            });
+            const externalId = tx.externalTransactionId;
+            batch.set(
+                externalId
+                    ? financeCollection.doc(financeDocId(anchorAccountId, externalId))
+                    : financeCollection.doc(),
+                {
+                    ...tx,
+                    ...(eventId ? { appliedEventId: eventId } : {}),
+                    createdAt: new Date().toISOString(),
+                    isSoftDeleted: false,
+                },
+            );
         }
         await batch.commit();
     }

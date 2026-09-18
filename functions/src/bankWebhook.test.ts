@@ -286,17 +286,43 @@ describe('monoWebhook processing lifecycle', () => {
     });
 });
 
-describe('eventKey', () => {
-    it("uses Mono's documented event_id", () => {
+describe('eventKey (lossless event identity)', () => {
+    it("uses Mono's documented event_id verbatim when it is document-id-safe", () => {
         expect(eventKey(payload(), 'ignored')).toBe(`evt_${EVENT_ID}`);
     });
 
-    it('falls back to a body hash when event_id is absent or too short', () => {
+    it('keeps distinct event ids distinct even when they differ only in characters that are not document-id-safe', () => {
+        const withDot = eventKey(payload({ event_id: 'abcd.12345678' }), 'raw');
+        const withoutDot = eventKey(payload({ event_id: 'abcd12345678' }), 'raw');
+
+        expect(withDot).not.toBe(withoutDot);
+        expect(withDot).toMatch(/^evt_[0-9a-f]{64}$/);
+    });
+
+    it('never emits a document-id-unsafe key for exotic ids', () => {
+        const key = eventKey(payload({ event_id: 'a/b/c.ünïcode/'.repeat(20) }), 'raw');
+
+        expect(key).toMatch(/^evt_[0-9a-f]{64}$/);
+        expect(key).not.toContain('/');
+    });
+
+    it('is deterministic for the same id', () => {
+        const id = 'not/doc/safe';
+        expect(eventKey(payload({ event_id: id }), 'one')).toBe(eventKey(payload({ event_id: id }), 'two'));
+    });
+
+    it('namespaces id-bearing events apart from id-less ones', () => {
         const raw = '{"event":"mono.events.account_updated"}';
         const withoutId = eventKey(payload({ event_id: undefined }), raw);
-        const withShortId = eventKey(payload({ event_id: 'abc' }), raw);
 
-        expect(withoutId).toMatch(/^body_[0-9a-f]{40}$/);
-        expect(withShortId).toBe(withoutId);
+        expect(withoutId).toMatch(/^body_[0-9a-f]{64}$/);
+        expect(withoutId.startsWith('evt_')).toBe(false);
+    });
+
+    it('preserves identity for ids shorter than the document-safe minimum', () => {
+        const short = eventKey(payload({ event_id: 'abc' }), 'raw');
+
+        expect(short).toMatch(/^evt_[0-9a-f]{64}$/);
+        expect(short).not.toBe(eventKey(payload({ event_id: undefined }), 'raw'));
     });
 });

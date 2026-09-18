@@ -16,9 +16,17 @@
  */
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+/** Test-owned documents all carry this prefix; cleanup only removes these. */
+const KEY_PREFIX = 'it_';
+const ISOLATED_PROJECT = 'anchor-os-webhook-emulator-test';
+
 // Must be set before ./config initializes firebase-admin.
+//
+// The project id is PINNED, never inherited: `firebase emulators:exec
+// --project demo-anchor-os` exports GCLOUD_PROJECT, so inheriting it would point
+// this suite (and its cleanup) at shared development data.
 vi.hoisted(() => {
-    process.env.GCLOUD_PROJECT = process.env.GCLOUD_PROJECT || 'anchor-os-webhook-emulator-test';
+    process.env.GCLOUD_PROJECT = 'anchor-os-webhook-emulator-test';
     process.env.FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
 });
 
@@ -30,7 +38,7 @@ const T0 = 1_800_000_000_000;
 let keyCounter = 0;
 function newKey(label: string): string {
     keyCounter += 1;
-    return `evt_${label}_${keyCounter}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${KEY_PREFIX}${label}_${keyCounter}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 async function readDoc(key: string) {
@@ -40,15 +48,46 @@ async function readDoc(key: string) {
 
 async function cleanup() {
     const snap = await db.collection('webhook_events').get();
-    if (snap.empty) return;
+    const owned = snap.docs.filter((doc) => doc.id.startsWith(KEY_PREFIX));
+    if (owned.length === 0) return;
 
     const batch = db.batch();
-    snap.docs.forEach((doc) => batch.delete(doc.ref));
+    owned.forEach((doc) => batch.delete(doc.ref));
     await batch.commit();
 }
 
 beforeEach(cleanup);
 afterAll(cleanup);
+
+describe('emulator test isolation', () => {
+    it('is pinned to its own project rather than the ambient one', () => {
+        expect(process.env.GCLOUD_PROJECT).toBe(ISOLATED_PROJECT);
+        expect(db.projectId).toBe(ISOLATED_PROJECT);
+    });
+
+    it('only removes documents it owns', async () => {
+        const foreignId = `foreign-${Date.now().toString(36)}`;
+        await db.collection('webhook_events').doc(foreignId).set({ status: 'processing' });
+        await db.collection('webhook_events').doc(`${KEY_PREFIX}owned`).set({ status: 'processing' });
+
+        try {
+            await cleanup();
+
+            expect((await db.collection('webhook_events').doc(`${KEY_PREFIX}owned`).get()).exists).toBe(false);
+            expect((await db.collection('webhook_events').doc(foreignId).get()).exists).toBe(true);
+        } finally {
+            await db.collection('webhook_events').doc(foreignId).delete();
+        }
+    });
+
+    it('creates every event under the owned prefix', async () => {
+        const key = newKey('prefixed');
+        await claimEvent(key, T0, 'worker-a');
+
+        const snap = await db.collection('webhook_events').get();
+        expect(snap.docs.every((doc) => doc.id.startsWith(KEY_PREFIX))).toBe(true);
+    });
+});
 
 describe('claimEvent against the Firestore emulator', () => {
     it('claims a fresh event with a bounded lease', async () => {
