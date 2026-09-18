@@ -248,24 +248,26 @@ describe('TransactionService', () => {
             };
             const transaction = createMockTransaction('tx-1', 'expense', 5000);
 
-            const mockBatch = {
+            const mockTransaction = {
+                get: vi.fn().mockResolvedValue({ exists: () => true, data: () => transaction }),
                 update: vi.fn(),
-                commit: vi.fn().mockResolvedValue(undefined),
+                set: vi.fn(),
+                delete: vi.fn(),
             };
-            vi.mocked(firestore.writeBatch).mockReturnValue(mockBatch as any);
+            vi.mocked(firestore.runTransaction).mockImplementation(async (_db, fn) => fn(mockTransaction as any));
 
             // Act
             await service.deleteTransaction(userId, 'tx-1', 'acc-1', [account], [transaction]);
 
-            // Assert
-            expect(mockBatch.update).toHaveBeenCalledWith(
+            // Assert (FI-05: the persisted row is the reversal authority)
+            expect(mockTransaction.get).toHaveBeenCalled();
+            expect(mockTransaction.update).toHaveBeenCalledWith(
                 expect.anything(), // tx ref
                 expect.objectContaining({
                     isSoftDeleted: true,
                     deletedBy: userId,
                 })
             );
-            expect(mockBatch.commit).toHaveBeenCalled();
         });
 
         it('reverses balance for expense transaction', async () => {
@@ -283,18 +285,20 @@ describe('TransactionService', () => {
             };
             const expenseTx = createMockTransaction('tx-expense', 'expense', 5000);
 
-            const mockBatch = {
+            const mockTransaction = {
+                get: vi.fn().mockResolvedValue({ exists: () => true, data: () => expenseTx }),
                 update: vi.fn(),
-                commit: vi.fn().mockResolvedValue(undefined),
+                set: vi.fn(),
+                delete: vi.fn(),
             };
-            vi.mocked(firestore.writeBatch).mockReturnValue(mockBatch as any);
+            vi.mocked(firestore.runTransaction).mockImplementation(async (_db, fn) => fn(mockTransaction as any));
 
             // Act
             await service.deleteTransaction(userId, 'tx-expense', 'acc-1', [account], [expenseTx]);
 
             // Assert
             // For expense deletion, balance should increase (reversal)
-            expect(mockBatch.update).toHaveBeenCalledWith(
+            expect(mockTransaction.update).toHaveBeenCalledWith(
                 expect.anything(), // account ref
                 { balanceCents: expect.objectContaining({ _increment: 5000 }) }
             );
@@ -315,18 +319,20 @@ describe('TransactionService', () => {
             };
             const incomeTx = createMockTransaction('tx-income', 'income', 10000);
 
-            const mockBatch = {
+            const mockTransaction = {
+                get: vi.fn().mockResolvedValue({ exists: () => true, data: () => incomeTx }),
                 update: vi.fn(),
-                commit: vi.fn().mockResolvedValue(undefined),
+                set: vi.fn(),
+                delete: vi.fn(),
             };
-            vi.mocked(firestore.writeBatch).mockReturnValue(mockBatch as any);
+            vi.mocked(firestore.runTransaction).mockImplementation(async (_db, fn) => fn(mockTransaction as any));
 
             // Act
             await service.deleteTransaction(userId, 'tx-income', 'acc-1', [account], [incomeTx]);
 
             // Assert
             // For income deletion, balance should decrease (reversal)
-            expect(mockBatch.update).toHaveBeenCalledWith(
+            expect(mockTransaction.update).toHaveBeenCalledWith(
                 expect.anything(), // account ref
                 { balanceCents: expect.objectContaining({ _increment: -10000 }) }
             );
@@ -352,13 +358,15 @@ describe('TransactionService', () => {
                 linkId: 'link-123',
             };
 
-            // BUG-035: Now uses runTransaction for atomic linked deletion
+            // FI-05: the primary row is read from the persisted store, then the
+            // linked counterpart is read inside the same transaction.
             const mockTransaction = {
-                get: vi.fn().mockResolvedValue({
-                    exists: () => true,
-                    data: () => createMockTransaction('tx-paired', 'income', 10000),
-                }),
+                get: vi.fn()
+                    .mockResolvedValueOnce({ exists: () => true, data: () => linkedTx })
+                    .mockResolvedValueOnce({ exists: () => true, data: () => createMockTransaction('tx-paired', 'income', 10000) }),
                 update: vi.fn(),
+                set: vi.fn(),
+                delete: vi.fn(),
             };
             vi.mocked(firestore.runTransaction).mockImplementation(async (_db, fn) => {
                 return fn(mockTransaction as any);
@@ -369,7 +377,7 @@ describe('TransactionService', () => {
 
             // Assert - runTransaction used for atomicity
             expect(firestore.runTransaction).toHaveBeenCalled();
-            expect(mockTransaction.get).toHaveBeenCalled();
+            expect(mockTransaction.get).toHaveBeenCalledTimes(2);
             expect(mockTransaction.update).toHaveBeenCalled();
         });
 
@@ -392,12 +400,15 @@ describe('TransactionService', () => {
                 linkedUserId: userId,
             };
 
-            // BUG-035: Now uses runTransaction for atomic linked deletion
+            // FI-05: the primary row is read from the persisted store; the linked
+            // counterpart is genuinely missing.
             const mockTransaction = {
-                get: vi.fn().mockResolvedValue({
-                    exists: () => false,
-                }),
+                get: vi.fn()
+                    .mockResolvedValueOnce({ exists: () => true, data: () => orphanedTx })
+                    .mockResolvedValueOnce({ exists: () => false }),
                 update: vi.fn(),
+                set: vi.fn(),
+                delete: vi.fn(),
             };
             vi.mocked(firestore.runTransaction).mockImplementation(async (_db, fn) => {
                 return fn(mockTransaction as any);
@@ -406,6 +417,7 @@ describe('TransactionService', () => {
             // Act & Assert - should not throw
             await expect(service.deleteTransaction(userId, 'tx-orphaned', 'acc-1', [account], [orphanedTx])).resolves.toBeUndefined();
             expect(firestore.runTransaction).toHaveBeenCalled();
+            expect(mockTransaction.get).toHaveBeenCalledTimes(2);
         });
 
         it('throws VALIDATION error if account not found', async () => {
@@ -473,11 +485,8 @@ describe('TransactionService', () => {
             };
             const tx = createMockTransaction('tx-1', 'expense', 1000);
 
-            const mockBatch = {
-                update: vi.fn(),
-                commit: vi.fn().mockRejectedValue(new Error('Firestore error')),
-            };
-            vi.mocked(firestore.writeBatch).mockReturnValue(mockBatch as any);
+            // FI-05: deletes run through a transaction, so that is what must fail here.
+            vi.mocked(firestore.runTransaction).mockRejectedValue(new Error('Firestore error'));
 
             // Act & Assert
             await expect(service.deleteTransaction('user-1', 'tx-1', 'acc-1', [account], [tx])).rejects.toThrow(AnchorError);

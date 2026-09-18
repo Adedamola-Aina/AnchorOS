@@ -108,40 +108,51 @@ export class TransactionService {
             const timestamp = new Date().toISOString();
             const targetUserId = account.ownerId || userId;
 
-            // BUG-035 Fix: Use runTransaction for linked deletions to prevent race conditions
-            if (txToDelete.linkedTransactionId && txToDelete.linkedUserId) {
-                await runTransaction(this.firestore, async (transaction) => {
-                    const txRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'finance', transactionId);
-                    transaction.update(txRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
-
-                    const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
-                    const balanceAdj = txToDelete.type === 'income' ? -txToDelete.amountCents : txToDelete.amountCents;
-                    transaction.update(accRef, { balanceCents: increment(balanceAdj) });
-
-                    await this.deleteLinkedTransaction(transaction, txToDelete, userId, timestamp);
-                });
-            } else {
-                // Simple delete uses writeBatch (still atomic, but faster for single ops)
-                const batch = writeBatch(this.firestore);
+            // FI-05: the PERSISTED document is the authority for what to reverse.
+            // The row the caller passed in is a client-memory snapshot: it can be
+            // stale (edited on another device) so reversing from it moves the
+            // balance by the wrong amount, and a row already soft-deleted elsewhere
+            // must not move the balance a second time.
+            const outcome = await runTransaction(this.firestore, async (transaction) => {
                 const txRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'finance', transactionId);
-                batch.update(txRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
+                const txSnap = await transaction.get(txRef);
+                if (!txSnap.exists()) throw new AnchorError('Transaction not found', 'VALIDATION');
+
+                const persisted = txSnap.data() as AnchorTransaction;
+                if (persisted.isSoftDeleted === true) {
+                    // Already deleted elsewhere: idempotent no-op, no balance change.
+                    return { alreadyDeleted: true, reversedCents: 0, persisted };
+                }
+
+                transaction.update(txRef, { isSoftDeleted: true, deletedBy: userId, deletedAt: timestamp });
 
                 const accRef = doc(this.firestore, 'artifacts', APP_ID, 'users', targetUserId, 'accounts', accountId);
-                const balanceAdj = txToDelete.type === 'income' ? -txToDelete.amountCents : txToDelete.amountCents;
-                batch.update(accRef, { balanceCents: increment(balanceAdj) });
+                const balanceAdj = persisted.type === 'income' ? -persisted.amountCents : persisted.amountCents;
+                transaction.update(accRef, { balanceCents: increment(balanceAdj) });
 
-                await batch.commit();
-            }
+                if (persisted.linkedTransactionId && persisted.linkedUserId) {
+                    await this.deleteLinkedTransaction(transaction, persisted, userId, timestamp);
+                }
+
+                return { alreadyDeleted: false, reversedCents: balanceAdj, persisted };
+            });
+
+            if (outcome.alreadyDeleted) return;
 
             // AUDIT: Log transaction deletion
             auditFinance.transactionDeleted(transactionId, accountId);
-            // ARCH-022: Immutable ledger entry
+            // ARCH-022: Immutable ledger entry (from the persisted values)
             void LedgerService.record(userId, {
                 action: 'transaction_deleted',
                 entityId: transactionId,
                 entityType: 'transaction',
-                amountCentsDelta: txToDelete.type === 'income' ? -txToDelete.amountCents : txToDelete.amountCents,
-                snapshotBefore: { id: transactionId, accountId, amountCents: txToDelete.amountCents, type: txToDelete.type },
+                amountCentsDelta: outcome.reversedCents,
+                snapshotBefore: {
+                    id: transactionId,
+                    accountId,
+                    amountCents: outcome.persisted.amountCents,
+                    type: outcome.persisted.type,
+                },
                 snapshotAfter: null,
             });
         } catch (error) {
