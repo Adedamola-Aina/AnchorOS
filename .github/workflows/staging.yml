@@ -429,34 +429,15 @@ jobs:
             playwright-report/
           retention-days: 14
 
-  post-deploy-e2e:
-    name: Post-Deploy E2E (non-blocking, normal mode)
-    runs-on: ubuntu-latest
-    needs: [plan, release-smoke]
-    if: >-
-      !cancelled() &&
-      needs.plan.outputs.mode == 'normal' &&
-      needs.release-smoke.result == 'success'
-    continue-on-error: true
-    strategy:
-      matrix:
-        shard: [1, 2, 3, 4]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v6
-        with: { node-version: '22', cache: 'npm' }
-      - run: npm ci
-      - name: Write E2E env config
-        run: printf '%s\n' "$E2E_VITE_ENV" > .env.development
-        env:
-          E2E_VITE_ENV: ${{ secrets.E2E_VITE_ENV }}
-      - run: npx playwright install chromium --with-deps
-      - run: npx playwright test --config config/playwright.config.ts --shard=${{ matrix.shard }}/4
-        env:
-          E2E_BASE_URL: ${{ secrets.STAGING_URL || 'https://anchor-os-staging.web.app' }}
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: e2e-shard-${{ matrix.shard }}
-          path: playwright-report/
-          retention-days: 14
+  # NOTE: there is deliberately NO post-deploy E2E job here.
+  #
+  # The authoritative deployed gate is the Release Smoke above, which
+  # authenticates with the dedicated staging canary (STAGING_SMOKE_*) and
+  # attests App Check. It proves the deployed environment in ~2 minutes.
+  #
+  # The general E2E suite (config/playwright.config.ts) is emulator-oriented: it
+  # authenticates with the disposable repository fixture identity
+  # (e2e/fixtures/test-data.ts) and asserts emulator-seeded data. Run against a
+  # cloud target it cannot pass, retries every test, and turned every staging
+  # run into a 15-30 minute job for zero gating value. It is covered by the PR
+  # "Bounded Smoke" job (emulator) and the scheduled weekly full regression.
