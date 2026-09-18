@@ -178,7 +178,7 @@ Status: CANONICAL. This file is the single authoritative register of every confi
 
 ## Re-audit addendum — RA-* (2026-09-17)
 
-**Addendum, not a rewrite.** The 2026-09 corpus above is an immutable historical record (89 canonical roots, report 00–11 evidence). A post-remediation re-audit found **seventeen** additional canonical roots that were **not** present in that corpus: RA-01…RA-10 on 2026-09-17, extended by RA-11…RA-17 on 2026-09-18 as the remediation PRs were reconciled. They are recorded here with the same column set plus a trailing `Status` column. RA-01…RA-11 and RA-13…RA-17 are remediated and merged; **RA-12 remains open**. The historical counts above are unchanged and still describe the 2026-09 corpus.
+**Addendum, not a rewrite.** The 2026-09 corpus above is an immutable historical record (89 canonical roots, report 00–11 evidence). A post-remediation re-audit found **twenty** additional canonical roots that were **not** present in that corpus: RA-01…RA-10 on 2026-09-17, extended by RA-11…RA-17 on 2026-09-18 as the remediation PRs were reconciled, and by RA-18…RA-20 on 2026-09-18 when the emulator-gate work exposed defects that had no ID of their own. They are recorded here with the same column set plus a trailing `Status` column. RA-01…RA-11 and RA-13…RA-20 are remediated and merged; **RA-12 remains open**. The historical counts above are unchanged and still describe the 2026-09 corpus.
 
 See also the [FI-02 contract correction](#correction--fi-02-contract-2026-09-18) and the [merged-awaiting-staging status](#remediation-status--merged-awaiting-staging-2026-09-18) below.
 
@@ -201,6 +201,21 @@ See also the [FI-02 contract correction](#correction--fi-02-contract-2026-09-18)
 | RA-15 | The rules-coverage gate passed vacuously — emulator rules tests used random project ids, so it always reported success. This is how RA-10/RA-16/RA-17 shipped unruled | re-audit 2026-09-18 | new | MEDIUM | HIGH | VER, CTRL | CI / rules gate | ROOT | — | X7 · Q0 · the gate guarding every rule | GATE | NONE→GATE | PROVEN / NO | RA-10, RA-16, RA-17 | W2·B10 | Deterministic static gate: every collection written through `secureDb` must have a rule; build fails otherwise | **REMEDIATED** — PR #177 (issue #169) |
 | RA-16 | `categories` was written through `secureDb` by `CategoryService` with no Firestore rule → permission-denied for every custom category | re-audit 2026-09-18 | new | MEDIUM | HIGH | SEC, CORR | Firestore rules / categories | ROOT | — | X3/X7 · Q0 · custom categories | LIVE | NONE→ADDED | PROVEN / DYN | RA-15 | W2 | Owner-only validated rule; owner CRUD + cross-user/unauth denial tests | **REMEDIATED** — PR #177 (issue #175) |
 | RA-17 | `fabric_monthly_reviews` had no Firestore rule → unreadable/unwritable, so the monthly review surface could never load | re-audit 2026-09-18 | new | MEDIUM | HIGH | SEC, CORR | Firestore rules / Fabric | ROOT | — | X3/X7 · Q0 · monthly reviews | LIVE | NONE→ADDED | PROVEN / DYN | RA-15 | W5 | Owner-only validated rule; access tests | **REMEDIATED** — PR #177 (issue #176) |
+| RA-18 | Emulator suites rode the process-global Admin **default** app, so in CI `db.projectId` resolved to the ambient `demo-anchor-os` while `GCLOUD_PROJECT` was correctly pinned — fixtures could be written into the wrong project namespace. The isolation assertion added earlier is what exposed it | re-audit 2026-09-18 | new | MEDIUM | HIGH | VER, PRIV | Test isolation | ROOT | — | X7/X5 · Q0 · every emulator test run | LIVE | NONE→ADDED | PROVEN / DYN (CI run 35316844760) | RA-20 | W2 | Mocked suites use a dedicated named Admin app; `FIREBASE_CONFIG` pinned; `db.projectId` assertion passes in CI | **REMEDIATED** — PR #182 |
+| RA-19 | Cline agent state (`.cline/data/settings/providers.json` holding plaintext provider keys, plus session transcripts) was untracked but **not** gitignored — one broad `git add` away from committing a live credential | re-audit 2026-09-18 | new | LOW | MEDIUM | SEC, PRIV | Repo hygiene / secrets | ROOT | — | X7 · Q0 · every agent session on a dev machine | LIVE | NONE→GATE | PROVEN / NO | — | W6 | `.cline/` ignored; nothing under it tracked; `check-ignore` recorded as the probe | **REMEDIATED** — PR #185 |
+| RA-20 | `functions/vitest.emulator.config.ts` — claim lifecycle, end-to-end handler idempotency, family revocation and isolation — was executed by **no** CI job: Backend Integration starts emulators, but `test:integration` only runs client tests matched by name | re-audit 2026-09-18 | new | MEDIUM | HIGH | VER, CTRL | CI / test gate | ROOT | — | X7 · Q0 · every functions and rules change | GATE | NONE→GATE | PROVEN / NO | FI-01, FI-18, FS-01, SN-01 | W2·B10 | `emulator-tests` job runs `npm run test:functions:emulator` on functions/rules changes | **REMEDIATED** — PR #182 |
+
+### Bundling disclosure and the one-finding-one-PR rule (2026-09-18)
+
+Several merged PRs carried more than one finding. Each ID is recorded individually above so it stays identifiable, and the bundles are stated explicitly rather than left implicit:
+
+| PR | Findings delivered together |
+|---|---|
+| #177 | RA-15, RA-16, RA-17 |
+| #180 | FI-01, FI-02 |
+| #182 | RA-18, RA-20 — the emulator CI gate plus the isolation defect its first CI run exposed |
+
+**Rule going forward: one finding, one ID, one PR.** A defect discovered in passing gets its own ID and its own PR rather than being fixed silently inside another change. Bookkeeping (registering an ID, recording a status) is the only thing batched, because it is not a fix. RA-18 exists precisely because the emulator-namespace defect was fixed inside the gate PR without an ID; this section is the correction, not a precedent.
 
 ### Correction — FI-02 contract (2026-09-18)
 
