@@ -24,6 +24,8 @@ const mockState = vi.hoisted(() => {
     // --project demo-anchor-os` point this suite at shared development data.
     const project = 'anchor-os-webhook-handler-test';
     process.env.GCLOUD_PROJECT = project;
+    // FIREBASE_CONFIG takes precedence for project resolution, so pin it as well.
+    process.env.FIREBASE_CONFIG = JSON.stringify({ projectId: project });
     const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
     // Fail before Firebase initialization or any fixture write/cleanup.
     if (!/^(localhost|127\.0\.0\.1|\[::1\]):([0-9]{1,5})$/.test(emulatorHost)) {
@@ -55,11 +57,17 @@ type RealQuerySnapshot = {
 };
 
 vi.mock('./config', async () => {
-    const { initializeApp, getApps } = await import('firebase-admin/app');
+    const { initializeApp, getApp, getApps } = await import('firebase-admin/app');
     const { getFirestore } = await import('firebase-admin/firestore');
 
-    if (getApps().length === 0) initializeApp({ projectId: mockState.PROJECT });
-    const real = getFirestore();
+    // Dedicated NAMED app: the default app is process-global and may already have
+    // been initialized with a different (ambient) project by another test file,
+    // which would silently point this suite's fixtures at the wrong namespace.
+    const name = 'webhook-handler-emulator-test';
+    const app = getApps().some((existing) => existing.name === name)
+        ? getApp(name)
+        : initializeApp({ projectId: mockState.PROJECT }, name);
+    const real = getFirestore(app);
 
     const guardDoc = (ref: RealDocRef): RealDocRef => ({
         update: async (data) => {

@@ -16,9 +16,20 @@
 import { beforeEach, afterAll, describe, expect, it, vi } from 'vitest';
 
 // Must be set before ./config initializes firebase-admin.
+//
+// The project id is PINNED, never inherited: `firebase emulators:exec --project
+// demo-anchor-os` exports GCLOUD_PROJECT, so inheriting it would point this suite
+// (and its fixtures) at shared development data.
 vi.hoisted(() => {
-  process.env.GCLOUD_PROJECT = process.env.GCLOUD_PROJECT || 'anchor-os-b1-test';
-  process.env.FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
+  process.env.GCLOUD_PROJECT = 'anchor-os-family-emulator-test';
+  // FIREBASE_CONFIG takes precedence for project resolution, so pin it as well.
+  process.env.FIREBASE_CONFIG = JSON.stringify({ projectId: 'anchor-os-family-emulator-test' });
+
+  const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
+  if (!/^(localhost|127\.0\.0\.1|\[::1\]):([0-9]{1,5})$/.test(emulatorHost)) {
+    throw new Error('Family revocation tests require a loopback Firestore emulator');
+  }
+  process.env.FIRESTORE_EMULATOR_HOST = emulatorHost;
 });
 
 // Expose the raw handlers (skip the onCall/AppCheck wrapper), keep everything

@@ -27,6 +27,10 @@ const ISOLATED_PROJECT = 'anchor-os-webhook-emulator-test';
 // this suite (and its cleanup) at shared development data.
 vi.hoisted(() => {
     process.env.GCLOUD_PROJECT = 'anchor-os-webhook-emulator-test';
+    // FIREBASE_CONFIG takes precedence for project resolution, so pin it as well:
+    // a no-argument initializeApp() anywhere in the process then cannot resolve to
+    // the ambient emulator project.
+    process.env.FIREBASE_CONFIG = JSON.stringify({ projectId: 'anchor-os-webhook-emulator-test' });
     const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
     // Fail before Firebase initialization or any fixture write/cleanup.
     if (!/^(localhost|127\.0\.0\.1|\[::1\]):([0-9]{1,5})$/.test(emulatorHost)) {
@@ -35,6 +39,22 @@ vi.hoisted(() => {
     const port = Number(emulatorHost.slice(emulatorHost.lastIndexOf(':') + 1));
     if (port < 1 || port > 65535) throw new Error('Invalid Firestore emulator port');
     process.env.FIRESTORE_EMULATOR_HOST = emulatorHost;
+});
+
+// A dedicated NAMED admin app. The default app is process-global and shared with
+// every other test file in the worker, so whichever file initializes it first wins
+// (in CI that is the ambient `emulators:exec` project). A named app makes this
+// suite's project namespace deterministic no matter the load order.
+vi.mock('./config', async () => {
+    const { initializeApp, getApp, getApps } = await import('firebase-admin/app');
+    const { getFirestore } = await import('firebase-admin/firestore');
+
+    const name = 'webhook-claim-emulator-test';
+    const app = getApps().some((existing) => existing.name === name)
+        ? getApp(name)
+        : initializeApp({ projectId: 'anchor-os-webhook-emulator-test' }, name);
+
+    return { db: getFirestore(app), APP_ID: 'anchor-os' };
 });
 
 import { db } from './config';
