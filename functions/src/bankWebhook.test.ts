@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
@@ -287,8 +288,16 @@ describe('monoWebhook processing lifecycle', () => {
 });
 
 describe('eventKey (lossless event identity)', () => {
-    it("uses Mono's documented event_id verbatim when it is document-id-safe", () => {
-        expect(eventKey(payload(), 'ignored')).toBe(`evt_${EVENT_ID}`);
+    it('does not alias an unusual ID with a literal ID equal to its digest', () => {
+        const id = 'abcd.12345678';
+        const digest = createHash('sha256').update(id).digest('hex');
+        expect(eventKey(payload({ event_id: id }), '')).not.toBe(
+            eventKey(payload({ event_id: digest }), ''),
+        );
+    });
+
+    it("hashes Mono's documented event_id consistently", () => {
+        expect(eventKey(payload(), 'ignored')).toBe(`evt_${createHash('sha256').update(EVENT_ID).digest('hex')}`);
     });
 
     it('keeps distinct event ids distinct even when they differ only in characters that are not document-id-safe', () => {

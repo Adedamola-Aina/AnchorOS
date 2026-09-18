@@ -27,7 +27,14 @@ const ISOLATED_PROJECT = 'anchor-os-webhook-emulator-test';
 // this suite (and its cleanup) at shared development data.
 vi.hoisted(() => {
     process.env.GCLOUD_PROJECT = 'anchor-os-webhook-emulator-test';
-    process.env.FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
+    const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
+    // Fail before Firebase initialization or any fixture write/cleanup.
+    if (!/^(localhost|127\.0\.0\.1|\[::1\]):([0-9]{1,5})$/.test(emulatorHost)) {
+        throw new Error('Webhook tests require a loopback Firestore emulator');
+    }
+    const port = Number(emulatorHost.slice(emulatorHost.lastIndexOf(':') + 1));
+    if (port < 1 || port > 65535) throw new Error('Invalid Firestore emulator port');
+    process.env.FIRESTORE_EMULATOR_HOST = emulatorHost;
 });
 
 import { db } from './config';
