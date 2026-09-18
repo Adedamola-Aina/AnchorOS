@@ -29,4 +29,34 @@ describe('MarketingLanding', () => {
     expect(screen.getAllByRole('link', { name: /start with anchoros/i })[0]).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: /enter app/i })).toHaveAttribute('href', '/dashboard');
   });
+
+  it('surfaces the product showcase, answers, and footer', () => {
+    render(
+      <MemoryRouter>
+        <MarketingLanding />
+      </MemoryRouter>
+    );
+
+    // Feature deep-dives
+    expect(screen.getByRole('heading', { name: /see your whole position/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /follow-through without the manipulation/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /shared life, with boundaries that hold/i })).toBeInTheDocument();
+
+    // FAQ
+    expect(screen.getByText(/what is anchoros, in one line\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/who can see my data\?/i)).toBeInTheDocument();
+
+    // Footer
+    expect(screen.getByText(/private by default\./i)).toBeInTheDocument();
+  });
+
+  it('renders a single, accessible marketing navigation', () => {
+    render(
+      <MemoryRouter>
+        <MarketingLanding />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('navigation', { name: /marketing/i })).toBeInTheDocument();
+  });
 });
