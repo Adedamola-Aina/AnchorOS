@@ -14,6 +14,7 @@ import { createAuditLog } from './helpers';
 import { enforceRateLimit } from './rateLimit';
 import { db, APP_ID } from './config';
 import { checkNewDeviceAlert } from './authAlertDetection';
+import { markSessionsRevoked } from './sessionEnforcement';
 
 const MAX_AUTH_EVENTS = 20;
 
@@ -133,6 +134,10 @@ export const reportUnrecognisedSignIn = secureOnCall(async (request) => {
 
     // Force-revoke all refresh tokens (logs out all sessions)
     await getAuth().revokeRefreshTokens(uid);
+
+    // A-03: also record the epoch, so tokens already issued on the offending
+    // device stop being accepted now rather than within the hour.
+    await markSessionsRevoked(uid, 'unrecognised_signin_reported', eventId);
 
     await createAuditLog('auth_unrecognised_signin_reported', uid, { eventId });
 

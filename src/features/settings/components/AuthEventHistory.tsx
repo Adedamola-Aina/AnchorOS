@@ -10,7 +10,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useNotifications } from '../../../context/NotificationContext';
 import {
     getAuthEvents,
-    dismissAuthEvent,
+    revokeSession,
     reportUnrecognisedSignIn,
     type AuthEvent,
 } from '../../../services/authEventService';
@@ -56,10 +56,21 @@ export const AuthEventHistory: React.FC = () => {
 
     const handleSignOut = async (event: AuthEvent) => {
         if (!event.id) return;
-        setSessions(prev => prev.filter(e => e.id !== event.id));
+        // A-03: the server cannot revoke a single device — Firebase Auth revokes
+        // refresh tokens per account. Say that plainly instead of implying a
+        // per-device sign-out that does not exist.
+        const confirmed = await confirm({
+            title: 'Sign out all devices?',
+            message: 'AnchorOS cannot sign out one device on its own. This signs out every session, including this one, and you will need to sign in again.',
+            type: 'danger', confirmText: 'Sign out all devices', cancelText: 'Cancel',
+        });
+        if (!confirmed) return;
+
         setDismissing(event.id);
         try {
-            await dismissAuthEvent(event.id);
+            await revokeSession(event.id);
+            showToast('All sessions signed out. Please sign in again.', 'info');
+            await logout();
         } catch (err) {
             captureError(err, 'AuthEventHistory.signOut');
             showToast('Could not sign out that device — please try again.', 'error');

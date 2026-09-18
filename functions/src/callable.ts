@@ -5,6 +5,7 @@
 
 import { onCall, type CallableOptions, type CallableRequest } from 'firebase-functions/v2/https';
 import { withTracing } from './tracing';
+import { assertSessionValid } from './sessionEnforcement';
 
 const projectId = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? '';
 const shouldEnforceByDefault = projectId === 'anchor-os' || projectId === 'anchor-os-staging';
@@ -44,6 +45,23 @@ function withAppCheck<T>(options: CallableOptions<T>): CallableOptions<T> {
     };
 }
 
+/**
+ * A-03 / AM-11: enforce server-side session revocation on every authenticated
+ * callable. `revokeSession` records a revocation epoch; any token issued before
+ * that epoch is rejected here, so a revoked device loses access immediately
+ * rather than keeping a usable ID token for up to an hour. Unauthenticated calls
+ * are left to the handler's own guards.
+ */
+function withSessionGuard<T, R>(handler: CallableHandler<T, R>): CallableHandler<T, R> {
+    return async (request: CallableRequest<T>) => {
+        if (request.auth) {
+            const authTime = (request.auth.token as { auth_time?: number } | undefined)?.auth_time;
+            await assertSessionValid(request.auth.uid, authTime);
+        }
+        return handler(request);
+    };
+}
+
 /** Counter used to derive a unique trace name when none is provided. */
 let callableCounter = 0;
 
@@ -55,12 +73,12 @@ export function secureOnCall<T = unknown, R = unknown>(
     const name = traceName ?? `callable_${++callableCounter}`;
 
     if (typeof optionsOrHandler === 'function') {
-        return onCall(withAppCheck<T>({}), withTracing(name, optionsOrHandler));
+        return onCall(withAppCheck<T>({}), withTracing(name, withSessionGuard(optionsOrHandler)));
     }
 
     if (!maybeHandler) {
         throw new Error('secureOnCall requires a handler when options are provided');
     }
 
-    return onCall(withAppCheck(optionsOrHandler), withTracing(name, maybeHandler));
+    return onCall(withAppCheck(optionsOrHandler), withTracing(name, withSessionGuard(maybeHandler)));
 }

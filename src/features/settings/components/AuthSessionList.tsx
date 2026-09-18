@@ -67,7 +67,7 @@ export const AuthSessionList: React.FC<AuthSessionListProps> = ({ sessions, dism
                 className="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 min-h-[44px] px-2 shrink-0"
                 onClick={() => onSignOut(session)}
                 isLoading={dismissing === session.id}
-                title="Sign out this device"
+                title="Sign out all devices"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </Button>

@@ -4,9 +4,13 @@ const mockDelete = vi.fn();
 const mockCreateAuditLog = vi.fn();
 const mockEnforceRateLimit = vi.fn();
 const mockRevokeRefreshTokens = vi.fn();
+const mockMarkSessionsRevoked = vi.fn();
 
 vi.mock('firebase-admin/auth', () => ({
   getAuth: () => ({ revokeRefreshTokens: mockRevokeRefreshTokens }),
+}));
+vi.mock('./sessionEnforcement', () => ({
+  markSessionsRevoked: (...args: unknown[]) => mockMarkSessionsRevoked(...args),
 }));
 vi.mock('./helpers', () => ({
   createAuditLog: (...args: unknown[]) => mockCreateAuditLog(...args),
@@ -130,7 +134,40 @@ describe('revokeSession', () => {
     const result = await revokeSession({ auth: { uid: 'u1' }, data: { eventId: 'evt-1' } } as any);
 
     expect(mockDelete).toHaveBeenCalled();
-    expect(mockCreateAuditLog).toHaveBeenCalledWith('session_revoked', 'u1', { eventId: 'evt-1' });
-    expect(result).toEqual({ success: true });
+    expect(mockCreateAuditLog).toHaveBeenCalledWith(
+      'session_revoked',
+      'u1',
+      expect.objectContaining({ eventId: 'evt-1', revokedAllSessions: true }),
+    );
+    expect(result).toMatchObject({ success: true, revokedAllSessions: true });
+  });
+
+  it('revokes refresh tokens and records the revocation epoch (A-03)', async () => {
+    mockColDoc.mockReturnValue({
+      get: () => Promise.resolve({ exists: true, data: () => ({ uid: 'u1' }) }),
+      delete: mockDelete,
+    });
+    mockDelete.mockResolvedValue(undefined);
+
+    await revokeSession({ auth: { uid: 'u1' }, data: { eventId: 'evt-1' } } as any);
+
+    // Authority, not just history: both the token mint and the in-flight token.
+    expect(mockRevokeRefreshTokens).toHaveBeenCalledWith('u1');
+    expect(mockMarkSessionsRevoked).toHaveBeenCalledWith('u1', 'session_revoked', 'evt-1');
+  });
+
+  it('does not revoke anything when the session is not the caller’s', async () => {
+    mockColDoc.mockReturnValue({
+      get: () => Promise.resolve({ exists: true, data: () => ({ uid: 'other-user' }) }),
+      delete: mockDelete,
+    });
+
+    await expect(
+      revokeSession({ auth: { uid: 'u1' }, data: { eventId: 'evt-1' } } as any)
+    ).rejects.toThrow('Session not found');
+
+    expect(mockRevokeRefreshTokens).not.toHaveBeenCalled();
+    expect(mockMarkSessionsRevoked).not.toHaveBeenCalled();
+    expect(mockDelete).not.toHaveBeenCalled();
   });
 });
