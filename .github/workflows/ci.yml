@@ -99,6 +99,17 @@ jobs:
               return;
             }
 
+            // Bot-authored PRs (Dependabot) cannot fill in the human PR template, so
+            // the governance gate would block every dependency update forever — which
+            // is exactly what happened: 16 dependency PRs sat unmergeable. Authored
+            // changes are still gated here; bot updates remain gated by the rest of
+            // CI, including the dependency audit and the full test suites.
+            const author = pr.user?.login || '';
+            if (pr.user?.type === 'Bot' || author.endsWith('[bot]')) {
+              core.info(`Governance gate skipped for bot author ${author}.`);
+              return;
+            }
+
             const body = pr.body || '';
             const marker = '<!-- governance-gate-feedback -->';
             const requiredHeadings = [
