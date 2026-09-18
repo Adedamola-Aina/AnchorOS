@@ -209,7 +209,7 @@ Every wave PR must state which invariants it touches and demonstrate them with t
 | INV-2 | **Revocation** | Revocation/logout/removal removes authoritative (rules/server) access, not only UI visibility |
 | INV-3 | **Session** | Security-sensitive account events (password change/reset, MFA change, explicit revoke) have defined, tested session-invalidating behavior |
 | INV-4 | **Finance** | One logical financial event produces one internally consistent state transition (idempotent under retry/race; corrections from persisted state) |
-| INV-5 | **Webhooks** | Authenticity (raw-byte HMAC), idempotency (mark-on-completion), and retry semantics are explicit and tested |
+| INV-5 | **Webhooks** | Authenticity by Mono's documented shared `mono-webhook-secret` header (constant-time, fail-closed; **no HMAC** over the body), idempotency by per-transaction identity plus bounded ownership-checked claim recovery, and retry semantics are explicit and tested |
 | INV-6 | **Family** | Share grants have one authoritative model (`sharedWith`) and complete revocation semantics (scope, row indexes, mirror rules) |
 | INV-7 | **Commitments** | One recurrence cycle produces at most one completion/streak increment, under duplicate/replay/concurrency |
 | INV-8 | **Offline** | Retrying an already-committed logical action never applies it twice (idempotency keys enforced at flush) |
@@ -233,8 +233,8 @@ Focus: tests required to **prove remediation**. "Skipped" = exists but disabled.
 | Family revocation | Disconnect batch-failure/orphan-grant; share-vs-disconnect race | functions/emulator | FS-04, FS-03 | Missing | none | Wave 1 |
 | Family revocation | `shares` legacy cleanup completeness | emulator | FS-02 | Missing | legacy fixtures | Wave 3 |
 | Finance idempotency | Offline-queue timeout-retry applies once (`requestId`) | integration | FI-06, INV-8/4 | Missing | flaky-network sim | Wave 3 |
-| Finance idempotency | Concurrent sync double-import | functions | FI-18, FI-03 | Missing | none | Wave 3 |
-| Webhook | Signature over raw bytes (fixture replay); retry-after-failure convergence | functions contract | FI-01, FI-02, INV-5 | Missing | captured Mono fixture | Wave 3 |
+| Finance idempotency | Concurrent sync double-import | functions + emulator | FI-18, FI-03 | **Partially delivered — PR #180** (concurrent webhook deliveries over the same transactions; pagination cases remain) | none | Wave 3 |
+| Webhook | Documented shared-secret auth (valid / invalid / missing header / config absent) + claim lifecycle + retry-after-failure convergence + per-transaction idempotency | functions contract + emulator | FI-01, FI-02, INV-5 | **Delivered — PR #180** | provider replay still outstanding | Wave 3 |
 | Finance correctness | Reversal from persisted doc (un-skip `useFinanceService.test.tsx:216,432`) | unit | FI-05, FI-07 | Skipped | none | Wave 3 |
 | Commitments | Toggle duplicate/replay/concurrency (one increment per cycle) | transaction unit | C-01, F-02, INV-7 | Missing | none | Wave 4 |
 | Commitments | Offline queue replay math (desired-state, TTL, logout clear, cross-tab) | unit/integration | C-02 | Missing (flush-only) | IDB harness | Wave 4 |

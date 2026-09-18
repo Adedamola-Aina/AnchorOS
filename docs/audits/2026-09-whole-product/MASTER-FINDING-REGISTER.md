@@ -178,7 +178,9 @@ Status: CANONICAL. This file is the single authoritative register of every confi
 
 ## Re-audit addendum — RA-* (2026-09-17)
 
-**Addendum, not a rewrite.** The 2026-09 corpus above is an immutable historical record (89 canonical roots, report 00–11 evidence). A post-remediation re-audit on 2026-09-17 found ten additional canonical roots that were **not** present in that corpus. They are recorded here with the same column set plus a trailing `Status` column, and were remediated immediately rather than scheduled into a wave. The historical counts above are unchanged and still describe the 2026-09 corpus.
+**Addendum, not a rewrite.** The 2026-09 corpus above is an immutable historical record (89 canonical roots, report 00–11 evidence). A post-remediation re-audit found **seventeen** additional canonical roots that were **not** present in that corpus: RA-01…RA-10 on 2026-09-17, extended by RA-11…RA-17 on 2026-09-18 as the remediation PRs were reconciled. They are recorded here with the same column set plus a trailing `Status` column. RA-01…RA-11 and RA-13…RA-17 are remediated and merged; **RA-12 remains open**. The historical counts above are unchanged and still describe the 2026-09 corpus.
+
+See also the [FI-02 contract correction](#correction--fi-02-contract-2026-09-18) and the [merged-awaiting-staging status](#remediation-status--merged-awaiting-staging-2026-09-18) below.
 
 | ID | Finding | Src | Orig | Norm | Conf | Cat | Subsystem | Rel | INV | Impact · Prereq · Blast | Reach | Tests | Repro/DynV | Deps | W·B | Acceptance | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -192,6 +194,38 @@ Status: CANONICAL. This file is the single authoritative register of every confi
 | RA-08 | Live `public/sw.js` cached cross-origin/opaque responses unguarded, failed the whole install when one precache asset was missing, and logged FCM payloads/environment in production | re-audit 2026-09-17 | new | LOW | HIGH | CORR, OPS | PWA service worker | ROOT | OFF | X8/X10 · Q0/Q3 · every installed client | LIVE | NONE→ADDED | PROVEN / DYN | F-04, F-05, R-08 | W6 | Cacheable-only writes; resilient precache; no production payload logging | **REMEDIATED** — PR #159 (issue #153) |
 | RA-09 | `OnboardingShell` rendered `FinanceProvider`/`TaskProvider` without `FabricProvider`; both contexts call `useFabricContext()`, so every account with onboarding incomplete crashed into the error boundary immediately after sign-up | re-audit 2026-09-17 | new | HIGH | HIGH | CORR | Onboarding / provider tree | ROOT | — | X3/X8 · Q0 · every new account | LIVE | NONE→ADDED | PROVEN / NO | F-03 | W2 | `FabricProvider` nests outside Finance/Task in the onboarding shell; regression test reproduces the error pre-fix | **REMEDIATED** — PR #164 (issue #163) |
 | RA-10 | `users/{uid}/goals` had no Firestore rule, so onboarding step 3's goal write fell through to the terminal default deny and every new account saw "Failed to save goal." | re-audit 2026-09-17 | new | HIGH | HIGH | SEC, CORR | Firestore rules / onboarding | ROOT | — | X3/X8 · Q0 · every new account | LIVE | NONE→ADDED | PROVEN / DYN | — | W2 | Owner-only validated `goals` rule; tests cover owner CRUD, cross-user/unauth denial and invalid payloads | **REMEDIATED** — PR #166 (issue #165) |
+| RA-11 | Post-onboarding there was no in-app way to see email-verification status or request another verification email; the Settings warning was a dead end | re-audit 2026-09-18 | new | LOW | HIGH | CORR | Settings / auth lifecycle | ROOT | — | X8 · Q0 · every unverified account | LIVE | NONE→ADDED | PROVEN / NO | — | W2 | Status visible in Settings; resend with 60s cooldown + re-check; warning is actionable | **REMEDIATED** — PR #172 (issue #167) |
+| RA-12 | Saved goals are write-only: onboarding writes `users/{uid}/goals` and no surface in the product ever reads it | re-audit 2026-09-18 | new | LOW | MEDIUM | CORR | Onboarding / Dashboard | ROOT | — | X8 · Q0 · every account that sets a goal | LIVE | NONE | PROVEN / NO | RA-10 | W5 | Goals rendered from `users/{uid}/goals` with progress on an existing read surface | **OPEN** — issue #168 |
+| RA-13 | Onboarding step 3 accepted an unparseable goal amount (`toCents('abc') === 0`) and failed with a generic toast, because the rule requires `targetAmountCents > 0` | re-audit 2026-09-18 | new | LOW | HIGH | CORR | Onboarding | ROOT | — | X8 · Q0 · every new account entering a typo | LIVE | NONE→ADDED | PROVEN / NO | RA-10, RA-12 | W2 | Field-level message for invalid/zero input; submit disabled; write path guarded | **REMEDIATED** — PR #174 (issue #171) |
+| RA-14 | `npm run emulator:start` also booted hosting, which fails closed for the demo project, so the documented one-command path never worked outside `dev:local` | re-audit 2026-09-18 | new | LOW | HIGH | OPS | Tooling / local dev | ROOT | — | X8 · Q0 · every developer | LIVE | NONE→ADDED | PROVEN / NO | — | W6 | Script scoped to the local services and starts successfully | **REMEDIATED** — PR #173 (issue #170) |
+| RA-15 | The rules-coverage gate passed vacuously — emulator rules tests used random project ids, so it always reported success. This is how RA-10/RA-16/RA-17 shipped unruled | re-audit 2026-09-18 | new | MEDIUM | HIGH | VER, CTRL | CI / rules gate | ROOT | — | X7 · Q0 · the gate guarding every rule | GATE | NONE→GATE | PROVEN / NO | RA-10, RA-16, RA-17 | W2·B10 | Deterministic static gate: every collection written through `secureDb` must have a rule; build fails otherwise | **REMEDIATED** — PR #177 (issue #169) |
+| RA-16 | `categories` was written through `secureDb` by `CategoryService` with no Firestore rule → permission-denied for every custom category | re-audit 2026-09-18 | new | MEDIUM | HIGH | SEC, CORR | Firestore rules / categories | ROOT | — | X3/X7 · Q0 · custom categories | LIVE | NONE→ADDED | PROVEN / DYN | RA-15 | W2 | Owner-only validated rule; owner CRUD + cross-user/unauth denial tests | **REMEDIATED** — PR #177 (issue #175) |
+| RA-17 | `fabric_monthly_reviews` had no Firestore rule → unreadable/unwritable, so the monthly review surface could never load | re-audit 2026-09-18 | new | MEDIUM | HIGH | SEC, CORR | Firestore rules / Fabric | ROOT | — | X3/X7 · Q0 · monthly reviews | LIVE | NONE→ADDED | PROVEN / DYN | RA-15 | W5 | Owner-only validated rule; access tests | **REMEDIATED** — PR #177 (issue #176) |
+
+### Correction — FI-02 contract (2026-09-18)
+
+The FI-02 row above is preserved verbatim (immutable record), but its premise is **wrong** and must not be reused: **Mono does not sign webhook bodies.** Mono's documented contract is a shared `mono-webhook-secret` header whose value must equal the secret configured on the webhook, compared directly (their reference implementation returns 401 otherwise) — there is no HMAC. The first remediation on that branch implemented HMAC-SHA512 over `req.rawBody`, so a genuine Mono delivery could not authenticate, and the "HMAC over raw bytes" acceptance criterion in the synthesis encoded the same wrong assumption.
+
+Corrected in PR #180 (issue #179):
+
+- constant-time comparison of the documented header against the configured secret, failing closed when either is absent, never logging the secret;
+- event identity derived by hashing Mono's `event_id` uniformly — id-less events are namespaced apart — so no id can alias another event's digest;
+- per-transaction idempotency via deterministic finance document ids (derived from account + provider transaction id), with a bounded, ownership-checked claim state machine. The connection's `lastProcessedEventId` is a re-sync fast path only, **not** the idempotency guarantee.
+
+INV-5 was reworded in `12-FINAL-SYNTHESIS-REMEDIATION-PLAN.md` so no later wave re-derives the HMAC assumption.
+
+### Remediation status — merged-awaiting-staging (2026-09-18)
+
+Findings whose remediation is merged to `master` but whose acceptance depends on the staging rollout. The historical rows above carry no status column and are unchanged.
+
+| Finding | Merge | Evidence in the repo | Remaining rollout step |
+|---|---|---|---|
+| FS-01, FS-01b, FS-04 | PR #119 (`c63933e1`, `072278a8`; rollout safety `edfbce30`) | family-revocation emulator suite | rules-first ordering; dry-run the cleanup-migration count before enabling |
+| SN-01, SN-03, SN-08 | PR #127 (`a98b8f2c`) | notification/token suites | functions before client |
+| FI-01, FI-02 | PR #180 (`a9c4a99b`) | webhook contract, claim, and end-to-end handler emulator suites | confirm Mono's configured secret equals `MONO_WEBHOOK_SECRET` on staging, then send a real delivery and assert 200 plus one-time ingest |
+| Retention TTL (RA-04) | PR #156 (`a3bb60c8`) | index catalog + TTL config | confirm the TTL policies are live on the deployed project |
+
+FI-06 (server-side idempotency for offline writes) remains **open** even though the client-side mechanism landed with RA-06 (PR #158).
 
 ## Cross-domain deduplication table (task 2 of synthesis)
 
