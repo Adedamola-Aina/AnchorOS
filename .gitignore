@@ -70,3 +70,10 @@ reports/
 # Must never be re-tracked as an engineering source of truth.
 tools/dashboard/
 tools/mcp-server/
+
+# Cline agent state (RA-19). Holds provider API keys
+# (.cline/data/settings/providers.json), session transcripts that can contain
+# pasted secrets, and local caches. Nothing under it is tracked, so ignoring the
+# whole directory is safe — and it must never be committed.
+.cline/
+
