@@ -757,7 +757,12 @@ test('deploy pipeline qualifies Functions filters via the deploy-targets builder
 test('staging release-smoke URL defaults to the deterministic staging host', () => {
     const expected = /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \|\| 'https:\/\/anchor-os-staging\.web\.app' \}\}/g;
     const matches = STAGING_WORKFLOW.match(expected) || [];
-    assert.equal(matches.length, 3, 'all three staging smoke/regression targets must set the fallback');
+    // Two targets only: Release Smoke (normal) and Release Smoke (B1). The
+    // former post-deploy E2E job was removed deliberately: it ran the
+    // emulator-oriented general suite (fixture identity + seeded data) against a
+    // cloud target, so it could never pass, retried every test, and added
+    // 15-30 minutes to every staging run for zero gating value.
+    assert.equal(matches.length, 2, 'both staging release-smoke targets must set the fallback');
     // The bare reference (empty because the secret does not exist) must be gone.
     assert.doesNotMatch(STAGING_WORKFLOW, /E2E_BASE_URL: \$\{\{ secrets\.STAGING_URL \}\}/);
 });
