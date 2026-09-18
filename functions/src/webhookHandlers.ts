@@ -1,4 +1,5 @@
 import { logger } from 'firebase-functions';
+import { createHash } from 'node:crypto';
 import { db, APP_ID } from './config';
 import { getAccountDetails, getTransactions } from './mono/monoClient';
 import { mapAndDeduplicate } from './mono/transactionMapper';
@@ -6,7 +7,19 @@ import type { BankConnectionDoc, MonoWebhookEvent } from './mono/monoTypes';
 
 const BATCH_CHUNK_SIZE = 400;
 
-export async function handleAccountUpdated(monoAccountId: string): Promise<void> {
+/**
+ * Deterministic, document-id-safe id for a synced finance document.
+ *
+ * The same provider transaction always maps to the same document, so a redelivery
+ * or a concurrent duplicate delivery overwrites rather than inserting a second
+ * copy. This is the durable idempotency guarantee for financial writes; the
+ * connection's `lastProcessedEventId` marker is only a re-sync fast path.
+ */
+export function financeDocId(anchorAccountId: string, externalTransactionId: string): string {
+    return createHash('sha256').update(`${anchorAccountId}:${externalTransactionId}`).digest('hex');
+}
+
+export async function handleAccountUpdated(monoAccountId: string, eventId?: string): Promise<void> {
     const connSnap = await db.collectionGroup('bankConnections')
         .where('monoAccountId', '==', monoAccountId)
         .where('status', '==', 'active')
@@ -20,6 +33,15 @@ export async function handleAccountUpdated(monoAccountId: string): Promise<void>
 
     const connDoc = connSnap.docs[0];
     const connection = connDoc.data() as BankConnectionDoc;
+
+    // FI-01: fast path only. A retry of an event that is not the most recently
+    // applied one still reaches the sync below, where per-transaction identity
+    // (deterministic finance doc ids + the existing-id filter) keeps it idempotent.
+    if (eventId && connection.lastProcessedEventId === eventId) {
+        logger.info(`[Webhook] Event ${eventId} already applied for ${connection.anchorAccountId}; skipping`);
+        return;
+    }
+
     const { userId, anchorAccountId } = connection;
     const userRef = db.collection('artifacts').doc(APP_ID).collection('users').doc(userId);
     const accountRef = userRef.collection('accounts').doc(anchorAccountId);
@@ -51,12 +73,20 @@ export async function handleAccountUpdated(monoAccountId: string): Promise<void>
     for (let i = 0; i < newTxns.length; i += BATCH_CHUNK_SIZE) {
         const chunk = newTxns.slice(i, i + BATCH_CHUNK_SIZE);
         const batch = db.batch();
+        const financeCollection = userRef.collection('finance');
         for (const tx of chunk) {
-            batch.set(userRef.collection('finance').doc(), {
-                ...tx,
-                createdAt: new Date().toISOString(),
-                isSoftDeleted: false,
-            });
+            const externalId = tx.externalTransactionId;
+            batch.set(
+                externalId
+                    ? financeCollection.doc(financeDocId(anchorAccountId, externalId))
+                    : financeCollection.doc(),
+                {
+                    ...tx,
+                    ...(eventId ? { appliedEventId: eventId } : {}),
+                    createdAt: new Date().toISOString(),
+                    isSoftDeleted: false,
+                },
+            );
         }
         await batch.commit();
     }
@@ -67,7 +97,10 @@ export async function handleAccountUpdated(monoAccountId: string): Promise<void>
         'externalConnection.syncStatus': 'active',
     });
 
-    await connDoc.ref.update({ lastSyncAt: new Date().toISOString() });
+    await connDoc.ref.update({
+        lastSyncAt: new Date().toISOString(),
+        ...(eventId ? { lastProcessedEventId: eventId } : {}),
+    });
 
     if (newTxns.length > 0) {
         logger.info(`[Webhook] Synced ${newTxns.length} txns for ${anchorAccountId}`);

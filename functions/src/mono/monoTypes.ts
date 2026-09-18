@@ -57,6 +57,10 @@ export interface MonoTransactionsResponse {
 
 export interface MonoWebhookEvent {
   event: string;
+  /** Mono's documented unique event identifier — used for deduplication. */
+  event_id?: string;
+  /** ISO timestamp Mono includes with the event. */
+  timestamp?: string;
   data: {
     account: { _id: string };
     [key: string]: unknown;
@@ -72,4 +76,10 @@ export interface BankConnectionDoc {
   linkedAt: string;
   status: 'active' | 'reconnect_required' | 'revoked';
   lastSyncAt?: string;
+  /** Mono `event_id` of the most recently applied webhook for this connection.
+   *  Fast path only (it avoids a redundant re-sync). It is NOT the idempotency
+   *  guarantee: any later event overwrites it, so a retry of an earlier event
+   *  still reaches the handler. Durable idempotency comes from the deterministic
+   *  id of each finance document derived from the provider transaction id. */
+  lastProcessedEventId?: string;
 }
