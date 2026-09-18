@@ -12,12 +12,13 @@ const mockState = vi.hoisted(() => ({
     accountUpdate: vi.fn(),
     connUpdate: vi.fn(),
     getAccountDetails: vi.fn(),
-    getTransactions: vi.fn(),
+    getAllTransactions: vi.fn(),
     mapAndDeduplicate: vi.fn(),
+    logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock('firebase-functions', () => ({
-    logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+    logger: mockState.logger,
 }));
 
 vi.mock('./config', () => {
@@ -53,7 +54,7 @@ vi.mock('./config', () => {
 
 vi.mock('./mono/monoClient', () => ({
     getAccountDetails: (...args: unknown[]) => mockState.getAccountDetails(...args),
-    getTransactions: (...args: unknown[]) => mockState.getTransactions(...args),
+    getAllTransactions: (...args: unknown[]) => mockState.getAllTransactions(...args),
 }));
 
 vi.mock('./mono/transactionMapper', () => ({
@@ -77,7 +78,7 @@ describe('handleAccountUpdated idempotency', () => {
         vi.clearAllMocks();
         mockState.connection = { ...BASE_CONNECTION };
         mockState.getAccountDetails.mockResolvedValue({ account: { balance: 100 }, meta: {} });
-        mockState.getTransactions.mockResolvedValue({ data: [] });
+        mockState.getAllTransactions.mockResolvedValue({ transactions: [], total: 0, pages: 1, truncated: false });
         mockState.mapAndDeduplicate.mockReturnValue([]);
     });
 
@@ -107,5 +108,24 @@ describe('handleAccountUpdated idempotency', () => {
         expect(mockState.accountUpdate).toHaveBeenCalled();
         const payload = mockState.connUpdate.mock.calls[0][0] as Record<string, unknown>;
         expect(payload).not.toHaveProperty('lastProcessedEventId');
+    });
+
+    it('logs the total-vs-imported shortfall when the history is truncated (FI-03)', async () => {
+        mockState.getAllTransactions.mockResolvedValue({
+            transactions: [{ _id: 'tx-1' }], total: 120, pages: 50, truncated: true,
+        });
+
+        await handleAccountUpdated('mono-1', 'evt-3');
+
+        expect(mockState.logger.warn).toHaveBeenCalledWith(expect.stringContaining('truncated'));
+    });
+
+    it('maps every row the paging client returned (FI-03)', async () => {
+        const rows = [{ _id: 'a' }, { _id: 'b' }];
+        mockState.getAllTransactions.mockResolvedValue({ transactions: rows, total: 2, pages: 2, truncated: false });
+
+        await handleAccountUpdated('mono-1', 'evt-4');
+
+        expect(mockState.mapAndDeduplicate).toHaveBeenCalledWith(rows, 'acc-1', 'USD', expect.any(Set));
     });
 });
