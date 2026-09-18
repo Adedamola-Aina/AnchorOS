@@ -130,12 +130,17 @@ export async function dismissAuthEvent(eventId: string): Promise<void> {
 }
 
 /**
- * Revoke a specific session (AUTH-003).
- * Records a security audit log entry and removes the session event.
+ * Revoke authority for a session (A-03).
+ *
+ * Firebase Auth cannot revoke one device, so this revokes refresh tokens for the
+ * whole account and records a revocation epoch the server enforces immediately.
+ * The caller must say so plainly — every device signs out, including this one.
  */
-export async function revokeSession(eventId: string): Promise<void> {
+export async function revokeSession(eventId: string): Promise<{ revokedAllSessions: boolean }> {
     const revokeFn = httpsCallable(functions, 'revokeSession');
-    await revokeFn({ eventId });
+    const result = await revokeFn({ eventId });
+    const data = result.data as { revokedAllSessions?: boolean } | undefined;
+    return { revokedAllSessions: data?.revokedAllSessions === true };
 }
 
 export { parseUserAgent };

@@ -27,12 +27,12 @@ vi.mock('../../../context/AuthContext', () => ({
 }));
 
 const mockGetEvents = vi.fn();
-const mockDismissAuthEvent = vi.fn().mockResolvedValue(undefined);
+const mockRevokeSession = vi.fn().mockResolvedValue({ revokedAllSessions: true });
 const mockReportUnrecognised = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('../../../services/authEventService', () => ({
     getAuthEvents: (...args: any[]) => mockGetEvents(...args),
-    dismissAuthEvent: (...args: any[]) => mockDismissAuthEvent(...args),
+    revokeSession: (...args: any[]) => mockRevokeSession(...args),
     reportUnrecognisedSignIn: (...args: any[]) => mockReportUnrecognised(...args),
 }));
 vi.mock('../../../utils/error', () => ({ captureError: vi.fn() }));
@@ -63,15 +63,15 @@ describe('AuthEventHistory', () => {
     it('does not show a Sign out button on the current device', async () => {
         render(<AuthEventHistory />);
         await waitFor(() => screen.getByText('This device'));
-        const signOutBtns = screen.getAllByTitle('Sign out this device');
+        const signOutBtns = screen.getAllByTitle('Sign out all devices');
         // Should only exist for the 2 non-current sessions
         expect(signOutBtns).toHaveLength(2);
     });
 
     it('shows Sign out button on non-current sessions', async () => {
         render(<AuthEventHistory />);
-        await waitFor(() => screen.getAllByTitle('Sign out this device'));
-        expect(screen.getAllByTitle('Sign out this device')).toHaveLength(2);
+        await waitFor(() => screen.getAllByTitle('Sign out all devices'));
+        expect(screen.getAllByTitle('Sign out all devices')).toHaveLength(2);
     });
 
     it('shows New device badge when newDevice is true', async () => {
@@ -79,25 +79,38 @@ describe('AuthEventHistory', () => {
         await waitFor(() => expect(screen.getByText('New')).toBeInTheDocument());
     });
 
-    it('clicking Sign out calls revokeSession and removes the row', async () => {
+    it('clicking Sign out confirms, revokes every session and logs out (A-03)', async () => {
         render(<AuthEventHistory />);
-        await waitFor(() => screen.getAllByTitle('Sign out this device'));
-        fireEvent.click(screen.getAllByTitle('Sign out this device')[0]);
+        await waitFor(() => screen.getAllByTitle('Sign out all devices'));
+        fireEvent.click(screen.getAllByTitle('Sign out all devices')[0]);
         await waitFor(() => {
-            expect(mockDismissAuthEvent).toHaveBeenCalledWith('e-2');
-            expect(screen.queryByText(/iOS/)).not.toBeInTheDocument();
+            expect(mockConfirm).toHaveBeenCalledWith(
+                expect.objectContaining({ title: 'Sign out all devices?' }),
+            );
+            expect(mockRevokeSession).toHaveBeenCalledWith('e-2');
+            expect(mockLogout).toHaveBeenCalled();
         });
     });
 
-    it('rolls back the row if revokeSession fails', async () => {
-        mockDismissAuthEvent.mockRejectedValueOnce(new Error('network error'));
-        mockGetEvents.mockResolvedValue(EVENTS);
+    it('does not revoke when the confirmation is declined', async () => {
+        mockConfirm.mockResolvedValueOnce(false);
         render(<AuthEventHistory />);
-        await waitFor(() => screen.getAllByTitle('Sign out this device'));
-        fireEvent.click(screen.getAllByTitle('Sign out this device')[0]);
+        await waitFor(() => screen.getAllByTitle('Sign out all devices'));
+        fireEvent.click(screen.getAllByTitle('Sign out all devices')[0]);
+        await waitFor(() => expect(mockConfirm).toHaveBeenCalled());
+        expect(mockRevokeSession).not.toHaveBeenCalled();
+        expect(mockLogout).not.toHaveBeenCalled();
+    });
+
+    it('reports an error and stays signed in when revocation fails', async () => {
+        mockRevokeSession.mockRejectedValueOnce(new Error('network error'));
+        render(<AuthEventHistory />);
+        await waitFor(() => screen.getAllByTitle('Sign out all devices'));
+        fireEvent.click(screen.getAllByTitle('Sign out all devices')[0]);
         await waitFor(() => expect(mockShowToast).toHaveBeenCalledWith(
             expect.stringContaining('Could not sign out'), 'error'
         ));
+        expect(mockLogout).not.toHaveBeenCalled();
     });
 
     it('hides Sign out all button when only one session', async () => {
