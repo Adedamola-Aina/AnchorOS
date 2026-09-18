@@ -496,10 +496,21 @@ jobs:
           retention-days: 14
 
   # Weekly full regression (merged from weekly-health.yml). Runs only on the
-  # scheduled event against staging; never part of the PR path.
+  # scheduled event, hermetically against the local emulator suite — never on
+  # the PR path, and never against a cloud origin: the general suite fail-closes
+  # on a non-loopback E2E_BASE_URL and its fixture identity only exists in the
+  # emulators (see also the removed post-deploy E2E job, #199).
+  #
+  # It goes through the canonical local runner so Playwright always receives its
+  # explicit `--config`. A bare `playwright test` (no config) uses Playwright's
+  # default discovery, collects the Vitest suites, and dies on
+  # `TypeError: Cannot redefine property: Symbol($$jest-matchers-object)`
+  # (issue #143) — that invariant is now pinned by
+  # scripts/ci/playwright-config.node-suite.mjs.
   scheduled-full-regression:
     name: 📅 Full E2E Regression (weekly)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     if: github.event_name == 'schedule'
     strategy:
       matrix:
@@ -509,10 +520,13 @@ jobs:
       - uses: actions/setup-node@v6
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm install -g firebase-tools
       - run: npx playwright install chromium --with-deps
-      - run: npx playwright test --shard=${{ matrix.shard }}/4
-        env:
-          E2E_BASE_URL: ${{ secrets.STAGING_URL || 'https://anchor-os-staging.web.app' }}
+      - run: npm run test:e2e:local -- --shard=${{ matrix.shard }}/4
       - uses: actions/upload-artifact@v7
         if: always()
         with:
