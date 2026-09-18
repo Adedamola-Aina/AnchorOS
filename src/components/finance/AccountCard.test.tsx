@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AccountCard } from './AccountCard';
+import { CARD_ASPECT_RATIO } from './cardConstants';
 import type { AnchorAccount } from '../../types';
 
 vi.mock('../../utils/format', () => ({
@@ -91,6 +92,10 @@ describe('AccountCard — Apple Wallet panel', () => {
 
   it('uses credit card aspect ratio', () => {
     const { container } = render(card());
-    expect(container.querySelector('.account-card')).toHaveStyle({ aspectRatio: '1.586' });
+    const el = container.querySelector('.account-card') as HTMLElement;
+    // jsdom >= 29.1 resolves `aspect-ratio` and normalises it to "<n> / 1";
+    // assert against the shared constant so the test tracks the real value
+    // (jsdom 29.0 ignored the property, which masked a stale 1.586 literal).
+    expect(el.style.aspectRatio.replace(/\s*\/\s*1$/, '')).toBe(`${CARD_ASPECT_RATIO}`);
   });
 });
