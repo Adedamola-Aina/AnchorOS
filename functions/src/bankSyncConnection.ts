@@ -1,7 +1,7 @@
 import { logger } from 'firebase-functions';
 import { db, APP_ID } from './config';
 import { getAccountDetails, getAllTransactions } from './mono/monoClient';
-import { mapAndDeduplicate } from './mono/transactionMapper';
+import { mapAndDeduplicate, financeDocId } from './mono/transactionMapper';
 import type { BankConnectionDoc } from './mono/monoTypes';
 
 const BATCH_CHUNK_SIZE = 400;
@@ -74,12 +74,19 @@ export async function syncConnection(
         const chunk = newTransactions.slice(i, i + BATCH_CHUNK_SIZE);
         const batch = db.batch();
         for (const tx of chunk) {
-            const txRef = userRef.collection('finance').doc();
-            batch.set(txRef, {
-                ...tx,
-                createdAt: new Date().toISOString(),
-                isSoftDeleted: false,
-            });
+            // FI-18: deterministic ids, so a concurrent sync overwrites rather than
+            // inserting a second copy of the same provider transaction.
+            const externalId = tx.externalTransactionId;
+            batch.set(
+                externalId
+                    ? userRef.collection('finance').doc(financeDocId(anchorAccountId, externalId))
+                    : userRef.collection('finance').doc(),
+                {
+                    ...tx,
+                    createdAt: new Date().toISOString(),
+                    isSoftDeleted: false,
+                },
+            );
         }
         await batch.commit();
     }

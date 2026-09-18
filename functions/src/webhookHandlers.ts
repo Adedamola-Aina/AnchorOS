@@ -1,23 +1,10 @@
 import { logger } from 'firebase-functions';
-import { createHash } from 'node:crypto';
 import { db, APP_ID } from './config';
 import { getAccountDetails, getAllTransactions } from './mono/monoClient';
-import { mapAndDeduplicate } from './mono/transactionMapper';
+import { financeDocId, mapAndDeduplicate } from './mono/transactionMapper';
 import type { BankConnectionDoc, MonoWebhookEvent } from './mono/monoTypes';
 
 const BATCH_CHUNK_SIZE = 400;
-
-/**
- * Deterministic, document-id-safe id for a synced finance document.
- *
- * The same provider transaction always maps to the same document, so a redelivery
- * or a concurrent duplicate delivery overwrites rather than inserting a second
- * copy. This is the durable idempotency guarantee for financial writes; the
- * connection's `lastProcessedEventId` marker is only a re-sync fast path.
- */
-export function financeDocId(anchorAccountId: string, externalTransactionId: string): string {
-    return createHash('sha256').update(`${anchorAccountId}:${externalTransactionId}`).digest('hex');
-}
 
 export async function handleAccountUpdated(monoAccountId: string, eventId?: string): Promise<void> {
     const connSnap = await db.collectionGroup('bankConnections')

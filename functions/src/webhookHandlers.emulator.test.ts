@@ -137,7 +137,8 @@ vi.mock('./mono/monoClient', () => ({
 }));
 
 import { db, APP_ID } from './config';
-import { handleAccountUpdated, financeDocId } from './webhookHandlers';
+import { handleAccountUpdated } from './webhookHandlers';
+import { financeDocId } from './mono/transactionMapper';
 import type { MonoTransaction } from './mono/monoTypes';
 
 let seq = 0;
