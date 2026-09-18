@@ -307,7 +307,7 @@ jobs:
       - name: Lint + typecheck
         run: |
           npm run lint
-          npx tsc -b config/tsconfig.app.json config/tsconfig.node.json
+          npx tsc -b config/tsconfig.app.json config/tsconfig.node.json config/tsconfig.spec.json
       - name: Product unit tests
         run: npm run test:run
       - name: Query-layer coverage gate
@@ -331,6 +331,9 @@ jobs:
         working-directory: functions
       - name: Build Functions
         run: npm run build
+        working-directory: functions
+      - name: Typecheck Functions tests
+        run: npm run typecheck
         working-directory: functions
       - name: Functions unit tests
         run: npx vitest run --config vitest.config.ts

@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockState = vi.hoisted(() => ({
   isSupported: false,
-  set: vi.fn(() => Promise.resolve()),
-  clear: vi.fn(() => Promise.resolve()),
-  isSupportedFn: vi.fn(() => Promise.resolve({ isSupported: false })),
+  set: vi.fn((..._args: unknown[]) => Promise.resolve()),
+  clear: vi.fn((..._args: unknown[]) => Promise.resolve()),
+  isSupportedFn: vi.fn((..._args: unknown[]) => Promise.resolve({ isSupported: false })),
 }));
 
 vi.mock('@capawesome/capacitor-badge', () => ({

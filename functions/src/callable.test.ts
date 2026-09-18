@@ -6,19 +6,19 @@ const mockWithTracing = vi.hoisted(() => vi.fn((_name, handler) => handler));
 const mockAssertSessionValid = vi.hoisted(() => vi.fn());
 
 vi.mock('firebase-functions/v2/https', () => ({
-  onCall: (...args: unknown[]) => mockOnCall(...args),
+  onCall: (options: unknown, handler: unknown) => mockOnCall(options, handler),
 }));
 
 vi.mock('./tracing', () => ({
-  withTracing: (...args: unknown[]) => mockWithTracing(...args),
+  withTracing: (name: unknown, handler: unknown) => mockWithTracing(name, handler),
 }));
 
 vi.mock('./sessionEnforcement', () => ({
   assertSessionValid: (...args: unknown[]) => mockAssertSessionValid(...args),
 }));
 
-// Import after mocks are set up
-const { secureOnCall } = await import('./callable');
+// vi.mock is hoisted above imports, so the static import resolves the mocks.
+import { secureOnCall } from './callable';
 
 describe('callable', () => {
   beforeEach(() => {

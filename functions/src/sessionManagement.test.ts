@@ -43,7 +43,18 @@ vi.mock('./callable', () => ({
   secureOnCall: (handler: Function) => handler,
 }));
 
-import { listActiveSessions, revokeSession } from './sessionManagement';
+import {
+  listActiveSessions as listActiveSessionsCallable,
+  revokeSession as revokeSessionCallable,
+} from './sessionManagement';
+
+const listActiveSessions = listActiveSessionsCallable as unknown as (
+  request: { auth: { uid: string } | null; data: Record<string, unknown> },
+) => Promise<{ sessions: Array<Record<string, unknown>> }>;
+
+const revokeSession = revokeSessionCallable as unknown as (
+  request: { auth: { uid: string } | null; data: { eventId?: string } },
+) => Promise<{ success: boolean; revokedAllSessions: boolean }>;
 
 describe('listActiveSessions', () => {
   beforeEach(() => {

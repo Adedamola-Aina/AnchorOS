@@ -26,7 +26,7 @@ vi.mock('firebase/firestore', () => ({
   getDocs: (...args: unknown[]) => getDocs(...args),
   collection: (...args: unknown[]) => collection(...args),
   where: (...args: unknown[]) => where(...args),
-  query: (...args: unknown[]) => query(...args),
+  query: (collectionRef: unknown, constraint: unknown) => query(collectionRef, constraint),
 }));
 
 import {

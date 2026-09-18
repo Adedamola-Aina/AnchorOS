@@ -63,7 +63,11 @@ vi.mock('./config', () => ({
   },
 }));
 
-import { recoverMfaWithCode } from './mfaRecovery';
+import { recoverMfaWithCode as recoverMfaWithCodeCallable } from './mfaRecovery';
+
+const recoverMfaWithCode = recoverMfaWithCodeCallable as unknown as (
+  request: { data: Record<string, unknown> },
+) => Promise<Record<string, unknown>>;
 
 describe('recoverMfaWithCode', () => {
   beforeEach(() => {

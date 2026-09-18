@@ -57,7 +57,7 @@ vi.mock('firebase-admin/firestore', () => ({
 
 vi.mock('./config', () => ({
   db: {
-    collection: (...args: unknown[]) => mockState.dbCollection(...args),
+    collection: (name: string) => mockState.dbCollection(name),
   },
   APP_ID: 'app-test-id',
 }));

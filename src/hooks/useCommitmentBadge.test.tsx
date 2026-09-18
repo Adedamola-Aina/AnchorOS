@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildTask } from '../test/factories';
 
 const mockState = vi.hoisted(() => ({
-  addListener: vi.fn(() => Promise.resolve({ remove: vi.fn() })),
+  addListener: vi.fn((..._args: unknown[]) => Promise.resolve({ remove: vi.fn() })),
   isAppPluginAvailable: false,
-  setAppBadgeCount: vi.fn(() => Promise.resolve()),
-  clearAppBadge: vi.fn(() => Promise.resolve()),
+  setAppBadgeCount: vi.fn((..._args: unknown[]) => Promise.resolve()),
+  clearAppBadge: vi.fn((..._args: unknown[]) => Promise.resolve()),
 }));
 
 vi.mock('@capacitor/app', () => ({

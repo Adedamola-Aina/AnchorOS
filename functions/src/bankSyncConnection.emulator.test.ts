@@ -101,7 +101,7 @@ async function setup(): Promise<{ uid: string; accId: string; connId: string; co
     return { uid, accId, connId, connection };
 }
 
-async function financeDocs(uid: string, accId: string) {
+async function financeDocs(uid: string, accId: string): Promise<Array<{ id: string } & Record<string, unknown>>> {
     const snap = await userRef(uid).collection('finance').where('accountId', '==', accId).get();
     return snap.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Record<string, unknown>) }));
 }

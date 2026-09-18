@@ -21,8 +21,9 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@capacitor/app', () => ({
   App: {
-    addListener: (...args: unknown[]) => mockState.addListener(...args),
-    exitApp: (...args: unknown[]) => mockState.exitApp(...args),
+    addListener: (event: string, callback: (event: { canGoBack: boolean }) => void) =>
+      mockState.addListener(event, callback),
+    exitApp: () => mockState.exitApp(),
   },
 }));
 

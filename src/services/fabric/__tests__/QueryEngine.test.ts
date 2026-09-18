@@ -71,6 +71,8 @@ describe('runFabricQuery', () => {
       input: intent.rawInput,
       transactions,
       commitments,
+      accounts: [],
+      recurring: [],
       now: new Date('2026-03-09T10:00:00.000Z'),
     });
 
@@ -92,6 +94,8 @@ describe('runFabricQuery', () => {
       input: intent.rawInput,
       transactions,
       commitments,
+      accounts: [],
+      recurring: [],
       now: new Date('2026-03-09T10:00:00.000Z'),
     });
 
@@ -113,6 +117,8 @@ describe('runFabricQuery', () => {
       input: intent.rawInput,
       transactions,
       commitments,
+      accounts: [],
+      recurring: [],
       now: new Date('2026-03-09T10:00:00.000Z'),
     });
 

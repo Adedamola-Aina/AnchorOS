@@ -19,7 +19,7 @@ describe('RecurringApi', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (RecurringApi as { instance?: RecurringApi }).instance = undefined;
+        (RecurringApi as unknown as { instance?: RecurringApi }).instance = undefined;
         api = RecurringApi.getInstance();
         vi.mocked(onSnapshot).mockReturnValue(mockUnsubscribe);
         mockCallable.mockResolvedValue({ data: { id: 'new-rec-1', success: true, status: 'paused' } });

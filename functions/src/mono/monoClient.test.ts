@@ -30,7 +30,7 @@ function page(ids: string[], next: string | null, total: number) {
 
 function mockFetchSequence(bodies: unknown[]) {
     let call = 0;
-    return vi.fn(async () => {
+    return vi.fn(async (_url: string) => {
         const body = bodies[Math.min(call, bodies.length - 1)];
         call += 1;
         if (body instanceof Error) throw body;

@@ -27,7 +27,7 @@ vi.mock('firebase/firestore', () => ({
     const id = stringParts[stringParts.length - 1] || `doc-${++docCounter}`;
     return { id, path: stringParts.join('/') };
   }),
-  writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
+  writeBatch: () => mockWriteBatch(),
   serverTimestamp: vi.fn(() => ({ __serverTimestamp: true })),
   getDoc: vi
     .fn()

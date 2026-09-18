@@ -31,9 +31,11 @@ vi.mock('./config', () => ({
 import {
   evaluateQuotaThresholds,
   buildQuotaMetrics,
-  checkFirestoreQuota,
+  checkFirestoreQuota as checkFirestoreQuotaCallable,
   type QuotaMetrics,
 } from './quotaMonitor';
+
+const checkFirestoreQuota = checkFirestoreQuotaCallable as unknown as () => Promise<void>;
 
 describe('quotaMonitor', () => {
   beforeEach(() => {

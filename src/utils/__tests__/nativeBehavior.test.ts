@@ -14,7 +14,6 @@ describe('nativeBehavior', () => {
     if ('Capacitor' in window) {
       delete (window as { Capacitor?: unknown }).Capacitor;
     }
-    // @ts-expect-error — restore for next test
     globalThis.window = originalWindow;
   });
 

@@ -20,7 +20,7 @@ vi.mock('firebase/auth', () => ({
 vi.mock('../../config/firebase', () => ({ auth: {}, app: {}, functions: {} }));
 
 // SN-01: passkey sign-in revokes the departing account's device registration.
-const mockDeregisterDevicePushToken = vi.fn(async () => false);
+const mockDeregisterDevicePushToken = vi.fn(async (..._a: any[]) => false);
 vi.mock('../../services/pushTokenLifecycle', () => ({
     deregisterDevicePushToken: (...a: any[]) => mockDeregisterDevicePushToken(...a),
 }));

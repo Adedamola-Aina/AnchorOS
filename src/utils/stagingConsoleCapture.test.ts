@@ -1,16 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initStagingConsoleCapture } from './stagingConsoleCapture';
 
-declare global {
-  interface Window {
-    __ANCHOR_CONSOLE_CAPTURE__?: {
-      getLogs: () => Array<{ ts: string; level: string; message: string }>;
-      clear: () => void;
-      exportText: () => string;
-    };
-  }
-}
-
 describe('initStagingConsoleCapture', () => {
   beforeEach(() => {
     window.localStorage.clear();
