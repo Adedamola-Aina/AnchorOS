@@ -127,9 +127,12 @@ vi.mock('./config', async () => {
 
 vi.mock('./mono/monoClient', () => ({
     getAccountDetails: async () => mockState.details,
-    getTransactions: async () => ({
-        data: mockState.transactions,
-        paging: { total: 0, page: 1, previous: null, next: null },
+    // FI-03: the handler consumes the paging client, which returns the whole history.
+    getAllTransactions: async () => ({
+        transactions: mockState.transactions,
+        total: mockState.transactions.length,
+        pages: 1,
+        truncated: false,
     }),
 }));
 
@@ -314,5 +317,24 @@ describe('handleAccountUpdated financial idempotency (real Firestore)', () => {
         expect(expectedId).toMatch(/^[0-9a-f]{64}$/);
         const docs = await financeDocs(uid, accId);
         expect(docs.map((doc) => doc.id)).toEqual([expectedId]);
+    });
+
+    it('persists a whole multi-page history exactly once, across write batches (FI-03)', async () => {
+        const { uid, accId, monoId } = await setup();
+        // 450 rows: more than one page of provider history and more than one
+        // 400-row write batch.
+        mockState.details = detailsWithBalance(1000);
+        mockState.transactions = Array.from({ length: 450 }, (_, i) =>
+            monoTx(`tx-page-${i}`, i + 1, 'debit', `Merchant ${i}`));
+
+        await handleAccountUpdated(monoId, 'evt-paged');
+
+        const docs = await financeDocs(uid, accId);
+        expect(docs).toHaveLength(450);
+        expect(new Set(docs.map((doc) => doc.externalTransactionId)).size).toBe(450);
+
+        // A redelivery with a different event id must not add a second copy.
+        await handleAccountUpdated(monoId, 'evt-paged-again');
+        expect(await financeDocs(uid, accId)).toHaveLength(450);
     });
 });

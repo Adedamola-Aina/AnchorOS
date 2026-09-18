@@ -1,7 +1,7 @@
 import { logger } from 'firebase-functions';
 import { createHash } from 'node:crypto';
 import { db, APP_ID } from './config';
-import { getAccountDetails, getTransactions } from './mono/monoClient';
+import { getAccountDetails, getAllTransactions } from './mono/monoClient';
 import { mapAndDeduplicate } from './mono/transactionMapper';
 import type { BankConnectionDoc, MonoWebhookEvent } from './mono/monoTypes';
 
@@ -51,9 +51,9 @@ export async function handleAccountUpdated(monoAccountId: string, eventId?: stri
 
     const currency = accountSnap.data()!.currency === 'USD' ? 'USD' : 'NGN';
 
-    const [details, txResponse] = await Promise.all([
+    const [details, history] = await Promise.all([
         getAccountDetails(monoAccountId),
-        getTransactions(monoAccountId, { paginate: false }),
+        getAllTransactions(monoAccountId),
     ]);
 
     const existingSnap = await userRef.collection('finance')
@@ -68,7 +68,14 @@ export async function handleAccountUpdated(monoAccountId: string, eventId?: stri
         if (extId) existingIds.add(extId);
     });
 
-    const newTxns = mapAndDeduplicate(txResponse.data, anchorAccountId, currency, existingIds);
+    const newTxns = mapAndDeduplicate(history.transactions, anchorAccountId, currency, existingIds);
+
+    if (history.truncated) {
+        logger.warn(
+            `[Webhook] Transaction history truncated for ${anchorAccountId}: ` +
+            `imported ${history.transactions.length} of ${history.total} rows in ${history.pages} pages`,
+        );
+    }
 
     for (let i = 0; i < newTxns.length; i += BATCH_CHUNK_SIZE) {
         const chunk = newTxns.slice(i, i + BATCH_CHUNK_SIZE);
