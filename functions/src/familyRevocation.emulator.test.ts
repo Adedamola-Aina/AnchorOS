@@ -22,6 +22,8 @@ import { beforeEach, afterAll, describe, expect, it, vi } from 'vitest';
 // (and its fixtures) at shared development data.
 vi.hoisted(() => {
   process.env.GCLOUD_PROJECT = 'anchor-os-family-emulator-test';
+  // FIREBASE_CONFIG takes precedence for project resolution, so pin it as well.
+  process.env.FIREBASE_CONFIG = JSON.stringify({ projectId: 'anchor-os-family-emulator-test' });
 
   const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080';
   if (!/^(localhost|127\.0\.0\.1|\[::1\]):([0-9]{1,5})$/.test(emulatorHost)) {
