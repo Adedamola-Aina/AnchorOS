@@ -20,7 +20,10 @@ export async function enqueueTransaction(userId: string, payload: CreateTransact
     const entry: QueueEntry = {
         id: crypto.randomUUID(),
         userId,
-        payload,
+        // FI-06: the queue is at-least-once (flush, timeout, service-worker wake,
+        // flush again). Mint the idempotency key once here so every replay of this
+        // entry carries the same one and the write applies exactly once.
+        payload: payload.requestId ? payload : { ...payload, requestId: crypto.randomUUID() },
         createdAt: new Date().toISOString(),
     };
     queue.push(entry);

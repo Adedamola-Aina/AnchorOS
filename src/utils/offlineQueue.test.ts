@@ -55,10 +55,26 @@ describe('offlineQueue', () => {
                 expect.arrayContaining([
                     expect.objectContaining({
                         userId: 'user-1',
-                        payload: samplePayload,
+                        payload: expect.objectContaining({ ...samplePayload, requestId: expect.any(String) }),
                     }),
                 ])
             );
+        });
+
+        // FI-06: the queue is at-least-once, so each entry carries a stable
+        // idempotency key that every replay of that entry reuses.
+        it('stamps an idempotency key on the queued payload', async () => {
+            await enqueueTransaction('user-1', samplePayload);
+
+            const savedQueue = mockSet.mock.calls[0][1] as Array<{ payload: { requestId?: string } }>;
+            expect(savedQueue[0].payload.requestId).toEqual(expect.any(String));
+        });
+
+        it('preserves a requestId the caller already supplied', async () => {
+            await enqueueTransaction('user-1', { ...samplePayload, requestId: 'req-42' });
+
+            const savedQueue = mockSet.mock.calls[0][1] as Array<{ payload: { requestId?: string } }>;
+            expect(savedQueue[0].payload.requestId).toBe('req-42');
         });
 
         it('appends to existing queue entries', async () => {

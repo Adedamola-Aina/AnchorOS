@@ -39,6 +39,15 @@ export interface CreateTransactionPayload {
   destinationAmountCents?: number;
   exchangeRate?: number;
   date?: string;
+  /**
+   * FI-06: stable idempotency key for this logical write.
+   *
+   * The offline queue is at-least-once (queue entry -> flush -> timeout/retry,
+   * service-worker wake, double tap), so a replayed write must apply exactly
+   * once. When present, `requestId` becomes the transaction document id and
+   * `TransactionService.addTransaction` refuses to apply it a second time.
+   */
+  requestId?: string;
 }
 
 /**
