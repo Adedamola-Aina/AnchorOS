@@ -19,7 +19,7 @@ export const FrequencyStep: React.FC<FrequencyStepProps> = ({ onSelectType, onCl
         { id: 'monthly', label: 'Monthly', desc: 'On a specific date', icon: <CheckCircle2 className="w-6 h-6 text-task-500" /> },
     ];
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" data-testid="commitment-frequency-step">
             <div className="flex justify-between items-center">
                 <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Choose Frequency</h3>
                 <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400"><X className="w-5 h-5" /></Button>

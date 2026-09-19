@@ -60,25 +60,53 @@ describe('TaskItem', () => {
     expect(container).toBeInTheDocument();
   });
 
-  it('detects financial keywords on completion', async () => {
+  it('reports the completed commitment for a transaction offer instead of opening a modal (UX-CM-08)', async () => {
     vi.useFakeTimers();
-    const onConfirmFinancial = vi.fn();
-    const financialTask = buildTask({ title: 'Pay electricity bill', completed: false, type: 'monthly' });
+    const onFinancialNudge = vi.fn();
+    const financialTask = buildTask({ id: 'task-pay', title: 'Pay electricity bill', completed: false, type: 'monthly' });
     render(
       <TaskItem
         {...defaultProps}
         task={financialTask}
-        onConfirmFinancial={onConfirmFinancial}
+        onFinancialNudge={onFinancialNudge}
       />
     );
     const buttons = screen.getAllByRole('button');
-    
+
     await act(async () => {
       fireEvent.click(buttons[0]);
       vi.advanceTimersByTime(900);
     });
-    
-    expect(onConfirmFinancial).toHaveBeenCalledWith('Pay electricity bill');
+
+    // The row reports WHICH commitment was completed; the parent renders the chip.
+    // Previously this path opened a blocking "Financial Transaction?" dialog.
+    expect(onFinancialNudge).toHaveBeenCalledWith('task-pay');
     vi.useRealTimers();
+  });
+
+  it('renders a dismissible inline chip when this row is the transaction offer (UX-CM-08)', () => {
+    const onRecordTransaction = vi.fn();
+    const onDismissFinancialNudge = vi.fn();
+    render(
+      <TaskItem
+        {...defaultProps}
+        task={buildTask({ title: 'Pay rent', completed: true })}
+        isFinancialNudge
+        onRecordTransaction={onRecordTransaction}
+        onDismissFinancialNudge={onDismissFinancialNudge}
+      />
+    );
+
+    expect(screen.getByTestId('financial-nudge')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Record' }));
+    expect(onRecordTransaction).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: /dismiss transaction prompt/i }));
+    expect(onDismissFinancialNudge).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render the transaction chip on rows that are not the offer (UX-CM-08)', () => {
+    render(<TaskItem {...defaultProps} task={buildTask({ title: 'Pay rent', completed: true })} />);
+
+    expect(screen.queryByTestId('financial-nudge')).not.toBeInTheDocument();
   });
 });

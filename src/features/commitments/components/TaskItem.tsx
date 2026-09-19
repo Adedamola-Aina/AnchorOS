@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Circle, Check, Pencil, Trash2 } from 'lucide-react';
 import { Badge, TaskContextBadge } from '../../../components/shared';
+import { FinancialNudgeChip } from './FinancialNudgeChip';
 import type { AnchorTask } from '../../../types';
 import { Card } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
@@ -16,7 +17,16 @@ interface TaskItemProps {
     onToggle: (id: string, completed: boolean) => void;
     onStartEdit: (id: string) => void;
     onDelete: (id: string) => void;
-    onConfirmFinancial?: (title: string) => void;
+    /**
+     * CM-08: completing a commitment that looks financial no longer interrupts
+     * with a cross-domain "Financial Transaction?" modal. The row reports the
+     * intent and the parent renders a dismissible chip.
+     */
+    onFinancialNudge?: (taskId: string) => void;
+    /** True when THIS row is the one waiting on the transaction decision. */
+    isFinancialNudge?: boolean;
+    onRecordTransaction?: () => void;
+    onDismissFinancialNudge?: () => void;
     /** Hide action buttons (for mobile swipe-to-delete) */
     hideActions?: boolean;
     /** Callback when title is tapped (for mobile tap-to-edit) */
@@ -32,7 +42,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onToggle,
     onStartEdit,
     onDelete,
-    onConfirmFinancial,
+    onFinancialNudge,
+    isFinancialNudge = false,
+    onRecordTransaction,
+    onDismissFinancialNudge,
     hideActions = false,
     onTitleClick,
 }) => {
@@ -54,10 +67,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             // Now trigger the actual completion
             await onToggle(task.id, task.completed);
 
-            if (onConfirmFinancial) {
+            if (onFinancialNudge) {
                 const keywords = ['pay', 'buy', 'bill', 'rent', 'subscription', 'lease', 'insurance', 'tax'];
                 if (keywords.some(k => task.title.toLowerCase().includes(k))) {
-                    onConfirmFinancial(task.title);
+                    onFinancialNudge(task.id);
                 }
             }
         } else {
@@ -167,6 +180,18 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                             const nudge = getStreakNudge(task.currentStreak || 0, task.longestStreak || 0);
                             return nudge ? <p className="mt-0.5 text-[10px] text-slate-400 dark:text-slate-500 truncate" data-testid="streak-nudge">{nudge}</p> : null;
                         })()}
+                        {/*
+                          * CM-08: the transaction offer used to be a blocking
+                          * cross-domain modal ("Financial Transaction?"). It is now
+                          * an inline chip on the completed row: same offer, no
+                          * interruption, and dismissing it costs nothing.
+                          */}
+                        {isFinancialNudge && (
+                            <FinancialNudgeChip
+                                onRecord={() => onRecordTransaction?.()}
+                                onDismiss={() => onDismissFinancialNudge?.()}
+                            />
+                        )}
                     </div>
                 </div>
                 {!hideActions && (
