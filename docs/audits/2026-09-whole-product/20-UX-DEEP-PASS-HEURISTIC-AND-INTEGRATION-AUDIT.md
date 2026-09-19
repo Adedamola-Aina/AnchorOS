@@ -127,7 +127,7 @@ Target model (no schema change required — `type`, `timeOfDay` and cadence fiel
 | `UX-CM-05` "unlabelled 3-icon switcher" | **Refined by `UX-CM-11`:** the control *does* have accessible names ("Timeline View", "List View", "Week View"); the real issues are the absence of **visible** labels and of an exposed selected state. | Instrumented `[aria-pressed]` inventory |
 | `UX-ST-01/02` settings chips | **Refined by `UX-ST-06`:** not five sections but **ten sections in one scroll**, behind nine anchor chips. The severity of the IA finding increases. | Full section heading inventory |
 | Round-1 nav observation | The "no nav element found" note in round 1 was a capture artefact (the query looked at the wrong element while the app was mid-load); the nav exists and is now fully inventoried, including its **five**-item state when Anchor AI is enabled. | Instrumented nav dumps |
-| Round-1 claim of "41 findings" | Still accurate for round 1. This document adds **23** further findings (`UX-FN-07…10`, `UX-OB-06…09`, `UX-CM-09…11`, `UX-AI-06…10`, `UX-DS-01`, `UX-GL-07/08`, `UX-ST-06`), for 64 total across the program. | Count reconciliation |
+| Round-1 claim of "41 findings" | Still accurate for round 1. This document adds **20** further findings (`UX-FN-07…10`, `UX-OB-06…09`, `UX-CM-09…11`, `UX-AI-06…10`, `UX-DS-01`, `UX-GL-07/08`, `UX-ST-06`), for **61** total across the program. **Correction (2026-09-18):** an earlier revision of this row said 23/64 — the ID list above is the authoritative count (4+4+3+5+1+2+1 = 20). | Count reconciliation |
 
 ## 7. Next steps
 
