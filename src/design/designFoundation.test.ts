@@ -82,8 +82,30 @@ describe('semantic role tokens (UX-DS-02 / UX-DS-03)', () => {
                 expect(occurrences(`--role-${role}${suffix}:`), `--role-${role}${suffix}`).toBeGreaterThanOrEqual(2);
             }
         }
-        for (const token of ['--surface-base', '--surface-raised', '--surface-sunken', '--text-primary', '--text-muted']) {
+        for (const token of [
+            // Radix-style 12-step aliases (doc 24 §9.3): every role must exist in
+            // BOTH themes, so a new alias cannot be added light-only.
+            '--surface-base', '--surface-raised', '--surface-hover', '--surface-active',
+            '--surface-sunken', '--surface-border',
+            '--border-subtle', '--border-interactive', '--focus-ring',
+            '--solid', '--solid-hover',
+            '--text-primary', '--text-secondary', '--text-muted',
+        ]) {
             expect(occurrences(`${token}:`), token).toBeGreaterThanOrEqual(2);
+        }
+    });
+
+    it('exposes every alias as a utility, so components never need raw palette classes', () => {
+        for (const [utility, source] of [
+            ['--color-surface-hover', '--surface-hover'],
+            ['--color-surface-active', '--surface-active'],
+            ['--color-border-subtle', '--border-subtle'],
+            ['--color-border-interactive', '--border-interactive'],
+            ['--color-focus-ring', '--focus-ring'],
+            ['--color-solid', '--solid'],
+            ['--color-solid-hover', '--solid-hover'],
+        ]) {
+            expect(css).toMatch(new RegExp(`${utility}:\\s*var\\(${source}\\)`));
         }
     });
 
