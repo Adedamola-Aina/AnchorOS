@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useApp } from '../../context/AnchorContext';
 import { FabricOnboarding } from './FabricOnboarding';
@@ -45,9 +46,16 @@ const FabricView: React.FC = () => {
   if (!isEnabled) {
     return (
       <FeatureErrorBoundary featureName="Anchor AI">
+        {/* UX-AI-02: a dead end became a doorway — explain the value and link to the switch. */}
         <div className="max-w-3xl mx-auto space-y-4 ">
           <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white">Anchor AI</h1>
-          <p className="text-slate-600 dark:text-slate-300">Anchor AI is disabled. Enable it in Settings to view your assistant tab.</p>
+          <p className="text-slate-600 dark:text-slate-300">
+            Anchor AI is off. Turn it on to get a daily briefing, notice spending patterns, and ask questions
+            about your own commitments and accounts.
+          </p>
+          <Button onClick={() => navigateTo('settings')} className="gap-2">
+            Open Settings to enable it
+          </Button>
         </div>
       </FeatureErrorBoundary>
     );

@@ -150,7 +150,8 @@ const FinanceView = () => {
         <div className="flex items-start justify-between gap-4 mb-2 animate-in fade-in slide-in-from-left-4 duration-700">
           <div className="min-w-0">
             <h2 className="text-h2 lg:text-h2-lg tracking-tight text-slate-900 dark:text-white">Finance</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Multi-account asset management and cashflow tracking</p>
+            {/* UX-FN-05: plain language, not internal vocabulary. */}
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Your accounts, balances and spending in one place.</p>
           </div>
           <button
             type="button"

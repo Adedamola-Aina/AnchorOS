@@ -70,7 +70,7 @@ describe('FabricView', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Anchor AI is disabled. Enable it in Settings to view your assistant tab.')).toBeInTheDocument();
+    expect(screen.getByText(/Anchor AI is off/i)).toBeInTheDocument();
   });
 
   it('shows onboarding when there are no patterns', () => {
