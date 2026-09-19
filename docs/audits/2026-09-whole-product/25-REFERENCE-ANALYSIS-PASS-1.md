@@ -150,9 +150,9 @@ commercial precedent in this set. Nothing gets gated on an entrance animation.
 | Role aliases (12-step) | ✅ landed | `--surface-base/raised/sunken/hover/active/border`, `--border-subtle`, `--border-interactive`, `--solid`, `--solid-hover`, `--text-primary/secondary/muted` (`src/index.css:541–555`) |
 | Motion duration | ✅ landed | `--duration-micro: 140ms`, `--duration-sheet: 200ms`, `--duration-balance: 250ms` (`:624–626`) |
 | Motion easing | ✅ landed | `--ease-standard/enter/exit` (`:627–629`) |
-| **Radius** | ❌ **not tokenised** | `var(--radius-md, 0.375rem)` with a hard fallback (`:224`), hardcoded `border-radius: 1rem` (`:328`), `9999px` scrollbars (`:439`, `:447`) |
-| **Spacing** | ❌ **not tokenised** | no `--space-*` scale exists at all |
-| **Elevation** | ❌ **not tokenised** | only Tailwind default `--shadow-sm…2xl` (`:125–130`) — no semantic elevation roles |
+| **Radius** | ✅ landed | six roles at `src/index.css:703–708` — `--radius-{field,control,card,panel,sheet,pill}`. The literals this row used to cite are gone: `:224` now reads `var(--radius-field)`, `:328` `var(--radius-panel)`, and both scrollbar thumbs (`:439`, `:447`) `var(--radius-pill)` |
+| **Spacing** | ✅ landed | three axes × three steps at `:716–729` (`--spacing-{inset,stack,inline}[-tight|-roomy]`, plus `stack-section`) and R1's row heights `--spacing-row-{compact,standard,comfortable}` = 44/48/56px |
+| **Elevation** | ✅ landed | five roles on `:root` (`:675–681`) **and** `.dark` (`:685–691`), mapped to `shadow-elevation-*` in `@theme` (`:735–739`). Dark values carry deeper alpha, because a light-tuned shadow is invisible on `#020617` |
 
 So `UX-DS-06` is not "radius and spacing need tidying": there is **no radius, spacing or elevation scale in the
 token layer**, which is why surfaces are mixing a literal `1rem` radius with `0.375rem` fallbacks and default

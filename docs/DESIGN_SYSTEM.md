@@ -97,6 +97,27 @@ Every monetary value is rendered with the `.money` utility (tabular figures, sla
 
 Callers ask for an **intent** (`taskComplete`, `taskUncomplete`, `recordSaved`, `streakMilestone`, `destructiveConfirm`, `validationError`); the pattern mapping lives in one place. Haptics fire on state change and confirmation only — **never** on navigation, scroll or hover. Sound is off by default and must aid comprehension to be offered at all.
 
+### Geometry, elevation and spacing scale (`UX-DS-06`)
+
+One radius family, one elevation set, one spacing rhythm — published in `src/index.css` and enforced by `src/design/designFoundation.test.ts`. Every value **aliases a size the app already renders** (usage counts are in the CSS comments), so publishing the scale changed no pixel; adoption across the surfaces is W-D1b.
+
+**Radius** — six roles, each an alias of the size that role already uses:
+
+| Token | Value | Use |
+|---|---|---|
+| `--radius-field` | 6px | Form controls, inputs, selects |
+| `--radius-control` | 8px | Buttons, small containers |
+| `--radius-card` | 12px | Cards, list groups |
+| `--radius-panel` | 16px | Panels, `.glass-card` |
+| `--radius-sheet` | 24px | Sheets, modals |
+| `--radius-pill` | full | Pills, chips, avatars |
+
+**Elevation** — five roles, ending the thirteen-weight shadow free-for-all: `flat` (border only) · `subtle` · `raised` · `overlay` · `modal`. These are **dual-theme** (`:root` + `.dark`) because a shadow tuned for a white surface disappears on `#020617`; a missing dark value fails a test. Utilities: `shadow-elevation-{role}`.
+
+**Spacing rhythm** — three axes × three steps, so a surface never invents a fourth: `inset` (padding inside a container) · `stack` (vertical rhythm between blocks) · `inline` (horizontal gap), each as `-tight` / default / `-roomy` (`stack` also has `-section`). Row heights come from reference rule R1 (doc 25 §3): `--spacing-row-compact` 44px · `-standard` 48px · `-comfortable` 56px — label left, value right-aligned on a shared rail, **no divider inside a group**.
+
+**Rules.** Choose the role that describes the job; never an arbitrary-value radius (a bracketed size). A new radius, elevation or spacing step is a **system** decision, not a component decision — if a screen seems to need a fourth step, the screen is wrong, not the rhythm. (Write bracketed class examples as prose, not as literal class names: Tailwind auto-scans the repo and would ship a utility for them.)
+
 ### Empty states (`UX-DS-07`)
 
 Use `src/components/shared/EmptyState.tsx`. The contract: say **what this is**, **why it is empty**, and **offer the action the sentence names**. One primary action maximum; when there is genuinely nothing to do, omit the action and keep the copy honest.

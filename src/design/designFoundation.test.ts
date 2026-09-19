@@ -120,3 +120,65 @@ describe('semantic role tokens (UX-DS-02 / UX-DS-03)', () => {
         expect(css).toMatch(/\.money\s*\{[^}]*font-variant-numeric:\s*tabular-nums/);
     });
 });
+describe('geometry, elevation and spacing scale (UX-DS-06)', () => {
+    const RADIUS_ROLES = ['field', 'control', 'card', 'panel', 'sheet', 'pill'];
+    const ELEVATION_ROLES = ['flat', 'subtle', 'raised', 'overlay', 'modal'];
+    const SPACING_ROLES = [
+        // inset = padding inside a container
+        'inset-tight', 'inset', 'inset-roomy',
+        // stack = vertical rhythm between blocks
+        'stack-tight', 'stack', 'stack-roomy', 'stack-section',
+        // inline = horizontal gap
+        'inline-tight', 'inline', 'inline-roomy',
+        // row heights, from reference rule R1 (doc 25 §3)
+        'row-compact', 'row-standard', 'row-comfortable',
+    ];
+
+    const occurrences = (token: string) => (css.match(new RegExp(token, 'g')) ?? []).length;
+
+    it('publishes one radius family, so no component invents its own corner', () => {
+        for (const role of RADIUS_ROLES) {
+            expect(css, `--radius-${role}`).toMatch(new RegExp(`--radius-${role}:\\s*[\\d.]+(rem|px)`));
+        }
+    });
+
+    it('publishes one spacing rhythm on three axes of at least three steps each', () => {
+        for (const role of SPACING_ROLES) {
+            expect(css, `--spacing-${role}`).toMatch(new RegExp(`--spacing-${role}:\\s*[\\d.]+(rem|px)`));
+        }
+        // A fourth step per axis is a decision nobody owns, so the rhythm stays short.
+        for (const axis of ['inset', 'stack', 'inline']) {
+            const steps = SPACING_ROLES.filter((role) => role === axis || role.startsWith(`${axis}-`));
+            expect(steps.length, axis).toBeGreaterThanOrEqual(3);
+        }
+    });
+
+    it('keeps the R1 row heights inside the 44–56px band the references show', () => {
+        for (const [role, expected] of [['row-compact', 44], ['row-standard', 48], ['row-comfortable', 56]] as const) {
+            expect(css, role).toMatch(new RegExp(`--spacing-${role}:\\s*${expected}px`));
+            expect(expected).toBeGreaterThanOrEqual(44);
+            expect(expected).toBeLessThanOrEqual(56);
+        }
+    });
+
+    it('defines every elevation role for light AND dark, so dark parity cannot be forgotten', () => {
+        for (const role of ELEVATION_ROLES) {
+            // Declared at least twice: once on :root (light), once on .dark.
+            expect(occurrences(`--elevation-${role}:`), role).toBeGreaterThanOrEqual(2);
+        }
+    });
+
+    it('exposes every elevation role as a utility through @theme', () => {
+        for (const role of ELEVATION_ROLES) {
+            expect(css).toMatch(new RegExp(`--shadow-elevation-${role}:\\s*var\\(--elevation-${role}\\)`));
+        }
+    });
+
+    it('retires the ad-hoc radius literals the scale replaces', () => {
+        // A literal 1rem card corner next to a 0.375rem field fallback was
+        // the original evidence for UX-DS-06 — neither may come back.
+        expect(css).not.toMatch(/border-radius:\s*1rem\b/);
+        expect(css).not.toMatch(/border-radius:\s*9999px\b/);
+        expect(css).not.toMatch(/var\(--radius-md,\s*0\.375rem\)/);
+    });
+});
