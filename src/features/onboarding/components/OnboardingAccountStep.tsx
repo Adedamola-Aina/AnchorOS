@@ -48,8 +48,9 @@ export function OnboardingAccountStep({
 
             <div className="space-y-4">
                 <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Account Name</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Account Name <span className="text-rose-500" aria-hidden="true">*</span></label>
                     <input type="text" value={accName} onChange={(e) => setAccName(e.target.value)}
+                        aria-required="true"
                         className="w-full p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                         placeholder="e.g. Chase Checking" />
                 </div>
@@ -75,14 +76,22 @@ export function OnboardingAccountStep({
                         </div>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Current Balance</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Current Balance <span className="text-rose-500" aria-hidden="true">*</span></label>
                         <input type="number" value={balance} onChange={(e) => setBalance(e.target.value)}
+                            aria-required="true"
                             className="w-full p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                             placeholder="0.00" />
                     </div>
                 </div>
 
+                {/* UX-OB-08: a disabled primary with no explanation reads as broken. */}
+                {(!accName || !balance) && (
+                    <p id="account-step-requirements" className="mt-1 text-xs text-slate-500 dark:text-slate-400 text-center">
+                        Add an account name and its current balance to continue.
+                    </p>
+                )}
                 <button onClick={onSubmit} disabled={!accName || !balance || loading}
+                    aria-describedby={!accName || !balance ? 'account-step-requirements' : undefined}
                     className="w-full mt-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
                     {loading ? 'Creating...' : 'Continue'}
                 </button>

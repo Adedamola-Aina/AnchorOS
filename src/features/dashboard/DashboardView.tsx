@@ -68,10 +68,10 @@ const DashboardView = () => {
           <div className="min-w-0 flex-1">
             <p
               className="text-sm lg:text-base font-medium text-slate-500 dark:text-slate-400 truncate"
-              title={`${getTimeGreeting()}, ${profile.name}`}
+              title={profile.name ? `${getTimeGreeting()}, ${profile.name}` : getTimeGreeting()}
               data-testid="dashboard-greeting"
             >
-              {getTimeGreeting()}, {profile.name}
+              {profile.name ? `${getTimeGreeting()}, ${profile.name}` : getTimeGreeting()}
             </p>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Life at a glance.</p>
           </div>

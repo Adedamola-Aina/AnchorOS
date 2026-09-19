@@ -334,7 +334,7 @@ All other severities were re-evaluated against the product-wide scale and preser
 
 ## UX wave F1 — registration on wave open (2026-09-18)
 
-Registered here because doc 18 §1 states `UX-*` findings are added to this register **only when their remediation wave opens**. F1 is the first UX wave (the functional finance/onboarding P0s identified in doc 20 §7.2); PR to follow.
+Registered here because doc 18 §1 states `UX-*` findings are added to this register **only when their remediation wave opens**. F1 is the first UX wave (the functional finance P0s identified in doc 20 §7.2), merged as PR #209.
 
 | ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
 |---|---|---|---|---|---|---|---|---|
@@ -343,4 +343,16 @@ Registered here because doc 18 §1 states `UX-*` findings are added to this regi
 | UX-FN-09 | MEDIUM | CORR | ROOT | — | X7 | LIVE | Tap targets below the 44×44px accessibility contract: the header `+` and both month controls measured 32×32 | **REMEDIATED in F1** — measured 44×44 in the running app |
 | (F1 side-fix) | LOW | CORR | CHILD | — | X7 | LIVE | `ActionSheet` icons contributed to the button's accessible name (`"+Add account"`), so actions announced incorrectly to assistive tech | **REMEDIATED in F1** — decorative icons are now `aria-hidden` |
 
-Remaining `UX-*` findings (rounds 1–2, and docs 18/20/21) stay **unregistered and unimplemented** until their own waves open. F1 did not touch schema, rules, functions, notification behaviour, or production.
+## UX wave F2 — onboarding P0s (2026-09-18)
+
+Registered on wave open, per doc 18 §1 (PR #210).
+
+| ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
+|---|---|---|---|---|---|---|---|---|
+| UX-OB-06 | HIGH | CORR | ROOT | — | X8 | LIVE | Onboarding progress was not persisted: reloading at step 3 returned to `STEP 1 OF 5` while the account and goal created in steps 2–3 already existed, inviting duplicate creation and repeated name entry | **REMEDIATED in F2** — the step is persisted to `onboardingProgress.gettingStartedStep` and resumed; verified by reloading mid-flow (step 3 → step 3) |
+| UX-OB-07 | HIGH | PRIV | ROOT | — | X6 | LIVE | The display name was derived from the email local-part (observed `ux-dbg-1770…`); with no profile the UI also invented "User" | **REMEDIATED in F2** — the profile name starts empty by design, no email-derived identity, no placeholder identity; onboarding asks for a name and explains why. Verified: the field starts empty |
+| UX-OB-08 | HIGH | CORR | ROOT | — | X8 | LIVE | Step 2's "Continue" was `disabled` until the balance was filled, with no required indicator and no explanation — reproduced (`continueDisabled=true`, no message); the experience was "the button does nothing" | **REMEDIATED in F2** — required markers (`*`, `aria-required`) plus an `aria-describedby` explanation on steps 1 and 2, rendered exactly while the primary is unavailable; verified in-browser |
+| UX-OB-09 | MEDIUM | CORR | ROOT | — | X8 | LIVE | "Skip for now →" carried three behaviours; on steps 2 and 4 it **silently terminated setup** | **REMEDIATED in F2** — step 1's control is "Finish later" (an explicit exit that records progress); later steps' skip advances exactly one step and can never end setup; verified |
+| UX-DB-01 | MEDIUM | CORR | ROOT | — | X8 | LIVE | The dashboard greeting emitted a dangling "Good evening, " whenever the name was empty (round-2 §6 re-scoped this from a data bug to a missing empty/loading guard) | **REMEDIATED in F2** — the greeting renders the separator and name only when a name exists (the same edit that removes the "User" placeholder) |
+
+F1 and F2 did not touch schema, rules, functions, notification behaviour, or production. Remaining `UX-*` findings (docs 18/20/21) stay **unregistered and unimplemented** until their own waves open. Deliberately still open from F2: a *resumable* "Finish later" requires changing the `onboardingComplete` gate contract — tracked with the W6 onboarding rewrite, as is the per-step label polish ("Skip this step").

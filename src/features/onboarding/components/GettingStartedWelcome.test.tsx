@@ -50,19 +50,21 @@ describe('GettingStartedWelcome', () => {
     expect(onStart).toHaveBeenCalledWith('Captain');
   });
 
-  it('falls back to userName if name is cleared', () => {
+  it('refuses to invent a name: clearing the field disables the primary action (UX-OB-07)', () => {
     const onStart = vi.fn();
     render(<GettingStartedWelcome {...defaultProps} onStart={onStart} />);
     const input = screen.getByDisplayValue('Teeto');
     fireEvent.change(input, { target: { value: '   ' } });
     fireEvent.click(screen.getByText("Let's Begin"));
-    expect(onStart).toHaveBeenCalledWith('Teeto');
+    // No fallback to the old name, and the user is told what is missing.
+    expect(onStart).not.toHaveBeenCalled();
+    expect(screen.getByText(/Add a name to continue/i)).toBeInTheDocument();
   });
 
-  it('calls onSkip when skip button clicked', () => {
+  it('calls onSkip when the finish-later control is clicked', () => {
     const onSkip = vi.fn();
     render(<GettingStartedWelcome {...defaultProps} onSkip={onSkip} />);
-    fireEvent.click(screen.getByText('Skip for now →'));
+    fireEvent.click(screen.getByText('Finish later'));
     expect(onSkip).toHaveBeenCalled();
   });
 

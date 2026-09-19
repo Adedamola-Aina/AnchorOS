@@ -141,6 +141,25 @@ describe('OnboardingView', () => {
         expect(screen.getByTestId('onboarding-illustration')).toBeInTheDocument();
     });
 
+    it('resumes at the persisted step instead of restarting at step 1 (UX-OB-06)', () => {
+        const authOverrides: Record<string, unknown> = {
+            profile: {
+                ...mockProfile,
+                onboardingProgress: {
+                    gettingStartedStep: 3,
+                    securityStepSeen: false,
+                    beyondBasicsComplete: false,
+                    completedItems: [],
+                },
+            },
+        };
+        renderWithContexts(createMockContexts({}, {}, {}, authOverrides));
+
+        // Step 3 is the goal step — a reload must not send the user back to step 1.
+        expect(screen.getByText('Set a Goal')).toBeInTheDocument();
+        expect(screen.queryByText('Welcome to Anchor OS.')).not.toBeInTheDocument();
+    });
+
     it('transitions to Step 2 (Account) on click', async () => {
         const { mocks } = renderWithContexts();
 
@@ -221,9 +240,10 @@ describe('OnboardingView', () => {
     // NEW TESTS: Issue 5.1 - Skip Option
     // ========================================
     describe('Skip Functionality', () => {
-        it('shows skip link on Step 1', () => {
+        it('offers finish-later (not a step skip) on Step 1', () => {
             renderWithContexts();
-            expect(screen.getByText(/skip/i)).toBeInTheDocument();
+            expect(screen.getByText('Finish later')).toBeInTheDocument();
+            expect(screen.queryByText(/skip/i)).not.toBeInTheDocument();
         });
 
         it('shows skip link on Step 2', async () => {
@@ -233,11 +253,10 @@ describe('OnboardingView', () => {
             expect(screen.getByText(/skip/i)).toBeInTheDocument();
         });
 
-        it('clicking skip sets onboardingComplete with progress', async () => {
+        it('"Finish later" on step 1 exits setup and records progress (UX-OB-09)', async () => {
             const { mocks } = renderWithContexts();
 
-            const skipLink = screen.getByText(/skip/i);
-            fireEvent.click(skipLink);
+            fireEvent.click(screen.getByText('Finish later'));
 
             await waitFor(() => {
                 expect(mocks.updateProfile).toHaveBeenCalledWith(expect.objectContaining({
@@ -245,6 +264,21 @@ describe('OnboardingView', () => {
                     onboardingProgress: expect.objectContaining({ beyondBasicsComplete: false }),
                 }));
             });
+        });
+
+        it('skipping a later step advances instead of ending setup (UX-OB-09)', async () => {
+            const { mocks } = renderWithContexts();
+
+            fireEvent.click(screen.getByText("Let's Begin"));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+
+            fireEvent.click(screen.getByText(/skip/i));
+
+            await waitFor(() => screen.getByText('Set a Goal'));
+            expect(screen.getByText('Set a Goal')).toBeInTheDocument();
+            expect(mocks.updateProfile).not.toHaveBeenCalledWith(
+                expect.objectContaining({ onboardingComplete: true }),
+            );
         });
     });
 
