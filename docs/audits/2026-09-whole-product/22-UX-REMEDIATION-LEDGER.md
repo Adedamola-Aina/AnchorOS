@@ -17,11 +17,11 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **14** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **47** |
-| Waves merged to `master` | F1 (finance), F2 (onboarding) |
-| Waves in review | P1a (commitments legibility), P1d (quick findings — this doc's PR) |
-| Deployed | `master` `8be1c1f3` → **staging**, Release Smoke green. **Production undeployed.** |
+| Closed | **15** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **46** |
+| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06) |
+| Deployed | `master` `b67aa498` / `v1.21.0-rc.0` → **staging**, Release Smoke green. **Production undeployed.** |
+| Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
 
 ## Closed (14)
 
@@ -41,17 +41,17 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | UX-AI-02 | HIGH | P1d | Disabled assistant was a dead end (no value, no link) | Explains value + links to Settings |
 | UX-DB-06 | LOW | P1d | Subtitle "Life at a glance." carried no information | Subtitle shows today's date |
 | UX-FN-05 | MEDIUM | P1d | Finance subtitle used internal vocabulary | Plain-language subtitle |
+| UX-AI-06 | HIGH | P1b | Assistant said "No tasks scheduled today" while active commitments existed — overdue work was invisible to the assistant **and** the nav badge | Shared schedule model (`commitmentSchedule.ts`); assistant, badge and page agree |
 | — | LOW | F1 | `ActionSheet` icons leaked into accessible names (`"+Add account"`) | `aria-hidden` on decorative icons |
 
 ## Remaining (47) — grouped by the wave that will close them
 
-### P1b — schedule-aware commitments engine · **no decision needed** (10 findings)
+### P1b — schedule-aware commitments engine · **in progress** (9 findings remain; UX-AI-06 closed)
 
-This is the highest-leverage remaining work: it fixes the assistant's false statements **at the root** and makes streaks fair.
+This is the highest-leverage remaining work: it fixes the assistant's false statements **at the root** and makes streaks fair. **Landed in this wave:** the shared schedule model (`src/services/fabric/commitmentSchedule.ts`) — "today" now means *scheduled today or carried over*, so the assistant, the nav badge and the Today card share one definition and cannot disagree; the empty day is honest ("You have no commitments yet" / "Nothing due today — next up Mon") and its button offers the action it names.
 
 | ID | Sev | Finding | Note |
 |---|---|---|---|
-| UX-AI-06 | HIGH | Assistant says "No tasks scheduled today" while 4 active commitments exist | **Verify the derivation first**, then "Today = scheduled today or overdue" |
 | UX-AI-08 | MEDIUM | First insight is a demoralising "completion: 0% — 0 of 4 in 30 days" | Replace `completed/total` with `completed/expected` |
 | UX-CM-07 | MEDIUM | Rows show no cadence, next-due, streak or category | Fill the space the stray dash occupies |
 | UX-CM-04 | MEDIUM | Filter chips mix cadence with type (`TODO` as a "frequency") | Cadence moves to a filter sheet; type stays out of the primary control |
@@ -73,7 +73,7 @@ This is the highest-leverage remaining work: it fixes the assistant's false stat
 | UX-OB-03 | HIGH | Onboarding pre-fills junk defaults ('Main Checking', 'Read for 15 mins') committed verbatim |
 | UX-DS-01 | MEDIUM | Emoji used as functional icons, against `DESIGN_SYSTEM.md` ("Lucide React exclusively") |
 
-### P2 — Home merge + shell · **blocked on D1, D2** (14 findings)
+### P2 — Home merge + shell · **D1/D2 accepted — ready to build** (14 findings)
 
 | ID | Sev | Finding |
 |---|---|---|
@@ -92,7 +92,7 @@ This is the highest-leverage remaining work: it fixes the assistant's false stat
 | UX-GL-04 | MEDIUM | Bottom nav has no safe-area reserve, no FAB slot, no scroll behaviour |
 | UX-GL-06 | LOW | Environment banner treatment undefined for non-dev |
 
-### P3 — Settings hub · **blocked on D4** (6 findings)
+### P3 — Settings hub · **D4 accepted — ready to build** (6 findings)
 
 | ID | Sev | Finding |
 |---|---|---|
@@ -103,7 +103,7 @@ This is the highest-leverage remaining work: it fixes the assistant's false stat
 | UX-ST-05 | MEDIUM | AI settings live in Settings while the AI surface lives elsewhere |
 | UX-GL-08 | LOW | Login offers theme toggles while Settings offers Auto/Light/Dark + text size + contrast |
 
-### P3 — Finance Wallet visuals (F2/F3 of doc 21) · **blocked on D5, D12, D13** (6 findings)
+### P3 — Finance Wallet visuals (F2/F3 of doc 21) · **D5/D12/D13 accepted — ready to build** (6 findings)
 
 | ID | Sev | Finding |
 |---|---|---|
@@ -114,7 +114,7 @@ This is the highest-leverage remaining work: it fixes the assistant's false stat
 | UX-FN-06 | MEDIUM | Month pager/search/empty state give no signal whether data exists elsewhere |
 | UX-FN-10 | MEDIUM | Empty month looks like "no data" while transactions exist in other months |
 
-### P3 — Onboarding rewrite (W6) · **blocked on D6** (4 findings)
+### P3 — Onboarding rewrite (W6) · **D6 accepted — ready to build** (4 findings)
 
 | ID | Sev | Finding |
 |---|---|---|

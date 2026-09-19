@@ -18,6 +18,15 @@ export interface TodayStats {
   pendingTasks: number;
   /** Best active streak across all commitments (requires >= 3 days). */
   streakHighlight?: { title: string; days: number };
+  /** Outstanding and past its most recent scheduled day (P1b, UX-AI-06). */
+  overdueTasks?: number;
+  /**
+   * Commitments the user tracks, due or not. Lets a genuinely empty day say
+   * *why* it is empty instead of implying the user has nothing at all (P1b).
+   */
+  trackedCommitments?: number;
+  /** Deterministic label for the next scheduled day, e.g. "Mon" (P1b). */
+  nextDueLabel?: string;
 }
 
 export interface DailyBriefing {

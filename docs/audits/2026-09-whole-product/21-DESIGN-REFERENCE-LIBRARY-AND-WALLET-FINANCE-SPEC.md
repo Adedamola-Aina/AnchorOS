@@ -189,7 +189,7 @@ Highest-value sets, in priority order — each maps to findings already recorded
    - **F1 (functional, now):** restore tappability, add the `+` → action sheet with **Record transaction**, real empty-state button, 44px targets, per-currency labelling. *Do not restyle yet.*
    - **F2 (Wallet visuals, after F1):** pass fronts, gradients, tabular balances, 3-card hero + currency sections + "All accounts" list.
    - **F3 (ledger in place):** pass pinned with the ledger beneath, ⋯ options, balance animation on save.
-3. **New decisions this adds:**
+3. **New decisions this adds — ALL ACCEPTED 2026-09-18 (the recommendations below are the approved design, with D1–D11):**
    - **D12** — Adopt the Wallet model for Finance (pass fronts, stack + "All accounts" list, `+` → action sheet)? Recommend **yes**.
    - **D13** — Account identity colour: derive a gradient per account from the existing account colour, or a restrained palette per account *type*? Recommend **type-based palette with a per-account hue shift**, so two Checking accounts are distinguishable without becoming a rainbow.
    - **D14** — Does the commitment list adopt a card-stack idiom too, or stay a list (with the timeline as the visual view)? Recommend **stay a list** — cards everywhere is the fastest way to make an app feel like a template.

@@ -2,28 +2,21 @@ import type { AnchorTask, AnchorTransaction, RecurringTransaction } from '../../
 import type { DailyBriefing, TodayStats, UpcomingItem } from '../../types/fabricBriefing';
 import { detectPrimaryCurrency, getBestCompletionDay, getDateRange, getHighSpendDay, toDate, withinRange } from './fabricUtils';
 
-/** Day-name letters matching AnchorTask.daysOfWeek (Sun=0…Sat=6). */
-const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
+import { describeNextDue, getDueToday, getNextDue, isOverdue } from './commitmentSchedule';
 
-/** Returns commitments that are scheduled for `now` (daily, relevant weekly, todo). */
+/**
+ * Returns the commitments due today (UX-AI-06 / P1b).
+ *
+ * Historically this counted only cadences matching *today*, so a weekly or
+ * monthly commitment on a non-scheduled day vanished from the assistant's
+ * numbers: it said "No tasks scheduled today" while the Commitments page still
+ * showed outstanding work, and the nav badge silently read 0. "Today" now means
+ * scheduled today **or overdue**, computed by the shared schedule model
+ * (commitmentSchedule.ts), so the assistant, the badge and the page can never
+ * disagree again.
+ */
 function getTodayTasks(commitments: AnchorTask[], now: Date): AnchorTask[] {
-  const dayIdx = now.getDay();
-  const dayLetter = DAY_LETTERS[dayIdx];
-
-  return commitments.filter((task) => {
-    if (task.type === 'daily') return true;
-    if (task.type === 'todo') return true; // show all outstanding todos
-    if (task.type === 'weekly') {
-      // daysOfWeek is an array like ['M','T','F'] – match on letter
-      return task.daysOfWeek?.includes(dayLetter) ?? false;
-    }
-    if (task.type === 'monthly') {
-      const dom = now.getDate();
-      if (task.daysOfMonth?.length) return task.daysOfMonth.includes(dom);
-      if (task.dayOfMonth) return task.dayOfMonth === dom;
-    }
-    return false;
-  });
+  return getDueToday(commitments, now);
 }
 
 /** Returns upcoming recurring transactions within the next `windowDays` days. */
@@ -135,6 +128,10 @@ export function buildDailyBriefing(
     return !best || s > (best.currentStreak ?? 0) ? t : best;
   }, null);
 
+  // Next scheduled day across outstanding commitments (P1b): lets a genuinely
+  // empty day say "next up Mon" instead of implying nothing exists at all.
+  const nextDue = getNextDue(commitments, now);
+
   const todayStats: TodayStats = {
     totalTasks: todayTasks.length,
     completedTasks,
@@ -142,6 +139,9 @@ export function buildDailyBriefing(
     streakHighlight: streakTask
       ? { title: streakTask.title, days: streakTask.currentStreak! }
       : undefined,
+    overdueTasks: commitments.filter((task) => isOverdue(task, now)).length,
+    trackedCommitments: commitments.length,
+    nextDueLabel: nextDue ? describeNextDue(nextDue, now) : undefined,
   };
 
   // Upcoming bills/recurring
