@@ -86,6 +86,20 @@ export default defineConfig({
         },
         {
             name: 'chromium',
+            // The design-surface evidence harness is deliberately opt-in: it
+            // walks the four surfaces in both themes through the real theme
+            // control, so it is slow and belongs to migration time rather than
+            // every push. It has its own project below.
+            testIgnore: /design-surfaces\.spec\.ts/,
+            use: { ...devices['Desktop Chrome'] },
+        },
+        // W-D1b evidence capture (`e2e/design-surfaces.spec.ts`). Opt in with
+        // DESIGN_EVIDENCE=1, and pin it to chromium because that is the only
+        // engine CI installs (`npx playwright install chromium`):
+        //   DESIGN_EVIDENCE=1 npm run test:e2e:local -- --project=design-evidence
+        {
+            name: 'design-evidence',
+            testMatch: /design-surfaces\.spec\.ts/,
             use: { ...devices['Desktop Chrome'] },
         },
         // Mobile viewport for responsive visual testing

@@ -34,6 +34,9 @@ public/__firebase-config.js
 *.sln
 *.sw?
 test-results/
+# W-D1b surface evidence (e2e/design-surfaces.spec.ts). Generated on demand;
+# kept out of test-results/ because Playwright wipes that directory each run.
+design-evidence/
 coverage/
 playwright-report/
 # Playwright storageState (Firebase Auth session/refresh tokens) — never commit
