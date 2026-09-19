@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.8](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.7...v1.21.0-rc.8) (2026-09-19)
+
+
+### Features
+
+* **design:** extend the role layer to the full 12-step alias set (UX-DS-02) ([#222](https://github.com/Adedamola-Aina/AnchorOS/issues/222)) ([1589274](https://github.com/Adedamola-Aina/AnchorOS/commit/1589274675288545d416c2f5f3e74a2297d87cc4))
+
 ## [1.21.0-rc.7](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.6...v1.21.0-rc.7) (2026-09-19)
 
 ## [1.21.0-rc.6](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.5...v1.21.0-rc.6) (2026-09-19)
