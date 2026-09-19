@@ -504,3 +504,124 @@ input::-webkit-credentials-auto-fill-button {
 
 /* ─── Mobile horizontal scroll ──────────────────────────── */
 /* (kept for feature parity — used by finance charts) */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   W-D1 — Design foundation (doc 24 §5)
+   Semantic ROLE tokens with dark parity by construction, money
+   numerals, and the motion/sensory contract.
+
+   Why roles rather than more brand scales: meaning (success /
+   warning / danger / info) and elevation (surface) are what the
+   interface actually says. Light values live on :root, dark values
+   on .dark, and @theme maps them to utilities — so a missing dark
+   value is an invariant-test failure, not a bug nobody notices.
+
+   Rule from doc 24: COLOUR IS NEVER THE ONLY SIGNAL. Every role must
+   be paired with an icon, sign or label.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+:root {
+  /* Roles — light */
+  --role-success:          #15803d;
+  --role-success-surface:  #f0fdf4;
+  --role-success-border:   #bbf7d0;
+  --role-warning:          #b45309;
+  --role-warning-surface:  #fffbeb;
+  --role-warning-border:   #fde68a;
+  --role-danger:           #b91c1c;
+  --role-danger-surface:   #fef2f2;
+  --role-danger-border:    #fecaca;
+  --role-info:             #1d4ed8;
+  --role-info-surface:     #eff6ff;
+  --role-info-border:      #bfdbfe;
+
+  /* Surfaces — light */
+  --surface-base:          #ffffff;
+  --surface-raised:        #f8fafc;
+  --surface-sunken:        #f1f5f9;
+  --surface-border:        #e2e8f0;
+  --text-primary:          #0f172a;
+  --text-secondary:        #475569;
+  --text-muted:            #94a3b8;
+}
+
+.dark {
+  /* Roles — dark (AA against the dark surfaces below) */
+  --role-success:          #4ade80;
+  --role-success-surface:  #052e16;
+  --role-success-border:   #14532d;
+  --role-warning:          #fbbf24;
+  --role-warning-surface:  #451a03;
+  --role-warning-border:   #78350f;
+  --role-danger:           #f87171;
+  --role-danger-surface:   #450a0a;
+  --role-danger-border:    #7f1d1d;
+  --role-info:             #60a5fa;
+  --role-info-surface:     #082f49;
+  --role-info-border:      #0c4a6e;
+
+  /* Surfaces — dark */
+  --surface-base:          #020617;
+  --surface-raised:        #0f172a;
+  --surface-sunken:        #1e293b;
+  --surface-border:        #1e293b;
+  --text-primary:          #f8fafc;
+  --text-secondary:        #cbd5e1;
+  --text-muted:            #94a3b8;
+}
+
+@theme {
+  /* Role utilities: bg-success-surface, text-success, border-danger-border … */
+  --color-success:         var(--role-success);
+  --color-success-surface: var(--role-success-surface);
+  --color-success-border:  var(--role-success-border);
+  --color-warning:         var(--role-warning);
+  --color-warning-surface: var(--role-warning-surface);
+  --color-warning-border:  var(--role-warning-border);
+  --color-danger:          var(--role-danger);
+  --color-danger-surface:  var(--role-danger-surface);
+  --color-danger-border:   var(--role-danger-border);
+  --color-info:            var(--role-info);
+  --color-info-surface:    var(--role-info-surface);
+  --color-info-border:     var(--role-info-border);
+
+  /* Surface utilities: bg-surface-base, border-surface-border, text-muted … */
+  --color-surface-base:    var(--surface-base);
+  --color-surface-raised:  var(--surface-raised);
+  --color-surface-sunken:  var(--surface-sunken);
+  --color-surface-border:  var(--surface-border);
+  --color-text-primary:    var(--text-primary);
+  --color-text-secondary:  var(--text-secondary);
+  --color-text-muted:      var(--text-muted);
+
+  /* Motion budget (UX-DS-04) — must stay in sync with src/design/motion.ts,
+     which the invariant test enforces. */
+  --duration-micro:   140ms;
+  --duration-sheet:   200ms;
+  --duration-balance: 250ms;
+  --ease-standard:    cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter:       cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit:        cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ─── Money numerals (UX-DS-03) ───────────────────────────────
+   Every monetary value uses tabular figures so digits stop shifting
+   as values change. `.money` is the single supported way to render an
+   amount; it also opts into the slashed zero for legibility. */
+.money {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* ─── Reduced motion: honour BOTH the OS setting and the in-app one ──
+   The in-app switch (.a11y-reduced-motion) already existed; the OS
+   preference was never honoured. Doc 24 §4 requires both. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+    scroll-behavior:           auto   !important;
+  }
+}
+
