@@ -54,3 +54,36 @@ Include the **full screen with the app chrome** where possible, and both **light
 - Extract the **system rules**: hierarchy order, spacing rhythm, row heights, type-scale ratios, colour roles, corner radii, elevation/shadow treatment, motion cues described in the flow.
 - Map those rules onto our tokens (`src/index.css`) and components, then show **before/after screenshots in both themes** plus **5/10/20px Squint Test** artifacts (doc 24 §9.4) so the judgement is visible rather than asserted.
 - Log anything I cannot infer from static screens as an open question rather than guessing.
+
+## Current uploads
+
+15 captures uploaded 2026-09-19. Analysis lives in
+[`25-REFERENCE-ANALYSIS-PASS-1.md`](../25-REFERENCE-ANALYSIS-PASS-1.md).
+
+**Analysed in pass 1 (5):**
+`SCR-20260919-nmzu.png` (Dashboard · iOS · Most popular — Plum, Peloton, Bing, Badoo, Lifesum) ·
+`SCR-20260919-nnxv.png` (Dashboard · Web · Trending — MacroFactor, Future Pro, Box Box Club, Lloyds) ·
+`SCR-20260919-nogp.png` (Account Setup · Most popular — Headspace, Gemini, Revolut, Buddy, Spotify) ·
+`SCR-20260919-nokg.png` (Account Setup · Trending — Bumble, Shop, MacroFactor, Lifesum) ·
+`SCR-20260919-nopw.png` (Splash Screen · Most popular — Duolingo, Wise, Revolut, Airbnb)
+
+**Queued for pass 2 (10):** `notw`, `npao`, `npdx`, `npgu`, `npmr`, `nppn`, `npwr`, `npzr`, `nqiw`, `nqmx`.
+
+Pass 1 extracted 15 rules (row grammar, parent-row aggregates, state-by-shape for `CM-18`, `done of expected` for
+`UX-AI-08`, chip-not-tint status, docked primary action, rhythm-over-rules density, explain-the-number
+disclosure) and found that **radius, spacing and elevation are not tokenised at all** (`UX-DS-06`), which makes
+that scale a prerequisite of the W-D1b migration.
+
+### Reading note (limits, so nothing is over-claimed)
+
+The image reader has a **cumulative per-session media budget**. Originals here are 0.4–1.8 MB; the first three
+reads succeeded, then everything ≥1.4 MB was declined, and once ~6 MB had been read even a 215 KB re-encode was
+declined. So the cap is cumulative, not per-file — it is why pass 1 covers 5 of 15 and why pass 2 picks up the
+rest. Downscaled previews can be generated with:
+
+```bash
+node scripts/design/prepare-reference-previews.mjs            # 1500px wide -> /tmp/anchor-ref-previews
+node scripts/design/prepare-reference-previews.mjs --width 900 --force
+```
+
+No re-upload is needed for pass 2; the files are already on the server.
