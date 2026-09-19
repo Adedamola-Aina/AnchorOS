@@ -28,7 +28,7 @@ describe('buildCommitmentInsight — UX-AI-08 metric honesty', () => {
         expect(insight).not.toBeNull();
         expect(insight!.detail).toContain('30 of 31 scheduled commitments');
         expect(insight!.detail).not.toMatch(/0 of 1 /);
-        expect(insight!.metric.current).toBeGreaterThanOrEqual(90);
+        expect(insight!.metric?.current).toBeGreaterThanOrEqual(90);
     });
 
     it('measures partial consistency against what the cadence required', () => {
@@ -63,7 +63,7 @@ describe('buildCommitmentInsight — UX-AI-08 metric honesty', () => {
 
         const insight = buildCommitmentInsight([overAchiever], now);
 
-        expect(insight!.metric.current).toBe(100);
+        expect(insight!.metric?.current).toBe(100);
         expect(insight!.detail).toContain('31 of 31 scheduled commitments');
     });
 });
