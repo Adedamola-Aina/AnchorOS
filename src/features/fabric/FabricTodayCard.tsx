@@ -8,9 +8,26 @@ interface FabricTodayCardProps {
 }
 
 export const FabricTodayCard: React.FC<FabricTodayCardProps> = ({ todayStats, onOpenCommitments }) => {
-  const { totalTasks, completedTasks, pendingTasks, streakHighlight } = todayStats;
+  const {
+    totalTasks,
+    completedTasks,
+    pendingTasks,
+    streakHighlight,
+    overdueTasks = 0,
+    trackedCommitments = 0,
+    nextDueLabel,
+  } = todayStats;
   const progressPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const allDone = pendingTasks === 0 && totalTasks > 0;
+
+  // UX-AI-06 (P1b): an empty day must never claim "No tasks scheduled today"
+  // while the user tracks commitments, and the empty state must offer the
+  // action it describes instead of a generic route to another page.
+  const emptyMessage = trackedCommitments === 0
+    ? 'You have no commitments yet.'
+    : nextDueLabel
+      ? `Nothing due today — next up ${nextDueLabel}.`
+      : 'Nothing due today.';
 
   return (
     <article className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-3">
@@ -25,7 +42,7 @@ export const FabricTodayCard: React.FC<FabricTodayCardProps> = ({ todayStats, on
       </div>
 
       {totalTasks === 0 ? (
-        <p className="text-sm text-slate-500 dark:text-slate-400">No tasks scheduled today.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>
       ) : (
         <>
           {/* Progress bar */}
@@ -43,6 +60,14 @@ export const FabricTodayCard: React.FC<FabricTodayCardProps> = ({ todayStats, on
               />
             </div>
           </div>
+
+          {/* Work carried over from an earlier scheduled day (P1b) */}
+          {overdueTasks > 0 && (
+            <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+              <Circle className="w-4 h-4 shrink-0" />
+              <span>{overdueTasks} carried over from earlier</span>
+            </div>
+          )}
 
           {/* Pending count or completion message */}
           {pendingTasks > 0 && (
@@ -65,7 +90,7 @@ export const FabricTodayCard: React.FC<FabricTodayCardProps> = ({ todayStats, on
         onClick={onOpenCommitments}
         className="w-full min-h-11 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
       >
-        Open commitments
+        {trackedCommitments === 0 ? 'Create a commitment' : 'Open commitments'}
       </button>
     </article>
   );

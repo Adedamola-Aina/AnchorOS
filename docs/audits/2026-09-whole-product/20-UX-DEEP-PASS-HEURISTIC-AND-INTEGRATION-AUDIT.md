@@ -205,6 +205,8 @@ Unchanged from doc 18 §4.1, with one added constraint: the bar must not grow to
 
 ### 7.4 Decisions still required (in addition to D1–D8 in doc 18 §7)
 
+> **D9–D11 ACCEPTED — 2026-09-18 (product owner).** The *Recommendation* column is the approved design, together with D1–D8 in doc 18 §7 and D12–D14 in doc 21 §6. No decision blocks any wave.
+
 | # | Decision | Recommendation |
 |---|---|---|
 | D9 | Dev-surface policy: may a devtools trigger, environment banner or "Developer Tools" settings section exist in any deployed environment, and who proves the gating? | Keep them dev-only, add the gating proof to the P0 wave, and make "no dev control visible in staging" a release-checklist item |

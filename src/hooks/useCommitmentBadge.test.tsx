@@ -32,7 +32,12 @@ describe('useCommitmentBadge', () => {
     mockState.isAppPluginAvailable = false;
   });
 
-  it('computes pending tasks scheduled for today', () => {
+  it('computes pending work due today: scheduled today plus anything carried over (UX-AI-06)', () => {
+    // P1b: "today" = scheduled today OR carried over from an earlier scheduled
+    // day. Previously the weekly-Friday task on a Friday counted, but Monday's
+    // outstanding weekly and the 12th's monthly silently read 0 on the badge —
+    // the audit's "the nav signals nothing" finding. 4 scheduled + 2 carried
+    // over = 6, and the completed daily is excluded.
     const now = new Date('2026-04-10T09:00:00.000Z');
     const tasks = [
       buildTask({ type: 'daily', completed: false }),
@@ -44,7 +49,7 @@ describe('useCommitmentBadge', () => {
       buildTask({ type: 'todo', completed: false }),
     ];
 
-    expect(getPendingCountForToday(tasks, now)).toBe(4);
+    expect(getPendingCountForToday(tasks, now)).toBe(6);
   });
 
   it('syncs badge count for signed-in users', async () => {

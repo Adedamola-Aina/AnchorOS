@@ -275,6 +275,8 @@ Each wave is a separate branch/PR with the full 7-section governance body (Risk 
 
 These are product decisions, not engineering ones. Each blocks a wave; the waves listed as "not blocked" can start immediately.
 
+> **ALL RECOMMENDATIONS ACCEPTED — 2026-09-18 (product owner).** The *Recommendation* column is now the **approved design** for every row: D1–D8 here, D9–D11 in doc 20 §7.4, and D12–D14 in doc 21 §6. Nothing is blocked on a decision any more. Any change of direction must be recorded as an explicit amendment to this section rather than absorbed silently into a wave.
+
 | # | Decision | Recommendation | Blocks |
 |---|---|---|---|
 | D1 | Merge Dashboard and Anchor AI into one `Home` surface, with the assistant as a layer invoked as "Ask Anchor"? | **Yes** — the evidence in §4.3 shows both surfaces consume identical inputs and currently duplicate/compete | W2, W3 |

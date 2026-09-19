@@ -367,3 +367,14 @@ P1 is split so each part can be verified independently: **P1a** = the self-conta
 | UX-CM-11 | MEDIUM | CORR | ROOT | — | X7 | LIVE | The timeline/list/calendar switcher was three unlabelled icons whose selected state was not exposed (`aria-pressed` absent — an automated scan found only the theme toggles) | **REMEDIATED in P1a** — each view now has a visible text label, a `role="group"` container with an accessible name, and `aria-pressed` reflecting the active view |
 
 Still open in P1: `UX-CM-01` (classification before capture), `UX-CM-02` (inline composer with no step context), `UX-CM-04` (filter/cadence label collision), `UX-CM-05` (fixed in P1a), `UX-CM-06` (placeholder dash / row height), `UX-CM-07` (no schedule·next-due·streak on rows), `UX-CM-08` (cross-domain interruption on completion), `UX-CM-09` (composer step 2: jargon, Save below the fold, dual dismiss, emoji priority, no exact time), `UX-CM-10` (identical labels for filter chips and cadence cards).
+
+## UX wave P1b — schedule-aware commitments (2026-09-18, partial wave)
+
+P1b exists to make the product's statements about the user's day **true**. This first part lands the shared schedule model so the assistant, the nav badge and the Today card derive "today" from one definition; the remaining P1b items (expected-occurrence metrics, fair streaks, row metadata) follow in the same wave.
+
+| ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
+|---|---|---|---|---|---|---|---|---|
+| UX-AI-06 | HIGH | CORR | ROOT | — | X8 | LIVE | The assistant stated "No tasks scheduled today" while active commitments existed. The derivation counted only cadences *matching today*, so every outstanding weekly/monthly commitment on a non-scheduled day was invisible — and the same derivation fed the nav badge, which silently read 0 ("the nav signals nothing") | **REMEDIATED in P1b (part 1)** — `src/services/fabric/commitmentSchedule.ts` is now the single source of truth for "today": scheduled today **or carried over** from an earlier scheduled day. Completed work is never overdue; stale completed to-dos no longer inflate the denominator; a weekly/monthly commitment with no configured day is available rather than invisible. The Today card says "You have no commitments yet" / "Nothing due today — next up Mon", offers the action it names, and reports "N carried over from earlier". Regression tests: `commitmentSchedule.test.ts`, `DailyBriefingEngine.test.ts`, `FabricTodayCard.test.tsx`; the `useCommitmentBadge` expectation moved 4 → 6 because the badge can no longer hide carried-over work |
+
+Still open in P1b: `UX-AI-08` (completion metric), `UX-CM-04`, `UX-CM-06`, `UX-CM-07`, `UX-CM-08`, `UX-AI-04`, `UX-AI-09`, `UX-ST-03`, `UX-GL-05`.
+
