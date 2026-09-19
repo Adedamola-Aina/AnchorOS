@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.17](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.16...v1.21.0-rc.17) (2026-09-19)
+
+
+### Bug Fixes
+
+* **ux:** close five Home findings (UX-DB-02/03/04/05, UX-AI-07) ([#232](https://github.com/Adedamola-Aina/AnchorOS/issues/232)) ([4304523](https://github.com/Adedamola-Aina/AnchorOS/commit/43045237a9351fd4f3ff6aff7ed4fc7805def886))
+
 ## [1.21.0-rc.16](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.15...v1.21.0-rc.16) (2026-09-19)
 
 ## [1.21.0-rc.15](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.14...v1.21.0-rc.15) (2026-09-19)
