@@ -59,10 +59,26 @@ test('the bump is derived from Conventional Commits, never hand-typed', () => {
 
 test('release versioning pushes the commit + tag and publishes the GitHub Release', () => {
     assert.match(VERSION_WORKFLOW, /git tag -a "\$TAG" -m "Release \$TAG"/);
-    assert.match(VERSION_WORKFLOW, /git push origin HEAD:master/);
-    assert.match(VERSION_WORKFLOW, /git push origin "refs\/tags\/\$TAG"/);
+    assert.match(VERSION_WORKFLOW, /git push --no-verify origin HEAD:master/);
+    assert.match(VERSION_WORKFLOW, /git push --no-verify origin "refs\/tags\/\$TAG"/);
     assert.match(VERSION_WORKFLOW, /gh release create "\$TAG"/);
     assert.match(VERSION_WORKFLOW, /contents: write/);
+});
+
+test('the release push never runs the developer hook and never blocks on input', () => {
+    // Regression (run 35450947888, 2026-09-19): `.husky/pre-push` runs the FULL test
+    // suite for pushes targeting master, so the release bot's own push sat in_progress
+    // for 10+ minutes on a version-only commit and the release looked hung rather than
+    // failed. The version commit is mechanical and is validated by the ci.yml run that
+    // is requested right after, so the hook stays disabled and nothing may wait on a
+    // prompt.
+    assert.match(VERSION_WORKFLOW, /HUSKY: '0'/);
+    assert.match(VERSION_WORKFLOW, /GIT_TERMINAL_PROMPT: '0'/);
+    assert.match(VERSION_WORKFLOW, /git commit --no-verify -m "chore\(release\): \$TAG"/);
+    // A rejected push must re-apply onto the new tip; a conflicted rebase must stop
+    // loudly instead of guessing at a release commit.
+    assert.match(VERSION_WORKFLOW, /git rebase --abort/);
+    assert.match(VERSION_WORKFLOW, /Rebase onto origin\/master conflicted/);
 });
 
 test('the release commit is explicitly validated by CI so it can actually deploy', () => {
