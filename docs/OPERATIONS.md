@@ -59,7 +59,11 @@ Classification is computed by `scripts/ci/deploy-surface-classifier.js` from ALL
 
 ## Versions & releases
 
-- `commit-and-tag-version` via `npm run version:{dev|staging|production}`; version bumps and tags are CI-driven on master.
+- **Automatic.** Nobody bumps a version by hand. `.github/workflows/version.yml` runs on every merge to `master` and, in one pass: derives the bump from Conventional Commits since the last tag (`feat` → minor, `fix` → patch, `BREAKING CHANGE` → major), runs `commit-and-tag-version` (`npm run version:{rc|production|dev}` mapping onto `version:staging|production|dev`), commits `chore(release): <tag>`, pushes the commit + annotated tag, explicitly requests CI for the release commit, and publishes the GitHub Release.
+- **Why versioning is its own workflow:** `staging.yml` / `production.yml` are dispatch-only deployments and `production.yml` is invariant-tested to never push, commit or version-bump master. `staging.yml` passes `--skip-version-bump` precisely because this workflow owns the bump. Pushing to master still never mutates an environment.
+- **GITHUB_TOKEN caveat (why step "Request CI" exists):** a push made with the default `GITHUB_TOKEN` does not trigger other workflows. Since staging/production only deploy a SHA whose `ci.yml` run succeeded, the release commit would otherwise be permanently undeployable — so the workflow dispatches `ci.yml` for it (which is why `ci.yml` is dispatchable).
+- **Channels:** `rc` (default, staging prerelease), `production` (final, non-prerelease cut), `dev` (local-only prerelease, changelog skipped). Re-run the workflow manually to cut a specific channel; the idempotence + loop guards make repeated runs safe.
+- **Manual fallback (rarely needed):** `npm run version:{dev|staging|production}` still exists for local prerelease work; CI is the only path that tags or publishes.
 - **GitHub Releases are the authoritative full release history.** `CHANGELOG.md` is a small bounded pointer/recent-summary; version tooling appends only new release sections (never the full history). Do not let it grow unbounded.
 - Deploy provenance is the successful workflow run for a SHA (`scripts/ci/last-deployed-sha.js`) — no deploy-marker commits.
 

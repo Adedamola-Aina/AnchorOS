@@ -15,6 +15,11 @@ on:
     branches: [master]
   schedule:
     - cron: '0 22 * * 0'
+  # Dispatchable so the Release Versioning workflow (version.yml) can request
+  # validation of the release commit it just pushed: a push made with the
+  # default GITHUB_TOKEN does not trigger workflows, and staging/production only
+  # deploy a SHA whose ci.yml run succeeded.
+  workflow_dispatch:
 permissions:
   contents: write
   pull-requests: write
