@@ -73,7 +73,10 @@ const DashboardView = () => {
             >
               {profile.name ? `${getTimeGreeting()}, ${profile.name}` : getTimeGreeting()}
             </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Life at a glance.</p>
+            {/* UX-DB-06: the subtitle carries information instead of filler. */}
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {!beyondBasics.allComplete && (
