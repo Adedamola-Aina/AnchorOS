@@ -42,8 +42,10 @@ push to master → CI (ci.yml) proves the merged SHA
   │     classifies surfaces vs the last successfully deployed production SHA
   │     (fail closed: bootstrap_required), human approval via the `production`
   │     environment, surface-aware guarded deploy, release smoke, GitHub Release.
-  └─► Staging Deploy (staging.yml): EXPLICIT operator workflow_dispatch for an
-        exact SHA only — a merge/push to master never mutates staging.
+  └─► Staging Deploy (staging.yml): EXPLICIT operator workflow_dispatch for the
+        current master tip only — a merge/push to master never mutates staging.
+        Note: after any merge the tip is the `chore(release): <tag>` commit that
+        `version.yml` pushes, **not** the PR merge commit (see "Deployable SHA").
         Gates: SHA is current master tip → CI success for that SHA → classify vs
         last successfully deployed staging SHA (fail closed: bootstrap_required)
         → surface-aware guarded deploy → fail-fast release smoke.
@@ -63,6 +65,7 @@ Classification is computed by `scripts/ci/deploy-surface-classifier.js` from ALL
 - **Why versioning is its own workflow:** `staging.yml` / `production.yml` are dispatch-only deployments and `production.yml` is invariant-tested to never push, commit or version-bump master. `staging.yml` passes `--skip-version-bump` precisely because this workflow owns the bump. Pushing to master still never mutates an environment.
 - **GITHUB_TOKEN caveat (why step "Request CI" exists):** a push made with the default `GITHUB_TOKEN` does not trigger other workflows. Since staging/production only deploy a SHA whose `ci.yml` run succeeded, the release commit would otherwise be permanently undeployable — so the workflow dispatches `ci.yml` for it (which is why `ci.yml` is dispatchable).
 - **Channels:** `rc` (default, staging prerelease), `production` (final, non-prerelease cut), `dev` (local-only prerelease, changelog skipped). Re-run the workflow manually to cut a specific channel; the idempotence + loop guards make repeated runs safe.
+- **Deployable SHA (learned from a false staging failure).** `staging.yml` authorizes only the *current master tip*, and every merge is followed by a `chore(release): <tag>` commit from `version.yml`. So the deployable SHA is normally the **release commit** (the tagged `<tag>` commit), never the PR merge commit. Dispatching staging with the PR merge SHA races the version workflow and fails the provenance guard with `❌ Requested SHA … is not the current master tip` — this is the guard working correctly, **not** a test or deploy failure (run `35449036186`, 2026-09-19). Correct order: merge → wait for `version.yml` → copy the sha from `git log -1 origin/master` (or the new tag) → dispatch staging with it. A guard rejection produces no deploy and no partial mutation, so it never needs a rollback.
 - **Manual fallback (rarely needed):** `npm run version:{dev|staging|production}` still exists for local prerelease work; CI is the only path that tags or publishes.
 - **GitHub Releases are the authoritative full release history.** `CHANGELOG.md` is a small bounded pointer/recent-summary; version tooling appends only new release sections (never the full history). Do not let it grow unbounded.
 - Deploy provenance is the successful workflow run for a SHA (`scripts/ci/last-deployed-sha.js`) — no deploy-marker commits.
