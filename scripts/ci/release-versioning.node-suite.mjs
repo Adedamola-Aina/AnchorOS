@@ -42,8 +42,11 @@ test('release versioning refuses to run off master and never races itself', () =
 test('release versioning is idempotent and loop-safe', () => {
     // Loop guard: the bot's own release commit must never trigger another release.
     assert.match(VERSION_WORKFLOW, /grep -qE '\^chore\\\(release\\\):'/);
-    // Idempotence: an already-released tip must exit without a second bump.
-    assert.match(VERSION_WORKFLOW, /git describe --tags --abbrev=0/);
+    // Idempotence: it must key on HEAD being the tagged release commit. Keying
+    // on "package.json equals the latest tag" silently stops every later release
+    // once the first prerelease has been cut (regression: no rc.1 was produced).
+    assert.match(VERSION_WORKFLOW, /TAG_SHA=\$\(git rev-list -n1 "\$LATEST_TAG"/);
+    assert.match(VERSION_WORKFLOW, /\[ "\$TAG_SHA" = "\$HEAD_SHA" \]/);
     assert.match(VERSION_WORKFLOW, /idempotent, nothing to do/);
 });
 
