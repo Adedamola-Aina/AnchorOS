@@ -131,6 +131,19 @@ jobs:
 
       - name: Commit and push the release commit + annotated tag
         if: steps.decide.outputs.release == 'true'
+        # WHY THE HOOK IS DISABLED HERE (regression guard — do not "tidy" this away):
+        # `.husky/pre-push` runs the FULL test suite whenever the target branch is
+        # master. The release bot pushes `HEAD:master`, so the hook fired inside CI
+        # and the push step sat in_progress for 10+ minutes on a version bump
+        # (run 35450947888, 2026-09-19) — the release looked hung, not failed.
+        # This commit is mechanical (package.json / package-lock.json / CHANGELOG.md)
+        # and is validated by the ci.yml run requested in the next step, which is
+        # also what staging/production gate on. Pushing must also never block on an
+        # interactive prompt, hence the non-interactive env.
+        env:
+          HUSKY: '0'
+          GIT_TERMINAL_PROMPT: '0'
+          GIT_EDITOR: 'true'
         run: |
           set -euo pipefail
           git config user.name 'anchor-release-bot'
@@ -138,16 +151,20 @@ jobs:
           git add package.json
           if [ -f package-lock.json ]; then git add package-lock.json; fi
           if [ -f CHANGELOG.md ]; then git add CHANGELOG.md; fi
-          git commit -m "chore(release): $TAG"
+          git commit --no-verify -m "chore(release): $TAG"
           git tag -a "$TAG" -m "Release $TAG"
           for attempt in 1 2 3; do
-            if git push origin HEAD:master && git push origin "refs/tags/$TAG"; then
+            if git push --no-verify origin HEAD:master && git push --no-verify origin "refs/tags/$TAG"; then
               echo "✅ Pushed $TAG at $(git rev-parse HEAD)"
               exit 0
             fi
-            echo "↻ push rejected (attempt $attempt) — rebasing onto the new master tip and retrying"
-            git fetch origin master
-            git rebase origin/master
+            echo "↻ push rejected (attempt $attempt) — re-applying onto the new master tip and retrying"
+            git fetch origin master --tags --force
+            if ! git rebase origin/master; then
+              git rebase --abort >/dev/null 2>&1 || true
+              echo "❌ Rebase onto origin/master conflicted. Not guessing at a release commit."
+              exit 1
+            fi
           done
           echo "❌ Could not push the release commit after 3 attempts."
           exit 1
