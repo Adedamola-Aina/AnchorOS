@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.3](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.2...v1.21.0-rc.3) (2026-09-19)
+
+
+### Bug Fixes
+
+* **test:** optional-chain the optional insight metric so master typechecks (UX-AI-08) ([#217](https://github.com/Adedamola-Aina/AnchorOS/issues/217)) ([bf0567b](https://github.com/Adedamola-Aina/AnchorOS/commit/bf0567b3f4a8a4582e611be965b91ef6b2797409))
+
 ## [1.21.0-rc.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.1...v1.21.0-rc.2) (2026-09-19)
 
 
