@@ -7,7 +7,7 @@
 
 
 import { useState, useMemo } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { captureError } from '../../utils/error';
 import type { AnchorTask } from '../../types';
 import { useApp } from '../../context/AnchorContext';
@@ -84,7 +84,7 @@ const CommitmentsView = () => {
   return (
     <FeatureErrorBoundary featureName="Commitments">
       <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8">
-        <SectionHeader title="Commitments" subtitle={hasFamilyActive ? "Manage your daily obligations, goals, and family duties." : "Manage your daily obligations and goals."} action={<Button onClick={() => setShowAdd(!showAdd)} variant={showAdd ? 'secondary' : 'primary'} className="gap-2"><Plus className="w-4 h-4" /> <span>{showAdd ? 'Close' : 'New Commitment'}</span></Button>} />
+        <SectionHeader title="Commitments" subtitle={hasFamilyActive ? "Manage your daily obligations, goals, and family duties." : "Manage your daily obligations and goals."} action={<Button onClick={() => setShowAdd(!showAdd)} variant={showAdd ? 'secondary' : 'primary'} className="gap-2" aria-expanded={showAdd}>{showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />} <span>{showAdd ? 'Close' : 'New Commitment'}</span></Button>} />
         <CommitmentsFilterBar filter={filter} viewMode={viewMode} onFilterChange={setFilter} onViewChange={setViewMode} />
         {showAdd && <TaskForm onClose={() => setShowAdd(false)} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} />}
         {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}
