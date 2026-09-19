@@ -33,13 +33,27 @@ describe('CommitmentsEmptyState', () => {
 describe('CommitmentsFilterBar', () => {
   const defaults = { filter: 'all', viewMode: 'list', onFilterChange: vi.fn(), onViewChange: vi.fn() };
 
-  it('renders all filter buttons', () => {
+  it('renders every filter option', () => {
     render(<CommitmentsFilterBar {...defaults} />);
-    expect(screen.getByText('all')).toBeInTheDocument();
-    expect(screen.getByText('daily')).toBeInTheDocument();
-    expect(screen.getByText('weekly')).toBeInTheDocument();
-    expect(screen.getByText('monthly')).toBeInTheDocument();
-    expect(screen.getByText('todo')).toBeInTheDocument();
+    for (const label of ['All', 'Daily', 'Weekly', 'Monthly', 'One-off']) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    }
+  });
+
+  it('names the one-off option as a one-off, not as a frequency (UX-CM-04)', () => {
+    render(<CommitmentsFilterBar {...defaults} />);
+    // "TODO" sat between DAILY/WEEKLY/MONTHLY and read as a cadence word, which is
+    // how a one-off type ended up presented as a frequency.
+    expect(screen.getByText('One-off')).toBeInTheDocument();
+    expect(screen.queryByText('todo')).not.toBeInTheDocument();
+  });
+
+  it('labels the group so it cannot be confused with the composer cadence cards (UX-CM-10)', () => {
+    render(<CommitmentsFilterBar {...defaults} />);
+    // The composer's "Choose Frequency" step renders Daily/Weekly/Monthly cards on
+    // the same screen; an unlabelled chip row was a second identical-looking control.
+    expect(screen.getByText('Show')).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: /show/i })).toBeInTheDocument();
   });
 
   it('switches view mode', () => {
@@ -50,7 +64,7 @@ describe('CommitmentsFilterBar', () => {
 
   it('changes filter', () => {
     render(<CommitmentsFilterBar {...defaults} />);
-    fireEvent.click(screen.getByText('daily'));
+    fireEvent.click(screen.getByText('Daily'));
     expect(defaults.onFilterChange).toHaveBeenCalledWith('daily');
   });
 });

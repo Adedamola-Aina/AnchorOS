@@ -17,7 +17,11 @@ interface TaskListProps {
     onToggle: (id: string, completed: boolean) => void;
     onStartEdit: (id: string) => void;
     onDelete: (id: string) => void;
-    onConfirmFinancial: (title: string) => void;
+    /** CM-08: the row that is awaiting a transaction decision, if any. */
+    financialNudgeTaskId?: string | null;
+    onFinancialNudge?: (taskId: string) => void;
+    onRecordTransaction?: () => void;
+    onDismissFinancialNudge?: () => void;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -28,9 +32,15 @@ export const TaskList: React.FC<TaskListProps> = ({
     onToggle,
     onStartEdit,
     onDelete,
-    onConfirmFinancial,
+    financialNudgeTaskId = null,
+    onFinancialNudge,
+    onRecordTransaction,
+    onDismissFinancialNudge,
 }) => {
     const [showCompleted, setShowCompleted] = useState(false);
+    // CM-08: the completed row carrying the transaction chip must be visible
+    // without the user first expanding a collapsed section.
+    const completedExpanded = showCompleted || Boolean(financialNudgeTaskId);
     const parentRef = useRef<HTMLDivElement>(null);
     const useVirtual = activeTasks.length > VIRTUALIZE_THRESHOLD;
 
@@ -61,7 +71,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)` }}
                                         className="pb-3">
                                         <SwipeableTaskItem task={task} hasFamilyActive={hasFamilyActive} isEditing={editingTaskId === task.id}
-                                            onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onConfirmFinancial={onConfirmFinancial} />
+                                            onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onFinancialNudge={onFinancialNudge} />
                                     </div>
                                 );
                             })}
@@ -72,7 +82,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                         {activeTasks.map((task) => (
                             <div key={task.id} className="transition-all duration-200 ease-out">
                                 <SwipeableTaskItem task={task} hasFamilyActive={hasFamilyActive} isEditing={editingTaskId === task.id}
-                                    onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onConfirmFinancial={onConfirmFinancial} />
+                                    onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onFinancialNudge={onFinancialNudge} />
                             </div>
                         ))}
                     </div>
@@ -92,7 +102,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                         {showCompleted ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </Button>
 
-                    {showCompleted && (
+                    {completedExpanded && (
                         <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                             {completedTasks.map((task) => (
                                 <SwipeableTaskItem
@@ -103,6 +113,9 @@ export const TaskList: React.FC<TaskListProps> = ({
                                     onToggle={onToggle}
                                     onStartEdit={onStartEdit}
                                     onDelete={onDelete}
+                                    isFinancialNudge={financialNudgeTaskId === task.id}
+                                    onRecordTransaction={onRecordTransaction}
+                                    onDismissFinancialNudge={onDismissFinancialNudge}
                                 />
                             ))}
                         </div>

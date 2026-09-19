@@ -52,20 +52,28 @@ const CommitmentsView = () => {
     catch (err) { captureError(err, 'Commitments.updateTask'); showToast('Could not update commitment. Please try again.', 'error'); }
   };
 
-  const handleConfirmFinancial = async (title: string) => {
-    // BUG-041 Fix: Remove artificial 1300ms delay that made users think app was frozen
-    // TaskItem already has 800ms animation, no need for additional delay here
-    // Using only requestAnimationFrame to ensure DOM is painted before showing dialog
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    if (await confirm({
-      title: 'Financial Transaction?',
-      message: `You've marked '${title}' as done. Would you like to record a financial transaction for this now?`,
-      confirmText: 'Yes, Record',
-      cancelText: 'Not now'
-    })) {
-      navigateTo('finance');
-    }
+  /**
+   * CM-08: completing a financial-looking commitment used to interrupt with a
+   * blocking cross-domain "Financial Transaction?" modal. It now raises an
+   * inline, dismissible chip on the completed row instead — same offer, no
+   * interruption, and the user keeps their place in the list.
+   */
+  const [financialNudgeTaskId, setFinancialNudgeTaskId] = useState<string | null>(null);
+
+  const handleFinancialNudge = (taskId: string) => setFinancialNudgeTaskId(taskId);
+
+  const handleRecordTransaction = () => {
+    setFinancialNudgeTaskId(null);
+    navigateTo('finance');
   };
+
+  // Only offer it while that commitment is still completed, so un-completing or
+  // deleting the row cannot leave a chip pointing at nothing.
+  const activeFinancialNudgeId = useMemo(() => {
+    if (!financialNudgeTaskId) return null;
+    const task = tasks.find(t => t.id === financialNudgeTaskId);
+    return task?.completed ? financialNudgeTaskId : null;
+  }, [financialNudgeTaskId, tasks]);
 
   const handleDeleteTask = async (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
@@ -89,7 +97,7 @@ const CommitmentsView = () => {
         {showAdd && <TaskForm onClose={() => setShowAdd(false)} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} />}
         {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}
         <div className={loadingTasks ? 'opacity-50' : ''}>
-          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={toggleTask} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={toggleTask} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} onConfirmFinancial={handleConfirmFinancial} /> : (
+          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={toggleTask} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={toggleTask} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} /> : (
             <div className="space-y-3">
               <div className="flex gap-2">
                 {(['week', 'month'] as const).map(r => (<Button key={r} variant={calendarRange === r ? 'primary' : 'secondary'} size="sm" onClick={() => setCalendarRange(r)} className="capitalize text-xs">{r}</Button>))}

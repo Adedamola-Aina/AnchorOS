@@ -25,7 +25,11 @@ interface SwipeableTaskItemProps {
     onToggle: (id: string, completed: boolean) => void;
     onStartEdit: (id: string) => void;
     onDelete: (id: string) => void;
-    onConfirmFinancial?: (title: string) => void;
+    /** CM-08: inline transaction chip, never a blocking modal. */
+    onFinancialNudge?: (taskId: string) => void;
+    isFinancialNudge?: boolean;
+    onRecordTransaction?: () => void;
+    onDismissFinancialNudge?: () => void;
 }
 
 export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
@@ -35,7 +39,10 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
     onToggle,
     onStartEdit,
     onDelete,
-    onConfirmFinancial,
+    onFinancialNudge,
+    isFinancialNudge,
+    onRecordTransaction,
+    onDismissFinancialNudge,
 }) => {
     const { isMobile } = useResponsive();
 
@@ -58,7 +65,10 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
                     onToggle={onToggle}
                     onStartEdit={onStartEdit}
                     onDelete={onDelete}
-                    onConfirmFinancial={onConfirmFinancial}
+                    onFinancialNudge={onFinancialNudge}
+                    isFinancialNudge={isFinancialNudge}
+                    onRecordTransaction={onRecordTransaction}
+                    onDismissFinancialNudge={onDismissFinancialNudge}
                     hideActions // Hide action buttons on mobile - use swipe instead
                     onTitleClick={() => onStartEdit(task.id)} // Tap title to edit
                 />
@@ -75,7 +85,10 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
             onToggle={onToggle}
             onStartEdit={onStartEdit}
             onDelete={onDelete}
-            onConfirmFinancial={onConfirmFinancial}
+            onFinancialNudge={onFinancialNudge}
+            isFinancialNudge={isFinancialNudge}
+            onRecordTransaction={onRecordTransaction}
+            onDismissFinancialNudge={onDismissFinancialNudge}
         />
     );
 };

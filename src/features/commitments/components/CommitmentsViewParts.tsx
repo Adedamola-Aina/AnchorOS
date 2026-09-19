@@ -38,12 +38,33 @@ const VIEW_OPTIONS = [
     { id: 'calendar', label: 'Week', icon: CalendarDays },
 ] as const;
 
+/**
+ * CM-04 / CM-10: this control used to render five UNLABELLED chips whose words
+ * ("DAILY", "WEEKLY", "MONTHLY", "TODO") were identical to the composer's cadence
+ * cards rendered on the same screen — one vocabulary doing two jobs, with a
+ * one-off type presented as if it were a frequency.
+ *
+ * Now the group says what it does ("Show"), so the two controls are
+ * distinguishable by context, and the one-off option is named for what it is
+ * instead of borrowing a cadence word. The stored task type values are unchanged.
+ */
+const FILTER_OPTIONS = [
+    { value: 'all', label: 'All' },
+    { value: 'daily', label: 'Daily' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'todo', label: 'One-off' },
+] as const;
+
 export const CommitmentsFilterBar: React.FC<FilterBarProps> = ({ filter, viewMode, onFilterChange, onViewChange }) => (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mb-2">
-            {(['all', 'daily', 'weekly', 'monthly', 'todo'] as const).map((f) => (
-                <Button key={f} onClick={() => onFilterChange(f)} variant={filter === f ? 'primary' : 'secondary'} size="sm" className="capitalize uppercase tracking-widest text-[10px]">{f}</Button>
-            ))}
+        <div className="flex flex-col gap-1.5">
+            <span id="commitments-filter-label" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Show</span>
+            <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mb-2" role="group" aria-labelledby="commitments-filter-label">
+                {FILTER_OPTIONS.map(({ value, label }) => (
+                    <Button key={value} onClick={() => onFilterChange(value)} variant={filter === value ? 'primary' : 'secondary'} size="sm" className="uppercase tracking-widest text-[10px]">{label}</Button>
+                ))}
+            </div>
         </div>
         <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start sm:self-auto" role="group" aria-label="Commitment view">
             {VIEW_OPTIONS.map(({ id, label, icon: Icon }) => {

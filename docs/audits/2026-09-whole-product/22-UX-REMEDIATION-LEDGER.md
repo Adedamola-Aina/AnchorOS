@@ -19,13 +19,13 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **21** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **40** |
+| Closed | **25** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **36** |
 | Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06) |
 | Deployed | `master` `b67aa498` / `v1.21.0-rc.0` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
 
-## Closed (21)
+## Closed (25)
 
 | ID | Sev | Wave | What was wrong | Verified by |
 |---|---|---|---|---|
@@ -50,33 +50,33 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | UX-DB-04 | MEDIUM | P2 | Portfolio and Asset Split duplicated the same payload | Deleted from Portfolio (it now carries the number; the split carries the composition). `PortfolioWidget.test.tsx` |
 | UX-DB-05 | MEDIUM | P2 | Goal empty state was a dead end ("set one during onboarding", no control) | Shared `EmptyState` with honest copy; no action promised while no goal surface exists. `GoalProgressCard.test.tsx` |
 | UX-AI-07 | MEDIUM | P2 | Proactive card rendered a literal **"?"** where an icon should be | Lucide `MessageCircleQuestion`, per `DESIGN_SYSTEM.md`. `FabricProactiveQuestionCard.test.tsx` |
+| UX-CM-08 | MEDIUM | P1b | Completing a financial-looking commitment interrupted with a blocking cross-domain "Financial Transaction?" modal and navigated away on confirm | Inline dismissible chip on the completed row; no modal, no auto-navigation. `TaskList.test.tsx`, `TaskItem.test.tsx` |
+| UX-CM-04 | MEDIUM | P1b | Filter chips mixed cadence with type (`TODO` read as a frequency) | Group labelled "Show"; the one-off option is named "One-off". `CommitmentsViewParts.test.tsx` |
+| UX-CM-06 | MEDIUM | P1b | Task rows ~175px tall with a stray grey dash | Verified already remediated (no dash in the feature; single-line `Card p-3`; 72px list estimate) — no change needed |
+| UX-CM-10 | MEDIUM | P1c | Composer cadence cards and filter chips shared identical labels on one screen | Filter group now carries a visible label + accessible name. `CommitmentsViewParts.test.tsx` |
 | — | LOW | F1 | `ActionSheet` icons leaked into accessible names (`"+Add account"`) | `aria-hidden` on decorative icons |
 
-## Remaining (40) — grouped by the wave that will close them
+## Remaining (36) — grouped by the wave that will close them
 
-### P1b — schedule-aware commitments engine · **in progress** (8 findings remain; UX-AI-06, UX-AI-08 closed)
+### P1b — schedule-aware commitments engine · **in progress** (5 findings remain; UX-AI-06, UX-AI-08, UX-CM-04, UX-CM-06, UX-CM-08 closed)
 
 This is the highest-leverage remaining work: it fixes the assistant's false statements **at the root** and makes streaks fair. **Landed in this wave:** the shared schedule model (`src/services/fabric/commitmentSchedule.ts`) — "today" now means *scheduled today or carried over*, so the assistant, the nav badge and the Today card share one definition and cannot disagree; the empty day is honest ("You have no commitments yet" / "Nothing due today — next up Mon") and its button offers the action it names.
 
 | ID | Sev | Finding | Note |
 |---|---|---|---|
-| UX-CM-07 | MEDIUM | Rows show no cadence, next-due, streak or category | Fill the space the stray dash occupies |
-| UX-CM-04 | MEDIUM | Filter chips mix cadence with type (`TODO` as a "frequency") | Cadence moves to a filter sheet; type stays out of the primary control |
-| UX-CM-08 | MEDIUM | Completing a task interrupts with a cross-domain "Financial Transaction?" modal | Becomes a dismissible inline chip on the completed row |
-| UX-CM-06 | MEDIUM | Task rows ~175px tall with a **stray grey dash** placeholder | Rows 64–72px with real metadata |
+| UX-CM-07 | MEDIUM | Rows show no **next-due** (cadence, streak, notes preview and context badge already render) | **Partial.** Next-due needs `CM-17`'s date/interval model, so the remainder moves to `W-C3` |
 | UX-AI-09 | MEDIUM | Mood is the first interactive block in the assistant; nav grows to 5 items with AI on | Mood relocates; nav stays at 4 |
 | UX-AI-04 | MEDIUM | Mood check-in lives inside the AI tab | Same edit as UX-AI-09 |
 | UX-ST-03 | MEDIUM | "USER IDENTIFIER" exposes the raw internal id | Move behind "About → technical details" |
 | UX-GL-05 | MEDIUM | Navigation signals nothing (no dot for new insights/due items) | One Status Dot on Home |
 
-### P1c — capture-first composer sheet · **no decision needed** (6 findings)
+### P1c — capture-first composer sheet · **no decision needed** (5 findings remain; UX-CM-10 closed)
 
 | ID | Sev | Finding |
 |---|---|---|
 | UX-CM-01 | HIGH | Composer opens on "Choose Frequency" — classification before capture |
 | UX-CM-02 | HIGH | Composer renders inline in page flow: no step context, no back, no visible Create |
 | UX-CM-09 | MEDIUM | Step 2: "DOMAIN" jargon, Save below the fold, two dismiss controls, emoji priority, **no exact reminder time** |
-| UX-CM-10 | MEDIUM | Cadence cards and filter chips share identical visible labels on one screen |
 | UX-OB-03 | HIGH | Onboarding pre-fills junk defaults ('Main Checking', 'Read for 15 mins') committed verbatim |
 | UX-DS-01 | MEDIUM | Emoji used as functional icons, against `DESIGN_SYSTEM.md` ("Lucide React exclusively") |
 
