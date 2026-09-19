@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.14](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.13...v1.21.0-rc.14) (2026-09-19)
+
+
+### Features
+
+* **design:** publish the radius, elevation and spacing scale (UX-DS-06) ([#229](https://github.com/Adedamola-Aina/AnchorOS/issues/229)) ([496b7a7](https://github.com/Adedamola-Aina/AnchorOS/commit/496b7a7e2de3fd609635efd80439e2fb9f5c48bc)), closes [#020617](https://github.com/Adedamola-Aina/AnchorOS/issues/020617)
+
 ## [1.21.0-rc.13](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.12...v1.21.0-rc.13) (2026-09-19)
 
 ## [1.21.0-rc.12](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.11...v1.21.0-rc.12) (2026-09-19)
