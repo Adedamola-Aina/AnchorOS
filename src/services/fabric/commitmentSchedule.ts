@@ -133,3 +133,32 @@ export function getNextDue(commitments: AnchorTask[], now: Date): Date | null {
   }
   return best;
 }
+
+/**
+ * How many times this commitment was *expected* between `from` and `to`
+ * (UX-AI-08). This is the honest denominator: "0 of 4" used to mean "0 of the 4
+ * commitments you track are flagged complete right now", which says nothing
+ * about the last 30 days and reads as failure even for a daily habit the user
+ * has kept 30 times.
+ *
+ * The count is clamped to the commitment's creation date, so a habit added
+ * yesterday is not blamed for the previous four weeks. A one-off to-do carries
+ * a single expectation.
+ */
+export function countScheduledOccurrences(task: AnchorTask, from: Date, to: Date): number {
+  const start = startOfDay(from);
+  const end = startOfDay(to);
+  if (end.getTime() < start.getTime()) return 0;
+
+  const createdAt = task.createdAt instanceof Date ? startOfDay(task.createdAt) : null;
+  const effectiveStart = createdAt && createdAt.getTime() > start.getTime() ? createdAt : start;
+  if (effectiveStart.getTime() > end.getTime()) return 0;
+
+  if (task.type === 'todo') return 1;
+
+  let count = 0;
+  for (let cursor = new Date(effectiveStart); cursor.getTime() <= end.getTime(); cursor = addDays(cursor, 1)) {
+    if (isScheduledOn(task, cursor)) count += 1;
+  }
+  return count;
+}
