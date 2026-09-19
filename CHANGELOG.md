@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.6](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.5...v1.21.0-rc.6) (2026-09-19)
+
+
+### Features
+
+* **design:** add the semantic token, motion, sensory and empty-state foundation (UX-DS-02) ([#220](https://github.com/Adedamola-Aina/AnchorOS/issues/220)) ([c841cef](https://github.com/Adedamola-Aina/AnchorOS/commit/c841cefcc7332f4f4daab0d9d329d1d60d726f8a))
+
 ## [1.21.0-rc.5](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.4...v1.21.0-rc.5) (2026-09-19)
 
 ## [1.21.0-rc.4](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.3...v1.21.0-rc.4) (2026-09-19)
