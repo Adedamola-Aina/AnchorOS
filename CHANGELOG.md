@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.18](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.17...v1.21.0-rc.18) (2026-09-19)
+
+
+### Bug Fixes
+
+* **ux:** replace the blocking transaction modal with an inline chip; close four commitment findings ([#233](https://github.com/Adedamola-Aina/AnchorOS/issues/233)) ([19ff704](https://github.com/Adedamola-Aina/AnchorOS/commit/19ff7042bd474521df3a2477b8131ad548d1e3a6))
+
 ## [1.21.0-rc.17](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.16...v1.21.0-rc.17) (2026-09-19)
 
 
