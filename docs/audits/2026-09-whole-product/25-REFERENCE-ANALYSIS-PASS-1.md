@@ -1,16 +1,18 @@
-# 25 — Reference analysis, pass 1
+# 25 — Reference analysis (passes 1–2, all 15 captures)
 
-**Status:** partial (5 of 15 uploads analysed; remainder queued for pass 2)
+**Status:** complete (15 of 15 captures read; R1–R15 in §3, R16–R46 in §9–§10)
 **Input:** 15 Mobbin captures in `references/mobbin/` (third-party UI, gitignored, internal design input only)
 **Method:** local image read (files on disk are readable; web fetch is not), rules extracted as *observable → mapping → finding ID*.
 **Preview tooling:** `scripts/design/prepare-reference-previews.mjs` (downscales references via Playwright/canvas so they can be read inside the per-session media budget).
 
-## 1. Why only 5 of 15
+## 1. How the 15 were read (and why pass 1 stopped at 5)
 
 Mobbin captures are ~1500–3000px web screenshots at 0.4–1.8 MB each. The session has a cumulative media budget:
 3 uploads read (1.7/1.5/1.4 MB) succeeded, then everything ≥1.4 MB was declined, and after ~6 MB cumulative
 even a 215 KB render was declined. So the limit is **cumulative, not per-file** — downscaling helps but does not
-lift it. The remaining 10 uploads stay on disk and are read first thing in pass 2; **no re-upload is needed**.
+lift it. The remaining 10 were read in pass 2 from **900px previews** (~150–300 KB each, ~2.2 MB for the ten) in three
+batches, so the cumulative budget never ran out. **No re-upload was needed**, all 15 are now read, and the
+originals stay on disk as the fidelity fallback if a single detail ever needs a second look.
 
 ## 2. Coverage
 
@@ -21,16 +23,16 @@ lift it. The remaining 10 uploads stay on disk and are read first thing in pass 
 | `SCR-20260919-nogp.png` | Account Setup · Most popular | Headspace, Gemini, Revolut, Buddy, Spotify | ✅ analysed |
 | `SCR-20260919-nokg.png` | Account Setup · Trending | Bumble, Shop, MacroFactor ×2, Lifesum | ✅ analysed |
 | `SCR-20260919-nopw.png` | Splash Screen · Most popular | Duolingo ×2, Wise, Revolut, Airbnb | ✅ analysed |
-| `SCR-20260919-notw.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-npao.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-npdx.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-npgu.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-npmr.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-nppn.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-npwr.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-npzr.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-nqiw.png` | — | — | ⏳ pass 2 |
-| `SCR-20260919-nqmx.png` | — | — | ⏳ pass 2 |
+| `SCR-20260919-notw.png` | Splash Screen · Trending | Luma, Shop, corner, Claude, Box Box Club | ✅ §9.1 |
+| `SCR-20260919-npao.png` | Signup · Trending | Mesh, Claude, Shop, Cash App, corner | ✅ §9.2 |
+| `SCR-20260919-npdx.png` | Verification · Most popular | Wise ×2, Revolut ×2, MoonPay | ✅ §9.3 |
+| `SCR-20260919-npgu.png` | Verification · Trending | Claude, Rodeo, Lloyds, Bumble, Chick-fil-A | ✅ §9.3 |
+| `SCR-20260919-npmr.png` | Settings & Preferences · Most popular | Afterpay, Airbnb, Luma, Revolut, Ahead | ✅ §9.4 |
+| `SCR-20260919-nppn.png` | Settings & Preferences · Trending | Future Pro, Lifesum, Claude ×2, Klarna | ✅ §9.4 |
+| `SCR-20260919-npwr.png` | Loading · Most popular | Revolut, ChatGPT, App Store, pillowtalk, Lifesum | ✅ §9.5 |
+| `SCR-20260919-npzr.png` | Loading · Trending | Lifesum ×2, Claude, Lloyds, Shop | ✅ §10.1 |
+| `SCR-20260919-nqiw.png` | Finance · Wallet & Balance · Most popular | Cash App, Revolut ×2, Plum, Grab | ✅ §10.2 |
+| `SCR-20260919-nqmx.png` | Finance · Wallet & Balance · Trending | Lloyds ×2, Cash App ×2, Klarna ×2 | ✅ §10.2 |
 
 ## 3. Extracted rules
 
@@ -170,18 +172,29 @@ existing first, so the scale lands **before** the Finance/Settings class migrati
   motion (R15).
 - `UX-DS-06` is promoted to a **prerequisite** of the W-D1b class migration (§4).
 
-## 6. Still missing (priority order for the next upload)
+## 6. Gaps — closed by pass 2, or designed natively
 
-1. **Commitments / task rows and capture** — Things 3, Todoist, Apple Reminders, Structured, Tiimo, Motion,
-   Sunsama. *None of the 15 cover a scheduling or list surface*, and W-C1/W-C2/W-C3 are the largest remaining
-   waves. This is the highest-value gap.
-2. **AI citation / grounding surfaces** — Perplexity, ChatGPT, Notion AI, Copilot (for `AI-11`, `AI-15`).
-3. **Empty states / first-run** — we just shipped `EmptyState.tsx`; no empty state appears in the 15.
-4. **Undo / destructive confirmation** (`CM-23`) — nothing in this set shows an undo affordance.
-5. **Dark ledger** — only Box Box Club is dark and it is a sports screen, so there is no dark-mode finance
-   reference to check our dark tokens against.
-6. **Desktop task dashboard** — Linear / Height / Asana, for the assistant and commitments web layout. The two
-   desktop references here are a nutrition dashboard and a bank.
+**Closed by pass 2:**
+
+1. **AI grounding / citation surfaces** — Lloyds "Explore your spending" (`npzr`): a user bubble, a brand-avatar
+   response row reading "Preparing a response", a `Powered by AI` chip and a `0/250` composer. Combined with R13's
+   existing `ⓘ How is this calculated?` disclosure this covers the `AI-11`/`AI-15` visuals (see R41).
+2. **Empty states / first-run** — Revolut's wallet (`nqiw`) shows `No transactions yet` next to a "get set up"
+   progress card, and Cash App's promotions area is empty. The grammar is: **one muted line + one action**, no
+   illustration-plus-paragraph block (see R40).
+3. **Dark ledger** — Revolut dark wallet movements (`nqiw`) and Revolut dark settings (`npmr`): same rails, same
+   radii, elevated surfaces, amounts at full contrast (see §10.3).
+4. **First-run / loading** — §9.5 and §10.1.
+
+**Not in the set — designed natively, not re-requested.** The 15 are a *comparison set*, not a spec, so these are
+extrapolations from the extracted grammar and must be browser-verified rather than asserted:
+
+5. **Commitments / task rows** — no scheduling or list app appears (Things 3, Todoist, Structured, Tiimo, Sunsama are
+   absent). Task rows are built from R1 (icon + label + value on a shared rail, 44–56px, no intra-group dividers), R2
+   (parent holds the aggregate) and R27 (one row primitive with variants). W-C1/W-C2/W-C3 remain the largest waves.
+6. **Undo / destructive confirmation** (`CM-23`) — no undo affordance is shown anywhere in the set.
+7. **Desktop task dashboard** — the two desktop captures are a nutrition dashboard and a bank; the desktop layout is
+   the same row/rail grammar at a wider measure, and `UX-ST-03` stays browser-verified-only.
 
 ## 7. Open questions (not inferable from static screens)
 
@@ -191,12 +204,153 @@ existing first, so the scale lands **before** the Finance/Settings class migrati
   about motion from these images would be invented; it stays asserted-by-token, not asserted-by-reference.
 - **Dynamic type** — whether these products survive a 200% type scale cannot be seen; our own answer must come
   from the browser, not from copying them.
-- **The unread 10 uploads may already cover §6** for their categories — content is not inferable from filenames,
-  so §6 is provisional until pass 2 reads them.
+- **All 15 captures are now read** (passes 1–2). §6 records what the set does and does not cover; the areas it does
+  not cover are designed natively and browser-verified, not inferred from a missing reference.
 
-## 8. Pass 2 plan
+## 8. Pass 2 outcome
 
-Read the remaining 10 uploads (downscaled previews via `scripts/design/prepare-reference-previews.mjs`), then
-extend §3 with a second rule set and re-rank §6. No re-upload required.
+Done. The 10 remaining captures were read from 900px previews
+(`node scripts/design/prepare-reference-previews.mjs --width 900 --out /tmp/refs900 --force`) in three batches of
+3/4/3, adding **R16–R46** (§9, §10) and closing §6. **The reference set has now been read end-to-end, and the analysis
+phase is closed — the next step is implementation, not more reference gathering.** Rule inventory: pass 1 R1–R15
+(5 captures), pass 2 R16–R46 (10 captures) = **46 rules from 15 captures**.
+
+## 9. Pass-2 rules (R16–R39)
+
+Read: `notw` (Splash · Trending — Luma, Shop, corner, Claude, Box Box Club), `npao` (Signup · Trending — Mesh,
+Claude, Shop, Cash App, corner), `npdx` (Verification · Most popular — Wise ×2, Revolut ×2, MoonPay), `npgu`
+(Verification · Trending — Claude, Rodeo, Lloyds, Bumble, Chick-fil-A), `npmr` (Settings · Most popular —
+Afterpay, Airbnb, Luma, Revolut, Ahead), `nppn` (Settings · Trending — Future Pro, Lifesum, Claude ×2, Klarna),
+`npwr` (Loading · Most popular — Revolut, ChatGPT, App Store, pillowtalk, Lifesum).
+
+### 9.1 Splash (`notw`) — flat field + mark, nothing else
+
+**R16.** A splash is a **flat brand field and a centred wordmark**: Shop = flat purple + `shop`; Box Box Club = flat
+red + logo; Claude = plain white + asterisk + wordmark; App Store (`npwr`) = pure white + the Apple mark. **Zero of
+five show a spinner, progress bar, carousel or marketing copy.** At most *one* short line accompanies the mark (Luma
+"Delightful events *start here*", corner "drag to build your new map.").
+**Mapping.** Replaces our decorative splash grammar: flat surface + wordmark + at most one line, non-looping.
+**Finding.** splash, R42.
+
+### 9.2 Signup (`npao`) — one decision, providers uncoloured, legal demoted
+
+**R17.** First signup screen = H1 (sentence case) + optional muted subcopy + **stacked full-width provider buttons** +
+one field + one filled primary. Mesh: Google (white) and Apple (**black**) stacked, then the email field, then the
+orange "Sign up with email" primary. Shop/Claude: one field, one `Continue`.
+**R18.** **Exactly one element is visually primary.** Provider buttons are not filled with the screen's brand colour;
+the brand CTA colour belongs to the screen's own primary action.
+**R19.** Legal fine print is **demoted directly under the CTA** (11–12px, muted, inline bold-blue links — Cash App's
+"By entering and tapping Next…"), never above the fold, never a second paragraph block.
+**R20.** The CTA stays **above the keyboard, directly under the field it submits** (Claude, Shop, Cash App `Next`).
+Step chrome is minimal: none (Claude), two small muted chevrons (Shop), or `‹` + title (Revolut).
+**Mapping.** `OB-*`, `UX-CP-*` (sentence case, second person, no "Please enter…"), `UX-FN-07/08` (Cash App's
+in-field dial code). **Finding.** `OB-01`, `OB-03`, onboarding wave.
+
+### 9.3 Verification / OTP / identity (`npdx`, `npgu`)
+
+**R21.** Verification = `‹`/`✕` + H1 + **one sentence with the identifier bolded inside it**, masked for privacy
+(`+65 9836 9627 XXXX`), then the code input, then the resend affordance. No card chrome, no illustration.
+**R22.** Resend is a **text-weight row with a live countdown** ("Resend code in 00:14") or a bold text button (Rodeo
+"Resend Code") — never filled, and it never competes with the bottom-docked primary (`Next`).
+**R23.** A `?` help affordance sits in the header, and every identity screen carries an **escape hatch** as a one-line
+muted link at the bottom ("I don't have my ID with me" — Lloyds; "Change email address" — Claude).
+**R24.** "What good looks like" is a **✓ checklist of terse imperative clauses**, max three, caveat as the tail of
+the same line (Wise "Details are in focus"; Lloyds "…watch out for glare or shadow"), plus **positive image
+examples** where the input is a camera (Wise's three photos, Bumble's example).
+**R25.** Where options are offered ("Select your verification method") they are **outlined stacked rows with leading
+icons** (Send message / Voice call); the commitment is still one primary.
+**Mapping.** `OB-*`, `UX-CP-*`, and the existing `ⓘ How is this calculated?` disclosure (R13) as the shared help
+affordance. **Finding.** onboarding wave.
+
+### 9.4 Settings (`npmr`, `nppn`) — section header + card of rows, one row primitive
+
+**R26.** Settings = **muted section header + a single card of rows**, every row a leading icon + label + chevron.
+*Inside a settings card* hairline dividers are acceptable (Airbnb, Luma, Ahead) — unlike list rows, which are
+divider-free (R1). Section headers appear in two accepted styles: **ALL CAPS muted** (Lifesum "CUSTOMIZATION") or
+sentence-case muted (Airbnb "Settings"); we must pick one and apply it everywhere.
+**R27.** One **row primitive with variants**, not four bespoke components: (a) label + chevron; (b) label +
+right-aligned **value** + chevron (Language `English (United Kingdom)`, Speed `Fast`, Lifesum `1152 kcal/day`);
+(c) label + **sub-label** + trailing control (checkbox/switch); (d) label + sub-label + **inline secondary action**
+(Lifesum's `Opt-in` inside the row). Header rows are the two-line variant (avatar + name + secondary + chevron).
+**R28.** **Sign out is set apart by grouping and position (last), not by colour** — "Sign Out" (Luma), "Log out"
+(Ahead) are ordinary-weight rows in their own group. No red.
+**R29.** The app **version/build lives in a muted centred footer** ("Version 2.0.0 (231)" — Luma). Ours goes there
+too, which also makes the release tag user-visible.
+**R30.** Settings opens as a **sheet**: pushed with `‹` (Airbnb, Luma) or modal with `✕` + drag handle (Revolut,
+Ahead). Pick one and be consistent.
+**R31.** Promotions are an **illustrated card at the top with one action** (Airbnb "Airbnb your home", Ahead's purple
+card, Claude's inline `Upgrade` pill) — never a row mixed into the menu. Klarna/Revolut extend this to a 2×2 **tile
+grid** with "New" chips.
+**R32.** Choice controls are a **row of surface cards with the selected one tinted/filled and checked** (Claude voice
+settings), not cramped pills. Checkbox = square + white tick; toggle = switch; **never both for one meaning**.
+**R33.** Account-critical rows (Privacy Policy, Manage subscription) stay plain rows — the separation is structural,
+not colour.
+**Mapping.** The whole Settings surface (W-D1b second half) and `ST-*`: one `SettingRow` primitive, real section
+headers, real footer version, a single sheet style, promo as card. **Finding.** `UX-DS-06`, `ST-*`, W-D1b.
+
+### 9.5 Loading and motion (`npwr`) — skeleton or content-first, never a blocking spinner
+
+**R34.** Content loading is either a **skeleton mirroring the final layout** (ChatGPT's grey answer-paragraph lines
+while streaming) or **content-first with the chrome already usable** (Revolut "Add money" is interactive before
+anything loads). **No capture shows a full-screen blocking spinner.**
+**R35.** A brand-toned **thin ring at the bottom edge** (Lifesum's green ring) is the only progress indicator in the
+set, and it blocks nothing.
+**R36.** Streaming text uses a **caret/cursor at the text edge** (ChatGPT's trailing dot) — the cue is "more is
+arriving", not "please wait".
+**R37.** **Radial glow / breathing gradient is the only decorative loop in all 15 captures** (pillowtalk), and even
+that does not gate content.
+**R38.** No screen uses a looping animation as decoration on an otherwise idle surface.
+**R39.** Loading states respect layout: the indicator/skeleton sits where the content will be, so nothing jumps when
+data lands.
+**Mapping.** Splash + the five looping animations (`R15`, now 15/15 evidence): decorative loops are **not
+reference-justified** and should be removed or reduced to a single non-blocking transition. AI streaming
+(`UX-AI-08`) takes the caret + `done of expected` treatment.
+**Finding.** loop-animation audit, `UX-AI-08`, splash, `UX-PF-*`.
+
+## 10. Pass-2b rules (R40–R46) — loading, finance / wallet
+
+Read: `npzr` (Loading · Trending — Lifesum ×2, Claude, Lloyds, Shop), `nqiw` (Finance · Wallet & Balance · Most
+popular — Cash App, Revolut ×2, Plum, Grab), `nqmx` (Finance · Wallet & Balance · Trending — Lloyds ×2, Cash App ×2,
+Klarna ×2). **That completes all 15 captures.**
+
+### 10.1 First-run and in-progress (R40–R41)
+
+**R40.** First-run is a **skeleton where the content will be**, plus one non-blocking brand-tinted factoid, with the
+shell already painted: Shop shows card-shaped skeletons while the search field and tab bar are live; Lifesum shows a
+grey header block above a pink card with a huge `10%` and one line of copy. Claude goes furthest — its signup form is
+usable while the illustration sits above it. Nothing is gated behind a full-screen loader.
+**R41.** An in-progress AI answer is a **user bubble + a response row with a small avatar and three dots**
+(Lloyds: "Preparing a response") — the cue lives *inside* the answer row, and the composer shows a `0/250` counter.
+**Mapping.** `UX-AI-08` streaming, `UX-PF-*` perceived performance. **Finding.** `UX-AI-08`.
+
+### 10.2 Finance / wallet (R42–R46)
+
+**R42.** A finance surface is a **stack of value cards**: the parent card holds the aggregate plus a delta chip
+(Plum `£142.83` / `+£5.05 total return`), **segmented tabs** slice it (Pockets / Investments / Card), rows are
+label-left / value-right on one rail, progress is a **step counter** (`2 of 5 complete`), and a group ends with a
+`See all rules` link. This is R1 + R2 rendered in a real ledger.
+**R43.** **Movement rows: amount left, counter-amount right, timestamp beneath** (Revolut dark: `$0.00 → USD
++US$1.49` / `11:07 15 Feb`). The hero is label + big numeral + `?` help. Secondary actions are **side-by-side
+outlined buttons** (Add money / Withdraw — Cash App), never two filled primaries (echoes R18).
+**R44.** Paid or affiliate content carries an explicit **"Sponsored" label** at the tile (Grab), and category entry
+points are **circular icon + label**. **Mapping.** any future placement/affiliate surface.
+**R45.** Status is a **trailing chip** (`Pending`) with date and amount on the same rail (Klarna "In progress"), and
+"Show breakdown" is an **inline disclosure under the value** (echoes R13).
+**Mapping.** Finance ledger status, `CM-06`/`CM-07`, `UX-AI-11`.
+**R46.** Upsells and benefit lists are **terse clauses each with its own icon** inside a sheet with `✕` dismiss
+(Klarna's upgrade sheet: "2% cashback with Klarna balance…", "Cancel any trip or event and get most of your money
+back") — never paragraphs. **Mapping.** Settings promo card (R26/R31), upgrade surfaces.
+
+### 10.3 What the completed set does and does not cover
+
+- **Dark ledger is now covered** — it was §6 item 5 and is closed: Revolut dark (wallet movements) and Revolut dark
+  settings. Dark keeps *identical* grammar: same rails, same radii, elevated surfaces; amounts stay at full contrast
+  rather than being dimmed with the rest of the chrome.
+- **Commitments / task rows are genuinely not in the set**, and per direction they will **not** be re-requested. The
+  15 are a *comparison* set, not an exhaustive spec. Task rows will be designed natively from R1 (icon + label +
+  value, shared rail, 44–56px, no intra-group dividers), R2 (parent holds the aggregate) and R27 (one row primitive
+  with variants), and marked as **inference** — then verified in the browser, not asserted from a reference.
+- **Not inferable from any capture:** row tap targets, 200% dynamic type, and true motion (duration/easing/gating).
+  Those stay browser-verified: `UX-FN-07`/`UX-FN-08`, `UX-ST-03`, `UX-GL-07`.
 
 

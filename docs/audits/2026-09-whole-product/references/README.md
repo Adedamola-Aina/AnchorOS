@@ -67,12 +67,21 @@ Include the **full screen with the app chrome** where possible, and both **light
 `SCR-20260919-nokg.png` (Account Setup · Trending — Bumble, Shop, MacroFactor, Lifesum) ·
 `SCR-20260919-nopw.png` (Splash Screen · Most popular — Duolingo, Wise, Revolut, Airbnb)
 
-**Queued for pass 2 (10):** `notw`, `npao`, `npdx`, `npgu`, `npmr`, `nppn`, `npwr`, `npzr`, `nqiw`, `nqmx`.
+**Analysed in pass 2 (10):** `notw` (Splash · Trending) · `npao` (Signup · Trending) · `npdx` (Verification · Most
+popular) · `npgu` (Verification · Trending) · `npmr` (Settings · Most popular) · `nppn` (Settings · Trending) ·
+`npwr` (Loading · Most popular) · `npzr` (Loading · Trending) · `nqiw` (Finance · Wallet & Balance · Most popular) ·
+`nqmx` (Finance · Wallet & Balance · Trending). **All 15 captures are now read — analysis is complete.**
 
 Pass 1 extracted 15 rules (row grammar, parent-row aggregates, state-by-shape for `CM-18`, `done of expected` for
 `UX-AI-08`, chip-not-tint status, docked primary action, rhythm-over-rules density, explain-the-number
 disclosure) and found that **radius, spacing and elevation are not tokenised at all** (`UX-DS-06`), which makes
-that scale a prerequisite of the W-D1b migration.
+that scale a prerequisite of the W-D1b migration. Pass 2 added 31 more rules (**R16–R46**: splash, signup,
+verification, the settings row primitive, loading/motion, and the finance/wallet grammar) and closed the
+dark-ledger, AI-grounding and empty-state gaps.
+
+**These 15 are a comparison set, not a spec.** No further uploads are being requested: the remaining gaps
+(commitments/task rows, undo, desktop task dashboard) are designed natively from the extracted grammar and marked as
+inference, then verified in the browser.
 
 ### Reading note (limits, so nothing is over-claimed)
 
