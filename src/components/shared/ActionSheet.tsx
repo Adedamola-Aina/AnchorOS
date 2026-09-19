@@ -65,7 +65,7 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({ isOpen, onClose, items
                   : 'text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50'}
                 ${i > 0 ? 'border-t border-slate-100 dark:border-slate-700/50' : ''}`}
             >
-              {item.icon && <span className="w-5 h-5 shrink-0">{item.icon}</span>}
+              {item.icon && <span className="w-5 h-5 shrink-0" aria-hidden="true">{item.icon}</span>}
               {item.label}
             </button>
           ))}

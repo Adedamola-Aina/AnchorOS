@@ -331,3 +331,16 @@ Full verification plan (method, precautions, decision impact): report 12 §18. T
 | R-01..R-13 | unnumbered in report 11 → INFO/LOW | Reachability items normalized on the INFO/LOW scale; R-03 kept LOW (authenticated-only attack surface; remediation couples with FI-10) |
 
 All other severities were re-evaluated against the product-wide scale and preserved; no historical label was preserved mechanically.
+
+## UX wave F1 — registration on wave open (2026-09-18)
+
+Registered here because doc 18 §1 states `UX-*` findings are added to this register **only when their remediation wave opens**. F1 is the first UX wave (the functional finance/onboarding P0s identified in doc 20 §7.2); PR to follow.
+
+| ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
+|---|---|---|---|---|---|---|---|---|
+| UX-FN-07 | HIGH | CORR | ROOT | — | X8 | LIVE | Non-front account cards were unopenable: the card's whole box was the hit area, painted beneath the front card, so real pointer clicks were intercepted (`locator.click` TimeoutError vs force-click OK) | **REMEDIATED in F1** — non-front stacked cards now expose a 48px tappable peek strip and their body is removed from the hit-test surface; verified by real (non-forced) tap → `/finance/account/acc-ngn-ops` |
+| UX-FN-08 | HIGH | CORR | ROOT | — | X8 | LIVE | The Finance landing page had **no** transaction entry point (`transaction-ish controls on /finance: []`) while its empty state instructed "Add your first transaction to get started"; recording lived only inside account detail — unreachable per UX-FN-07 | **REMEDIATED in F1** — one `+` opens an action sheet (Record transaction / Add account), plus a real empty-state CTA; verified in-browser |
+| UX-FN-09 | MEDIUM | CORR | ROOT | — | X7 | LIVE | Tap targets below the 44×44px accessibility contract: the header `+` and both month controls measured 32×32 | **REMEDIATED in F1** — measured 44×44 in the running app |
+| (F1 side-fix) | LOW | CORR | CHILD | — | X7 | LIVE | `ActionSheet` icons contributed to the button's accessible name (`"+Add account"`), so actions announced incorrectly to assistive tech | **REMEDIATED in F1** — decorative icons are now `aria-hidden` |
+
+Remaining `UX-*` findings (rounds 1–2, and docs 18/20/21) stay **unregistered and unimplemented** until their own waves open. F1 did not touch schema, rules, functions, notification behaviour, or production.

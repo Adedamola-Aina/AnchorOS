@@ -11,6 +11,7 @@ import { FinanceContext } from '../../context/FinanceContext';
 import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
 import type { AnchorAccount, AnchorTransaction, UserProfile } from '../../types';
+import { getTransactionLabel } from '../../utils/finance';
 
 const mockLogProductEvent = vi.fn();
 const mockHapticSelection = vi.fn();
@@ -321,9 +322,21 @@ describe('FinanceView', () => {
       expect(screen.getByText('Finance')).toBeInTheDocument();
     });
 
-    it('renders create account button', () => {
+    it('renders the single add affordance (account or transaction) — UX-FN-08', () => {
       renderWithContext(<FinanceView />);
-      expect(screen.getByLabelText('Create account')).toBeInTheDocument();
+      expect(screen.getByLabelText('Add account or record a transaction')).toBeInTheDocument();
+    });
+
+    it('offers both actions from the add affordance — UX-FN-08', async () => {
+      renderWithContext(<FinanceView />);
+      await userEvent.click(screen.getByLabelText('Add account or record a transaction'));
+      expect(await screen.findByRole('button', { name: 'Record transaction' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Add account' })).toBeInTheDocument();
+    });
+
+    it('exposes the empty-state transaction call to action when nothing is recorded — UX-FN-08', () => {
+      renderWithContext(<FinanceView />, { finance: { transactions: [] } });
+      expect(screen.getByRole('button', { name: /Record your first transaction/i })).toBeInTheDocument();
     });
 
     it('renders TotalAssetsSummaryBar with active accounts', () => {
