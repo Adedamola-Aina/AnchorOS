@@ -150,14 +150,21 @@ commercial precedent in this set. Nothing gets gated on an entrance animation.
 | Role aliases (12-step) | ✅ landed | `--surface-base/raised/sunken/hover/active/border`, `--border-subtle`, `--border-interactive`, `--solid`, `--solid-hover`, `--text-primary/secondary/muted` (`src/index.css:541–555`) |
 | Motion duration | ✅ landed | `--duration-micro: 140ms`, `--duration-sheet: 200ms`, `--duration-balance: 250ms` (`:624–626`) |
 | Motion easing | ✅ landed | `--ease-standard/enter/exit` (`:627–629`) |
-| **Radius** | ✅ landed | six roles at `src/index.css:703–708` — `--radius-{field,control,card,panel,sheet,pill}`. The literals this row used to cite are gone: `:224` now reads `var(--radius-field)`, `:328` `var(--radius-panel)`, and both scrollbar thumbs (`:439`, `:447`) `var(--radius-pill)` |
-| **Spacing** | ✅ landed | three axes × three steps at `:716–729` (`--spacing-{inset,stack,inline}[-tight|-roomy]`, plus `stack-section`) and R1's row heights `--spacing-row-{compact,standard,comfortable}` = 44/48/56px |
-| **Elevation** | ✅ landed | five roles on `:root` (`:675–681`) **and** `.dark` (`:685–691`), mapped to `shadow-elevation-*` in `@theme` (`:735–739`). Dark values carry deeper alpha, because a light-tuned shadow is invisible on `#020617` |
+| **Radius** | ✅ landed | six roles — `--radius-{field,control,card,panel,sheet,pill}` (`src/index.css:706–711`). The literals this row used to cite are gone: `:224` now reads `var(--radius-field)`, `:328` `var(--radius-panel)`, and both scrollbar thumbs (`:439`, `:447`) `var(--radius-pill)` |
+| **Spacing** | ✅ landed | three axes × three steps — `--spacing-{inset,stack,inline}[-tight|-roomy]` plus `stack-section` (`:719–728`) — and R1's row heights `--spacing-row-{compact,standard,comfortable}` = 44/48/56px (`:733–735`) |
+| **Elevation** | ✅ landed | five roles on `:root` (`:678–682`) **and** `.dark` (`:688–692`), mapped to `shadow-elevation-*` in `@theme` (`:739–743`). Dark values carry deeper alpha, because a light-tuned shadow is invisible on `#020617` |
 
-So `UX-DS-06` is not "radius and spacing need tidying": there is **no radius, spacing or elevation scale in the
-token layer**, which is why surfaces are mixing a literal `1rem` radius with `0.375rem` fallbacks and default
-shadows. R1 (row heights), R5 (kicker/display spacing) and R12 (rhythm over rules) all depend on that scale
-existing first, so the scale lands **before** the Finance/Settings class migration, not after it.
+So `UX-DS-06` was not "radius and spacing need tidying": there was **no radius, spacing or elevation scale in the
+token layer at all**, which is why surfaces mixed a literal `1rem` radius with `0.375rem` fallbacks and default
+shadows. That scale has since landed (the three ✅ rows above) — before the Finance/Settings class migration
+rather than after it, precisely because R1 (row heights), R5 (kicker/display spacing) and R12 (rhythm over rules)
+depend on the vocabulary existing first. Publishing it changed no pixel: every value aliases a size the app
+already rendered, proven by comparing a baseline build against the new one by *resolved* value (`var()`
+indirection followed) — 67 geometry declarations identical, zero component rules added.
+
+Line references are for the revision above. The scale is the `W-D1 — Geometry & elevation scale (UX-DS-06)`
+section at the end of `src/index.css`, so `grep -nE '^\s*--(radius|spacing|elevation)-' src/index.css` locates it
+even after the file grows — prefer that over the numbers if they ever disagree.
 
 ## 5. What pass 1 changed in the plan
 
