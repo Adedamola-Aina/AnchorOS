@@ -56,9 +56,29 @@ Durable additions from `24-DESIGN-EXCELLENCE-RESEARCH-AND-SURFACE-STRATEGY.md`. 
 
 ### Semantic role tokens (`UX-DS-02`)
 
-Roles live in `src/index.css`: `--role-{success,warning,danger,info}[-surface|-border]` plus surfaces (`--surface-base|raised|sunken|border`) and text (`--text-primary|secondary|muted`). Light values are on `:root`, dark values on `.dark`, and `@theme` maps both to utilities — so **a missing dark value fails a test** instead of shipping as a bug. Use `bg-success-surface`, `text-danger`, `border-surface-border`, `text-muted`, etc. Never raw palette scales for meaning.
+Roles live in `src/index.css`: `--role-{success,warning,danger,info}[-surface|-border]` plus the **12-step alias set** below. Light values are on `:root`, dark values on `.dark`, and `@theme` maps both to utilities — so **a missing dark value fails a test** instead of shipping as a bug.
+
+**The 12-step alias convention** (adopted from the Radix Colors spec, doc 24 §9.3 — each step has one job, so colour stops being a vibe):
+
+| Step | Purpose | Token | Utility |
+|---|---|---|---|
+| 1–2 | App / subtle background | `--surface-base` | `bg-surface-base` |
+| 3 | Component background | `--surface-raised` | `bg-surface-raised` |
+| 4 | Component hover | `--surface-hover` | `bg-surface-hover` |
+| 5 | Component pressed / selected | `--surface-active` | `bg-surface-active` |
+| 6 | Subtle border, separators | `--border-subtle` | `border-border-subtle` |
+| 7 | Interactive border | `--border-interactive` | `border-border-interactive` |
+| 8 | Focus ring | `--focus-ring` | `ring-focus-ring` |
+| 9 | Solid accent background | `--solid` | `bg-solid` |
+| 10 | Solid accent hover | `--solid-hover` | `bg-solid-hover` |
+| 11 | Low-contrast text | `--text-muted` | `text-muted` |
+| 12 | High-contrast text | `--text-primary` | `text-text-primary` |
+
+**Text may only use steps 11 and 12**, and only on a matching background — that is how accessibility is guaranteed structurally rather than hoped for. Status roles (`success` / `warning` / `danger` / `info`) sit alongside the aliases for meaning; `--surface-sunken` remains for inset wells.
 
 **Colour is never the only signal.** Every role must be paired with an icon, sign or label.
+
+**Fewer colours, and reserve bright warm colours for warnings and errors** (NN/g visual-hierarchy guidance). Bright/saturated colour is for what matters; everything else uses the neutral aliases.
 
 ### Money numerals (`UX-DS-03`)
 

@@ -535,11 +535,21 @@ input::-webkit-credentials-auto-fill-button {
   --role-info-surface:     #eff6ff;
   --role-info-border:      #bfdbfe;
 
-  /* Surfaces — light */
+  /* Surfaces — light. Aliased to the Radix-style step roles (doc 24 §9.3):
+     base↔1-2, raised↔3, hover↔4, active↔5, border-subtle↔6,
+     border-interactive↔7, focus-ring↔8, solid↔9, solid-hover↔10. */
   --surface-base:          #ffffff;
   --surface-raised:        #f8fafc;
+  --surface-hover:         #f1f5f9;
+  --surface-active:        #e2e8f0;
   --surface-sunken:        #f1f5f9;
   --surface-border:        #e2e8f0;
+  --border-subtle:         #e2e8f0;
+  --border-interactive:    #cbd5e1;
+  --focus-ring:            #2563eb;
+  --solid:                 #2563eb;
+  --solid-hover:           #1d4ed8;
+  /* Text — steps 11/12 only (low-contrast / high-contrast), never raw hues. */
   --text-primary:          #0f172a;
   --text-secondary:        #475569;
   --text-muted:            #94a3b8;
@@ -560,11 +570,19 @@ input::-webkit-credentials-auto-fill-button {
   --role-info-surface:     #082f49;
   --role-info-border:      #0c4a6e;
 
-  /* Surfaces — dark */
+  /* Surfaces — dark (same alias roles, dark values) */
   --surface-base:          #020617;
   --surface-raised:        #0f172a;
+  --surface-hover:         #1e293b;
+  --surface-active:        #334155;
   --surface-sunken:        #1e293b;
   --surface-border:        #1e293b;
+  --border-subtle:         #1e293b;
+  --border-interactive:    #334155;
+  --focus-ring:            #60a5fa;
+  --solid:                 #3b82f6;
+  --solid-hover:           #60a5fa;
+  /* Text — dark values keep the same 11/12 semantics. */
   --text-primary:          #f8fafc;
   --text-secondary:        #cbd5e1;
   --text-muted:            #94a3b8;
@@ -588,8 +606,15 @@ input::-webkit-credentials-auto-fill-button {
   /* Surface utilities: bg-surface-base, border-surface-border, text-muted … */
   --color-surface-base:    var(--surface-base);
   --color-surface-raised:  var(--surface-raised);
+  --color-surface-hover:   var(--surface-hover);
+  --color-surface-active:  var(--surface-active);
   --color-surface-sunken:  var(--surface-sunken);
   --color-surface-border:  var(--surface-border);
+  --color-border-subtle:   var(--border-subtle);
+  --color-border-interactive: var(--border-interactive);
+  --color-focus-ring:      var(--focus-ring);
+  --color-solid:           var(--solid);
+  --color-solid-hover:     var(--solid-hover);
   --color-text-primary:    var(--text-primary);
   --color-text-secondary:  var(--text-secondary);
   --color-text-muted:      var(--text-muted);
