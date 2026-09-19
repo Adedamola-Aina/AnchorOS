@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { AnchorTask } from '../../types';
-import { describeNextDue, getDueToday, getNextDue, isOverdue, isScheduledOn } from './commitmentSchedule';
+import { countScheduledOccurrences, describeNextDue, getDueToday, getNextDue, isOverdue, isScheduledOn } from './commitmentSchedule';
 
 const LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
@@ -95,5 +95,42 @@ describe('commitmentSchedule — next due', () => {
         expect(getNextDue([], now)).toBeNull();
         expect(getNextDue([done], now)).toBeNull();
         expect(getNextDue([task({ type: 'daily' })], now)?.getDate()).toBe(now.getDate());
+    });
+});
+
+describe('commitmentSchedule — expected occurrences (UX-AI-08 denominator)', () => {
+    const from = new Date(2026, 8, 20, 0, 0, 0);
+    from.setDate(from.getDate() - 30);
+
+    it('counts how often a cadence required the commitment inside the window', () => {
+        // 31 inclusive days for a daily commitment.
+        expect(countScheduledOccurrences(task({ type: 'daily' }), from, now)).toBe(31);
+        // A weekly commitment recurs roughly weekly in a 31-day window. The data
+        // model stores day *letters* (S M T W T F S), so a 'T' or 'S' commitment
+        // legitimately matches two weekdays — hence the range rather than a
+        // single number. This letter collision is a known cadence limitation.
+        const weekly = countScheduledOccurrences(task({ type: 'weekly', daysOfWeek: [LETTERS[now.getDay()]] }), from, now);
+        expect(weekly).toBeGreaterThanOrEqual(4);
+        expect(weekly).toBeLessThanOrEqual(10);
+        // A one-off to-do carries a single expectation.
+        expect(countScheduledOccurrences(task({ type: 'todo' }), from, now)).toBe(1);
+    });
+
+    it('does not blame a new commitment for weeks before it existed', () => {
+        const createdToday = task({ type: 'daily', createdAt: now });
+        expect(countScheduledOccurrences(createdToday, from, now)).toBe(1);
+    });
+
+    it('returns zero when the cadence was never due in the window', () => {
+        const tomorrowsMonthly = task({ type: 'monthly', createdAt: now, dayOfMonth: now.getDate() + 1 });
+        expect(countScheduledOccurrences(tomorrowsMonthly, from, now)).toBe(0);
+        expect(countScheduledOccurrences(task({ type: 'daily' }), now, from)).toBe(0);
+    });
+
+    it('counts a monthly commitment once per matching day-of-month', () => {
+        const monthly = task({ type: 'monthly', dayOfMonth: 15 });
+        const wideFrom = new Date(2026, 5, 1, 0, 0, 0);   // 1 Jun 2026
+        const wideTo = new Date(2026, 8, 20, 0, 0, 0);    // 20 Sep 2026
+        expect(countScheduledOccurrences(monthly, wideFrom, wideTo)).toBe(4); // 15 Jun, Jul, Aug, Sep
     });
 });

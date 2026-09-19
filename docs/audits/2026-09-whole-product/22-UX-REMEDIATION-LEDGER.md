@@ -17,8 +17,8 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **15** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **46** |
+| Closed | **16** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **45** |
 | Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06) |
 | Deployed | `master` `b67aa498` / `v1.21.0-rc.0` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
@@ -42,17 +42,17 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | UX-DB-06 | LOW | P1d | Subtitle "Life at a glance." carried no information | Subtitle shows today's date |
 | UX-FN-05 | MEDIUM | P1d | Finance subtitle used internal vocabulary | Plain-language subtitle |
 | UX-AI-06 | HIGH | P1b | Assistant said "No tasks scheduled today" while active commitments existed — overdue work was invisible to the assistant **and** the nav badge | Shared schedule model (`commitmentSchedule.ts`); assistant, badge and page agree |
+| UX-AI-08 | MEDIUM | P1b | First insight was a demoralising "completion: 0% — 0 of 4 done in 30 days": a momentary complete-flag was described as 30-day performance | Expected occurrences per cadence vs evidenced completions; silent when nothing was due |
 | — | LOW | F1 | `ActionSheet` icons leaked into accessible names (`"+Add account"`) | `aria-hidden` on decorative icons |
 
 ## Remaining (47) — grouped by the wave that will close them
 
-### P1b — schedule-aware commitments engine · **in progress** (9 findings remain; UX-AI-06 closed)
+### P1b — schedule-aware commitments engine · **in progress** (8 findings remain; UX-AI-06, UX-AI-08 closed)
 
 This is the highest-leverage remaining work: it fixes the assistant's false statements **at the root** and makes streaks fair. **Landed in this wave:** the shared schedule model (`src/services/fabric/commitmentSchedule.ts`) — "today" now means *scheduled today or carried over*, so the assistant, the nav badge and the Today card share one definition and cannot disagree; the empty day is honest ("You have no commitments yet" / "Nothing due today — next up Mon") and its button offers the action it names.
 
 | ID | Sev | Finding | Note |
 |---|---|---|---|
-| UX-AI-08 | MEDIUM | First insight is a demoralising "completion: 0% — 0 of 4 in 30 days" | Replace `completed/total` with `completed/expected` |
 | UX-CM-07 | MEDIUM | Rows show no cadence, next-due, streak or category | Fill the space the stray dash occupies |
 | UX-CM-04 | MEDIUM | Filter chips mix cadence with type (`TODO` as a "frequency") | Cadence moves to a filter sheet; type stays out of the primary control |
 | UX-CM-08 | MEDIUM | Completing a task interrupts with a cross-domain "Financial Transaction?" modal | Becomes a dismissible inline chip on the completed row |
