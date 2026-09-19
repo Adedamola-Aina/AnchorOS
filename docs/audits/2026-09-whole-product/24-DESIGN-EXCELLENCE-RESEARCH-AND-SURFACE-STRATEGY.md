@@ -198,7 +198,60 @@ Non-negotiables if we build it:
 
 `W-D1 Design foundation` → `W-C1 Capture` → `W-C2 Scheduling truth` → `W-C3 Rows & history` → `W-A1 Assistant trust` → `W-C4 Find & organise` → `W-A2 Assistant memory & synthesis` → `W-M Money link` → `W-F Family` → `W-P2 Home + nav` → `W-P3 Settings / Finance visuals / Onboarding` → `W-A3 Ask anything` → **`R-01` decision gate** (statement import).
 
-Doc 21 remains the authority for the Wallet *composition*; doc 24 adds the colour, motion, type, sensory and cohesion law that every surface — including Wallet — must obey. Where they conflict, doc 24 governs the *system* and doc 21 governs the *composition*.
+## 9. Reference library, and an honest confidence statement
+
+You asked what references I actually hold, and whether I'm confident. Here is the truthful answer, written down so it can't drift into over-claiming.
+
+### 9.1 What I can and cannot use
+
+**My fetching tool returns text, not images.** That matters because Dribbble and Mobbin are *image* libraries: Dribbble's search page refused to load ("we need to verify that you're not a robot"), and Mobbin's browse page returned only its navigation. Even if they had loaded, I could not *look* at the shots — so no amount of link-hunting by me produces visual judgement the way a designer browsing Mobbin does.
+
+**Therefore the honest division of labour:**
+- **You supply the taste reference** — screens you love (Dribbble shots, Mobbin flows, App Store screenshots of `Tiimo`, `Structured`, `Gentler Streak`, `Things`, `Flighty`). Drop them in a folder or paste links; that is genuinely useful input and I will treat it as the visual brief.
+- **I supply the system** — I extract the *rules* behind those screens from sources that are readable as text (design-system specs, research articles, Apple's own award write-ups) and encode them as tokens, components and hard gates. Rules are what make a screen reproducible; a screenshot alone is not.
+- **Neither of us should rely on my taste.** Where a choice is subjective, it gets a measured gate (below) rather than my preference.
+
+### 9.2 My confidence, stated precisely
+
+| Area | Confidence | Basis |
+|---|---|---|
+| What award-winning apps do *conceptually* | **High** | Apple's own ADA 2026/2025 write-ups, read in full, with the praised traits quoted in §2 |
+| Motion: purpose, budget, dark-pattern boundary | **High** | NN/g "The Role of Animation and Motion in UX", read in full |
+| Beauty vs usability trade-off, and its trap | **High** | NN/g "The Aesthetic-Usability Effect" + the 1995/2004 primary sources it cites |
+| Colour role systems and accessibility guarantees | **High** (after this round) | Radix Colors spec — see §9.3 |
+| Visual hierarchy, density and grouping | **High** (after this round) | NN/g "Visual Hierarchy in UX" — see §9.4 |
+| **Specific pixel-level visual direction** (exact spacing, shadows, illustration style, "does this look premium?") | **Low — needs your input or a screenshot review** | No image reading; no Mobbin/Dribbble access. This is exactly the gap you spotted |
+| Apple HIG text | **None** | JS-gated; I refuse to cite it as read |
+
+### 9.3 Adopted: Radix's 12-step role semantics (upgrades `UX-DS-02`)
+
+Radix Colors specifies each step's *use case* rather than a colour: **1–2** app/subtle backgrounds · **3–5** component backgrounds (normal / hover / active-selected) · **6–8** borders (subtle / interactive / stronger + focus ring) · **9–10** solid backgrounds (rest / hover) · **11–12** text (low contrast / high contrast). It guarantees text steps reach **APCA Lc 60 / Lc 90** on a step-2 background of the same scale, ships **alpha variants** for blending over colour, and switches **dark mode by applying a class** — the same mechanism we already use (`.dark`).
+
+**Decision:** our role tokens adopt this **aliasing convention** so every role has a defined purpose instead of a vibe — `surface-base`↔step 1–2, `surface-raised`↔3, `surface-hover`↔4, `surface-active`↔5, `border-subtle`↔6, `border-interactive`↔7, `focus`↔8, `solid`↔9, `solid-hover`↔10, `text-muted`↔11, `text-primary`↔12. Steps 11/12 are the only ones permitted for text, and they must sit on the matching background — which is how "colour never carries meaning alone" becomes structurally true rather than aspirational.
+
+This is the **W-D1b** refinement: extend the role layer to the full alias set (including `focus` and `solid`), then migrate surfaces.
+
+### 9.4 Adopted: the **Squint Test** as a verification gate (extends doc 23 Part E)
+
+NN/g's practical method: *"squint or apply a slight blur to the design to get an idea of the conveyed groupings and hierarchy"* — blurring at 5/10/20px reveals what is actually emphasised (their Spotify example shows an unintended element dominating at 20px). It also confirms the underlying claim that hierarchy comes from **contrast in value and saturation in context**, not from hue, and warns that content can break a template's hierarchy.
+
+**New gate, added to every wave:** blur each touched screen at 5, 10 and 20px and confirm the intended element still dominates. If it doesn't, the hierarchy is wrong regardless of how the unblurred screen looks. This is objective, cheap, and it is the closest thing to a "does it look right?" test that does not depend on my opinion — and it can be captured as a screenshot artifact for your review.
+
+Also adopted from the same source, as rules: use **fewer colours** (bright/saturated reserved for what matters), **reserve warm bright colours for warnings and errors**, and give sections **breathing room** rather than equal-weight everything.
+
+### 9.5 What I will not do
+
+- I will not claim visual references I cannot see.
+- I will not invent "Apple-like" specifics and attribute them to the HIG.
+- I will not treat my own preference as evidence. Where taste decides, we decide together — or it goes behind a measured or blur-based gate.
+
+### 9.6 Document precedence (unchanged)
+
+Doc 21 remains the authority for the Wallet *composition*; doc 24 adds the colour, motion, type, sensory and cohesion law that every surface — including Wallet — must obey. Where they conflict, **doc 24 governs the system and doc 21 governs the composition**.
+
+**Verification-protocol additions from this section** (they extend doc 23 Part E): the **Squint Test** at 5/10/20px on every touched screen, the **12-step role aliasing** for colour decisions, and the requirement that any pixel-level taste call arrives with a reference from you or is decided behind a measured gate.
+
+
 
 
 
