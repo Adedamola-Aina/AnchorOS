@@ -14,6 +14,7 @@ import { Target } from 'lucide-react';
 import type { AnchorGoal } from '../../../types';
 import { fromCents } from '../../../utils/moneyUtils';
 import { formatCurrency, formatCurrencyCompact } from '../../../utils/format';
+import { EmptyState } from '../../../components/shared/EmptyState';
 
 interface GoalProgressCardProps {
     goals: AnchorGoal[];
@@ -44,11 +45,19 @@ export function GoalProgressCard({ goals, isLoading = false }: GoalProgressCardP
             {isLoading ? (
                 <p className="text-sm text-slate-400 italic text-center py-4">Loading goals…</p>
             ) : goals.length === 0 ? (
-                <div className="text-center py-4" data-testid="goal-empty-state">
-                    <Target className="w-6 h-6 mx-auto text-slate-300 dark:text-slate-600 mb-2" aria-hidden="true" />
-                    <p className="text-sm text-slate-400 italic">No goal set yet</p>
-                    <p className="text-xs text-slate-400 mt-1">Set one during onboarding to track it here.</p>
-                </div>
+                /* DB-05: this used to instruct "set one during onboarding" while
+                 * offering no control to do it — a dead end. Goals can only be
+                 * created during onboarding today, so per the EmptyState contract
+                 * (doc 24 §5) the action is omitted and the copy stays honest
+                 * rather than promising a control that does not exist. The action
+                 * comes back when a goal surface ships. */
+                <EmptyState
+                    icon={Target}
+                    title="No goal set yet"
+                    description="Goals are created during onboarding. Progress here stays read-only until goals can be funded."
+                    testId="goal-empty-state"
+                    className="py-4"
+                />
             ) : (
                 <div className="space-y-4">
                     {goals.map((goal) => {

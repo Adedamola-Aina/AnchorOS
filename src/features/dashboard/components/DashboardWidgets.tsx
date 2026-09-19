@@ -7,30 +7,43 @@
 
 import React from 'react';
 import { Wallet, TrendingUp, TrendingDown, Activity, CheckCircle2, ArrowRight, Target } from 'lucide-react';
-import { formatCurrencyCompact } from '../../../utils/format';
+import { formatCurrency, formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
 import type { Currency, AnchorTask, AnchorTransaction } from '../../../types';
-import type { AssetClass } from '../../../utils/financeInsights';
+import type { CurrencyTotal } from '../../../utils/financeInsights';
 
-interface PortfolioWidgetProps { assets: AssetClass[]; onNavigate: () => void; accountCount: number; isMobile?: boolean; }
-export const PortfolioWidget: React.FC<PortfolioWidgetProps> = ({ assets, onNavigate, accountCount, isMobile }) => (
+interface PortfolioWidgetProps { totals: CurrencyTotal[]; onNavigate: () => void; accountCount: number; isMobile?: boolean; }
+export const PortfolioWidget: React.FC<PortfolioWidgetProps> = ({ totals, onNavigate, accountCount, isMobile }) => (
     <div onClick={onNavigate} className={`glass-card overflow-hidden relative group cursor-pointer hover:shadow-xl transition-all active:scale-[0.99] ${isMobile ? 'p-4' : 'p-5'}`}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
         <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg text-primary-600 dark:text-primary-400"><Wallet className="w-5 h-5" /></div>
             <h3 className="font-bold text-slate-700 dark:text-slate-200">Portfolio</h3>
         </div>
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total across {accountCount} accounts</p>
-        <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-slate-800/50">
-            {assets.slice(0, 3).map(asset => (
-                <div key={asset.id} className="flex justify-between items-center text-xs">
-                    <div className="flex items-center gap-2 min-w-0 flex-1"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0" /><span className="font-medium text-slate-600 dark:text-slate-400 truncate">{asset.name}</span></div>
-                    <div className="text-right">
-                        <p className="text-xs font-bold font-mono text-slate-900 dark:text-white tabular-nums">{formatCurrencyCompact(asset.amount, asset.currency as Currency)}</p>
-                        <p className="text-[10px] font-bold text-slate-400 tabular-nums">{asset.percent.toFixed(1)}%</p>
-                    </div>
-                </div>
-            ))}
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Total across {accountCount} {accountCount === 1 ? 'account' : 'accounts'}
+        </p>
+        {/*
+          * DB-03: this label promised a total and the card never printed one.
+          * DB-04: the per-asset rows that used to live here duplicated the Asset
+          * Split card, so the Portfolio card now carries the NUMBER and the split
+          * carries the composition.
+          * One line per currency: a mixed-currency sum is not a number (UX-FN-02).
+          */}
+        <div className="space-y-1 pt-4 mt-1 border-t border-slate-100 dark:border-slate-800/50">
+            {totals.length === 0 ? (
+                <p className="text-xs italic text-slate-400">No accounts yet.</p>
+            ) : (
+                totals.map(({ currency, total }) => (
+                    <p
+                        key={currency}
+                        className="money font-mono text-xl font-bold text-slate-900 dark:text-white"
+                        data-testid={`portfolio-total-${currency}`}
+                    >
+                        {formatCurrency(total, currency as Currency)}
+                    </p>
+                ))
+            )}
         </div>
     </div>
 );

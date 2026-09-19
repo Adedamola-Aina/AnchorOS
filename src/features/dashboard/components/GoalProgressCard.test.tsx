@@ -28,6 +28,18 @@ describe('GoalProgressCard', () => {
         expect(screen.getByText('No goal set yet')).toBeInTheDocument();
     });
 
+    it('does not promise an action it cannot offer (DB-05)', () => {
+        render(<GoalProgressCard goals={[]} />);
+
+        // The old copy instructed "Set one during onboarding to track it here."
+        // while offering no control — a dead end. Goals can only be created in
+        // onboarding today, so the shared empty state states the fact instead of
+        // naming an action that does not exist.
+        expect(screen.queryByText(/set one during onboarding/i)).not.toBeInTheDocument();
+        expect(screen.getByText(/goals are created during onboarding/i)).toBeInTheDocument();
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+
     it('renders loading state before goals resolve', () => {
         render(<GoalProgressCard goals={[]} isLoading />);
 

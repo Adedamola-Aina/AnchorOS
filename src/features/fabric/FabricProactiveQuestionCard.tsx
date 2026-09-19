@@ -1,4 +1,5 @@
 import React from 'react';
+import { MessageCircleQuestion } from 'lucide-react';
 
 interface Props {
   question: string;
@@ -20,8 +21,11 @@ export const FabricProactiveQuestionCard: React.FC<Props> = ({
           className="min-h-11 flex-1 text-left text-sm text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white"
           aria-label={question}
         >
-          <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 text-xs font-semibold">
-            ?
+          {/* AI-07: this used to render a literal "?" character where an icon
+              belongs — it read as a broken icon lookup. DESIGN_SYSTEM.md requires
+              Lucide icons for functional states. */}
+          <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">
+            <MessageCircleQuestion className="w-3.5 h-3.5" aria-hidden="true" />
           </span>
           {question}
         </button>
