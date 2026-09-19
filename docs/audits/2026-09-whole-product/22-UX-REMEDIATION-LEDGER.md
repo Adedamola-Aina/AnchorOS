@@ -4,6 +4,8 @@ Date: 2026-09-18 · Companion to docs 18 (round-1 audit + target spec), 19 (rese
 
 Purpose: **one place that answers "what is left?"** Every finding from the UX program appears exactly once, with its wave, its blocker (if any) and its status. Update this file when a wave closes; the register carries the formal remediation rows.
 
+**Forward plan:** doc 23 (`23-COMMITMENTS-BENCHMARK-AI-AMBITION-AND-PLAN.md`) registers the Commitments 2.0 and Fabric AI findings (`CM-12`…`CM-28`, `AI-11`…`AI-21`) and fixes the canonical wave order (W-C1 Capture → W-C2 Scheduling truth → W-C3 Rows & history → W-A1 Assistant trust → W-C4 → W-A2 → W-M → W-F → W-P2 → W-P3 → W-A3 Ask anything), together with the quality bar and the exit criteria for every wave (doc 23 Part E). This ledger holds per-finding status; doc 23 holds the sequence and the rationale.
+
 ## Legend
 
 - **CLOSED** — implemented, verified in the running app (not just unit tests) and merged or in a green PR.
