@@ -49,6 +49,9 @@ export const NODE_INCLUDE = [
   'src/api/**/*.{test,spec}.ts',
   'src/analytics/**/*.{test,spec}.ts',
   'src/config/**/*.{test,spec}.ts',
+  // Design foundation (W-D1 / doc 24): token, motion and sensory invariants.
+  // Pure Node (filesystem + a fake Document) — no DOM, so it belongs here.
+  'src/design/**/*.{test,spec}.ts',
   'src/services/**/*.{test,spec}.ts',
   'src/types/**/*.{test,spec}.ts',
   'src/utils/**/*.{test,spec}.ts',

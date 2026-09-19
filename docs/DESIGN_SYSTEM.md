@@ -49,3 +49,43 @@ Destructive actions use the danger token and require confirmation.
 - ARIA labels on interactive elements; `data-testid` on new components.
 - Keyboard navigable; focus rings visible (`focus:ring-2`).
 - Color never carries meaning alone.
+
+## Semantics, motion and sensory law (W-D1 — research basis in doc 24)
+
+Durable additions from `24-DESIGN-EXCELLENCE-RESEARCH-AND-SURFACE-STRATEGY.md`. These are not aspirations; they are enforced by `src/design/designFoundation.test.ts`.
+
+### Semantic role tokens (`UX-DS-02`)
+
+Roles live in `src/index.css`: `--role-{success,warning,danger,info}[-surface|-border]` plus surfaces (`--surface-base|raised|sunken|border`) and text (`--text-primary|secondary|muted`). Light values are on `:root`, dark values on `.dark`, and `@theme` maps both to utilities — so **a missing dark value fails a test** instead of shipping as a bug. Use `bg-success-surface`, `text-danger`, `border-surface-border`, `text-muted`, etc. Never raw palette scales for meaning.
+
+**Colour is never the only signal.** Every role must be paired with an icon, sign or label.
+
+### Money numerals (`UX-DS-03`)
+
+Every monetary value is rendered with the `.money` utility (tabular figures, slashed zero). Amounts must not shift as they change. Right-align amounts in lists and tables.
+
+### Motion law (`UX-DS-04`) — source of truth `src/design/motion.ts`
+
+- Allowed purposes **only**: `feedback`, `stateChange`, `spatialContinuity`. Delight, entrance, urgency → out of contract.
+- Budget: `micro` 140ms · `sheet` 200ms · `balance` 250ms · hard ceiling 300ms.
+- **Never gate content** on an entrance animation; content is readable immediately.
+- No looping decoration — only a genuine in-progress state.
+- No motion that pressures the user (pulsing, countdowns, urgency) — dark-pattern territory.
+- Reduced motion is honoured from **both** the OS setting (`prefers-reduced-motion`) and the in-app switch (`.a11y-reduced-motion`). Use `durationFor()` so callers cannot forget.
+
+### Sensory map (`UX-DS-05`) — `src/design/haptics.ts`
+
+Callers ask for an **intent** (`taskComplete`, `taskUncomplete`, `recordSaved`, `streakMilestone`, `destructiveConfirm`, `validationError`); the pattern mapping lives in one place. Haptics fire on state change and confirmation only — **never** on navigation, scroll or hover. Sound is off by default and must aid comprehension to be offered at all.
+
+### Empty states (`UX-DS-07`)
+
+Use `src/components/shared/EmptyState.tsx`. The contract: say **what this is**, **why it is empty**, and **offer the action the sentence names**. One primary action maximum; when there is genuinely nothing to do, omit the action and keep the copy honest.
+
+### Visual-noise budget (`UX-DS-08`)
+
+Every wave must **remove at least as much visual noise as it adds**. Reviewers check this. "We'll polish it later" does not apply to a screen the user sees daily.
+
+### Known adoption items (tracked, not yet done)
+
+- Existing decorative loop animations (`--animate-ring-glow`, `pulse-*`, `anchor-bob`, `tide-bar`, `sonar`) must be audited against the motion law; each surviving loop needs a stated in-progress meaning.
+- Surfaces still use ad-hoc palettes (`slate-*`, `emerald-*`, `amber-*`, `rose-*`) where a role token now exists; W-D1b migrates them surface by surface with before/after screenshots in both themes.
