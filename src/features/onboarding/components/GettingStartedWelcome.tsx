@@ -35,21 +35,30 @@ export function GettingStartedWelcome({ userName, onStart, onSkip }: GettingStar
 
       <div className="text-left max-w-xs mx-auto">
         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-          What should we call you?
+          What should we call you? <span className="text-rose-500" aria-hidden="true">*</span>
         </label>
         <input
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
+          aria-required="true"
           className="w-full p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-bold text-slate-900 dark:text-white text-center focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
           placeholder="Your name"
           maxLength={30}
         />
+        {/* UX-OB-07/UX-OB-08: no name is invented for the user — so ask for one
+            and say why the primary action is unavailable. */}
+        {!displayName.trim() && (
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 text-center">
+            Add a name to continue — it is only used to greet you.
+          </p>
+        )}
       </div>
 
       <button
-        onClick={() => onStart(displayName.trim() || userName)}
-        className="group bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold text-lg inline-flex items-center gap-3 hover:scale-105 transition-all shadow-xl shadow-slate-900/10 dark:shadow-white/5"
+        onClick={() => onStart(displayName.trim())}
+        disabled={!displayName.trim()}
+        className="group bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold text-lg inline-flex items-center gap-3 hover:scale-105 transition-all shadow-xl shadow-slate-900/10 dark:shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
         Let&apos;s Begin
         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -60,7 +69,7 @@ export function GettingStartedWelcome({ userName, onStart, onSkip }: GettingStar
           onClick={onSkip}
           className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
         >
-          Skip for now →
+          Finish later
         </button>
       </div>
     </div>

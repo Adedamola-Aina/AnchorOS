@@ -8,7 +8,7 @@
 // @ts-nocheck
 
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { captureError } from '../../utils/error';
 import { useFinance } from '../../context/FinanceContext';
@@ -36,7 +36,23 @@ export const OnboardingView = () => {
   const { addAccount } = useFinance();
   const { addTask } = useTasks();
   const { showToast } = useNotifications();
-  const [step, setStep] = useState(1);
+  /** UX-OB-06: resume where the user left off; progress is persisted per step. */
+  const savedStep = profile.onboardingProgress?.gettingStartedStep;
+  const [step, setStep] = useState<number>(
+    typeof savedStep === 'number' && savedStep >= 1 && savedStep <= TOTAL_STEPS ? savedStep : 1,
+  );
+
+  const goToStep = useCallback((next: number) => {
+    setStep(next);
+    void updateProfile({
+      onboardingProgress: {
+        gettingStartedStep: next,
+        securityStepSeen: profile.onboardingProgress?.securityStepSeen ?? false,
+        beyondBasicsComplete: profile.onboardingProgress?.beyondBasicsComplete ?? false,
+        completedItems: profile.onboardingProgress?.completedItems ?? [],
+      },
+    });
+  }, [profile.onboardingProgress, updateProfile]);
   const [loading, setLoading] = useState(false);
 
   // Account form state
@@ -55,7 +71,7 @@ export const OnboardingView = () => {
 
   const handleStart = async (name: string) => {
     await updateProfile({ name, onboardingComplete: false });
-    setStep(2);
+    goToStep(2);
   };
 
   const handleSkip = async () => {
@@ -76,7 +92,7 @@ export const OnboardingView = () => {
         color: 'bg-blue-500',
         scope: profile.familyMode ? 'family' : 'personal',
       });
-      setStep(3);
+      goToStep(3);
     } catch (e) {
       captureError(e, 'Onboarding.createAccount');
       showToast('Failed to create account.', 'error');
@@ -105,7 +121,7 @@ export const OnboardingView = () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-      setStep(4);
+      goToStep(4);
     } catch (e) {
       captureError(e, 'Onboarding.createGoal');
       showToast('Failed to save goal.', 'error');
@@ -124,7 +140,7 @@ export const OnboardingView = () => {
         category: 'personal',
         timeOfDay: 'morning',
       });
-      setStep(5);
+      goToStep(5);
     } catch (e) {
       captureError(e, 'Onboarding.createTask');
       showToast('Failed to create task.', 'error');
@@ -150,7 +166,7 @@ export const OnboardingView = () => {
 
         {step === 1 && (
           <GettingStartedWelcome
-            userName={profile.name || 'User'}
+            userName={profile.name}
             onStart={handleStart}
             onSkip={handleSkip}
           />
@@ -163,7 +179,7 @@ export const OnboardingView = () => {
             currency={currency} setCurrency={setCurrency}
             accountType={accountType} setAccountType={setAccountType}
             loading={loading} onSubmit={handleCreateAccount}
-            onSkip={handleSkip} onBack={() => setStep(1)}
+            onSkip={() => goToStep(3)} onBack={() => goToStep(1)}
           />
         )}
 
@@ -173,7 +189,7 @@ export const OnboardingView = () => {
             goalAmount={goalAmount} setGoalAmount={setGoalAmount}
             goalType={goalType} setGoalType={setGoalType}
             loading={loading} onSubmit={handleCreateGoal}
-            onSkip={() => setStep(4)} onBack={() => setStep(2)}
+            onSkip={() => goToStep(4)} onBack={() => goToStep(2)}
           />
         )}
 
@@ -181,7 +197,7 @@ export const OnboardingView = () => {
           <OnboardingHabitStep
             taskTitle={taskTitle} setTaskTitle={setTaskTitle}
             loading={loading} onSubmit={handleCreateTask}
-            onSkip={handleSkip} onBack={() => setStep(3)}
+            onSkip={() => goToStep(5)} onBack={() => goToStep(3)}
           />
         )}
 
@@ -193,7 +209,7 @@ export const OnboardingView = () => {
             onEnableMfa={() => showToast('MFA setup will open in Settings after onboarding.', 'info')}
             onFinish={handleSecurityComplete}
             onSkip={handleSecurityComplete}
-            onBack={() => setStep(4)}
+            onBack={() => goToStep(4)}
           />
         )}
       </div>

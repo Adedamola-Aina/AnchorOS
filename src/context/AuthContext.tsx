@@ -58,7 +58,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
     const initialTheme = typeof window !== 'undefined' ? getEffectiveTheme() : 'light';
-    const [profile, setProfile] = useState<UserProfile>({ name: 'User', theme: initialTheme, familyMode: false, onboardingComplete: false });
+    // UX-OB-07 / UX-DB-01: no placeholder identity. An empty name means "not yet
+    // known", and the UI must not invent one (or emit a dangling "Good evening, ").
+    const [profile, setProfile] = useState<UserProfile>({ name: '', theme: initialTheme, familyMode: false, onboardingComplete: false });
     const [loading, setLoading] = useState(true);
     const [profileLoaded, setProfileLoaded] = useState(false);
     const [accountNotifications, setAccountNotifications] = useState<string[]>([]);
@@ -117,7 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 } else {
                     if (snap.metadata.fromCache) { console.warn('[AuthContext] Profile not found but data is from cache'); return; }
                     if (import.meta.env.DEV) console.debug('[AuthContext] Creating new profile');
-                    createUserProfile(u.uid, { name: u.email?.split('@')[0] || 'User', theme: 'light', familyMode: false, onboardingComplete: false });
+                    // UX-OB-07: never invent a display name from the email local-part
+                    // (john.doe@… would become "john.doe"). Onboarding asks for it.
+                    createUserProfile(u.uid, { name: '', theme: 'light', familyMode: false, onboardingComplete: false });
                     setProfileLoaded(true); setLoading(false);
                 }
             });
@@ -157,10 +161,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await deregisterPreviousAccountPushToken();
             await clearClientCache(); // RA-05 (#149)
             const cred = await createUserWithEmailAndPassword(auth, e, p);
-            const name = e.split('@')[0];
-            await createUserProfile(cred.user.uid, { name, theme: 'light', familyMode: false, onboardingComplete: false });
+            // UX-OB-07: onboarding collects the real name; the email local-part is
+            // used only as friendly copy in the welcome email, never as identity.
+            const emailName = e.split('@')[0];
+            await createUserProfile(cred.user.uid, { name: '', theme: 'light', familyMode: false, onboardingComplete: false });
             void recordAuthEvent(navigator.userAgent, 'password');
-            try { await queueWelcomeEmail(e, getWelcomeEmailHtml(name)); }
+            try { await queueWelcomeEmail(e, getWelcomeEmailHtml(emailName)); }
             catch (err) { captureError(err, 'Auth.welcomeEmail'); }
         });
     };
