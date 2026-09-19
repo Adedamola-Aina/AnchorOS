@@ -77,3 +77,12 @@ tools/mcp-server/
 # whole directory is safe — and it must never be committed.
 .cline/
 
+# Design reference screenshots (third-party Mobbin / App Store captures).
+# Kept local on the server for design analysis only — never redistributed in the
+# repository, never pasted into PRs or releases. See
+# docs/audits/2026-09-whole-product/references/README.md
+docs/audits/2026-09-whole-product/references/**/*.png
+docs/audits/2026-09-whole-product/references/**/*.jpg
+docs/audits/2026-09-whole-product/references/**/*.jpeg
+docs/audits/2026-09-whole-product/references/**/*.webp
+docs/audits/2026-09-whole-product/references/**/*.gif

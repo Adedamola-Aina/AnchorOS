@@ -204,12 +204,13 @@ You asked what references I actually hold, and whether I'm confident. Here is th
 
 ### 9.1 What I can and cannot use
 
-**My fetching tool returns text, not images.** That matters because Dribbble and Mobbin are *image* libraries: Dribbble's search page refused to load ("we need to verify that you're not a robot"), and Mobbin's browse page returned only its navigation. Even if they had loaded, I could not *look* at the shots — so no amount of link-hunting by me produces visual judgement the way a designer browsing Mobbin does.
+**Correction after your Mobbin question (2026-09-19):** my *web* fetch returns text, not images — which is why Dribbble refused to load ("we need to verify that you're not a robot") and Mobbin returned only its navigation. But **image files on disk are readable directly**, so uploaded screenshots *are* analysable. That materially changes the confidence table below, and it is the reason the drop-zone exists.
 
-**Therefore the honest division of labour:**
-- **You supply the taste reference** — screens you love (Dribbble shots, Mobbin flows, App Store screenshots of `Tiimo`, `Structured`, `Gentler Streak`, `Things`, `Flighty`). Drop them in a folder or paste links; that is genuinely useful input and I will treat it as the visual brief.
-- **I supply the system** — I extract the *rules* behind those screens from sources that are readable as text (design-system specs, research articles, Apple's own award write-ups) and encode them as tokens, components and hard gates. Rules are what make a screen reproducible; a screenshot alone is not.
-- **Neither of us should rely on my taste.** Where a choice is subjective, it gets a measured gate (below) rather than my preference.
+**Updated division of labour:**
+- **You supply the taste reference** — drop Mobbin/App Store screenshots into `docs/audits/2026-09-whole-product/references/mobbin/` (how-to in that folder's README; the folder is gitignored because Mobbin captures are third-party UI we don't redistribute). Naming convention: `<app>__<screen>__<theme>.png`.
+- **I analyse them** — extracting the system rules (hierarchy order, spacing rhythm, row heights, type ratios, colour roles, radii, elevation, motion cues) and mapping them onto our tokens and components.
+- **I supply the system** — those rules become tokens, components and hard gates, and the review artifact is before/after screenshots in both themes plus the 5/10/20px Squint Test (§9.4). A screenshot alone isn't reproducible; rules are.
+- **Neither of us relies on my taste.** Where a choice is subjective, it goes behind a measured or blur-based gate.
 
 ### 9.2 My confidence, stated precisely
 
@@ -220,7 +221,7 @@ You asked what references I actually hold, and whether I'm confident. Here is th
 | Beauty vs usability trade-off, and its trap | **High** | NN/g "The Aesthetic-Usability Effect" + the 1995/2004 primary sources it cites |
 | Colour role systems and accessibility guarantees | **High** (after this round) | Radix Colors spec — see §9.3 |
 | Visual hierarchy, density and grouping | **High** (after this round) | NN/g "Visual Hierarchy in UX" — see §9.4 |
-| **Specific pixel-level visual direction** (exact spacing, shadows, illustration style, "does this look premium?") | **Low — needs your input or a screenshot review** | No image reading; no Mobbin/Dribbble access. This is exactly the gap you spotted |
+| **Specific pixel-level visual direction** (exact spacing, shadows, illustration style, "does this look premium?") | **Low until you upload references → High afterwards** | Web fetch cannot read images (Dribbble/Mobbin unreachable), **but local image files are readable directly** — so Mobbin captures dropped into `references/mobbin/` are fully analysable |
 | Apple HIG text | **None** | JS-gated; I refuse to cite it as read |
 
 ### 9.3 Adopted: Radix's 12-step role semantics (upgrades `UX-DS-02`)

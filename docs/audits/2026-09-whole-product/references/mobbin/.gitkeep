@@ -1,0 +1,5 @@
+Drop Mobbin / App Store screenshot files in this folder (see ../README.md).
+
+Images here are gitignored on purpose: they are third-party UI captures used as
+internal design reference only, never redistributed. This placeholder exists so
+the folder itself is present in the VS Code Explorer for drag-and-drop uploads.
