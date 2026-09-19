@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.0...v1.21.0-rc.1) (2026-09-19)
+
+
+### Bug Fixes
+
+* **ux:** make today mean scheduled-or-carried-over so the assistant cannot undercount (UX-AI-06) ([#214](https://github.com/Adedamola-Aina/AnchorOS/issues/214)) ([9696358](https://github.com/Adedamola-Aina/AnchorOS/commit/9696358b6d2738fd8aa12320d557c9716260cbbe))
+
 ## [1.21.0-rc.0](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.20.6...v1.21.0-rc.0) (2026-09-19)
 
 
