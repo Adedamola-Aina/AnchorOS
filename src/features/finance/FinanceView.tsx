@@ -3,12 +3,13 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Plus, Receipt } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
 import { useResponsive } from '../../hooks/useResponsive';
 import { Modal } from '../../components/shared/Modal';
+import { ActionSheet } from '../../components/shared/ActionSheet';
 import { AccountForm } from './AccountForm';
 import { TransactionForm } from './TransactionForm';
 import type { AnchorTransaction, Currency } from '../../types';
@@ -45,6 +46,15 @@ const FinanceView = () => {
   const [accountToUnshare, setAccountToUnshare] = useState<typeof accounts[0] | null>(null);
   const [transactionToDelete, setTransactionToDelete] = useState<AnchorTransaction | null>(null);
   const [prefillData, setPrefillData] = useState<{ amount?: number; category?: string; title?: string } | undefined>(undefined);
+  /** UX-FN-08: the landing page previously had no way to record a transaction. */
+  const [showCreateSheet, setShowCreateSheet] = useState(false);
+
+  const startRecordingTransaction = useCallback(() => {
+    setInitialTransactionType('expense');
+    setPrefillData(undefined);
+    setEditingTransaction(undefined);
+    setMode('addTx');
+  }, []);
 
   const activeAccounts = useMemo(() => {
     const filtered = accounts.filter(a => !a.isArchived);
@@ -144,11 +154,11 @@ const FinanceView = () => {
           </div>
           <button
             type="button"
-            onClick={() => setMode('addAcc')}
-            className="h-8 w-8 shrink-0 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center shadow-sm transition-all hover:opacity-90 active:scale-95"
-            aria-label="Create account"
+            onClick={() => setShowCreateSheet(true)}
+            className="h-11 w-11 shrink-0 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center shadow-sm transition-all hover:opacity-90 active:scale-95"
+            aria-label="Add account or record a transaction"
           >
-            <Plus className="w-4 h-4 text-white dark:text-slate-900" strokeWidth={2.5} />
+            <Plus className="w-5 h-5 text-white dark:text-slate-900" strokeWidth={2.5} />
           </button>
         </div>
 
@@ -167,6 +177,18 @@ const FinanceView = () => {
         {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
         {/* FIN-014: Upcoming bill reminders */}
         {activeAccounts.length > 0 && <FinanceBillsSection />}
+        {/* UX-FN-08: the transaction section's empty state instructed this action
+            but offered no control for it. */}
+        {activeAccounts.length > 0 && globalTransactions.length === 0 && (
+          <button
+            type="button"
+            onClick={startRecordingTransaction}
+            className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400"
+          >
+            <Receipt className="w-4 h-4" />
+            Record your first transaction
+          </button>
+        )}
         {/* Zone 4: Global Transaction History */}
         {activeAccounts.length > 0 && (
           <TransactionHistorySection transactions={globalTransactions} onEdit={handleEdit} onDelete={setTransactionToDelete} />
@@ -181,6 +203,24 @@ const FinanceView = () => {
           {(mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
         </Modal>
         <ConfirmationModal isOpen={!!transactionToDelete} onClose={() => setTransactionToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Transaction" message={`Are you sure you want to delete "${transactionToDelete?.title}"? This action cannot be undone.`} confirmLabel="Delete Transaction" isDestructive />
+
+        {/* UX-FN-08: one `+`, two named actions — replaces the unlabelled account-only affordance. */}
+        <ActionSheet
+          isOpen={showCreateSheet}
+          onClose={() => setShowCreateSheet(false)}
+          items={[
+            {
+              label: 'Record transaction',
+              icon: <Receipt className="w-5 h-5" />,
+              onPress: startRecordingTransaction,
+            },
+            {
+              label: 'Add account',
+              icon: <Plus className="w-5 h-5" />,
+              onPress: () => setMode('addAcc'),
+            },
+          ]}
+        />
       </div>
     </FeatureErrorBoundary>
   );

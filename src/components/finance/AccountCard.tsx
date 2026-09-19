@@ -10,7 +10,7 @@ import { getFinanceViewTransitionName } from '../../features/finance/financeView
 import { resolveAccountArtworkUrl, revokeAccountArtworkUrl } from '../../services/accountArtworkStorage';
 import {
   CARD_ASPECT_RATIO, CARD_BALANCE_FONT_SIZE, CARD_CORNER_RADIUS,
-  CARD_HEADER_FONT_SIZE, CARD_HEADER_LETTER_SPACING,
+  CARD_HEADER_FONT_SIZE, CARD_HEADER_LETTER_SPACING, CARD_HEADER_REVEAL,
   TYPE_COLORS, DEFAULT_CARD_COLORS, SHADOW_ACTIVE, SHADOW_DEFAULT,
 } from './cardConstants';
 
@@ -45,6 +45,16 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap(); }
   }, [onTap]);
 
+  /**
+   * UX-FN-07: in a collapsed stack only the visible peek strip is reachable.
+   * A non-front card used to expose its ENTIRE box as the hit area, but that box
+   * is painted underneath the front card — so a real pointer click landed on the
+   * front card and was swallowed (elementFromPoint intercepted; taps timed out).
+   * Fix: for non-front stacked cards the body ignores pointer events and a
+   * genuinely tappable strip (CARD_HEADER_REVEAL tall, ≥44px) sits on top.
+   */
+  const isStackedNonActive = mode === 'stack' && !isActive;
+
   useEffect(() => {
     let active = true;
     let resolvedUrl: string | undefined;
@@ -63,12 +73,12 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      aria-label={`Open ${instName} account`}
-      data-testid={`account-card-${account.id}`}
-      onClick={onTap}
-      onKeyDown={handleKeyDown}
+      role={isStackedNonActive ? 'presentation' : 'button'}
+      tabIndex={isStackedNonActive ? -1 : 0}
+      aria-label={isStackedNonActive ? undefined : `Open ${instName} account`}
+      data-testid={isStackedNonActive ? undefined : `account-card-${account.id}`}
+      onClick={isStackedNonActive ? undefined : onTap}
+      onKeyDown={isStackedNonActive ? undefined : handleKeyDown}
       className="account-card relative w-full overflow-hidden select-none cursor-pointer"
       style={{
         aspectRatio: `${CARD_ASPECT_RATIO}`,
@@ -79,8 +89,23 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
         viewTransitionName: skipViewTransition ? undefined : getFinanceViewTransitionName(account.id),
         transition: 'box-shadow 240ms ease',
         ...style,
+        // Must win over any caller style: a non-front card body is not a hit target.
+        pointerEvents: isStackedNonActive ? 'none' : undefined,
       }}
     >
+      {/* UX-FN-07: the only pointer target for a non-front stacked card. */}
+      {isStackedNonActive && (
+        <button
+          type="button"
+          data-testid={`account-card-${account.id}`}
+          data-account-card-strip="true"
+          aria-label={`Open ${instName} account`}
+          onClick={onTap}
+          className="absolute inset-x-0 top-0 z-[3] cursor-pointer border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          style={{ height: CARD_HEADER_REVEAL, pointerEvents: 'auto', borderRadius: `${CARD_CORNER_RADIUS}px ${CARD_CORNER_RADIUS}px 0 0` }}
+        />
+      )}
+
       {/* Subtle top highlight */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 40%)',
