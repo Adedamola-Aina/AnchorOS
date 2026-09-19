@@ -356,3 +356,14 @@ Registered on wave open, per doc 18 §1 (PR #210).
 | UX-DB-01 | MEDIUM | CORR | ROOT | — | X8 | LIVE | The dashboard greeting emitted a dangling "Good evening, " whenever the name was empty (round-2 §6 re-scoped this from a data bug to a missing empty/loading guard) | **REMEDIATED in F2** — the greeting renders the separator and name only when a name exists (the same edit that removes the "User" placeholder) |
 
 F1 and F2 did not touch schema, rules, functions, notification behaviour, or production. Remaining `UX-*` findings (docs 18/20/21) stay **unregistered and unimplemented** until their own waves open. Deliberately still open from F2: a *resumable* "Finish later" requires changing the `onboardingComplete` gate contract — tracked with the W6 onboarding rewrite, as is the per-step label polish ("Skip this step").
+
+## UX wave P1a — commitments legibility (2026-09-18, partial wave)
+
+P1 is split so each part can be verified independently: **P1a** = the self-contained commitments presentation defects (this section); **P1b** = schedule-aware occurrences/streaks/metrics; **P1c** = the capture-first composer sheet. Only P1a is remediated so far.
+
+| ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
+|---|---|---|---|---|---|---|---|---|
+| UX-CM-03 | HIGH | CORR | ROOT | — | X8 | LIVE | The primary CTA swapped its label to "Close" while keeping its `+` icon, so the icon contradicted the action; no expanded state was exposed | **REMEDIATED in P1a** — the icon switches with the state (`+` ⇄ `X`), an `X`/`Close` pairing now agrees, and `aria-expanded` is exposed |
+| UX-CM-11 | MEDIUM | CORR | ROOT | — | X7 | LIVE | The timeline/list/calendar switcher was three unlabelled icons whose selected state was not exposed (`aria-pressed` absent — an automated scan found only the theme toggles) | **REMEDIATED in P1a** — each view now has a visible text label, a `role="group"` container with an accessible name, and `aria-pressed` reflecting the active view |
+
+Still open in P1: `UX-CM-01` (classification before capture), `UX-CM-02` (inline composer with no step context), `UX-CM-04` (filter/cadence label collision), `UX-CM-05` (fixed in P1a), `UX-CM-06` (placeholder dash / row height), `UX-CM-07` (no schedule·next-due·streak on rows), `UX-CM-08` (cross-domain interruption on completion), `UX-CM-09` (composer step 2: jargon, Save below the fold, dual dismiss, emoji priority, no exact time), `UX-CM-10` (identical labels for filter chips and cadence cards).

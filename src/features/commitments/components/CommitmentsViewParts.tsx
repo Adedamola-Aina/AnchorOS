@@ -30,6 +30,14 @@ export const CommitmentsEmptyState: React.FC<EmptyStateProps> = ({ filter, hasFa
 );
 
 interface FilterBarProps { filter: string; viewMode: string; onFilterChange: (f: 'all' | 'daily' | 'weekly' | 'monthly' | 'todo') => void; onViewChange: (v: 'timeline' | 'list' | 'calendar') => void; }
+
+/** UX-CM-11: the switcher is labelled and its selected state is exposed to assistive tech. */
+const VIEW_OPTIONS = [
+    { id: 'timeline', label: 'Timeline', icon: Clock },
+    { id: 'list', label: 'List', icon: LayoutList },
+    { id: 'calendar', label: 'Week', icon: CalendarDays },
+] as const;
+
 export const CommitmentsFilterBar: React.FC<FilterBarProps> = ({ filter, viewMode, onFilterChange, onViewChange }) => (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mb-2">
@@ -37,10 +45,22 @@ export const CommitmentsFilterBar: React.FC<FilterBarProps> = ({ filter, viewMod
                 <Button key={f} onClick={() => onFilterChange(f)} variant={filter === f ? 'primary' : 'secondary'} size="sm" className="capitalize uppercase tracking-widest text-[10px]">{f}</Button>
             ))}
         </div>
-        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start sm:self-auto">
-            <button onClick={() => onViewChange('timeline')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'timeline' ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-400'}`} title="Timeline View" aria-label="Timeline View"><Clock className="w-4 h-4" /></button>
-            <button onClick={() => onViewChange('list')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-400'}`} title="List View" aria-label="List View"><LayoutList className="w-4 h-4" /></button>
-            <button onClick={() => onViewChange('calendar')} className={`p-3 sm:p-2 rounded-md transition-all min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-400'}`} title="Week View" aria-label="Week View"><CalendarDays className="w-4 h-4" /></button>
+        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start sm:self-auto" role="group" aria-label="Commitment view">
+            {VIEW_OPTIONS.map(({ id, label, icon: Icon }) => {
+                const isActive = viewMode === id;
+                return (
+                    <button
+                        key={id}
+                        type="button"
+                        onClick={() => onViewChange(id)}
+                        aria-pressed={isActive}
+                        className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all min-h-[44px] ${isActive ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                    >
+                        <Icon className="w-4 h-4" aria-hidden="true" />
+                        <span>{label}</span>
+                    </button>
+                );
+            })}
         </div>
     </div>
 );

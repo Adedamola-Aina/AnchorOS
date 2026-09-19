@@ -44,7 +44,7 @@ describe('CommitmentsFilterBar', () => {
 
   it('switches view mode', () => {
     render(<CommitmentsFilterBar {...defaults} />);
-    fireEvent.click(screen.getByLabelText('Week View'));
+    fireEvent.click(screen.getByRole('button', { name: 'Week' }));
     expect(defaults.onViewChange).toHaveBeenCalledWith('calendar');
   });
 
@@ -52,5 +52,28 @@ describe('CommitmentsFilterBar', () => {
     render(<CommitmentsFilterBar {...defaults} />);
     fireEvent.click(screen.getByText('daily'));
     expect(defaults.onFilterChange).toHaveBeenCalledWith('daily');
+  });
+});
+
+describe('CommitmentsFilterBar — labelled, stateful view switcher (UX-CM-11)', () => {
+  const props = { filter: 'all', viewMode: 'list', onFilterChange: vi.fn(), onViewChange: vi.fn() };
+
+  it('shows a visible text label for every view instead of icon-only controls', () => {
+    render(<CommitmentsFilterBar {...props} />);
+    expect(screen.getByText('Timeline')).toBeInTheDocument();
+    expect(screen.getByText('List')).toBeInTheDocument();
+    expect(screen.getByText('Week')).toBeInTheDocument();
+  });
+
+  it('exposes the selected view to assistive tech via aria-pressed', () => {
+    render(<CommitmentsFilterBar {...props} />);
+    expect(screen.getByRole('button', { name: 'List' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Timeline' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('changes the view when a labelled control is activated', () => {
+    render(<CommitmentsFilterBar {...props} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Week' }));
+    expect(props.onViewChange).toHaveBeenCalledWith('calendar');
   });
 });
