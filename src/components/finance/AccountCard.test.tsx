@@ -94,3 +94,54 @@ describe('AccountCard — Apple Wallet panel', () => {
     expect(container.querySelector('.account-card')).toHaveStyle({ aspectRatio: '1.586' });
   });
 });
+
+/**
+ * UX-FN-07 regression guard.
+ * A non-front card previously exposed its whole box as the hit area, but that box
+ * is painted underneath the front card, so real pointer clicks were intercepted and
+ * the account could not be opened at all. Only the peek strip is reachable.
+ */
+describe('AccountCard — stacked peek strip is a real hit target (UX-FN-07)', () => {
+  it('gives a non-front card a tappable 48px strip', () => {
+    render(card({ isActive: false }));
+    const strip = screen.getByTestId('account-card-acc-1');
+    expect(strip).toHaveAttribute('data-account-card-strip', 'true');
+    expect(strip).toHaveStyle({ height: '48px', pointerEvents: 'auto' });
+  });
+
+  it('removes the non-front card body from the hit-test surface', () => {
+    const { container } = render(card({ isActive: false }));
+    const body = container.querySelector('.account-card');
+    expect(body).toHaveStyle({ pointerEvents: 'none' });
+    expect(body).toHaveAttribute('role', 'presentation');
+    expect(body).not.toHaveAttribute('aria-label');
+  });
+
+  it('opens the account when the strip is tapped', async () => {
+    const onTap = vi.fn();
+    render(card({ isActive: false, onTap }));
+    await userEvent.click(screen.getByTestId('account-card-acc-1'));
+    expect(onTap).toHaveBeenCalledOnce();
+  });
+
+  it('exposes exactly one interactive element per card (no duplicate accessible name)', () => {
+    render(card({ isActive: false }));
+    expect(screen.getAllByTestId('account-card-acc-1')).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: /Chase Bank/ })).toHaveLength(1);
+  });
+
+  it('keeps the front card fully tappable (no strip, body handles the tap)', async () => {
+    const onTap = vi.fn();
+    const { container } = render(card({ isActive: true, onTap }));
+    const body = container.querySelector('.account-card');
+    expect(body).not.toHaveStyle({ pointerEvents: 'none' });
+    expect(screen.queryByTestId('account-card-acc-1')).not.toHaveAttribute('data-account-card-strip');
+    await userEvent.click(screen.getByTestId('account-card-acc-1'));
+    expect(onTap).toHaveBeenCalledOnce();
+  });
+
+  it('keeps the strip in expanded mode off (whole card is visible there)', () => {
+    render(card({ mode: 'expanded', isActive: false }));
+    expect(screen.queryByTestId('account-card-acc-1')).not.toHaveAttribute('data-account-card-strip');
+  });
+});

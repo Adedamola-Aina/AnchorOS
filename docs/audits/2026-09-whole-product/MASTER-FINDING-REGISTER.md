@@ -332,9 +332,20 @@ Full verification plan (method, precautions, decision impact): report 12 §18. T
 
 All other severities were re-evaluated against the product-wide scale and preserved; no historical label was preserved mechanically.
 
+## UX wave F1 — registration on wave open (2026-09-18)
+
+Registered here because doc 18 §1 states `UX-*` findings are added to this register **only when their remediation wave opens**. F1 is the first UX wave (the functional finance P0s identified in doc 20 §7.2), merged as PR #209.
+
+| ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
+|---|---|---|---|---|---|---|---|---|
+| UX-FN-07 | HIGH | CORR | ROOT | — | X8 | LIVE | Non-front account cards were unopenable: the card's whole box was the hit area, painted beneath the front card, so real pointer clicks were intercepted (`locator.click` TimeoutError vs force-click OK) | **REMEDIATED in F1** — non-front stacked cards now expose a 48px tappable peek strip and their body is removed from the hit-test surface; verified by real (non-forced) tap → `/finance/account/acc-ngn-ops` |
+| UX-FN-08 | HIGH | CORR | ROOT | — | X8 | LIVE | The Finance landing page had **no** transaction entry point (`transaction-ish controls on /finance: []`) while its empty state instructed "Add your first transaction to get started"; recording lived only inside account detail — unreachable per UX-FN-07 | **REMEDIATED in F1** — one `+` opens an action sheet (Record transaction / Add account), plus a real empty-state CTA; verified in-browser |
+| UX-FN-09 | MEDIUM | CORR | ROOT | — | X7 | LIVE | Tap targets below the 44×44px accessibility contract: the header `+` and both month controls measured 32×32 | **REMEDIATED in F1** — measured 44×44 in the running app |
+| (F1 side-fix) | LOW | CORR | CHILD | — | X7 | LIVE | `ActionSheet` icons contributed to the button's accessible name (`"+Add account"`), so actions announced incorrectly to assistive tech | **REMEDIATED in F1** — decorative icons are now `aria-hidden` |
+
 ## UX wave F2 — onboarding P0s (2026-09-18)
 
-Registered on wave open, per doc 18 §1. (F1's finance registration lives in its own PR; the two sections are appended independently to avoid a shared summary line.)
+Registered on wave open, per doc 18 §1 (PR #210).
 
 | ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
 |---|---|---|---|---|---|---|---|---|
@@ -344,4 +355,4 @@ Registered on wave open, per doc 18 §1. (F1's finance registration lives in its
 | UX-OB-09 | MEDIUM | CORR | ROOT | — | X8 | LIVE | "Skip for now →" carried three behaviours; on steps 2 and 4 it **silently terminated setup** | **REMEDIATED in F2** — step 1's control is "Finish later" (an explicit exit that records progress); later steps' skip advances exactly one step and can never end setup; verified |
 | UX-DB-01 | MEDIUM | CORR | ROOT | — | X8 | LIVE | The dashboard greeting emitted a dangling "Good evening, " whenever the name was empty (round-2 §6 re-scoped this from a data bug to a missing empty/loading guard) | **REMEDIATED in F2** — the greeting renders the separator and name only when a name exists (the same edit that removes the "User" placeholder) |
 
-F2 did not touch schema, rules, functions, notification behaviour, or production. Deliberately **not** included (still open): a *resumable* "Finish later" requires changing the `onboardingComplete` gate contract — tracked with the W6 onboarding rewrite, as is the per-step label polish ("Skip this step").
+F1 and F2 did not touch schema, rules, functions, notification behaviour, or production. Remaining `UX-*` findings (docs 18/20/21) stay **unregistered and unimplemented** until their own waves open. Deliberately still open from F2: a *resumable* "Finish later" requires changing the `onboardingComplete` gate contract — tracked with the W6 onboarding rewrite, as is the per-step label polish ("Skip this step").
