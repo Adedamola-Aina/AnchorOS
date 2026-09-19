@@ -56,4 +56,20 @@ describe('FabricProactiveQuestionCard', () => {
 
     expect(screen.getByRole('button', { name: 'Should we check your cash flow?' })).toHaveClass('min-h-11');
   });
+
+  it('renders an icon instead of a literal "?" glyph (AI-07)', () => {
+    const { container } = render(
+      <FabricProactiveQuestionCard
+        question="Should we review your subscriptions this week?"
+        onDismiss={vi.fn()}
+        onTap={vi.fn()}
+      />,
+    );
+
+    // The old markup placed a bare "?" character where an icon belongs, which
+    // read as a broken icon lookup and broke the DESIGN_SYSTEM rule that
+    // functional states use Lucide icons.
+    expect(screen.queryByText('?')).not.toBeInTheDocument();
+    expect(container.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+  });
 });

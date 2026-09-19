@@ -127,13 +127,13 @@ Sizes: **S** ≈ one PR, **M** ≈ one wave, **L** ≈ a wave with real regressi
 
 ## Part C — The complete remaining work, in one place
 
-Everything still open after this document (existing 45 from doc 22, plus the new findings registered here). **Existing** = already in the ledger; **New** = registered by this document.
+Everything still open after this document (existing 40 from doc 22, plus the new findings registered here). **Existing** = already in the ledger; **New** = registered by this document.
 
 | Group | Findings | Count | Source |
 |---|---|---|---|
 | P1b remainder | `CM-04`, `CM-06`, `CM-07`, `CM-08`, `AI-04`, `AI-09`, `ST-03`, `GL-05` | 8 | Existing |
 | P1c capture-first composer | `CM-01`, `CM-02`, `CM-09`, `CM-10`, `OB-03`, `DS-01` | 6 | Existing |
-| P2 Home merge + shell | `DB-02`…`DB-05`, `AI-01`, `AI-03`, `AI-05`, `AI-07`, `AI-10`, `GL-01`…`GL-04`, `GL-06` | 14 | Existing |
+| P2 Home merge + shell | `DB-02`…`DB-05`, `AI-01`, `AI-03`, `AI-05`, `AI-07`, `AI-10`, `GL-01`…`GL-04`, `GL-06` | 14 → **9** (`DB-02`, `DB-03`, `DB-04`, `DB-05`, `AI-07` closed) | Existing |
 | P3 Settings hub | `ST-01`, `ST-02`, `ST-04`, `ST-05`, `ST-06`, `GL-08` | 6 | Existing |
 | P3 Finance Wallet visuals | `FN-01`…`FN-04`, `FN-06`, `FN-10` | 6 | Existing |
 | P3 Onboarding rewrite | `OB-01`, `OB-02`, `OB-04`, `OB-05` | 4 | Existing |
@@ -145,7 +145,7 @@ Everything still open after this document (existing 45 from doc 22, plus the new
 | **Fabric AI — trust** | `AI-11`, `AI-15`, `AI-05/10`, `AI-07`, `AI-01`, `AI-04/09` | 6 | **New** |
 | **Fabric AI — ambition** | `AI-13`, `AI-18`, `AI-12`, `AI-16`, `AI-14`, `AI-19`, `AI-21`, `AI-03` | 8 | **New (need your yes)** |
 
-**Totals:** 45 existing + ~25 new findings ≈ **70 open items**, of which **14 are PROPOSED** and need your decision (8 commitments, 6 assistant).
+**Totals:** 40 existing + ~25 new findings ≈ **65 open items**, of which **14 are PROPOSED** and need your decision (8 commitments, 6 assistant).
 
 ## Part D — The wave plan (order, contents, exit criteria)
 

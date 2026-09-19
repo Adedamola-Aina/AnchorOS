@@ -15,7 +15,7 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
 import { useHaptic } from '../../hooks/useHaptic';
-import { getAssetDistribution } from '../../utils/financeInsights';
+import { getAssetDistribution, getPortfolioTotals } from '../../utils/financeInsights';
 import { getProductivityMetrics } from '../../utils/taskInsights';
 import { AssetAllocationWidget } from './components/AssetAllocationWidget';
 import { PortfolioWidget, CashFlowWidget, RecentActivityWidget, ProductivityWidget, TodaysFocusWidget } from './components/DashboardWidgets';
@@ -51,6 +51,7 @@ const DashboardView = () => {
   const hasCommitments = tasks.length > 0;
   const todaysPriorities = tasks.filter(t => t.type === 'daily' && !t.completed).slice(0, 3);
   const assets = getAssetDistribution(accounts);
+  const totals = getPortfolioTotals(accounts);
   const primaryCurrency: Currency = accounts.length > 0 ? (accounts[0].currency as Currency) : 'NGN';
 
   const handleRefresh = async () => {
@@ -120,7 +121,7 @@ const DashboardView = () => {
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${isMobile ? 'gap-3' : 'gap-5'} ${isRefreshing ? 'opacity-60' : ''}`}>
           {/* Column 1: Wealth */}
           <div className="space-y-5">
-            <PortfolioWidget assets={assets} onNavigate={() => navigateTo('finance')} accountCount={accounts.length} isMobile={isMobile} />
+            <PortfolioWidget totals={totals} onNavigate={() => navigateTo('finance')} accountCount={accounts.length} isMobile={isMobile} />
             {accounts.length > 1 && <AssetAllocationWidget assets={assets} />}
             <GoalProgressCard goals={goals} isLoading={goalsLoading} />
           </div>

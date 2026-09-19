@@ -395,6 +395,20 @@ First wave of the researched design programme (doc 24 §5). Its purpose is that 
 
 **Verification-integrity gap found while building the W-D1b gate (2026-09-19).** The visual regression suite could not detect a regression on any of the four surfaces: `e2e/visual.spec.ts` imports `test` from `@playwright/test` rather than the authenticated fixture in `e2e/fixtures/base.ts`, so five of its eight committed baselines (`auth-login`, `auth-signup`, `dashboard-overview`, `mobile-navigation`, `settings-page`) are **byte-identical** captures of the unauthenticated screen, and `auth-login-dark` == `dashboard-dark` for the same reason. Its `mobile` project also needs WebKit, which CI never installs (`npx playwright install chromium`), so it cannot run there either. W-D1b therefore has its own gate — `e2e/design-surfaces.spec.ts`, which authenticates for real, drives the real theme control, and fails if any two surface/theme captures are byte-identical. The old baselines still need regeneration or retirement.
 
+## UX wave P2 — Home merge + shell (2026-09-19, partial wave)
+
+First slice of the P2 wave: the Home surface's **money statements** and its dead ends. Colour/geometry token adoption for this surface is still W-D1b, so the wave is partial, not closed.
+
+| ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
+|---|---|---|---|---|---|---|---|---|
+| UX-DB-02 | HIGH | CORR | ROOT | — | X7 | LIVE | The Portfolio share divided every balance by one total that summed **all** currencies, so in a mixed-currency portfolio an NGN balance was divided by a denominator containing USD cents — the percentage was arithmetically meaningless | **REMEDIATED** — `getAssetDistribution` computes each share within its own currency, and Asset Split renders one bar + legend group per currency so every percentage is attributable. Regression tests in `financeInsights.test.ts`: mixed-currency shares, within-currency relativity, zero-balance currency |
+| UX-DB-03 | HIGH | CORR | ROOT | — | X6 | LIVE | The Portfolio card advertised "TOTAL ACROSS 3 ACCOUNTS" and never printed a total | **REMEDIATED** — `getPortfolioTotals` returns one total per currency and the card prints it (`portfolio-total-<CUR>`); the count also reads "1 account" instead of "1 accounts". Test: `PortfolioWidget.test.tsx` |
+| UX-DB-04 | MEDIUM | CORR | ROOT | — | X6 | LIVE | The Portfolio card repeated the Asset Split payload (per-asset amount + percentage) on one screen | **REMEDIATED by deletion** — Portfolio carries the number, Asset Split carries the composition; the widget no longer receives assets, so the duplication cannot return. Test: `PortfolioWidget.test.tsx` |
+| UX-DB-05 | MEDIUM | CORR | ROOT | — | X5 | LIVE | The goal empty state was a dead end: it instructed "set one during onboarding" with no control to do it | **REMEDIATED (honest copy)** — it uses the shared `EmptyState` (UX-DS-07). Goals can only be created during onboarding today, so per that contract the action is omitted and the copy states the fact instead of naming a control that does not exist; the action returns when a goal surface ships. Test: `GoalProgressCard.test.tsx` |
+| UX-AI-07 | MEDIUM | CORR | ROOT | — | X5 | LIVE | The proactive question card rendered a literal "?" character where an icon belongs, reading as a broken icon lookup | **REMEDIATED** — Lucide `MessageCircleQuestion`, per the `DESIGN_SYSTEM.md` rule that functional states use icons. Test: `FabricProactiveQuestionCard.test.tsx` |
+
+Still open in P2: `UX-AI-01`, `UX-AI-03`, `UX-AI-05`, `UX-AI-10`, `UX-GL-01`, `UX-GL-02`, `UX-GL-03`, `UX-GL-04`, `UX-GL-06`.
+
 **Guardrail fixed in this wave:** the vitest `include` lists were explicit directories, so a `src/design/**` test would have been **silently never collected**. `config/vitest.config.ts` now includes it in the node project, and `src/design/designFoundation.test.ts` enforces the token, motion and sensory contracts (10 assertions).
 
 

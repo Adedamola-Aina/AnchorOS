@@ -19,13 +19,13 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **16** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **45** |
+| Closed | **21** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **40** |
 | Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06) |
 | Deployed | `master` `b67aa498` / `v1.21.0-rc.0` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
 
-## Closed (14)
+## Closed (21)
 
 | ID | Sev | Wave | What was wrong | Verified by |
 |---|---|---|---|---|
@@ -45,9 +45,14 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | UX-FN-05 | MEDIUM | P1d | Finance subtitle used internal vocabulary | Plain-language subtitle |
 | UX-AI-06 | HIGH | P1b | Assistant said "No tasks scheduled today" while active commitments existed — overdue work was invisible to the assistant **and** the nav badge | Shared schedule model (`commitmentSchedule.ts`); assistant, badge and page agree |
 | UX-AI-08 | MEDIUM | P1b | First insight was a demoralising "completion: 0% — 0 of 4 done in 30 days": a momentary complete-flag was described as 30-day performance | Expected occurrences per cadence vs evidenced completions; silent when nothing was due |
+| UX-DB-02 | HIGH | P2 | Portfolio share divided every balance by one total that summed **all currencies**, so an NGN balance was divided by a denominator containing USD cents | Shares computed within their own currency; Asset Split renders one bar + legend per currency. `financeInsights.test.ts` |
+| UX-DB-03 | HIGH | P2 | Portfolio advertised "TOTAL ACROSS 3 ACCOUNTS" but printed no total | `getPortfolioTotals` + the card prints one total per currency, and reads "1 account" not "1 accounts". `PortfolioWidget.test.tsx` |
+| UX-DB-04 | MEDIUM | P2 | Portfolio and Asset Split duplicated the same payload | Deleted from Portfolio (it now carries the number; the split carries the composition). `PortfolioWidget.test.tsx` |
+| UX-DB-05 | MEDIUM | P2 | Goal empty state was a dead end ("set one during onboarding", no control) | Shared `EmptyState` with honest copy; no action promised while no goal surface exists. `GoalProgressCard.test.tsx` |
+| UX-AI-07 | MEDIUM | P2 | Proactive card rendered a literal **"?"** where an icon should be | Lucide `MessageCircleQuestion`, per `DESIGN_SYSTEM.md`. `FabricProactiveQuestionCard.test.tsx` |
 | — | LOW | F1 | `ActionSheet` icons leaked into accessible names (`"+Add account"`) | `aria-hidden` on decorative icons |
 
-## Remaining (47) — grouped by the wave that will close them
+## Remaining (40) — grouped by the wave that will close them
 
 ### P1b — schedule-aware commitments engine · **in progress** (8 findings remain; UX-AI-06, UX-AI-08 closed)
 
@@ -75,14 +80,10 @@ This is the highest-leverage remaining work: it fixes the assistant's false stat
 | UX-OB-03 | HIGH | Onboarding pre-fills junk defaults ('Main Checking', 'Read for 15 mins') committed verbatim |
 | UX-DS-01 | MEDIUM | Emoji used as functional icons, against `DESIGN_SYSTEM.md` ("Lucide React exclusively") |
 
-### P2 — Home merge + shell · **D1/D2 accepted — ready to build** (14 findings)
+### P2 — Home merge + shell · **D1/D2 accepted — partially closed** (9 findings remain; UX-DB-02, UX-DB-03, UX-DB-04, UX-DB-05 and UX-AI-07 closed)
 
 | ID | Sev | Finding |
 |---|---|---|
-| UX-DB-02 | HIGH | Percentage share computed across NGN **and** USD in one denominator (a correctness bug) |
-| UX-DB-03 | HIGH | Portfolio advertises "TOTAL ACROSS 3 ACCOUNTS" but prints no total |
-| UX-DB-04 | MEDIUM | Portfolio and Asset Split duplicate the same payload |
-| UX-DB-05 | MEDIUM | Goal empty state is a dead end ("set one during onboarding") |
 | UX-AI-01 | HIGH | Assistant is an equal-weight card stack; the input sits below mood and insights |
 | UX-AI-03 | MEDIUM | No conversation continuity, no stated data scope |
 | UX-AI-05 | MEDIUM | Transparency page unreachable from the assistant |

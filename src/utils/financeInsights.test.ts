@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect } from 'vitest';
-import { getWeeklySpending, detectRecurring, getCashFlowAnalysis, getAssetDistribution } from './financeInsights';
+import { getWeeklySpending, detectRecurring, getCashFlowAnalysis, getAssetDistribution, getPortfolioTotals } from './financeInsights';
 import type { AnchorTransaction } from '../types';
 import { buildAccount } from '../test/factories';
 
@@ -389,6 +389,78 @@ describe('financeInsights', () => {
             expect(result).toHaveLength(1);
             expect(result[0].name).toBe('Active');
             expect(result[0].percent).toBe(100);
+        });
+
+        // DB-02 regression. The share used to be divided by a total that summed
+        // EVERY currency together, so a mixed-currency portfolio produced a
+        // percentage that meant nothing.
+        it('computes each share within its own currency, not across currencies (DB-02)', () => {
+            const accounts = [
+                buildAccount({ id: 'ngn', name: 'Naira', balanceCents: 1_000_000, currency: 'NGN' }),
+                buildAccount({ id: 'usd', name: 'Dollars', balanceCents: 1_000_000, currency: 'USD' }),
+            ];
+            const result = getAssetDistribution(accounts);
+
+            // Under the old mixed denominator each account read as 50%, which was
+            // not a fact about either currency. Each is now the whole of its own.
+            expect(result.find(a => a.id === 'ngn')?.percent).toBe(100);
+            expect(result.find(a => a.id === 'usd')?.percent).toBe(100);
+        });
+
+        it('keeps shares relative within one currency when a second is present (DB-02)', () => {
+            const accounts = [
+                buildAccount({ id: 'ngn-small', name: 'Small', balanceCents: 25_000, currency: 'NGN' }),
+                buildAccount({ id: 'ngn-big', name: 'Big', balanceCents: 75_000, currency: 'NGN' }),
+                buildAccount({ id: 'usd', name: 'Dollars', balanceCents: 900_000, currency: 'USD' }),
+            ];
+            const result = getAssetDistribution(accounts);
+
+            expect(result.find(a => a.id === 'ngn-small')?.percent).toBe(25);
+            expect(result.find(a => a.id === 'ngn-big')?.percent).toBe(75);
+            expect(result.find(a => a.id === 'usd')?.percent).toBe(100);
+        });
+
+        it('gives a zero-balance currency a 0% share instead of dividing by zero', () => {
+            const accounts = [
+                buildAccount({ id: 'ngn', name: 'Empty', balanceCents: 0, currency: 'NGN' }),
+                buildAccount({ id: 'usd', name: 'Funded', balanceCents: 10_000, currency: 'USD' }),
+            ];
+            const result = getAssetDistribution(accounts);
+
+            expect(result.find(a => a.id === 'ngn')?.percent).toBe(0);
+            expect(result.find(a => a.id === 'usd')?.percent).toBe(100);
+        });
+    });
+
+    describe('getPortfolioTotals (DB-03)', () => {
+        it('totals each currency separately instead of concatenating them', () => {
+            const accounts = [
+                buildAccount({ id: 'n1', balanceCents: 100_000, currency: 'NGN' }),
+                buildAccount({ id: 'n2', balanceCents: 250_000, currency: 'NGN' }),
+                buildAccount({ id: 'u1', balanceCents: 500_000, currency: 'USD' }),
+            ];
+            const totals = getPortfolioTotals(accounts);
+
+            expect(totals).toHaveLength(2);
+            const ngn = totals.find(t => t.currency === 'NGN');
+            const usd = totals.find(t => t.currency === 'USD');
+            // 100_000 + 250_000 minor units = 3,500.00 — never added to the USD one.
+            expect(ngn?.total).toBe(3500);
+            expect(ngn?.accountCount).toBe(2);
+            expect(usd?.total).toBe(5000);
+            expect(usd?.accountCount).toBe(1);
+        });
+
+        it('excludes archived accounts and reports a zero total honestly', () => {
+            const accounts = [
+                buildAccount({ id: 'a1', balanceCents: 0, currency: 'NGN' }),
+                buildAccount({ id: 'a2', balanceCents: 500_000, currency: 'NGN', isArchived: true }),
+            ];
+            const totals = getPortfolioTotals(accounts);
+
+            expect(totals).toHaveLength(1);
+            expect(totals[0].total).toBe(0);
+            expect(totals[0].accountCount).toBe(1);
         });
     });
 });
