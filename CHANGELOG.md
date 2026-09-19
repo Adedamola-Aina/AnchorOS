@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.2](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.1...v1.21.0-rc.2) (2026-09-19)
+
+
+### Bug Fixes
+
+* **ux:** measure commitment completion against expected occurrences (UX-AI-08) ([#216](https://github.com/Adedamola-Aina/AnchorOS/issues/216)) ([6ce2fe0](https://github.com/Adedamola-Aina/AnchorOS/commit/6ce2fe05643b6e7f06f56d3db311d85e222e06a8))
+
 ## [1.21.0-rc.1](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.0...v1.21.0-rc.1) (2026-09-19)
 
 
