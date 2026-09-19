@@ -466,8 +466,12 @@ function workflowFiles() {
     return fs.readdirSync(WORKFLOW_DIR).filter((f) => f.endsWith('.yml')).sort();
 }
 
-test('exactly three normal workflows: ci.yml, staging.yml, production.yml', () => {
-    assert.deepEqual(workflowFiles(), ['ci.yml', 'production.yml', 'staging.yml']);
+test('exactly four workflows: ci.yml, staging.yml, production.yml and version.yml (release metadata only)', () => {
+    // version.yml was added deliberately: release versioning is automatic on
+    // merge to master, and it must live outside the deploy workflows because
+    // those are dispatch-only (and production.yml is forbidden from pushing).
+    // It publishes tags/Releases only — see release-versioning.node-suite.mjs.
+    assert.deepEqual(workflowFiles(), ['ci.yml', 'production.yml', 'staging.yml', 'version.yml']);
 });
 
 test('merge gate, weekly health and failure-email workflows are deleted (no duplicate executors)', () => {
