@@ -437,7 +437,7 @@ First slice of the P2 wave: the Home surface's **money statements** and its dead
 | UX-DB-05 | MEDIUM | CORR | ROOT | — | X5 | LIVE | The goal empty state was a dead end: it instructed "set one during onboarding" with no control to do it | **REMEDIATED (honest copy)** — it uses the shared `EmptyState` (UX-DS-07). Goals can only be created during onboarding today, so per that contract the action is omitted and the copy states the fact instead of naming a control that does not exist; the action returns when a goal surface ships. Test: `GoalProgressCard.test.tsx` |
 | UX-AI-07 | MEDIUM | CORR | ROOT | — | X5 | LIVE | The proactive question card rendered a literal "?" character where an icon belongs, reading as a broken icon lookup | **REMEDIATED** — Lucide `MessageCircleQuestion`, per the `DESIGN_SYSTEM.md` rule that functional states use icons. Test: `FabricProactiveQuestionCard.test.tsx` |
 
-Still open in P2: `UX-AI-01`, `UX-AI-03`, `UX-GL-01` (improved — Home now carries the doorway) and `UX-GL-04`. Closed in this wave: `UX-AI-04`, `UX-AI-05`, `UX-AI-09`, `UX-AI-10`, `UX-GL-02`, `UX-GL-03`, `UX-GL-05`, `UX-GL-06` and `UX-ST-03`.
+Still open in P2: `UX-GL-04` (the floating pill nav and the contextual FAB are their own change). Closed in the P2 shell wave: `UX-AI-04`, `UX-AI-05`, `UX-AI-09`, `UX-AI-10`, `UX-GL-02`, `UX-GL-03`, `UX-GL-05`, `UX-GL-06` and `UX-ST-03`. Its two assistant findings (`UX-AI-01`, `UX-AI-03`) and `UX-GL-01` closed in the W-A1 wave below.
 
 ## UX wave P2 — shell, vocabulary and assistant placement (2026-09-20, closing wave)
 
@@ -484,5 +484,16 @@ The Finance landing says what it means: totals are per currency and labelled, ac
 
 
 **Guardrail fixed in this wave:** the vitest `include` lists were explicit directories, so a `src/design/**` test would have been **silently never collected**. `config/vitest.config.ts` now includes it in the node project, and `src/design/designFoundation.test.ts` enforces the token, motion and sensory contracts (10 assertions).
+
+
+## UX wave W-A1 — assistant hierarchy, continuity and reachability (2026-09-20, closing wave)
+
+The assistant stops burying its own input and stops being a dead end. Mood had already left it (P2), which was one of the two blocks that pushed the input down; the remaining hierarchy, continuity and reachability findings close here.
+
+| ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
+|---|---|---|---|---|---|---|---|---|
+| UX-AI-01 | HIGH | CORR | ROOT | — | X7 | LIVE | The assistant was an **equal-weight card stack** — Onboarding, Today, Mood, Proactive question, Upcoming, Predictions, Insights, Query, Weekly snapshot — with the actual input near the **bottom**, after mood and insights | **REMEDIATED** — the input section now comes **directly under the Today block** ("what is happening" then "ask about it"), and insights are capped at **3** ranked cards with a "showing 3 of N" note. Mood left the surface in P2, removing the other block that buried it. Tests: `FabricView.test.tsx` (document-order assertion) |
+| UX-AI-03 | MEDIUM | CORR | ROOT | — | X5 | LIVE | No conversation continuity: one free-text submission, one result, no history, no "ask again", and **no visible statement of which data the answer used** | **REMEDIATED** — the section states its source ("Answered from your own commitments, accounts and recorded transactions"), keeps the last **3** exchanges readable under "Earlier", and every answer (current and earlier) carries an **Ask again** action. **Honest limit:** no *window* is stated because the query engine exposes none — inventing "last 30 days" would have been a false claim. Tests: `FabricQuerySection.test.tsx` (4 new) |
+| UX-GL-01 | HIGH | CORR | ROOT | — | X6 | LIVE | Anchor AI was unreachable when disabled | **CLOSED for the pre-merge state** — `/fabric` is addressable, the disabled state explains its value and its CTA now **deep-links to `/settings/assistant`** (a routed, searchable section that owns the switch), and Home carries the doorway while the feature is on. The separate destination disappears entirely with the Home merge (`W2`), which is why this is recorded as closed-here rather than deferred. Tests: `FabricView.test.tsx` (deep-link), `SettingsView.test.tsx` |
 
 

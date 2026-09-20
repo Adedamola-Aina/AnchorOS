@@ -19,13 +19,13 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **51** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **10** |
-| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep), P2 (Home shell + assistant placement), P3-Settings (hub + routed sections), P3-Finance (labelled totals, comparable rows, explainable empty months) |
+| Closed | **54** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **7** |
+| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep), P2 (Home shell + assistant placement), P3-Settings (hub + routed sections), P3-Finance (labelled totals, comparable rows, explainable empty months), W-A1 (assistant hierarchy + continuity) |
 | Deployed | `master` `5270bfb7` / `v1.21.0-rc.19` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
 
-## Closed (51)
+## Closed (54)
 
 | ID | Sev | Wave | What was wrong | Verified by |
 |---|---|---|---|---|
@@ -78,11 +78,15 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 
 
 
-## Remaining (10) — grouped by the wave that will close them
+## Remaining (7) — grouped by the wave that will close them
 
 ### P1b — schedule-aware commitments engine · **in progress** (1 finding remains — `UX-CM-07`, partial; UX-AI-06, UX-AI-08, UX-CM-04, UX-CM-06, UX-CM-08 closed here, and its remaining shell findings UX-AI-04, UX-AI-09, UX-ST-03 and UX-GL-05 closed in P2)
 
 This is the highest-leverage remaining work: it fixes the assistant's false statements **at the root** and makes streaks fair. **Landed in this wave:** the shared schedule model (`src/services/fabric/commitmentSchedule.ts`) — "today" now means *scheduled today or carried over*, so the assistant, the nav badge and the Today card share one definition and cannot disagree; the empty day is honest ("You have no commitments yet" / "Nothing due today — next up Mon") and its button offers the action it names.
+
+| UX-AI-01 | HIGH | W-A1 | The assistant was an equal-weight card stack with the input near the **bottom**, after mood and insights | The input now sits directly under the Today block, and insights are capped at **3** ranked cards with a "showing 3 of N" note. `FabricView.test.tsx` |
+| UX-AI-03 | MEDIUM | W-A1 | No continuity: one submission, one result, no thread, no "ask again", and no statement of which data the answer used | The section states its source ("Answered from your own commitments, accounts and recorded transactions"), keeps the last 3 exchanges readable under "Earlier", and every answer carries **Ask again**. `FabricQuerySection.test.tsx` |
+| UX-GL-01 | HIGH | W-A1 | Anchor AI was unreachable when disabled | **CLOSED for the pre-merge state:** `/fabric` is addressable, the disabled state explains its value and its CTA deep-links to `/settings/assistant` (a routed, searchable section), and Settings → Assistant is the single switch. The separate destination disappears entirely with the Home merge (`W2`) |
 
 | UX-FN-01 | HIGH | P3 | Two unlabelled "+" affordances, and an empty state instructing "Add your first transaction" with **no control at all** | The single `+` opens an action sheet naming both actions, and the empty state now carries its own primary action — the instruction and the control live together. `VirtualTransactionList.test.tsx`, `FinanceView.test.tsx` |
 | UX-FN-02 | HIGH | P3 | Mixed-currency totals concatenated as one headline figure, with no per-currency labelling, no account count and no FX basis | Each currency is its own labelled row with its account count, and mixed currencies state "no exchange rate is applied". The decorative rise cue no longer adds NGN to USD either. `TotalAssetsSummaryBar.test.tsx` |
@@ -105,9 +109,9 @@ The shell and assistant-placement findings are done, and they were **one coheren
 
 | ID | Sev | Finding | Note |
 |---|---|---|---|
-| UX-AI-01 | HIGH | Assistant is an equal-weight card stack; the input sits below mood and insights | Remains — this is the full Home merge (`W2`), not a shell fix. Mood left the assistant here, which is one of its two inputs |
-| UX-AI-03 | MEDIUM | No conversation continuity, no stated data scope | Remains — needs the assistant thread and a stated window/scope |
-| UX-GL-01 | HIGH | Anchor AI unreachable when disabled | **Improved, not closed:** Home now carries an "Ask Anchor" doorway (the nav no longer does) and the disabled state still explains its value and links to Settings. The finding closes with the merge, when there is no separate destination to reach |
+| UX-AI-01 | HIGH | Assistant is an equal-weight card stack; the input sits below mood and insights | **Closed in W-A1** — the input now precedes the insights and mood has left the surface |
+| UX-AI-03 | MEDIUM | No conversation continuity, no stated data scope | **Closed in W-A1** — source stated, thread kept, "Ask again" on every answer |
+| UX-GL-01 | HIGH | Anchor AI unreachable when disabled | **Closed in W-A1** — `/fabric` is addressable, the disabled state's CTA deep-links to `/settings/assistant`; the separate destination goes with the Home merge (`W2`) |
 | UX-GL-04 | MEDIUM | Bottom nav has no safe-area reserve, no FAB slot, no scroll behaviour | Remains — the floating pill nav and the contextual FAB are their own change |
 
 ### P3 — Settings hub · **CLOSED** (UX-ST-01, UX-ST-02, UX-ST-04, UX-ST-05, UX-ST-06 and UX-GL-08 all closed)

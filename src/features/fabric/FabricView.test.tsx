@@ -221,4 +221,46 @@ describe('FabricView', () => {
     // prompt-chips testid comes from FabricQuerySection mock, not FabricView directly
     expect(screen.queryByTestId('prompt-chips')).toBeInTheDocument();
   });
+
+  // ─── UX-AI-01: the assistant's input is not buried ──────────────────────
+  describe('UX-AI-01: hierarchy', () => {
+    it('places the input ABOVE the insights', () => {
+      useFabricMock.mockReturnValue({
+        ...baseHook,
+        insights: [{ id: 'i1', headline: 'Insight one', detail: 'd', trend: 'stable', category: 'spending', severity: 'low' }],
+      });
+
+      render(
+        <MemoryRouter>
+          <FabricView />
+        </MemoryRouter>
+      );
+
+      const askSection = screen.getByTestId('ask-anchor-section');
+      const insightsHeading = screen.getByText('Insights');
+      // askSection must precede the insights heading in document order.
+      expect(askSection.compareDocumentPosition(insightsHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('shows at most three insights and says how many there are', () => {
+      useFabricMock.mockReturnValue({
+        ...baseHook,
+        insights: [1, 2, 3, 4, 5].map((n) => ({
+          id: `i${n}`, headline: `Insight ${n}`, detail: 'd', trend: 'stable', category: 'spending', severity: 'low',
+        })),
+      });
+
+      render(
+        <MemoryRouter>
+          <FabricView />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByText('Insight 1')).toBeInTheDocument();
+      expect(screen.getByText('Insight 3')).toBeInTheDocument();
+      expect(screen.queryByText('Insight 4')).not.toBeInTheDocument();
+      expect(screen.queryByText('Insight 5')).not.toBeInTheDocument();
+      expect(screen.getByText(/showing 3 of 5/i)).toBeInTheDocument();
+    });
+  });
 });
