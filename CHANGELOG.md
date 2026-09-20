@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.23](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.22...v1.21.0-rc.23) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ux:** label Finance totals per currency and connect the money journey (UX-FN-02) ([#238](https://github.com/Adedamola-Aina/AnchorOS/issues/238)) ([121f0d4](https://github.com/Adedamola-Aina/AnchorOS/commit/121f0d4453dab48e254fcaed3c9dd680280d9507))
+
 ## [1.21.0-rc.22](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.21...v1.21.0-rc.22) (2026-09-20)
 
 
