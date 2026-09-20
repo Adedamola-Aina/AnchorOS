@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.19](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.18...v1.21.0-rc.19) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ux:** capture-first composer in a sheet (UX-CM-01/02/09) ([#234](https://github.com/Adedamola-Aina/AnchorOS/issues/234)) ([2977542](https://github.com/Adedamola-Aina/AnchorOS/commit/297754207228f1cd4e70572e1fc73329bd6867e8))
+
 ## [1.21.0-rc.18](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.17...v1.21.0-rc.18) (2026-09-19)
 
 
