@@ -11,54 +11,63 @@ const renderWithRouter = (ui: React.ReactElement, { route = '/dashboard' } = {})
 
 describe('BottomNavigation', () => {
     describe('rendering', () => {
-        it('renders Home, Tasks, Finance, and Settings tabs without Anchor AI', () => {
-            renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
+        it('renders Home, Commitments, Finance, and Settings tabs (UX-GL-03)', () => {
+            renderWithRouter(<BottomNavigation />);
             expect(screen.getByText('Home')).toBeInTheDocument();
-            expect(screen.getByText('Tasks')).toBeInTheDocument();
+            expect(screen.getByText('Commitments')).toBeInTheDocument();
             expect(screen.getByText('Finance')).toBeInTheDocument();
             expect(screen.getByText('Settings')).toBeInTheDocument();
         });
 
-        it('renders Anchor tab when anchorAIEnabled is true', () => {
-            renderWithRouter(<BottomNavigation anchorAIEnabled={true} />);
-            expect(screen.getByText('Anchor')).toBeInTheDocument();
+        it('never renders an Anchor tab — the bar stays at four items (UX-AI-09)', () => {
+            renderWithRouter(<BottomNavigation hasUnreadInsight />);
+            expect(screen.queryByRole('link', { name: /^anchor/i })).not.toBeInTheDocument();
+            expect(screen.queryByText('Tasks')).not.toBeInTheDocument();
         });
 
         it('renders correct hrefs for each tab', () => {
-            renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
+            renderWithRouter(<BottomNavigation />);
             expect(screen.getByRole('link', { name: /home/i })).toHaveAttribute('href', '/dashboard');
-            expect(screen.getByRole('link', { name: /tasks/i })).toHaveAttribute('href', '/commitments');
+            expect(screen.getByRole('link', { name: /commitments/i })).toHaveAttribute('href', '/commitments');
             expect(screen.getByRole('link', { name: /finance/i })).toHaveAttribute('href', '/finance');
             expect(screen.getByRole('link', { name: /settings/i })).toHaveAttribute('href', '/settings');
         });
 
         it('has correct aria-label for accessibility', () => {
-            renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
+            renderWithRouter(<BottomNavigation />);
             expect(screen.getByRole('navigation', { name: /mobile navigation/i })).toBeInTheDocument();
         });
 
         it('has md:hidden class for responsive visibility', () => {
-            renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
+            renderWithRouter(<BottomNavigation />);
             expect(screen.getByRole('navigation').className).toContain('md:hidden');
         });
     });
 
     describe('notification badge (removed)', () => {
         it('no longer renders red notification dot', () => {
-            const { container } = renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
+            const { container } = renderWithRouter(<BottomNavigation />);
             expect(container.querySelector('.bg-red-500.rounded-full.animate-pulse')).not.toBeInTheDocument();
         });
     });
 
-    describe('active state', () => {
-        it('renders fabric link when anchor AI is enabled', () => {
-            renderWithRouter(<BottomNavigation anchorAIEnabled={true} />);
-            expect(screen.getByRole('link', { name: /anchor/i })).toHaveAttribute('href', '/fabric');
+    // ─── UX-GL-05: one low-noise dot, on Home only ──────────────────────────
+    describe('nav state signalling (UX-GL-05)', () => {
+        it('renders no dot when nothing is unread', () => {
+            renderWithRouter(<BottomNavigation hasUnreadInsight={false} />);
+            expect(screen.queryByTestId('nav-home-dot')).not.toBeInTheDocument();
         });
 
-        it('does not render fabric link when anchor AI is disabled', () => {
-            renderWithRouter(<BottomNavigation anchorAIEnabled={false} />);
-            expect(screen.queryByRole('link', { name: /anchor/i })).not.toBeInTheDocument();
+        it('renders the dot on Home when an insight is unread', () => {
+            renderWithRouter(<BottomNavigation hasUnreadInsight />);
+            expect(screen.getByTestId('nav-home-dot')).toBeInTheDocument();
+        });
+
+        it('states the state in the accessible name, not by colour alone', () => {
+            renderWithRouter(<BottomNavigation hasUnreadInsight />);
+            expect(screen.getByRole('link', { name: 'Home, new insight' })).toHaveAttribute('href', '/dashboard');
+            // Still no numeric badge anywhere on the bar.
+            expect(screen.queryByText(/\d+\s*$/, { selector: 'span' })).not.toBeInTheDocument();
         });
     });
 });

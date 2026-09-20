@@ -112,7 +112,8 @@ describe('FabricView', () => {
     expect(screen.getByText('3 tasks remaining')).toBeInTheDocument();
   });
 
-  it('renders today card and mood card', () => {
+  // UX-AI-04 / UX-AI-09: mood is not an AI feature — it left the assistant.
+  it('renders the today card but no mood card (UX-AI-04)', () => {
     useFabricMock.mockReturnValue(baseHook);
 
     render(
@@ -122,7 +123,21 @@ describe('FabricView', () => {
     );
 
     expect(screen.getByTestId('today-card')).toBeInTheDocument();
-    expect(screen.getByTestId('mood-card')).toBeInTheDocument();
+    expect(screen.queryByTestId('mood-card')).not.toBeInTheDocument();
+  });
+
+  // UX-AI-05: provenance was effectively hidden — transparency is reachable
+  // from the assistant itself.
+  it('links to transparency from the assistant (UX-AI-05)', () => {
+    useFabricMock.mockReturnValue(baseHook);
+
+    render(
+      <MemoryRouter>
+        <FabricView />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('transparency-link')).toHaveAttribute('href', '/fabric/transparency');
   });
 
   it('renders predictions section when predictions exist', () => {
@@ -176,7 +191,11 @@ describe('FabricView', () => {
   it('does not render FabricPromptChips directly (delegated to FabricQuerySection)', async () => {
     // FabricPromptChips is no longer imported by FabricView — it lives in FabricQuerySection.
     // This test guards against re-introducing the direct import.
-    render(<FabricView />);
+    render(
+      <MemoryRouter>
+        <FabricView />
+      </MemoryRouter>
+    );
     await screen.findByTestId('fabric-view');
     // prompt-chips testid comes from FabricQuerySection mock, not FabricView directly
     expect(screen.queryByTestId('prompt-chips')).toBeInTheDocument();

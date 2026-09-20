@@ -24,6 +24,7 @@ import { NotificationSettings } from './components/NotificationSettings';
 import { AnchorAISettings } from './components/AnchorAISettings';
 import { FamilySettingsV2 } from './components/FamilySettingsV2';
 import { SupportSettings } from './components/SupportSettings';
+import { TechnicalDetails } from './components/TechnicalDetails';
 import { DeveloperTools } from './components/DeveloperTools';
 import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
@@ -188,8 +189,10 @@ const SettingsView = () => {
 
         {/* Support */}
         <SettingsSectionHeader label="Support" />
-        <div id="settings-support">
+        <div id="settings-support" className="space-y-4">
           <SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} />
+          {/* UX-ST-03: the raw account id lives here now — collapsed, explained and copyable. */}
+          <TechnicalDetails uid={user?.uid || ''} onCopied={() => showToast('Account identifier copied.', 'success')} />
         </div>
 
         {/* Advanced — local development only; never rendered in staging or production */}

@@ -29,11 +29,11 @@ test.describe('System - Navigation', () => {
         await page.click('a:has-text("Commitments")');
         await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible();
 
-        await page.click('a:has-text("System")');
-        await expect(page.getByRole('heading', { name: 'System' })).toBeVisible();
+        await page.click('a:has-text("Settings")');
+        await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
 
-        await page.click('a:has-text("Dashboard")');
-        const dashboard = page.locator('a:has-text("Dashboard")');
+        await page.click('a:has-text("Home")');
+        const dashboard = page.locator('a:has-text("Home")');
         await expect(dashboard).toBeVisible();
     });
 
@@ -48,7 +48,7 @@ test.describe('System - Navigation', () => {
         await page.waitForTimeout(500);
 
         // Should be back on dashboard
-        const dashboard = page.getByRole('link', { name: 'Dashboard' });
+        const dashboard = page.getByRole('link', { name: 'Home' });
         await expect(dashboard).toBeVisible();
     });
 });
@@ -96,7 +96,7 @@ test.describe('System - Deep Links', () => {
         await page.goto('/settings');
         await page.waitForTimeout(2000);
 
-        const systemHeading = page.getByRole('heading', { name: 'System' }).first();
+        const systemHeading = page.getByRole('heading', { name: 'Settings' }).first();
         const hasSettings = await systemHeading.isVisible().catch(() => false);
 
         expect(hasSettings).toBe(true);
@@ -116,7 +116,7 @@ test.describe('System - Error Handling', () => {
 
         // Should either show 404 or redirect to dashboard
         const is404 = page.locator('text=404').or(page.locator('text=Not Found'));
-        const isDashboard = page.getByRole('link', { name: 'Dashboard' });
+        const isDashboard = page.getByRole('link', { name: 'Home' });
 
         const has404 = await is404.first().isVisible().catch(() => false);
         const hasDashboard = await isDashboard.isVisible().catch(() => false);
@@ -239,12 +239,12 @@ test.describe('System - Basic Performance', () => {
         for (let i = 0; i < 3; i++) {
             await page.click('a:has-text("Finance")');
             await page.waitForTimeout(200);
-            await page.click('a:has-text("Dashboard")');
+            await page.click('a:has-text("Home")');
             await page.waitForTimeout(200);
         }
 
         // Verify core shell still renders after repeated navigation.
         await expect(page.locator('aside')).toBeVisible();
-        await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
     });
 });

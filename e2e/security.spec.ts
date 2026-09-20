@@ -14,7 +14,7 @@ async function goToSettings(page: Page) {
     await loginOrSignup(page, TEST_USER);
     const aside = page.locator('aside');
     if (await aside.isVisible()) {
-        await aside.getByRole('link', { name: 'System' }).click();
+        await aside.getByRole('link', { name: 'Settings' }).click();
         await expect(page.getByRole('heading', { name: 'System Settings' })).toBeVisible();
     }
 }
@@ -157,13 +157,13 @@ test.describe('Security Navigation', () => {
         await loginOrSignup(page, TEST_USER);
 
         // Check if logged in
-        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Home' });
         if (!(await dashboardBtn.isVisible().catch(() => false))) {
             test.skip(); return;
         }
 
         // Check for notification indicator (red asterisk or dot) on System nav
-        const systemNav = page.getByRole('link', { name: 'System' });
+        const systemNav = page.getByRole('link', { name: 'Settings' });
         await expect(systemNav).toBeVisible();
 
         await systemNav.click();

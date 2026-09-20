@@ -18,8 +18,8 @@ import { loginOrSignup } from './helpers';
 // Helper: Navigate to Settings
 async function goToSettings(page: Page) {
     await loginOrSignup(page, TEST_USER, true);
-    await page.click('a:has-text("System")');
-    await expect(page.getByRole('heading', { name: 'System' })).toBeVisible();
+    await page.click('a:has-text("Settings")');
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
 }
 
 test.describe('Settings - Profile', () => {

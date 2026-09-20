@@ -94,8 +94,8 @@ test.describe('Responsive Layout Tests', () => {
         const bottomNav = page.locator('nav[aria-label="Mobile navigation"]');
         await expect(bottomNav).toBeVisible();
 
-        // Click Tasks link
-        await bottomNav.getByRole('link', { name: 'Tasks' }).click({ force: true });
+        // Click Commitments link (UX-GL-03: the old "Tasks" alias is retired)
+        await bottomNav.getByRole('link', { name: 'Commitments' }).click({ force: true });
         await page.waitForURL('**/commitments');
 
         // Verify we navigated to commitments
@@ -137,7 +137,7 @@ test.describe('Responsive Layout Tests', () => {
         // Verify all navigation links exist with correct hrefs
         const expectedLinks = [
             { name: 'Home', href: '/dashboard' },
-            { name: 'Tasks', href: '/commitments' },
+            { name: 'Commitments', href: '/commitments' },
             { name: 'Finance', href: '/finance' },
             { name: 'Settings', href: '/settings' },
         ];

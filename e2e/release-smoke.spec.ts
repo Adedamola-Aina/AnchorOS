@@ -22,7 +22,7 @@ test.describe('Release Smoke — authenticated shell', () => {
         const dashboardContent = page
             .locator('text=Net Worth')
             .or(page.locator('aside'))
-            .or(page.getByRole('link', { name: 'Dashboard' }));
+            .or(page.getByRole('link', { name: 'Home' }));
         await expect(dashboardContent.first()).toBeVisible({ timeout: 10000 });
     });
 

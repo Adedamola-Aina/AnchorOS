@@ -224,14 +224,14 @@ test.describe('Error Handling - UI Edge Cases', () => {
     test('should handle rapid navigation', async ({ page }) => {
         await login(page);
 
-        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Home' });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
             // Rapid navigation between views
             await page.getByRole('link', { name: 'Finance' }).click();
-            await page.getByRole('link', { name: 'Dashboard' }).click();
+            await page.getByRole('link', { name: 'Home' }).click();
             await page.getByRole('link', { name: 'Commitments' }).click();
-            await page.getByRole('link', { name: 'System' }).click();
+            await page.getByRole('link', { name: 'Settings' }).click();
 
             // Should not crash
             const body = page.locator('body');
@@ -286,7 +286,7 @@ test.describe('Error Handling - Data Loading', () => {
     test('should show loading states appropriately', async ({ page }) => {
         await login(page);
 
-        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Home' });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
             // Navigate to finance (may have loading state)
@@ -305,7 +305,7 @@ test.describe('Error Handling - Data Loading', () => {
     test('should handle empty data states', async ({ page }) => {
         await login(page);
 
-        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Home' });
 
         if (await dashboardBtn.isVisible().catch(() => false)) {
             await page.getByRole('link', { name: 'Finance' }).click();

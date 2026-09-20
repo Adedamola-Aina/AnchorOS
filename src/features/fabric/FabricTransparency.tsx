@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useFabric } from '../../hooks/useFabric';
 
@@ -33,14 +35,38 @@ const FabricTransparency: React.FC = () => {
   return (
     <FeatureErrorBoundary featureName="Anchor AI Transparency">
       <div className="max-w-3xl mx-auto space-y-5  animate-in fade-in duration-300">
+        {/*
+          * UX-AI-10: this page was reachable only by typing the URL, so it had
+          * no way back. The back affordance is now part of the page itself.
+          */}
+        <Link
+          to="/fabric"
+          data-testid="transparency-back"
+          className="inline-flex items-center gap-1.5 min-h-11 px-2 -ml-2 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+          Back to Anchor AI
+        </Link>
+
         <header className="space-y-1">
           <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white">What Anchor AI Knows</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">Review and remove learned behavior patterns at any time. Your account data remains private to your workspace.</p>
         </header>
 
         {groupedItems.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-2" data-testid="transparency-empty">
             <p className="text-sm text-slate-600 dark:text-slate-300">Anchor AI hasn&apos;t learned any confirmed patterns yet.</p>
+            {/*
+              * UX-AI-10: the empty state used to state the fact and stop, which
+              * reads as "this is broken". It now says what it learns from, and
+              * when to expect something here.
+              */}
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              It only learns from your own activity — commitments you complete and transactions you record. A pattern
+              appears here once the same two things have happened together often enough for Anchor AI to be confident,
+              so this page is expected to be empty when you have just started. Nothing is learned from anyone else&apos;s
+              data, and everything listed here can be deleted by you.
+            </p>
           </div>
         ) : (
           <div className="space-y-3">

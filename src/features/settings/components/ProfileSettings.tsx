@@ -97,7 +97,16 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
                         <label className="text-[10px] uppercase font-bold text-slate-400">Display Name</label>
                         <input type="text" value={localName} onChange={(e) => setLocalName(e.target.value)} className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" />
                     </div>
-                    <div className="flex flex-col justify-end"><label className="text-[10px] uppercase font-bold text-slate-400">User Identifier</label><div className="text-xs text-slate-400 font-mono mt-1 select-all">{uid}</div></div>
+                    {/*
+                      * UX-ST-03: this cell used to expose the raw internal id as
+                      * primary, unexplained information. Identity here is the
+                      * display name and the email; the id moved to
+                      * Support → "Technical details", collapsed and explained.
+                      */}
+                    <div className="flex flex-col justify-end">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Email</label>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate" data-testid="profile-email">{user?.email || '—'}</div>
+                    </div>
                 </div>
                 <div className="pt-2"><label className="text-[10px] uppercase font-bold text-slate-400 block mb-2">Sign-in Method</label><SignInMethodBadge providerId={providerId} /></div>
             </CardContent>

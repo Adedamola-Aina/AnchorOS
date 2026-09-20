@@ -13,7 +13,7 @@ import { loginOrSignup } from './helpers';
 async function goToSettings(page: Page) {
     await loginOrSignup(page, TEST_USER);
     const aside = page.locator('aside');
-    await aside.getByRole('link', { name: 'System' }).click();
+    await aside.getByRole('link', { name: 'Settings' }).click();
     await expect(page.getByRole('heading', { name: 'System Settings' })).toBeVisible();
 }
 
@@ -119,11 +119,11 @@ test.describe('Family Mode Toggle Behavior', () => {
         await goToSettings(page);
 
         // Navigate to dashboard
-        await page.getByRole('link', { name: 'Dashboard' }).click();
+        await page.getByRole('link', { name: 'Home' }).click();
         await page.waitForTimeout(1000);
 
         // Navigate back to settings
-        await page.getByRole('link', { name: 'System' }).click();
+        await page.getByRole('link', { name: 'Settings' }).click();
 
         // Family section should still show same state
         await expect(page.locator('text=Invite Family Member').or(page.locator('text=Family Connected')).first()).toBeVisible();
