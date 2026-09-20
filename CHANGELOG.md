@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.20](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.19...v1.21.0-rc.20) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ux:** stop onboarding manufacturing junk data; finish the emoji sweep (UX-OB-03, UX-DS-01) ([#235](https://github.com/Adedamola-Aina/AnchorOS/issues/235)) ([1edb070](https://github.com/Adedamola-Aina/AnchorOS/commit/1edb070d2cdfff6b77706b7b05f8ce166ac4ef25))
+
 ## [1.21.0-rc.19](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.18...v1.21.0-rc.19) (2026-09-20)
 
 
