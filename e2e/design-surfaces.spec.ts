@@ -142,6 +142,28 @@ for (const viewport of VIEWPORTS) {
     });
 }
 
+test.describe('the commitment composer (UX-CM-01 / CM-02 / CM-09)', () => {
+    // The composer is the one screen where the fix IS the presentation: it opened
+    // on a "Choose Frequency" classifier and rendered inline in the page flow.
+    // It now opens on the name inside a sheet, so it needs its own capture.
+    test.skip(!process.env.DESIGN_EVIDENCE, EVIDENCE_OPT_IN_HINT);
+
+    for (const theme of THEMES) {
+        test(`composer renders in ${theme}`, async ({ page }) => {
+            await prepare(page, { route: '/commitments', theme, viewport: VIEWPORTS[0] });
+
+            await page.getByRole('button', { name: /new commitment/i }).first().click();
+            await expect(page.getByTestId('task-name')).toBeVisible();
+            await page.addStyleTag({ content: `${STILL_CSS}\n${DYNAMIC_CSS}` });
+            await page.waitForTimeout(300);
+
+            const base = path.join(EVIDENCE_DIR, 'mobile', `composer-${theme}`);
+            await capture(page, `${base}.png`);
+            await capture(page, `${base}-squint10.png`, { squint: true });
+        });
+    }
+});
+
 test.describe('the four surfaces are genuinely distinct', () => {
     // This is the guard against the visual.spec.ts failure mode: if the harness
     // silently stops authenticating, every capture collapses to one screen and

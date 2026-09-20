@@ -379,7 +379,22 @@ P1b exists to make the product's statements about the user's day **true**. This 
 | UX-AI-08 | MEDIUM | CORR | ROOT | — | X7 | LIVE | The first insight a diligent user saw was "Commitment completion: 0% — 0 of 4 done in the last 30 days". The numerator was the momentary `completed` flag over the commitments tracked, so a daily habit kept 30 times read as zero the moment the day reset — the number did not measure what the sentence claimed | **REMEDIATED in P1b (part 2)** — `countScheduledOccurrences` gives the honest denominator (how often the cadence required the commitment, clamped to its creation date) and completions are evidenced by streak/last-completed, capped at the expectation; when nothing was due the insight is not emitted rather than reporting 0%. Tests: `commitmentInsights.test.ts`, `commitmentSchedule.test.ts` |
 Still open in P1b: `UX-CM-07` (partial — see below), `UX-AI-04`, `UX-AI-09`, `UX-ST-03`, `UX-GL-05`.
 
+## UX wave P1c — capture-first composer (2026-09-19, partial wave)
+
+The composer is the screen where the fix *is* the presentation, so all three findings here were one coherent change. `UX-DS-01` (emoji as functional icons) is not closed by this wave — its remaining sites are listed below.
+
+| ID | Norm | Cat | Rel | INV | Impact | Reach | Findings (evidence) | Status |
+|---|---|---|---|---|---|---|---|---|
+| UX-CM-01 | HIGH | CORR | ROOT | — | X7 | LIVE | The composer opened on "Choose Frequency", so a user had to classify a commitment before they could capture it | **REMEDIATED** — it opens on the **name**, with cadence defaulted to Daily and adjustable in place (`cadence-selector`); the classifier step is deleted, not hidden. Tests: `TaskForm.test.tsx`, `CommitmentsView.test.tsx` |
+| UX-CM-02 | HIGH | CORR | ROOT | — | X7 | LIVE | The composer rendered inline in the page flow: no sheet context, no visible Save on the first step | **REMEDIATED** — it is now the shared `Modal` (the same primitive Finance uses for "Record Transaction"), giving one sheet, one dismiss, and a **pinned Save** in a sticky footer. The old second exit (a "Back" step button) is gone. Tests: `TaskForm.test.tsx` |
+| UX-CM-09 | MEDIUM | CORR | ROOT | — | X6 | LIVE | Step 2 carried "DOMAIN" jargon, two dismiss controls, emoji priority, and Save below the fold | **REMEDIATED** — the label is "Area", there is one dismiss, priority uses Lucide icons (`PriorityIndicator`), and Save is pinned. Tests: `TaskForm.test.tsx` |
+
+Still open in P1c: `UX-CM-01`… done; remaining are `UX-OB-03` (onboarding junk defaults) and `UX-DS-01` (functional emoji elsewhere). `UX-DS-01` is now **partial**: the commitment priority indicators, the streak badge, the month-calendar priority dots and the ✓ status glyphs still need converting.
+
+`UX-CM-10` (closed in #233) and `UX-CM-09` are the same story from two sides — the composer's cadence words and the filter chips' words — so the "Show" label added in #233 and the in-place cadence control added here are the two halves of one fix.
+
 ## UX wave P1b/P1c — commitment rows, filters and the completion offer (2026-09-19, partial wave)
+
 
 Four findings closed on the Commitments surface. Two were **re-verified against the current code before any edit**: `UX-CM-06` had already been remediated by earlier waves, and `UX-CM-07`'s remaining part is blocked on unbuilt work rather than on effort — so neither was "fixed" a second time.
 

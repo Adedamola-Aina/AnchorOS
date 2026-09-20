@@ -368,13 +368,15 @@ describe('CommitmentsView', () => {
       const addButton = screen.getByRole('button', { name: /New Commitment/i });
       await user.click(addButton);
 
-      expect(screen.getByText('Choose Frequency')).toBeInTheDocument();
-      // Scoped to the composer step: "Daily"/"Weekly"/"Monthly" also label the
-      // filter chips now, so an unscoped query would be ambiguous.
-      const frequencyStep = within(screen.getByTestId('commitment-frequency-step'));
-      expect(frequencyStep.getByText('Daily')).toBeInTheDocument();
-      expect(frequencyStep.getByText('Weekly')).toBeInTheDocument();
-      expect(frequencyStep.getByText('Monthly')).toBeInTheDocument();
+      // UX-CM-01: the composer opens on the NAME, not on a classifier.
+      expect(screen.getByText('New Commitment')).toBeInTheDocument();
+      expect(screen.getByTestId('task-name')).toBeInTheDocument();
+      // Cadence is adjustable in place. Scoped to its own control because
+      // "Daily"/"Weekly"/"Monthly" also label the filter chips.
+      const cadence = within(screen.getByTestId('cadence-selector'));
+      expect(cadence.getByText('Daily')).toBeInTheDocument();
+      expect(cadence.getByText('Weekly')).toBeInTheDocument();
+      expect(cadence.getByText('Monthly')).toBeInTheDocument();
     });
 
     it('closes add task form when top X is clicked', async () => {
@@ -406,7 +408,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Daily'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
 
       expect(screen.getByRole('button', { name: /morning/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /afternoon/i })).toBeInTheDocument();
@@ -418,7 +420,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Weekly'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Weekly'));
 
       // Check for S M T W T F S toggles
       expect(screen.getByText('M')).toBeInTheDocument();
@@ -431,7 +433,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Monthly'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Monthly'));
 
       // Check for a few day options in the grid (15 may appear twice: badge + form)
       expect(screen.getByText('1')).toBeInTheDocument();
@@ -446,7 +448,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Daily'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
 
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
       await user.type(input, 'New Daily Task');
@@ -471,7 +473,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Weekly'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Weekly'));
 
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
       await user.type(input, 'New Weekly Task');
@@ -502,7 +504,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Monthly'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Monthly'));
 
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
       await user.type(input, 'Multi-day Monthly');
@@ -539,16 +541,16 @@ describe('CommitmentsView', () => {
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
 
       // Daily should NOT show day of week or day of month selectors
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Daily'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
       expect(screen.queryByText('M')).not.toBeInTheDocument();
       // Note: '15' may appear from task badge, so check form-specific date grid is absent
       expect(screen.queryByText('31')).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: /morning/i })).toBeInTheDocument();
 
-      // Switch to Weekly - should NOT show time of day or day of month
-      const backBtn = await screen.findByRole('button', { name: /back/i });
-      await user.click(backBtn);
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Weekly'));
+      // Switch to Weekly - should NOT show time of day or day of month.
+      // UX-CM-01: cadence is switched in place now; there is no "Back" step to
+      // navigate (and no second dismiss control).
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Weekly'));
 
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: /morning/i })).not.toBeInTheDocument();
@@ -556,9 +558,7 @@ describe('CommitmentsView', () => {
       });
 
       // Switch to Monthly - should NOT show time of day or day of week
-      const backBtn2 = await screen.findByRole('button', { name: /back/i });
-      await user.click(backBtn2);
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Monthly'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Monthly'));
 
       await waitFor(() => {
         expect(screen.queryByText('M')).not.toBeInTheDocument();
@@ -572,7 +572,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Daily'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
 
       const payload = '<script>alert("xss")</script>Dangerous Task';
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
@@ -593,7 +593,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Monthly'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Monthly'));
 
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
       await user.type(input, 'New Monthly Task');
@@ -634,7 +634,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Daily'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
 
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
       await user.type(input, 'New Family Task');
@@ -661,7 +661,7 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
-      await user.click(within(screen.getByTestId('commitment-frequency-step')).getByText('Daily'));
+      await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
 
       const saveButton = screen.getByRole('button', { name: /Save Commitment/i });
       await user.click(saveButton);

@@ -1,51 +1,17 @@
 /**
- * TaskForm Wizard Steps & Field Components
+ * TaskForm field components
  * Extracted from TaskForm.tsx per CLAUDE.md §3.2
+ *
+ * The old `FrequencyStep` ("Choose Frequency") and `DetailsHeader` are gone:
+ * UX-CM-01 removed the classification-first step, so the composer opens on the
+ * name with the cadence adjustable in place.
  */
 // @ts-nocheck
 
 
 import React from 'react';
-import { X, Sunrise, Calendar, CheckCircle2, ChevronDown } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
-import type { TaskType, TimeOfDay } from '../../../types';
-
-interface FrequencyStepProps { onSelectType: (type: TaskType) => void; onClose: () => void; }
-export const FrequencyStep: React.FC<FrequencyStepProps> = ({ onSelectType, onClose }) => {
-    const options = [
-        { id: 'todo', label: 'Todo', desc: 'One-time task', icon: <CheckCircle2 className="w-6 h-6 text-emerald-500" /> },
-        { id: 'daily', label: 'Daily', desc: 'Every single day', icon: <Sunrise className="w-6 h-6 text-task-500" /> },
-        { id: 'weekly', label: 'Weekly', desc: 'On specific days', icon: <Calendar className="w-6 h-6 text-purple-500" /> },
-        { id: 'monthly', label: 'Monthly', desc: 'On a specific date', icon: <CheckCircle2 className="w-6 h-6 text-task-500" /> },
-    ];
-    return (
-        <div className="space-y-6" data-testid="commitment-frequency-step">
-            <div className="flex justify-between items-center">
-                <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white">Choose Frequency</h3>
-                <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400"><X className="w-5 h-5" /></Button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {options.map((option) => (
-                    <button key={option.id} onClick={() => onSelectType(option.id as TaskType)} className="flex flex-col items-center gap-4 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 hover:border-task-500/50 hover:bg-task-50/50 dark:hover:bg-task-900/10 transition-all text-center group">
-                        <div className="p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 group-hover:scale-110 transition-transform">{option.icon}</div>
-                        <div><h4 className="font-bold text-slate-900 dark:text-white">{option.label}</h4><p className="text-xs text-slate-500 dark:text-slate-400">{option.desc}</p></div>
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-interface DetailsHeaderProps { taskType: TaskType; onBack: () => void; onClose: () => void; }
-export const DetailsHeader: React.FC<DetailsHeaderProps> = ({ taskType, onBack, onClose }) => (
-    <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-            <Button type="button" variant="ghost" size="icon" onClick={onBack} className="text-slate-400"><ChevronDown className="w-5 h-5 rotate-90" /></Button>
-            <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white capitalize">{taskType} Commitment</h3>
-        </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400"><X className="w-5 h-5" /></Button>
-    </div>
-);
+import type { TimeOfDay } from '../../../types';
 
 interface DailyTimeFieldProps { value: TimeOfDay; onChange: (v: TimeOfDay) => void; }
 export const DailyTimeField: React.FC<DailyTimeFieldProps> = ({ value, onChange }) => (
