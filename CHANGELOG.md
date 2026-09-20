@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.22](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.21...v1.21.0-rc.22) (2026-09-20)
+
+
+### Features
+
+* **ux:** make Settings a routed hub with addressable sections (UX-ST-01/02/06) ([#237](https://github.com/Adedamola-Aina/AnchorOS/issues/237)) ([52047f3](https://github.com/Adedamola-Aina/AnchorOS/commit/52047f310785599aec6d2907383e0752d6311541))
+
 ## [1.21.0-rc.21](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.20...v1.21.0-rc.21) (2026-09-20)
 
 
