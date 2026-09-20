@@ -102,7 +102,7 @@ describe('GettingStartedSecurity', () => {
   it('calls onSkip when skip clicked', () => {
     const onSkip = vi.fn();
     render(<GettingStartedSecurity {...defaultProps} onSkip={onSkip} />);
-    fireEvent.click(screen.getByText("I'll do this later →"));
+    fireEvent.click(screen.getByText('Skip for now'));
     expect(onSkip).toHaveBeenCalled();
   });
 });

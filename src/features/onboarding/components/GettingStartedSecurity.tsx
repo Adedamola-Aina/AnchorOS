@@ -132,9 +132,10 @@ export function GettingStartedSecurity({
         </button>
         <button
           onClick={onSkip}
+          aria-label="Skip for now — you can turn these on later in Settings"
           className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
         >
-          I'll do this later →
+          Skip for now
         </button>
       </div>
     </div>

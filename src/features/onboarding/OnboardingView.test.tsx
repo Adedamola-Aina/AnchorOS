@@ -214,7 +214,7 @@ describe('OnboardingView', () => {
 
         await waitFor(() => screen.getByText('Set a Goal'));
         // Step 3 -> 4 (Habit) via Skip
-        fireEvent.click(screen.getByText('Skip for now →'));
+        fireEvent.click(screen.getByText('Skip for now'));
 
         await waitFor(() => screen.getByText('One Small Habit'));
 
@@ -424,6 +424,82 @@ describe('OnboardingView', () => {
                     title: 'Drink 2L Water',
                 }));
             });
+        });
+    });
+
+    /**
+     * UX-OB-02: every step persists through one contract — attempt the write,
+     * advance only on success, and on failure say what happened and stay put.
+     * Two steps previously had no error handling at all.
+     */
+    describe('UX-OB-02 — one persistence contract with recovery', () => {
+        it('stays on step 1 and says so when the profile write fails', async () => {
+            const mocks = createMockContexts();
+            mocks.updateProfile.mockRejectedValueOnce(new Error('offline'));
+            renderWithContexts(mocks);
+
+            fireEvent.change(screen.getByPlaceholderText(/your name/i), { target: { value: 'Ada' } });
+            fireEvent.click(screen.getByText(/Let's Begin/i));
+
+            await waitFor(() => {
+                expect(mocks.notifications.showToast).toHaveBeenCalledWith(
+                    expect.stringMatching(/Couldn't save your name/i),
+                    'error',
+                );
+            });
+            // Still on step 1: the account step never appeared.
+            expect(screen.queryByText(/Skip for now/)).not.toBeInTheDocument();
+        });
+
+        it('keeps the user on the account step and reports the failure', async () => {
+            const mocks = createMockContexts();
+            mocks.addAccount.mockRejectedValueOnce(new Error('denied'));
+            renderWithContexts(mocks);
+
+            fireEvent.change(screen.getByPlaceholderText(/your name/i), { target: { value: 'Ada' } });
+            fireEvent.click(screen.getByText(/Let's Begin/i));
+            await waitFor(() => expect(screen.getByText('Skip for now')).toBeInTheDocument());
+
+            fireEvent.change(screen.getByPlaceholderText(/e\.g\. Chase Checking/i), { target: { value: 'Checking' } });
+            fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '1000' } });
+            fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
+
+            await waitFor(() => {
+                expect(mocks.notifications.showToast).toHaveBeenCalledWith(
+                    expect.stringMatching(/Couldn't save your account/i),
+                    'error',
+                );
+            });
+            // The form is still there, so pressing the same button again is enough.
+            expect(screen.getByRole('button', { name: /^continue$/i })).toBeInTheDocument();
+        });
+
+        it('does not leave onboarding when the final write fails', async () => {
+            const mocks = createMockContexts();
+            // Step 1's write succeeds; the security step's write fails.
+            mocks.updateProfile.mockResolvedValueOnce(undefined).mockRejectedValue(new Error('offline'));
+            renderWithContexts(mocks);
+
+            fireEvent.change(screen.getByPlaceholderText(/your name/i), { target: { value: 'Ada' } });
+            fireEvent.click(screen.getByText(/Let's Begin/i));
+
+            // Skip through steps 2, 3 and 4 (skips advance without a write).
+            for (let i = 0; i < 3; i += 1) {
+                await waitFor(() => expect(screen.getByText('Skip for now')).toBeInTheDocument());
+                fireEvent.click(screen.getByText('Skip for now'));
+            }
+
+            await waitFor(() => expect(screen.getByRole('button', { name: /continue to anchor os/i })).toBeInTheDocument());
+            fireEvent.click(screen.getByRole('button', { name: /continue to anchor os/i }));
+
+            await waitFor(() => {
+                expect(mocks.notifications.showToast).toHaveBeenCalledWith(
+                    expect.stringMatching(/Couldn't save your security choices/i),
+                    'error',
+                );
+            });
+            // The final control is still there, so the user can simply try again.
+            expect(screen.getByRole('button', { name: /continue to anchor os/i })).toBeInTheDocument();
         });
     });
 });
