@@ -42,6 +42,8 @@ Destructive actions use the danger token and require confirmation.
 
 - Import: `import { IconName } from 'lucide-react'` (tree-shakeable, MIT).
 - 5-level size system: `w-3` (12px badges) · `w-4` (16px inline/buttons) · `w-5` (20px nav/default) · `w-6` (24px feature) · `w-8` (32px error/empty states). Default stroke width 2.
+- **Functional states are Lucide, never emoji** (`UX-DS-01`). An emoji cannot inherit `currentColor`, renders differently per platform, and carries no accessible text. Converted under this rule: commitment priority (`PriorityIndicator`), streak milestones (`streakUtils.ts`: Sprout/Star/Flame/Dumbbell/Trophy/Gem/Crown/Sparkles/Target), the month-calendar priority dot, and status ticks (`Check`).
+- **Approved illustration exception — mood check-in.** The five mood faces (`FabricMoodCard`) stay emoji, and that is a deliberate illustration decision, not an oversight: the face *is* the expression being recorded, and a Lucide glyph cannot represent "how I feel" as directly. Two conditions make it contractual rather than accidental — (a) every face button carries an accessible `aria-label` (Rough … Great) plus `aria-pressed`, so meaning never depends on the glyph, and (b) the faces are never the only signal: the label text renders under each face and the logged state is stated in prose ("Feeling good today"). Any new emoji-as-icon outside this exception is a `UX-DS-01` violation.
 
 ## Accessibility contract
 

@@ -1,9 +1,10 @@
 // @ts-nocheck
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Circle, Check, Pencil, Trash2 } from 'lucide-react';
+import { Circle, Check, Pencil, Trash2, Flame } from 'lucide-react';
 import { Badge, TaskContextBadge } from '../../../components/shared';
 import { FinancialNudgeChip } from './FinancialNudgeChip';
+import { PriorityIndicator } from './PriorityIndicator';
 import type { AnchorTask } from '../../../types';
 import { Card } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
@@ -142,15 +143,21 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                             )}
                             {!task.completed && !isAnimating && (task.currentStreak || 0) > 0 && (() => {
                                 const milestone = getStreakMilestone(task.currentStreak || 0);
+                                // UX-DS-01: Lucide only. The milestone icon (Sprout, Star,
+                                // Flame, Trophy…) replaces the emoji, and `Flame` is the
+                                // generic "streak" icon when the count is not a milestone.
+                                const StreakIcon = milestone ? milestone.icon : Flame;
                                 return (
                                     <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" data-testid="streak-badge">
-                                        {milestone ? `${milestone.emoji} ${task.currentStreak}` : `🔥${task.currentStreak}`}
+                                        <StreakIcon className="w-3 h-3" aria-hidden="true" />
+                                        {task.currentStreak}
+                                        {milestone && <span className="sr-only">{milestone.label}</span>}
                                     </span>
                                 );
                             })()}
                             {isAnimating && (
                                 <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-                                    ✓ Done!
+                                    <Check className="w-3 h-3" aria-hidden="true" /> Done!
                                 </span>
                             )}
                         </div>
@@ -159,8 +166,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                             <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
                                 <Badge type={task.type}>{task.type}</Badge>
                                 {task.priority && task.priority !== 'medium' && (
-                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${task.priority === 'high' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
-                                        {task.priority === 'high' ? '🔴 High' : '🟢 Low'}
+                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${task.priority === 'high' ? 'bg-rose-100 dark:bg-rose-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
+                                        <PriorityIndicator priority={task.priority} />
                                     </span>
                                 )}
                                 <TaskContextBadge task={task} />

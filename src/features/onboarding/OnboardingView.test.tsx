@@ -352,4 +352,78 @@ describe('OnboardingView', () => {
             });
         });
     });
+
+    // ========================================
+    // UX-OB-03: no pre-filled junk data
+    // ========================================
+    describe('UX-OB-03: nothing is created unless the user chooses it', () => {
+        it('starts the account name and balance empty (suggestions are placeholders)', async () => {
+            renderWithContexts();
+
+            fireEvent.click(screen.getByText("Let's Begin"));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+
+            // The previous defect: these inputs were pre-filled with 'Main Checking'.
+            // (`.value` is checked directly because jest-dom reports `null` for an
+            // empty `input[type=number]`.)
+            expect((screen.getByPlaceholderText('e.g. Chase Checking') as HTMLInputElement).value).toBe('');
+            expect((screen.getByPlaceholderText('0.00') as HTMLInputElement).value).toBe('');
+        });
+
+        it('does not manufacture an account from default text when the name is never chosen', async () => {
+            const { mocks } = renderWithContexts();
+
+            fireEvent.click(screen.getByText("Let's Begin"));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+
+            // Tapping straight through must not create anything.
+            fireEvent.click(screen.getByText('Continue'));
+
+            expect(mocks.addAccount).not.toHaveBeenCalled();
+        });
+
+        it('starts the habit title empty and refuses to create an unnamed commitment', async () => {
+            const { mocks } = renderWithContexts();
+
+            fireEvent.click(screen.getByText("Let's Begin"));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+
+            fireEvent.change(screen.getByPlaceholderText('e.g. Chase Checking'), { target: { value: 'Bank' } });
+            fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '100' } });
+            fireEvent.click(screen.getByText('Continue'));
+            await waitFor(() => screen.getByText('Set a Goal'));
+
+            fireEvent.click(screen.getByText(/skip for now/i));
+            await waitFor(() => screen.getByText('One Small Habit'));
+
+            // The previous defect: pre-filled with 'Read for 15 mins'.
+            expect(screen.getByPlaceholderText('e.g. Drink water, Read pages, Exercise')).toHaveValue('');
+
+            fireEvent.click(screen.getByText('Finish Setup'));
+
+            expect(mocks.addTask).not.toHaveBeenCalled();
+        });
+
+        it('still accepts a suggestion chip as a deliberate choice', async () => {
+            const { mocks } = renderWithContexts();
+
+            fireEvent.click(screen.getByText("Let's Begin"));
+            await waitFor(() => screen.getByText('Add Primary Account'));
+            fireEvent.change(screen.getByPlaceholderText('e.g. Chase Checking'), { target: { value: 'Bank' } });
+            fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '100' } });
+            fireEvent.click(screen.getByText('Continue'));
+            await waitFor(() => screen.getByText('Set a Goal'));
+            fireEvent.click(screen.getByText(/skip for now/i));
+            await waitFor(() => screen.getByText('One Small Habit'));
+
+            fireEvent.click(screen.getByText('Drink 2L Water'));
+            fireEvent.click(screen.getByText('Finish Setup'));
+
+            await waitFor(() => {
+                expect(mocks.addTask).toHaveBeenCalledWith(expect.objectContaining({
+                    title: 'Drink 2L Water',
+                }));
+            });
+        });
+    });
 });

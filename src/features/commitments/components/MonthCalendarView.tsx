@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Circle, CheckCircle2 } from 'lucide-react';
 import type { AnchorTask } from '../../../types';
+import { PriorityIndicator } from './PriorityIndicator';
 
 interface MonthCalendarViewProps {
   tasks: AnchorTask[];
@@ -124,9 +125,8 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ tasks, onT
               </button>
               <span className={`text-sm font-medium ${t.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}`}>{t.title}</span>
               {t.priority && t.priority !== 'medium' && (
-                <span className={`text-[10px] font-semibold ${t.priority === 'high' ? 'text-rose-500' : 'text-emerald-500'}`}>
-                  {t.priority === 'high' ? '🔴' : '🟢'}
-                </span>
+                /* UX-DS-01: the priority dot was a 🔴/🟢 emoji. */
+                <PriorityIndicator priority={t.priority} withLabel={false} />
               )}
             </div>
           ))}

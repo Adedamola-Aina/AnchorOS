@@ -871,10 +871,10 @@ describe('CommitmentsView', () => {
       await user.click(listBtn!);
 
       expect(await screen.findByText('Streaked Task')).toBeInTheDocument();
-      // Check for Streak Badge content
-      expect(screen.getByText(/5/)).toBeInTheDocument();
-      // We can also search for the emoji if exact
-      expect(screen.getByText((content) => content.includes('🔥'))).toBeInTheDocument();
+      // UX-DS-01: the streak badge now renders a Lucide icon, not the 🔥 emoji.
+      const badge = screen.getByTestId('streak-badge');
+      expect(badge.textContent).toContain('5');
+      expect(badge.querySelector('svg')).not.toBeNull();
     });
 
     it('toggles between Timeline, List and Weekly view', async () => {

@@ -27,6 +27,25 @@ describe('getStreakMilestone', () => {
   });
 });
 
+// UX-DS-01: the milestone used to carry an emoji (🔥); it now carries a Lucide
+// component, and the nudge string no longer interpolates a glyph.
+describe('UX-DS-01: milestones are Lucide icons, not emoji', () => {
+  it('exposes an icon component instead of an emoji field', () => {
+    const m = getStreakMilestone(7);
+    expect(m).toBeTruthy();
+    expect(typeof m!.icon).toBe('object');
+    expect(m).not.toHaveProperty('emoji');
+  });
+
+  it('never returns a glyph in the nudge text', () => {
+    const emojiPattern = /\p{Extended_Pictographic}/u;
+    for (const streak of [0, 1, 3, 6, 13, 29, 364]) {
+      const nudge = getStreakNudge(streak, streak + 2);
+      if (nudge) expect(emojiPattern.test(nudge)).toBe(false);
+    }
+  });
+});
+
 describe('getStreakNudge', () => {
   it('returns encouragement when streak is 0 and longest > 0', () => {
     const nudge = getStreakNudge(0, 5);

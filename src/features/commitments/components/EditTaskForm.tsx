@@ -6,6 +6,7 @@ import { Button } from '@anchor-os/ui';
 import { Card } from '@anchor-os/ui';
 import { PopoverMenu, SegmentedControl } from '../../../components/shared';
 import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
+import { PriorityIndicator } from './PriorityIndicator';
 
 interface EditTaskFormProps {
     task: AnchorTask;
@@ -132,7 +133,10 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                     <label className="text-[10px] uppercase font-bold text-slate-400">Priority</label>
                     <div className="flex gap-2" data-testid="edit-priority-selector">
                         {(['high', 'medium', 'low'] as const).map(p => (
-                            <Button key={p} type="button" onClick={() => setEditPriority(p)} variant={editPriority === p ? 'primary' : 'secondary'} size="sm" className="flex-1 capitalize text-xs">{p === 'high' ? '🔴 High' : p === 'medium' ? '🟡 Medium' : '🟢 Low'}</Button>
+                            <Button key={p} type="button" onClick={() => setEditPriority(p)} variant={editPriority === p ? 'primary' : 'secondary'} size="sm" className="flex-1 justify-center">
+                                {/* UX-DS-01: the label was '🔴 High' / '🟡 Medium' / '🟢 Low'. */}
+                                <PriorityIndicator priority={p} />
+                            </Button>
                         ))}
                     </div>
                 </div>
