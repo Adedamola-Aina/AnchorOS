@@ -81,7 +81,7 @@ const DYNAMIC_CSS = `[data-testid="dashboard-greeting"],
 const THEME_LABEL = { light: 'Light', dark: 'Dark' };
 
 async function setTheme(page, theme) {
-    await page.goto('/settings', { waitUntil: 'domcontentloaded' });
+    await page.goto('/settings/preferences', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle').catch(() => {});
 
     const wantDark = theme === 'dark';

@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SettingsView from './SettingsView';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AppContext } from '../../context/AnchorContext';
 import { AuthContext } from '../../context/AuthContext';
 import { NotificationContext } from '../../context/NotificationContext';
@@ -110,21 +111,31 @@ const createMockContexts = (appOverrides = {}, authOverrides = {}) => {
     return { app, auth, notifications, finance, tasks };
 };
 
-const renderWithContext = (ui: React.ReactElement, { app = {}, auth = {} } = {}) => {
+const renderWithContext = (ui: React.ReactElement, { app = {}, auth = {}, path = '/settings/security' } = {}) => {
     const mocks = createMockContexts(app, auth);
     return {
         ...render(
-            <AuthContext.Provider value={mocks.auth as any}>
-                <AppContext.Provider value={mocks.app as any}>
-                    <FinanceContext.Provider value={mocks.finance as any}>
-                        <TaskContext.Provider value={mocks.tasks as any}>
-                            <NotificationContext.Provider value={mocks.notifications as any}>
-                                {ui}
-                            </NotificationContext.Provider>
-                        </TaskContext.Provider>
-                    </FinanceContext.Provider>
-                </AppContext.Provider>
-            </AuthContext.Provider>
+            <MemoryRouter initialEntries={[path]}>
+                <Routes>
+                    <Route path="/settings" element={ui} />
+                    {/* UX-ST-02: sections are addressable routes now, so this suite
+                        renders the Security section the way the app reaches it. */}
+                    <Route path="/settings/:section" element={ui} />
+                </Routes>
+            </MemoryRouter>,
+            { wrapper: ({ children }: { children: React.ReactNode }) => (
+                <AuthContext.Provider value={mocks.auth as any}>
+                    <AppContext.Provider value={mocks.app as any}>
+                        <FinanceContext.Provider value={mocks.finance as any}>
+                            <TaskContext.Provider value={mocks.tasks as any}>
+                                <NotificationContext.Provider value={mocks.notifications as any}>
+                                    {children}
+                                </NotificationContext.Provider>
+                            </TaskContext.Provider>
+                        </FinanceContext.Provider>
+                    </AppContext.Provider>
+                </AuthContext.Provider>
+            ) }
         ),
         mocks
     };

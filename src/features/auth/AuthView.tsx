@@ -10,13 +10,12 @@
 
 
 import React, { useState } from 'react';
-import { AnchorLogo, ThemeToggle, type Theme } from '../../components/shared';
+import { AnchorLogo } from '../../components/shared';
 import { AuthLeftPanel } from './AuthLeftPanel';
 import { AuthFormFields } from './AuthFormFields';
 import { AuthSubmitButton } from './AuthSubmitButton';
 import { SocialSignInButtons } from './SocialSignInButtons';
 import { useKeyboardAvoidance } from '../../hooks/useKeyboardAvoidance';
-import { getEffectiveTheme } from '../../utils/systemTheme';
 import { useAuthRateLimit } from './useAuthRateLimit';
 import { useAuth } from '../../context/AuthContext';
 import { usePasskeyAuth } from './usePasskeyAuth';
@@ -34,8 +33,6 @@ interface AuthViewProps {
     authError: string;
     isAuthenticating: boolean;
     onSubmit: (e: React.FormEvent) => void;
-    theme?: Theme;
-    onSetTheme?: (theme: Theme) => void;
 }
 
 const titles = { login: 'Welcome back', signup: 'Create your account', mfa: 'Security Challenge', reset: 'Reset Password' };
@@ -45,7 +42,7 @@ const subtitles = {
 
 const AuthView: React.FC<AuthViewProps> = ({
     authMode, setAuthMode, email, setEmail, password, setPassword,
-    mfaCode, setMfaCode, authError, isAuthenticating, onSubmit, theme = getEffectiveTheme(), onSetTheme
+    mfaCode, setMfaCode, authError, isAuthenticating, onSubmit
 }) => {
     // KB-001: Ensure keyboard doesn't cover inputs on mobile
     useKeyboardAvoidance();
@@ -169,8 +166,15 @@ const AuthView: React.FC<AuthViewProps> = ({
                         )}
 
                         <div className="mt-auto pt-8 flex flex-col items-center animate-in fade-in duration-1000 delay-500">
-                            <ThemeToggle variant="minimal" theme={theme} onSetTheme={(t) => onSetTheme?.(t)} options={['light', 'dark']} />
-                            <p className="mt-6 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.2em]">&copy; 2026 Anchor OS</p>
+                            {/*
+                              * UX-GL-08: appearance is changed in exactly ONE place —
+                              * Settings → Preferences (Auto/Light/Dark plus text size
+                              * and contrast). The pre-auth footer toggle offered only
+                              * Light/Dark and wrote a different store, so the two
+                              * controls disagreed. This screen still *follows* the
+                              * saved theme; it just no longer sets it.
+                              */}
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.2em]">&copy; 2026 Anchor OS</p>
                         </div>
                     </div>
                 </div>

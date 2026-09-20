@@ -38,6 +38,8 @@ export default function AuthenticatedAppShell() {
               <Route path="fabric/transparency" element={<FabricTransparency />} />
               <Route path="finance/*" element={<FinanceView />} />
               <Route path="settings" element={<SettingsView />} />
+              {/* UX-ST-02: sections are addressable — `/settings/<id>` survives reload, back/forward and deep links. */}
+              <Route path="settings/:section" element={<SettingsView />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<NotFoundView />} />
             </Routes>

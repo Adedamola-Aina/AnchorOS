@@ -28,13 +28,57 @@ describe('ProfileSettings', () => {
     expect(screen.getByTestId('profile-email')).toHaveTextContent('alice@example.com');
   });
 
-  it('debounces name update', () => {
-    const onUpdate = vi.fn();
-    render(<ProfileSettings name="Alice" uid="u-1" onUpdateName={onUpdate} />);
-    fireEvent.change(screen.getByDisplayValue('Alice'), { target: { value: 'Bob' } });
-    expect(onUpdate).not.toHaveBeenCalled();
-    act(() => { vi.advanceTimersByTime(500); });
-    expect(onUpdate).toHaveBeenCalledWith('Bob');
+  // UX-ST-04: the field used to auto-save on a debounce with no dirty state,
+  // no validation and no confirmation.
+  describe('UX-ST-04: explicit save', () => {
+    it('does not save while the user is still typing', () => {
+      const onUpdate = vi.fn();
+      render(<ProfileSettings name="Alice" uid="u-1" onUpdateName={onUpdate} />);
+
+      fireEvent.change(screen.getByTestId('profile-name-input'), { target: { value: 'Bob' } });
+      act(() => { vi.advanceTimersByTime(2000); });
+
+      expect(onUpdate).not.toHaveBeenCalled();
+      expect(screen.getByTestId('profile-dirty')).toBeInTheDocument();
+    });
+
+    it('saves the trimmed name when Save is pressed, and confirms in place', () => {
+      const onUpdate = vi.fn();
+      render(<ProfileSettings name="Alice" uid="u-1" onUpdateName={onUpdate} />);
+
+      fireEvent.change(screen.getByTestId('profile-name-input'), { target: { value: '  Bob  ' } });
+      fireEvent.click(screen.getByTestId('profile-save-name'));
+
+      expect(onUpdate).toHaveBeenCalledWith('Bob');
+      expect(screen.getByTestId('profile-saved')).toBeInTheDocument();
+    });
+
+    it('disables Save until there is something valid to save', () => {
+      const onUpdate = vi.fn();
+      render(<ProfileSettings name="Alice" uid="u-1" onUpdateName={onUpdate} />);
+
+      // Nothing changed yet.
+      expect(screen.getByTestId('profile-save-name')).toBeDisabled();
+
+      fireEvent.change(screen.getByTestId('profile-name-input'), { target: { value: 'Bob' } });
+      expect(screen.getByTestId('profile-save-name')).toBeEnabled();
+
+      act(() => { vi.advanceTimersByTime(5000); });
+      expect(onUpdate).not.toHaveBeenCalled();
+    });
+
+    it('rejects an empty name inline instead of saving it', () => {
+      const onUpdate = vi.fn();
+      render(<ProfileSettings name="Alice" uid="u-1" onUpdateName={onUpdate} />);
+
+      fireEvent.change(screen.getByTestId('profile-name-input'), { target: { value: '   ' } });
+
+      expect(screen.getByTestId('profile-name-error')).toHaveTextContent(/enter a display name/i);
+      expect(screen.getByTestId('profile-save-name')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('profile-save-name'));
+      expect(onUpdate).not.toHaveBeenCalled();
+    });
   });
 
   it('does not fire update if name unchanged', () => {

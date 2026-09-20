@@ -32,7 +32,7 @@ const isRecoveryCode = (value: string): boolean => /^[A-Z0-9]{8}$/.test(value.tr
 interface AuthGateProps { children: React.ReactNode; }
 
 const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
-    const { user, loading, profile, profileLoaded, updateProfile, signIn, signUp, verifyMfa, logout, sendVerificationEmail, sendPasswordReset } = useAuth();
+    const { user, loading, profile, profileLoaded, signIn, signUp, verifyMfa, logout, sendVerificationEmail, sendPasswordReset } = useAuth();
     const { showToast } = useNotifications();
     const navigate = useNavigate();
     const location = useLocation();
@@ -89,7 +89,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
     if (loading) return <AuthLoadingScreen />;
 
     if (!user) return (
-        <AuthView authMode={mfaResolver ? 'mfa' : authMode} setAuthMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} mfaCode={mfaCode} setMfaCode={setMfaCode} authError={authError} isAuthenticating={isAuthenticating} theme={profile?.theme || 'light'} onSetTheme={(theme) => updateProfile({ theme })}
+        <AuthView authMode={mfaResolver ? 'mfa' : authMode} setAuthMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} mfaCode={mfaCode} setMfaCode={setMfaCode} authError={authError} isAuthenticating={isAuthenticating}
             onSubmit={async (e) => {
                 e.preventDefault(); setAuthError('');
                 if (Date.now() < lockoutUntil) { setAuthError(`Too many attempts. Please try again in ${Math.ceil((lockoutUntil - Date.now()) / 1000)}s.`); return; }
