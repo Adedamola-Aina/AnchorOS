@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.24](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.23...v1.21.0-rc.24) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ux:** put the assistant's input first and give it continuity (UX-AI-01) ([#239](https://github.com/Adedamola-Aina/AnchorOS/issues/239)) ([b39cb7b](https://github.com/Adedamola-Aina/AnchorOS/commit/b39cb7b24ab17da9ae7ef29ec60d8be14d15e619))
+
 ## [1.21.0-rc.23](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.22...v1.21.0-rc.23) (2026-09-20)
 
 
