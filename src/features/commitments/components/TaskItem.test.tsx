@@ -109,4 +109,42 @@ describe('TaskItem', () => {
 
     expect(screen.queryByTestId('financial-nudge')).not.toBeInTheDocument();
   });
+
+  // ─── UX-DS-01: functional icons are Lucide, never emoji ───────────────
+  describe('UX-DS-01', () => {
+    /** Matches any emoji/pictograph that used to be used as a product icon. */
+    const emojiPattern = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2705}\u{274C}\u{2B50}]/u;
+
+    it('renders the streak badge as a Lucide icon rather than 🔥', () => {
+      render(<TaskItem {...defaultProps} />);
+
+      const badge = screen.getByTestId('streak-badge');
+      expect(badge.querySelector('svg')).not.toBeNull();
+      expect(emojiPattern.test(badge.textContent ?? '')).toBe(false);
+    });
+
+    it('uses the milestone icon and an accessible label at a milestone streak', () => {
+      render(<TaskItem {...defaultProps} task={buildTask({ title: 'Read Bible', completed: false, currentStreak: 7 })} />);
+
+      const badge = screen.getByTestId('streak-badge');
+      expect(badge.querySelector('svg')).not.toBeNull();
+      // The meaning moved from a glyph to real text.
+      expect(badge.textContent).toContain('1 week strong!');
+    });
+
+    it('renders priority as the shared Lucide indicator, not 🔴/🟢', () => {
+      render(<TaskItem {...defaultProps} task={buildTask({ title: 'Pay rent', completed: false, priority: 'high' })} />);
+
+      expect(screen.getByTestId('priority-high')).toBeInTheDocument();
+      expect(screen.queryByText('🔴 High')).toBeNull();
+    });
+
+    it('never renders an emoji as an icon anywhere in the row', () => {
+      const { container } = render(
+        <TaskItem {...defaultProps} task={buildTask({ title: 'Pay rent', completed: false, currentStreak: 3, priority: 'low' })} />
+      );
+
+      expect(emojiPattern.test(container.textContent ?? '')).toBe(false);
+    });
+  });
 });

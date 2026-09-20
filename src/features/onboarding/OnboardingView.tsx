@@ -56,7 +56,13 @@ export const OnboardingView = () => {
   const [loading, setLoading] = useState(false);
 
   // Account form state
-  const [accName, setAccName] = useState('Main Checking');
+  //
+  // UX-OB-03: these used to start at 'Main Checking' / 'Read for 15 mins', so a
+  // user tapping straight through committed the sample text as real data — the
+  // product manufactured junk by default. Suggested names are now *placeholders*
+  // and the suggestion chips on the habit step are opt-in, so nothing is created
+  // unless the user chooses it (doc 18 §4.4.3).
+  const [accName, setAccName] = useState('');
   const [balance, setBalance] = useState('');
   const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD');
   const [accountType, setAccountType] = useState<AccountType>('checking');
@@ -67,7 +73,7 @@ export const OnboardingView = () => {
   const [goalType, setGoalType] = useState<GoalType>('savings');
 
   // Task form state
-  const [taskTitle, setTaskTitle] = useState('Read for 15 mins');
+  const [taskTitle, setTaskTitle] = useState('');
 
   const handleStart = async (name: string) => {
     await updateProfile({ name, onboardingComplete: false });
@@ -82,10 +88,17 @@ export const OnboardingView = () => {
   };
 
   const handleCreateAccount = async () => {
+    // UX-OB-03: the UI already disables this button while the name or balance
+    // is empty; this guard makes "nothing is created unless chosen" a property
+    // of the handler too, so a stray submit cannot manufacture a default account.
+    if (!accName.trim() || !balance) {
+      showToast('Add an account name and its current balance to continue.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       await addAccount({
-        name: accName,
+        name: accName.trim(),
         type: accountType,
         currency,
         balanceCents: toCents(balance),
@@ -131,10 +144,15 @@ export const OnboardingView = () => {
   };
 
   const handleCreateTask = async () => {
+    // UX-OB-03: same contract as the account step — no default commitment.
+    if (!taskTitle.trim()) {
+      showToast('Name the habit you want to commit to.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       await addTask({
-        title: taskTitle,
+        title: taskTitle.trim(),
         type: 'daily',
         completed: false,
         category: 'personal',

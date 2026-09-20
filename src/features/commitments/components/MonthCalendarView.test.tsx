@@ -9,6 +9,10 @@ vi.mock('lucide-react', () => ({
   ChevronRight: () => <span data-testid="chevron-right" />,
   Circle: () => <span data-testid="circle" />,
   CheckCircle2: () => <span data-testid="check-circle" />,
+  // UX-DS-01: the priority dot is now the shared PriorityIndicator.
+  ChevronsUp: () => <span data-testid="priority-high-icon" />,
+  Minus: () => <span data-testid="priority-medium-icon" />,
+  ChevronsDown: () => <span data-testid="priority-low-icon" />,
 }));
 
 const baseTask: AnchorTask = {

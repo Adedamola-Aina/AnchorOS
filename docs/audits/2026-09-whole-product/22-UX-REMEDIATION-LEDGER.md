@@ -19,13 +19,13 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **28** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **33** |
-| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06) |
-| Deployed | `master` `b67aa498` / `v1.21.0-rc.0` → **staging**, Release Smoke green. **Production undeployed.** |
+| Closed | **30** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **31** |
+| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep) |
+| Deployed | `master` `5270bfb7` / `v1.21.0-rc.19` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
 
-## Closed (28)
+## Closed (30)
 
 | ID | Sev | Wave | What was wrong | Verified by |
 |---|---|---|---|---|
@@ -57,9 +57,11 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | UX-CM-01 | HIGH | P1c | Composer opened on "Choose Frequency" — classification before capture | Opens on the name; cadence defaulted and adjustable in place. `TaskForm.test.tsx` |
 | UX-CM-02 | HIGH | P1c | Composer rendered inline in page flow: no sheet context, no visible Create | Now the shared `Modal`: one sheet, one dismiss, pinned Save. `TaskForm.test.tsx` |
 | UX-CM-09 | MEDIUM | P1c | "DOMAIN" jargon, two dismiss controls, emoji priority, Save below the fold | "Area" label, one dismiss, Lucide `PriorityIndicator`, pinned Save. `TaskForm.test.tsx` |
+| UX-OB-03 | HIGH | P1c | Onboarding pre-filled 'Main Checking' / 'Read for 15 mins' and committed them verbatim, manufacturing junk data by default | Both inputs start empty; suggestions are placeholders and opt-in chips; the handlers refuse to create an unnamed account/commitment. `OnboardingView.test.tsx` |
+| UX-DS-01 | MEDIUM | P1c | Emoji used as functional icons, against `DESIGN_SYSTEM.md` ("Lucide React exclusively") | Priority (`PriorityIndicator`), streak milestones (Lucide `icon` field), the month-calendar priority dot and the ✓ status tick are all Lucide now; the mood faces are an explicit, documented illustration exception with accessible names. `TaskItem.test.tsx`, `streakUtils.test.ts`, `DESIGN_SYSTEM.md` |
 | — | LOW | F1 | `ActionSheet` icons leaked into accessible names (`"+Add account"`) | `aria-hidden` on decorative icons |
 
-## Remaining (33) — grouped by the wave that will close them
+## Remaining (31) — grouped by the wave that will close them
 
 ### P1b — schedule-aware commitments engine · **in progress** (5 findings remain; UX-AI-06, UX-AI-08, UX-CM-04, UX-CM-06, UX-CM-08 closed)
 
@@ -73,12 +75,9 @@ This is the highest-leverage remaining work: it fixes the assistant's false stat
 | UX-ST-03 | MEDIUM | "USER IDENTIFIER" exposes the raw internal id | Move behind "About → technical details" |
 | UX-GL-05 | MEDIUM | Navigation signals nothing (no dot for new insights/due items) | One Status Dot on Home |
 
-### P1c — capture-first composer sheet · **no decision needed** (2 findings remain; UX-CM-10, UX-CM-01, UX-CM-02, UX-CM-09 closed)
+### P1c — capture-first composer sheet · **CLOSED** (UX-CM-10, UX-CM-01, UX-CM-02, UX-CM-09, UX-OB-03 and UX-DS-01 all closed)
 
-| ID | Sev | Finding |
-|---|---|---|
-| UX-OB-03 | HIGH | Onboarding pre-fills junk defaults ('Main Checking', 'Read for 15 mins') committed verbatim |
-| UX-DS-01 | MEDIUM | Emoji used as functional icons, against `DESIGN_SYSTEM.md` ("Lucide React exclusively") — **partial**: the composer's priority emoji are now Lucide `PriorityIndicator`; the streak badge, month-calendar dots and ✓ status glyphs remain |
+The composer work is done, and with it the two findings that were *not* about the composer but were left in this wave. **`UX-OB-03`:** onboarding no longer manufactures data — the account name and the habit title start **empty**, the suggested names live in placeholders and in opt-in suggestion chips, and both handlers refuse to create an unnamed record, so "nothing is created unless the user chooses it" is a property of the code rather than of the copy. **`UX-DS-01`:** the emoji-as-functional-icon sweep is complete — priority uses the shared `PriorityIndicator`, streak milestones carry a Lucide `icon` instead of an emoji field, the month-calendar priority dot and the ✓ status tick are Lucide, and the mood faces are recorded in `DESIGN_SYSTEM.md` as an explicit illustration exception with accessible names (so the rule now has one documented exception instead of an accidental contradiction).
 
 ### P2 — Home merge + shell · **D1/D2 accepted — partially closed** (9 findings remain; UX-DB-02, UX-DB-03, UX-DB-04, UX-DB-05 and UX-AI-07 closed)
 
