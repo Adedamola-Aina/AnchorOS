@@ -74,12 +74,37 @@ export interface IntentEntities {
   page?: string;
 }
 
+/**
+ * AI-11 / AI-15 — the records behind an answer.
+ *
+ * Every sentence the assistant produces must be traceable to records the user
+ * owns. A citation names the records, how many there were, the window they were
+ * read from, and the basis of the arithmetic — which is what "why I said this"
+ * means in practice.
+ */
+export interface QueryCitation {
+  /** What was read, e.g. "Expense transactions". */
+  label: string;
+  /** How many records the statement was computed from. */
+  count: number;
+  /** The window, e.g. "this month" — omitted when the answer is not time-bound. */
+  window?: string;
+  /** The basis of the arithmetic, so the number can be checked by hand. */
+  basis: string;
+}
+
 export interface FabricQueryResult {
   data: unknown;
   summary: string;
   detail?: string;
   visualizable: boolean;
   actions?: FabricQuickAction[];
+  /**
+   * AI-11: the grounding invariant. Present for every answer that states a
+   * number about the user's records; absent only for answers that claim nothing
+   * (navigation, a fallback, or a recording confirmation).
+   */
+  citations?: QueryCitation[];
 }
 
 export interface WeeklyReport {

@@ -27,6 +27,7 @@ import { CommitmentsEmptyState, CommitmentsFilterBar } from './components/Commit
 import { SmartViewBar, CommitmentSearchField, QuickAddBar } from './components/CommitmentToolbar';
 import { DoneHistory, CommitmentUndoBar, BulkActionBar } from './components/CommitmentHistory';
 import { useCommitmentsWorkspace } from './hooks/useCommitmentsWorkspace';
+import { useRegisterFab } from '../../context/FabContext';
 import type { QuickAddDraft } from './utils/parseQuickAdd';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 
@@ -49,6 +50,9 @@ const CommitmentsView = () => {
   const [quickAddDraft, setQuickAddDraft] = useState<QuickAddDraft | null>(null);
 
   const closeComposer = () => { setShowAdd(false); setQuickAddDraft(null); };
+
+  // UX-GL-04: this page's one primary action, rendered as the mobile FAB.
+  useRegisterFab({ label: 'New commitment', onClick: () => setShowAdd(true) });
 
   const handleAdd = async (taskPayload: Omit<AnchorTask, 'id' | 'createdAt'>) => {
     try {

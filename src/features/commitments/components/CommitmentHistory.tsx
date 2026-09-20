@@ -13,7 +13,6 @@
 import React from 'react';
 import { Check, Undo2, Trash2, X } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
-import type { AnchorTask } from '../../../types';
 import { SwipeableTaskItem } from './SwipeableTaskItem';
 import type { CompletedGroup } from '../utils/smartViews';
 

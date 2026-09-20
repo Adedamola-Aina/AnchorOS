@@ -9,6 +9,8 @@ import { useResponsive } from '../hooks/useResponsive';
 import { useKeyboardAvoidance } from '../hooks/useKeyboardAvoidance';
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChanges';
 import { BottomNavigation } from '../components/mobile/BottomNavigation';
+import { ContextualFab } from '../components/mobile/ContextualFab';
+import { useNavScrollVisibility } from '../components/mobile/useNavScrollVisibility';
 import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { useFinanceService } from '../hooks/useFinanceService';
 import { useFabric } from '../hooks/useFabric';
@@ -54,6 +56,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     // assistant has an unread proactive insight.
     const { proactiveQuestion } = useFabric();
     const { isMobile } = useResponsive();
+    // UX-GL-04: hide the bar (and the FAB) while scrolling down.
+    const navHidden = useNavScrollVisibility();
     const { accounts } = useFinanceService(user);
     const accountColors = useMemo(() => accounts.map(a => a.color).filter(Boolean), [accounts]);
 
@@ -113,7 +117,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
             <main
                 data-scroll
                 className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0"
-                style={isMobile ? { paddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px) + 1.5rem)', scrollPaddingBottom: 'calc(49px + env(safe-area-inset-bottom, 0px))' } : undefined}
+                style={isMobile ? { paddingBottom: 'calc(var(--bottom-nav-height, 49px) + 1.5rem)', scrollPaddingBottom: 'var(--bottom-nav-height, 49px)' } : undefined}
             >
                 {/* On mobile, pad bottom is now handled by parent main container */}
                 <div
@@ -125,7 +129,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 <InstallPrompt />
             </main>
 
-            {isMobile && <BottomNavigation accountColors={accountColors} hasUnreadInsight={!!proactiveQuestion} />}
+            {isMobile && <ContextualFab navHidden={navHidden} />}
+            {isMobile && <BottomNavigation accountColors={accountColors} hasUnreadInsight={!!proactiveQuestion} hidden={navHidden} />}
         </div>
     );
 };

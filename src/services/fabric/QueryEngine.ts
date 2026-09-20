@@ -15,8 +15,18 @@ import { momentumQuery } from './query/momentumQueries';
 import { planWeek, todayQuery, upcomingQuery } from './query/planningQueries';
 import { scenarioQuery } from './query/scenarioQueries';
 import type { RunFabricQueryInput } from './query/types';
+import { deriveCitations, withCitations } from './query/citations';
 
+/**
+ * AI-11: every answer that states a number about the user's records carries
+ * citations. Attaching them here — once, after dispatch — means a query cannot
+ * be added without them, and the invariant test can iterate the action map.
+ */
 export function runFabricQuery(input: RunFabricQueryInput): FabricQueryResult {
+  return withCitations(dispatchQuery(input), deriveCitations(input));
+}
+
+function dispatchQuery(input: RunFabricQueryInput): FabricQueryResult {
   const { action } = input.intent;
 
   if (action === 'query_spending') return spendingSummary(input);

@@ -17,6 +17,7 @@ import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { EmptyAccountsState } from './components/EmptyAccountsState';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
+import { useRegisterFab } from '../../context/FabContext';
 import { CardStack } from '../../components/finance/CardStack';
 import { AccountListItem } from './components/AccountListItem';
 import { TotalAssetsSummaryBar } from '../../components/finance/TotalAssetsSummaryBar';
@@ -49,6 +50,9 @@ const FinanceView = () => {
   const [prefillData, setPrefillData] = useState<{ amount?: number; category?: string; title?: string } | undefined>(undefined);
   /** UX-FN-08: the landing page previously had no way to record a transaction. */
   const [showCreateSheet, setShowCreateSheet] = useState(false);
+
+  // UX-GL-04: the mobile FAB records a transaction — the page's primary action.
+  useRegisterFab({ label: 'Record transaction', onClick: () => setShowCreateSheet(true) });
   /**
    * UX-FN-03: the account just created in the success state, so the transaction
    * form can preselect it — creation and recording are one journey.

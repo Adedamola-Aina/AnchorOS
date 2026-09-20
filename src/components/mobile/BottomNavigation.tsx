@@ -13,11 +13,18 @@ interface BottomNavigationProps {
   accountColors?: string[];
   /** UX-GL-05: one low-noise dot on Home when an insight is unread. */
   hasUnreadInsight?: boolean;
+  /**
+   * UX-GL-04: hide the bar while the user scrolls down. The links stay in the
+   * accessibility tree (no aria-hidden over focusable content) — the bar is only
+   * moved out of the way, and it returns on the first upward scroll.
+   */
+  hidden?: boolean;
 }
 
 export const BottomNavigation = ({
   accountColors = [],
   hasUnreadInsight = false,
+  hidden = false,
 }: BottomNavigationProps) => {
   const [animatingRoute, setAnimatingRoute] = useState<string | null>(null);
   const [celebrationColor, setCelebrationColor] = useState(CELEBRATION_COLORS[0]);
@@ -79,9 +86,10 @@ export const BottomNavigation = ({
       role="navigation"
       aria-label="Mobile navigation"
       data-bottom-nav
-      className="md:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200/60 dark:border-white/[0.06]"
+      data-nav-hidden={hidden ? 'true' : 'false'}
+      className={`md:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200/60 dark:border-white/[0.06] transition-transform duration-200 ease-out motion-reduce:transition-none ${hidden ? 'translate-y-full pointer-events-none' : 'translate-y-0'}`}
       style={{
-        height: 'calc(49px + env(safe-area-inset-bottom, 0px))',
+        height: 'var(--bottom-nav-height, calc(49px + env(safe-area-inset-bottom, 0px)))',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         WebkitTapHighlightColor: 'transparent',
       }}

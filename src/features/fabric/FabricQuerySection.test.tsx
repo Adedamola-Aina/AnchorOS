@@ -238,4 +238,75 @@ describe('FabricQuerySection', () => {
       expect(screen.queryByTestId('ask-anchor-thread')).not.toBeInTheDocument();
     });
   });
+
+  // ─── AI-15: tap-to-cite — "why I said this" ─────────────────────────────
+  describe('AI-15 — every statement expands to its records', () => {
+    const baseProps = {
+      freeText: '',
+      inputRef: createRef<HTMLInputElement>(),
+      isQuerying: false,
+      onChangeText: vi.fn(),
+      onSubmitText: vi.fn(),
+      onPrompt: vi.fn(async () => undefined),
+      onGenerateWeeklyReport: vi.fn(),
+      onAction: vi.fn(),
+      onAskAgain: vi.fn(async () => undefined),
+    };
+
+    const cited = {
+      data: null,
+      summary: 'You spent ₦5,000 this month.',
+      visualizable: false,
+      citations: [
+        { label: 'Expense transactions', count: 2, window: 'this month', basis: 'Summed from your ledger; soft-deleted transactions are excluded.' },
+      ],
+    };
+
+    it('offers the records behind the answer, closed by default', () => {
+      render(
+        <FabricQuerySection {...baseProps} queryResult={cited} thread={[{ id: '1', question: 'How much did I spend?', answer: null }]} />,
+      );
+
+      const toggle = screen.getByTestId('why-said-this');
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByTestId('citation-list')).not.toBeInTheDocument();
+    });
+
+    it('shows what was read, how many, the window and the basis', () => {
+      render(
+        <FabricQuerySection {...baseProps} queryResult={cited} thread={[{ id: '1', question: 'How much did I spend?', answer: null }]} />,
+      );
+
+      fireEvent.click(screen.getByTestId('why-said-this'));
+
+      const list = screen.getByTestId('citation-list');
+      expect(within(list).getByText('Expense transactions')).toBeInTheDocument();
+      expect(within(list).getByText(/this month/)).toBeInTheDocument();
+      expect(within(list).getByText(/2 records/)).toBeInTheDocument();
+      expect(within(list).getByText(/soft-deleted transactions are excluded/)).toBeInTheDocument();
+    });
+
+    it('can be collapsed again', () => {
+      render(
+        <FabricQuerySection {...baseProps} queryResult={cited} thread={[{ id: '1', question: 'How much did I spend?', answer: null }]} />,
+      );
+
+      fireEvent.click(screen.getByTestId('why-said-this'));
+      expect(screen.getByTestId('citation-list')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('why-said-this'));
+      expect(screen.queryByTestId('citation-list')).not.toBeInTheDocument();
+    });
+
+    it('says nothing about records when the answer claims nothing', () => {
+      render(
+        <FabricQuerySection
+          {...baseProps}
+          queryResult={{ data: null, summary: 'Opening Finance.', visualizable: false }}
+          thread={[{ id: '1', question: 'Go to finance', answer: null }]}
+        />,
+      );
+
+      expect(screen.queryByTestId('why-said-this')).not.toBeInTheDocument();
+    });
+  });
 });

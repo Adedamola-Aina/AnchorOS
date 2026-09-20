@@ -420,6 +420,15 @@ a, button, input, select, textarea, [role="button"], [tabindex] {
 .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .pb-safe-nav      { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
+/*
+ * UX-GL-04: one source of truth for the bottom nav's height. The nav, the
+ * content reserve and the contextual FAB all read this, so the bar, the space it
+ * occupies and the button above it cannot drift apart.
+ */
+:root {
+  --bottom-nav-height: calc(49px + env(safe-area-inset-bottom, 0px));
+}
+
 
 /* ─── Touch targets (WCAG 2.5.5) ───────────────────────── */
 .touch-target { min-width: 44px; min-height: 44px; }
