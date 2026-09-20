@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.25](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.24...v1.21.0-rc.25) (2026-09-20)
+
+
+### Features
+
+* **ux:** twenty ranked items — scheduling truth, a commitments workbench, grounded answers, and a proved dev-surface gate ([#240](https://github.com/Adedamola-Aina/AnchorOS/issues/240)) ([4e60974](https://github.com/Adedamola-Aina/AnchorOS/commit/4e60974bb6e4fad3d856341024c34bc83f298728))
+
 ## [1.21.0-rc.24](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.23...v1.21.0-rc.24) (2026-09-20)
 
 
