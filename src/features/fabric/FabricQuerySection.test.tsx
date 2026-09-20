@@ -1,7 +1,7 @@
 /// <reference types="@testing-library/jest-dom/vitest" />
 import React, { createRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { FabricQuerySection } from './FabricQuerySection';
 
 vi.mock('./FabricPromptChips', () => ({
@@ -23,6 +23,8 @@ describe('FabricQuerySection', () => {
         inputRef={createRef<HTMLInputElement>()}
         isQuerying={false}
         queryResult={null}
+        thread={[]}
+        onAskAgain={vi.fn(async () => undefined)}
         onChangeText={onChangeText}
         onSubmitText={onSubmitText}
         onPrompt={vi.fn(async () => undefined)}
@@ -47,6 +49,8 @@ describe('FabricQuerySection', () => {
         inputRef={createRef<HTMLInputElement>()}
         isQuerying={false}
         queryResult={null}
+        thread={[]}
+        onAskAgain={vi.fn(async () => undefined)}
         onChangeText={vi.fn()}
         onSubmitText={vi.fn()}
         onPrompt={vi.fn(async () => undefined)}
@@ -63,6 +67,8 @@ describe('FabricQuerySection', () => {
         inputRef={createRef<HTMLInputElement>()}
         isQuerying={true}
         queryResult={null}
+        thread={[]}
+        onAskAgain={vi.fn(async () => undefined)}
         onChangeText={vi.fn()}
         onSubmitText={vi.fn()}
         onPrompt={vi.fn(async () => undefined)}
@@ -81,6 +87,8 @@ describe('FabricQuerySection', () => {
         inputRef={createRef<HTMLInputElement>()}
         isQuerying={true}
         queryResult={null}
+        thread={[]}
+        onAskAgain={vi.fn(async () => undefined)}
         onChangeText={vi.fn()}
         onSubmitText={vi.fn()}
         onPrompt={vi.fn(async () => undefined)}
@@ -100,6 +108,8 @@ describe('FabricQuerySection', () => {
         freeText="hello"
         inputRef={createRef<HTMLInputElement>()}
         isQuerying={false}
+        thread={[]}
+        onAskAgain={vi.fn(async () => undefined)}
         queryResult={{
           data: null,
           summary: 'Summary text',
@@ -132,6 +142,8 @@ describe('FabricQuerySection', () => {
         freeText="hello"
         inputRef={createRef<HTMLInputElement>()}
         isQuerying={false}
+        thread={[]}
+        onAskAgain={vi.fn(async () => undefined)}
         queryResult={{
           data: null,
           summary: 'Summary only',
@@ -147,5 +159,83 @@ describe('FabricQuerySection', () => {
 
     expect(screen.getByText('Summary only')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Open Finance' })).not.toBeInTheDocument();
+  });
+
+  // ─── UX-AI-03: continuity and a stated data source ──────────────────────
+  describe('UX-AI-03', () => {
+    const baseProps = {
+      freeText: '',
+      inputRef: createRef<HTMLInputElement>(),
+      isQuerying: false,
+      onChangeText: vi.fn(),
+      onSubmitText: vi.fn(),
+      onPrompt: vi.fn(async () => undefined),
+      onGenerateWeeklyReport: vi.fn(),
+      onAction: vi.fn(),
+    };
+
+    it('states which data the answer used', () => {
+      render(
+        <FabricQuerySection
+          {...baseProps}
+          queryResult={{ data: null, summary: 'You spent ₦5,000', visualizable: false }}
+          thread={[{ id: '1', question: 'How much did I spend?', answer: null }]}
+          onAskAgain={vi.fn(async () => undefined)}
+        />,
+      );
+
+      expect(screen.getByTestId('answer-source')).toHaveTextContent(/your own commitments, accounts and recorded transactions/i);
+      expect(screen.getByTestId('query-answer-question')).toHaveTextContent('How much did I spend?');
+    });
+
+    it('offers Ask again on the current answer', () => {
+      const onAskAgain = vi.fn(async () => undefined);
+      render(
+        <FabricQuerySection
+          {...baseProps}
+          queryResult={{ data: null, summary: 'You spent ₦5,000', visualizable: false }}
+          thread={[{ id: '1', question: 'How much did I spend?', answer: null }]}
+          onAskAgain={onAskAgain}
+        />,
+      );
+
+      fireEvent.click(screen.getByTestId('ask-again'));
+      expect(onAskAgain).toHaveBeenCalledWith('How much did I spend?');
+    });
+
+    it('keeps earlier exchanges readable, each with its own Ask again', () => {
+      const onAskAgain = vi.fn(async () => undefined);
+      render(
+        <FabricQuerySection
+          {...baseProps}
+          queryResult={{ data: null, summary: 'Current summary', visualizable: false }}
+          thread={[
+            { id: 'new', question: 'Current question', answer: null },
+            { id: 'old', question: 'Earlier question', answer: { data: null, summary: 'Earlier summary', visualizable: false } },
+          ]}
+          onAskAgain={onAskAgain}
+        />,
+      );
+
+      const thread = screen.getByTestId('ask-anchor-thread');
+      expect(within(thread).getByText('Earlier question')).toBeInTheDocument();
+      expect(within(thread).getByText('Earlier summary')).toBeInTheDocument();
+
+      fireEvent.click(within(thread).getByText('Ask again'));
+      expect(onAskAgain).toHaveBeenCalledWith('Earlier question');
+    });
+
+    it('renders no thread section when there is only the current exchange', () => {
+      render(
+        <FabricQuerySection
+          {...baseProps}
+          queryResult={{ data: null, summary: 'Only answer', visualizable: false }}
+          thread={[{ id: '1', question: 'Only question', answer: null }]}
+          onAskAgain={vi.fn(async () => undefined)}
+        />,
+      );
+
+      expect(screen.queryByTestId('ask-anchor-thread')).not.toBeInTheDocument();
+    });
   });
 });

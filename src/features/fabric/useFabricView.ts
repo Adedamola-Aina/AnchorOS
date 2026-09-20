@@ -5,6 +5,15 @@ import { logProductEvent } from '../../services/telemetry';
 import type { FabricQueryResult, TabView } from '../../types';
 import type { Currency } from '../../services/fabric/fabricUtils';
 
+export interface ThreadEntry {
+  id: string;
+  question: string;
+  answer: FabricQueryResult | null;
+}
+
+/** How many exchanges the in-session thread keeps (UX-AI-03). */
+const THREAD_LIMIT = 3;
+
 interface UseFabricViewResult {
   isEnabled: boolean;
   isReady: boolean;
@@ -22,6 +31,9 @@ interface UseFabricViewResult {
   markQuestionShown: ReturnType<typeof useFabric>['markQuestionShown'];
   queryResult: FabricQueryResult | null;
   isQuerying: boolean;
+  /** UX-AI-03: the last few exchanges, newest first, so an answer is not a dead end. */
+  thread: ThreadEntry[];
+  askAgain: (question: string) => Promise<void>;
   freeText: string;
   setFreeText: (text: string) => void;
   questionDismissed: boolean;
@@ -35,6 +47,7 @@ interface UseFabricViewResult {
 export function useFabricView(): UseFabricViewResult {
   const { navigateTo } = useApp();
   const [queryResult, setQueryResult] = useState<FabricQueryResult | null>(null);
+  const [thread, setThread] = useState<ThreadEntry[]>([]);
   const [isQuerying, setIsQuerying] = useState(false);
   const [freeText, setFreeText] = useState('');
   const [questionDismissed, setQuestionDismissed] = useState(false);
@@ -75,7 +88,18 @@ export function useFabricView(): UseFabricViewResult {
     setIsQuerying(true);
     setQueryResult(null);
     const result = await runQuery(trimmed);
-    setQueryResult(result ?? null);
+    const answer = result ?? null;
+    setQueryResult(answer);
+    /**
+     * UX-AI-03: the assistant had no continuity — one submission, one result,
+     * and nothing to ask again from. The thread keeps the last few exchanges
+     * (newest first) so a follow-up is one tap and the previous answers are
+     * still readable.
+     */
+    setThread(prev => [
+      { id: `${Date.now()}-${prev.length}`, question: trimmed, answer },
+      ...prev,
+    ].slice(0, THREAD_LIMIT));
     setIsQuerying(false);
     try {
       logProductEvent('fabric_query_submitted', {
@@ -84,6 +108,10 @@ export function useFabricView(): UseFabricViewResult {
         hasResult: !!result?.summary,
       });
     } catch { /* telemetry must never break the UI */ }
+  };
+
+  const askAgain = async (question: string) => {
+    await submitPrompt(question);
   };
 
   const handleAction = (type: string, payload: Record<string, unknown>) => {
@@ -118,6 +146,8 @@ export function useFabricView(): UseFabricViewResult {
     markQuestionShown,
     queryResult,
     isQuerying,
+    thread,
+    askAgain,
     freeText,
     setFreeText,
     questionDismissed,

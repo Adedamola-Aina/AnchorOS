@@ -33,6 +33,8 @@ const FabricView: React.FC = () => {
     markQuestionShown,
     queryResult,
     isQuerying,
+    thread,
+    askAgain,
     freeText,
     setFreeText,
     questionDismissed,
@@ -108,6 +110,29 @@ const FabricView: React.FC = () => {
           * where it is adjacent to the assistant without being part of it.
           */}
 
+        {/*
+          * UX-AI-01: the input used to sit near the BOTTOM of the card stack,
+          * after mood and insights, so the assistant's primary action was the
+          * last thing you could reach. It now comes directly under the Today
+          * block — "what is happening" then "ask about it".
+          */}
+        <FabricQuerySection
+          freeText={freeText}
+          inputRef={inputRef}
+          isQuerying={isQuerying}
+          queryResult={queryResult}
+          thread={thread}
+          onChangeText={setFreeText}
+          onSubmitText={() => {
+            void submitPrompt(freeText);
+            setFreeText('');
+          }}
+          onPrompt={submitPrompt}
+          onAskAgain={askAgain}
+          onGenerateWeeklyReport={() => { void generateWeeklyReport(); }}
+          onAction={handleAction}
+        />
+
         {proactiveQuestion && !questionDismissed && (
           <FabricProactiveQuestionCard
             question={proactiveQuestion}
@@ -138,38 +163,30 @@ const FabricView: React.FC = () => {
           navigateTo={navigateTo}
         />
 
-        {/* ── Insights ────────────────────────────────────────────────────── */}
+        {/* ── Insights: at most 3, ranked (UX-AI-01) ──────────────────────── */}
         {insights.length > 0 && (
           <section className="space-y-2">
-            <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">Insights</p>
+            <p className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+              Insights
+              {insights.length > 3 && (
+                <span className="ml-2 font-normal normal-case tracking-normal text-slate-400 dark:text-slate-500">
+                  showing 3 of {insights.length}
+                </span>
+              )}
+            </p>
             <div className="space-y-2">
-              {insights.map((insight) => <FabricInsightCard key={insight.id} insight={insight} />)}
+              {insights.slice(0, 3).map((insight) => <FabricInsightCard key={insight.id} insight={insight} />)}
             </div>
           </section>
         )}
 
-        <FabricQuerySection
-          freeText={freeText}
-          inputRef={inputRef}
-          isQuerying={isQuerying}
-          queryResult={queryResult}
-          onChangeText={setFreeText}
-          onSubmitText={() => {
-            void submitPrompt(freeText);
-            setFreeText('');
-          }}
-          onPrompt={submitPrompt}
-          onGenerateWeeklyReport={() => { void generateWeeklyReport(); }}
-          onAction={handleAction}
-        />
-
         <FabricWeeklySnapshotSection
           weeklyReport={weeklyReport}
         />
-
       </div>
     </FeatureErrorBoundary>
   );
 };
 
 export default FabricView;
+

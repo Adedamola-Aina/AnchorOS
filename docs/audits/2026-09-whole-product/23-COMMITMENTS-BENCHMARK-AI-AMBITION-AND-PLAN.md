@@ -142,10 +142,10 @@ Everything still open after this document (existing 33 from doc 22, plus the new
 | **Commitments 2.0 — capture & ease** | `CM-01/02/09/10`, `CM-16`, `OB-03`, `DS-01` | 4 | **New** (overlaps P1c, now specified) |
 | **Commitments 2.0 — find & undo** | `CM-15`, `CM-23` | 2 | **New** |
 | **Commitments 2.0 — proposed** | `CM-27`, `CM-24`, `CM-12`, `CM-26`, `CM-13`, `CM-28`, `CM-19`, `CM-22` | 8 | **New (need your yes)** |
-| **Fabric AI — trust** | `AI-11`, `AI-15`, `AI-05/10`, `AI-07`, `AI-01`, `AI-04/09` | 6 | **New** |
+| **Fabric AI — trust** | `AI-11`, `AI-15`, `AI-05/10`, `AI-07`, `AI-01`, `AI-04/09` | 6 → **3** (`AI-01`, `AI-04/09`, `AI-05/10`, `AI-07` closed; `AI-11`, `AI-15` remain) | **New** |
 | **Fabric AI — ambition** | `AI-13`, `AI-18`, `AI-12`, `AI-16`, `AI-14`, `AI-19`, `AI-21`, `AI-03` | 8 | **New (need your yes)** |
 
-**Totals:** 10 existing + ~25 new findings ≈ **35 open items**, of which **14 are PROPOSED** and need your decision (8 commitments, 6 assistant).
+**Totals:** 7 existing + ~25 new findings ≈ **32 open items**, of which **14 are PROPOSED** and need your decision (8 commitments, 6 assistant).
 
 ## Part D — The wave plan (order, contents, exit criteria)
 
