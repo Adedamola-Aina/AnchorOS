@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import type { AnchorTask, AnchorTransaction } from '../../../types';
-import { runFabricQuery } from '../QueryEngine';
-import { deriveCitations, UNCITED_ACTIONS } from './citations';
-import { getDueToday } from '../commitmentSchedule';
-import type { RunFabricQueryInput } from './types';
+import type { AnchorTask, AnchorTransaction } from '../../../../types';
+import { runFabricQuery } from '../../QueryEngine';
+import { deriveCitations, UNCITED_ACTIONS } from '../../query/citations';
+import { getDueToday } from '../../commitmentSchedule';
+import type { RunFabricQueryInput } from '../../query/types';
 
 /**
  * AI-11 — grounding invariants.
