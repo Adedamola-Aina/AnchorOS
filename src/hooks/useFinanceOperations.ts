@@ -31,7 +31,10 @@ export const useFinanceOperations = (
         if (!user) return;
         return financeTracer.trace('addAccount', async () => {
             try {
-                await withTimeout(financeService.addAccount(user.uid, acc), OPERATION_TIMEOUT, 'addAccount');
+                // UX-FN-03: return the created id so the caller can connect the
+                // next step ("Record first transaction") to the account it just
+                // made. The service already returned it; this used to discard it.
+                return await withTimeout(financeService.addAccount(user.uid, acc), OPERATION_TIMEOUT, 'addAccount');
             } catch (err) {
                 throw handleError(err);
             }

@@ -18,6 +18,19 @@ interface VirtualTransactionListProps {
     className?: string;
     /** When provided, a "Previous month" divider is shown before this index. */
     carryoverStartIndex?: number;
+    /**
+     * UX-FN-01: the empty state used to instruct "Add your first transaction to
+     * get started" with **no control at all**. The action now lives with the
+     * instruction.
+     */
+    onRecordTransaction?: () => void;
+    /**
+     * UX-FN-10: when the account holds transactions in other months, the empty
+     * state must say so and offer the one-tap way there instead of implying the
+     * account is empty.
+     */
+    latestActivityLabel?: string;
+    onJumpToLatestActivity?: () => void;
 }
 
 export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
@@ -30,6 +43,9 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     onClearSearch,
     className = "h-[calc(100vh-320px)] min-h-[400px]",
     carryoverStartIndex,
+    onRecordTransaction,
+    latestActivityLabel,
+    onJumpToLatestActivity,
 }) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const { isMobile } = useResponsive();
@@ -46,21 +62,57 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     const rowVirtualizer = parentVirtualizer;
 
     if (safeTransactions.length === 0) {
+        const searching = !!searchQuery;
+        const activityElsewhere = !searching && !!latestActivityLabel && !!onJumpToLatestActivity;
+
+        // UX-FN-06: an empty list must state *why* it is empty — "no matches for
+        // this search", "nothing this month but you have activity elsewhere", or
+        // "you have not recorded anything yet" are three different situations.
+        const title = searching
+            ? 'No transactions found'
+            : activityElsewhere
+                ? 'Nothing this month'
+                : 'No transactions yet';
+        const body = searching
+            ? 'Try a different search term.'
+            : activityElsewhere
+                ? `You have activity in ${latestActivityLabel}.`
+                : 'Record your first transaction to get started.';
+
         return (
-            <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
+            <div className="py-12 px-4 text-center flex flex-col items-center justify-center" data-testid="transaction-empty-state">
                 <Search className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
-                <h4 className="font-bold text-slate-800 dark:text-white mb-1">
-                    {searchQuery ? 'No transactions found' : 'No transactions yet'}
-                </h4>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {searchQuery ? 'Try a different search term' : 'Add your first transaction to get started'}
-                </p>
-                {searchQuery && onClearSearch && (
+                <h4 className="font-bold text-slate-800 dark:text-white mb-1">{title}</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{body}</p>
+
+                {searching && onClearSearch && (
                     <button
                         onClick={onClearSearch}
-                        className="mt-4 text-primary-500 text-sm font-bold hover:underline"
+                        className="mt-4 min-h-11 px-4 text-primary-500 text-sm font-bold hover:underline"
                     >
-                        Clear Search
+                        Clear search
+                    </button>
+                )}
+
+                {activityElsewhere && (
+                    <button
+                        type="button"
+                        onClick={onJumpToLatestActivity}
+                        data-testid="jump-to-latest-activity"
+                        className="mt-4 min-h-11 px-4 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+                    >
+                        Go to {latestActivityLabel}
+                    </button>
+                )}
+
+                {!searching && !activityElsewhere && onRecordTransaction && (
+                    <button
+                        type="button"
+                        onClick={onRecordTransaction}
+                        data-testid="record-first-transaction"
+                        className="mt-4 min-h-11 px-4 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+                    >
+                        Record transaction
                     </button>
                 )}
             </div>

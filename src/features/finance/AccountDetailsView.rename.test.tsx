@@ -88,7 +88,8 @@ const renderView = (
         transactions: overrides.transactions ?? mockTransactions,
         accounts: [account],
         loadingFinance: false,
-        addAccount: noopAsync,
+        // UX-FN-03: addAccount now returns the created account id.
+        addAccount: () => Promise.resolve(undefined),
         deleteAccount: noopAsync,
         updateAccountPersonalization: noopAsync,
         addTransaction: noopAsync,

@@ -101,6 +101,22 @@ describe('TransactionForm', () => {
         // For now, let's assume if title/amount work, the pattern holds.
     });
 
+    // UX-FN-03: recording a transaction never showed the account's resulting
+    // position, so cause and effect were invisible.
+    it('shows the account balance before → after the transaction (UX-FN-03)', async () => {
+        const user = userEvent.setup();
+        renderForm({ defaultAccountId: 'acc1' });
+
+        const preview = screen.getByTestId('balance-preview');
+        expect(preview).toHaveTextContent(/Main Checking/);
+        expect(preview).toHaveTextContent(/₦5,000\.00/);
+
+        await user.type(screen.getByLabelText(/Amount/i), '100');
+
+        // ₦5,000.00 − ₦100.00 — the "after" figure is now visible before saving.
+        expect(screen.getByTestId('balance-preview')).toHaveTextContent(/₦4,900\.00/);
+    });
+
     // BUG-033: scope field must be included in addTransaction call
     it('includes scope field from source account when creating a transaction', async () => {
         const user = userEvent.setup();

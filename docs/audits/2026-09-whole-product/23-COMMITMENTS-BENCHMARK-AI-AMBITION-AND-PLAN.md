@@ -135,7 +135,7 @@ Everything still open after this document (existing 33 from doc 22, plus the new
 | P1c capture-first composer | `CM-01`, `CM-02`, `CM-09`, `CM-10`, `OB-03`, `DS-01` | 6 → **0** (`CM-10` closed in #233; `CM-01`, `CM-02`, `CM-09` closed in #234; `OB-03` and `DS-01` closed in the P1c closing wave) | Existing |
 | P2 Home shell + assistant placement | `DB-02`…`DB-05`, `AI-01`, `AI-03`, `AI-05`, `AI-07`, `AI-10`, `GL-01`…`GL-04`, `GL-06` | 14 → **4** (`DB-02`…`DB-05`, `AI-07` closed in #232; `AI-05`, `AI-10`, `GL-02`, `GL-03`, `GL-06` closed in the P2 shell wave; `AI-01`, `AI-03`, `GL-01` — improved, Home carries the doorway — and `GL-04` remain) | Existing |
 | P3 Settings hub | `ST-01`, `ST-02`, `ST-04`, `ST-05`, `ST-06`, `GL-08` | 6 → **0** (hub + `/settings/:section` routes, one section registry, explicit save, appearance consolidated) | Existing |
-| P3 Finance Wallet visuals | `FN-01`…`FN-04`, `FN-06`, `FN-10` | 6 | Existing |
+| P3 Finance landing | `FN-01`, `FN-02`, `FN-03`, `FN-04`, `FN-06`, `FN-10` | 6 → **0** (labelled per-currency totals, connected account→transaction journey, comparable rows, explainable empty months) | Existing |
 | P3 Onboarding rewrite | `OB-01`, `OB-02`, `OB-04`, `OB-05` | 4 | Existing |
 | Dev-surface gating | `GL-07` | 1 | Existing |
 | **Commitments 2.0 — scheduling truth** | `CM-18`, `CM-17`, `CM-21`, `CM-06/07`, `CM-25` | 5 | **New** |
@@ -145,7 +145,7 @@ Everything still open after this document (existing 33 from doc 22, plus the new
 | **Fabric AI — trust** | `AI-11`, `AI-15`, `AI-05/10`, `AI-07`, `AI-01`, `AI-04/09` | 6 | **New** |
 | **Fabric AI — ambition** | `AI-13`, `AI-18`, `AI-12`, `AI-16`, `AI-14`, `AI-19`, `AI-21`, `AI-03` | 8 | **New (need your yes)** |
 
-**Totals:** 16 existing + ~25 new findings ≈ **41 open items**, of which **14 are PROPOSED** and need your decision (8 commitments, 6 assistant).
+**Totals:** 10 existing + ~25 new findings ≈ **35 open items**, of which **14 are PROPOSED** and need your decision (8 commitments, 6 assistant).
 
 ## Part D — The wave plan (order, contents, exit criteria)
 

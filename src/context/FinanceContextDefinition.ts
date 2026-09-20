@@ -7,7 +7,7 @@ interface FinanceContextType {
     transactions: AnchorTransaction[];
     accounts: AnchorAccount[];
     loadingFinance: boolean;
-    addAccount: (acc: CreateAccountPayload) => Promise<void>;
+    addAccount: (acc: CreateAccountPayload) => Promise<string | undefined>;
     deleteAccount: (id: string) => Promise<void>;
     updateAccountPersonalization: (id: string, updates: { cardColor?: string; cardArtwork?: string; cardArtworkPath?: string; cardArtworkPreset?: string }) => Promise<void>;
     addTransaction: (tx: CreateTransactionPayload) => Promise<void>;
