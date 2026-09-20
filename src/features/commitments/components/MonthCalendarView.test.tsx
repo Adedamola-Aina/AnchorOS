@@ -75,7 +75,7 @@ describe('MonthCalendarView', () => {
       ...baseTask,
       id: '2',
       type: 'weekly',
-      daysOfWeek: ['Monday'],
+      daysOfWeek: [1],
     };
     render(<MonthCalendarView tasks={[weeklyTask]} onToggle={vi.fn()} />);
     const dots = screen.getAllByTestId('task-dot');

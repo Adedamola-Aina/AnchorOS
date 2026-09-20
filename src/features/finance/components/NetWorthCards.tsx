@@ -34,11 +34,11 @@ export const NetWorthCards = ({ netWorth }: NetWorthCardsProps) => {
                 variants={microMotion.netWorthRise}
                 initial="idle"
                 animate={showRiseCue ? 'rise' : 'idle'}
-                className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-r from-finance-300/0 via-finance-300/30 to-finance-300/0"
+                className="pointer-events-none absolute inset-0 rounded-sheet bg-gradient-to-r from-finance-300/0 via-finance-300/30 to-finance-300/0"
             />
             {/* NGN Net Worth Card */}
             {hasNGN && (
-                <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-slate-800 to-slate-900">
+                <div className="relative overflow-hidden rounded-panel p-6 bg-gradient-to-br from-slate-800 to-slate-900">
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
                         <Landmark className="w-16 h-16 text-slate-400" />
                     </div>
@@ -51,7 +51,7 @@ export const NetWorthCards = ({ netWorth }: NetWorthCardsProps) => {
 
             {/* USD Net Worth Card */}
             {hasUSD && (
-                <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-indigo-600 to-indigo-800">
+                <div className="relative overflow-hidden rounded-panel p-6 bg-gradient-to-br from-indigo-600 to-indigo-800">
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
                         <DollarSign className="w-16 h-16 text-primary-300" />
                     </div>

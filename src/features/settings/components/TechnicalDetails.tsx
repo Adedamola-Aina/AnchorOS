@@ -43,7 +43,7 @@ export const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ uid, onCopie
     return (
         <details
             data-testid="technical-details"
-            className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4"
+            className="group rounded-card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4"
         >
             <summary className="flex items-center justify-between gap-2 cursor-pointer list-none min-h-11">
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Technical details</span>

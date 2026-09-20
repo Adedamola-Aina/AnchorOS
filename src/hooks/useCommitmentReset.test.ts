@@ -65,11 +65,11 @@ describe('useCommitmentResetEffect', () => {
   // ── Weekly ───────────────────────────────────────────────────────────────
 
   it('resets weekly task when today matches daysOfWeek', () => {
-    // NOW is a Monday — include 'Monday' in daysOfWeek
+    // NOW is a Monday — include 1 in daysOfWeek
     const task = {
       id: 't2', type: 'weekly', completed: true,
       lastCompletedAt: YESTERDAY, // different day
-      daysOfWeek: ['Monday'],
+      daysOfWeek: [1],
       currentStreak: 2,
     };
     renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
@@ -80,7 +80,7 @@ describe('useCommitmentResetEffect', () => {
     const task = {
       id: 't2', type: 'weekly', completed: true,
       lastCompletedAt: EIGHT_DAYS_AGO, // 8 days ago
-      daysOfWeek: ['Saturday'], // today is Monday — won't match
+      daysOfWeek: [6], // today is Monday — won't match
       currentStreak: 2,
     };
     renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
@@ -91,7 +91,7 @@ describe('useCommitmentResetEffect', () => {
     const task = {
       id: 't2', type: 'weekly', completed: true,
       lastCompletedAt: '2024-01-13', // 2 days ago, Saturday
-      daysOfWeek: ['Saturday'], // doesn't match Monday
+      daysOfWeek: [6], // doesn't match Monday
       currentStreak: 2,
     };
     renderHook(() => useCommitmentResetEffect(fakeUser, [task]));

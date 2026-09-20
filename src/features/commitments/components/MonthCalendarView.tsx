@@ -94,7 +94,7 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ tasks, onT
               data-testid={isToday ? 'calendar-today' : undefined}
               onClick={() => setSelectedDay(day)}
               className={`aspect-square flex flex-col items-center justify-center rounded-lg text-xs font-medium transition-all ${
-                isSelected ? 'bg-task-500 text-white shadow-sm' : isToday ? 'bg-task-50 dark:bg-task-900/20 text-task-700 dark:text-task-300 ring-1 ring-task-200 dark:ring-task-800' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                isSelected ? 'bg-task-500 text-white shadow-elevation-subtle' : isToday ? 'bg-task-50 dark:bg-task-900/20 text-task-700 dark:text-task-300 ring-1 ring-task-200 dark:ring-task-800' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
               <span>{day}</span>

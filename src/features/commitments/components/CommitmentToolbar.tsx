@@ -95,14 +95,14 @@ export const QuickAddBar: React.FC<QuickAddBarProps> = ({ onSave, onAdjust, now 
                     value={line}
                     onChange={(event) => { setLine(event.target.value); setDraft(null); }}
                     placeholder="Pay rent Fri 9am · Read 15m daily"
-                    className="flex-1 min-h-[44px] px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500"
+                    className="flex-1 min-h-[44px] px-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500"
                 />
                 <Button type="submit" variant="secondary" className="min-h-[44px]" disabled={!line.trim()}>
                     Add
                 </Button>
             </div>
             {draft && (
-                <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700" data-testid="quick-add-preview">
+                <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-card bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700" data-testid="quick-add-preview">
                     <span className="text-xs text-slate-600 dark:text-slate-300">
                         <strong className="font-semibold text-slate-800 dark:text-white">{draft.title}</strong>
                         {describeQuickAdd(draft) && <span> · {describeQuickAdd(draft)}</span>}
@@ -138,7 +138,7 @@ export const CommitmentSearchField: React.FC<CommitmentSearchFieldProps> = ({ va
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
                 placeholder="Search commitments, notes or area"
-                className="w-full min-h-[44px] pl-9 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500"
+                className="w-full min-h-[44px] pl-9 pr-10 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500"
             />
             {value && (
                 <button

@@ -105,7 +105,7 @@ const DashboardView = () => {
                 type="button"
                 onClick={() => { haptic.trigger('light'); setChecklistOpen(true); }}
                 data-testid="getting-started-pill"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors min-h-[36px]"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-info-surface text-info border border-info-border text-xs font-semibold hover:opacity-90 transition-colors min-h-[36px]"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Getting Started</span>
@@ -123,7 +123,7 @@ const DashboardView = () => {
               <div
                 data-testid="getting-started-complete"
                 role="status"
-                className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold min-h-[36px]"
+                className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-pill bg-success-surface text-success border border-success-border text-xs font-semibold min-h-[36px]"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Getting Started — all {beyondBasics.totalCount} done</span>

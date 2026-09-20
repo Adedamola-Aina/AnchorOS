@@ -39,7 +39,7 @@ export function InviteSuccessStep({
                 </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <div className="p-6 rounded-panel bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 text-center">
                     Verification Code
                 </p>

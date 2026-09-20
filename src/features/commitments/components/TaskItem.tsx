@@ -128,7 +128,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                         initial="idle"
                         animate={isAnimating ? 'complete' : 'idle'}
                         className={`relative min-w-11 min-h-11 flex items-center justify-center rounded-full shrink-0 ${isAnimating
-                            ? 'bg-emerald-500 text-white scale-150 ring-4 ring-emerald-300 dark:ring-emerald-700 shadow-lg shadow-emerald-500/50'
+                            ? 'bg-emerald-500 text-white scale-150 ring-4 ring-emerald-300 dark:ring-emerald-700 shadow-elevation-raised shadow-emerald-500/50'
                             : task.completed
                                 ? 'bg-emerald-500 text-white'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-500'
@@ -185,7 +185,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                 // generic "streak" icon when the count is not a milestone.
                                 const StreakIcon = milestone ? milestone.icon : Flame;
                                 return (
-                                    <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" data-testid="streak-badge">
+                                    <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-pill text-[10px] font-semibold bg-warning-surface text-warning border border-warning-border" data-testid="streak-badge">
                                         <StreakIcon className="w-3 h-3" aria-hidden="true" />
                                         {task.currentStreak}
                                         {milestone && <span className="sr-only">{milestone.label}</span>}
@@ -203,7 +203,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                             <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
                                 <Badge type={task.type}>{task.type}</Badge>
                                 {task.priority && task.priority !== 'medium' && (
-                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${task.priority === 'high' ? 'bg-rose-100 dark:bg-rose-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
+                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-pill text-[10px] font-semibold border ${task.priority === 'high' ? 'bg-danger-surface text-danger border-danger-border' : 'bg-success-surface text-success border-success-border'}`}>
                                         <PriorityIndicator priority={task.priority} />
                                     </span>
                                 )}

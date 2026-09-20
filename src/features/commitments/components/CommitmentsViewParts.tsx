@@ -75,7 +75,7 @@ export const CommitmentsFilterBar: React.FC<FilterBarProps> = ({ filter, viewMod
                         type="button"
                         onClick={() => onViewChange(id)}
                         aria-pressed={isActive}
-                        className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all min-h-[44px] ${isActive ? 'bg-white dark:bg-slate-600 shadow-sm text-task-600 dark:text-task-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all min-h-[44px] ${isActive ? 'bg-white dark:bg-slate-600 shadow-elevation-subtle text-task-600 dark:text-task-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                     >
                         <Icon className="w-4 h-4" aria-hidden="true" />
                         <span>{label}</span>

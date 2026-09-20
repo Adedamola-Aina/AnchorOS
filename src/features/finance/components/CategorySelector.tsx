@@ -53,7 +53,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         <div>
             <label htmlFor="tx-category" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                 Category
-                {error && <span className="text-rose-500 ml-2 normal-case font-normal animate-pulse">{error}</span>}
+                {error && <span className="text-danger ml-2 normal-case font-normal animate-pulse">{error}</span>}
             </label>
             <div className="flex items-center gap-3 relative">
                 <CategoryIcon category={category} size={14} className="scale-110" />

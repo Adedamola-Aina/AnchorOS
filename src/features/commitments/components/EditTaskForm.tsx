@@ -87,7 +87,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     };
 
     return (
-        <Card ref={formRef} className="space-y-4 p-5 border-task-500/20 shadow-xl animate-in slide-in-from-top-2 duration-200">
+        <Card ref={formRef} className="space-y-4 p-5 border-task-500/20 shadow-elevation-overlay animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Editing {task.type} Commitment</span>
                 <Button variant="ghost" size="icon" onClick={onCancel} className="text-slate-400 h-8 w-8">
@@ -103,7 +103,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
                         placeholder="Commitment title"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all"
+                        className="w-full px-4 py-3 rounded-card bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all"
                         autoFocus
                     />
                 </div>
@@ -182,7 +182,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                         value={editNotes}
                         onChange={(e) => setEditNotes(e.target.value)}
                         data-testid="edit-task-notes"
-                        className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
+                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
                     />
                 </div>
             </div>

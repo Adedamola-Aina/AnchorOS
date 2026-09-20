@@ -95,7 +95,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                         autoFocus
                         type="text"
                         placeholder="e.g. Morning Prayer, Gym, Rent Payment"
-                        className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400"
+                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400"
                         value={newTaskTitle}
                         onChange={(e) => setNewTaskTitle(e.target.value)}
                         data-testid="task-name"
@@ -172,11 +172,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                             value={newTaskNotes}
                             onChange={(e) => setNewTaskNotes(e.target.value)}
                             data-testid="task-notes"
-                            className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
+                            className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
                         />
                     </div>
                     {/* Reminder field: inline compact layout (BUG-092) */}
-                    <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                    <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-card bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                         <TimeWheelPicker
                             label="Reminder"
                             value={newTaskReminder}

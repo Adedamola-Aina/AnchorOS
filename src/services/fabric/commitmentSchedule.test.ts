@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { AnchorTask } from '../../types';
 import { countScheduledOccurrences, describeNextDue, getDueToday, getNextDue, isOverdue, isScheduledOn } from './commitmentSchedule';
 
-const LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
+const LETTERS = [0, 1, 2, 3, 4, 5, 6] as const;
 
 function task(overrides: Partial<AnchorTask>): AnchorTask {
     return {

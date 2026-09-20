@@ -35,7 +35,7 @@ export const MfaStep2ScanQR: React.FC<Step2Props> = ({ qrUrl, manualKey, isLoadi
                 <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Open your authenticator app and choose "Add Account" or "Scan QR Code".</p>
             </div>
             <div className="flex justify-center py-2">
-                <div className="p-4 bg-white rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800 min-h-48 min-w-48 flex items-center justify-center">
+                <div className="p-4 bg-white rounded-panel shadow-elevation-raised border border-slate-100 dark:border-slate-800 min-h-48 min-w-48 flex items-center justify-center">
                     {hasRenderableQr ? (
                         <Suspense fallback={<div className="w-40 h-40 flex items-center justify-center"><QrCode className="w-8 h-8 text-slate-400 animate-pulse" /></div>}>
                             <QRCodeSVG value={qrUrl} size={160} level="H" />
@@ -82,7 +82,7 @@ export const MfaStep3Verify: React.FC<Step3Props> = ({ mfaCode, mfaError, isEnro
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Enter the 6-digit code from your app to confirm everything is working.</p>
         </div>
         <div className="max-w-xs mx-auto space-y-4">
-            <input type="text" inputMode="numeric" maxLength={6} placeholder="000 000" value={mfaCode} onChange={(e) => onSetMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} className="w-full p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-center text-3xl font-mono tracking-[0.5em] text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800" autoFocus />
+            <input type="text" inputMode="numeric" maxLength={6} placeholder="000 000" value={mfaCode} onChange={(e) => onSetMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} className="w-full p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-panel text-center text-3xl font-mono tracking-[0.5em] text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800" autoFocus />
             {mfaError && <p className="text-xs font-bold text-rose-500 animate-in fade-in slide-in-from-top-1">{mfaError}</p>}
             <Button onClick={onEnroll} isLoading={isEnrolling} disabled={mfaCode.length !== 6} className="w-full py-6 font-black uppercase tracking-widest">Verify & Enable</Button>
         </div>

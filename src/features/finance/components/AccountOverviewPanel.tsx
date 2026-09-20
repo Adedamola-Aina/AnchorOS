@@ -56,7 +56,7 @@ export const AccountOverviewPanel = ({
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {items.map(({ label, value, icon: Icon, hint }) => (
-          <div key={label} className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div key={label} className="rounded-panel border border-slate-200 bg-white px-4 py-4 shadow-elevation-subtle dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
               <Icon className="h-4 w-4" />
               <span className="text-xs font-semibold uppercase tracking-[0.14em]">{label}</span>

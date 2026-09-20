@@ -116,7 +116,7 @@ export const AuthEventHistory: React.FC = () => {
                     </CardTitle>
                     <div className="flex items-center gap-2">
                         {otherSessions.length > 0 && (
-                            <Button variant="secondary" size="sm" className="text-rose-500 hover:text-white hover:bg-rose-500 border-rose-200 dark:border-rose-900 gap-2 min-h-[44px]" onClick={handleSignOutAll} isLoading={signingOutAll} aria-label="Sign out all other devices">
+                            <Button variant="secondary" size="sm" className="text-danger hover:text-white hover:bg-rose-500 border-rose-200 dark:border-rose-900 gap-2 min-h-[44px]" onClick={handleSignOutAll} isLoading={signingOutAll} aria-label="Sign out all other devices">
                                 <LogOut className="w-4 h-4" />
                                 <span className="hidden sm:inline text-xs font-medium">Sign out all other devices</span>
                             </Button>

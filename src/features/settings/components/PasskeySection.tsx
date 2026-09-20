@@ -134,7 +134,7 @@ export const PasskeySection: React.FC = () => {
                 {passkeys.length === 0 ? (
                     <p className="text-xs text-slate-500 dark:text-slate-400">No passkeys registered yet. You can register up to {MAX_PASSKEYS}.</p>
                 ) : passkeys.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 px-3 py-2.5">
+                    <div key={item.id} className="flex items-center justify-between rounded-card border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 px-3 py-2.5">
                         <div className="flex items-center gap-3 min-w-0">
                             <div className="p-1.5 bg-emerald-500/10 rounded-lg shrink-0"><Fingerprint className="w-4 h-4 text-emerald-500" /></div>
                             <div className="min-w-0">

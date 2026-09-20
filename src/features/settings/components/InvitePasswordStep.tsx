@@ -30,7 +30,7 @@ export function InvitePasswordStep({
 }: InvitePasswordStepProps) {
     return (
         <form onSubmit={onSubmit} className="space-y-4">
-            <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800 mb-4">
+            <div className="p-4 rounded-card bg-slate-100 dark:bg-slate-800 mb-4">
                 <p className="text-sm text-slate-600 dark:text-slate-300">
                     Inviting: <span className="font-semibold">{inviteeEmail}</span>
                 </p>
@@ -47,7 +47,7 @@ export function InvitePasswordStep({
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        className="w-full pl-10 pr-4 py-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                         autoFocus
                         autoComplete="current-password"
                     />

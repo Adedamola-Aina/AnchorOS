@@ -102,7 +102,7 @@ export const EmailChangeForm: React.FC = () => {
         placeholder="New email address"
         value={newEmail}
         onChange={(e) => setNewEmail(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+        className="w-full px-4 py-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
       />
       <input
         type="password"
@@ -110,7 +110,7 @@ export const EmailChangeForm: React.FC = () => {
         placeholder="Current password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+        className="w-full px-4 py-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
       />
       <div className="flex gap-3">
         <Button type="submit" isLoading={submitting} disabled={!newEmail || !password} className="font-bold">Send Verification</Button>

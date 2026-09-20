@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React from 'react';
+import { isDevSurfaceEnabled } from '../../utils/devSurface';
 
 /**
  * EnvironmentBanner (UX-GL-06)
@@ -26,6 +27,8 @@ const TREATMENTS: Record<string, { className: string; label: string }> = {
 };
 
 export const EnvironmentBanner: React.FC = () => {
+  // UX-GL-07: one gate for every developer surface (see utils/devSurface).
+  if (!isDevSurfaceEnabled()) return null;
   const env = import.meta.env.VITE_APP_ENV as string | undefined;
   const treatment = env ? TREATMENTS[env] : undefined;
   if (!treatment) return null;

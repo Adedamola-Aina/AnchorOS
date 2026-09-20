@@ -93,7 +93,7 @@ const mockTasks: AnchorTask[] = [
     completed: false,
     category: 'personal',
     createdAt: new Date('2024-01-01'),
-    daysOfWeek: ['Sunday'],
+    daysOfWeek: [0],
   },
   {
     id: 'task-4',

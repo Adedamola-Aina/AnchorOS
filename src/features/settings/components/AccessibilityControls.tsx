@@ -41,10 +41,10 @@ export const AccessibilityControls: React.FC<Props> = ({ preferences, onUpdate }
           <p className="text-xs text-slate-400">Adjust text size across the app</p>
         </div>
       </div>
-      <div className="flex bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-slate-800">
+      <div className="flex bg-slate-100 dark:bg-slate-900 rounded-card p-1 border border-slate-200 dark:border-slate-800">
         {FONT_SIZES.map(({ value, label }) => (
           <button key={value} onClick={() => onUpdate({ fontSize: value })}
-            className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${preferences.fontSize === value ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+            className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${preferences.fontSize === value ? 'bg-white dark:bg-slate-800 shadow-elevation-subtle text-slate-900 dark:text-white' : 'text-slate-400'}`}>
             {label}
           </button>
         ))}

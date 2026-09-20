@@ -50,7 +50,8 @@
     "cap:open:ios": "cap open ios",
     "cap:open:android": "cap open android",
     "cap:run:ios": "cap run ios",
-    "cap:run:android": "cap run android"
+    "cap:run:android": "cap run android",
+    "check:dev-surface": "node scripts/ci/check-dev-surface.mjs"
   },
   "dependencies": {
     "@anchor-os/ui": "1.0.0",

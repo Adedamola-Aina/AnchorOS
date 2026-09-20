@@ -46,7 +46,7 @@ export function MfaConfirmationCard({
             </CardHeader>
             <CardContent className="p-6 pt-0">
                 <form onSubmit={onMfaSubmit} className="space-y-4">
-                    <div className="p-4 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800">
+                    <div className="p-4 rounded-card bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800">
                         <p className="text-sm text-slate-600 dark:text-slate-300">Connecting with: <span className="font-semibold">{inviteeEmail}</span></p>
                         <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">✓ Password verified • MFA required</p>
                     </div>
@@ -65,7 +65,7 @@ export function MfaConfirmationCard({
                                 }}
                                 placeholder="000000"
                                 maxLength={6}
-                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xl tracking-widest text-center"
+                                className="w-full pl-10 pr-4 py-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xl tracking-widest text-center"
                                 autoFocus
                                 autoComplete="one-time-code"
                             />

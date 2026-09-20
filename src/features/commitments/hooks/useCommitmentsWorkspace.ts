@@ -105,7 +105,7 @@ export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask
         clearSelection();
         setUndo({
             message: `Completed ${ids.length} ${ids.length === 1 ? 'commitment' : 'commitments'}.`,
-            run: () => Promise.all(ids.map((id) => toggleTask(id, true))),
+            run: async () => { await Promise.all(ids.map((id) => toggleTask(id, true))); },
         });
         void titles;
     }, [selectedIds, scoped, toggleTask, clearSelection]);

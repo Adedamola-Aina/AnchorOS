@@ -36,7 +36,7 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
                     const dayTasks = tasks.filter(t => t.type !== 'todo' && isScheduledOn(t, date));
 
                     return (
-                        <div key={idx} className={`flex flex-col gap-2 rounded-xl border transition-colors ${isToday ? 'bg-task-50/50 border-task-100 dark:bg-task-900/10 dark:border-task-900/30 p-2' : 'border-transparent p-2'}`}>
+                        <div key={idx} className={`flex flex-col gap-2 rounded-card border transition-colors ${isToday ? 'bg-task-50/50 border-task-100 dark:bg-task-900/10 dark:border-task-900/30 p-2' : 'border-transparent p-2'}`}>
                             <div className="text-center mb-1">
                                 <div className={`text-[10px] font-bold uppercase tracking-wider ${isToday ? 'text-task-600 dark:text-task-400' : 'text-slate-400'}`}>{dayName}</div>
                                 <div className={`text-xl font-bold ${isToday ? 'text-task-700 dark:text-task-300' : 'text-slate-700 dark:text-slate-300'}`}>{dayNum}</div>
@@ -46,7 +46,7 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
                                 {dayTasks.map(task => (
                                     <div
                                         key={task.id}
-                                        className={`p-2 rounded-lg border shadow-sm flex flex-col items-center text-center gap-1 transition-all ${isToday ? 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700' : 'bg-slate-50 dark:bg-slate-800/50 border-transparent opacity-70'
+                                        className={`p-2 rounded-lg border shadow-elevation-subtle flex flex-col items-center text-center gap-1 transition-all ${isToday ? 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700' : 'bg-slate-50 dark:bg-slate-800/50 border-transparent opacity-70'
                                             }`}
                                     >
                                         <div className="text-xs font-medium truncate w-full" title={task.title}>

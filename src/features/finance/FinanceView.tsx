@@ -212,7 +212,7 @@ const FinanceView = () => {
           <button
             type="button"
             onClick={() => setShowCreateSheet(true)}
-            className="h-11 w-11 shrink-0 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center shadow-sm transition-all hover:opacity-90 active:scale-95"
+            className="h-11 w-11 shrink-0 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center shadow-elevation-subtle transition-all hover:opacity-90 active:scale-95"
             aria-label="Add account or record a transaction"
           >
             <Plus className="w-5 h-5 text-white dark:text-slate-900" strokeWidth={2.5} />

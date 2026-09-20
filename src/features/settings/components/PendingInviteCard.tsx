@@ -27,7 +27,7 @@ export function PendingInviteCard({ inviteeEmail, createdAt, onCancelInvite }: P
             </CardHeader>
             <CardContent className="p-6 pt-0">
                 <div className="space-y-4">
-                    <div className="p-4 rounded-xl bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-800">
+                    <div className="p-4 rounded-card bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-800">
                         <p className="text-sm text-slate-600 dark:text-slate-300">
                             Waiting for <span className="font-semibold">{inviteeEmail}</span> to accept and enter the verification code.
                         </p>

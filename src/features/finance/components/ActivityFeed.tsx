@@ -76,7 +76,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
                     <div
                         key={activity.id}
                         className={`
-              flex gap-2.5 ${compact ? 'py-1.5 px-2' : 'p-3'} rounded-xl transition-colors
+              flex gap-2.5 ${compact ? 'py-1.5 px-2' : 'p-3'} rounded-card transition-colors
               ${index === 0 ? 'bg-slate-50 dark:bg-slate-800/50' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'}
             `}
                     >

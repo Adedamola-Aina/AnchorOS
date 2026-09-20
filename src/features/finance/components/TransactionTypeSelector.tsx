@@ -22,21 +22,21 @@ export const TransactionTypeSelector: React.FC<TransactionTypeSelectorProps> = (
             <button
                 type="button"
                 onClick={() => onChange('expense')}
-                className={`flex-1 rounded-md text-xs font-medium py-2 transition-all ${type === 'expense' ? 'bg-white dark:bg-slate-600 text-rose-600 dark:text-rose-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+                className={`flex-1 rounded-md text-xs font-medium py-2 transition-all ${type === 'expense' ? 'bg-white dark:bg-slate-600 text-rose-600 dark:text-rose-400 shadow-elevation-subtle' : 'text-slate-500 dark:text-slate-400'}`}
             >
                 Expense
             </button>
             <button
                 type="button"
                 onClick={() => onChange('income')}
-                className={`flex-1 rounded-md text-xs font-medium py-2 transition-all ${type === 'income' ? 'bg-white dark:bg-slate-600 text-finance-600 dark:text-finance-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+                className={`flex-1 rounded-md text-xs font-medium py-2 transition-all ${type === 'income' ? 'bg-white dark:bg-slate-600 text-finance-600 dark:text-finance-400 shadow-elevation-subtle' : 'text-slate-500 dark:text-slate-400'}`}
             >
                 Income
             </button>
             <button
                 type="button"
                 onClick={() => onChange('transfer')}
-                className={`flex-1 rounded-md text-xs font-medium py-2 transition-all flex items-center justify-center gap-1 ${type === 'transfer' ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+                className={`flex-1 rounded-md text-xs font-medium py-2 transition-all flex items-center justify-center gap-1 ${type === 'transfer' ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-elevation-subtle' : 'text-slate-500 dark:text-slate-400'}`}
             >
                 <ArrowRightLeft className="w-3 h-3" />
                 Transfer

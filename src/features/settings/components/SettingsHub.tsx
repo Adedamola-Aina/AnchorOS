@@ -28,7 +28,7 @@ const SectionRow: React.FC<{ section: SettingsSectionDef }> = ({ section }) => (
     <Link
         to={settingsSectionPath(section.id)}
         data-testid={`settings-row-${section.id}`}
-        className="flex items-center gap-3 min-h-11 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+        className="flex items-center gap-3 min-h-11 p-4 rounded-card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
     >
         <span className="flex-1 min-w-0">
             <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">{section.label}</span>
@@ -63,7 +63,7 @@ export const SettingsHub: React.FC<SettingsHubProps> = ({ hideAssistant = false 
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Search settings"
                     data-testid="settings-search"
-                    className="w-full min-h-11 pl-10 pr-3 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full min-h-11 pl-10 pr-3 py-3 rounded-card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
             </label>
 

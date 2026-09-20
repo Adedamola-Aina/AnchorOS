@@ -53,10 +53,10 @@ export const SharePermissionPicker: React.FC<Props> = ({ accountId, ownerUid, sh
         <Shield className="w-3 h-3" />
         {sharedUserName ? `${sharedUserName}'s access` : 'Shared access'}
       </p>
-      <div className="flex bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-slate-800">
+      <div className="flex bg-slate-100 dark:bg-slate-900 rounded-card p-1 border border-slate-200 dark:border-slate-800">
         {PERMISSIONS.map(({ value, label, Icon }) => (
           <button key={value} onClick={() => handleChange(value)} disabled={saving}
-            className={`flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${permission === value ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600'} ${saving ? 'opacity-50 cursor-wait' : ''}`}>
+            className={`flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${permission === value ? 'bg-white dark:bg-slate-800 shadow-elevation-subtle text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600'} ${saving ? 'opacity-50 cursor-wait' : ''}`}>
             <Icon className="w-3.5 h-3.5" />{label}
           </button>
         ))}
