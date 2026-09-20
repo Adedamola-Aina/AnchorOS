@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.21](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.20...v1.21.0-rc.21) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ux:** one nav vocabulary, one state dot, mood out of the assistant (UX-GL-03) ([#236](https://github.com/Adedamola-Aina/AnchorOS/issues/236)) ([e6292c7](https://github.com/Adedamola-Aina/AnchorOS/commit/e6292c7e87f0fbc8509030f7fcf6a742db0078e6))
+
 ## [1.21.0-rc.20](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.19...v1.21.0-rc.20) (2026-09-20)
 
 
