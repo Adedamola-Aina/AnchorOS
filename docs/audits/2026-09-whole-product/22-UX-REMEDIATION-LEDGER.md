@@ -19,13 +19,13 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **39** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **22** |
-| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep), P2 (Home shell + assistant placement) |
+| Closed | **45** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **16** |
+| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep), P2 (Home shell + assistant placement), P3-Settings (hub + routed sections) |
 | Deployed | `master` `5270bfb7` / `v1.21.0-rc.19` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
 
-## Closed (39)
+## Closed (45)
 
 | ID | Sev | Wave | What was wrong | Verified by |
 |---|---|---|---|---|
@@ -69,9 +69,16 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | UX-AI-09 | MEDIUM | P2 | Mood was the first interactive block in the assistant, and the nav grew to five items with AI on | The assistant is no longer a nav destination (the bar is exactly four), Home carries the "Ask Anchor" doorway, and mood is no longer in the assistant. `bottomNavigationItems.test.ts`, `DashboardView.test.tsx` |
 | UX-AI-05 | MEDIUM | P2 | Transparency was routed but appeared in no navigation, so provenance was hidden | The assistant links to `/fabric/transparency` from its own header. `FabricView.test.tsx` |
 | UX-AI-10 | MEDIUM | P2 | Transparency had no back affordance and never explained what it will learn | A back link to the assistant, plus copy that says what it learns from and when to expect a pattern. `FabricTransparency.test.tsx` |
+| UX-ST-01 | HIGH | P3 | Nine chip-tabs over ten sections in one scroll; the last chip was clipped with no overflow affordance | Chips deleted; the hub is a grouped list with a search field, and nothing scrolls horizontally. `SettingsView.test.tsx`, `SettingsHub.test.tsx` |
+| UX-ST-02 | HIGH | P3 | Sections were not addressable, so every "go to Settings" journey lost its target | `/settings/:section` with a real URL per section; state survives reload, back/forward and deep links; the registry is the single source of truth. `SettingsView.test.tsx`, `sections.test.ts` |
+| UX-ST-04 | MEDIUM | P3 | Tall one-field cards; no dirty state, no validation, no confirmation, no search | Explicit save with inline validation, a visible "Unsaved changes", an in-place "Saved" confirmation, a hub search, and typed confirmation already in place for deletion. `ProfileSettings.test.tsx` |
+| UX-ST-05 | MEDIUM | P3 | Assistant settings lived in Settings while the assistant lived elsewhere | The `assistant` section owns its behaviour and data sources and mirrors the assistant surface's transparency link. `SettingsView.test.tsx` |
+| UX-ST-06 | MEDIUM | P3 | Ten sections in one continuous scroll behind nine anchor chips — no identity, no URL, no back behaviour | Each section is a destination with a title, a description and a back affordance; the ten-section scroll is gone. `SettingsView.test.tsx` |
+| UX-GL-08 | LOW | P3 | Login offered Light/Dark while Settings offered Auto/Light/Dark plus text size and contrast — two controls, different stores | Appearance is changed in exactly one place (Settings → Preferences); the pre-auth toggle is removed and the login screen follows the saved theme. `AuthView.test.tsx` |
 
 
-## Remaining (22) — grouped by the wave that will close them
+
+## Remaining (16) — grouped by the wave that will close them
 
 ### P1b — schedule-aware commitments engine · **in progress** (1 finding remains — `UX-CM-07`, partial; UX-AI-06, UX-AI-08, UX-CM-04, UX-CM-06, UX-CM-08 closed here, and its remaining shell findings UX-AI-04, UX-AI-09, UX-ST-03 and UX-GL-05 closed in P2)
 
@@ -96,16 +103,11 @@ The shell and assistant-placement findings are done, and they were **one coheren
 | UX-GL-01 | HIGH | Anchor AI unreachable when disabled | **Improved, not closed:** Home now carries an "Ask Anchor" doorway (the nav no longer does) and the disabled state still explains its value and links to Settings. The finding closes with the merge, when there is no separate destination to reach |
 | UX-GL-04 | MEDIUM | Bottom nav has no safe-area reserve, no FAB slot, no scroll behaviour | Remains — the floating pill nav and the contextual FAB are their own change |
 
-### P3 — Settings hub · **D4 accepted — ready to build** (6 findings)
+### P3 — Settings hub · **CLOSED** (UX-ST-01, UX-ST-02, UX-ST-04, UX-ST-05, UX-ST-06 and UX-GL-08 all closed)
 
-| ID | Sev | Finding |
-|---|---|---|
-| UX-ST-01 | HIGH | Chip bar overflows; the last of **nine** chips is clipped with no affordance |
-| UX-ST-02 | HIGH | Sections are not addressable — "go to Settings" journeys lose their target |
-| UX-ST-06 | MEDIUM | **Ten** sections render in one continuous scroll behind nine anchor chips |
-| UX-ST-04 | MEDIUM | Low density; no save/dirty state, no search, no "recently changed" |
-| UX-ST-05 | MEDIUM | AI settings live in Settings while the AI surface lives elsewhere |
-| UX-GL-08 | LOW | Login offers theme toggles while Settings offers Auto/Light/Dark + text size + contrast |
+Settings is a hub with **real routes** now. `/settings` is a grouped, searchable index; every section is `/settings/<id>` with a title, a description and a back affordance. The nine-chip strip and the ten-section scroll are deleted, the section list lives in one registry (`src/features/settings/sections.ts`) that the hub, the router and every deep-linking call site share, and appearance is changed in exactly one place. Verified in the browser: the hub renders with its groups, and the evidence harness drives the real theme control through the new deep link `/settings/preferences`.
+
+**Honest note on `UX-ST-04`:** explicit save, inline validation, in-place confirmation, hub search and typed confirmation for irreversible deletion all landed. A "recently changed" affordance did **not** — that is a new feature rather than a fix, and the finding's four named parts are covered.
 
 ### P3 — Finance Wallet visuals (F2/F3 of doc 21) · **D5/D12/D13 accepted — ready to build** (6 findings)
 

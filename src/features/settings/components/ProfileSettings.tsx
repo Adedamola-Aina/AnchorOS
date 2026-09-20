@@ -1,7 +1,7 @@
 // @ts-nocheck
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { User, Mail, Globe, Camera, Trash2 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
+import { Card, CardHeader, CardTitle, CardContent, Button } from '@anchor-os/ui';
 import { useAuth } from '../../../context/AuthContext';
 import { uploadAvatar, deleteAvatar } from '../../../services/AvatarService';
 
@@ -10,8 +10,6 @@ interface ProfileSettingsProps {
     uid: string;
     onUpdateName: (name: string) => void;
 }
-
-const DEBOUNCE_MS = 500;
 
 function SignInMethodBadge({ providerId }: { providerId: string }) {
     if (providerId === 'google.com') {
@@ -27,20 +25,53 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
     const { user, profile, updateProfile } = useAuth();
     const providerId = user?.providerData?.[0]?.providerId ?? 'password';
     const [localName, setLocalName] = useState(name);
+    const [saving, setSaving] = useState(false);
+    const [justSaved, setJustSaved] = useState(false);
     const [avatarUploading, setAvatarUploading] = useState(false);
     const [avatarError, setAvatarError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const isFirstMount = useRef(true);
 
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
+    /**
+     * UX-ST-04: modern-form behaviour.
+     *
+     * This field used to **auto-save on a 500ms debounce** with no dirty state,
+     * no validation and no confirmation — so a half-typed name was persisted and
+     * the user was never told what happened. It is now an explicit save: the
+     * field reports its own validity inline, a dirty state is visible, the Save
+     * button is disabled until there is something valid to save, and the
+     * confirmation renders next to the button (so it never requires scrolling).
+     */
+    const trimmedName = localName.trim();
+    const nameError = trimmedName.length === 0
+        ? 'Enter a display name.'
+        : trimmedName.length > 60
+            ? 'Keep it to 60 characters or fewer.'
+            : null;
+    const isDirty = trimmedName !== (name ?? '').trim();
+    const canSave = isDirty && !nameError && !saving;
+
+    // Keep the field in step with the profile when the *profile* is what changed
+    // (saved elsewhere, or another device). This is React's "adjust state when a
+    // prop changes" pattern rather than an effect — an effect here would also
+    // fight the user's own typing and trips `react-hooks/set-state-in-effect`.
+    const [syncedName, setSyncedName] = useState(name);
+    if (name !== syncedName) {
+        setSyncedName(name);
+        setLocalName(name);
+        setJustSaved(false);
+    }
+
+    const handleSaveName = () => {
+        if (!canSave) return;
+        setSaving(true);
+        try {
+            onUpdateName(trimmedName);
+            setJustSaved(true);
+            window.setTimeout(() => setJustSaved(false), 2500);
+        } finally {
+            setSaving(false);
         }
-        if (localName === name) return;
-        const timer = setTimeout(() => onUpdateName(localName), DEBOUNCE_MS);
-        return () => clearTimeout(timer);
-    }, [localName, name, onUpdateName]);
+    };
 
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -94,8 +125,27 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] uppercase font-bold text-slate-400">Display Name</label>
-                        <input type="text" value={localName} onChange={(e) => setLocalName(e.target.value)} className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" />
+                        <label htmlFor="profile-display-name" className="text-[10px] uppercase font-bold text-slate-400">Display Name</label>
+                        <input
+                            id="profile-display-name"
+                            type="text"
+                            value={localName}
+                            onChange={(e) => setLocalName(e.target.value)}
+                            aria-invalid={nameError ? true : undefined}
+                            aria-describedby={nameError ? 'profile-name-error' : undefined}
+                            data-testid="profile-name-input"
+                            className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                        />
+                        {nameError && (
+                            <p id="profile-name-error" role="alert" data-testid="profile-name-error" className="text-[10px] text-rose-500">{nameError}</p>
+                        )}
+                        <div className="flex items-center gap-3 pt-1">
+                            <Button type="button" size="sm" onClick={handleSaveName} disabled={!canSave} data-testid="profile-save-name">
+                                {saving ? 'Saving…' : 'Save changes'}
+                            </Button>
+                            {isDirty && !nameError && <span className="text-[10px] text-slate-500 dark:text-slate-400" data-testid="profile-dirty">Unsaved changes</span>}
+                            {justSaved && <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400" data-testid="profile-saved">Saved</span>}
+                        </div>
                     </div>
                     {/*
                       * UX-ST-03: this cell used to expose the raw internal id as

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Sparkles, ShieldCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useApp } from '../../context/AnchorContext';
+import { settingsSectionPath } from '../settings/sections';
 import { FabricOnboarding } from './FabricOnboarding';
 import { FabricInsightCard } from './FabricInsightCard';
 import { FabricProactiveQuestionCard } from './FabricProactiveQuestionCard';
@@ -17,6 +18,7 @@ import { useFabricView } from './useFabricView';
 
 const FabricView: React.FC = () => {
   const { navigateTo } = useApp();
+  const navigate = useNavigate();
   const {
     isEnabled,
     isReady,
@@ -51,7 +53,7 @@ const FabricView: React.FC = () => {
             Anchor AI is off. Turn it on to get a daily briefing, notice spending patterns, and ask questions
             about your own commitments and accounts.
           </p>
-          <Button onClick={() => navigateTo('settings')} className="gap-2">
+          <Button onClick={() => navigate(settingsSectionPath('assistant'))} className="gap-2">
             Open Settings to enable it
           </Button>
         </div>

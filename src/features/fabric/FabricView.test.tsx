@@ -1,8 +1,8 @@
 /// <reference types="@testing-library/jest-dom/vitest" />
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import FabricView from './FabricView';
 
 const useFabricMock = vi.fn();
@@ -71,6 +71,27 @@ describe('FabricView', () => {
     );
 
     expect(screen.getByText(/Anchor AI is off/i)).toBeInTheDocument();
+  });
+
+  // UX-ST-02: a contextual "manage X" need must deep-link into the Settings
+  // SECTION, never the Settings root.
+  it('sends a disabled-state user to the assistant settings section', async () => {
+    useFabricMock.mockReturnValue({ ...baseHook, isEnabled: false, isReady: false, patterns: [], briefing: null });
+
+    render(
+      <MemoryRouter initialEntries={['/fabric']}>
+        <Routes>
+          <Route path="/fabric" element={<FabricView />} />
+          <Route path="/settings" element={<div data-testid="settings-root">settings root</div>} />
+          <Route path="/settings/:section" element={<div data-testid="settings-section-marker">section</div>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /open settings to enable it/i }));
+
+    expect(await screen.findByTestId('settings-section-marker')).toBeInTheDocument();
+    expect(screen.queryByTestId('settings-root')).not.toBeInTheDocument();
   });
 
   it('shows onboarding when there are no patterns', () => {

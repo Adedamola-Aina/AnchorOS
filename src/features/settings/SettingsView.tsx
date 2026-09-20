@@ -1,13 +1,20 @@
 /**
- * SettingsView - Main settings page orchestrator
+ * SettingsView — the Settings hub and its section screens.
  *
- * Sections are grouped by function so users can navigate purposefully:
- *   Profile → Account & Security → Preferences → AI & Features →
- *   Family → Data → Support → Advanced
+ * IA (UX-ST-01, UX-ST-02, UX-ST-06): `/settings` is a grouped, searchable index
+ * and every section is its own route (`/settings/<id>`) with a title, a
+ * description and a back affordance. The old chip bar — nine anchors that
+ * scrolled ten sections in one continuous scroll — is deleted, so nothing
+ * scrolls horizontally and no "go to Settings" journey loses its target.
+ *
+ * The section list lives in `./sections` (single source of truth, reused by the
+ * hub, this router branch and any deep-linking call site).
  */
 // @ts-nocheck
 
 import { useState } from 'react';
+import { Link, Navigate, useParams } from 'react-router-dom';
+import { ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { captureError } from '../../utils/error';
 import { useNotifications } from '../../context/NotificationContext';
@@ -30,25 +37,17 @@ import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
 import { ReauthModal } from './components/ReauthModal';
 import { RecoveryCodesDisplay } from './components/RecoveryCodesDisplay';
-import { SectionNav } from './components/SectionNav';
+import { SettingsHub } from './components/SettingsHub';
+import { SettingsSectionShell } from './components/SettingsSectionShell';
 import { handleWipeData, handleDeleteAccount } from './components/SettingsDataActions';
+import { SETTINGS_ROOT, getSettingsSection } from './sections';
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { auditSettings } from '../../services/AuditService';
 import { getDisplayVersion } from '../../version';
 
-function SettingsSectionHeader({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-3 mt-2">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 whitespace-nowrap">
-        {label}
-      </span>
-      <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
-    </div>
-  );
-}
-
 const SettingsView = () => {
+  const { section: sectionParam } = useParams();
   const {
     profile, updateProfile, user, logout,
     generateMfaSecret, enrollMfa, unenrollMfa, reauthenticate
@@ -75,6 +74,7 @@ const SettingsView = () => {
 
   const onWipeData = () => handleWipeData(user!.uid, showToast);
   const onDeleteAccount = () => handleDeleteAccount(user, familyConnection, disconnectFamily, logout, showToast);
+  const onOpenContact = () => { setInitialSubject('feedback'); setShowContactModal(true); };
 
   const handleReauthenticate = async () => {
     setIsReauthenticating(true);
@@ -100,58 +100,47 @@ const SettingsView = () => {
     finally { setIsReauthenticating(false); }
   };
 
-  return (
-    <FeatureErrorBoundary featureName="Settings">
-      <div className="max-w-3xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-500">
-        <div className="flex flex-col gap-2 mb-2">
-          <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white tracking-tight">Settings</h1>
-          <p className="text-slate-500 dark:text-slate-400">Manage your account and preferences.</p>
-        </div>
 
-        <SectionNav includeAnchorAI={isAnchorAIFlagEnabled} />
+  const section = getSettingsSection(sectionParam);
 
-        {/* Profile */}
-        <SettingsSectionHeader label="Profile" />
-        <div id="settings-profile">
+  // An unknown (or feature-gated) section must not render a half-empty page.
+  if (sectionParam && (!section || (section.id === 'assistant' && !isAnchorAIFlagEnabled))) {
+    return <Navigate to={SETTINGS_ROOT} replace />;
+  }
+
+  const sectionContent = () => {
+    switch (section?.id) {
+      case 'profile':
+        return (
           <ProfileSettings
             name={profile.name}
             uid={user?.uid || ''}
             onUpdateName={(name) => { updateProfile({ name }); auditSettings.profileUpdated(['name']); }}
           />
-        </div>
-
-        {/* Account & Security */}
-        <SettingsSectionHeader label="Account & Security" />
-        <div id="settings-security">
-          <SecuritySettings
-            mfaEnabled={profile.mfaEnabled || false}
-            isEnrolling={mfa.isEnrolling}
-            show2FASetup={mfa.show2FASetup}
-            mfaQrUrl={mfa.mfaQrUrl}
-            mfaManualKey={mfa.mfaManualKey}
-            mfaCode={mfa.mfaCode}
-            mfaError={mfa.mfaError}
-            onSetShow2FASetup={mfa.setShow2FASetup}
-            onSetMfaCode={mfa.setMfaCode}
-            onGenerateMfaSecret={mfa.handleGenerateSecret}
-            onEnrollMfa={mfa.handleEnroll}
-            onUnenrollMfa={unenrollMfa}
-            onRequiresReauthForUnenroll={() => { setPendingMfaUnenroll(true); setShowReauthModal(true); }}
-          />
-        </div>
-        {mfa.recoveryCodes && <RecoveryCodesDisplay codes={mfa.recoveryCodes} onDone={mfa.clearRecoveryCodes} />}
-
-        {/* Preferences */}
-        <SettingsSectionHeader label="Preferences" />
-        <div id="settings-appearance">
-          <AppearanceSettings
-            theme={profile.theme as 'light' | 'dark'}
-            onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }}
-            accessibility={profile.accessibility}
-            onUpdateAccessibility={(prefs) => updateProfile({ accessibility: { ...(profile.accessibility || { fontSize: 'default', highContrast: false, reducedMotion: false }), ...prefs } })}
-          />
-        </div>
-        <div id="settings-notifications">
+        );
+      case 'security':
+        return (
+          <>
+            <SecuritySettings
+              mfaEnabled={profile.mfaEnabled || false}
+              isEnrolling={mfa.isEnrolling}
+              show2FASetup={mfa.show2FASetup}
+              mfaQrUrl={mfa.mfaQrUrl}
+              mfaManualKey={mfa.mfaManualKey}
+              mfaCode={mfa.mfaCode}
+              mfaError={mfa.mfaError}
+              onSetShow2FASetup={mfa.setShow2FASetup}
+              onSetMfaCode={mfa.setMfaCode}
+              onGenerateMfaSecret={mfa.handleGenerateSecret}
+              onEnrollMfa={mfa.handleEnroll}
+              onUnenrollMfa={unenrollMfa}
+              onRequiresReauthForUnenroll={() => { setPendingMfaUnenroll(true); setShowReauthModal(true); }}
+            />
+            {mfa.recoveryCodes && <RecoveryCodesDisplay codes={mfa.recoveryCodes} onDone={mfa.clearRecoveryCodes} />}
+          </>
+        );
+      case 'notifications':
+        return (
           <NotificationSettings
             emailEnabled={profile.notificationPreferences?.enabled || false}
             email={profile.notificationPreferences?.email || ''}
@@ -163,55 +152,85 @@ const SettingsView = () => {
             pushPermissionStatus={pushPermissionStatus}
             requestPushPermission={() => requestPushPermission()}
           />
-        </div>
+        );
+      case 'preferences':
+        return (
+          <AppearanceSettings
+            theme={profile.theme as 'light' | 'dark'}
+            onSetTheme={(theme) => { updateProfile({ theme }); auditSettings.themeChanged(theme); }}
+            accessibility={profile.accessibility}
+            onUpdateAccessibility={(prefs) => updateProfile({ accessibility: { ...(profile.accessibility || { fontSize: 'default', highContrast: false, reducedMotion: false }), ...prefs } })}
+          />
+        );
 
-        {/* AI & Features */}
-        {isAnchorAIFlagEnabled && (
+      case 'assistant':
+        return (
           <>
-            <SettingsSectionHeader label="AI & Features" />
-            <div id="settings-anchor-ai">
-              <AnchorAISettings userId={user?.uid} showToast={showToast} />
+            {/* UX-ST-05: the assistant section is the ONLY place its behaviour and
+                data sources are configured, and it mirrors the assistant surface's
+                own transparency link (UX-AI-05). */}
+            <AnchorAISettings userId={user?.uid} showToast={showToast} />
+            <Link
+              to="/fabric/transparency"
+              data-testid="assistant-transparency-link"
+              className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            >
+              <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+              What Anchor AI knows
+            </Link>
+          </>
+        );
+      case 'family':
+        return (
+          <FamilySettingsV2
+            onNavigateToFinance={() => navigateTo('finance')}
+            connection={familyConnection}
+            connectionLoading={familyLoading}
+          />
+        );
+      case 'data':
+        return (
+          <>
+            <DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={onWipeData} />
+            <DangerZone onDeleteAccount={onDeleteAccount} />
+          </>
+        );
+      case 'about':
+        return (
+          <>
+            <SupportSettings onOpenContact={onOpenContact} />
+            <TechnicalDetails uid={user?.uid || ''} onCopied={() => showToast('Account identifier copied.', 'success')} />
+            <p className="text-center text-[10px] text-slate-400 dark:text-slate-500 font-mono tracking-wider" data-testid="settings-version">
+              {getDisplayVersion()}
+            </p>
+            {/* Local development only; never rendered in staging or production. */}
+            {import.meta.env.VITE_APP_ENV === 'development' && <DeveloperTools userUid={user?.uid || ''} />}
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <FeatureErrorBoundary featureName="Settings">
+      <div className="max-w-3xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-500">
+        {section ? (
+          <SettingsSectionShell section={section}>{sectionContent()}</SettingsSectionShell>
+        ) : (
+          <>
+            <div className="flex flex-col gap-2 mb-2">
+              <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white tracking-tight">Settings</h1>
+              <p className="text-slate-500 dark:text-slate-400">Manage your account and preferences.</p>
+            </div>
+
+            <SettingsHub hideAssistant={!isAnchorAIFlagEnabled} />
+
+            <div className="mt-8 flex flex-col items-center gap-4 pb-8">
+              <Button variant="ghost" size="sm" onClick={() => logout()} className="min-h-11 text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
             </div>
           </>
         )}
-
-        {/* Family */}
-        <SettingsSectionHeader label="Family" />
-        <div id="settings-family">
-          <FamilySettingsV2 onNavigateToFinance={() => navigateTo('finance')} connection={familyConnection} connectionLoading={familyLoading} />
-        </div>
-
-        {/* Data */}
-        <SettingsSectionHeader label="Data" />
-        <div id="settings-data">
-          <DataManagement userUid={user?.uid || ''} profile={profile} onWipeData={onWipeData} />
-        </div>
-
-        {/* Support */}
-        <SettingsSectionHeader label="Support" />
-        <div id="settings-support" className="space-y-4">
-          <SupportSettings onOpenContact={() => { setInitialSubject('feedback'); setShowContactModal(true); }} />
-          {/* UX-ST-03: the raw account id lives here now — collapsed, explained and copyable. */}
-          <TechnicalDetails uid={user?.uid || ''} onCopied={() => showToast('Account identifier copied.', 'success')} />
-        </div>
-
-        {/* Advanced — local development only; never rendered in staging or production */}
-        {import.meta.env.VITE_APP_ENV === 'development' && (
-          <>
-            <SettingsSectionHeader label="Advanced" />
-            <DeveloperTools userUid={user?.uid || ''} />
-          </>
-        )}
-        <div id="settings-danger">
-          <DangerZone onDeleteAccount={onDeleteAccount} />
-        </div>
-
-        <div className="mt-8 flex flex-col items-center gap-4 pb-8">
-          <Button variant="ghost" size="sm" onClick={() => logout()} className="min-h-11 text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono tracking-wider">
-            {getDisplayVersion()}
-          </p>
-        </div>
 
         {showContactModal && <ContactModal onClose={() => setShowContactModal(false)} currentPage="settings" initialSubject={initialSubject} />}
         <ReauthModal
@@ -228,3 +247,4 @@ const SettingsView = () => {
 };
 
 export default SettingsView;
+
