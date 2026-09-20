@@ -18,6 +18,7 @@ import { EmptyAccountsState } from './components/EmptyAccountsState';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { CardStack } from '../../components/finance/CardStack';
+import { AccountListItem } from './components/AccountListItem';
 import { TotalAssetsSummaryBar } from '../../components/finance/TotalAssetsSummaryBar';
 import { SkeletonCards } from '../../components/finance/SkeletonCards';
 import { useReorderAccounts } from '../../hooks/useReorderAccounts';
@@ -31,7 +32,7 @@ import { getAccountIdFromPath, isAccountsListPath } from './financeViewHelpers';
 import { useFinanceCardInteraction } from './hooks/useFinanceCardInteraction';
 
 const FinanceView = () => {
-  const { accounts, transactions, deleteTransaction, deleteAccount, loadingFinance, netWorth } = useFinance();
+  const { accounts, transactions, deleteTransaction, deleteAccount, loadingFinance, netWorth, currentMonth, jumpToMonth } = useFinance();
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,6 +49,15 @@ const FinanceView = () => {
   const [prefillData, setPrefillData] = useState<{ amount?: number; category?: string; title?: string } | undefined>(undefined);
   /** UX-FN-08: the landing page previously had no way to record a transaction. */
   const [showCreateSheet, setShowCreateSheet] = useState(false);
+  /**
+   * UX-FN-03: the account just created in the success state, so the transaction
+   * form can preselect it — creation and recording are one journey.
+   */
+  const [newAccountIdForTx, setNewAccountIdForTx] = useState<string | null>(null);
+  const handleRecordFirstTransaction = useCallback((accountId: string) => {
+    setNewAccountIdForTx(accountId || null);
+    setMode('addTx');
+  }, []);
 
   const startRecordingTransaction = useCallback(() => {
     setInitialTransactionType('expense');
@@ -76,6 +86,48 @@ const FinanceView = () => {
       .filter(tx => !tx.isSoftDeleted)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions]);
+
+  /**
+   * UX-FN-06 / UX-FN-10: the landing defaults to the current month, so it used
+   * to show "No transactions yet" while the account held transactions in other
+   * months — with no cue that data existed elsewhere and no way to widen the
+   * range. These two values let the empty state say *why* it is empty and offer
+   * the one-tap way to the month that has the data.
+   */
+  const latestActivityMonth = useMemo(() => {
+    const latest = globalTransactions[0];
+    return latest ? new Date(latest.date) : null;
+  }, [globalTransactions]);
+
+  const currentMonthHasActivity = useMemo(
+    () => globalTransactions.some(tx => {
+      const d = new Date(tx.date);
+      return d.getFullYear() === currentMonth.getFullYear() && d.getMonth() === currentMonth.getMonth();
+    }),
+    [globalTransactions, currentMonth]
+  );
+
+  const latestActivityLabel = latestActivityMonth
+    ? latestActivityMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : null;
+
+  const activityElsewhere = latestActivityMonth !== null && !currentMonthHasActivity;
+
+  /**
+   * UX-FN-04: the overlapping card stack exposed only a sliver of the inactive
+   * accounts and offered no comparable view. The hero stack stays, and every
+   * account is also a compact row — grouped by currency, because two currencies
+   * cannot be compared by eye either.
+   */
+  const accountsByCurrency = useMemo(() => {
+    const grouped = new Map<string, typeof activeAccounts>();
+    for (const account of activeAccounts) {
+      const group = grouped.get(account.currency) ?? [];
+      group.push(account);
+      grouped.set(account.currency, group);
+    }
+    return Array.from(grouped, ([currency, group]) => ({ currency, accounts: group }));
+  }, [activeAccounts]);
 
   const openAccountDetails = useCallback((accountId: string) => {
     void runFinanceViewTransition(() => {
@@ -171,6 +223,33 @@ const FinanceView = () => {
             {activeAccounts.length > 0 && (
               <CardStack accounts={activeAccounts} mode={viewMode} onCardTap={handleCardTap} onReorder={handleReorder} onShowAll={activeAccounts.length > 10 ? () => navigate('/finance/accounts') : undefined} />
             )}
+            {/*
+              * UX-FN-04: the stack exposed only a sliver of the inactive
+              * accounts. Every account is now also a compact, comparable row
+              * (name · type · currency · balance), grouped by currency.
+              */}
+            {activeAccounts.length > 0 && (
+              <section data-testid="all-accounts-list" className="space-y-2">
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  All accounts
+                </h3>
+                {accountsByCurrency.map(({ currency, accounts: groupAccounts }) => (
+                  <div key={currency} className="space-y-2">
+                    {accountsByCurrency.length > 1 && (
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{currency}</p>
+                    )}
+                    {groupAccounts.map(account => (
+                      <AccountListItem
+                        key={account.id}
+                        account={account}
+                        currentUserId={user?.uid}
+                        onOpenAccount={openAccountDetails}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </section>
+            )}
           </>
         ) : (
           <FinanceDesktopContent netWorth={netWorth} transactions={globalTransactions} currency={primaryCurrency} accounts={accounts} activeAccounts={activeAccounts} loading={loadingFinance} userId={user?.uid || ''} onOpenAccount={openAccountDetails} />
@@ -178,30 +257,28 @@ const FinanceView = () => {
         {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
         {/* FIN-014: Upcoming bill reminders */}
         {activeAccounts.length > 0 && <FinanceBillsSection />}
-        {/* UX-FN-08: the transaction section's empty state instructed this action
-            but offered no control for it. */}
-        {activeAccounts.length > 0 && globalTransactions.length === 0 && (
-          <button
-            type="button"
-            onClick={startRecordingTransaction}
-            className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400"
-          >
-            <Receipt className="w-4 h-4" />
-            Record your first transaction
-          </button>
-        )}
+        {/* UX-FN-01: the empty state inside the list now carries its own action,
+            so there is no longer a separate button instructing one thing while
+            the instruction lives somewhere else. */}
         {/* Zone 4: Global Transaction History */}
         {activeAccounts.length > 0 && (
-          <TransactionHistorySection transactions={globalTransactions} onEdit={handleEdit} onDelete={setTransactionToDelete} />
+          <TransactionHistorySection
+            transactions={globalTransactions}
+            onEdit={handleEdit}
+            onDelete={setTransactionToDelete}
+            onRecordTransaction={startRecordingTransaction}
+            latestActivityLabel={activityElsewhere ? latestActivityLabel ?? undefined : undefined}
+            onJumpToLatestActivity={activityElsewhere && latestActivityMonth ? () => jumpToMonth(latestActivityMonth) : undefined}
+          />
         )}
 
         {/* Forms / Modals */}
-        {!showModal && mode === 'addAcc' && <div className="animate-in fade-in zoom-in-95 duration-200"><AccountForm onClose={handleCloseForm} /></div>}
-        {!showModal && (mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
+        {!showModal && mode === 'addAcc' && <div className="animate-in fade-in zoom-in-95 duration-200"><AccountForm onClose={handleCloseForm} onRecordFirstTransaction={handleRecordFirstTransaction} /></div>}
+        {!showModal && (mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={newAccountIdForTx ?? activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
 
         <Modal isOpen={showModal && mode !== 'view'} onClose={handleCloseForm} title={mode === 'addAcc' ? 'Create Account' : mode === 'editTx' ? 'Edit Transaction' : 'New Transaction'} maxWidth="max-w-2xl">
-          {mode === 'addAcc' && <AccountForm onClose={handleCloseForm} />}
-          {(mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
+          {mode === 'addAcc' && <AccountForm onClose={handleCloseForm} onRecordFirstTransaction={handleRecordFirstTransaction} />}
+          {(mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={newAccountIdForTx ?? activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
         </Modal>
         <ConfirmationModal isOpen={!!transactionToDelete} onClose={() => setTransactionToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Transaction" message={`Are you sure you want to delete "${transactionToDelete?.title}"? This action cannot be undone.`} confirmLabel="Delete Transaction" isDestructive />
 

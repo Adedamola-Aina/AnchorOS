@@ -19,13 +19,13 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **45** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **16** |
-| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep), P2 (Home shell + assistant placement), P3-Settings (hub + routed sections) |
+| Closed | **51** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **10** |
+| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep), P2 (Home shell + assistant placement), P3-Settings (hub + routed sections), P3-Finance (labelled totals, comparable rows, explainable empty months) |
 | Deployed | `master` `5270bfb7` / `v1.21.0-rc.19` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
 
-## Closed (45)
+## Closed (51)
 
 | ID | Sev | Wave | What was wrong | Verified by |
 |---|---|---|---|---|
@@ -78,11 +78,18 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 
 
 
-## Remaining (16) — grouped by the wave that will close them
+## Remaining (10) — grouped by the wave that will close them
 
 ### P1b — schedule-aware commitments engine · **in progress** (1 finding remains — `UX-CM-07`, partial; UX-AI-06, UX-AI-08, UX-CM-04, UX-CM-06, UX-CM-08 closed here, and its remaining shell findings UX-AI-04, UX-AI-09, UX-ST-03 and UX-GL-05 closed in P2)
 
 This is the highest-leverage remaining work: it fixes the assistant's false statements **at the root** and makes streaks fair. **Landed in this wave:** the shared schedule model (`src/services/fabric/commitmentSchedule.ts`) — "today" now means *scheduled today or carried over*, so the assistant, the nav badge and the Today card share one definition and cannot disagree; the empty day is honest ("You have no commitments yet" / "Nothing due today — next up Mon") and its button offers the action it names.
+
+| UX-FN-01 | HIGH | P3 | Two unlabelled "+" affordances, and an empty state instructing "Add your first transaction" with **no control at all** | The single `+` opens an action sheet naming both actions, and the empty state now carries its own primary action — the instruction and the control live together. `VirtualTransactionList.test.tsx`, `FinanceView.test.tsx` |
+| UX-FN-02 | HIGH | P3 | Mixed-currency totals concatenated as one headline figure, with no per-currency labelling, no account count and no FX basis | Each currency is its own labelled row with its account count, and mixed currencies state "no exchange rate is applied". The decorative rise cue no longer adds NGN to USD either. `TotalAssetsSummaryBar.test.tsx` |
+| UX-FN-03 | HIGH | P3 | Account creation and transaction recording were disconnected — no opening-transaction invitation, and no resulting position shown when recording | Creating an account now ends in a success state with one primary next step ("Record first transaction", preselecting the new account), and the transaction form shows the account's balance before → after. `AccountForm.test.tsx`, `TransactionForm.test.tsx` |
+| UX-FN-04 | MEDIUM | P3 | The card stack exposed only a sliver of inactive accounts, with no comparable view | An "All accounts" list sits under the hero stack: compact rows (name · type · currency · balance) grouped by currency. Verified in the browser capture. `FinanceView.test.tsx` |
+| UX-FN-06 | MEDIUM | P3 | The month pager, search and empty state formed an unlabelled cluster; an empty month never said *why* it was empty | The month control is labelled ("September 2026" with prev/next) and the empty state distinguishes three situations: no matches for this search, nothing this month, or nothing recorded at all. `VirtualTransactionList.test.tsx` |
+| UX-FN-10 | MEDIUM | P3 | The landing defaulted to the current month, showing "No transactions yet" while the account held transactions in other months — no cue, no range widening | The empty state says "You have activity in <Month>" and offers a one-tap "Go to <Month>" that jumps the pager. `VirtualTransactionList.test.tsx`, `FinanceView.test.tsx` |
 
 | ID | Sev | Finding | Note |
 |---|---|---|---|
@@ -109,16 +116,9 @@ Settings is a hub with **real routes** now. `/settings` is a grouped, searchable
 
 **Honest note on `UX-ST-04`:** explicit save, inline validation, in-place confirmation, hub search and typed confirmation for irreversible deletion all landed. A "recently changed" affordance did **not** — that is a new feature rather than a fix, and the finding's four named parts are covered.
 
-### P3 — Finance Wallet visuals (F2/F3 of doc 21) · **D5/D12/D13 accepted — ready to build** (6 findings)
+### P3 — Finance landing · **CLOSED** (UX-FN-01, UX-FN-02, UX-FN-03, UX-FN-04, UX-FN-06 and UX-FN-10 all closed)
 
-| ID | Sev | Finding |
-|---|---|---|
-| UX-FN-01 | HIGH | Two unlabelled "+" affordances; empty state instructed an action with no control |
-| UX-FN-02 | HIGH | Mixed-currency totals concatenated as one headline figure |
-| UX-FN-03 | HIGH | Account creation and transaction recording are disconnected |
-| UX-FN-04 | MEDIUM | Overlapping card stack hides accounts; no comparable view |
-| UX-FN-06 | MEDIUM | Month pager/search/empty state give no signal whether data exists elsewhere |
-| UX-FN-10 | MEDIUM | Empty month looks like "no data" while transactions exist in other months |
+The Finance landing says what it means. Totals are **per currency, always labelled, with account counts** — and mixed currencies state plainly that no exchange rate is applied, so the UI never implies a conversion it cannot perform (`UX-FN-02`). Account creation ends in a success state with one primary next step that preselects the account it just made, and the transaction form shows the account's **balance before → after** (`UX-FN-03`). The hero stack keeps its Wallet feel while an **"All accounts"** list of compact, comparable rows sits beneath it, grouped by currency (`UX-FN-04`). The transaction empty state carries its own action (`UX-FN-01`) and distinguishes *why* it is empty — no search matches, nothing this month, or nothing recorded — offering a one-tap jump to the month that has the data (`UX-FN-06`, `UX-FN-10`). Verified in the browser: the capture shows `USD · 2 ACCOUNTS $10,000.00` and the "All accounts" rows.
 
 ### P3 — Onboarding rewrite (W6) · **D6 accepted — ready to build** (4 findings)
 

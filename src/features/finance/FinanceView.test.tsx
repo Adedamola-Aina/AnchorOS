@@ -111,13 +111,18 @@ vi.mock('./components/VirtualTransactionList', () => ({
 }));
 
 vi.mock('./components/TransactionHistorySection', () => ({
-  TransactionHistorySection: ({ transactions, onEdit, onDelete }: any) => (
+  TransactionHistorySection: ({ transactions, onRecordTransaction, latestActivityLabel, onJumpToLatestActivity }: any) => (
     <div data-testid="transaction-history-section">
       <div data-testid="global-transaction-list">
         {transactions.map((tx: any) => (
           <div key={tx.id} data-testid={`tx-${tx.id}`}>{tx.title}</div>
         ))}
       </div>
+      {/* UX-FN-01 / UX-FN-10 wiring: surface what FinanceView actually passes. */}
+      {onRecordTransaction && <button data-testid="wired-record-transaction" onClick={onRecordTransaction}>record</button>}
+      {onJumpToLatestActivity && (
+        <button data-testid="wired-jump-to-latest" onClick={onJumpToLatestActivity}>{latestActivityLabel}</button>
+      )}
     </div>
   ),
 }));
@@ -334,15 +339,35 @@ describe('FinanceView', () => {
       expect(screen.getByRole('button', { name: 'Add account' })).toBeInTheDocument();
     });
 
-    it('exposes the empty-state transaction call to action when nothing is recorded — UX-FN-08', () => {
+    it('wires the empty-state transaction action into the history section — UX-FN-01', () => {
       renderWithContext(<FinanceView />, { finance: { transactions: [] } });
-      expect(screen.getByRole('button', { name: /Record your first transaction/i })).toBeInTheDocument();
+      // UX-FN-01: the action lives inside the empty state that instructs it, so
+      // FinanceView must hand the callback to the section (which owns the list).
+      expect(screen.getByTestId('wired-record-transaction')).toBeInTheDocument();
+    });
+
+    it('only cues other months when activity exists elsewhere — UX-FN-10', () => {
+      // No transactions at all: there is nothing to jump to.
+      renderWithContext(<FinanceView />, { finance: { transactions: [] } });
+      expect(screen.queryByTestId('wired-jump-to-latest')).not.toBeInTheDocument();
     });
 
     it('renders TotalAssetsSummaryBar with active accounts', () => {
       renderWithContext(<FinanceView />);
       expect(screen.getByTestId('total-assets-bar')).toBeInTheDocument();
       expect(screen.getByText('Total: 3 accounts')).toBeInTheDocument();
+    });
+
+    // UX-FN-04: the overlapping stack exposed only a sliver of the inactive
+    // accounts and offered no comparable view.
+    it('lists every account as a comparable row under the stack (UX-FN-04)', () => {
+      renderWithContext(<FinanceView />);
+
+      const list = screen.getByTestId('all-accounts-list');
+      expect(list).toBeInTheDocument();
+      expect(within(list).getAllByRole('button').length).toBe(3);
+      // Name, type · currency and balance are all present, so accounts compare.
+      expect(within(list).getByText(/checking · NGN/i)).toBeInTheDocument();
     });
 
     it('renders CardStack with active accounts in collapsed mode by default', () => {

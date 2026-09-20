@@ -1,7 +1,17 @@
 /**
- * TotalAssetsSummaryBar — Apple-inspired total assets card.
- * Large hero typography for primary currency, secondary currency below.
- * UX-041 Phase 2 §3.2.
+ * TotalAssetsSummaryBar — per-currency totals, always labelled (UX-FN-02).
+ *
+ * The defect: mixed-currency balances were presented as **one headline figure**
+ * — two amounts separated by a divider under a single "Total Assets" heading,
+ * with no per-currency label, no account count, and nothing saying whether a
+ * conversion had been applied. Adding NGN to USD is arithmetically meaningless,
+ * so the UI must never imply it did.
+ *
+ * Now each currency is its own labelled row with its account count, and when
+ * more than one currency is present the card states plainly that no exchange
+ * rate is applied. Cross-currency consolidation stays out of scope until an FX
+ * provider decision exists (doc 18 §4.6.2) — this component cannot imply a
+ * conversion it cannot perform.
  */
 import React, { useMemo } from 'react';
 import { fromCents } from '../../utils/moneyUtils';
@@ -14,53 +24,48 @@ interface TotalAssetsSummaryBarProps {
 }
 
 export const TotalAssetsSummaryBar: React.FC<TotalAssetsSummaryBarProps> = ({ accounts }) => {
-  const totals = useMemo(() => {
-    const byC: Partial<Record<Currency, number>> = {};
-    for (const a of accounts) {
-      byC[a.currency] = (byC[a.currency] ?? 0) + a.balanceCents;
+  const rows = useMemo(() => {
+    const byCurrency: Partial<Record<Currency, { cents: number; count: number }>> = {};
+    for (const account of accounts) {
+      const entry = byCurrency[account.currency] ?? { cents: 0, count: 0 };
+      entry.cents += account.balanceCents;
+      entry.count += 1;
+      byCurrency[account.currency] = entry;
     }
-    return byC;
+    return (Object.keys(byCurrency) as Currency[]).map((currency) => ({
+      currency,
+      ...byCurrency[currency]!,
+    }));
   }, [accounts]);
 
-  const usdTotal = totals.USD != null ? fromCents(totals.USD) : null;
-  const ngnTotal = totals.NGN != null ? fromCents(totals.NGN) : null;
-
-  if (usdTotal === null && ngnTotal === null) return null;
-
-  // Primary = NGN if present, else USD
-  const primaryCurrency: Currency = ngnTotal !== null ? 'NGN' : 'USD';
-  const primaryAmount = primaryCurrency === 'NGN' ? ngnTotal! : usdTotal!;
-  const secondaryCurrency: Currency | null =
-    ngnTotal !== null && usdTotal !== null ? 'USD' : null;
-  const secondaryAmount = secondaryCurrency ? usdTotal! : null;
-
-  const hasBoth = secondaryCurrency !== null && secondaryAmount !== null;
+  if (rows.length === 0) return null;
 
   return (
-    <div
-      data-testid="total-assets-bar"
-      className="px-4 py-4"
-    >
+    <div data-testid="total-assets-bar" className="px-4 py-4">
       <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
         Total Assets
       </p>
-      {hasBoth ? (
-        <div className="flex items-center gap-4">
-          <div className="min-w-0">
-            <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums leading-tight">
-              {formatCurrency(primaryAmount, primaryCurrency)}
-            </p>
+
+      <div className="space-y-2">
+        {rows.map(({ currency, cents, count }) => (
+          <div
+            key={currency}
+            data-testid={`total-assets-${currency}`}
+            className="flex items-baseline justify-between gap-3"
+          >
+            <span className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              {currency} · {count} {count === 1 ? 'account' : 'accounts'}
+            </span>
+            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums leading-tight">
+              {formatCurrency(fromCents(cents), currency)}
+            </span>
           </div>
-          <div className="w-px self-stretch bg-slate-200 dark:bg-slate-700" />
-          <div className="min-w-0">
-            <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums leading-tight">
-              {formatCurrency(secondaryAmount, secondaryCurrency)}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums leading-tight">
-          {formatCurrency(primaryAmount, primaryCurrency)}
+        ))}
+      </div>
+
+      {rows.length > 1 && (
+        <p className="mt-2 text-[11px] text-slate-400 dark:text-slate-500" data-testid="total-assets-fx-note">
+          Shown per currency — no exchange rate is applied.
         </p>
       )}
     </div>

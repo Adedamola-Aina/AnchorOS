@@ -17,14 +17,23 @@ type AccountMode = 'manual' | 'link';
 
 interface AccountFormProps {
     onClose: () => void;
+    /**
+     * UX-FN-03: account creation and transaction recording were disconnected —
+     * creating an account never invited the opening transaction. The success
+     * state now offers exactly that, with the new account's id so the form can
+     * preselect it.
+     */
+    onRecordFirstTransaction?: (accountId: string) => void;
 }
 
-export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
+export const AccountForm: React.FC<AccountFormProps> = ({ onClose, onRecordFirstTransaction }) => {
     const { addAccount } = useFinance();
     const { showToast } = useNotifications();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [mode, setMode] = useState<AccountMode>('manual');
+    /** UX-FN-03: set once the account exists, so the form can hand off to the next step. */
+    const [created, setCreated] = useState<{ id: string; name: string } | null>(null);
 
     const [newAccName, setNewAccName] = useState('');
     const [newAccType, setNewAccType] = useState<AnchorAccount['type']>('checking');
@@ -57,7 +66,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
 
         setIsSubmitting(true);
         try {
-            await addAccount({
+            const createdId = await addAccount({
                 name: newAccName,
                 type: newAccType,
                 currency: newAccCurrency,
@@ -67,9 +76,11 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
             });
             showToast('Account created successfully', 'success');
 
+            // UX-FN-03: a success state with ONE primary next step, instead of
+            // closing and leaving the user to find "record a transaction" alone.
+            setCreated({ id: createdId ?? '', name: newAccName.trim() });
             setNewAccName('');
             setNewAccBalance('');
-            onClose();
         } catch (err) {
             captureError(err, 'AccountForm.addAccount');
             const msg = err instanceof Error ? err.message : 'Failed to create account';
@@ -79,6 +90,48 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onClose }) => {
             setIsSubmitting(false);
         }
     };
+
+    if (created) {
+        return (
+            <motion.div
+                variants={microMotion.createSlideIn}
+                initial="hidden"
+                animate="visible"
+                data-testid="account-created"
+                className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl space-y-4 text-center"
+            >
+                <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <Landmark className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="space-y-1">
+                    <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white">{created.name} is ready</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                        The balance you entered is this account&apos;s opening balance. Record the transaction behind it now,
+                        or come back to it later.
+                    </p>
+                </div>
+                <div className="flex flex-col gap-2 pt-2">
+                    {onRecordFirstTransaction && (
+                        <button
+                            type="button"
+                            onClick={() => onRecordFirstTransaction(created.id)}
+                            data-testid="record-first-transaction-after-create"
+                            className="w-full min-h-11 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+                        >
+                            Record first transaction
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="w-full min-h-11 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                        Done
+                    </button>
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div

@@ -18,8 +18,10 @@ interface NetWorthCardsProps {
 }
 
 export const NetWorthCards = ({ netWorth }: NetWorthCardsProps) => {
-    const total = netWorth.NGN + netWorth.USD;
-    const showRiseCue = total > 0;
+    // UX-FN-02: these two numbers are in different currencies, so they are never
+    // added — not even for a decorative cue. The rise cue asks "is there money
+    // here at all", which each currency can answer on its own.
+    const showRiseCue = netWorth.NGN > 0 || netWorth.USD > 0;
 
     const hasNGN = netWorth.NGN > 0;
     const hasUSD = netWorth.USD > 0;

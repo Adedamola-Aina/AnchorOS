@@ -14,14 +14,51 @@ vi.mock('../../hooks/useUnsavedChanges', () => ({
 }));
 
 // Mock dependencies
+const mockAddAccount = vi.fn().mockResolvedValue(undefined);
 vi.mock('../../context/FinanceContext', () => ({
-    useFinance: () => ({ addAccount: vi.fn().mockResolvedValue(undefined) }),
+    useFinance: () => ({ addAccount: mockAddAccount }),
 }));
 vi.mock('../../context/NotificationContext', () => ({
     useNotifications: () => ({ showToast: vi.fn() }),
 }));
 
 const defaultProps = { onClose: vi.fn() };
+
+describe('AccountForm — connected journey (UX-FN-03)', () => {
+    it('shows a success state with one primary next step instead of closing', async () => {
+        const onClose = vi.fn();
+        const onRecordFirstTransaction = vi.fn();
+        mockAddAccount.mockResolvedValueOnce('acc-9');
+
+        render(<AccountForm onClose={onClose} onRecordFirstTransaction={onRecordFirstTransaction} />);
+
+        fireEvent.change(screen.getByPlaceholderText(/Zenith Spending/i), { target: { value: 'Main Checking' } });
+        fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '1000' } });
+        fireEvent.click(screen.getByRole('button', { name: /create account|save|add account/i }));
+
+        // The defect: it closed immediately, so creation and recording were disconnected.
+        expect(await screen.findByTestId('account-created')).toBeInTheDocument();
+        expect(onClose).not.toHaveBeenCalled();
+
+        fireEvent.click(screen.getByTestId('record-first-transaction-after-create'));
+        expect(onRecordFirstTransaction).toHaveBeenCalledWith('acc-9');
+    });
+
+    it('still offers a plain Done exit', async () => {
+        const onClose = vi.fn();
+        mockAddAccount.mockResolvedValueOnce('acc-10');
+
+        render(<AccountForm onClose={onClose} />);
+
+        fireEvent.change(screen.getByPlaceholderText(/Zenith Spending/i), { target: { value: 'Savings' } });
+        fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '50' } });
+        fireEvent.click(screen.getByRole('button', { name: /create account|save|add account/i }));
+
+        await screen.findByTestId('account-created');
+        fireEvent.click(screen.getByRole('button', { name: /^Done$/i }));
+        expect(onClose).toHaveBeenCalledTimes(1);
+    });
+});
 
 describe('AccountForm — unsaved changes guard', () => {
     it('starts with dirty = false', () => {

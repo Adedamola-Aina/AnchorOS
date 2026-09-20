@@ -103,6 +103,24 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                 {isPayBill ? 'Pay Bill' : getTransactionLabel(formState.type).header}
             </h3>
             {isOverdraft && <OverdraftWarning projectedBalance={projectedBalance} amountCents={toCents(amount)} />}
+            {/*
+              * UX-FN-03: recording a transaction never showed the account's
+              * resulting position, so cause and effect were invisible. The
+              * preview below states the balance before → after, in the account's
+              * own currency, and turns red when it would go negative.
+              */}
+            {sourceAccount && (
+              <p className="text-xs text-slate-500 dark:text-slate-400" data-testid="balance-preview">
+                {sourceAccount.name} balance:{' '}
+                <span className="font-semibold tabular-nums text-slate-600 dark:text-slate-300">
+                  {formatCurrency(fromCents(currentBalance), sourceAccount.currency)}
+                </span>
+                <span aria-hidden="true"> → </span>
+                <span className={`font-semibold tabular-nums ${isOverdraft ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-100'}`}>
+                  {formatCurrency(fromCents(projectedBalance), sourceAccount.currency)}
+                </span>
+              </p>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Account context: compact badge when known, full grid when browsing */}

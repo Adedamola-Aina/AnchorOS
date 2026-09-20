@@ -17,9 +17,14 @@ interface TransactionHistorySectionProps {
   transactions: AnchorTransaction[];
   onEdit: (tx: AnchorTransaction) => void;
   onDelete: (tx: AnchorTransaction) => void;
+  /** UX-FN-01: the empty state's action. */
+  onRecordTransaction?: () => void;
+  /** UX-FN-10: set only when activity exists in another month. */
+  latestActivityLabel?: string;
+  onJumpToLatestActivity?: () => void;
 }
 
-export const TransactionHistorySection = ({ transactions, onEdit, onDelete }: TransactionHistorySectionProps) => {
+export const TransactionHistorySection = ({ transactions, onEdit, onDelete, onRecordTransaction, latestActivityLabel, onJumpToLatestActivity }: TransactionHistorySectionProps) => {
   const { currentMonth, nextMonth, prevMonth } = useFinance();
   const { user } = useAuth();
   const { isOwner, connection } = useFamilySharing(user?.uid);
@@ -100,6 +105,9 @@ export const TransactionHistorySection = ({ transactions, onEdit, onDelete }: Tr
           onClearSearch={() => setSearchQuery('')}
           onEdit={onEdit}
           onDelete={onDelete}
+          onRecordTransaction={onRecordTransaction}
+          latestActivityLabel={latestActivityLabel}
+          onJumpToLatestActivity={onJumpToLatestActivity}
           className="min-h-[200px] max-h-[calc(100vh-250px)]"
         />
         {shouldUsePaginatedOwn && hasNextPage && !searchQuery.trim() && (
