@@ -19,6 +19,23 @@ describe('BottomNavigation', () => {
             expect(screen.getByText('Settings')).toBeInTheDocument();
         });
 
+        it('reserves the safe area in one place and can move out of the way (UX-GL-04)', () => {
+            const { rerender } = renderWithRouter(<BottomNavigation />);
+            const nav = screen.getByRole('navigation', { name: /mobile navigation/i });
+            // Height comes from the shared custom property, so the bar, the content
+            // reserve and the FAB cannot drift apart.
+            expect(nav).toHaveStyle({ height: 'var(--bottom-nav-height, calc(49px + env(safe-area-inset-bottom, 0px)))' });
+            expect(nav).toHaveAttribute('data-nav-hidden', 'false');
+            expect(nav.className).toContain('translate-y-0');
+
+            // Scrolling down moves it away, and the links stay in the a11y tree.
+            rerender(<MemoryRouter><BottomNavigation hidden /></MemoryRouter>);
+            const hiddenNav = screen.getByRole('navigation', { name: /mobile navigation/i });
+            expect(hiddenNav).toHaveAttribute('data-nav-hidden', 'true');
+            expect(hiddenNav.className).toContain('translate-y-full');
+            expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
+        });
+
         it('never renders an Anchor tab — the bar stays at four items (UX-AI-09)', () => {
             renderWithRouter(<BottomNavigation hasUnreadInsight />);
             expect(screen.queryByRole('link', { name: /^anchor/i })).not.toBeInTheDocument();

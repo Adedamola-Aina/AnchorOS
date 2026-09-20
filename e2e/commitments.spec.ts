@@ -53,13 +53,17 @@ test.describe('Commitments - Create', () => {
         await addBtn.click();
         await page.waitForTimeout(500);
 
-        // Select daily frequency
-        const dailyBtn = page.locator('button:has-text("Daily")').first();
+        // Scope to the composer: the page's own type filter also has a "Daily"
+        // chip, and while the sheet is open it is behind the overlay.
+        const cadence = page.locator('[data-testid="cadence-selector"]');
+        const dailyBtn = cadence.getByText('Daily', { exact: true });
         if (await dailyBtn.isVisible()) {
             await dailyBtn.click();
 
-            // Should NOT show day selector (daily is every day)
-            const daySelector = page.locator('text=Monday').or(page.locator('text=Tuesday'));
+            // Should NOT show day selector (daily is every day).
+            // CM-18: the composer labels weekdays two letters (Mo, Tu, …).
+            const composer = page.locator('[role="dialog"]');
+            const daySelector = composer.getByText('Mo', { exact: true }).or(composer.getByText('Tu', { exact: true }));
             const hasDaySelector = await daySelector.first().isVisible().catch(() => false);
             expect(hasDaySelector).toBe(false);
         }
@@ -70,13 +74,17 @@ test.describe('Commitments - Create', () => {
         await addBtn.click();
         await page.waitForTimeout(500);
 
-        const weeklyBtn = page.locator('button:has-text("Weekly")').first();
+        const cadence = page.locator('[data-testid="cadence-selector"]');
+        const weeklyBtn = cadence.getByText('Weekly', { exact: true });
         if (await weeklyBtn.isVisible()) {
             await weeklyBtn.click();
             await page.waitForTimeout(300);
 
-            // Should show day selector
-            const daySelector = page.locator('text=Mon').or(page.locator('text=Tue')).or(page.locator('text=Wed'));
+            // Should show day selector. CM-18: two-letter labels, so Tue/Thu and
+            // Sat/Sun are finally distinguishable in the UI. The weekday buttons
+            // live in the composer's own field, not in the cadence group.
+            const composer = page.locator('[role="dialog"]');
+            const daySelector = composer.getByText('Mo', { exact: true }).or(composer.getByText('Tu', { exact: true })).or(composer.getByText('We', { exact: true }));
             const hasDaySelector = await daySelector.first().isVisible().catch(() => false);
             expect(hasDaySelector).toBe(true);
         }

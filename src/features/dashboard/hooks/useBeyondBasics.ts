@@ -99,5 +99,19 @@ export function useBeyondBasics() {
   const allComplete = completedCount === totalCount;
   const progress_pct = totalCount > 0 ? completedCount / totalCount : 0;
 
-  return { items, completedCount, totalCount, allComplete, progress: progress_pct };
+  /**
+   * UX-OB-05: at 100% the "Getting Started" affordance used to vanish with no
+   * acknowledgement — the work finished and nothing said so. It now stays until
+   * the user dismisses it, and the dismissal is remembered on the profile.
+   */
+  const acknowledged = progress?.beyondBasicsComplete === true;
+
+  return {
+    items,
+    completedCount,
+    totalCount,
+    allComplete,
+    progress: progress_pct,
+    acknowledged,
+  };
 }

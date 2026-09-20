@@ -77,7 +77,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
                 </div>
 
                 {show2FASetup && (
-                    <div className="mt-8 bg-slate-50 dark:bg-slate-900/40 rounded-3xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-500 overflow-hidden">
+                    <div className="mt-8 bg-slate-50 dark:bg-slate-900/40 rounded-sheet border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-500 overflow-hidden">
                         <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
                             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                                 <span className={step >= 1 ? "text-blue-600 dark:text-blue-400" : ""}>Step 1</span><span className="text-slate-300 dark:text-slate-700">→</span>

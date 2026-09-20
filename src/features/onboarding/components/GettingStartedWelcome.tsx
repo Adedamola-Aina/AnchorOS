@@ -65,8 +65,15 @@ export function GettingStartedWelcome({ userName, onStart, onSkip }: GettingStar
       </button>
 
       <div>
+        {/*
+          UX-OB-01 / UX-OB-09: step 1's control is not a step skip — it leaves
+          setup entirely, so it keeps its own words ("Finish later") while every
+          step skip below reads the same ("Skip for now"). The accessible name
+          states the consequence in both cases.
+        */}
         <button
           onClick={onSkip}
+          aria-label="Finish later — leave setup and continue to the app"
           className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
         >
           Finish later

@@ -13,6 +13,7 @@ import {
   updateCommitment,
 } from '../api/CommitmentApi';
 import { useCommitmentOfflineSync } from './useCommitmentOfflineSync';
+import { migrateTasksSchedule } from '../services/fabric/commitmentSchedule';
 
 function isNetworkError(error: unknown): boolean {
   if (error instanceof Error) {
@@ -33,7 +34,12 @@ export const useCommitmentService = (user: User | null) => {
   const tasks = useMemo(() => {
     const timeOrder: Record<string, number> = { 'morning': 1, 'afternoon': 2, 'evening': 3, 'any': 4 };
     const priorityOrder: Record<string, number> = { 'high': 0, 'medium': 1, 'low': 2 };
-    return [...rawTasks].sort((a, b) => {
+    // CM-18 migration: legacy documents store weekday letters ('T' meant Tue AND
+    // Thu) or full day names (which the schedule engine could not read at all).
+    // Upgrading on read means every consumer sees canonical indexes immediately,
+    // with no destructive script and no window where the app disagrees with
+    // itself. The migrated value is persisted on the next write.
+    return migrateTasksSchedule([...rawTasks]).sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
       const pa = priorityOrder[a.priority || 'medium'] ?? 1;
       const pb = priorityOrder[b.priority || 'medium'] ?? 1;

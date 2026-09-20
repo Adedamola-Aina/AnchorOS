@@ -49,7 +49,7 @@ export const FamilyConnectedState: React.FC<ConnectedStateProps> = ({ connection
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/5">
+                <div className="flex items-center justify-between p-4 rounded-panel border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/5">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center"><span className="text-lg">👥</span></div>
                         <div>
@@ -76,7 +76,7 @@ export const FamilyInviteCard: React.FC<InviteCardProps> = ({ onShowInviteForm }
     <Card className="overflow-hidden border-dashed border-2 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700 transition-colors">
         <CardContent className="p-6">
             <button onClick={onShowInviteForm} className="w-full flex items-center gap-4 text-left group">
-                <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30 transition-colors">
+                <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-card group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30 transition-colors">
                     <Users className="w-6 h-6 text-slate-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" />
                 </div>
                 <div className="flex-1">

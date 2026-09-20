@@ -134,7 +134,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
                             aria-invalid={nameError ? true : undefined}
                             aria-describedby={nameError ? 'profile-name-error' : undefined}
                             data-testid="profile-name-input"
-                            className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                            className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-card bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                         />
                         {nameError && (
                             <p id="profile-name-error" role="alert" data-testid="profile-name-error" className="text-[10px] text-rose-500">{nameError}</p>

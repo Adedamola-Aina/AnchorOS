@@ -83,7 +83,7 @@ export const FinanceAccountsRoute = ({
           <button
             type="button"
             onClick={onBack}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-elevation-subtle transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
             aria-label="Back to finance overview"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -97,7 +97,7 @@ export const FinanceAccountsRoute = ({
           <button
             type="button"
             onClick={onCreateAccount}
-            className="min-h-[44px] rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+            className="min-h-[44px] rounded-panel bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
           >
             New Account
           </button>
@@ -110,7 +110,7 @@ export const FinanceAccountsRoute = ({
           { label: 'Owned', value: summary.owned },
           { label: 'Shared', value: summary.shared },
         ].map((item) => (
-          <div key={item.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div key={item.label} className="rounded-panel border border-slate-200 bg-white px-4 py-3 shadow-elevation-subtle dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{item.label}</p>
             <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{item.value}</p>
           </div>
@@ -124,7 +124,7 @@ export const FinanceAccountsRoute = ({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search accounts"
-          className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+          className="w-full rounded-panel border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 shadow-elevation-subtle outline-none transition focus:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
         />
       </label>
 
@@ -169,7 +169,7 @@ export const FinanceAccountsRoute = ({
           <AccountListItem key={account.id} account={account} currentUserId={currentUserId} onOpenAccount={onOpenAccount} />
         ))}
         {filteredAccounts.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+          <div className="rounded-panel border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
             No accounts match this view.
           </div>
         ) : null}

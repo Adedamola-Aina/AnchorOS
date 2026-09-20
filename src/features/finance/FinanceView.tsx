@@ -17,6 +17,7 @@ import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { EmptyAccountsState } from './components/EmptyAccountsState';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
+import { useRegisterFab } from '../../context/FabContext';
 import { CardStack } from '../../components/finance/CardStack';
 import { AccountListItem } from './components/AccountListItem';
 import { TotalAssetsSummaryBar } from '../../components/finance/TotalAssetsSummaryBar';
@@ -49,6 +50,9 @@ const FinanceView = () => {
   const [prefillData, setPrefillData] = useState<{ amount?: number; category?: string; title?: string } | undefined>(undefined);
   /** UX-FN-08: the landing page previously had no way to record a transaction. */
   const [showCreateSheet, setShowCreateSheet] = useState(false);
+
+  // UX-GL-04: the mobile FAB records a transaction — the page's primary action.
+  useRegisterFab({ label: 'Record transaction', onClick: () => setShowCreateSheet(true) });
   /**
    * UX-FN-03: the account just created in the success state, so the transaction
    * form can preselect it — creation and recording are one journey.
@@ -208,7 +212,7 @@ const FinanceView = () => {
           <button
             type="button"
             onClick={() => setShowCreateSheet(true)}
-            className="h-11 w-11 shrink-0 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center shadow-sm transition-all hover:opacity-90 active:scale-95"
+            className="h-11 w-11 shrink-0 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center shadow-elevation-subtle transition-all hover:opacity-90 active:scale-95"
             aria-label="Add account or record a transaction"
           >
             <Plus className="w-5 h-5 text-white dark:text-slate-900" strokeWidth={2.5} />

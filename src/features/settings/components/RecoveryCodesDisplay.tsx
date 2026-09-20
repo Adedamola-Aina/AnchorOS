@@ -50,7 +50,7 @@ export const RecoveryCodesDisplay: React.FC<RecoveryCodesDisplayProps> = ({ code
                 </p>
             </div>
 
-            <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-card p-4 border border-slate-200 dark:border-slate-800">
                 <div className="grid grid-cols-2 gap-2">
                     {codes.map((code, i) => (
                         <div key={i} className="font-mono text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 px-3 py-2 rounded-lg text-center tracking-wider">
@@ -70,7 +70,7 @@ export const RecoveryCodesDisplay: React.FC<RecoveryCodesDisplayProps> = ({ code
                 </Button>
             </div>
 
-            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-card p-4">
                 <label className="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)}
                         className="mt-1 rounded border-amber-300 text-amber-600 focus:ring-amber-500" />

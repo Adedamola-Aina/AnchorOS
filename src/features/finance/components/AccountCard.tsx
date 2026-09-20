@@ -43,10 +43,10 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
         <div
             onClick={() => onEdit(account)}
             data-testid={`account-card-${account.id}`}
-            className={`cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all group overflow-hidden relative ${account.currency === 'USD' ? 'hover:border-primary-500/30' : 'hover:border-finance-500/30'}`}
+            className={`cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-panel border border-slate-200 dark:border-slate-700 hover:shadow-elevation-raised transition-all group overflow-hidden relative ${account.currency === 'USD' ? 'hover:border-primary-500/30' : 'hover:border-finance-500/30'}`}
         >
             <div className="flex justify-between items-start mb-4 relative z-10">
-                <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 ${account.currency === 'USD' ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'bg-finance-50 dark:bg-finance-900/30 text-finance-600 dark:text-finance-400'}`}>
+                <div className={`p-2.5 rounded-card transition-transform group-hover:scale-110 ${account.currency === 'USD' ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'bg-finance-50 dark:bg-finance-900/30 text-finance-600 dark:text-finance-400'}`}>
                     {account.currency === 'USD' ? <DollarSign size={22} /> : <Banknote size={22} />}
                 </div>
                 {/* Share toggle button - only shown to owner with active connection */}
@@ -55,8 +55,8 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
                         <button
                             onClick={handleShareToggle}
                             className={`p-2 rounded-full transition-all ${isSharedWithFamily
-                                ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100'
-                                : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50/50'
+                                ? 'text-warning bg-warning-surface border border-warning-border'
+                                : 'text-slate-400 hover:text-warning'
                                 }`}
                             title={isSharedWithFamily ? 'Stop Sharing' : 'Share with Family'}
                         >
@@ -97,14 +97,14 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{account.currency}</span>
                     {account.source === 'linked' && account.externalConnection && (
                         <>
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-success">
                                 <Link2 className="w-3 h-3" />
                                 {account.externalConnection.maskedAccountNumber}
                             </span>
                             {account.externalConnection.syncStatus === 'reconnect_required' && (
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onReconnect?.(account); }}
-                                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+                                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-warning-surface text-warning border border-warning-border hover:opacity-90 transition-colors"
                                     title="Re-authenticate your bank connection"
                                 >
                                     <AlertTriangle className="w-3 h-3" /> Reconnect

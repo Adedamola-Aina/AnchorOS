@@ -75,16 +75,46 @@ export const OnboardingView = () => {
   // Task form state
   const [taskTitle, setTaskTitle] = useState('');
 
+  /**
+   * UX-OB-02: every step used to persist through a different path (`addAccount`,
+   * `secureDb.addDocument`, `addTask`, `updateProfile`) and only some of them
+   * handled failure — two had no try/catch at all, so a failed write left the
+   * user on a step that looked fine with nothing saved.
+   *
+   * One contract now: attempt the write, advance only if it succeeded, and on
+   * failure say what happened and stay put with the answers still in the form.
+   * The user can simply press the same button again.
+   */
+  const runStep = async (what: string, persist: () => Promise<void>, advance: () => void) => {
+    setLoading(true);
+    try {
+      await persist();
+      advance();
+    } catch (e) {
+      captureError(e, `Onboarding.${what}`);
+      showToast(`Couldn't save ${what}. Nothing was lost — try again.`, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleStart = async (name: string) => {
-    await updateProfile({ name, onboardingComplete: false });
-    goToStep(2);
+    await runStep(
+      'your name',
+      () => updateProfile({ name, onboardingComplete: false }),
+      () => goToStep(2),
+    );
   };
 
   const handleSkip = async () => {
-    await updateProfile({
-      onboardingComplete: true,
-      onboardingProgress: { gettingStartedStep: step, securityStepSeen: step >= 5, beyondBasicsComplete: false, completedItems: [] },
-    });
+    await runStep(
+      'your progress',
+      () => updateProfile({
+        onboardingComplete: true,
+        onboardingProgress: { gettingStartedStep: step, securityStepSeen: step >= 5, beyondBasicsComplete: false, completedItems: [] },
+      }),
+      () => { /* the app leaves onboarding once onboardingComplete is set */ },
+    );
   };
 
   const handleCreateAccount = async () => {
@@ -95,37 +125,35 @@ export const OnboardingView = () => {
       showToast('Add an account name and its current balance to continue.', 'error');
       return;
     }
-    setLoading(true);
-    try {
-      await addAccount({
+    await runStep(
+      'your account',
+      () => addAccount({
         name: accName.trim(),
         type: accountType,
         currency,
         balanceCents: toCents(balance),
         color: 'bg-blue-500',
         scope: profile.familyMode ? 'family' : 'personal',
-      });
-      goToStep(3);
-    } catch (e) {
-      captureError(e, 'Onboarding.createAccount');
-      showToast('Failed to create account.', 'error');
-    } finally {
-      setLoading(false);
-    }
+      }),
+      () => goToStep(3),
+    );
   };
 
   const handleCreateGoal = async () => {
-    setLoading(true);
-    try {
-      const uid = user?.uid;
-      if (!uid) throw new Error('User not authenticated');
-      // RA-13 (#171): guard the write too — the rules reject non-positive targets.
-      const targetAmountCents = toCents(goalAmount);
-      if (targetAmountCents <= 0) {
-        showToast('Enter a target amount greater than zero.', 'error');
-        return;
-      }
-      await secureDb.addDocument(uid, 'goals', {
+    const uid = user?.uid;
+    // RA-13 (#171): guard the write too — the rules reject non-positive targets.
+    const targetAmountCents = toCents(goalAmount);
+    if (!uid) {
+      showToast('You need to be signed in to save a goal.', 'error');
+      return;
+    }
+    if (targetAmountCents <= 0) {
+      showToast('Enter a target amount greater than zero.', 'error');
+      return;
+    }
+    await runStep(
+      'your goal',
+      () => secureDb.addDocument(uid, 'goals', {
         title: goalTitle,
         targetAmountCents,
         currentAmountCents: 0,
@@ -133,14 +161,9 @@ export const OnboardingView = () => {
         goalType,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      });
-      goToStep(4);
-    } catch (e) {
-      captureError(e, 'Onboarding.createGoal');
-      showToast('Failed to save goal.', 'error');
-    } finally {
-      setLoading(false);
-    }
+      }),
+      () => goToStep(4),
+    );
   };
 
   const handleCreateTask = async () => {
@@ -149,29 +172,30 @@ export const OnboardingView = () => {
       showToast('Name the habit you want to commit to.', 'error');
       return;
     }
-    setLoading(true);
-    try {
-      await addTask({
+    await runStep(
+      'your habit',
+      () => addTask({
         title: taskTitle.trim(),
         type: 'daily',
         completed: false,
         category: 'personal',
         timeOfDay: 'morning',
-      });
-      goToStep(5);
-    } catch (e) {
-      captureError(e, 'Onboarding.createTask');
-      showToast('Failed to create task.', 'error');
-    } finally {
-      setLoading(false);
-    }
+      }),
+      () => goToStep(5),
+    );
   };
 
   const handleSecurityComplete = async () => {
-    await updateProfile({
-      onboardingComplete: true,
-      onboardingProgress: { gettingStartedStep: 5, securityStepSeen: true, beyondBasicsComplete: false, completedItems: [] },
-    });
+    // UX-OB-02: this had no error handling either — a failed write meant the user
+    // never left onboarding and never learned why.
+    await runStep(
+      'your security choices',
+      () => updateProfile({
+        onboardingComplete: true,
+        onboardingProgress: { gettingStartedStep: 5, securityStepSeen: true, beyondBasicsComplete: false, completedItems: [] },
+      }),
+      () => { /* the app leaves onboarding once onboardingComplete is set */ },
+    );
   };
 
   return (

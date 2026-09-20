@@ -11,11 +11,12 @@ import type { TaskType, TimeOfDay, TaskPriority, AnchorTask } from '../../../typ
 import { Button } from '@anchor-os/ui';
 import { Modal } from '../../../components/shared/Modal';
 import { PopoverMenu, TimeWheelPicker } from '../../../components/shared';
-import { DailyTimeField, WeeklyDaysField, MonthlyDatesField } from './TaskFormParts';
+import { DailyTimeField, WeeklyDaysField, MonthlyDatesField, RepeatFields } from './TaskFormParts';
 import { PriorityIndicator } from './PriorityIndicator';
+import type { QuickAddDraft } from '../utils/parseQuickAdd';
 import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
 
-interface TaskFormProps { onClose: () => void; onAdd: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>; hasFamilyActive: boolean; }
+interface TaskFormProps { onClose: () => void; onAdd: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>; hasFamilyActive: boolean; /** CM-16: a draft parsed from the quick-add line, pre-filled for adjustment. */ initialDraft?: QuickAddDraft | null; }
 
 /**
  * UX-CM-01: the composer used to OPEN on "Choose Frequency", so a user had to
@@ -36,15 +37,22 @@ const CADENCE_OPTIONS: { value: TaskType; label: string }[] = [
     { value: 'monthly', label: 'Monthly' },
 ];
 
-export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyActive }) => {
-    const [newTaskTitle, setNewTaskTitle] = useState('');
-    const [newTaskType, setNewTaskType] = useState<TaskType>('daily');
+export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyActive, initialDraft }) => {
+    // CM-16: a quick-add draft seeds every field, so "Adjust" opens a composer
+    // that already knows what the user typed.
+    const [newTaskTitle, setNewTaskTitle] = useState(initialDraft?.title ?? '');
+    const [newTaskType, setNewTaskType] = useState<TaskType>(initialDraft?.type ?? 'daily');
     const [newTaskScope, setNewTaskScope] = useState<'personal' | 'family'>('personal');
     const [newTaskTime, setNewTaskTime] = useState<TimeOfDay>('morning');
-    const [newTaskDays, setNewTaskDays] = useState<string[]>([]);
-    const [newTaskDates, setNewTaskDates] = useState<number[]>([]);
+    const [newTaskDays, setNewTaskDays] = useState<number[]>(initialDraft?.daysOfWeek ?? []);
+    const [newTaskDates, setNewTaskDates] = useState<number[]>(initialDraft?.dayOfMonth ? [initialDraft.dayOfMonth] : []);
     const [newTaskDomain, setNewTaskDomain] = useState('Personal Development');
-    const [newTaskReminder, setNewTaskReminder] = useState('');
+    const [newTaskReminder, setNewTaskReminder] = useState(initialDraft?.reminderTime ?? '');
+    // CM-17: the real schedule model — interval, anchor date, end date, due date.
+    const [newTaskInterval, setNewTaskInterval] = useState(initialDraft?.interval ?? 1);
+    const [newTaskStart, setNewTaskStart] = useState('');
+    const [newTaskEnd, setNewTaskEnd] = useState('');
+    const [newTaskDue, setNewTaskDue] = useState(initialDraft?.dueDate ?? '');
     const [newTaskNotes, setNewTaskNotes] = useState('');
     const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('medium');
     const [isSaving, setIsSaving] = useState(false);
@@ -64,6 +72,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
             if (newTaskType === 'daily') taskPayload.timeOfDay = newTaskTime;
             if (newTaskType === 'weekly') taskPayload.daysOfWeek = newTaskDays;
             if (newTaskType === 'monthly') taskPayload.daysOfMonth = newTaskDates;
+            // CM-17: only written when the user actually set them, so the stored
+            // document stays clean and the presets keep their old shape.
+            if (newTaskInterval > 1) taskPayload.interval = newTaskInterval;
+            if (newTaskType === 'todo') { if (newTaskDue) taskPayload.dueDate = newTaskDue; }
+            else {
+                if (newTaskStart) taskPayload.startDate = newTaskStart;
+                if (newTaskEnd) taskPayload.endDate = newTaskEnd;
+            }
             await onAdd(taskPayload);
         } finally { setIsSaving(false); }
     };
@@ -79,7 +95,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                         autoFocus
                         type="text"
                         placeholder="e.g. Morning Prayer, Gym, Rent Payment"
-                        className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400"
+                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400"
                         value={newTaskTitle}
                         onChange={(e) => setNewTaskTitle(e.target.value)}
                         data-testid="task-name"
@@ -130,6 +146,20 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                             {newTaskType === 'daily' && <DailyTimeField value={newTaskTime} onChange={setNewTaskTime} />}
                             {newTaskType === 'weekly' && <WeeklyDaysField value={newTaskDays} onChange={setNewTaskDays} />}
                             {newTaskType === 'monthly' && <MonthlyDatesField value={newTaskDates} onChange={setNewTaskDates} />}
+                            {/* CM-17: interval, anchor and end date — and the due date
+                                for a one-off. Optional; the preset is unchanged if
+                                the user ignores them. */}
+                            <RepeatFields
+                                type={newTaskType}
+                                interval={newTaskInterval}
+                                onIntervalChange={setNewTaskInterval}
+                                startDate={newTaskStart}
+                                onStartDateChange={setNewTaskStart}
+                                endDate={newTaskEnd}
+                                onEndDateChange={setNewTaskEnd}
+                                dueDate={newTaskDue}
+                                onDueDateChange={setNewTaskDue}
+                            />
                         </div>
                     </div>
                     {/* Notes field (COMM-006) */}
@@ -142,11 +172,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                             value={newTaskNotes}
                             onChange={(e) => setNewTaskNotes(e.target.value)}
                             data-testid="task-notes"
-                            className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
+                            className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
                         />
                     </div>
                     {/* Reminder field: inline compact layout (BUG-092) */}
-                    <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                    <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-card bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                         <TimeWheelPicker
                             label="Reminder"
                             value={newTaskReminder}

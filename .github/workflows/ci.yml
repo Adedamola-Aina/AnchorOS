@@ -296,6 +296,26 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+  # UX-GL-07: proves the developer-only surfaces cannot reach production. A gate
+  # is an intention; this builds the real production bundle and fails if the
+  # environment banner, Developer Tools section or query devtools survived into
+  # the shipped assets.
+  dev-surface-gate:
+    name: 🚧 Dev Surface Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [classify]
+    if: needs.classify.outputs.frontend_changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build:production
+      - run: npm run check:dev-surface
+
   frontend-checks:
     name: 🖥️ Frontend Checks
     runs-on: ubuntu-latest

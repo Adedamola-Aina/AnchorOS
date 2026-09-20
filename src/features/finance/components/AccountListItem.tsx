@@ -23,7 +23,7 @@ export const AccountListItem = ({ account, currentUserId, onOpenAccount }: Accou
   <button
     type="button"
     onClick={() => onOpenAccount(account.id)}
-    className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+    className="flex w-full items-center justify-between rounded-panel border border-slate-200 bg-white px-4 py-4 text-left shadow-elevation-subtle transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-slate-800"
   >
     <div className="min-w-0 space-y-2">
       <div>

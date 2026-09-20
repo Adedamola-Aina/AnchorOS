@@ -13,6 +13,8 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import AuthGate from './components/auth/AuthGate';
 import { getSystemTheme, subscribeToSystemTheme } from './utils/systemTheme';
 import { NotificationProvider } from './context/NotificationContext';
+import { FabProvider } from './context/FabContext';
+import { isDevSurfaceEnabled } from './utils/devSurface';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OfflineIndicator } from './components/shared/OfflineIndicator';
 import { EnvironmentBanner } from './components/shared/EnvironmentBanner';
@@ -123,6 +125,7 @@ export default function App() {
         }}
       >
         <NotificationProvider>
+          <FabProvider>
           <AuthProvider>
             <AppProvider>
               <div
@@ -139,8 +142,9 @@ export default function App() {
               </div>
             </AppProvider>
           </AuthProvider>
+          </FabProvider>
         </NotificationProvider>
-        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        {isDevSurfaceEnabled() && <ReactQueryDevtools initialIsOpen={false} />}
       </PersistQueryClientProvider>
     </ErrorBoundary>
   );

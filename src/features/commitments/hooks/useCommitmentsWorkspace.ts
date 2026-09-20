@@ -1,0 +1,139 @@
+/**
+ * CM-21 / CM-23 / CM-25 — the Commitments workspace.
+ *
+ * Keeps the view's derived state (smart view, search, selection, undo) out of the
+ * component so CommitmentsView stays a layout, and so the behaviour is unit
+ * testable without rendering the page.
+ */
+
+import { useCallback, useMemo, useState } from 'react';
+import type { AnchorTask } from '../../../types';
+import {
+    filterBySmartView,
+    groupCompletedByPeriod,
+    searchCommitments,
+    SMART_VIEWS,
+    type CompletedGroup,
+    type SmartViewId,
+} from '../utils/smartViews';
+
+export type TypeFilter = 'all' | 'daily' | 'weekly' | 'monthly' | 'todo';
+
+export interface UndoState {
+    message: string;
+    run: () => void | Promise<void>;
+}
+
+interface WorkspaceArgs {
+    tasks: AnchorTask[];
+    addTask: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>;
+    toggleTask: (id: string, completed: boolean) => Promise<void>;
+    deleteTask: (id: string) => Promise<void>;
+    /** Injectable clock so tests and screenshots are deterministic. */
+    now?: Date;
+}
+
+export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask, now }: WorkspaceArgs) {
+    const [smartView, setSmartView] = useState<SmartViewId>('today');
+    const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+    const [query, setQuery] = useState('');
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [undo, setUndo] = useState<UndoState | null>(null);
+
+    const reference = useMemo(() => now ?? new Date(), [now]);
+
+    /** Search → type filter. Every view and count derives from this. */
+    const scoped = useMemo(() => {
+        const searched = searchCommitments(tasks, query);
+        return searched.filter((task) => typeFilter === 'all' || task.type === typeFilter);
+    }, [tasks, query, typeFilter]);
+
+    const visible = useMemo(
+        () => filterBySmartView(scoped, smartView, reference),
+        [scoped, smartView, reference],
+    );
+
+    /** The size of each answer, so the bar is not a set of blind buttons. */
+    const counts = useMemo(() => {
+        const result: Partial<Record<SmartViewId, number>> = {};
+        for (const entry of SMART_VIEWS) {
+            result[entry.id] = filterBySmartView(scoped, entry.id, reference).length;
+        }
+        return result;
+    }, [scoped, reference]);
+
+    const doneGroups: CompletedGroup[] = useMemo(
+        () => groupCompletedByPeriod(visible, reference),
+        [visible, reference],
+    );
+
+    const selectable = selectionMode || selectedIds.size > 0;
+    const toggleSelect = useCallback((id: string) => {
+        setSelectedIds((previous) => {
+            const next = new Set(previous);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    }, []);
+    const clearSelection = useCallback(() => {
+        setSelectedIds(new Set());
+        setSelectionMode(false);
+    }, []);
+    const startSelection = useCallback(() => setSelectionMode(true), []);
+
+    /** CM-23: completing is undoable, and the message says what happened. */
+    const completeWithUndo = useCallback(async (id: string, title: string, completed: boolean) => {
+        await toggleTask(id, completed);
+        if (!completed) {
+            setUndo({ message: `Completed “${title}”.`, run: () => toggleTask(id, true) });
+        }
+    }, [toggleTask]);
+
+    /** CM-23: deleting is undoable — the commitment is restored, not resurrected by hand. */
+    const deleteWithUndo = useCallback(async (task: AnchorTask) => {
+        await deleteTask(task.id);
+        const { id: _id, createdAt: _createdAt, ...restorable } = task;
+        setUndo({ message: `Deleted “${task.title}”.`, run: () => addTask(restorable) });
+    }, [addTask, deleteTask]);
+
+    const bulkComplete = useCallback(async () => {
+        const ids = [...selectedIds];
+        const titles = scoped.filter((task) => selectedIds.has(task.id)).map((task) => task.title);
+        await Promise.all(ids.map((id) => toggleTask(id, false)));
+        clearSelection();
+        setUndo({
+            message: `Completed ${ids.length} ${ids.length === 1 ? 'commitment' : 'commitments'}.`,
+            run: async () => { await Promise.all(ids.map((id) => toggleTask(id, true))); },
+        });
+        void titles;
+    }, [selectedIds, scoped, toggleTask, clearSelection]);
+
+    const bulkDelete = useCallback(async () => {
+        const targets = scoped.filter((task) => selectedIds.has(task.id));
+        await Promise.all(targets.map((task) => deleteTask(task.id)));
+        clearSelection();
+        setUndo({
+            message: `Deleted ${targets.length} ${targets.length === 1 ? 'commitment' : 'commitments'}.`,
+            run: async () => {
+                for (const task of targets) {
+                    const { id: _id, createdAt: _createdAt, ...restorable } = task;
+                    await addTask(restorable);
+                }
+            },
+        });
+    }, [selectedIds, scoped, deleteTask, addTask, clearSelection]);
+
+    return {
+        smartView, setSmartView,
+        typeFilter, setTypeFilter,
+        query, setQuery,
+        visible,
+        counts,
+        doneGroups,
+        selectable, selectedIds, toggleSelect, clearSelection, startSelection,
+        completeWithUndo, deleteWithUndo, bulkComplete, bulkDelete,
+        undo, setUndo, dismissUndo: () => setUndo(null),
+    };
+}

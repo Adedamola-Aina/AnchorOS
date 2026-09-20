@@ -99,7 +99,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                         type="button"
                         onClick={onJumpToLatestActivity}
                         data-testid="jump-to-latest-activity"
-                        className="mt-4 min-h-11 px-4 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+                        className="mt-4 min-h-11 px-4 rounded-card bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
                     >
                         Go to {latestActivityLabel}
                     </button>
@@ -110,7 +110,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                         type="button"
                         onClick={onRecordTransaction}
                         data-testid="record-first-transaction"
-                        className="mt-4 min-h-11 px-4 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+                        className="mt-4 min-h-11 px-4 rounded-card bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
                     >
                         Record transaction
                     </button>

@@ -70,7 +70,7 @@ export const TransactionHistorySection = ({ transactions, onEdit, onDelete, onRe
       {/* Toolbar: month nav + search */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         {/* Month navigation */}
-        <div className="flex items-center bg-white dark:bg-slate-900 rounded-xl p-1 shadow-sm border border-slate-200 dark:border-slate-800">
+        <div className="flex items-center bg-white dark:bg-slate-900 rounded-card p-1 shadow-elevation-subtle border border-slate-200 dark:border-slate-800">
           <button type="button" onClick={prevMonth} className="h-11 w-11 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Previous month">
             <ChevronLeft className="w-4 h-4 text-slate-600 dark:text-slate-300" />
           </button>
@@ -92,13 +92,13 @@ export const TransactionHistorySection = ({ transactions, onEdit, onDelete, onRe
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder={`Search in ${currentMonth.toLocaleDateString('en-US', { month: 'long' })}...`}
-            className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all dark:text-white shadow-sm"
+            className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all dark:text-white shadow-elevation-subtle"
           />
         </div>
       </div>
 
       {/* Transaction list */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-panel border border-slate-200 dark:border-slate-800 overflow-hidden">
         <VirtualTransactionList
           transactions={filtered}
           searchQuery={searchQuery}
@@ -116,7 +116,7 @@ export const TransactionHistorySection = ({ transactions, onEdit, onDelete, onRe
               type="button"
               onClick={() => void fetchNextPage()}
               disabled={isFetchingNextPage}
-              className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="min-h-[44px] px-4 py-2 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isFetchingNextPage ? 'Loading...' : 'Load more'}
             </button>

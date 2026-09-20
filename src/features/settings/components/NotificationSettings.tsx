@@ -89,7 +89,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                                 type="email"
                                 value={email || userEmail || ''}
                                 onChange={(e) => onUpdatePreferences({ email: e.target.value })}
-                                className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 outline-none transition-all placeholder:text-slate-400"
+                                className="w-full p-3 border border-slate-200 dark:border-slate-700 rounded-card bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 outline-none transition-all placeholder:text-slate-400"
                             />
                             {!emailVerified && (
                                 <p className="text-[10px] text-amber-500 mt-1 flex items-center gap-1 font-bold">

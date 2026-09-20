@@ -74,7 +74,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ tasks, onToggle, onS
                                     {isUpcoming && (
                                         <button
                                             onClick={() => onStartFocus(task.id)}
-                                            className="w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2 flex items-center justify-center gap-2 rounded-xl bg-white/50 hover:bg-white dark:bg-black/20 dark:hover:bg-black/40 transition-colors"
+                                            className="w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2 flex items-center justify-center gap-2 rounded-card bg-white/50 hover:bg-white dark:bg-black/20 dark:hover:bg-black/40 transition-colors"
                                             title="Start Task Focus Timer"
                                         >
                                             <Play className="w-4 h-4" />
@@ -83,7 +83,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ tasks, onToggle, onS
                                     )}
                                     <button
                                         onClick={() => onToggle(task.id, task.completed)}
-                                        className={`w - 10 h - 10 flex items - center justify - center rounded - xl transition - all ${task.completed ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-white/50 hover:bg-emerald-500 hover:text-white dark:bg-black/20 dark:hover:bg-emerald-500'} `}
+                                        className={`w - 10 h - 10 flex items - center justify - center rounded - xl transition - all ${task.completed ? 'bg-emerald-500 text-white shadow-elevation-raised shadow-emerald-500/30' : 'bg-white/50 hover:bg-emerald-500 hover:text-white dark:bg-black/20 dark:hover:bg-emerald-500'} `}
                                     >
                                         {task.completed ? <Check className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                                     </button>

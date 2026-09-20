@@ -7,7 +7,7 @@
 
 
 import { useState } from 'react';
-import { CheckCircle2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Sparkles, X } from 'lucide-react';
 import { useApp } from '../../context/AnchorContext';
 import { useAuth } from '../../context/AuthContext';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -37,7 +37,7 @@ const getTimeGreeting = () => {
 
 const DashboardView = () => {
   const { navigateTo } = useApp();
-  const { profile, user } = useAuth();
+  const { profile, user, updateProfile } = useAuth();
   const { tasks } = useTasks();
   const { accounts, recentActivity, cashFlow, refetch } = useFinance();
   const { isMobile } = useResponsive();
@@ -49,6 +49,22 @@ const DashboardView = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
   const beyondBasics = useBeyondBasics();
+
+  /**
+   * UX-OB-05: the acknowledgement is dismissed deliberately and remembered, so
+   * it neither vanishes on its own nor reappears on every visit.
+   */
+  const dismissGettingStarted = () => {
+    haptic.trigger('light');
+    void updateProfile({
+      onboardingProgress: {
+        gettingStartedStep: profile.onboardingProgress?.gettingStartedStep ?? 5,
+        securityStepSeen: profile.onboardingProgress?.securityStepSeen ?? true,
+        beyondBasicsComplete: true,
+        completedItems: profile.onboardingProgress?.completedItems ?? [],
+      },
+    });
+  };
   const { data: goals = [], isLoading: goalsLoading } = useGoalsQuery(user?.uid);
 
   const productivity = getProductivityMetrics(tasks);
@@ -89,7 +105,7 @@ const DashboardView = () => {
                 type="button"
                 onClick={() => { haptic.trigger('light'); setChecklistOpen(true); }}
                 data-testid="getting-started-pill"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors min-h-[36px]"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-info-surface text-info border border-info-border text-xs font-semibold hover:opacity-90 transition-colors min-h-[36px]"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Getting Started</span>
@@ -97,6 +113,29 @@ const DashboardView = () => {
                   {beyondBasics.totalCount - beyondBasics.completedCount}
                 </span>
               </button>
+            )}
+            {/*
+              UX-OB-05: finishing used to be silent — the pill simply disappeared
+              at 100%. It now acknowledges the work and stays until dismissed, so
+              completion is stated rather than inferred from an absence.
+            */}
+            {beyondBasics.allComplete && !beyondBasics.acknowledged && (
+              <div
+                data-testid="getting-started-complete"
+                role="status"
+                className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-pill bg-success-surface text-success border border-success-border text-xs font-semibold min-h-[36px]"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Getting Started — all {beyondBasics.totalCount} done</span>
+                <button
+                  type="button"
+                  onClick={dismissGettingStarted}
+                  aria-label="Dismiss the getting started acknowledgement"
+                  className="ml-1 w-6 h-6 inline-flex items-center justify-center rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
+                >
+                  <X className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              </div>
             )}
             {/*
               * UX-GL-02: the dashboard gear is gone. Settings has exactly ONE

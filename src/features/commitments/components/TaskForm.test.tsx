@@ -19,6 +19,8 @@ vi.mock('./TaskFormParts', () => ({
     DailyTimeField: () => <div data-testid="daily-time" />,
     WeeklyDaysField: () => null,
     MonthlyDatesField: () => null,
+    // CM-17: the schedule model fields (interval / start / end / due date).
+    RepeatFields: () => <div data-testid="repeat-fields" />,
 }));
 
 vi.mock('../../../components/shared', () => ({

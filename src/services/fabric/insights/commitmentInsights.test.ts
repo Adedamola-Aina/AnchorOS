@@ -34,7 +34,7 @@ describe('buildCommitmentInsight — UX-AI-08 metric honesty', () => {
     it('measures partial consistency against what the cadence required', () => {
         const weekly = task({
             type: 'weekly',
-            daysOfWeek: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
             completed: false,
             currentStreak: 1,
             lastCompletedAt: new Date(2026, 8, 18, 9, 0, 0).toISOString(),

@@ -24,6 +24,13 @@ vi.mock('../../../components/shared', () => ({
       </select>
     </div>
   ),
+  // CM-17: the schedule model uses the inline date picker.
+  InlineDatePicker: ({ value, onChange, testId, label }: any) => (
+    <div data-testid={testId}>
+      {label && <span>{label}</span>}
+      <input type="date" value={value || ''} onChange={(e: any) => onChange(e.target.value)} />
+    </div>
+  ),
   SegmentedControl: ({ options, value, onChange, label, testId }: any) => (
     <div data-testid={testId}>
       {label && <span>{label}</span>}

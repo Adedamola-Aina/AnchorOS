@@ -9,6 +9,7 @@
 import React from 'react';
 import { Button } from '@anchor-os/ui';
 import type { TimeOfDay } from '../../../types';
+import { WEEKDAY_COMPACT_LABELS, WEEKDAY_FULL_LABELS } from '../../../services/fabric/commitmentSchedule';
 
 interface DailyFieldsProps {
     editTime: TimeOfDay;
@@ -35,23 +36,29 @@ export const DailyFields: React.FC<DailyFieldsProps> = ({ editTime, setEditTime 
 );
 
 interface WeeklyFieldsProps {
-    editDays: string[];
-    setEditDays: React.Dispatch<React.SetStateAction<string[]>>;
+    editDays: number[];
+    setEditDays: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
+/**
+ * CM-18: weekday indexes, and two-letter labels — a single letter cannot
+ * distinguish Tue/Thu or Sat/Sun.
+ */
 export const WeeklyFields: React.FC<WeeklyFieldsProps> = ({ editDays, setEditDays }) => (
     <div className="flex flex-col gap-1.5">
         <label className="text-[10px] uppercase font-bold text-slate-400">Days</label>
         <div className="flex flex-wrap gap-1.5">
-            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+            {WEEKDAY_FULL_LABELS.map((day, index) => (
                 <Button
                     key={day}
                     type="button"
-                    onClick={() => setEditDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day])}
-                    variant={editDays.includes(day) ? 'primary' : 'secondary'}
-                    className={`h-11 px-3 text-[10px] ${editDays.includes(day) ? 'bg-purple-600' : ''}`}
+                    aria-pressed={editDays.includes(index)}
+                    aria-label={day}
+                    onClick={() => setEditDays(prev => prev.includes(index) ? prev.filter(d => d !== index) : [...prev, index])}
+                    variant={editDays.includes(index) ? 'primary' : 'secondary'}
+                    className={`h-11 px-3 text-[10px] ${editDays.includes(index) ? 'bg-purple-600' : ''}`}
                 >
-                    {day.slice(0, 3)}
+                    {WEEKDAY_COMPACT_LABELS[index]}
                 </Button>
             ))}
         </div>

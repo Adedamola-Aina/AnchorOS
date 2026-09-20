@@ -104,7 +104,8 @@ export const seedData = async (userId: string) => {
         const timeOfDay = ['morning', 'afternoon', 'evening', 'any'][secureRandomInt(4)] as TimeOfDay;
         const taskData: Omit<AnchorTask, 'createdAt'> & { createdAt: FieldValue } = { id: doc(tasksRef).id, title, type: taskType, completed: secureRandomInt(100) >= 60, category: 'personal', createdAt: serverTimestamp(), domain, reminderTime: '08:00' };
         if (taskType === 'daily') taskData.timeOfDay = timeOfDay;
-        else if (taskType === 'weekly') taskData.daysOfWeek = ['Monday', 'Wednesday', 'Friday'];
+        // CM-18: canonical weekday indexes (Mon, Wed, Fri), not day names.
+        else if (taskType === 'weekly') taskData.daysOfWeek = [1, 3, 5];
         else if (taskType === 'monthly') taskData.dayOfMonth = 15;
         batch.set(doc(tasksRef, taskData.id), taskData);
         opCount++;

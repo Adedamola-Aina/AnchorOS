@@ -42,8 +42,8 @@ describe('useCommitmentBadge', () => {
     const tasks = [
       buildTask({ type: 'daily', completed: false }),
       buildTask({ type: 'daily', completed: true }),
-      buildTask({ type: 'weekly', completed: false, daysOfWeek: ['F'] }),
-      buildTask({ type: 'weekly', completed: false, daysOfWeek: ['M'] }),
+      buildTask({ type: 'weekly', completed: false, daysOfWeek: [5] }),
+      buildTask({ type: 'weekly', completed: false, daysOfWeek: [1] }),
       buildTask({ type: 'monthly', completed: false, dayOfMonth: 10 }),
       buildTask({ type: 'monthly', completed: false, dayOfMonth: 12 }),
       buildTask({ type: 'todo', completed: false }),

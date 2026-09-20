@@ -16,7 +16,7 @@ interface EmptyAccountsStateProps {
 export const EmptyAccountsState = ({ onCreateAccount }: EmptyAccountsStateProps) => {
     return (
         <div
-            className="relative flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl animate-in fade-in zoom-in-95 duration-500 cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors"
+            className="relative flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-panel animate-in fade-in zoom-in-95 duration-500 cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors"
             style={{ aspectRatio: `${CARD_ASPECT_RATIO}` }}
             onClick={onCreateAccount}
             role="button"

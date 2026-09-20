@@ -79,13 +79,13 @@ export const PasswordChange: React.FC = () => {
       {error && <p className="text-sm text-rose-500 font-medium">{error}</p>}
       <input type="password" autoComplete="current-password" placeholder="Current password" value={currentPw}
         onChange={(e) => setCurrentPw(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        className="w-full px-4 py-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
       <input type="password" autoComplete="new-password" placeholder="New password (min 8 chars)" value={newPw}
         onChange={(e) => setNewPw(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        className="w-full px-4 py-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
       <input type="password" autoComplete="new-password" placeholder="Confirm new password" value={confirmPw}
         onChange={(e) => setConfirmPw(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        className="w-full px-4 py-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
       <div className="flex gap-3">
         <Button type="submit" isLoading={isSubmitting} disabled={!currentPw || !newPw || !confirmPw} className="font-bold">Update Password</Button>
         <Button type="button" variant="ghost" onClick={() => { reset(); setOpen(false); }}>Cancel</Button>

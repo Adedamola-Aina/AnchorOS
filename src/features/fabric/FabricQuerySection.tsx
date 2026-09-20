@@ -35,6 +35,49 @@ interface FabricQuerySectionProps {
   onAction: (type: string, payload: Record<string, unknown>) => void;
 }
 
+/**
+ * AI-15 — "Why I said this".
+ *
+ * Every answer expands to the records behind it: what was read, how many, over
+ * which window, and the basis of the arithmetic. Trust becomes something the
+ * user can check rather than something they have to believe, and it answers
+ * "is it making this up?" in one tap.
+ */
+const AnswerCitations: React.FC<{ citations: NonNullable<FabricQueryResult['citations']> }> = ({ citations }) => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="pt-1">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        data-testid="why-said-this"
+        className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 min-h-11 inline-flex items-center gap-1"
+      >
+        {open ? 'Hide why I said this' : 'Why I said this'}
+      </button>
+      {open && (
+        <ul className="mt-1 space-y-2" data-testid="citation-list">
+          {citations.map((citation) => (
+            <li
+              key={`${citation.label}-${citation.window ?? ''}`}
+              className="text-xs text-slate-500 dark:text-slate-400 rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 py-2"
+            >
+              <span className="font-semibold text-slate-700 dark:text-slate-200">
+                {citation.label}
+              </span>
+              {citation.window && <span> · {citation.window}</span>}
+              <span className="block">
+                {citation.count} {citation.count === 1 ? 'record' : 'records'} · {citation.basis}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
 const AnswerBody: React.FC<{
   answer: FabricQueryResult;
   onAction: (type: string, payload: Record<string, unknown>) => void;
@@ -42,6 +85,7 @@ const AnswerBody: React.FC<{
   <>
     <p className="text-sm font-semibold text-slate-900 dark:text-white">{answer.summary}</p>
     {answer.detail && <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line">{answer.detail}</p>}
+    {answer.citations && answer.citations.length > 0 && <AnswerCitations citations={answer.citations} />}
     {answer.actions && answer.actions.length > 0 && (
       <div className="flex flex-wrap gap-2 pt-1">
         {answer.actions.map((action) => (

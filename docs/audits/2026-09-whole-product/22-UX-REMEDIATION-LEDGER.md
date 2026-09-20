@@ -14,13 +14,46 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 - **OPEN — needs verification first** — the fix cannot be scoped until a code/behaviour question is answered.
 - **OPEN — needs external input** — needs Mobbin-grade screenshots, a provider metric, or a real device.
 
+## W-T20 batch (2026-09-20) — twenty items worked in one ranked pass
+
+Twenty items were ranked by leverage and worked in one batch: the ledger's remaining
+findings plus the decision-free Commitments 2.0 / Fabric AI findings from doc 23 and
+the `W-D1b` adoption gap. Everything below is implemented and covered by tests.
+
+| # | Item | Outcome |
+|---|---|---|
+| 1 | `CM-18` | `daysOfWeek` is a weekday **index** (0–6). `T` matched Tue *and* Thu and `S` matched Sat *and* Sun, and the composer stored full day names the engine could not read — so a UI-created weekly commitment was never counted as due. Legacy letters and names are parsed on read and migrated on the next write. |
+| 2 | `CM-17` | Real schedule model: `startDate`, `endDate`, `interval` and `dueDate`, in the composer and the edit form. A commitment past its end date is finished, not overdue. |
+| 3 | `UX-CM-07` | Rows state when the next occurrence is, from the shared model. |
+| 4 | `CM-21` | Smart views: Today, Overdue, This week, Later, Done, All — with counts. |
+| 5 | `CM-25` | Done history grouped by period (Today / This week / Earlier). |
+| 6 | `UX-GL-04` | Nav reserves the safe area through one custom property, hides on scroll-down and returns on scroll-up, and the shell renders a single page-registered contextual FAB. |
+| 7 | `CM-16` | Instant add: one line parsed into a draft you can save or adjust. |
+| 8 | `CM-15` | Search across title, notes and area, with a live match count. |
+| 9 | `CM-23` | Undo after completing or deleting, and multi-select bulk complete/delete. |
+| 10 | `AI-11` | Every answer that states a number cites the records behind it; citations are derived centrally and attached by the engine. Invariant tests assert the assistant's numbers equal the page's numbers. |
+| 11 | `AI-15` | Every answer expands to "Why I said this" — the records, the window and the basis. |
+| 12 | `UX-OB-02` | One persistence contract for every onboarding step: advance only on success, and on failure say what happened and stay put. Two steps had no error handling at all. |
+| 13 | `UX-OB-05` | Finishing is no longer silent: the getting-started surface acknowledges completion and stays until dismissed (remembered on the profile). The unreachable `CompletionRing` — unlabelled, permanently glowing, vanishing at 100% — is deleted; the pill is the live surface. |
+| 14 | `UX-OB-01` | Step skips read "Skip for now" everywhere, each stating its consequence. Step 1 keeps "Finish later" because it leaves setup (`UX-OB-09`). |
+| 15 | `UX-ST-04` | The last part: "Recently changed" in the Settings hub, derived centrally from profile writes and honestly labelled session-scoped. |
+| 16 | `UX-GL-07` | One gate for every developer surface, and a **proof**: `scripts/ci/check-dev-surface.mjs` scans a real production build and fails if a marker survives. Wired into CI as its own job. It immediately caught that the statically-imported Developer Tools section was shipping. |
+| 17 | `UX-DS-02` | Colour-role adoption in all four surfaces (info/success/warning/danger, with surfaces and borders). Adoption was at **0%** before this. |
+| 18 | `UX-DS-04` | The loop-animation audit as a check: both reduced-motion rules neutralise every loop, including inline-style animations. |
+| 19 | `UX-DS-06` | Radius and elevation roles adopted across the four surfaces (values map 1:1, so no visual change). |
+| 20 | e2e regression | The Finance bootstrap the previous pass recorded as broken is **green**: `e2e/finance.spec.ts` passes 19/1 skipped/0 failed through the runner. The recorded "stale `System` heading" in `settings.spec.ts`/`system.spec.ts` **does not exist** — that note was wrong. |
+
+**Not in this batch, and why:** `UX-OB-04` (needs the gate-contract change, a product
+decision), the 14 `PROPOSED` items in doc 23 (they need a yes), `FS-02`/`FS-03` and the
+`SN-*` items beyond B2 (deferred by design), and `RA-25` (Dependabot lockfile).
+
 ## Totals
 
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
 | Closed | **54** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **7** |
+| Remaining | **1** — `UX-OB-04` (resumable onboarding; needs the gate-contract decision). The W-T20 batch (2026-09-20) closed the other six, and closed the `W-D1b` adoption items (`UX-DS-02/04/06`) that this count had been omitting |
 | Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep), P2 (Home shell + assistant placement), P3-Settings (hub + routed sections), P3-Finance (labelled totals, comparable rows, explainable empty months), W-A1 (assistant hierarchy + continuity) |
 | Deployed | `master` `5270bfb7` / `v1.21.0-rc.19` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |

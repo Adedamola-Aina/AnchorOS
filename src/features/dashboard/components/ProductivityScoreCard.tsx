@@ -41,7 +41,7 @@ export function ProductivityScoreCard({ commitmentStats, navigateTo }: Productiv
     }
 
     return (
-        <div className="premium-gradient text-white p-6 rounded-3xl shadow-2xl overflow-hidden relative border border-white/10 flex flex-col justify-between group">
+        <div className="premium-gradient text-white p-6 rounded-sheet shadow-elevation-modal overflow-hidden relative border border-white/10 flex flex-col justify-between group">
             <div className="flex justify-between items-start mb-4 relative z-10 transition-transform duration-700 group-hover:-translate-y-1">
                 <div>
                     <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Productivity Score</h4>

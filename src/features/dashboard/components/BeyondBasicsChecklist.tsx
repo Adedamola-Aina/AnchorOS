@@ -40,7 +40,7 @@ export function BeyondBasicsChecklist({
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom-8 duration-300 max-h-[80vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-sheet shadow-elevation-modal animate-in slide-in-from-bottom-8 duration-300 max-h-[80vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-slate-900 p-6 pb-4 border-b border-slate-100 dark:border-slate-800 rounded-t-3xl">
           <div className="flex items-center justify-between">
@@ -54,7 +54,7 @@ export function BeyondBasicsChecklist({
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-11 min-w-[44px] flex items-center justify-center"
+              className="p-2 rounded-card hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-11 min-w-[44px] flex items-center justify-center"
               aria-label="Close checklist"
             >
               <X className="w-5 h-5 text-slate-400" />
@@ -72,7 +72,7 @@ export function BeyondBasicsChecklist({
                 type="button"
                 disabled={item.completed}
                 onClick={() => isClickable && onItemClick(item)}
-                className={`w-full flex items-start gap-3 p-3 rounded-xl transition-all text-left min-h-11 ${
+                className={`w-full flex items-start gap-3 p-3 rounded-card transition-all text-left min-h-11 ${
                   item.completed
                     ? 'bg-slate-50 dark:bg-slate-800/50 opacity-75 cursor-default'
                     : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer active:scale-[0.98]'

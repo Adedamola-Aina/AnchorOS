@@ -147,6 +147,18 @@ Everything still open after this document (existing 33 from doc 22, plus the new
 
 **Totals:** 7 existing + ~25 new findings ≈ **32 open items**, of which **14 are PROPOSED** and need your decision (8 commitments, 6 assistant).
 
+### Update — W-T20 batch, 2026-09-20
+
+The decision-free half of this list was worked in one ranked pass (see the W-T20 batch
+table in doc 22). Closed here: `CM-15`, `CM-16`, `CM-17`, `CM-18`, `CM-21`, `CM-23`,
+`CM-25`, `AI-11`, `AI-15`, plus the ledger's `UX-CM-07`, `UX-GL-04`, `UX-GL-07`,
+`UX-OB-01`, `UX-OB-02`, `UX-OB-05`, `UX-ST-04` and the `W-D1b` adoption items
+(`UX-DS-02/04/06`).
+
+**Still open, unchanged:** the 14 PROPOSED items (8 commitments, 6 assistant) — they need
+a yes, not an implementation — and `CM-17`'s follow-on UI affordances beyond the composer
+(`CM-19`, `CM-22`, `CM-24`, `CM-26`…`CM-28`).
+
 ## Part D — The wave plan (order, contents, exit criteria)
 
 Waves are ordered by **value ÷ risk**, and each is one PR (plus its staging deploy) so nothing sprawls.

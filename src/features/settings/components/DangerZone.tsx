@@ -76,11 +76,11 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
     };
 
     return (
-        <Card className="overflow-hidden border-2 border-rose-100 dark:border-rose-900/20">
-            <CardHeader className="p-6 border-b border-rose-100 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-900/10">
+        <Card className="overflow-hidden border-2 border-danger-border">
+            <CardHeader className="p-6 border-b border-danger-border bg-danger-surface">
                 <CardTitle className="text-base font-bold text-rose-900 dark:text-rose-400 flex items-center gap-3">
                     <div className="p-2 bg-rose-500/10 rounded-lg">
-                        <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                        <AlertCircle className="w-5 h-5 text-danger" />
                     </div>
                     Danger Zone
                 </CardTitle>
@@ -103,14 +103,14 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
                 </div>
 
                 {step === 'name' && (
-                    <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800 animate-in slide-in-from-top-2 duration-300">
+                    <div className="mt-6 p-4 bg-danger-surface rounded-card border border-danger-border animate-in slide-in-from-top-2 duration-300">
                         <p className="text-sm font-bold text-rose-900 dark:text-rose-300 mb-1">Type your name to confirm</p>
                         <p className="text-xs text-rose-700 dark:text-rose-400 mb-3">
                             Please type <span className="font-bold">{displayName}</span> below to continue.
                         </p>
                         <input type="text" value={nameConfirm} onChange={(e) => setNameConfirm(e.target.value)}
                             placeholder={displayName} autoComplete="off"
-                            className="w-full p-3 border border-rose-200 dark:border-rose-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500/20 outline-none mb-3"
+                            className="w-full p-3 border border-danger-border rounded-card bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500/20 outline-none mb-3"
                             onKeyDown={(e) => e.key === 'Enter' && handleNameConfirmed()} />
                         <div className="flex gap-2">
                             <Button variant="secondary" size="sm" onClick={resetFlow}>Cancel</Button>
@@ -121,11 +121,11 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
                 )}
 
                 {step === 'password' && (
-                    <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800 animate-in slide-in-from-top-2 duration-300">
+                    <div className="mt-6 p-4 bg-danger-surface rounded-card border border-danger-border animate-in slide-in-from-top-2 duration-300">
                         <p className="text-sm font-bold text-rose-900 dark:text-rose-300 mb-3">Confirm your password to proceed</p>
                         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password" autoComplete="current-password"
-                            className="w-full p-3 border border-rose-200 dark:border-rose-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500/20 outline-none mb-3"
+                            className="w-full p-3 border border-danger-border rounded-card bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500/20 outline-none mb-3"
                             onKeyDown={(e) => e.key === 'Enter' && handleConfirmDelete()} />
                         <div className="flex gap-2">
                             <Button variant="secondary" size="sm" onClick={resetFlow}>Cancel</Button>
@@ -136,7 +136,7 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
                 )}
 
                 {step === 'social' && (
-                    <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800 animate-in slide-in-from-top-2 duration-300">
+                    <div className="mt-6 p-4 bg-danger-surface rounded-card border border-danger-border animate-in slide-in-from-top-2 duration-300">
                         <p className="text-sm font-bold text-rose-900 dark:text-rose-300 mb-1">Verify your identity to proceed</p>
                         <p className="text-xs text-rose-700 dark:text-rose-400 mb-4">
                             Your account uses {providerLabel} sign-in. You'll be prompted to confirm your identity in a popup.

@@ -22,7 +22,7 @@ export const TransactionFilterHeader: React.FC<FilterHeaderProps> = ({ searchQue
             </div>
             <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
                 {(['all', 'expense', 'income'] as const).map((type) => (
-                    <button key={type} onClick={() => onFilterChange(type)} className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${filterType === type ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+                    <button key={type} onClick={() => onFilterChange(type)} className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${filterType === type ? 'bg-white dark:bg-slate-700 shadow-elevation-subtle text-slate-900 dark:text-white' : 'text-slate-400'}`}>
                         {type === 'all' ? 'All' : type === 'expense' ? 'Out' : 'In'}
                     </button>
                 ))}

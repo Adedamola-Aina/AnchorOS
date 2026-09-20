@@ -39,7 +39,7 @@ export function InviteMfaStep({
 
     return (
         <form onSubmit={onSubmit} className="space-y-4">
-            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 mb-4">
+            <div className="p-4 rounded-card bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 mb-4">
                 <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
                     <KeyRound className="w-5 h-5" />
                     <p className="font-semibold">Two-Factor Authentication Required</p>
@@ -63,7 +63,7 @@ export function InviteMfaStep({
                         value={mfaCode}
                         onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
                         placeholder="000000"
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 text-center text-2xl tracking-[0.3em] font-mono"
+                        className="w-full pl-10 pr-4 py-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 text-center text-2xl tracking-[0.3em] font-mono"
                         autoFocus
                     />
                 </div>

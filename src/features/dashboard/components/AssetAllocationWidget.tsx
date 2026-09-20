@@ -93,7 +93,7 @@ export const AssetAllocationWidget = ({ assets }: AssetAllocationWidgetProps) =>
                             {(expanded ? group.assets : group.assets.slice(0, 4)).map((asset, i) => (
                                 <div key={asset.id} className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-3 h-3 rounded-full ${getColor(i)} ring-2 ring-white dark:ring-slate-900 shadow-sm`} />
+                                        <div className={`w-3 h-3 rounded-full ${getColor(i)} ring-2 ring-white dark:ring-slate-900 shadow-elevation-subtle`} />
                                         <div>
                                             <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{asset.name}</p>
                                             {expanded && <p className="text-[10px] text-slate-400 font-mono mt-0.5">{asset.type}</p>}

@@ -12,7 +12,7 @@
  */
 // @ts-nocheck
 
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -32,13 +32,21 @@ import { AnchorAISettings } from './components/AnchorAISettings';
 import { FamilySettingsV2 } from './components/FamilySettingsV2';
 import { SupportSettings } from './components/SupportSettings';
 import { TechnicalDetails } from './components/TechnicalDetails';
-import { DeveloperTools } from './components/DeveloperTools';
+// UX-GL-07: the condition is read *inline*, because Vite replaces
+// `import.meta.env.DEV` with `false` in this file during a production build, so
+// the whole expression — dynamic import included — folds away and no chunk is
+// emitted. A value imported from another module is not folded the same way.
+const DeveloperTools = import.meta.env.DEV
+  ? lazy(() => import('./components/DeveloperTools').then((module) => ({ default: module.DeveloperTools })))
+  : null;
 import { DataManagement } from './components/DataManagement';
 import { DangerZone } from './components/DangerZone';
 import { ReauthModal } from './components/ReauthModal';
 import { RecoveryCodesDisplay } from './components/RecoveryCodesDisplay';
 import { SettingsHub } from './components/SettingsHub';
 import { SettingsSectionShell } from './components/SettingsSectionShell';
+import { describeChangeAge, useRecentSettingsChanges } from './recentChanges';
+import { isDeveloperToolsEnabled } from '../../utils/devSurface';
 import { handleWipeData, handleDeleteAccount } from './components/SettingsDataActions';
 import { SETTINGS_ROOT, getSettingsSection } from './sections';
 import { Button } from '@anchor-os/ui';
@@ -56,6 +64,11 @@ const SettingsView = () => {
   const { connection: familyConnection, loading: familyLoading, disconnectFamily } = useFamilySharing(user?.uid);
   const isAnchorAIFlagEnabled = useFeatureFlag('anchor_ai_enabled', user?.uid);
   const { showToast, pushPermissionStatus, requestPushPermission } = useNotifications();
+
+  // UX-ST-04: "Recently changed" — derived centrally from profile writes.
+  const recentChanges = useRecentSettingsChanges(profile);
+  // A single snapshot taken on mount, so rendering stays pure.
+  const [nowSnapshot] = useState(() => Date.now());
 
   const [showContactModal, setShowContactModal] = useState(false);
   const [initialSubject, setInitialSubject] = useState<'question' | 'feedback' | undefined>(undefined);
@@ -204,7 +217,17 @@ const SettingsView = () => {
               {getDisplayVersion()}
             </p>
             {/* Local development only; never rendered in staging or production. */}
-            {import.meta.env.VITE_APP_ENV === 'development' && <DeveloperTools userUid={user?.uid || ''} />}
+            {/*
+              UX-GL-07: two layers, deliberately. The import above is folded away
+              in a production build (so the section's code does not ship), and this
+              runtime check keeps staging — which is deployed, but must not be
+              instrumented — from showing it either.
+            */}
+            {isDeveloperToolsEnabled() && DeveloperTools && (
+              <Suspense fallback={null}>
+                <DeveloperTools userUid={user?.uid || ''} />
+              </Suspense>
+            )}
           </>
         );
       default:
@@ -226,8 +249,30 @@ const SettingsView = () => {
 
             <SettingsHub hideAssistant={!isAnchorAIFlagEnabled} />
 
+            {/*
+              UX-ST-04: the last part of the finding — a change you just made is
+              visible, so it is confirmed rather than assumed. Session-scoped, and
+              it says so.
+            */}
+            {recentChanges.length > 0 && (
+              <section className="mt-6" data-testid="recently-changed" aria-labelledby="recently-changed-heading">
+                <h2 id="recently-changed-heading" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  Recently changed
+                </h2>
+                <ul className="mt-2 space-y-1">
+                  {recentChanges.map((change) => (
+                    <li key={change.id} className="flex items-center justify-between gap-3 text-sm text-slate-600 dark:text-slate-300">
+                      <span>{change.label}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">{describeChangeAge(change.at, nowSnapshot)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">While the app has been open.</p>
+              </section>
+            )}
+
             <div className="mt-8 flex flex-col items-center gap-4 pb-8">
-              <Button variant="ghost" size="sm" onClick={() => logout()} className="min-h-11 text-rose-500 dark:text-rose-400 font-bold">Sign Out</Button>
+              <Button variant="ghost" size="sm" onClick={() => logout()} className="min-h-11 text-danger font-bold">Sign Out</Button>
             </div>
           </>
         )}

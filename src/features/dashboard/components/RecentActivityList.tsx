@@ -31,10 +31,10 @@ export function RecentActivityList({ recentActivity }: RecentActivityListProps) 
                         return (
                             <div
                                 key={tx.id || idx}
-                                className="flex items-center justify-between text-sm group p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                                className="flex items-center justify-between text-sm group p-3 rounded-card hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                             >
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                    <div className={`p-2 rounded-xl shrink-0 ${tx.type === 'income'
+                                    <div className={`p-2 rounded-card shrink-0 ${tx.type === 'income'
                                         ? 'bg-emerald-500/10 text-emerald-500'
                                         : tx.type === 'expense'
                                             ? 'bg-rose-500/10 text-rose-500'

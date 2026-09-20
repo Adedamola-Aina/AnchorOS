@@ -32,7 +32,7 @@ interface InsightCardsProps {
 }
 
 const trendConfig = {
-    up: { icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-100 dark:bg-rose-900/20', label: 'Spending Up' },
+    up: { icon: TrendingUp, color: 'text-danger', bg: 'bg-danger-surface', label: 'Spending Up' },
     down: { icon: TrendingDown, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/20', label: 'Spending Down' },
     flat: { icon: Minus, color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800', label: 'Spending Steady' },
 };
@@ -46,7 +46,7 @@ export const InsightCards: React.FC<InsightCardsProps> = ({ trend, anomalies, cu
         <div className="flex flex-col gap-3 mt-4">
             {/* Spending Trend */}
             <div className="glass-card p-3 flex items-center gap-3">
-                <div className={`p-2 rounded-xl ${cfg.bg} ${cfg.color}`}>
+                <div className={`p-2 rounded-card ${cfg.bg} ${cfg.color}`}>
                     <TrendIcon className="w-4 h-4" />
                 </div>
                 <p className="text-sm text-slate-700 dark:text-slate-300">
@@ -60,7 +60,7 @@ export const InsightCards: React.FC<InsightCardsProps> = ({ trend, anomalies, cu
             {/* Top Anomaly */}
             {topAnomaly && (
                 <div className="glass-card p-3 flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/20 text-amber-600">
+                    <div className="p-2 rounded-card bg-amber-100 dark:bg-amber-900/20 text-amber-600">
                         <AlertTriangle className="w-4 h-4" />
                     </div>
                     <p className="text-sm text-slate-700 dark:text-slate-300">
@@ -74,7 +74,7 @@ export const InsightCards: React.FC<InsightCardsProps> = ({ trend, anomalies, cu
             {/* Source Breakdown — only shown when bank data exists */}
             {sourceBreakdown?.hasBankData && (
                 <div className="glass-card p-3 flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-sky-100 dark:bg-sky-900/20 text-sky-600">
+                    <div className="p-2 rounded-card bg-sky-100 dark:bg-sky-900/20 text-sky-600">
                         <Landmark className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">

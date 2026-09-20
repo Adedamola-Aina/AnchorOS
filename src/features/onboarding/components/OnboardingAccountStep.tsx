@@ -98,7 +98,7 @@ export function OnboardingAccountStep({
 
                 <div className="text-center flex justify-center gap-4">
                     <button onClick={onBack} className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">← Back</button>
-                    <button onClick={onSkip} className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Skip for now →</button>
+                    <button onClick={onSkip} aria-label="Skip for now — you can add this later" className="min-h-11 px-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Skip for now</button>
                 </div>
             </div>
         </div>

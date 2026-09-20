@@ -70,7 +70,7 @@ export const SpendingTrendsChart = ({
 
             {/* Summary Stats — shows selected week totals when filtered, monthly totals otherwise */}
             <div className="grid grid-cols-3 gap-3 mb-5">
-                <div className="text-center p-3 rounded-xl bg-finance-50 dark:bg-finance-900/20">
+                <div className="text-center p-3 rounded-card bg-finance-50 dark:bg-finance-900/20">
                     <div className="flex items-center justify-center gap-1 mb-1">
                         <ArrowUpRight className="w-3 h-3 text-finance-500" />
                         <span className="text-[9px] font-bold text-finance-600 dark:text-finance-400 uppercase">In</span>
@@ -79,7 +79,7 @@ export const SpendingTrendsChart = ({
                         {formatCurrencyCompact(selectedWeek ? selectedWeek.income : totals.income, currency)}
                     </p>
                 </div>
-                <div className="text-center p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20">
+                <div className="text-center p-3 rounded-card bg-rose-50 dark:bg-rose-900/20">
                     <div className="flex items-center justify-center gap-1 mb-1">
                         <ArrowDownRight className="w-3 h-3 text-rose-500" />
                         <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase">Out</span>
@@ -88,7 +88,7 @@ export const SpendingTrendsChart = ({
                         {formatCurrencyCompact(selectedWeek ? selectedWeek.expense : totals.expense, currency)}
                     </p>
                 </div>
-                <div className={`text-center p-3 rounded-xl ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
+                <div className={`text-center p-3 rounded-card ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
                     <div className="flex items-center justify-center gap-1 mb-1">
                         {(selectedWeek ? selectedWeek.net : net) >= 0 ? <TrendingUp className="w-3 h-3 text-blue-500" /> : <TrendingDown className="w-3 h-3 text-amber-500" />}
                         <span className={`text-[9px] font-bold uppercase ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>Net</span>

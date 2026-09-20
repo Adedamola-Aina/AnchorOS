@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Circle, CheckCircle2 } from 'lucide-react';
 import type { AnchorTask } from '../../../types';
 import { PriorityIndicator } from './PriorityIndicator';
+import { isScheduledOn } from '../../../services/fabric/commitmentSchedule';
 
 interface MonthCalendarViewProps {
   tasks: AnchorTask[];
@@ -10,7 +11,6 @@ interface MonthCalendarViewProps {
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const FULL_DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function getMonthDays(year: number, month: number) {
   const firstDay = new Date(year, month, 1).getDay();
@@ -19,14 +19,10 @@ function getMonthDays(year: number, month: number) {
 }
 
 function getTasksForDay(tasks: AnchorTask[], date: Date): AnchorTask[] {
-  const dayName = FULL_DAY_NAMES[date.getDay()];
-  const dayNum = date.getDate();
-  return tasks.filter((t) => {
-    if (t.type === 'daily') return true;
-    if (t.type === 'weekly') return t.daysOfWeek?.includes(dayName);
-    if (t.type === 'monthly') return t.daysOfMonth?.includes(dayNum) || t.dayOfMonth === dayNum;
-    return false;
-  });
+  // CM-18/CM-17: the same schedule definition the assistant and the rows use, so
+  // the month grid cannot disagree with them (and start/end dates and the
+  // recurrence interval apply here too).
+  return tasks.filter((t) => t.type !== 'todo' && isScheduledOn(t, date));
 }
 
 export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ tasks, onToggle }) => {
@@ -98,7 +94,7 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ tasks, onT
               data-testid={isToday ? 'calendar-today' : undefined}
               onClick={() => setSelectedDay(day)}
               className={`aspect-square flex flex-col items-center justify-center rounded-lg text-xs font-medium transition-all ${
-                isSelected ? 'bg-task-500 text-white shadow-sm' : isToday ? 'bg-task-50 dark:bg-task-900/20 text-task-700 dark:text-task-300 ring-1 ring-task-200 dark:ring-task-800' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                isSelected ? 'bg-task-500 text-white shadow-elevation-subtle' : isToday ? 'bg-task-50 dark:bg-task-900/20 text-task-700 dark:text-task-300 ring-1 ring-task-200 dark:ring-task-800' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
               <span>{day}</span>
