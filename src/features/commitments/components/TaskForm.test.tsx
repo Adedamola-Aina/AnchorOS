@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import { TaskForm } from './TaskForm';
 
@@ -13,14 +13,9 @@ vi.mock('../../../hooks/useUnsavedChanges', () => ({
     },
 }));
 
-// Mock TaskFormParts (heavy sub-components)
+// Mock TaskFormParts (heavy sub-components). The old FrequencyStep/DetailsHeader
+// are gone: UX-CM-01 removed the classification-first step.
 vi.mock('./TaskFormParts', () => ({
-    FrequencyStep: ({ onSelectType }: any) => (
-        <div data-testid="frequency-step">
-            <button onClick={() => onSelectType('daily')}>Daily</button>
-        </div>
-    ),
-    DetailsHeader: ({ onClose }: any) => <div data-testid="details-header"><button onClick={onClose}>Close</button></div>,
     DailyTimeField: () => <div data-testid="daily-time" />,
     WeeklyDaysField: () => null,
     MonthlyDatesField: () => null,
@@ -39,6 +34,17 @@ vi.mock('../../../components/shared', () => ({
         <div data-testid={testId}>
             {label && <label>{label}</label>}
             <input type="time" value={value} onChange={(e: any) => onChange(e.target.value)} className="min-h-[44px]" data-testid="reminder-time-input" />
+        </div>
+    ),
+}));
+
+// `Modal` is imported from its own module (the shared barrel does not re-export
+// it), so it needs its own mock.
+vi.mock('../../../components/shared/Modal', () => ({
+    Modal: ({ children, title, maxWidth }: any) => (
+        <div data-testid="composer-sheet" className={maxWidth}>
+            {title && <h3>{title}</h3>}
+            {children}
         </div>
     ),
 }));
@@ -77,6 +83,50 @@ describe('TaskForm — unsaved changes guard', () => {
     });
 });
 
+describe('TaskForm — capture-first composer (UX-CM-01 / CM-02 / CM-09)', () => {
+    it('opens on the name, not on a classifier (UX-CM-01)', () => {
+        render(<TaskForm {...defaultProps} />);
+
+        expect(screen.getByTestId('task-name')).toBeInTheDocument();
+        expect(screen.queryByText(/choose frequency/i)).not.toBeInTheDocument();
+        // The cadence is still reachable, just not in the way of capturing.
+        expect(screen.getByTestId('cadence-selector')).toBeInTheDocument();
+    });
+
+    it('is presented as a sheet with a title (UX-CM-02)', () => {
+        render(<TaskForm {...defaultProps} />);
+
+        const sheet = screen.getByTestId('composer-sheet');
+        expect(sheet).toBeInTheDocument();
+        expect(within(sheet).getByText('New Commitment')).toBeInTheDocument();
+    });
+
+    it('offers exactly one dismiss path and a reachable Save (UX-CM-02)', () => {
+        render(<TaskForm {...defaultProps} />);
+
+        // The old form had a "Back" step button plus a header close: two exits.
+        expect(screen.queryByRole('button', { name: /^back$/i })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /save commitment/i })).toBeInTheDocument();
+    });
+
+    it('says "Area" instead of the internal "Domain" jargon (UX-CM-09)', () => {
+        render(<TaskForm {...defaultProps} />);
+
+        expect(screen.getByText('Area')).toBeInTheDocument();
+        expect(screen.queryByText('Domain')).not.toBeInTheDocument();
+    });
+
+    it('shows priority as icons, never as emoji (UX-CM-09 / UX-DS-01)', () => {
+        render(<TaskForm {...defaultProps} />);
+
+        const selector = screen.getByTestId('priority-selector');
+        expect(within(selector).getByTestId('priority-high')).toBeInTheDocument();
+        expect(within(selector).getByTestId('priority-medium')).toBeInTheDocument();
+        expect(within(selector).getByTestId('priority-low')).toBeInTheDocument();
+        // The emoji were 🔴 / 🟡 / 🟢.
+        expect(selector.textContent).not.toMatch(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
+    });
+});
 describe('TaskForm — reminder field layout (BUG-092)', () => {
     it('renders reminder field outside the two-column grid as a full-width row', () => {
         render(<TaskForm {...defaultProps} />);

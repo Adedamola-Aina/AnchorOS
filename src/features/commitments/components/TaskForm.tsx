@@ -9,15 +9,34 @@
 import React, { useState, useMemo } from 'react';
 import type { TaskType, TimeOfDay, TaskPriority, AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
-import { Card } from '@anchor-os/ui';
+import { Modal } from '../../../components/shared/Modal';
 import { PopoverMenu, TimeWheelPicker } from '../../../components/shared';
-import { FrequencyStep, DetailsHeader, DailyTimeField, WeeklyDaysField, MonthlyDatesField } from './TaskFormParts';
+import { DailyTimeField, WeeklyDaysField, MonthlyDatesField } from './TaskFormParts';
+import { PriorityIndicator } from './PriorityIndicator';
 import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
 
 interface TaskFormProps { onClose: () => void; onAdd: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>; hasFamilyActive: boolean; }
 
+/**
+ * UX-CM-01: the composer used to OPEN on "Choose Frequency", so a user had to
+ * classify before they could capture. It now opens on the name, with the cadence
+ * defaulted and adjustable in place.
+ *
+ * UX-CM-02: it also rendered inline in the page flow — no sheet context, no
+ * visible Save on the first step. It is now a Modal: one sheet, one dismiss, and
+ * Save pinned in the footer so it is always reachable.
+ *
+ * UX-CM-09: the "Domain" jargon is gone (it is an Area now) and the priority
+ * emoji are Lucide icons.
+ */
+const CADENCE_OPTIONS: { value: TaskType; label: string }[] = [
+    { value: 'todo', label: 'One-off' },
+    { value: 'daily', label: 'Daily' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'monthly', label: 'Monthly' },
+];
+
 export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyActive }) => {
-    const [creationStep, setCreationStep] = useState<'frequency' | 'details'>('frequency');
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskType, setNewTaskType] = useState<TaskType>('daily');
     const [newTaskScope, setNewTaskScope] = useState<'personal' | 'family'>('personal');
@@ -49,38 +68,55 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
         } finally { setIsSaving(false); }
     };
 
-    const handleSelectType = (type: TaskType) => { setNewTaskType(type); setCreationStep('details'); };
-
     return (
-        <Card className="p-4 sm:p-5 mb-6 max-w-2xl mx-auto shadow-xl animate-in zoom-in-95 duration-200">
-            {creationStep === 'frequency' ? (
-                <FrequencyStep onSelectType={handleSelectType} onClose={onClose} />
-            ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <DetailsHeader taskType={newTaskType} onBack={() => setCreationStep('frequency')} onClose={onClose} />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-3">
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-[10px] uppercase font-bold text-slate-400">Name</label>
-                                <input autoFocus type="text" placeholder="e.g. Morning Prayer, Gym, Rent Payment" className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} />
+        <Modal isOpen onClose={onClose} title="New Commitment" maxWidth="max-w-2xl">
+            <form onSubmit={handleSubmit} className="space-y-4">
+                {/* UX-CM-01: capture first — the name is the first control, not a classifier. */}
+                <div className="flex flex-col gap-1.5">
+                    <label htmlFor="commitment-name" className="text-[10px] uppercase font-bold text-slate-400">Name</label>
+                    <input
+                        id="commitment-name"
+                        autoFocus
+                        type="text"
+                        placeholder="e.g. Morning Prayer, Gym, Rent Payment"
+                        className="w-full min-h-[44px] px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400"
+                        value={newTaskTitle}
+                        onChange={(e) => setNewTaskTitle(e.target.value)}
+                        data-testid="task-name"
+                    />
+                </div>
+
+                {/* Cadence is adjustable in place, so nothing has to be classified up front. */}
+                <div className="flex flex-col gap-1.5">
+                    <span id="cadence-label" className="text-[10px] uppercase font-bold text-slate-400">How often?</span>
+                    <div className="flex flex-wrap gap-2" role="group" aria-labelledby="cadence-label" data-testid="cadence-selector">
+                        {CADENCE_OPTIONS.map(({ value, label }) => (
+                            <Button key={value} type="button" onClick={() => setNewTaskType(value)} variant={newTaskType === value ? 'primary' : 'secondary'} className="flex-1 capitalize text-xs">{label}</Button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                        <div className="flex flex-col gap-1.5">
+                            <PopoverMenu
+                                label="Area"
+                                items={domains.map(d => ({ value: d, label: d }))}
+                                value={newTaskDomain}
+                                onChange={setNewTaskDomain}
+                                testId="domain-select"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] uppercase font-bold text-slate-400">Priority</label>
+                            <div className="flex gap-2" data-testid="priority-selector">
+                                {(['high', 'medium', 'low'] as const).map(p => (
+                                    <Button key={p} type="button" onClick={() => setNewTaskPriority(p)} variant={newTaskPriority === p ? 'primary' : 'secondary'} className="flex-1 text-xs">
+                                        <PriorityIndicator priority={p} />
+                                    </Button>
+                                ))}
                             </div>
-                            <div className="flex flex-col gap-1.5">
-                                <PopoverMenu
-                                    label="Domain"
-                                    items={domains.map(d => ({ value: d, label: d }))}
-                                    value={newTaskDomain}
-                                    onChange={setNewTaskDomain}
-                                    testId="domain-select"
-                                />
-                            </div>
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-[10px] uppercase font-bold text-slate-400">Priority</label>
-                                <div className="flex gap-2" data-testid="priority-selector">
-                                    {(['high', 'medium', 'low'] as const).map(p => (
-                                        <Button key={p} type="button" onClick={() => setNewTaskPriority(p)} variant={newTaskPriority === p ? 'primary' : 'secondary'} className="flex-1 capitalize text-xs">{p === 'high' ? '🔴 High' : p === 'medium' ? '🟡 Medium' : '🟢 Low'}</Button>
-                                    ))}
-                                </div>
-                            </div>
+                        </div>
                             {hasFamilyActive && (
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[10px] uppercase font-bold text-slate-400">Context</label>
@@ -119,12 +155,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                             testId="reminder-input"
                         />
                     </div>
-                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <Button type="button" variant="ghost" onClick={() => setCreationStep('frequency')}>Back</Button>
+                    {/* UX-CM-02: one dismiss (the sheet's own close) and a pinned Save,
+                        so the primary action is reachable without scrolling. */}
+                    <div className="sticky bottom-0 -mx-1 px-1 pt-3 pb-1 flex justify-end bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-100 dark:border-slate-800">
                         <Button type="submit" isLoading={isSaving} className="px-8">Save Commitment</Button>
                     </div>
                 </form>
-            )}
-        </Card>
+        </Modal>
     );
 };
