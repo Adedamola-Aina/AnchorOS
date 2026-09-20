@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sunrise, Sun, Moon } from 'lucide-react';
 import type { AnchorTask } from '../../types';
+import { parseWeekdays, WEEKDAY_COMPACT_LABELS } from '../../services/fabric/commitmentSchedule';
 export { ThemeToggle, type Theme } from './ThemeToggle';
 export { ToggleSwitch } from './ToggleSwitch';
 export { CategoryIcon } from './CategoryIcon';
@@ -53,10 +54,9 @@ export const TaskContextBadge = ({ task }: { task: AnchorTask }) => {
       );
     }
     if (task.type === 'weekly' && task.daysOfWeek && task.daysOfWeek.length > 0) {
-      const dayShortnames: Record<string, string> = {
-        'Sunday': 'Su', 'Monday': 'M', 'Tuesday': 'Tu', 'Wednesday': 'W', 'Thursday': 'Th', 'Friday': 'F', 'Saturday': 'Sa'
-      };
-      const days = task.daysOfWeek.map(d => dayShortnames[d] || d.charAt(0));
+      // CM-18: indexes via the shared parser, rendered as two-letter labels — a
+      // single letter cannot distinguish Tue/Thu or Sat/Sun.
+      const days = parseWeekdays(task.daysOfWeek).map(i => WEEKDAY_COMPACT_LABELS[i]);
       // Show max 3 days, then +N more
       const maxShow = 3;
       const display = days.length <= maxShow

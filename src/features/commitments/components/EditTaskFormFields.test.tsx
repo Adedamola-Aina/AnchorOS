@@ -23,17 +23,22 @@ describe('EditTaskFormFields', () => {
 
   describe('WeeklyFields', () => {
     it('renders all 7 days', () => {
-      render(<WeeklyFields editDays={['Mon']} setEditDays={vi.fn()} />);
-      ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(day => {
+      // CM-18: two-letter labels — a single letter cannot distinguish Tue/Thu or
+      // Sat/Sun, which is how the collision reached the UI.
+      render(<WeeklyFields editDays={[1]} setEditDays={vi.fn()} />);
+      ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(day => {
         expect(screen.getByText(day)).toBeInTheDocument();
       });
     });
 
-    it('toggles day selection', () => {
+    it('toggles day selection by weekday index', () => {
       const setEditDays = vi.fn();
-      render(<WeeklyFields editDays={['Mon']} setEditDays={setEditDays} />);
-      fireEvent.click(screen.getByText('Wed'));
+      render(<WeeklyFields editDays={[1]} setEditDays={setEditDays} />);
+      fireEvent.click(screen.getByText('We'));
       expect(setEditDays).toHaveBeenCalled();
+      // Wednesday is index 3, and the existing Monday (1) is kept.
+      const updater = setEditDays.mock.calls[0]?.[0] as (prev: number[]) => number[];
+      expect(updater([1])).toEqual([1, 3]);
     });
   });
 

@@ -30,6 +30,10 @@ interface SwipeableTaskItemProps {
     isFinancialNudge?: boolean;
     onRecordTransaction?: () => void;
     onDismissFinancialNudge?: () => void;
+    /** CM-23: selection mode — the leading control selects instead of completing. */
+    selectable?: boolean;
+    selected?: boolean;
+    onSelect?: (id: string) => void;
 }
 
 export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
@@ -43,6 +47,9 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
     isFinancialNudge,
     onRecordTransaction,
     onDismissFinancialNudge,
+    selectable,
+    selected,
+    onSelect,
 }) => {
     const { isMobile } = useResponsive();
 
@@ -56,7 +63,8 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
                     color: 'red',
                     icon: <Trash2 className="w-4 h-4 mr-1" />,
                 }}
-                disabled={isEditing}
+                // CM-23: swiping is meaningless while selecting rows.
+                disabled={isEditing || selectable}
             >
                 <TaskItem
                     task={task}
@@ -69,6 +77,9 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
                     isFinancialNudge={isFinancialNudge}
                     onRecordTransaction={onRecordTransaction}
                     onDismissFinancialNudge={onDismissFinancialNudge}
+                    selectable={selectable}
+                    selected={selected}
+                    onSelect={onSelect}
                     hideActions // Hide action buttons on mobile - use swipe instead
                     onTitleClick={() => onStartEdit(task.id)} // Tap title to edit
                 />
@@ -89,6 +100,9 @@ export const SwipeableTaskItem: React.FC<SwipeableTaskItemProps> = ({
             isFinancialNudge={isFinancialNudge}
             onRecordTransaction={onRecordTransaction}
             onDismissFinancialNudge={onDismissFinancialNudge}
+            selectable={selectable}
+            selected={selected}
+            onSelect={onSelect}
         />
     );
 };

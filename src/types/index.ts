@@ -20,11 +20,25 @@ export interface AnchorTask {
   category: 'personal' | 'family';
   createdAt: Date | null;
   timeOfDay?: TimeOfDay;
-  daysOfWeek?: string[]; // Array for multiple days (S, M, T, W, T, F, S)
+  /**
+   * CM-18: canonical weekday INDEXES (0 = Sunday … 6 = Saturday).
+   * Legacy documents stored single letters ('S','M','T','W','T','F','S' — where
+   * `T` meant Tue *and* Thu) or full day names; `migrateTasksSchedule()` upgrades
+   * them on read, and `parseWeekdays()` still understands both.
+   */
+  daysOfWeek?: number[];
   dayOfMonth?: number;
   daysOfMonth?: number[];
   domain?: string; // Health, Fitness, Work, Bible, Personal Development, etc.
   reminderTime?: string; // HH:mm format
+  /** CM-17: anchor date (ISO YYYY-MM-DD) the recurrence counts from. */
+  startDate?: string;
+  /** CM-17: date (ISO YYYY-MM-DD) after which the commitment no longer recurs. */
+  endDate?: string;
+  /** CM-17: recurrence multiplier — 2 = "every 2 weeks" for a weekly commitment. */
+  interval?: number;
+  /** CM-17: exact date (ISO YYYY-MM-DD) a one-off to-do is promised for. */
+  dueDate?: string;
   lastCompletedAt?: string; // ISO date string for reset logic
   currentStreak?: number;
   longestStreak?: number;

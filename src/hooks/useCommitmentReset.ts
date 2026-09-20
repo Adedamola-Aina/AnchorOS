@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import type { AnchorTask } from '../types';
 import { resetCommitmentCompletion, resetCommitmentStreak } from '../api/CommitmentResetApi';
+import { getWeekdays } from '../services/fabric/commitmentSchedule';
 
 export function useCommitmentResetEffect(user: User | null, rawTasks: AnchorTask[]) {
     useEffect(() => {
@@ -30,8 +31,9 @@ export function useCommitmentResetEffect(user: User | null, rawTasks: AnchorTask
                     if (t.type === 'daily') {
                         shouldReset = true;
                     } else if (t.type === 'weekly') {
-                        const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
-                        if (t.daysOfWeek?.includes(dayName)) {
+                        // CM-18: ask the shared schedule model (weekday indexes)
+                        // instead of comparing a localized day name.
+                        if (getWeekdays(t).includes(now.getDay())) {
                             shouldReset = true;
                         } else {
                             const diffTime = Math.abs(now.getTime() - lastDate.getTime());

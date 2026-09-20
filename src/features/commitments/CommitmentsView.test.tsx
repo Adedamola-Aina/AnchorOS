@@ -410,9 +410,12 @@ describe('CommitmentsView', () => {
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
 
-      expect(screen.getByRole('button', { name: /morning/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /afternoon/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /evening/i })).toBeInTheDocument();
+      // Scoped to the composer: row controls now carry accessible names that
+      // include the commitment title (e.g. "Mark Evening Prayer as done").
+      const composer = within(screen.getByRole('dialog'));
+      expect(composer.getByRole('button', { name: /^morning$/i })).toBeInTheDocument();
+      expect(composer.getByRole('button', { name: /^afternoon$/i })).toBeInTheDocument();
+      expect(composer.getByRole('button', { name: /^evening$/i })).toBeInTheDocument();
     });
 
     it('shows day of week selector for weekly tasks', async () => {
@@ -422,10 +425,11 @@ describe('CommitmentsView', () => {
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Weekly'));
 
-      // Check for S M T W T F S toggles
-      expect(screen.getByText('M')).toBeInTheDocument();
-      // Should find two 'S' (Sunday, Saturday)
-      expect(screen.getAllByText('S').length).toBe(2);
+      // CM-18: two-letter labels, because a single letter cannot distinguish
+      // Tuesday from Thursday or Saturday from Sunday.
+      ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach((label) => {
+        expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(1);
+      });
     });
 
     it('shows day of month selector for monthly tasks', async () => {
@@ -435,10 +439,11 @@ describe('CommitmentsView', () => {
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Monthly'));
 
-      // Check for a few day options in the grid (15 may appear twice: badge + form)
-      expect(screen.getByText('1')).toBeInTheDocument();
-      expect(screen.getAllByText('15').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('31')).toBeInTheDocument();
+      // Scoped to the composer: the smart-view bar also renders counts ("Today 1").
+      const composer = within(screen.getByRole('dialog'));
+      expect(composer.getByText('1')).toBeInTheDocument();
+      expect(composer.getAllByText('15').length).toBeGreaterThanOrEqual(1);
+      expect(composer.getByText('31')).toBeInTheDocument();
     });
 
     it('calls addTask with correct daily task data', async () => {
@@ -478,11 +483,10 @@ describe('CommitmentsView', () => {
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
       await user.type(input, 'New Weekly Task');
 
-      // Select Friday and Saturday
-      const fridayButton = screen.getByText('F');
-      const saturdayButton = screen.getAllByText('S')[1]; // Second S is Saturday
-      await user.click(fridayButton);
-      await user.click(saturdayButton);
+      // CM-18: Friday = 5 and Saturday = 6 (weekday indexes, 0 = Sunday), not
+      // day-name strings the schedule engine could not read.
+      await user.click(screen.getAllByText('Fr')[0]);
+      await user.click(screen.getAllByText('Sa')[0]);
 
       const saveButton = screen.getByRole('button', { name: /Save Commitment/i });
       await user.click(saveButton);
@@ -492,7 +496,7 @@ describe('CommitmentsView', () => {
           expect.objectContaining({
             title: 'New Weekly Task',
             type: 'weekly',
-            daysOfWeek: expect.arrayContaining(['Friday', 'Saturday']),
+            daysOfWeek: expect.arrayContaining([5, 6]),
           })
         );
       });
@@ -542,10 +546,11 @@ describe('CommitmentsView', () => {
 
       // Daily should NOT show day of week or day of month selectors
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
-      expect(screen.queryByText('M')).not.toBeInTheDocument();
+      // CM-18: 'We' only exists in the weekly day picker (two-letter labels).
+      expect(screen.queryByText('We')).not.toBeInTheDocument();
       // Note: '15' may appear from task badge, so check form-specific date grid is absent
       expect(screen.queryByText('31')).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /morning/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^morning$/i })).toBeInTheDocument();
 
       // Switch to Weekly - should NOT show time of day or day of month.
       // UX-CM-01: cadence is switched in place now; there is no "Back" step to
@@ -553,15 +558,15 @@ describe('CommitmentsView', () => {
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Weekly'));
 
       await waitFor(() => {
-        expect(screen.queryByRole('button', { name: /morning/i })).not.toBeInTheDocument();
-        expect(screen.getByText('M')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /^morning$/i })).not.toBeInTheDocument();
+        expect(screen.getByText('We')).toBeInTheDocument();
       });
 
       // Switch to Monthly - should NOT show time of day or day of week
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Monthly'));
 
       await waitFor(() => {
-        expect(screen.queryByText('M')).not.toBeInTheDocument();
+        expect(screen.queryByText('We')).not.toBeInTheDocument();
         expect(screen.getAllByText('15').length).toBeGreaterThanOrEqual(1);
       });
     });
@@ -823,7 +828,7 @@ describe('CommitmentsView', () => {
       await user.click(editButtons[0].closest('button')!);
 
       expect(screen.getByDisplayValue('Morning Meditation')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /morning/i })).toHaveClass('text-task-600');
+      expect(screen.getByRole('button', { name: /^morning$/i })).toHaveClass('text-task-600');
     });
 
     it('cancels edit without saving changes', async () => {

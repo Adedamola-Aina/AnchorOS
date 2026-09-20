@@ -22,6 +22,9 @@ interface TaskListProps {
     onFinancialNudge?: (taskId: string) => void;
     onRecordTransaction?: () => void;
     onDismissFinancialNudge?: () => void;
+    /** CM-23: selection mode for bulk complete/delete. */
+    selectedIds?: Set<string>;
+    onSelect?: (id: string) => void;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -36,6 +39,8 @@ export const TaskList: React.FC<TaskListProps> = ({
     onFinancialNudge,
     onRecordTransaction,
     onDismissFinancialNudge,
+    selectedIds,
+    onSelect,
 }) => {
     const [showCompleted, setShowCompleted] = useState(false);
     // CM-08: the completed row carrying the transaction chip must be visible
@@ -71,7 +76,8 @@ export const TaskList: React.FC<TaskListProps> = ({
                                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)` }}
                                         className="pb-3">
                                         <SwipeableTaskItem task={task} hasFamilyActive={hasFamilyActive} isEditing={editingTaskId === task.id}
-                                            onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onFinancialNudge={onFinancialNudge} />
+                                            onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onFinancialNudge={onFinancialNudge}
+                                            selectable={Boolean(onSelect)} selected={selectedIds?.has(task.id) ?? false} onSelect={onSelect} />
                                     </div>
                                 );
                             })}
@@ -82,7 +88,8 @@ export const TaskList: React.FC<TaskListProps> = ({
                         {activeTasks.map((task) => (
                             <div key={task.id} className="transition-all duration-200 ease-out">
                                 <SwipeableTaskItem task={task} hasFamilyActive={hasFamilyActive} isEditing={editingTaskId === task.id}
-                                    onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onFinancialNudge={onFinancialNudge} />
+                                    onToggle={onToggle} onStartEdit={onStartEdit} onDelete={onDelete} onFinancialNudge={onFinancialNudge}
+                                    selectable={Boolean(onSelect)} selected={selectedIds?.has(task.id) ?? false} onSelect={onSelect} />
                             </div>
                         ))}
                     </div>

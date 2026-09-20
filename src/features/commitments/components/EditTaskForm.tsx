@@ -6,7 +6,9 @@ import { Button } from '@anchor-os/ui';
 import { Card } from '@anchor-os/ui';
 import { PopoverMenu, SegmentedControl } from '../../../components/shared';
 import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
+import { RepeatFields } from './TaskFormParts';
 import { PriorityIndicator } from './PriorityIndicator';
+import { parseWeekdays } from '../../../services/fabric/commitmentSchedule';
 
 interface EditTaskFormProps {
     task: AnchorTask;
@@ -26,9 +28,16 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     const [editDomain, setEditDomain] = useState(task.domain || 'Personal Development');
     const [editScope, setEditScope] = useState<'personal' | 'family'>(task.category === 'family' ? 'family' : 'personal');
     const [editTime, setEditTime] = useState<TimeOfDay>(task.timeOfDay || 'morning');
-    const [editDays, setEditDays] = useState<string[]>(task.daysOfWeek || []);
+    // CM-18: parse, so a legacy task (letters or full day names) opens with the
+    // right days selected and is written back as canonical indexes.
+    const [editDays, setEditDays] = useState<number[]>(() => parseWeekdays(task.daysOfWeek));
     const [editDaysOfMonth, setEditDaysOfMonth] = useState<number[]>(task.daysOfMonth || (task.dayOfMonth ? [task.dayOfMonth] : []));
     const [editNotes, setEditNotes] = useState(task.notes || '');
+    // CM-17: the schedule model is editable, not just settable at creation.
+    const [editInterval, setEditInterval] = useState(task.interval ?? 1);
+    const [editStart, setEditStart] = useState(task.startDate || '');
+    const [editEnd, setEditEnd] = useState(task.endDate || '');
+    const [editDue, setEditDue] = useState(task.dueDate || '');
     const [editPriority, setEditPriority] = useState<TaskPriority>(task.priority || 'medium');
     const [isSaving, setIsSaving] = useState(false);
 
@@ -59,6 +68,16 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                 updates.daysOfWeek = editDays;
             } else if (task.type === 'monthly') {
                 updates.daysOfMonth = editDaysOfMonth;
+            }
+
+            // CM-17: persist the schedule model. Undefined clears a value that was
+            // removed, so "Clear" on the end date really retires the bound.
+            if (task.type === 'todo') {
+                updates.dueDate = editDue || undefined;
+            } else {
+                updates.interval = editInterval > 1 ? editInterval : undefined;
+                updates.startDate = editStart || undefined;
+                updates.endDate = editEnd || undefined;
             }
 
             await onSave(task.id, updates);
@@ -127,6 +146,19 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                 {task.type === 'monthly' && (
                     <MonthlyFields editDaysOfMonth={editDaysOfMonth} setEditDaysOfMonth={setEditDaysOfMonth} />
                 )}
+
+                {/* CM-17: the schedule model is editable after creation. */}
+                <RepeatFields
+                    type={task.type}
+                    interval={editInterval}
+                    onIntervalChange={setEditInterval}
+                    startDate={editStart}
+                    onStartDateChange={setEditStart}
+                    endDate={editEnd}
+                    onEndDateChange={setEditEnd}
+                    dueDate={editDue}
+                    onDueDateChange={setEditDue}
+                />
 
                 {/* Priority selector (COMM-007) */}
                 <div className="flex flex-col gap-1.5">

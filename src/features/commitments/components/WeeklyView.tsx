@@ -2,6 +2,7 @@
 import React from 'react';
 import type { AnchorTask } from '../../../types';
 import { Circle, CheckCircle2 } from 'lucide-react';
+import { isScheduledOn } from '../../../services/fabric/commitmentSchedule';
 
 interface WeeklyViewProps {
     tasks: AnchorTask[];
@@ -23,17 +24,16 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 min-w-0">
                 {days.map((date, idx) => {
                     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                    const fullDayName = date.toLocaleDateString('en-US', { weekday: 'long' });
                     const dayNum = date.getDate();
                     const isToday = idx === 0;
 
-                    // Filter tasks for this day
-                    const dayTasks = tasks.filter(t => {
-                        if (t.type === 'daily') return true;
-                        if (t.type === 'weekly') return t.daysOfWeek?.includes(fullDayName);
-                        if (t.type === 'monthly') return t.daysOfMonth?.includes(dayNum) || t.dayOfMonth === dayNum;
-                        return false;
-                    });
+                    // CM-18: one definition of "scheduled" for the whole app. This
+                    // grid compared full day names ('Monday') while the schedule
+                    // engine compared letters ('M'), so the calendar and the
+                    // assistant disagreed about the same commitment. Both now ask
+                    // commitmentSchedule, which also honours CM-17's start/end
+                    // dates and interval.
+                    const dayTasks = tasks.filter(t => t.type !== 'todo' && isScheduledOn(t, date));
 
                     return (
                         <div key={idx} className={`flex flex-col gap-2 rounded-xl border transition-colors ${isToday ? 'bg-task-50/50 border-task-100 dark:bg-task-900/10 dark:border-task-900/30 p-2' : 'border-transparent p-2'}`}>

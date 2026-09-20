@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Circle, Check, Pencil, Trash2, Flame } from 'lucide-react';
+import { Circle, Check, Pencil, Trash2, Flame, CalendarClock } from 'lucide-react';
 import { Badge, TaskContextBadge } from '../../../components/shared';
 import { FinancialNudgeChip } from './FinancialNudgeChip';
 import { PriorityIndicator } from './PriorityIndicator';
@@ -10,6 +10,7 @@ import { Card } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
 import { getStreakMilestone, getStreakNudge } from '../utils/streakUtils';
 import { microMotion } from '../../../animations/microInteractions';
+import { describeNextDue, describeSchedule, nextScheduledOnOrAfter } from '../../../services/fabric/commitmentSchedule';
 
 interface TaskItemProps {
     task: AnchorTask;
@@ -32,6 +33,15 @@ interface TaskItemProps {
     hideActions?: boolean;
     /** Callback when title is tapped (for mobile tap-to-edit) */
     onTitleClick?: () => void;
+    /**
+     * UX-CM-07: the reference "now" for the next-due chip. Injectable so tests
+     * and screenshots are deterministic; defaults to the real clock.
+     */
+    now?: Date;
+    /** CM-23: when true the row's leading control selects instead of completing. */
+    selectable?: boolean;
+    selected?: boolean;
+    onSelect?: (id: string) => void;
 }
 
 import { useHaptic } from '../../../hooks/useHaptic';
@@ -49,11 +59,32 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onDismissFinancialNudge,
     hideActions = false,
     onTitleClick,
+    now,
+    selectable = false,
+    selected = false,
+    onSelect,
 }) => {
     const [isAnimating, setIsAnimating] = useState(false);
     const { trigger } = useHaptic();
 
+    /**
+     * UX-CM-07: rows showed cadence, streak, notes and context but never *when*
+     * the next occurrence is — the one thing a commitment is actually about.
+     * Derived from the shared schedule model, so the chip cannot disagree with
+     * the assistant, the badge or the calendar.
+     */
+    const reference = now ?? new Date();
+    const nextDue = task.completed ? null : nextScheduledOnOrAfter(task, reference);
+    const nextDueLabel = nextDue ? `Next: ${describeNextDue(nextDue, reference)}` : null;
+    const scheduleLabel = describeSchedule(task);
+
     const handleToggle = async () => {
+        // CM-23: in selection mode the leading control selects the row instead of
+        // completing it, so a bulk action never depends on a long-press.
+        if (selectable && onSelect) {
+            onSelect(task.id);
+            return;
+        }
         // Only animate when completing (not uncompleting)
         if (!task.completed) {
             setIsAnimating(true);
@@ -89,6 +120,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                     {/* Checkbox Button with Animation */}
                     <motion.button
                         onClick={handleToggle}
+                        aria-pressed={selectable ? selected : undefined}
+                        aria-label={selectable ? `Select ${task.title}` : `Mark ${task.title} as ${task.completed ? 'not done' : 'done'}`}
+                        data-testid={selectable ? 'select-task' : 'toggle-task'}
                         disabled={isAnimating}
                         variants={microMotion.completionPop}
                         initial="idle"
@@ -111,6 +145,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                             />
                         ) : task.completed ? (
                             <Check className="w-4 h-4" strokeWidth={2.5} />
+                        ) : selectable && selected ? (
+                            // CM-23: selected reads as a filled check, not colour alone.
+                            <Check className="w-4 h-4" strokeWidth={3} />
                         ) : (
                             <Circle className="w-4 h-4" />
                         )}
@@ -171,6 +208,25 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                     </span>
                                 )}
                                 <TaskContextBadge task={task} />
+                                {/* UX-CM-07: when this commitment next comes round. */}
+                                {nextDueLabel && (
+                                    <span
+                                        data-testid="next-due-badge"
+                                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 shrink-0"
+                                    >
+                                        <CalendarClock className="w-3 h-3" aria-hidden="true" />
+                                        {nextDueLabel}
+                                    </span>
+                                )}
+                                {/* CM-17: only rendered when a real interval or end date is set. */}
+                                {scheduleLabel && (
+                                    <span
+                                        data-testid="schedule-badge"
+                                        className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300 shrink-0 capitalize"
+                                    >
+                                        {scheduleLabel}
+                                    </span>
+                                )}
                                 {hasFamilyActive && task.category === 'family' && (
                                     <Badge type="family">Family</Badge>
                                 )}
