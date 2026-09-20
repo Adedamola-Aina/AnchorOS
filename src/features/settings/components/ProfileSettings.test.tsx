@@ -5,7 +5,7 @@ import React from 'react';
 import { ProfileSettings } from './ProfileSettings';
 
 vi.mock('../../../context/AuthContext', () => ({
-    useAuth: () => ({ user: { providerData: [{ providerId: 'password' }] } }),
+    useAuth: () => ({ user: { providerData: [{ providerId: 'password' }], email: 'alice@example.com' } }),
 }));
 
 // Google provider uses Globe icon (Chrome not available in this lucide-react version)
@@ -14,11 +14,18 @@ describe('ProfileSettings', () => {
   beforeEach(() => { vi.useFakeTimers(); });
   afterEach(() => { vi.useRealTimers(); });
 
-  it('renders name input and uid', () => {
+  it('renders the name input but NOT the raw internal id (UX-ST-03)', () => {
     render(<ProfileSettings name="Alice" uid="u-123" onUpdateName={vi.fn()} />);
     expect(screen.getByText('User Profile')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Alice')).toBeInTheDocument();
-    expect(screen.getByText('u-123')).toBeInTheDocument();
+    // The defect: the raw id was primary, unexplained information here.
+    expect(screen.queryByText('u-123')).not.toBeInTheDocument();
+    expect(screen.queryByText('User Identifier')).not.toBeInTheDocument();
+  });
+
+  it('shows the email as the identity field instead of the id (UX-ST-03)', () => {
+    render(<ProfileSettings name="Alice" uid="u-123" onUpdateName={vi.fn()} />);
+    expect(screen.getByTestId('profile-email')).toHaveTextContent('alice@example.com');
   });
 
   it('debounces name update', () => {

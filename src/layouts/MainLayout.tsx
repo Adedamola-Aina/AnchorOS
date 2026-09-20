@@ -13,10 +13,6 @@ import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { useFinanceService } from '../hooks/useFinanceService';
 import { useFabric } from '../hooks/useFabric';
 
-const AnchorAINavIcon = ({ className = '' }: { className?: string }) => (
-    <AnchorLogo className={className} strokeWidth={10} />
-);
-
 interface MainLayoutProps {
     children: React.ReactNode;
     version: string;
@@ -54,7 +50,9 @@ const NavItem: React.FC<NavItemProps> = ({ to, label, icon: Icon }) => {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     const { user, profile, logout } = useAuth();
-    const { isEnabled: anchorAIEnabled } = useFabric();
+    // UX-GL-05: the only nav state signal — one dot on Home while the
+    // assistant has an unread proactive insight.
+    const { proactiveQuestion } = useFabric();
     const { isMobile } = useResponsive();
     const { accounts } = useFinanceService(user);
     const accountColors = useMemo(() => accounts.map(a => a.color).filter(Boolean), [accounts]);
@@ -76,12 +74,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 </div>
 
                 <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-2 min-h-0">
-                    <NavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
+                    {/*
+                      * UX-GL-03: one destination vocabulary everywhere — the
+                      * sidebar, the mobile bar and the page titles all say
+                      * Home / Commitments / Finance / Settings. The old
+                      * "Dashboard", "System" and "Anchor AI" aliases are gone.
+                      *
+                      * UX-AI-09: Anchor AI is not a destination in either nav.
+                      * It stays addressable at /fabric (deep links, the disabled
+                      * state) and Home carries the doorway.
+                      */}
+                    <NavItem to="/dashboard" label="Home" icon={LayoutDashboard} />
                     <NavItem to="/commitments" label="Commitments" icon={CheckCircle2} />
-                    {anchorAIEnabled && <NavItem to="/fabric" label="Anchor AI" icon={AnchorAINavIcon} />}
                     <NavItem to="/finance" label="Finance" icon={CreditCard} />
                     <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
-                        <NavItem to="/settings" label="System" icon={Settings} />
+                        <NavItem to="/settings" label="Settings" icon={Settings} />
                     </div>
                 </nav>
 
@@ -118,7 +125,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
                 <InstallPrompt />
             </main>
 
-            {isMobile && <BottomNavigation accountColors={accountColors} anchorAIEnabled={anchorAIEnabled} />}
+            {isMobile && <BottomNavigation accountColors={accountColors} hasUnreadInsight={!!proactiveQuestion} />}
         </div>
     );
 };

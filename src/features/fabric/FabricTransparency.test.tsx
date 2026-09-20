@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import FabricTransparency from './FabricTransparency';
 
 const deletePattern = vi.fn();
@@ -10,13 +11,42 @@ vi.mock('../../hooks/useFabric', () => ({
   useFabric: () => useFabricMock(),
 }));
 
+const renderTransparency = () =>
+  render(
+    <MemoryRouter>
+      <FabricTransparency />
+    </MemoryRouter>
+  );
+
 describe('FabricTransparency', () => {
   it('renders empty state when no confirmed patterns exist', () => {
     useFabricMock.mockReturnValue({ confirmedPatterns: [], deletePattern });
 
-    render(<FabricTransparency />);
+    renderTransparency();
 
     expect(screen.getByText("Anchor AI hasn't learned any confirmed patterns yet.")).toBeInTheDocument();
+  });
+
+  // ─── UX-AI-10: no back affordance, no explanation ────────────────────────
+  describe('UX-AI-10', () => {
+    it('offers a way back to the assistant', () => {
+      useFabricMock.mockReturnValue({ confirmedPatterns: [], deletePattern });
+
+      renderTransparency();
+
+      expect(screen.getByTestId('transparency-back')).toHaveAttribute('href', '/fabric');
+    });
+
+    it('explains what it learns from and when to expect patterns', () => {
+      useFabricMock.mockReturnValue({ confirmedPatterns: [], deletePattern });
+
+      renderTransparency();
+
+      const empty = screen.getByTestId('transparency-empty');
+      // The old copy stated the fact and stopped, which reads as "broken".
+      expect(empty.textContent).toMatch(/only learns from your own activity/i);
+      expect(empty.textContent).toMatch(/expected to be empty when you have just started/i);
+    });
   });
 
   it('renders patterns and allows deletion', () => {
@@ -31,7 +61,7 @@ describe('FabricTransparency', () => {
       deletePattern,
     });
 
-    render(<FabricTransparency />);
+    renderTransparency();
 
     fireEvent.click(screen.getByText('Delete group'));
     expect(deletePattern).toHaveBeenCalledWith('pattern-1');
@@ -54,7 +84,7 @@ describe('FabricTransparency', () => {
       deletePattern,
     });
 
-    render(<FabricTransparency />);
+    renderTransparency();
 
     expect(screen.getByText(/transaction recorded.*Food.*review budget.*Food/i)).toBeInTheDocument();
     expect(screen.getByText(/transaction recorded.*Transport.*review budget.*Transport/i)).toBeInTheDocument();

@@ -34,7 +34,7 @@ test.describe('Smoke Tests', () => {
         await page.goto('/dashboard');
         await page.waitForTimeout(2000);
         // Dashboard shows net worth, sidebar, or navigation elements
-        const dashboardContent = page.locator('text=Net Worth').or(page.locator('aside')).or(page.getByRole('link', { name: 'Dashboard' }));
+        const dashboardContent = page.locator('text=Net Worth').or(page.locator('aside')).or(page.getByRole('link', { name: 'Home' }));
         await expect(dashboardContent.first()).toBeVisible({ timeout: 10000 });
     });
 

@@ -61,7 +61,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
             await page.waitForTimeout(1000);
 
             // Even if Commitments has an error, other navigation should work
-            const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+            const dashboardBtn = page.getByRole('link', { name: 'Home' });
             await dashboardBtn.click();
             await page.waitForTimeout(500);
 
@@ -85,7 +85,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
 
     test('Dashboard: error boundary isolates widget failures', async ({ page }) => {
         // Dashboard should be visible
-        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Home' });
         if (await dashboardBtn.isVisible().catch(() => false)) {
             await dashboardBtn.click();
             await page.waitForTimeout(1000);
@@ -114,7 +114,7 @@ test.describe('Feature Error Boundaries - Error Isolation', () => {
             await expect(body).toBeVisible();
 
             // Can navigate away
-            const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+            const dashboardBtn = page.getByRole('link', { name: 'Home' });
             await dashboardBtn.click();
             await page.waitForTimeout(500);
 
@@ -204,7 +204,7 @@ test.describe('Feature Error Boundaries - Mobile Responsive', () => {
         // Error boundary buttons comply with min-h-[44px] on mobile
 
         // Navigate through features on mobile
-        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Home' });
         if (await dashboardBtn.isVisible().catch(() => false)) {
             await dashboardBtn.click();
             await page.waitForTimeout(500);
@@ -257,7 +257,7 @@ test.describe('Feature Error Boundaries - Accessibility', () => {
         // Error boundary buttons are native <button> elements
         // Keyboard navigation: Tab, Enter, Space all work
 
-        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Home' });
         if (await dashboardBtn.isVisible().catch(() => false)) {
             // Test keyboard navigation through app
             await page.keyboard.press('Tab');

@@ -11,12 +11,13 @@ import { buildBottomNavItems } from './bottomNavigationItems';
 
 interface BottomNavigationProps {
   accountColors?: string[];
-  anchorAIEnabled?: boolean;
+  /** UX-GL-05: one low-noise dot on Home when an insight is unread. */
+  hasUnreadInsight?: boolean;
 }
 
 export const BottomNavigation = ({
   accountColors = [],
-  anchorAIEnabled = false,
+  hasUnreadInsight = false,
 }: BottomNavigationProps) => {
   const [animatingRoute, setAnimatingRoute] = useState<string | null>(null);
   const [celebrationColor, setCelebrationColor] = useState(CELEBRATION_COLORS[0]);
@@ -63,9 +64,9 @@ export const BottomNavigation = ({
 
   const navItems = useMemo(() => buildBottomNavItems({
     accountColors,
-    anchorAIEnabled,
+    hasUnreadInsight,
     isDarkMode,
-  }), [accountColors, anchorAIEnabled, isDarkMode]);
+  }), [accountColors, hasUnreadInsight, isDarkMode]);
 
   return (
     /*
@@ -89,11 +90,11 @@ export const BottomNavigation = ({
         data-bottom-nav-items
         className="flex items-stretch h-[49px] list-none m-0 px-1"
       >
-        {navItems.map(({ to, label, renderIcon }) => (
+        {navItems.map(({ to, label, renderIcon, dot }) => (
           <li key={to} className="flex-1 flex">
             <NavLink
               to={to}
-              aria-label={label}
+              aria-label={dot ? `${label}, new insight` : label}
               onClick={(e) => handleTap(to, e)}
               className="relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors duration-150"
             >
@@ -119,7 +120,22 @@ export const BottomNavigation = ({
                       />
                     )}
                     <span className={`relative z-10 flex flex-col items-center gap-0.5 ${colorClass}`}>
-                      {renderIcon(isAnimating, iconClass)}
+                      <span className="relative">
+                        {renderIcon(isAnimating, iconClass)}
+                        {/*
+                          * UX-GL-05: one dot, on Home only, and it is never the
+                          * only signal — the link's accessible name states the
+                          * state too ("Home, new insight"), because colour and
+                          * shape alone must not carry meaning.
+                          */}
+                        {dot && (
+                          <span
+                            aria-hidden="true"
+                            data-testid="nav-home-dot"
+                            className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-primary-500 ring-2 ring-white dark:ring-slate-900"
+                          />
+                        )}
+                      </span>
                       <span className="text-[10px] font-medium leading-none tracking-tight">
                         {label}
                       </span>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@anchor-os/ui';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useApp } from '../../context/AnchorContext';
@@ -8,7 +9,6 @@ import { FabricInsightCard } from './FabricInsightCard';
 import { FabricProactiveQuestionCard } from './FabricProactiveQuestionCard';
 import { FabricTodayCard } from './FabricTodayCard';
 import { FabricUpcomingCard } from './FabricUpcomingCard';
-import { FabricMoodCard } from './FabricMoodCard';
 import { FabricPredictionsSection } from './FabricPredictionsSection';
 import { FabricQuerySection } from './FabricQuerySection';
 import { FabricWeeklySnapshotSection } from './FabricWeeklySnapshotSection';
@@ -25,10 +25,8 @@ const FabricView: React.FC = () => {
     predictions,
     weeklyReport,
     briefing,
-    moodToday,
     dismissPrediction,
     generateWeeklyReport,
-    saveMood,
     proactiveQuestion,
     markQuestionShown,
     queryResult,
@@ -67,9 +65,24 @@ const FabricView: React.FC = () => {
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <header className="space-y-0.5">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary-500" />
-            <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white">Anchor AI</h1>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary-500" />
+              <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white">Anchor AI</h1>
+            </div>
+            {/*
+              * UX-AI-05: transparency was routed but appeared in no navigation,
+              * so provenance was effectively hidden. The assistant now links to
+              * it directly — you can always see what it has learned from you.
+              */}
+            <Link
+              to="/fabric/transparency"
+              data-testid="transparency-link"
+              className="inline-flex items-center gap-1.5 min-h-11 px-2 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            >
+              <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+              What Anchor AI knows
+            </Link>
           </div>
           {briefing?.subtitle && (
             <p className="text-sm text-slate-500 dark:text-slate-400 pl-7">{briefing.subtitle}</p>
@@ -87,8 +100,11 @@ const FabricView: React.FC = () => {
           />
         )}
 
-        {/* ── Mood check-in ────────────────────────────────────────────────── */}
-        <FabricMoodCard moodToday={moodToday} onSave={saveMood} />
+        {/*
+          * UX-AI-04 / UX-AI-09: the mood check-in is NOT here any more. Mood is
+          * not an AI feature, so it moved to the bottom of Home (DashboardView)
+          * where it is adjacent to the assistant without being part of it.
+          */}
 
         {proactiveQuestion && !questionDismissed && (
           <FabricProactiveQuestionCard

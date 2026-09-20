@@ -19,13 +19,13 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | Metric | Value |
 |---|---|
 | Findings in the UX program | **61** (41 round-1 + 20 round-2) |
-| Closed | **30** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
-| Remaining | **31** |
-| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep) |
+| Closed | **39** (+1 unnumbered accessibility side-fix in the shared `ActionSheet`) |
+| Remaining | **22** |
+| Waves merged to `master` | F1 (finance), F2 (onboarding), P1a (commitments legibility), P1d (quick findings), P1b (partial — UX-AI-06), P1c (composer + onboarding defaults + emoji sweep), P2 (Home shell + assistant placement) |
 | Deployed | `master` `5270bfb7` / `v1.21.0-rc.19` → **staging**, Release Smoke green. **Production undeployed.** |
 | Decisions | **D1–D14 ACCEPTED 2026-09-18** (doc 18 §7, doc 20 §7.4, doc 21 §6) — no wave is decision-blocked any more |
 
-## Closed (30)
+## Closed (39)
 
 | ID | Sev | Wave | What was wrong | Verified by |
 |---|---|---|---|---|
@@ -60,39 +60,41 @@ Purpose: **one place that answers "what is left?"** Every finding from the UX pr
 | UX-OB-03 | HIGH | P1c | Onboarding pre-filled 'Main Checking' / 'Read for 15 mins' and committed them verbatim, manufacturing junk data by default | Both inputs start empty; suggestions are placeholders and opt-in chips; the handlers refuse to create an unnamed account/commitment. `OnboardingView.test.tsx` |
 | UX-DS-01 | MEDIUM | P1c | Emoji used as functional icons, against `DESIGN_SYSTEM.md` ("Lucide React exclusively") | Priority (`PriorityIndicator`), streak milestones (Lucide `icon` field), the month-calendar priority dot and the ✓ status tick are all Lucide now; the mood faces are an explicit, documented illustration exception with accessible names. `TaskItem.test.tsx`, `streakUtils.test.ts`, `DESIGN_SYSTEM.md` |
 | — | LOW | F1 | `ActionSheet` icons leaked into accessible names (`"+Add account"`) | `aria-hidden` on decorative icons |
+| UX-ST-03 | MEDIUM | P2 | "USER IDENTIFIER" exposed the raw internal id as primary, unexplained information | Identity is the display name + email; the id lives behind Support → "Technical details", collapsed, explained and copyable. `ProfileSettings.test.tsx`, `TechnicalDetails.test.tsx` |
+| UX-GL-02 | HIGH | P2 | Two independent settings entry points (dashboard gear + nav) | The dashboard gear is deleted — Settings is reachable from exactly one place. `DashboardView.test.tsx` |
+| UX-GL-03 | MEDIUM | P2 | Two vocabularies for identical destinations (Dashboard/Commitments/Anchor AI/Finance/System vs Home/Tasks/Finance/Settings) | One vocabulary everywhere — Home / Commitments / Finance / Settings — in the sidebar, the mobile bar and the page titles. `bottomNavigationItems.test.ts`, `BottomNavigation.test.tsx` |
+| UX-GL-05 | MEDIUM | P2 | Navigation reported no state (new insight invisible from the shell) | Exactly one low-noise dot, on Home, while the assistant has an unread insight; the state is in the accessible name and there are no numeric badges. `BottomNavigation.test.tsx` |
+| UX-GL-06 | LOW | P2 | Environment-banner treatment undefined for every non-dev environment | Explicit per-environment treatments (development blue; staging amber, "STAGING — TEST DATA"); an absent or unknown env renders nothing, so it fails closed instead of guessing. `EnvironmentBanner.test.tsx` |
+| UX-AI-04 | MEDIUM | P2 | The mood check-in lived inside the AI tab | Mood moved to the bottom of Home — adjacent to the assistant, deliberately not part of it. `DashboardView.test.tsx`, `FabricView.test.tsx` |
+| UX-AI-09 | MEDIUM | P2 | Mood was the first interactive block in the assistant, and the nav grew to five items with AI on | The assistant is no longer a nav destination (the bar is exactly four), Home carries the "Ask Anchor" doorway, and mood is no longer in the assistant. `bottomNavigationItems.test.ts`, `DashboardView.test.tsx` |
+| UX-AI-05 | MEDIUM | P2 | Transparency was routed but appeared in no navigation, so provenance was hidden | The assistant links to `/fabric/transparency` from its own header. `FabricView.test.tsx` |
+| UX-AI-10 | MEDIUM | P2 | Transparency had no back affordance and never explained what it will learn | A back link to the assistant, plus copy that says what it learns from and when to expect a pattern. `FabricTransparency.test.tsx` |
 
-## Remaining (31) — grouped by the wave that will close them
 
-### P1b — schedule-aware commitments engine · **in progress** (5 findings remain; UX-AI-06, UX-AI-08, UX-CM-04, UX-CM-06, UX-CM-08 closed)
+## Remaining (22) — grouped by the wave that will close them
+
+### P1b — schedule-aware commitments engine · **in progress** (1 finding remains — `UX-CM-07`, partial; UX-AI-06, UX-AI-08, UX-CM-04, UX-CM-06, UX-CM-08 closed here, and its remaining shell findings UX-AI-04, UX-AI-09, UX-ST-03 and UX-GL-05 closed in P2)
 
 This is the highest-leverage remaining work: it fixes the assistant's false statements **at the root** and makes streaks fair. **Landed in this wave:** the shared schedule model (`src/services/fabric/commitmentSchedule.ts`) — "today" now means *scheduled today or carried over*, so the assistant, the nav badge and the Today card share one definition and cannot disagree; the empty day is honest ("You have no commitments yet" / "Nothing due today — next up Mon") and its button offers the action it names.
 
 | ID | Sev | Finding | Note |
 |---|---|---|---|
 | UX-CM-07 | MEDIUM | Rows show no **next-due** (cadence, streak, notes preview and context badge already render) | **Partial.** Next-due needs `CM-17`'s date/interval model, so the remainder moves to `W-C3` |
-| UX-AI-09 | MEDIUM | Mood is the first interactive block in the assistant; nav grows to 5 items with AI on | Mood relocates; nav stays at 4 |
-| UX-AI-04 | MEDIUM | Mood check-in lives inside the AI tab | Same edit as UX-AI-09 |
-| UX-ST-03 | MEDIUM | "USER IDENTIFIER" exposes the raw internal id | Move behind "About → technical details" |
-| UX-GL-05 | MEDIUM | Navigation signals nothing (no dot for new insights/due items) | One Status Dot on Home |
 
 ### P1c — capture-first composer sheet · **CLOSED** (UX-CM-10, UX-CM-01, UX-CM-02, UX-CM-09, UX-OB-03 and UX-DS-01 all closed)
 
 The composer work is done, and with it the two findings that were *not* about the composer but were left in this wave. **`UX-OB-03`:** onboarding no longer manufactures data — the account name and the habit title start **empty**, the suggested names live in placeholders and in opt-in suggestion chips, and both handlers refuse to create an unnamed record, so "nothing is created unless the user chooses it" is a property of the code rather than of the copy. **`UX-DS-01`:** the emoji-as-functional-icon sweep is complete — priority uses the shared `PriorityIndicator`, streak milestones carry a Lucide `icon` instead of an emoji field, the month-calendar priority dot and the ✓ status tick are Lucide, and the mood faces are recorded in `DESIGN_SYSTEM.md` as an explicit illustration exception with accessible names (so the rule now has one documented exception instead of an accidental contradiction).
 
-### P2 — Home merge + shell · **D1/D2 accepted — partially closed** (9 findings remain; UX-DB-02, UX-DB-03, UX-DB-04, UX-DB-05 and UX-AI-07 closed)
+### P2 — Home shell + assistant placement · **CLOSED for this slice** (UX-AI-04, UX-AI-05, UX-AI-09, UX-AI-10, UX-GL-02, UX-GL-03, UX-GL-05, UX-GL-06 and UX-ST-03 closed; UX-AI-01, UX-AI-03, UX-GL-01 and UX-GL-04 remain)
 
-| ID | Sev | Finding |
-|---|---|---|
-| UX-AI-01 | HIGH | Assistant is an equal-weight card stack; the input sits below mood and insights |
-| UX-AI-03 | MEDIUM | No conversation continuity, no stated data scope |
-| UX-AI-05 | MEDIUM | Transparency page unreachable from the assistant |
-| UX-AI-10 | MEDIUM | Transparency has no back affordance and no explanation of what it will learn |
-| UX-AI-07 | MEDIUM | Proactive card renders a literal **"?"** where an icon should be (**verify first**) |
-| UX-GL-01 | HIGH | Anchor AI unreachable when disabled (partly eased by P1d) |
-| UX-GL-02 | HIGH | Two settings entry points (dashboard gear + nav) |
-| UX-GL-03 | MEDIUM | Two vocabularies for the same destinations (Home/Tasks vs Dashboard/Commitments/System) |
-| UX-GL-04 | MEDIUM | Bottom nav has no safe-area reserve, no FAB slot, no scroll behaviour |
-| UX-GL-06 | LOW | Environment banner treatment undefined for non-dev |
+The shell and assistant-placement findings are done, and they were **one coherent change**: a nav that says one thing, in one vocabulary, with one state signal; a Home that owns the doorway to the assistant and the mood check-in; and a transparency page you can actually reach, leave, and understand. Four findings that the wave order had parked in P1b (`UX-AI-04`, `UX-AI-09`, `UX-ST-03`, `UX-GL-05`) were shell/assistant items and closed here instead.
+
+| ID | Sev | Finding | Note |
+|---|---|---|---|
+| UX-AI-01 | HIGH | Assistant is an equal-weight card stack; the input sits below mood and insights | Remains — this is the full Home merge (`W2`), not a shell fix. Mood left the assistant here, which is one of its two inputs |
+| UX-AI-03 | MEDIUM | No conversation continuity, no stated data scope | Remains — needs the assistant thread and a stated window/scope |
+| UX-GL-01 | HIGH | Anchor AI unreachable when disabled | **Improved, not closed:** Home now carries an "Ask Anchor" doorway (the nav no longer does) and the disabled state still explains its value and links to Settings. The finding closes with the merge, when there is no separate destination to reach |
+| UX-GL-04 | MEDIUM | Bottom nav has no safe-area reserve, no FAB slot, no scroll behaviour | Remains — the floating pill nav and the contextual FAB are their own change |
 
 ### P3 — Settings hub · **D4 accepted — ready to build** (6 findings)
 

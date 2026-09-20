@@ -7,14 +7,15 @@
 
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Settings, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AnchorContext';
 import { useAuth } from '../../context/AuthContext';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useFinance } from '../../context/FinanceContext';
 import { useTasks } from '../../context/TaskContext';
 import { useHaptic } from '../../hooks/useHaptic';
+import { useFabric } from '../../hooks/useFabric';
+import { FabricMoodCard } from '../fabric/FabricMoodCard';
 import { getAssetDistribution, getPortfolioTotals } from '../../utils/financeInsights';
 import { getProductivityMetrics } from '../../utils/taskInsights';
 import { AssetAllocationWidget } from './components/AssetAllocationWidget';
@@ -40,8 +41,11 @@ const DashboardView = () => {
   const { tasks } = useTasks();
   const { accounts, recentActivity, cashFlow, refetch } = useFinance();
   const { isMobile } = useResponsive();
+  // UX-AI-04/UX-AI-09: the mood check-in lives on Home, not inside the
+  // assistant, and Home is also the doorway to the assistant now that it is no
+  // longer a nav destination.
+  const { isEnabled: anchorAIEnabled, moodToday, saveMood } = useFabric();
   const haptic = useHaptic();
-  const navigate = useNavigate();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
   const beyondBasics = useBeyondBasics();
@@ -94,15 +98,27 @@ const DashboardView = () => {
                 </span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => { haptic.trigger('light'); navigate('/settings'); }}
-              aria-label="Settings"
-              data-testid="settings-pill"
-              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
+            {/*
+              * UX-GL-02: the dashboard gear is gone. Settings has exactly ONE
+              * entry point (the nav), and any contextual "manage X" need from
+              * Home must deep-link into the relevant Settings *section* rather
+              * than to the Settings root.
+              *
+              * UX-AI-09: this slot now carries the doorway to the assistant,
+              * which is no longer a nav destination — "Anchor belongs inside
+              * Home, not in the bar" (doc 20 §4.1).
+              */}
+            {anchorAIEnabled && (
+              <button
+                type="button"
+                onClick={() => { haptic.trigger('light'); navigateTo('fabric'); }}
+                data-testid="ask-anchor-doorway"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 text-xs font-semibold hover:bg-primary-100 dark:hover:bg-primary-500/20 transition-colors min-h-[36px]"
+              >
+                <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Ask Anchor</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -138,6 +154,18 @@ const DashboardView = () => {
             <TodaysFocusWidget priorities={todaysPriorities} onNavigate={() => navigateTo('commitments')} />
           </div>
         </div>
+
+        {/*
+          * UX-AI-04 / UX-AI-09: the mood check-in used to be the first
+          * interactive block *inside* the assistant. Mood is not an AI feature,
+          * so it relocates to the bottom of Home — adjacent to the assistant,
+          * deliberately not part of it (doc 18 §4.3 item 5, matching Tiimo).
+          */}
+        {anchorAIEnabled && (
+          <div data-testid="home-mood-section">
+            <FabricMoodCard moodToday={moodToday} onSave={saveMood} />
+          </div>
+        )}
       </div>
     </FeatureErrorBoundary>
   );

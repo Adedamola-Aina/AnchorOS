@@ -27,7 +27,7 @@ test.describe('Dashboard', () => {
     });
 
     test('Renders after login', async ({ page }) => {
-        const dashboardBtn = page.getByRole('link', { name: 'Dashboard' });
+        const dashboardBtn = page.getByRole('link', { name: 'Home' });
         await expect(dashboardBtn).toBeVisible();
 
         // Dashboard should be the active view (NavLink sets aria-current="page" when active)
