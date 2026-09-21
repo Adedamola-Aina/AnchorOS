@@ -111,7 +111,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
                         <PopoverMenu
-                            label="Domain"
+                            label="Area"
                             items={domains.map(d => ({ value: d, label: d }))}
                             value={editDomain}
                             onChange={setEditDomain}

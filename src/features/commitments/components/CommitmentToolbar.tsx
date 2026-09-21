@@ -55,52 +55,85 @@ export const SmartViewBar: React.FC<SmartViewBarProps> = ({ view, onViewChange, 
     </div>
 );
 
-interface QuickAddBarProps {
-    /** CM-16: save the parsed draft straight away (it is undoable). */
-    onSave: (draft: QuickAddDraft) => void;
-    /** CM-16: open the composer with the draft pre-filled, to adjust it. */
-    onAdjust: (draft: QuickAddDraft) => void;
+/**
+ * CM-16 / CM-15 — one field that finds *or* adds.
+ *
+ * These were two adjacent full-width inputs: a "Find" search box and a separate
+ * "Quick add" line, both asking the user to type a commitment title, stacked one
+ * above the other. The platform pattern is a single field — what you type filters
+ * what you already have, and when the same text reads as something new, it offers
+ * to become it. Nothing is captured by surprise: the parse is shown back with its
+ * cadence and schedule first, and Enter adds it.
+ */
+interface CommitmentFindOrAddProps {
+    /** One value, two jobs: it filters the list *and* it is parsed for a new commitment. */
+    value: string;
+    onChange: (value: string) => void;
+    /** What the current text matched, so the field reports its own effect. */
+    resultCount: number;
+    onSaveDraft: (draft: QuickAddDraft) => void;
+    onAdjustDraft: (draft: QuickAddDraft) => void;
     now?: Date;
 }
 
-/**
- * CM-16 — instant add.
- *
- * One line at the top of Commitments: "Pay rent Fri 9am" becomes a weekly
- * commitment with a Friday reminder, and "Read 15m daily" a daily one. The parse
- * is shown back before it is saved, so nothing is captured by surprise, and
- * "Adjust" hands the same draft to the full composer.
- */
-export const QuickAddBar: React.FC<QuickAddBarProps> = ({ onSave, onAdjust, now }) => {
-    const [line, setLine] = React.useState('');
-    const [draft, setDraft] = React.useState<QuickAddDraft | null>(null);
+export const CommitmentFindOrAdd: React.FC<CommitmentFindOrAddProps> = ({
+    value,
+    onChange,
+    resultCount,
+    onSaveDraft,
+    onAdjustDraft,
+    now,
+}) => {
+    const query = value.trim();
+    const draft = query ? parseQuickAdd(query, now ?? new Date()) : null;
 
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
-        const parsed = parseQuickAdd(line, now ?? new Date());
-        if (!parsed) return;
-        setDraft(parsed);
+        // Enter adds the parsed commitment. The iOS keyboard fix only forces an
+        // `enterkeyhint` when one is absent, so the hint is set here explicitly —
+        // otherwise the key reads "done" and never submits.
+        if (draft) onSaveDraft(draft);
     };
 
-    const reset = () => { setDraft(null); setLine(''); };
-
     return (
-        <form onSubmit={submit} className="flex flex-col gap-2" data-testid="quick-add">
-            <label htmlFor="quick-add-input" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                Quick add
+        <div className="flex flex-col gap-1.5">
+            <label htmlFor="commitment-find" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                Find or add
             </label>
-            <div className="flex gap-2">
-                <input
-                    id="quick-add-input"
-                    value={line}
-                    onChange={(event) => { setLine(event.target.value); setDraft(null); }}
-                    placeholder="Pay rent Fri 9am · Read 15m daily"
-                    className="flex-1 min-h-[44px] px-3 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500"
-                />
-                <Button type="submit" variant="secondary" className="min-h-[44px]" disabled={!line.trim()}>
-                    Add
-                </Button>
-            </div>
+            <form onSubmit={submit}>
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
+                    <input
+                        id="commitment-find"
+                        type="search"
+                        value={value}
+                        onChange={(event) => onChange(event.target.value)}
+                        placeholder="Find a commitment, or type a new one"
+                        data-testid="commitment-find-or-add"
+                        enterKeyHint={draft ? 'done' : 'search'}
+                        className="w-full min-h-[44px] pl-9 pr-10 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500"
+                    />
+                    {value && (
+                        <button
+                            type="button"
+                            onClick={() => onChange('')}
+                            aria-label="Clear"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        >
+                            <X className="w-4 h-4" aria-hidden="true" />
+                        </button>
+                    )}
+                </div>
+            </form>
+
+            {query && (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400" role="status" data-testid="search-result-count">
+                    {resultCount === 0
+                        ? `No commitments match “${query}”.`
+                        : `${resultCount} ${resultCount === 1 ? 'match' : 'matches'} for “${query}”.`}
+                </p>
+            )}
+
             {draft && (
                 <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-card bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700" data-testid="quick-add-preview">
                     <span className="text-xs text-slate-600 dark:text-slate-300">
@@ -108,55 +141,12 @@ export const QuickAddBar: React.FC<QuickAddBarProps> = ({ onSave, onAdjust, now 
                         {describeQuickAdd(draft) && <span> · {describeQuickAdd(draft)}</span>}
                     </span>
                     <div className="flex items-center gap-1 ml-auto">
-                        <Button type="button" size="sm" className="min-h-[44px]" onClick={() => { onSave(draft); reset(); }}>Save</Button>
-                        <Button type="button" size="sm" variant="secondary" className="min-h-[44px]" onClick={() => { onAdjust(draft); reset(); }}>Adjust</Button>
+                        <Button type="button" size="sm" className="min-h-[44px]" onClick={() => onSaveDraft(draft)}>Add</Button>
+                        <Button type="button" size="sm" variant="secondary" className="min-h-[44px]" onClick={() => onAdjustDraft(draft)}>Adjust</Button>
                     </div>
                 </div>
             )}
-        </form>
+        </div>
     );
 };
 
-interface CommitmentSearchFieldProps {
-    value: string;
-    onChange: (value: string) => void;
-    /** What the current query matched, so the field reports its own effect. */
-    resultCount: number;
-}
-
-/** CM-15: search across title, notes and area — labelled, clearable, 44px. */
-export const CommitmentSearchField: React.FC<CommitmentSearchFieldProps> = ({ value, onChange, resultCount }) => (
-    <div className="flex flex-col gap-1.5">
-        <label htmlFor="commitment-search" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-            Find
-        </label>
-        <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
-            <input
-                id="commitment-search"
-                type="search"
-                value={value}
-                onChange={(event) => onChange(event.target.value)}
-                placeholder="Search commitments, notes or area"
-                className="w-full min-h-[44px] pl-9 pr-10 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500"
-            />
-            {value && (
-                <button
-                    type="button"
-                    onClick={() => onChange('')}
-                    aria-label="Clear search"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                >
-                    <X className="w-4 h-4" aria-hidden="true" />
-                </button>
-            )}
-        </div>
-        {value.trim() && (
-            <p className="text-[11px] text-slate-500 dark:text-slate-400" role="status" data-testid="search-result-count">
-                {resultCount === 0
-                    ? `No commitments match “${value.trim()}”.`
-                    : `${resultCount} ${resultCount === 1 ? 'match' : 'matches'} for “${value.trim()}”.`}
-            </p>
-        )}
-    </div>
-);

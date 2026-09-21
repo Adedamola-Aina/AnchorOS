@@ -83,7 +83,7 @@ test.describe('System - Deep Links', () => {
 
         const commitmentsHeading = page.getByRole('heading', { name: 'Commitments', exact: true });
         const commitmentsFallback = page.getByRole('heading', { name: 'Welcome to your Commitments' })
-            .or(page.getByRole('button', { name: /New Commitment|Create First Commitment/i }));
+            .or(page.getByTestId('contextual-fab'));
         const hasCommitments = await commitmentsHeading.or(commitmentsFallback.first()).first().isVisible().catch(() => false);
 
         expect(hasCommitments).toBe(true);

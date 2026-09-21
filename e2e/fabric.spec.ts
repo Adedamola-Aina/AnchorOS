@@ -51,37 +51,29 @@ test.describe('Fabric Features', () => {
         // Add a financial task
         await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible({ timeout: 10000 });
 
-        // Open create flow from either empty state or header action
-        const newCommitmentBtn = page.getByRole('button', { name: 'New Commitment' });
-        const hasNewCommitment = await newCommitmentBtn.isVisible().catch(() => false);
-        if (hasNewCommitment) {
-            await newCommitmentBtn.click();
-        } else {
-            const createFirstBtn = page.getByRole('button', { name: 'Create First Commitment' });
+        // Open the create flow: one affordance — the FAB (UX-GL-04). The empty
+        // state offers its own action when there is nothing yet.
+        const createFirstBtn = page.getByRole('button', { name: 'Create First Commitment' });
+        if (await createFirstBtn.isVisible().catch(() => false)) {
             await createFirstBtn.click();
+        } else {
+            await page.getByTestId('contextual-fab').click();
         }
         let taskTitle = 'Pay Electric Bill'; // Default or updated unique
 
-        // Step 1: Choose Frequency
-        // Wait for modal content
-        await expect(page.locator('text=Choose Frequency')).toBeVisible();
-        // Click the card/button for Daily (use description to differentiate from filter buttons)
-        await page.locator('button').filter({ hasText: 'Every single day' }).first().click();
-
-        // Step 2: Fill Details
+        // The composer opens on the name, with the cadence adjustable in place
+        // (UX-CM-01) — there is no "Choose Frequency" step to get past.
         const taskInput = page.locator('input[placeholder*="Morning Prayer"]');
         await taskInput.first().waitFor({ state: 'visible', timeout: 10000 });
         const uniqueTaskTitle = `Pay Electric Bill ${Date.now()}`;
         await taskInput.fill(uniqueTaskTitle);
 
-        // Touch other fields to assume interaction (new UI avoids native <select>).
-        const workCategoryBtn = page.getByRole('button', { name: /^Work$/ }).first();
-        if (await workCategoryBtn.isVisible().catch(() => false)) {
-            await workCategoryBtn.click();
-        }
-        const afternoonBtn = page.getByRole('button', { name: 'Afternoon' }).first();
-        if (await afternoonBtn.isVisible().catch(() => false)) {
-            await afternoonBtn.click();
+        // Area is a pull-down inside "More options" (the refinements are collapsed).
+        await page.getByTestId('composer-more-toggle').click();
+        const workArea = page.getByTestId('domain-select');
+        if (await workArea.isVisible().catch(() => false)) {
+            await workArea.click();
+            await page.getByRole('option', { name: 'Work' }).click();
         }
 
         // Save
@@ -97,7 +89,7 @@ test.describe('Fabric Features', () => {
         await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible({ timeout: 10000 });
 
         await expect(page.getByRole('heading', { name: 'Commitments', exact: true })).toBeVisible({ timeout: 10000 });
-        await page.getByRole('button', { name: 'List View' }).click();
+        await page.getByRole('button', { name: 'List', exact: true }).click();
 
         // Locate the specific task card and click its toggle button
         const createdTaskVisible = await page.getByText(taskTitle, { exact: false }).isVisible({ timeout: 10000 }).catch(() => false);

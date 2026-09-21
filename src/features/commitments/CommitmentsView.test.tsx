@@ -66,6 +66,8 @@ vi.mock('../../components/shared', async (importOriginal) => {
 });
 
 import { useFamilySharing } from '../../hooks/useFamilySharing';
+import { FabProvider } from '../../context/FabContext';
+import { ContextualFab } from '../../components/mobile/ContextualFab';
 
 const mockTasks: AnchorTask[] = [
   {
@@ -176,7 +178,15 @@ const renderWithContext = (ui: React.ReactElement, { tasks = {}, app = {}, auth 
       <AppContext.Provider value={mockAppContext as any}>
         <TaskContext.Provider value={mockTasksContext as any}>
           <NotificationContext.Provider value={mockNotificationsContext as any}>
-            {ui}
+            {/*
+              * UX-GL-04: creating a commitment is the FAB's job, so the harness
+              * renders the real one. The page registers it, the shell shows it,
+              * and the tests click it — the same path a thumb takes.
+              */}
+            <FabProvider>
+              {ui}
+              <ContextualFab />
+            </FabProvider>
           </NotificationContext.Provider>
         </TaskContext.Provider>
       </AppContext.Provider>
@@ -403,19 +413,31 @@ describe('CommitmentsView', () => {
       });
     });
 
-    it('shows time of day selector for daily tasks', async () => {
+    it('offers the time of day as a pull-down, not a row of buttons', async () => {
       renderWithContext(<CommitmentsView />);
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
 
-      // Scoped to the composer: row controls now carry accessible names that
-      // include the commitment title (e.g. "Mark Evening Prayer as done").
+      // One control that states its own value…
       const composer = within(screen.getByRole('dialog'));
-      expect(composer.getByRole('button', { name: /^morning$/i })).toBeInTheDocument();
-      expect(composer.getByRole('button', { name: /^afternoon$/i })).toBeInTheDocument();
-      expect(composer.getByRole('button', { name: /^evening$/i })).toBeInTheDocument();
+      expect(composer.getByText('Preferred time')).toBeInTheDocument();
+
+      const select = screen.getByTestId('time-of-day-select').querySelector('select') as HTMLSelectElement;
+      expect(select).not.toBeNull();
+      expect(select).toHaveValue('morning');
+      expect(Array.from(select.options).map((option) => option.textContent))
+        .toEqual(['Morning', 'Afternoon', 'Evening', 'Anytime']);
+
+      // …instead of the four standalone buttons it used to render inline.
+      ['morning', 'afternoon', 'evening', 'any'].forEach((word) => {
+        expect(screen.queryByRole('button', { name: new RegExp(`^${word}$`, 'i') })).not.toBeInTheDocument();
+      });
+
+      // And the choice is wired through.
+      await user.selectOptions(select, 'evening');
+      expect(select).toHaveValue('evening');
     });
 
     it('shows day of week selector for weekly tasks', async () => {
@@ -432,18 +454,22 @@ describe('CommitmentsView', () => {
       });
     });
 
-    it('shows day of month selector for monthly tasks', async () => {
+    it('opens the day-of-month picker in a half sheet, not a calendar in the form', async () => {
       renderWithContext(<CommitmentsView />);
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Monthly'));
 
-      // Scoped to the composer: the smart-view bar also renders counts ("Today 1").
-      const composer = within(screen.getByRole('dialog'));
-      expect(composer.getByText('1')).toBeInTheDocument();
-      expect(composer.getAllByText('15').length).toBeGreaterThanOrEqual(1);
-      expect(composer.getByText('31')).toBeInTheDocument();
+      // The composer holds one row; the 31 days are not in it.
+      expect(screen.getByTestId('month-days-row')).toHaveTextContent('Not set');
+      expect(screen.queryByTestId('month-days-sheet')).not.toBeInTheDocument();
+
+      await user.click(screen.getByTestId('month-days-row'));
+
+      const sheet = within(screen.getByTestId('month-days-sheet'));
+      expect(sheet.getByRole('button', { name: 'Day 1' })).toBeInTheDocument();
+      expect(sheet.getByRole('button', { name: 'Day 31' })).toBeInTheDocument();
     });
 
     it('calls addTask with correct daily task data', async () => {
@@ -513,16 +539,16 @@ describe('CommitmentsView', () => {
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
       await user.type(input, 'Multi-day Monthly');
 
-      // Select 1st, 15th, and 30th - find day buttons in form grid (not badge span)
-      const dayButtons = screen.getAllByRole('button').filter(btn =>
-        btn.classList.contains('w-11') && btn.classList.contains('h-11')
-      );
-      const day1 = dayButtons.find(btn => btn.textContent === '1');
-      const day15 = dayButtons.find(btn => btn.textContent === '15');
-      const day30 = dayButtons.find(btn => btn.textContent === '30');
-      await user.click(day1!);
-      await user.click(day15!);
-      await user.click(day30!);
+      // Select 1st, 15th, and 30th in the sheet, then confirm the row reports it.
+      await user.click(screen.getByTestId('month-days-row'));
+      await user.click(screen.getByRole('button', { name: 'Day 1' }));
+      await user.click(screen.getByRole('button', { name: 'Day 15' }));
+      await user.click(screen.getByRole('button', { name: 'Day 30' }));
+      await user.click(screen.getByRole('button', { name: 'Done' }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('month-days-row')).toHaveTextContent('1, 15, 30');
+      });
 
       const saveButton = screen.getByRole('button', { name: /Save Commitment/i });
       await user.click(saveButton);
@@ -544,31 +570,32 @@ describe('CommitmentsView', () => {
 
       await user.click(screen.getByRole('button', { name: /New Commitment/i }));
 
-      // Daily should NOT show day of week or day of month selectors
+      // Daily: the time-of-day pull-down, and nothing else's control.
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Daily'));
+      expect(screen.getByTestId('time-of-day-select')).toBeInTheDocument();
       // CM-18: 'We' only exists in the weekly day picker (two-letter labels).
       expect(screen.queryByText('We')).not.toBeInTheDocument();
-      // Note: '15' may appear from task badge, so check form-specific date grid is absent
-      expect(screen.queryByText('31')).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /^morning$/i })).toBeInTheDocument();
+      expect(screen.queryByTestId('month-days-row')).not.toBeInTheDocument();
 
-      // Switch to Weekly - should NOT show time of day or day of month.
+      // Switch to Weekly - should NOT show time of day or the month-days row.
       // UX-CM-01: cadence is switched in place now; there is no "Back" step to
       // navigate (and no second dismiss control).
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Weekly'));
 
       await waitFor(() => {
-        expect(screen.queryByRole('button', { name: /^morning$/i })).not.toBeInTheDocument();
+        expect(screen.queryByTestId('time-of-day-select')).not.toBeInTheDocument();
         expect(screen.getByText('We')).toBeInTheDocument();
       });
+      expect(screen.queryByTestId('month-days-row')).not.toBeInTheDocument();
 
       // Switch to Monthly - should NOT show time of day or day of week
       await user.click(within(screen.getByTestId('cadence-selector')).getByText('Monthly'));
 
       await waitFor(() => {
         expect(screen.queryByText('We')).not.toBeInTheDocument();
-        expect(screen.getAllByText('15').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByTestId('month-days-row')).toBeInTheDocument();
       });
+      expect(screen.queryByTestId('time-of-day-select')).not.toBeInTheDocument();
     });
 
     it('sanitizes input for XSS payloads', async () => {
@@ -604,8 +631,9 @@ describe('CommitmentsView', () => {
       await user.type(input, 'New Monthly Task');
 
       // Select 20th
-      const day20 = screen.getByText('20');
-      await user.click(day20);
+      await user.click(screen.getByTestId('month-days-row'));
+      await user.click(screen.getByRole('button', { name: 'Day 20' }));
+      await user.click(screen.getByRole('button', { name: 'Done' }));
 
       const saveButton = screen.getByRole('button', { name: /Save Commitment/i });
       await user.click(saveButton);
@@ -906,6 +934,64 @@ describe('CommitmentsView', () => {
 
       expect(screen.getByText(dayName)).toBeInTheDocument();
       expect(screen.getAllByText(/[0-9]{1,2}/).length).toBeGreaterThanOrEqual(7); // Dates 1-31
+    });
+  });
+
+  /**
+   * CM-15 / CM-16 — the search box and the quick-add line were two adjacent
+   * full-width inputs both asking for a commitment title. They are now one field:
+   * what you type filters what you have, and the same text offers to become a new
+   * commitment with its parse shown back first.
+   */
+  describe('Find or add — one field', () => {
+    it('replaces the separate search box and quick-add line', () => {
+      renderWithContext(<CommitmentsView />);
+
+      expect(screen.getByLabelText(/^Find or add$/i)).toBeInTheDocument();
+      expect(screen.queryByLabelText(/^Quick add$/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/^Find$/i)).not.toBeInTheDocument();
+    });
+
+    it('filters the list and offers the same text as a new commitment', async () => {
+      renderWithContext(<CommitmentsView />);
+      const user = userEvent.setup();
+
+      await user.type(screen.getByTestId('commitment-find-or-add'), 'Morning');
+
+      // It reports what it matched…
+      expect(screen.getByTestId('search-result-count')).toHaveTextContent(/match/i);
+      // …and, in the same breath, offers to create it — parse shown back.
+      const preview = screen.getByTestId('quick-add-preview');
+      expect(within(preview).getByText('Morning')).toBeInTheDocument();
+    });
+
+    it('adds the parsed commitment from the same field', async () => {
+      const { tasks } = createMockContexts();
+      renderWithContext(<CommitmentsView />, { tasks });
+      const user = userEvent.setup();
+
+      await user.type(screen.getByTestId('commitment-find-or-add'), 'Read daily');
+      await user.click(within(screen.getByTestId('quick-add-preview')).getByRole('button', { name: 'Add' }));
+
+      await waitFor(() => {
+        expect(tasks.addTask).toHaveBeenCalledWith(
+          expect.objectContaining({ title: 'Read', type: 'daily' })
+        );
+      });
+    });
+
+    it('hands the same text to the composer when it needs adjusting', async () => {
+      renderWithContext(<CommitmentsView />);
+      const user = userEvent.setup();
+
+      await user.type(screen.getByTestId('commitment-find-or-add'), 'Pay rent monthly');
+      await user.click(within(screen.getByTestId('quick-add-preview')).getByRole('button', { name: 'Adjust' }));
+
+      // The composer opens pre-filled from the parse, not empty.
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+      });
+      expect(screen.getByPlaceholderText(/e.g. Morning Prayer/i)).toHaveValue('Pay rent');
     });
   });
 });

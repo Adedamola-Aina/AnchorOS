@@ -133,7 +133,20 @@ export const auth = initializeAuth(app, {
 import { initializeFirestore, memoryLocalCache, connectFirestoreEmulator } from 'firebase/firestore';
 
 export const db = initializeFirestore(app, {
-  localCache: memoryLocalCache()
+  localCache: memoryLocalCache(),
+  /**
+   * Optional fields are passed as `undefined` by design — an empty reminder, an
+   * unset end date, an unset interval. Without this, the SDK refuses the whole
+   * write client-side with `Unsupported field value: undefined`, so *no* optional
+   * field could ever be left blank. That is what produced "Could not update
+   * commitment. Please try again." on every edit-save, and it broke creation for
+   * any commitment saved without a reminder or notes.
+   *
+   * This makes an `undefined` value mean "do not write this field". Note that it
+   * is therefore *ignored* rather than *cleared* on an update — code that needs to
+   * remove a stored field must send `deleteField()` (see `updateCommitment`).
+   */
+  ignoreUndefinedProperties: true,
 });
 
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
