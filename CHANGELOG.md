@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.29](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.28...v1.21.0-rc.29) (2026-09-21)
+
+
+### Bug Fixes
+
+* **ux:** remove the commitments filter bars and the Select button (CM-04, CM-15, CM-21) ([#250](https://github.com/Adedamola-Aina/AnchorOS/issues/250)) ([d34872a](https://github.com/Adedamola-Aina/AnchorOS/commit/d34872a8074770658e4445034b8e546fb321a7d2))
+
 ## [1.21.0-rc.28](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.27...v1.21.0-rc.28) (2026-09-21)
 
 
