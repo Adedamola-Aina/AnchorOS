@@ -111,7 +111,7 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
   return (
     <>
       {label && (
-        <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1.5">
+        <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
           {label}
         </label>
       )}
@@ -124,7 +124,7 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
         aria-expanded={isOpen}
         className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 min-h-[44px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-base transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/20 ${className}`}
       >
-        <span className="flex items-center gap-2 truncate">
+        <span className="flex min-w-0 items-center gap-2 text-left">
           {icon}
           {selectedItem?.icon}
           {selectedItem?.label ?? placeholder}
@@ -178,7 +178,7 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
                         {item.icon}
                       </span>
                     )}
-                    <span className="flex-1 truncate">{item.label}</span>
+                    <span className="flex-1">{item.label}</span>
                     {isSelected && <Check className="w-4 h-4 shrink-0" />}
                   </button>
                 );

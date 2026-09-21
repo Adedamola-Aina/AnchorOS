@@ -1,9 +1,8 @@
 // @ts-nocheck
-import React, { useState, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useState } from 'react';
 import type { AnchorTask, TimeOfDay, TaskPriority } from '../../../types';
 import { Button } from '@anchor-os/ui';
-import { Card } from '@anchor-os/ui';
+import { Modal } from '../../../components/shared/Modal';
 import { PopoverMenu, SegmentedControl } from '../../../components/shared';
 import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
 import { RepeatFields } from './TaskFormParts';
@@ -23,7 +22,6 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     onSave,
     onCancel,
 }) => {
-    const formRef = useRef<HTMLDivElement>(null);
     const [editTitle, setEditTitle] = useState(task.title);
     const [editDomain, setEditDomain] = useState(task.domain || 'Personal Development');
     const [editScope, setEditScope] = useState<'personal' | 'family'>(task.category === 'family' ? 'family' : 'personal');
@@ -40,13 +38,6 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     const [editDue, setEditDue] = useState(task.dueDate || '');
     const [editPriority, setEditPriority] = useState<TaskPriority>(task.priority || 'medium');
     const [isSaving, setIsSaving] = useState(false);
-
-    // EDIT-001: Scroll form into view when opened on mobile
-    useEffect(() => {
-        if (formRef.current && typeof formRef.current.scrollIntoView === 'function') {
-            formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }, []);
 
     const domains = ['Health', 'Fitness', 'Work', 'Bible', 'Personal Development', 'Financial'];
 
@@ -87,24 +78,36 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
     };
 
     return (
-        <Card ref={formRef} className="space-y-4 p-5 border-task-500/20 shadow-elevation-overlay animate-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Editing {task.type} Commitment</span>
-                <Button variant="ghost" size="icon" onClick={onCancel} className="text-slate-400 h-8 w-8">
-                    <X className="w-4 h-4" />
-                </Button>
-            </div>
-
+        /*
+         * A sheet, not a Card in the page flow.
+         *
+         * This used to render inline as a <Card> with its own "Editing monthly
+         * Commitment" header, so a single task took 2–3 screens of page scroll to
+         * reach Cancel / Save, and the floating + New commitment button and the
+         * staging banner sat on top of it. As a modal sheet it is bounded, the
+         * actions are pinned in the footer, and the shell's FAB stands down.
+         */
+        <Modal
+            isOpen
+            onClose={onCancel}
+            title="Edit commitment"
+            maxWidth="max-w-2xl"
+            footer={
+                <div className="flex justify-end gap-3">
+                    <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
+                    <Button onClick={handleSave} isLoading={isSaving} size="sm" className="px-6">Save Changes</Button>
+                </div>
+            }
+        >
             <div className="space-y-4">
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400">Title</label>
+                    <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Title</label>
                     <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
                         placeholder="Commitment title"
-                        className="w-full px-4 py-3 rounded-card bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all"
-                        autoFocus
+                        className="w-full px-4 py-3 rounded-card bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all"
                     />
                 </div>
 
@@ -162,19 +165,19 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
 
                 {/* Priority selector (COMM-007) */}
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400">Priority</label>
+                    <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Priority</label>
                     <div className="flex gap-2" data-testid="edit-priority-selector">
                         {(['high', 'medium', 'low'] as const).map(p => (
                             <Button key={p} type="button" onClick={() => setEditPriority(p)} variant={editPriority === p ? 'primary' : 'secondary'} size="sm" className="flex-1 justify-center">
                                 {/* UX-DS-01: the label was '🔴 High' / '🟡 Medium' / '🟢 Low'. */}
-                                <PriorityIndicator priority={p} />
+                                <PriorityIndicator priority={p} tone={editPriority === p ? 'inherit' : 'auto'} />
                             </Button>
                         ))}
                     </div>
                 </div>
                 {/* Notes field (COMM-006) */}
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400">Notes</label>
+                    <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Notes</label>
                     <textarea
                         placeholder="Add details, motivation, or context (optional)"
                         maxLength={500}
@@ -182,28 +185,10 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                         value={editNotes}
                         onChange={(e) => setEditNotes(e.target.value)}
                         data-testid="edit-task-notes"
-                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
+                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none text-sm"
                     />
                 </div>
             </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onCancel}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={handleSave}
-                    isLoading={isSaving}
-                    size="sm"
-                    className="px-6"
-                >
-                    Save Changes
-                </Button>
-            </div>
-        </Card>
+        </Modal>
     );
 };

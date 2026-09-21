@@ -11,7 +11,27 @@ interface ModalProps {
     maxWidth?: string;
     /** If true, modal takes full screen on mobile devices (default: true) */
     fullScreenMobile?: boolean;
+    /**
+     * Pinned action bar, rendered OUTSIDE the scrollable body.
+     *
+     * A `sticky bottom-0` bar inside the body scrolls *over* the fields it is
+     * submitting, and with a translucent background it reads as a floating pill
+     * covering NOTES / REMINDER / STARTS. A footer in the modal's own flex column
+     * cannot overlap anything, and it stays reachable without scrolling.
+     *
+     * A submit button placed here must name its form (`form="<form-id>"`).
+     */
+    footer?: React.ReactNode;
 }
+
+/**
+ * How many modals are currently open.
+ *
+ * The contextual FAB hides itself while any modal is open, so a floating primary
+ * action can never sit on top of a sheet and block the fields beneath it. A
+ * counter rather than a boolean keeps stacked sheets correct.
+ */
+let openModalCount = 0;
 
 export const Modal: React.FC<ModalProps> = ({
     isOpen,
@@ -19,7 +39,8 @@ export const Modal: React.FC<ModalProps> = ({
     title,
     children,
     maxWidth = 'max-w-lg',
-    fullScreenMobile = true
+    fullScreenMobile = true,
+    footer
 }) => {
     const modalRef = useRef<HTMLDivElement>(null);
     const previousActiveElement = useRef<HTMLElement | null>(null);
@@ -67,6 +88,10 @@ export const Modal: React.FC<ModalProps> = ({
             document.body.style.overflow = 'hidden';
             document.addEventListener('keydown', handleKeyDown);
 
+            // Tells the shell a sheet is up, so the contextual FAB stands down.
+            openModalCount += 1;
+            document.body.dataset.modalOpen = 'true';
+
             // NOTE: Removed auto-focus logic here - child components with autoFocus
             // attribute (like DescriptionField) should handle their own focus.
             // The previous implementation was stealing focus from inputs.
@@ -88,6 +113,10 @@ export const Modal: React.FC<ModalProps> = ({
         return () => {
             document.body.style.overflow = 'unset';
             document.removeEventListener('keydown', handleKeyDown);
+            if (isOpen) {
+                openModalCount = Math.max(0, openModalCount - 1);
+                if (openModalCount === 0) delete document.body.dataset.modalOpen;
+            }
         };
     }, [isOpen, handleKeyDown]);
 
@@ -131,10 +160,24 @@ export const Modal: React.FC<ModalProps> = ({
                 </div>
 
                 {/* Scrollable Body - with safe area padding on mobile */}
-                <div className={`p-6 overflow-y-auto flex-1 overscroll-contain ${fullScreenMobile ? 'pb-[calc(1rem+env(safe-area-inset-bottom,0px))]' : ''
+                <div className={`p-6 overflow-y-auto flex-1 overscroll-contain ${fullScreenMobile && !footer ? 'pb-[calc(1rem+env(safe-area-inset-bottom,0px))]' : ''
                     }`} style={{ WebkitOverflowScrolling: 'touch' }}>
                     {children}
                 </div>
+
+                {/*
+                  * Pinned action bar. Solid, opaque, and outside the scroll area, so
+                  * it can never sit on top of a field or a field label — and it
+                  * carries the bottom safe-area inset itself.
+                  */}
+                {footer && (
+                    <div
+                        data-testid="modal-footer"
+                        className="shrink-0 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
+                    >
+                        {footer}
+                    </div>
+                )}
             </div>
         </div>,
         document.body

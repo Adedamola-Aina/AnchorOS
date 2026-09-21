@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useFab } from '../../context/FabContext';
 
@@ -13,11 +14,25 @@ import { useFab } from '../../context/FabContext';
  * It used to be `md:hidden`, which meant the *only* floating action in the app
  * simply did not exist at ≥768px — reported as "why is the floating icon not
  * there?". It is the page's primary action, so it is now present at every width.
+ *
+ * It also stands down while a sheet is open (`data-modal-open` on <body>): a
+ * floating button pinned over a modal is what blocked PRIORITY and
+ * Cancel / Save Changes in the editor.
  */
 export const ContextualFab = ({ navHidden = false }: { navHidden?: boolean }) => {
   const { action } = useFab();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  if (!action) return null;
+  useEffect(() => {
+    const target = document.body;
+    const sync = () => setSheetOpen(target.dataset.modalOpen === 'true');
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(target, { attributes: true, attributeFilter: ['data-modal-open'] });
+    return () => observer.disconnect();
+  }, []);
+
+  if (!action || sheetOpen) return null;
 
   return (
     <button

@@ -90,7 +90,27 @@ describe('useIOSKeyboardFix', () => {
     document.body.removeChild(div);
   });
 
-  it('temporarily demotes sibling fields in iOS PWA mode', async () => {
+  /**
+   * These three guard the exact hacks that made the keyboard unusable on iOS.
+   * The hook used to set `readOnly` on the focused field (which dismisses the
+   * keyboard) and demote every sibling to `tabindex="-1"`.
+   */
+  it('never makes the focused field readOnly (that dismisses the iOS keyboard)', () => {
+    setIOS();
+    setStandalonePWA();
+    renderHook(() => useIOSKeyboardFix());
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    document.body.appendChild(input);
+
+    input.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(input.readOnly).toBe(false);
+
+    document.body.removeChild(input);
+  });
+
+  it('never demotes sibling fields, so focus can move between them', () => {
     setIOS();
     setStandalonePWA();
     renderHook(() => useIOSKeyboardFix());
@@ -103,12 +123,22 @@ describe('useIOSKeyboardFix', () => {
     document.body.appendChild(form);
 
     first.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-    expect(second.getAttribute('tabindex')).toBe('-1');
-
-    first.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
-    await new Promise((resolve) => setTimeout(resolve, 140));
     expect(second.getAttribute('tabindex')).toBeNull();
 
     document.body.removeChild(form);
+  });
+
+  it('leaves an enterkeyhint the field declared for itself', () => {
+    setIOS();
+    renderHook(() => useIOSKeyboardFix());
+
+    const input = document.createElement('input');
+    input.setAttribute('enterkeyhint', 'search');
+    document.body.appendChild(input);
+
+    input.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(input.getAttribute('enterkeyhint')).toBe('search');
+
+    document.body.removeChild(input);
   });
 });
