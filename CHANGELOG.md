@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.28](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.27...v1.21.0-rc.28) (2026-09-21)
+
+
+### Bug Fixes
+
+* **ux:** repair the commitment write path and the composer controls (CM-16) ([#249](https://github.com/Adedamola-Aina/AnchorOS/issues/249)) ([31c7c1e](https://github.com/Adedamola-Aina/AnchorOS/commit/31c7c1e9aa2f8c7b519442c698bdac3e3a44fa35))
+
 ## [1.21.0-rc.27](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.26...v1.21.0-rc.27) (2026-09-21)
 
 
