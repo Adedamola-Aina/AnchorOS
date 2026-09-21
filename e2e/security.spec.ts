@@ -15,29 +15,44 @@ async function goToSettings(page: Page) {
     const aside = page.locator('aside');
     if (await aside.isVisible()) {
         await aside.getByRole('link', { name: 'Settings' }).click();
-        await expect(page.getByRole('heading', { name: 'System Settings' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
     }
 }
 
-// Helper to check if on Settings page
+// Helper to check if on a Settings surface (the hub or a section route)
 async function isOnSettingsPage(page: Page): Promise<boolean> {
-    const heading = page.getByRole('heading', { name: 'System Settings' });
-    return await heading.isVisible().catch(() => false);
+    const heading = page.getByRole('heading', { name: 'Settings' });
+    if (await heading.isVisible().catch(() => false)) return true;
+    // UX-ST-01/02: a section route shows its own title and a back link to the hub.
+    return await page.locator('[data-testid="settings-back"]').isVisible().catch(() => false);
+}
+
+/**
+ * UX-ST-01/02: Security is a section route in the Settings hub, so the MFA
+ * controls live at /settings/security rather than inline on the hub.
+ */
+async function goToSecuritySection(page: Page) {
+    await goToSettings(page);
+    await page.goto('/settings/security', { waitUntil: 'domcontentloaded' });
 }
 
 test.describe('Security Settings', () => {
     test.beforeEach(async ({ page }) => {
-        await goToSettings(page);
+        await goToSecuritySection(page);
     });
 
-    test('should display Identity & Security section', async ({ page }) => {
+    test('should display the Security section in the Settings hub', async ({ page }) => {
         if (!(await isOnSettingsPage(page))) { test.skip(); return; }
-        await expect(page.locator('text=Identity & Security')).toBeVisible();
+        // UX-ST-01/02: the hub lists a "Security" section (inside "Access & alerts")
+        // rather than an inline "Identity & Security" card.
+        await expect(page.locator('text=Security').first()).toBeVisible();
     });
 
-    test('should display Two-Factor Authentication subsection', async ({ page }) => {
+    test('should display the Two-Factor Authentication subsection', async ({ page }) => {
         if (!(await isOnSettingsPage(page))) { test.skip(); return; }
-        await expect(page.locator('text=Two-Factor Authentication (2FA)')).toBeVisible();
+        // The section is its own route; open it before asserting its contents.
+        await page.goto('/settings/security', { waitUntil: 'domcontentloaded' });
+        await expect(page.locator('text=Two-Factor Authentication').first()).toBeVisible({ timeout: 10000 });
     });
 
     test('should show Setup 2FA button when MFA is disabled', async ({ page }) => {
@@ -53,7 +68,7 @@ test.describe('Security Settings', () => {
 
 test.describe('MFA Setup Flow', () => {
     test.beforeEach(async ({ page }) => {
-        await goToSettings(page);
+        await goToSecuritySection(page);
     });
 
     test('should show QR code when Setup 2FA is clicked', async ({ page }) => {
@@ -153,7 +168,7 @@ test.describe('MFA Setup Access', () => {
 });
 
 test.describe('Security Navigation', () => {
-    test('should show notification indicator on System nav when security actions pending', async ({ page }) => {
+    test('should show notification indicator on the Settings nav when security actions are pending', async ({ page }) => {
         await loginOrSignup(page, TEST_USER);
 
         // Check if logged in
@@ -162,11 +177,13 @@ test.describe('Security Navigation', () => {
             test.skip(); return;
         }
 
-        // Check for notification indicator (red asterisk or dot) on System nav
-        const systemNav = page.getByRole('link', { name: 'Settings' });
-        await expect(systemNav).toBeVisible();
+        // UX-GL-03: the bar is Home / Commitments / Finance / Settings — there is
+        // no "System" destination any more, so the pending-action indicator (when
+        // there is one) rides on Settings.
+        const settingsNav = page.getByRole('link', { name: 'Settings' });
+        await expect(settingsNav).toBeVisible();
 
-        await systemNav.click();
-        await expect(page.getByRole('heading', { name: 'System Settings' })).toBeVisible();
+        await settingsNav.click();
+        await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
     });
 });

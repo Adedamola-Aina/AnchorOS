@@ -14,7 +14,7 @@ async function goToSettings(page: Page) {
     await loginOrSignup(page, TEST_USER);
     const aside = page.locator('aside');
     await aside.getByRole('link', { name: 'Settings' }).click();
-    await expect(page.getByRole('heading', { name: 'System Settings' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
 }
 
 // Helper: Login and go to Finance
@@ -31,17 +31,17 @@ test.describe('Family Mode Settings', () => {
     });
 
     test('should display Family Mode section', async ({ page }) => {
-        const settingsHeading = page.getByRole('heading', { name: 'System Settings' });
+        const settingsHeading = page.getByRole('heading', { name: 'Settings' });
         if (!(await settingsHeading.isVisible().catch(() => false))) {
-            test.skip(true, 'System Settings page is not visible for current account state'); return;
+            test.skip(true, 'Settings page is not visible for current account state'); return;
         }
         await expect(page.locator('text=Invite Family Member').or(page.locator('text=Family Connected')).first()).toBeVisible();
     });
 
     test('should display Family Mode toggle', async ({ page }) => {
-        const settingsHeading = page.getByRole('heading', { name: 'System Settings' });
+        const settingsHeading = page.getByRole('heading', { name: 'Settings' });
         if (!(await settingsHeading.isVisible().catch(() => false))) {
-            test.skip(true, 'System Settings page is not visible for current account state'); return;
+            test.skip(true, 'Settings page is not visible for current account state'); return;
         }
         // Look for family section card
         const familySection = page.locator('text=Invite Family Member').or(page.locator('text=Family Connected')).first();
@@ -58,9 +58,9 @@ test.describe('Family Mode Settings', () => {
     });
 
     test('should show Connect Spouse section', async ({ page }) => {
-        const settingsHeading = page.getByRole('heading', { name: 'System Settings' });
+        const settingsHeading = page.getByRole('heading', { name: 'Settings' });
         if (!(await settingsHeading.isVisible().catch(() => false))) {
-            test.skip(true, 'System Settings page is not visible for current account state'); return;
+            test.skip(true, 'Settings page is not visible for current account state'); return;
         }
         // Look for spouse connection UI - check for any related text
         const spouseTexts = [
@@ -91,10 +91,10 @@ test.describe('Spouse Invitation Flow', () => {
 
     test('should display spouse email input when not connected', async ({ page }) => {
         // Check if we're on settings page first
-        const settingsHeading = page.getByRole('heading', { name: 'System Settings' });
+        const settingsHeading = page.getByRole('heading', { name: 'Settings' });
         if (!(await settingsHeading.isVisible().catch(() => false))) {
             // Not on settings page (might be on verification flow)
-            test.skip(true, 'System Settings page is not visible for current account state');
+            test.skip(true, 'Settings page is not visible for current account state');
             return;
         }
 
