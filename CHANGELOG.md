@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.30](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.29...v1.21.0-rc.30) (2026-09-21)
+
+
+### Bug Fixes
+
+* **ios:** make the keyboard open, pin the composer's actions, end the overlap (CM-02, CM-17) ([#251](https://github.com/Adedamola-Aina/AnchorOS/issues/251)) ([ef91d4b](https://github.com/Adedamola-Aina/AnchorOS/commit/ef91d4b12025423266326f72027a7f8623735c02))
+
 ## [1.21.0-rc.29](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.28...v1.21.0-rc.29) (2026-09-21)
 
 
