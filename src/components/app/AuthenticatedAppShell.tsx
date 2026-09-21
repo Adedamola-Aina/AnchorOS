@@ -11,6 +11,7 @@ import { APP_VERSION } from '../../version';
 
 const DashboardView = lazyWithRetry(() => import('../../features/dashboard/DashboardView'));
 const CommitmentsView = lazyWithRetry(() => import('../../features/commitments/CommitmentsView'));
+const EditCommitmentView = lazyWithRetry(() => import('../../features/commitments/EditCommitmentView'));
 const FabricView = lazyWithRetry(() => import('../../features/fabric/FabricView'));
 const FabricTransparency = lazyWithRetry(() => import('../../features/fabric/FabricTransparency'));
 const FinanceView = lazyWithRetry(() => import('../../features/finance/FinanceView'));
@@ -34,6 +35,8 @@ export default function AuthenticatedAppShell() {
             <Routes>
               <Route path="dashboard" element={<DashboardView />} />
               <Route path="commitments" element={<CommitmentsView />} />
+              {/* Editing is a destination, not a form wedged into the list. */}
+              <Route path="commitments/:id/edit" element={<EditCommitmentView />} />
               <Route path="fabric" element={<FabricView />} />
               <Route path="fabric/transparency" element={<FabricTransparency />} />
               <Route path="finance/*" element={<FinanceView />} />

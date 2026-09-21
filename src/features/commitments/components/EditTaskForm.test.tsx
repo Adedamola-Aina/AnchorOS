@@ -65,20 +65,17 @@ describe('EditTaskForm', () => {
     Element.prototype.scrollIntoView = vi.fn();
   });
 
-  it('renders as a sheet with the title pre-filled and a pinned action bar', () => {
+  it('renders the title pre-filled with a pinned action bar, not a modal', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
 
     expect(screen.getByDisplayValue('Read Bible')).toBeInTheDocument();
 
-    // It is a modal sheet, not a Card in the page flow: that is what keeps the
-    // actions reachable and stops the shell's FAB covering the fields.
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Edit commitment')).toBeInTheDocument();
-
-    // Cancel / Save live in the modal footer, outside the scrollable body.
-    const footer = screen.getByTestId('modal-footer');
-    expect(within(footer).getByText('Cancel')).toBeInTheDocument();
-    expect(within(footer).getByText('Save Changes')).toBeInTheDocument();
+    // The editor is a page (`/commitments/:id/edit`), so the actions live in a bar
+    // pinned to the bottom of that page — not in a sheet.
+    const actions = screen.getByTestId('edit-actions');
+    expect(within(actions).getByText('Cancel')).toBeInTheDocument();
+    expect(within(actions).getByText('Save Changes')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('shows DailyFields for daily tasks', () => {

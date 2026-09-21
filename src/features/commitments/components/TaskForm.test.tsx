@@ -6,6 +6,8 @@ import { TaskForm } from './TaskForm';
 
 // Mock useUnsavedChanges to capture calls
 const mockSetDirty = vi.fn();
+/** Flipped per-test so the reminder cross-check can be asserted both ways. */
+let reminderOutsideWindow = false;
 vi.mock('../../../hooks/useUnsavedChanges', () => ({
     useUnsavedChanges: (dirty?: boolean) => {
         mockSetDirty(dirty);
@@ -21,6 +23,8 @@ vi.mock('./TaskFormParts', () => ({
     MonthlyDatesField: () => null,
     // CM-17: the schedule model fields (interval / start / end / due date).
     RepeatFields: () => <div data-testid="repeat-fields" />,
+    // The reminder cross-check lives beside the fields it describes.
+    reminderOutsidePreferredWindow: () => reminderOutsideWindow,
 }));
 
 vi.mock('../../../components/shared', () => ({
@@ -239,5 +243,37 @@ describe('TaskForm — capture first, refinements one tap away', () => {
         openMoreOptions();
 
         expect(screen.queryByTestId('composer-more-set')).toBeNull();
+    });
+
+    /**
+     * "Preferred time: Afternoon" beside "Reminder: 9:00 AM" was reported as
+     * contradictory with nothing explaining the relationship. The reminder is a
+     * notification; the preferred time only orders the day — and when they
+     * disagree, the composer says so.
+     */
+    it('states the reminder separately from the preferred time of day', () => {
+        render(<TaskForm {...defaultProps} />);
+        openMoreOptions();
+
+        // The preferred-time half of the pair is asserted where it renders
+        // (TaskFormParts.test.tsx); here we own the reminder's own wording.
+        expect(screen.getByText(/sends a notification at this exact time/i)).toBeInTheDocument();
+    });
+
+    it('says when a reminder falls outside the preferred time of day', () => {
+        reminderOutsideWindow = true;
+        render(<TaskForm {...defaultProps} />);
+        openMoreOptions();
+
+        expect(screen.getByTestId('reminder-window-note')).toBeInTheDocument();
+        expect(screen.getByTestId('reminder-window-note').textContent).toMatch(/outside your preferred/i);
+    });
+
+    it('stays quiet when the reminder sits inside the preferred time of day', () => {
+        reminderOutsideWindow = false;
+        render(<TaskForm {...defaultProps} />);
+        openMoreOptions();
+
+        expect(screen.queryByTestId('reminder-window-note')).toBeNull();
     });
 });

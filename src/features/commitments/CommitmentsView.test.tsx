@@ -68,6 +68,8 @@ vi.mock('../../components/shared', async (importOriginal) => {
 import { useFamilySharing } from '../../hooks/useFamilySharing';
 import { FabProvider } from '../../context/FabContext';
 import { ContextualFab } from '../../components/mobile/ContextualFab';
+import { MemoryRouter } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 const mockTasks: AnchorTask[] = [
   {
@@ -173,25 +175,31 @@ const createMockContexts = (taskOverrides = {}, appOverrides = {}, authOverrides
 const renderWithContext = (ui: React.ReactElement, { tasks = {}, app = {}, auth = {}, family = {}, notifications = {} } = {}) => {
   const { tasks: mockTasksContext, app: mockAppContext, auth: mockAuthContext, family: _mockFamilyContext, notifications: mockNotificationsContext } = createMockContexts(tasks, app, auth, family, notifications);
   return render(
-    <AuthContext.Provider value={mockAuthContext as any}>
+    /*
+     * A Router is required: editing navigates to `/commitments/:id/edit` rather
+     * than rendering a form inline.
+     */
+    <MemoryRouter initialEntries={['/commitments']}>
+      <AuthContext.Provider value={mockAuthContext as any}>
 
-      <AppContext.Provider value={mockAppContext as any}>
-        <TaskContext.Provider value={mockTasksContext as any}>
-          <NotificationContext.Provider value={mockNotificationsContext as any}>
-            {/*
-              * UX-GL-04: creating a commitment is the FAB's job, so the harness
-              * renders the real one. The page registers it, the shell shows it,
-              * and the tests click it — the same path a thumb takes.
-              */}
-            <FabProvider>
-              {ui}
-              <ContextualFab />
-            </FabProvider>
-          </NotificationContext.Provider>
-        </TaskContext.Provider>
-      </AppContext.Provider>
+        <AppContext.Provider value={mockAppContext as any}>
+          <TaskContext.Provider value={mockTasksContext as any}>
+            <NotificationContext.Provider value={mockNotificationsContext as any}>
+              {/*
+                * UX-GL-04: creating a commitment is the FAB's job, so the harness
+                * renders the real one. The page registers it, the shell shows it,
+                * and the tests click it — the same path a thumb takes.
+                */}
+              <FabProvider>
+                {ui}
+                <ContextualFab />
+              </FabProvider>
+            </NotificationContext.Provider>
+          </TaskContext.Provider>
+        </AppContext.Provider>
 
-    </AuthContext.Provider>
+      </AuthContext.Provider>
+    </MemoryRouter>
   );
 };
 
@@ -814,44 +822,32 @@ describe('CommitmentsView', () => {
   });
 
   describe('Edit and Delete Operations', () => {
-    it('populates edit form with existing task data', async () => {
+    /**
+     * Editing is a destination (`/commitments/:id/edit`), not a form wedged into
+     * the list — which is what made one task cost 2-3 screens of scroll to reach
+     * Cancel / Save.
+     */
+    it('navigates to the editor route instead of rendering a form inline', async () => {
       const { tasks } = createMockContexts();
-      renderWithContext(<CommitmentsView />, { tasks });
+      renderWithContext(
+        <Routes>
+          <Route path="/commitments" element={<CommitmentsView />} />
+          <Route path="/commitments/:id/edit" element={<div data-testid="edit-route" />} />
+        </Routes>,
+        { tasks },
+      );
       const user = userEvent.setup();
 
-      // Switch to List View
-      const listBtn = screen.getByTestId('list-icon').closest('button');
-      await user.click(listBtn!);
-
-      // Find edit button for 'Morning Meditation'
-      const editButtons = await screen.findAllByTestId('pencil-icon');
-      await user.click(editButtons[0].closest('button')!);
-
-      expect(screen.getByDisplayValue('Morning Meditation')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /^morning$/i })).toHaveClass('text-task-600');
-    });
-
-    it('cancels edit without saving changes', async () => {
-      const { tasks } = createMockContexts();
-      renderWithContext(<CommitmentsView />, { tasks });
-      const user = userEvent.setup();
-
-      // Switch to List View
       const listBtn = screen.getByTestId('list-icon').closest('button');
       await user.click(listBtn!);
 
       const editButtons = await screen.findAllByTestId('pencil-icon');
       await user.click(editButtons[0].closest('button')!);
 
-      const input = screen.getByDisplayValue('Morning Meditation');
-      await user.clear(input);
-      await user.type(input, 'Modified Title');
-
-      await user.click(screen.getByText('Cancel'));
-
+      expect(await screen.findByTestId('edit-route')).toBeInTheDocument();
+      // No inline form, and no save path from the list.
+      expect(screen.queryByTestId('edit-actions')).not.toBeInTheDocument();
       expect(tasks.addTask).not.toHaveBeenCalled();
-      expect(tasks.deleteTask).not.toHaveBeenCalled();
-      expect(screen.queryByDisplayValue('Modified Title')).not.toBeInTheDocument();
     });
   });
 

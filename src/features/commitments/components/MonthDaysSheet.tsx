@@ -77,7 +77,7 @@ export const MonthDaysSheet: React.FC<MonthDaysSheetProps> = ({ isOpen, value, o
                   data-testid={`month-day-${day}`}
                   className={`h-11 rounded-lg text-sm font-semibold transition-all ${
                     selected
-                      ? 'bg-task-600 text-white'
+                      ? 'bg-primary-600 text-white'
                       : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -91,7 +91,7 @@ export const MonthDaysSheet: React.FC<MonthDaysSheetProps> = ({ isOpen, value, o
             <button
               type="button"
               onClick={onClose}
-              className="w-full min-h-[44px] rounded-xl bg-task-600 text-white text-sm font-semibold"
+              className="w-full min-h-[44px] rounded-xl bg-primary-600 text-white text-sm font-semibold"
             >
               Done
             </button>

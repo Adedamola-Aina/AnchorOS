@@ -10,6 +10,7 @@ import { useState, useMemo } from 'react';
 import { captureError } from '../../utils/error';
 import type { AnchorTask } from '../../types';
 import { useApp } from '../../context/AnchorContext';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
 import { useTasks } from '../../context/TaskContext';
@@ -17,7 +18,6 @@ import { useNotifications } from '../../context/NotificationContext';
 import { SectionHeader } from '../../components/shared';
 import { TaskList } from './components/TaskList';
 import { TaskForm } from './components/TaskForm';
-import { EditTaskForm } from './components/EditTaskForm';
 import { Button } from '@anchor-os/ui';
 import { WeeklyView } from './components/WeeklyView';
 import { MonthCalendarView } from './components/MonthCalendarView';
@@ -31,17 +31,17 @@ import type { QuickAddDraft } from './utils/parseQuickAdd';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 
 const CommitmentsView = () => {
-  const { tasks, addTask, toggleTask, deleteTask, updateTask, loadingTasks } = useTasks();
+  const { tasks, addTask, toggleTask, deleteTask, loadingTasks } = useTasks();
   const { user } = useAuth();
   const { connection } = useFamilySharing(user?.uid);
   const { navigateTo } = useApp();
   const { confirm, showToast } = useNotifications();
+  const navigate = useNavigate();
 
   const hasFamilyActive = !!connection;
   const [showAdd, setShowAdd] = useState(false);
   const [viewMode, setViewMode] = useState<'timeline' | 'list' | 'calendar'>('list');
   const [calendarRange, setCalendarRange] = useState<'week' | 'month'>('week');
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   // CM-21 / CM-23 / CM-25: smart views, search, selection and undo.
   const workspace = useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask });
@@ -60,10 +60,12 @@ const CommitmentsView = () => {
     } catch (error: unknown) { captureError(error, 'Commitments.addTask'); showToast(`Failed to add task: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error'); }
   };
 
-  const handleSaveEdit = async (taskId: string, updates: Partial<AnchorTask>) => {
-    try { await updateTask(taskId, updates); setEditingTaskId(null); showToast('Commitment updated!', 'success'); }
-    catch (err) { captureError(err, 'Commitments.updateTask'); showToast('Could not update commitment. Please try again.', 'error'); }
-  };
+  /**
+   * Editing is its own destination (`/commitments/:id/edit`) rather than a form
+   * wedged into the list, so a single task no longer costs 2-3 screens of scroll
+   * to reach Cancel / Save.
+   */
+  const handleStartEdit = (id: string) => navigate(`/commitments/${id}/edit`);
 
   /** CM-16: a parsed draft → the same shape the composer submits. */
   const draftToTask = (draft: QuickAddDraft): Omit<AnchorTask, 'id' | 'createdAt'> => ({
@@ -122,8 +124,6 @@ const CommitmentsView = () => {
     return { activeTasks: filtered.filter(t => !t.completed), completedTasks: filtered.filter(t => t.completed), totalFiltered: filtered.length, allFiltered: filtered };
   }, [workspace.visible]);
 
-  const editingTask = useMemo(() => editingTaskId ? tasks.find(t => t.id === editingTaskId) : null, [editingTaskId, tasks]);
-
   return (
     <FeatureErrorBoundary featureName="Commitments">
       <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8">
@@ -156,9 +156,8 @@ const CommitmentsView = () => {
         <CommitmentsViewSwitcher viewMode={viewMode} onViewChange={setViewMode} />
 
         {showAdd && <TaskForm onClose={closeComposer} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} initialDraft={quickAddDraft} />}
-        {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}
         <div className={loadingTasks ? 'opacity-50' : ''}>
-          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={handleToggle} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={handleToggle} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} /> : (
+          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={handleToggle} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={null} onToggle={handleToggle} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} /> : (
             <div className="space-y-3">
               <div className="flex gap-2">
                 {(['week', 'month'] as const).map(r => (<Button key={r} variant={calendarRange === r ? 'primary' : 'secondary'} size="sm" onClick={() => setCalendarRange(r)} className="capitalize text-xs">{r}</Button>))}

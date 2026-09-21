@@ -71,7 +71,7 @@ export const CommitmentFindOrAdd: React.FC<CommitmentFindOrAddProps> = ({
                         placeholder="Find a commitment, or type a new one"
                         data-testid="commitment-find-or-add"
                         enterKeyHint={draft ? 'done' : 'search'}
-                        className="w-full min-h-[44px] pl-9 pr-10 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500"
+                        className="w-full min-h-[44px] pl-9 pr-10 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                     />
                     {value && (
                         <button
