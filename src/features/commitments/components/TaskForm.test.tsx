@@ -57,6 +57,9 @@ const defaultProps = {
     hasFamilyActive: false,
 };
 
+/** The refinements live behind one deliberate tap now. */
+const openMoreOptions = () => fireEvent.click(screen.getByTestId('composer-more-toggle'));
+
 describe('TaskForm — unsaved changes guard', () => {
     it('starts with dirty = false', () => {
         render(<TaskForm {...defaultProps} />);
@@ -113,6 +116,7 @@ describe('TaskForm — capture-first composer (UX-CM-01 / CM-02 / CM-09)', () =>
 
     it('says "Area" instead of the internal "Domain" jargon (UX-CM-09)', () => {
         render(<TaskForm {...defaultProps} />);
+        openMoreOptions();
 
         expect(screen.getByText('Area')).toBeInTheDocument();
         expect(screen.queryByText('Domain')).not.toBeInTheDocument();
@@ -120,6 +124,7 @@ describe('TaskForm — capture-first composer (UX-CM-01 / CM-02 / CM-09)', () =>
 
     it('shows priority as icons, never as emoji (UX-CM-09 / UX-DS-01)', () => {
         render(<TaskForm {...defaultProps} />);
+        openMoreOptions();
 
         const selector = screen.getByTestId('priority-selector');
         expect(within(selector).getByTestId('priority-high')).toBeInTheDocument();
@@ -130,22 +135,24 @@ describe('TaskForm — capture-first composer (UX-CM-01 / CM-02 / CM-09)', () =>
     });
 });
 describe('TaskForm — reminder field layout (BUG-092)', () => {
-    it('renders reminder field outside the two-column grid as a full-width row', () => {
+    it('renders the reminder as a full-width row, never a grid cell (BUG-092)', () => {
         render(<TaskForm {...defaultProps} />);
         fireEvent.click(screen.getByText('Daily'));
+        openMoreOptions();
 
-        const reminderLabel = screen.getByText(/reminder/i);
-        expect(reminderLabel).toBeInTheDocument();
+        expect(screen.getByText(/reminder/i)).toBeInTheDocument();
 
-        // The reminder container should NOT be inside the grid
-        const grid = document.querySelector('.grid');
+        // The reminder owns the whole row: it is not a grid cell.
         const reminderContainer = screen.getByTestId('reminder-field');
-        expect(grid?.contains(reminderContainer)).toBe(false);
+        const more = screen.getByTestId('composer-more-options');
+        expect(more.contains(reminderContainer)).toBe(true);
+        expect(more.className).not.toContain('grid');
     });
 
     it('reminder input has iOS-safe attributes', () => {
         render(<TaskForm {...defaultProps} />);
         fireEvent.click(screen.getByText('Daily'));
+        openMoreOptions();
 
         const reminderInput = screen.getByTestId('reminder-input');
         expect(reminderInput).not.toBeNull();
@@ -159,5 +166,77 @@ describe('TaskForm — reminder field layout (BUG-092)', () => {
         const { container } = render(<TaskForm {...defaultProps} />);
         const card = container.querySelector('.max-w-2xl');
         expect(card).toBeInTheDocument();
+    });
+});
+
+/**
+ * The composer used to open with every field it owned — Area, Priority,
+ * Context, the whole recurrence model, Notes and a reminder — so capturing a
+ * simple commitment meant reading past all of them. Capture is name + cadence +
+ * when; the rest is a refinement, one deliberate tap away, and nothing was
+ * removed.
+ */
+describe('TaskForm — capture first, refinements one tap away', () => {
+    it('opens on the name, the cadence and when — nothing else', () => {
+        render(<TaskForm {...defaultProps} />);
+
+        expect(screen.getByTestId('task-name')).toBeInTheDocument();
+        expect(screen.getByTestId('cadence-selector')).toBeInTheDocument();
+        // `daily` is the default cadence, so its field is the "when".
+        expect(screen.getByTestId('daily-time')).toBeInTheDocument();
+
+        // The refinements are not in the way of capturing.
+        expect(screen.queryByTestId('composer-more-options')).toBeNull();
+        expect(screen.queryByTestId('priority-selector')).toBeNull();
+        expect(screen.queryByText('Area')).toBeNull();
+        expect(screen.queryByTestId('task-notes')).toBeNull();
+        expect(screen.queryByTestId('reminder-field')).toBeNull();
+        expect(screen.queryByTestId('repeat-fields')).toBeNull();
+        // …and the primary action is reachable without expanding anything.
+        expect(screen.getByRole('button', { name: /save commitment/i })).toBeInTheDocument();
+    });
+
+    it('puts every refinement one tap away, and loses none of them', () => {
+        render(<TaskForm {...defaultProps} />);
+        openMoreOptions();
+
+        expect(screen.getByTestId('composer-more-options')).toBeInTheDocument();
+        expect(screen.getByText('Area')).toBeInTheDocument();
+        expect(screen.getByTestId('priority-selector')).toBeInTheDocument();
+        expect(screen.getByTestId('repeat-fields')).toBeInTheDocument();
+        expect(screen.getByTestId('task-notes')).toBeInTheDocument();
+        expect(screen.getByTestId('reminder-field')).toBeInTheDocument();
+    });
+
+    it('collapses again, so the sheet returns to capture-only', () => {
+        render(<TaskForm {...defaultProps} />);
+
+        openMoreOptions();
+        expect(screen.getByTestId('composer-more-options')).toBeInTheDocument();
+        expect(screen.getByTestId('composer-more-toggle')).toHaveAttribute('aria-expanded', 'true');
+
+        openMoreOptions();
+        expect(screen.queryByTestId('composer-more-options')).toBeNull();
+        expect(screen.getByTestId('composer-more-toggle')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('states when a collapsed refinement holds a non-default value', () => {
+        render(<TaskForm {...defaultProps} />);
+        // Nothing set yet — the toggle stays quiet.
+        expect(screen.queryByTestId('composer-more-set')).toBeNull();
+
+        openMoreOptions();
+        fireEvent.change(screen.getByTestId('reminder-time-input'), { target: { value: '07:30' } });
+        openMoreOptions(); // collapse
+
+        expect(screen.getByTestId('composer-more-set')).toBeInTheDocument();
+    });
+
+    it('does not flag the toggle for values that are still the preset', () => {
+        render(<TaskForm {...defaultProps} />);
+        openMoreOptions();
+        openMoreOptions();
+
+        expect(screen.queryByTestId('composer-more-set')).toBeNull();
     });
 });

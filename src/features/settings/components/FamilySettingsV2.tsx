@@ -84,13 +84,13 @@ export function FamilySettingsV2({ onNavigateToFinance, connection: externalConn
     if (showInviteForm) {
         return (
             <Card className="overflow-hidden">
-                <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-amber-50/30 dark:bg-amber-900/10">
+                <CardHeader className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-amber-50/30 dark:bg-amber-900/10">
                     <CardTitle className="text-base font-bold text-amber-900 dark:text-amber-500 flex items-center gap-3">
                         <div className="p-2 bg-amber-500/10 rounded-lg"><Users className="w-5 h-5 text-amber-600 dark:text-amber-500" /></div>
                         Invite Family Member
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                     <InviteFamilyMember userEmail={user.email || ''} isEmailVerified={user.emailVerified} onInviteSent={() => setShowInviteForm(false)} />
                 </CardContent>
             </Card>

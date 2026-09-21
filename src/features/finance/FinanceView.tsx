@@ -7,25 +7,22 @@ import { Plus, Receipt } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
-import { useResponsive } from '../../hooks/useResponsive';
 import { Modal } from '../../components/shared/Modal';
 import { ActionSheet } from '../../components/shared/ActionSheet';
 import { AccountForm } from './AccountForm';
 import { TransactionForm } from './TransactionForm';
-import type { AnchorTransaction, Currency } from '../../types';
+import type { AnchorTransaction } from '../../types';
 import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { EmptyAccountsState } from './components/EmptyAccountsState';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 import { useRegisterFab } from '../../context/FabContext';
 import { CardStack } from '../../components/finance/CardStack';
-import { AccountListItem } from './components/AccountListItem';
 import { TotalAssetsSummaryBar } from '../../components/finance/TotalAssetsSummaryBar';
 import { SkeletonCards } from '../../components/finance/SkeletonCards';
 import { useReorderAccounts } from '../../hooks/useReorderAccounts';
 import { logProductEvent } from '../../services/telemetry';
 import { FinanceAccountsRoute } from './components/FinanceAccountsRoute';
-import { FinanceDesktopContent } from './components/FinanceDesktopContent';
 import { TransactionHistorySection } from './components/TransactionHistorySection';
 import { FinanceBillsSection } from './components/FinanceBillsSection';
 import { runFinanceViewTransition } from './financeViewTransition';
@@ -33,12 +30,11 @@ import { getAccountIdFromPath, isAccountsListPath } from './financeViewHelpers';
 import { useFinanceCardInteraction } from './hooks/useFinanceCardInteraction';
 
 const FinanceView = () => {
-  const { accounts, transactions, deleteTransaction, deleteAccount, loadingFinance, netWorth, currentMonth, jumpToMonth } = useFinance();
+  const { accounts, transactions, deleteTransaction, deleteAccount, loadingFinance, currentMonth, jumpToMonth } = useFinance();
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { familyMemberUid, familyMemberName, shareAccount: toggleShareAccount } = useFamilySharing(user?.uid);
-  const { isMobile } = useResponsive();
   const { reorder } = useReorderAccounts();
 
   const [mode, setMode] = useState<'view' | 'addTx' | 'addAcc' | 'editTx'>('view');
@@ -74,11 +70,6 @@ const FinanceView = () => {
     const filtered = accounts.filter(a => !a.isArchived);
     return filtered.sort((a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity));
   }, [accounts]);
-  const primaryCurrency = useMemo<Currency>(() => {
-    const counts: Record<string, number> = {};
-    activeAccounts.forEach(a => { counts[a.currency] = (counts[a.currency] || 0) + 1; });
-    return (Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] as Currency) || 'NGN';
-  }, [activeAccounts]);
   const showAllAccountsRoute = useMemo(() => isAccountsListPath(location.pathname), [location.pathname]);
   const selectedAccountId = useMemo(() => getAccountIdFromPath(location.pathname), [location.pathname]);
   const selectedAccount = useMemo(() => selectedAccountId ? accounts.find(a => a.id === selectedAccountId) || null : null, [selectedAccountId, accounts]);
@@ -116,22 +107,6 @@ const FinanceView = () => {
     : null;
 
   const activityElsewhere = latestActivityMonth !== null && !currentMonthHasActivity;
-
-  /**
-   * UX-FN-04: the overlapping card stack exposed only a sliver of the inactive
-   * accounts and offered no comparable view. The hero stack stays, and every
-   * account is also a compact row — grouped by currency, because two currencies
-   * cannot be compared by eye either.
-   */
-  const accountsByCurrency = useMemo(() => {
-    const grouped = new Map<string, typeof activeAccounts>();
-    for (const account of activeAccounts) {
-      const group = grouped.get(account.currency) ?? [];
-      group.push(account);
-      grouped.set(account.currency, group);
-    }
-    return Array.from(grouped, ([currency, group]) => ({ currency, accounts: group }));
-  }, [activeAccounts]);
 
   const openAccountDetails = useCallback((accountId: string) => {
     void runFinanceViewTransition(() => {
@@ -219,44 +194,21 @@ const FinanceView = () => {
           </button>
         </div>
 
-        {/* Zone 2–3: Mobile = wallet stack, Desktop = production layout */}
-        {isMobile ? (
-          <>
-            <TotalAssetsSummaryBar accounts={activeAccounts} />
-            {loadingFinance && accounts.length === 0 && <SkeletonCards count={3} />}
-            {activeAccounts.length > 0 && (
-              <CardStack accounts={activeAccounts} mode={viewMode} onCardTap={handleCardTap} onReorder={handleReorder} onShowAll={activeAccounts.length > 10 ? () => navigate('/finance/accounts') : undefined} />
-            )}
-            {/*
-              * UX-FN-04: the stack exposed only a sliver of the inactive
-              * accounts. Every account is now also a compact, comparable row
-              * (name · type · currency · balance), grouped by currency.
-              */}
-            {activeAccounts.length > 0 && (
-              <section data-testid="all-accounts-list" className="space-y-2">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                  All accounts
-                </h3>
-                {accountsByCurrency.map(({ currency, accounts: groupAccounts }) => (
-                  <div key={currency} className="space-y-2">
-                    {accountsByCurrency.length > 1 && (
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{currency}</p>
-                    )}
-                    {groupAccounts.map(account => (
-                      <AccountListItem
-                        key={account.id}
-                        account={account}
-                        currentUserId={user?.uid}
-                        onOpenAccount={openAccountDetails}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </section>
-            )}
-          </>
-        ) : (
-          <FinanceDesktopContent netWorth={netWorth} transactions={globalTransactions} currency={primaryCurrency} accounts={accounts} activeAccounts={activeAccounts} loading={loadingFinance} userId={user?.uid || ''} onOpenAccount={openAccountDetails} />
+        {/*
+          * Mobile-first, single surface. AnchorOS ships to iOS/Android through
+          * Capacitor, so there is one layout at every width.
+          *
+          * The Wallet stack is the *only* account surface on this page. It used
+          * to be drawn twice — the stack, plus a duplicate "All accounts" list of
+          * the very same accounts — which read as two competing lists. The stack
+          * is not capped at 3, so the list was never "the rest of the accounts".
+          * When there are more accounts than a comfortable stack, the stack
+          * offers its own way into the full searchable list (`/finance/accounts`).
+          */}
+        <TotalAssetsSummaryBar accounts={activeAccounts} />
+        {loadingFinance && accounts.length === 0 && <SkeletonCards count={3} />}
+        {activeAccounts.length > 0 && (
+          <CardStack accounts={activeAccounts} mode={viewMode} onCardTap={handleCardTap} onReorder={handleReorder} onShowAll={() => navigate('/finance/accounts')} />
         )}
         {!loadingFinance && accounts.length === 0 && <EmptyAccountsState onCreateAccount={() => setMode('addAcc')} />}
         {/* FIN-014: Upcoming bill reminders */}

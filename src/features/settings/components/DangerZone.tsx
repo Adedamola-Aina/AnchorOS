@@ -77,7 +77,7 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
 
     return (
         <Card className="overflow-hidden border-2 border-danger-border">
-            <CardHeader className="p-6 border-b border-danger-border bg-danger-surface">
+            <CardHeader className="p-4 sm:p-6 border-b border-danger-border bg-danger-surface">
                 <CardTitle className="text-base font-bold text-rose-900 dark:text-rose-400 flex items-center gap-3">
                     <div className="p-2 bg-rose-500/10 rounded-lg">
                         <AlertCircle className="w-5 h-5 text-danger" />
@@ -85,8 +85,8 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ onDeleteAccount }) => {
                     Danger Zone
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
                     <div>
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Delete Account</p>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">

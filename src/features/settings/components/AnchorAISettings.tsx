@@ -22,7 +22,7 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({ userId, show
 
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-primary-50/30 dark:bg-primary-900/10">
+            <CardHeader className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-primary-50/30 dark:bg-primary-900/10">
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
                     <div className="p-2 bg-primary-500/10 rounded-lg">
                         <Sparkles className="w-5 h-5 text-primary-500" />

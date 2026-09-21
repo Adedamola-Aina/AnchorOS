@@ -644,7 +644,9 @@ describe('CommitmentsView', () => {
       const input = screen.getByPlaceholderText(/e.g. Morning Prayer/i);
       await user.type(input, 'New Family Task');
 
-      const familyButton = screen.getByRole('button', { name: /family/i });
+      // Context is a refinement: one deliberate tap reveals it.
+      await user.click(screen.getByTestId('composer-more-toggle'));
+      const familyButton = screen.getByRole('button', { name: /^family$/i });
       await user.click(familyButton);
 
       const saveButton = screen.getByRole('button', { name: /Save Commitment/i });

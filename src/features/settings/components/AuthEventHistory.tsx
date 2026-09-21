@@ -106,7 +106,7 @@ export const AuthEventHistory: React.FC = () => {
 
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
+            <CardHeader className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between gap-3">
                     <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
                         <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">

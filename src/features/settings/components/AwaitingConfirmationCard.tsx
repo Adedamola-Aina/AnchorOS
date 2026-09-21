@@ -28,7 +28,7 @@ export function AwaitingConfirmationCard({
     return (
         <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/10 overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <CardHeader className="p-6 pb-4">
+            <CardHeader className="p-4 sm:p-6 pb-4">
                 <CardTitle className="text-base font-bold text-emerald-900 dark:text-emerald-400 flex items-center gap-3">
                     <div className="p-2 bg-emerald-500/10 rounded-lg">
                         <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -36,7 +36,7 @@ export function AwaitingConfirmationCard({
                     Confirm Family Connection
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 pt-0">
+            <CardContent className="p-4 sm:p-6 pt-0">
                 {showPasswordPrompt ? (
                     <form onSubmit={onPasswordSubmit} className="space-y-4">
                         <div className="p-4 rounded-card bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800">
