@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.27](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.26...v1.21.0-rc.27) (2026-09-21)
+
+
+### Bug Fixes
+
+* **ux:** one account surface, Anchor on Home, capture-first composer (FN-04, AI-09) ([#242](https://github.com/Adedamola-Aina/AnchorOS/issues/242)) ([cd2ac9e](https://github.com/Adedamola-Aina/AnchorOS/commit/cd2ac9e8d66dfd495c753c320b749f0ac6e68de0))
+
 ## [1.21.0-rc.26](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.25...v1.21.0-rc.26) (2026-09-21)
 
 ## [1.21.0-rc.25](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.24...v1.21.0-rc.25) (2026-09-20)
