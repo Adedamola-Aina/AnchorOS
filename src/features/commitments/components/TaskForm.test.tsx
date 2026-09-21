@@ -43,10 +43,11 @@ vi.mock('../../../components/shared', () => ({
 // `Modal` is imported from its own module (the shared barrel does not re-export
 // it), so it needs its own mock.
 vi.mock('../../../components/shared/Modal', () => ({
-    Modal: ({ children, title, maxWidth }: any) => (
+    Modal: ({ children, title, maxWidth, footer }: any) => (
         <div data-testid="composer-sheet" className={maxWidth}>
             {title && <h3>{title}</h3>}
             {children}
+            {footer && <div data-testid="modal-footer">{footer}</div>}
         </div>
     ),
 }));

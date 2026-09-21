@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import React from 'react';
 
 // Mock child components
@@ -65,10 +65,20 @@ describe('EditTaskForm', () => {
     Element.prototype.scrollIntoView = vi.fn();
   });
 
-  it('renders with task title pre-filled', () => {
+  it('renders as a sheet with the title pre-filled and a pinned action bar', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
+
     expect(screen.getByDisplayValue('Read Bible')).toBeInTheDocument();
-    expect(screen.getByText(/editing daily commitment/i)).toBeInTheDocument();
+
+    // It is a modal sheet, not a Card in the page flow: that is what keeps the
+    // actions reachable and stops the shell's FAB covering the fields.
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Edit commitment')).toBeInTheDocument();
+
+    // Cancel / Save live in the modal footer, outside the scrollable body.
+    const footer = screen.getByTestId('modal-footer');
+    expect(within(footer).getByText('Cancel')).toBeInTheDocument();
+    expect(within(footer).getByText('Save Changes')).toBeInTheDocument();
   });
 
   it('shows DailyFields for daily tasks', () => {

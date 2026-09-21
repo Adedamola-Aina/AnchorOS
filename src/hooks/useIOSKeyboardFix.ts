@@ -1,19 +1,26 @@
 /**
- * useIOSKeyboardFix — Suppress iOS keyboard input accessory bar (Previous/Next/Done toolbar)
+ * useIOSKeyboardFix — make iOS actually open the keyboard.
  *
- * The iOS Safari/PWA form assistant toolbar appears above the keyboard for all
- * focused inputs. There is no single CSS property to hide it. This hook applies
- * multiple proven mitigations globally:
+ * BUG-093 originally chased the iOS input accessory bar (the Previous/Next/Done
+ * strip above the keyboard). Two of the mitigations it shipped traded the
+ * keyboard away to hide a cosmetic strip:
  *
- * 1. Detects iOS (Safari/PWA standalone)
- * 2. Adds `is-ios` class to <html> for CSS-based fixes
- * 3. Intercepts focus on inputs/textareas and sets attributes that suppress toolbar:
- *    - Sets autocomplete="off" on inputs that don't already specify one
- *    - Ensures font-size >= 16px (prevents iOS auto-zoom)
- * 4. On standalone PWA: blurs and refocuses inputs after a micro-delay
- *    to break the toolbar attachment cycle
+ *   1. It set `readOnly = true` on the focused field, then cleared it in a
+ *      requestAnimationFrame and refocused. On iOS, making a focused field
+ *      readOnly dismisses the keyboard, and the refocus that follows is not tied
+ *      to a user gesture — so the keyboard does not come back. Tapping the field
+ *      again fires no `focus` event (it is already `document.activeElement`), so
+ *      the field is simply untypeable. Reported from iOS as "the keyboard doesn't
+ *      come up for typing".
+ *   2. It demoted every other input on the page to `tabindex="-1"`, which broke
+ *      moving between fields and fought the modal's own focus trap.
  *
- * BUG-093: iOS keyboard toolbar still visible in PWA
+ * Both are removed. What remains is the part that is safe and useful: the
+ * `is-ios` marker for CSS, the autocorrect/autocapitalise hints, and hiding the
+ * native accessory bar through the Capacitor Keyboard plugin.
+ *
+ * `enterkeyhint` is only set when the field has not declared one — a caller that
+ * needs the key to submit sets it explicitly (see `CommitmentFindOrAdd`).
  */
 // @ts-nocheck
 
@@ -27,16 +34,10 @@ const isIOS = (): boolean => {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 };
 
-const isStandalonePWA = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  return ('standalone' in window.navigator && (window.navigator as Navigator & { standalone?: boolean }).standalone === true) ||
-    window.matchMedia('(display-mode: standalone)').matches;
-};
-
 export function useIOSKeyboardFix(): void {
   useEffect(() => {
-    // Hide iOS keyboard accessory bar (Prev/Next/Done) in native app.
-    // This is the strip shown above the keyboard across forms.
+    // Hide iOS keyboard accessory bar (Prev/Next/Done) in the native app. This is
+    // the supported, non-invasive way to do it — no DOM tricks required.
     if (isNative() && isCapacitorIOS() && isPluginAvailable('Keyboard')) {
       void Keyboard.setAccessoryBarVisible({ isVisible: false });
     }
@@ -46,23 +47,13 @@ export function useIOSKeyboardFix(): void {
     // Mark <html> so CSS can target iOS-specific overrides
     document.documentElement.classList.add('is-ios');
 
-    const isPWA = isStandalonePWA();
-    let demotedInputs: Array<{ element: HTMLElement; previousTabIndex: string | null }> = [];
-
     const isTextControl = (element: Element): element is HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement =>
       element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement;
 
-    const restoreDemotedInputs = () => {
-      demotedInputs.forEach(({ element, previousTabIndex }) => {
-        if (previousTabIndex === null) {
-          element.removeAttribute('tabindex');
-        } else {
-          element.setAttribute('tabindex', previousTabIndex);
-        }
-      });
-      demotedInputs = [];
-    };
-
+    /**
+     * Focus hints only. Nothing here touches `readOnly`, `tabindex` or focus, so
+     * the field the user tapped keeps the keyboard it opened.
+     */
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       if (!isTextControl(target)) return;
@@ -70,66 +61,23 @@ export function useIOSKeyboardFix(): void {
       // Skip inputs that explicitly need autocomplete (passwords, emails)
       const autoCompleteValue = target.getAttribute('autocomplete');
       const preserveAutocomplete = autoCompleteValue && !['off', 'on'].includes(autoCompleteValue);
+      if (preserveAutocomplete || target.hasAttribute('data-keep-autocomplete')) return;
 
-      if (!preserveAutocomplete && !target.hasAttribute('data-keep-autocomplete')) {
-        target.setAttribute('autocomplete', 'off');
-        if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
-          target.setAttribute('autocorrect', 'off');
-          target.setAttribute('autocapitalize', 'off');
-          target.setAttribute('spellcheck', 'false');
-          // Suppress iOS form navigation (Previous/Next) by hinting single-field
-          if (!target.hasAttribute('enterkeyhint')) {
-            target.setAttribute('enterkeyhint', 'done');
-          }
+      target.setAttribute('autocomplete', 'off');
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+        target.setAttribute('autocorrect', 'off');
+        target.setAttribute('autocapitalize', 'off');
+        target.setAttribute('spellcheck', 'false');
+        if (!target.hasAttribute('enterkeyhint')) {
+          target.setAttribute('enterkeyhint', 'done');
         }
       }
-
-      if (!isPWA) return;
-
-      const parentForm = target.closest('form');
-      if (parentForm && !parentForm.hasAttribute('autocomplete')) {
-        parentForm.setAttribute('autocomplete', 'off');
-      }
-
-      restoreDemotedInputs();
-      const controls = Array.from(document.querySelectorAll('input, textarea, select'));
-      demotedInputs = controls
-        .filter((control) => control !== target && isTextControl(control))
-        .map((control) => {
-          const element = control as HTMLElement;
-          const previousTabIndex = element.getAttribute('tabindex');
-          element.setAttribute('tabindex', '-1');
-          return { element, previousTabIndex };
-        });
-
-      // PWA-only: encourage iOS to attach keyboard in single-field mode.
-      if ((target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) && !target.hasAttribute('data-ios-fixed')) {
-        target.setAttribute('data-ios-fixed', 'true');
-        target.readOnly = true;
-        requestAnimationFrame(() => {
-          target.readOnly = false;
-          target.focus({ preventScroll: true });
-          setTimeout(() => target.removeAttribute('data-ios-fixed'), 300);
-        });
-      }
-    };
-
-    const handleFocusOut = (e: FocusEvent) => {
-      if (!isPWA) return;
-      const next = e.relatedTarget;
-      if (next && isTextControl(next)) return;
-      setTimeout(() => {
-        restoreDemotedInputs();
-      }, 120);
     };
 
     document.addEventListener('focusin', handleFocusIn, { passive: true });
-    document.addEventListener('focusout', handleFocusOut);
 
     return () => {
-      restoreDemotedInputs();
       document.removeEventListener('focusin', handleFocusIn);
-      document.removeEventListener('focusout', handleFocusOut);
       document.documentElement.classList.remove('is-ios');
     };
   }, []);

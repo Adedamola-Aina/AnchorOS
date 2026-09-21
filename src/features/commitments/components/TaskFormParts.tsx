@@ -55,12 +55,12 @@ interface WeeklyDaysFieldProps { value: number[]; onChange: (days: number[]) => 
  */
 export const WeeklyDaysField: React.FC<WeeklyDaysFieldProps> = ({ value, onChange }) => (
     <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] uppercase font-bold text-slate-400">On which days?</label>
+        <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">On which days?</label>
         <div className="flex justify-between gap-1">
             {WEEKDAY_FULL_LABELS.map((day, index) => (
                 <button key={day} type="button" onClick={() => onChange(value.includes(index) ? value.filter(d => d !== index) : [...value, index])}
                     aria-pressed={value.includes(index)} aria-label={day}
-                    className={`w-10 h-10 rounded-full text-xs font-bold border transition-all flex items-center justify-center ${value.includes(index) ? 'bg-purple-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-purple-300'}`}>{WEEKDAY_COMPACT_LABELS[index]}</button>
+                    className={`w-11 h-11 rounded-full text-xs font-bold border transition-all flex items-center justify-center ${value.includes(index) ? 'bg-purple-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-purple-300'}`}>{WEEKDAY_COMPACT_LABELS[index]}</button>
             ))}
         </div>
     </div>
@@ -87,7 +87,7 @@ export const MonthlyDatesField: React.FC<MonthlyDatesFieldProps> = ({ value, onC
     return (
         <>
             <div className="flex flex-col gap-1.5">
-                <label id="month-days-label" className="text-[10px] uppercase font-bold text-slate-400">On which dates?</label>
+                <label id="month-days-label" className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">On which dates?</label>
                 <button
                     type="button"
                     onClick={() => setIsOpen(true)}
@@ -115,7 +115,13 @@ const INTERVAL_UNITS: Record<string, { singular: string; plural: string }> = {
 interface RepeatFieldsProps {
     type: TaskType;
     interval: number;
-    onIntervalChange: (value: number) => void;
+    /**
+     * Optional. The interval is only offered where the cadence is already fixed —
+     * i.e. in the edit form. In the composer the "How often?" control is the
+     * single frequency picker, and a second one reading "Every day" beneath
+     * "Daily" was pure duplication.
+     */
+    onIntervalChange?: (value: number) => void;
     startDate: string;
     onStartDateChange: (value: string) => void;
     endDate: string;
@@ -140,7 +146,7 @@ export const RepeatFields: React.FC<RepeatFieldsProps> = ({
 
     return (
         <div className="flex flex-col gap-3">
-            {unit && (
+            {unit && onIntervalChange && (
                 <PopoverMenu
                     label="Repeats"
                     icon={<Repeat className="w-4 h-4 text-slate-400" aria-hidden="true" />}
@@ -154,7 +160,7 @@ export const RepeatFields: React.FC<RepeatFieldsProps> = ({
                 />
             )}
             <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400">{type === 'todo' ? 'Due date' : 'Starts'}</label>
+                <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">{type === 'todo' ? 'Due date (optional)' : 'Starts'}</label>
                 <InlineDatePicker
                     value={type === 'todo' ? (dueDate || '') : startDate}
                     onChange={type === 'todo' ? (v) => onDueDateChange?.(v) : onStartDateChange}
@@ -164,7 +170,7 @@ export const RepeatFields: React.FC<RepeatFieldsProps> = ({
             </div>
             {type !== 'todo' && (
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400">Ends <span className="normal-case font-medium">(optional)</span></label>
+                    <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Ends <span className="normal-case font-medium">(optional)</span></label>
                     <div className="flex items-center gap-2">
                         <InlineDatePicker value={endDate} onChange={onEndDateChange} label="End date" testId="end-date-input" />
                         {endDate && (
