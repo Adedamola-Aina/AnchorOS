@@ -10,6 +10,7 @@ import {
 const addDoc = vi.fn();
 const collection = vi.fn();
 const deleteDoc = vi.fn();
+const deleteField = vi.fn(() => 'DELETE_FIELD');
 const doc = vi.fn();
 const runTransaction = vi.fn();
 const serverTimestamp = vi.fn(() => 'server-ts');
@@ -19,6 +20,7 @@ vi.mock('firebase/firestore', () => ({
   addDoc: (...args: unknown[]) => addDoc(...args),
   collection: (...args: unknown[]) => collection(...args),
   deleteDoc: (...args: unknown[]) => deleteDoc(...args),
+  deleteField: () => deleteField(),
   doc: (...args: unknown[]) => doc(...args),
   runTransaction: (...args: unknown[]) => runTransaction(...args),
   serverTimestamp: () => serverTimestamp(),
@@ -198,6 +200,48 @@ describe('CommitmentApi', () => {
       expect(doc).toHaveBeenCalledWith(
         expect.anything(),
         'artifacts', 'test-app-id', 'users', 'user-1', 'commitments', 'commit-1',
+      );
+    });
+
+    /**
+     * The edit form sends `undefined` for every field the user left empty. The
+     * SDK rejects a payload containing `undefined` outright — that single write
+     * failed client-side and surfaced as "Could not update commitment. Please try
+     * again." on every edit, regardless of which field was touched.
+     */
+    it('never passes an undefined value through to updateDoc', async () => {
+      await updateCommitment('user-1', 'commit-1', {
+        title: 'Pay rent',
+        priority: 'high',
+        notes: undefined,
+      });
+
+      const payload = updateDoc.mock.calls[0][1];
+      expect(payload).toEqual({ title: 'Pay rent', priority: 'high', notes: 'DELETE_FIELD' });
+      expect(Object.values(payload)).not.toContain(undefined);
+    });
+
+    it('converts a cleared field into a deletion, so "Clear" really clears', async () => {
+      await updateCommitment('user-1', 'commit-1', {
+        endDate: undefined,
+        interval: undefined,
+        startDate: undefined,
+      });
+
+      expect(deleteField).toHaveBeenCalledTimes(3);
+      expect(updateDoc).toHaveBeenCalledWith(
+        expect.any(Object),
+        { endDate: 'DELETE_FIELD', interval: 'DELETE_FIELD', startDate: 'DELETE_FIELD' },
+      );
+    });
+
+    it('passes defined values through untouched, and invents no fields', async () => {
+      await updateCommitment('user-1', 'commit-1', { title: 'Updated Title', completed: true });
+
+      expect(deleteField).not.toHaveBeenCalled();
+      expect(updateDoc).toHaveBeenCalledWith(
+        expect.any(Object),
+        { title: 'Updated Title', completed: true },
       );
     });
   });

@@ -165,24 +165,26 @@ test.describe('Comprehensive Production Readiness Check', () => {
     });
 
     // --- Commitments ---
-    test('Commitments: Frequency fields', async ({ page }) => {
+    test('Commitments: cadence fields', async ({ page }) => {
         await navigateTo(page, 'Commitments');
 
-        await page.getByRole('button', { name: 'New Commitment' }).click();
+        // Creating is the FAB's job (UX-GL-04) — the header button was a duplicate.
+        await page.getByTestId('contextual-fab').click();
 
-        // Click Monthly frequency button
-        await expect(page.locator('text=Choose Frequency')).toBeVisible();
-        await page.getByRole('button', { name: 'Monthly On a specific date' }).click();
+        // Monthly: the day-of-month picker is a half sheet, not an inline calendar.
+        await page.getByTestId('cadence-selector').getByText('Monthly').click();
+        await expect(page.getByTestId('month-days-row')).toBeVisible();
+        await page.getByTestId('month-days-row').click();
+        await expect(page.getByTestId('month-days-sheet')).toBeVisible();
+        await page.getByRole('button', { name: 'Done' }).click();
 
-        // Verify we see the monthly configuration (Which date(s)?)
-        await expect(page.locator('text=Which date(s)?')).toBeVisible();
-
-        // Back
-        await page.click('button:has-text("Back")');
-
-        // Click Weekly - use exact match for the large button
-        await page.getByRole('button', { name: 'Weekly On specific days' }).click();
+        // Weekly: the day strip stays inline — it is small, and it *is* the "when".
+        await page.getByTestId('cadence-selector').getByText('Weekly').click();
         await expect(page.locator('text=On which days?')).toBeVisible();
+
+        // Daily: the time of day is a pull-down, not four buttons.
+        await page.getByTestId('cadence-selector').getByText('Daily').click();
+        await expect(page.getByTestId('time-of-day-select')).toBeVisible();
     });
 
     // --- Security ---

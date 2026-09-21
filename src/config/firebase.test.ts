@@ -120,7 +120,15 @@ describe('firebase config module', () => {
         );
         expect(mockState.initializeFirestore).toHaveBeenCalledWith(
             { app: 'firebase-app' },
-            { localCache: { cache: 'memory' } },
+            {
+                localCache: { cache: 'memory' },
+                // Optional commitment/schedule fields are sent as `undefined`.
+                // Without this the SDK refuses the entire write client-side with
+                // "Unsupported field value: undefined", which surfaced as
+                // "Could not update commitment. Please try again." on every edit
+                // and broke creating a commitment without a reminder or notes.
+                ignoreUndefinedProperties: true,
+            },
         );
         expect(mockState.getFunctions).toHaveBeenCalledWith({ app: 'firebase-app' }, 'us-central1');
 

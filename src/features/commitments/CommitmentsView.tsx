@@ -7,7 +7,7 @@
 
 
 import { useState, useMemo } from 'react';
-import { Plus, X, CheckSquare } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import { captureError } from '../../utils/error';
 import type { AnchorTask } from '../../types';
 import { useApp } from '../../context/AnchorContext';
@@ -24,7 +24,7 @@ import { WeeklyView } from './components/WeeklyView';
 import { MonthCalendarView } from './components/MonthCalendarView';
 import { TimelineView } from './components/TimelineView';
 import { CommitmentsEmptyState, CommitmentsFilterBar } from './components/CommitmentsViewParts';
-import { SmartViewBar, CommitmentSearchField, QuickAddBar } from './components/CommitmentToolbar';
+import { SmartViewBar, CommitmentFindOrAdd } from './components/CommitmentToolbar';
 import { DoneHistory, CommitmentUndoBar, BulkActionBar } from './components/CommitmentHistory';
 import { useCommitmentsWorkspace } from './hooks/useCommitmentsWorkspace';
 import { useRegisterFab } from '../../context/FabContext';
@@ -137,30 +137,41 @@ const CommitmentsView = () => {
   return (
     <FeatureErrorBoundary featureName="Commitments">
       <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8">
+        {/*
+          * One create affordance, not two.
+          *
+          * This header used to carry its own "New Commitment" button while the
+          * FAB rendered a second one with the identical handler — two buttons,
+          * one action, both on screen. Creating is the FAB's job (UX-GL-04: the
+          * page's primary action belongs under the thumb), and the FAB now exists
+          * at every width, so the header keeps only the bulk-selection control.
+          */}
         <SectionHeader title="Commitments" subtitle={hasFamilyActive ? "Manage your daily obligations, goals, and family duties." : "Manage your daily obligations and goals."} action={<div className="flex items-center gap-2">
           <Button onClick={workspace.startSelection} variant="secondary" className="gap-2" aria-pressed={workspace.selectable}>
             <CheckSquare className="w-4 h-4" /><span>Select</span>
           </Button>
-          <Button onClick={() => setShowAdd(!showAdd)} variant={showAdd ? 'secondary' : 'primary'} className="gap-2" aria-expanded={showAdd}>{showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />} <span>{showAdd ? 'Close' : 'New Commitment'}</span></Button>
         </div>} />
 
-        {/* CM-21 / CM-15: "what do I owe right now?" first, then find anything. */}
+        {/*
+          * CM-21 / CM-15 / CM-16: "what do I owe right now?" first, then one field
+          * that both finds an existing commitment and adds a new one.
+          */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
           <SmartViewBar view={workspace.smartView} onViewChange={workspace.setSmartView} counts={workspace.counts} />
           <div className="lg:w-80">
-            <CommitmentSearchField value={workspace.query} onChange={workspace.setQuery} resultCount={totalFiltered} />
+            <CommitmentFindOrAdd
+              value={workspace.query}
+              onChange={workspace.setQuery}
+              resultCount={totalFiltered}
+              onSaveDraft={(draft) => { void handleAdd(draftToTask(draft)); workspace.setQuery(''); }}
+              onAdjustDraft={(draft) => { setQuickAddDraft(draft); setShowAdd(true); workspace.setQuery(''); }}
+            />
           </div>
         </div>
 
         <CommitmentsFilterBar filter={workspace.typeFilter} viewMode={viewMode} onFilterChange={workspace.setTypeFilter} onViewChange={setViewMode} />
 
         <BulkActionBar count={workspace.selectedIds.size} onComplete={workspace.bulkComplete} onDelete={handleBulkDelete} onClear={workspace.clearSelection} />
-
-        {/* CM-16: instant add — one line, parsed and shown back before it is saved. */}
-        <QuickAddBar
-          onSave={(draft) => { void handleAdd(draftToTask(draft)); }}
-          onAdjust={(draft) => { setQuickAddDraft(draft); setShowAdd(true); }}
-        />
 
         {showAdd && <TaskForm onClose={closeComposer} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} initialDraft={quickAddDraft} />}
         {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}

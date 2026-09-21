@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { addDoc, collection, deleteDoc, doc, runTransaction, serverTimestamp, updateDoc, db } from '../utils/secureDb';
+import { addDoc, collection, deleteDoc, deleteField, doc, runTransaction, serverTimestamp, updateDoc, db } from '../utils/secureDb';
 import { APP_ID } from '../config/firebase';
 import type { AnchorTask } from '../types';
 
@@ -43,10 +43,32 @@ export async function deleteCommitment(userUid: string, id: string) {
   await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', userUid, 'commitments', id));
 }
 
+/**
+ * Turn an `undefined` value into an explicit field deletion.
+ *
+ * The edit form expresses "this field is empty" as `undefined` — an unset end
+ * date, an interval back at 1, cleared notes. The Firestore SDK refuses a write
+ * containing `undefined` outright, and the database-level
+ * `ignoreUndefinedProperties` (which stops that crash) would otherwise *ignore*
+ * those keys, leaving the previously-stored value in place — so "Clear" would
+ * silently fail to clear. `deleteField()` is the one value that means "remove
+ * this field", so the intent is preserved exactly.
+ */
+function toUpdatePayload(updates: Record<string, unknown>): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(updates)) {
+    payload[key] = value === undefined ? deleteField() : value;
+  }
+  return payload;
+}
+
 export async function updateCommitment(
   userUid: string,
   id: string,
   updates: Partial<Omit<AnchorTask, 'id' | 'createdAt' | 'type'>>
 ) {
-  await updateDoc(doc(db, 'artifacts', APP_ID, 'users', userUid, 'commitments', id), updates);
+  await updateDoc(
+    doc(db, 'artifacts', APP_ID, 'users', userUid, 'commitments', id),
+    toUpdatePayload(updates as Record<string, unknown>)
+  );
 }

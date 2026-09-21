@@ -100,7 +100,8 @@ test.describe('Responsive Layout Tests', () => {
 
         // Verify we navigated to commitments
         await expect(page.getByText('Manage your daily obligations')).toBeVisible();
-        await expect(page.getByText('New Commitment')).toBeVisible();
+        // Creating is the FAB's job (UX-GL-04) — it is the page's primary action.
+        await expect(page.getByTestId('contextual-fab')).toBeVisible();
     });
 
     test('Settings - Bottom Nav Link Exists and Routes Correctly', async ({ page }) => {

@@ -21,6 +21,8 @@ interface PopoverMenuProps {
   onChange: (value: string) => void;
   placeholder?: string;
   label?: string;
+  /** Optional leading icon on the trigger, e.g. a Repeat glyph. */
+  icon?: React.ReactNode;
   className?: string;
   /** Test ID for the trigger button */
   testId?: string;
@@ -32,6 +34,7 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
   onChange,
   placeholder = 'Select…',
   label,
+  icon,
   className = '',
   testId,
 }) => {
@@ -122,6 +125,7 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
         className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 min-h-[44px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-base transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/20 ${className}`}
       >
         <span className="flex items-center gap-2 truncate">
+          {icon}
           {selectedItem?.icon}
           {selectedItem?.label ?? placeholder}
         </span>
