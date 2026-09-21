@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.31](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.30...v1.21.0-rc.31) (2026-09-21)
+
+
+### Bug Fixes
+
+* **ux:** the editor as a route, one accent, and the last of the iOS report (CM-17, GL-04) ([#252](https://github.com/Adedamola-Aina/AnchorOS/issues/252)) ([258bb7c](https://github.com/Adedamola-Aina/AnchorOS/commit/258bb7cab440fe016d280e5c7924d07615c6084f))
+
 ## [1.21.0-rc.30](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.29...v1.21.0-rc.30) (2026-09-21)
 
 
