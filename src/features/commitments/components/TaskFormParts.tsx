@@ -37,16 +37,47 @@ const TIME_OF_DAY_OPTIONS = [
  * A pull-down menu, not four buttons: it is one value out of four. This is the
  * Apple Reminders pattern for a short closed set, and it stops the composer
  * spending a whole grid row on a single choice.
+ *
+ * The helper line exists because "Preferred time" and "Reminder" were reported as
+ * competing: one said Afternoon while the other said 9:00 AM, with nothing to say
+ * how they relate. This one orders your day; the reminder is what notifies you.
  */
 export const DailyTimeField: React.FC<DailyTimeFieldProps> = ({ value, onChange }) => (
-    <PopoverMenu
-        label="Preferred time"
-        items={TIME_OF_DAY_OPTIONS}
-        value={value}
-        onChange={(next) => onChange(next as TimeOfDay)}
-        testId="time-of-day-select"
-    />
+    <div className="flex flex-col gap-1.5">
+        <PopoverMenu
+            label="Preferred time"
+            items={TIME_OF_DAY_OPTIONS}
+            value={value}
+            onChange={(next) => onChange(next as TimeOfDay)}
+            testId="time-of-day-select"
+        />
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            Where this belongs in your day. It orders your list — it does not notify you.
+        </p>
+    </div>
 );
+
+/** The hours each preferred block covers, for the reminder cross-check below. */
+const PREFERRED_WINDOWS: Partial<Record<TimeOfDay, [number, number]>> = {
+    morning: [5, 11],
+    afternoon: [12, 16],
+    evening: [17, 23],
+};
+
+/**
+ * Does an `HH:MM` reminder fall outside the preferred part of the day?
+ *
+ * "Afternoon" with a 9:00 AM reminder is not wrong — you can want a morning nudge
+ * about an afternoon commitment — but it should be *said*, not left for the user
+ * to notice. `any` never conflicts.
+ */
+export function reminderOutsidePreferredWindow(timeOfDay: TimeOfDay, reminderTime: string): boolean {
+    const window = PREFERRED_WINDOWS[timeOfDay];
+    if (!window || !reminderTime) return false;
+    const hour = Number(reminderTime.split(':')[0]);
+    if (Number.isNaN(hour)) return false;
+    return hour < window[0] || hour > window[1];
+}
 
 interface WeeklyDaysFieldProps { value: number[]; onChange: (days: number[]) => void; }
 /**
@@ -60,7 +91,7 @@ export const WeeklyDaysField: React.FC<WeeklyDaysFieldProps> = ({ value, onChang
             {WEEKDAY_FULL_LABELS.map((day, index) => (
                 <button key={day} type="button" onClick={() => onChange(value.includes(index) ? value.filter(d => d !== index) : [...value, index])}
                     aria-pressed={value.includes(index)} aria-label={day}
-                    className={`w-11 h-11 rounded-full text-xs font-bold border transition-all flex items-center justify-center ${value.includes(index) ? 'bg-purple-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-purple-300'}`}>{WEEKDAY_COMPACT_LABELS[index]}</button>
+                    className={`w-11 h-11 rounded-full text-xs font-bold border transition-all flex items-center justify-center ${value.includes(index) ? 'bg-primary-600 text-white border-transparent' : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-primary-300'}`}>{WEEKDAY_COMPACT_LABELS[index]}</button>
             ))}
         </div>
     </div>
@@ -159,28 +190,31 @@ export const RepeatFields: React.FC<RepeatFieldsProps> = ({
                     testId="repeat-interval-select"
                 />
             )}
-            <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">{type === 'todo' ? 'Due date (optional)' : 'Starts'}</label>
-                <InlineDatePicker
-                    value={type === 'todo' ? (dueDate || '') : startDate}
-                    onChange={type === 'todo' ? (v) => onDueDateChange?.(v) : onStartDateChange}
-                    label={type === 'todo' ? 'Due date' : 'Start date'}
-                    testId={type === 'todo' ? 'due-date-input' : 'start-date-input'}
-                />
-            </div>
-            {type !== 'todo' && (
+            {/* Starts and Ends share one grid, so the two dates are the same width. */}
+            <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Ends <span className="normal-case font-medium">(optional)</span></label>
-                    <div className="flex items-center gap-2">
-                        <InlineDatePicker value={endDate} onChange={onEndDateChange} label="End date" testId="end-date-input" />
-                        {endDate && (
-                            <Button type="button" variant="ghost" size="sm" onClick={() => onEndDateChange('')} className="text-xs">
-                                Clear
-                            </Button>
-                        )}
-                    </div>
+                    <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">{type === 'todo' ? 'Due date (optional)' : 'Starts'}</label>
+                    <InlineDatePicker
+                        value={type === 'todo' ? (dueDate || '') : startDate}
+                        onChange={type === 'todo' ? (v) => onDueDateChange?.(v) : onStartDateChange}
+                        label={type === 'todo' ? 'Due date' : 'Start date'}
+                        testId={type === 'todo' ? 'due-date-input' : 'start-date-input'}
+                    />
                 </div>
-            )}
+                {type !== 'todo' && (
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                            <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Ends <span className="normal-case font-medium">(optional)</span></label>
+                            {endDate && (
+                                <Button type="button" variant="ghost" size="sm" onClick={() => onEndDateChange('')} className="text-xs h-6 px-1.5">
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+                        <InlineDatePicker value={endDate} onChange={onEndDateChange} label="End date" testId="end-date-input" />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

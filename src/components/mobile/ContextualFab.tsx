@@ -18,6 +18,10 @@ import { useFab } from '../../context/FabContext';
  * It also stands down while a sheet is open (`data-modal-open` on <body>): a
  * floating button pinned over a modal is what blocked PRIORITY and
  * Cancel / Save Changes in the editor.
+ *
+ * Colour: Anchor Blue, like every other primary action. It was the task purple,
+ * which made the FAB, the Save button and the selected chips three different
+ * accents for one role. Purple stays the *commitment* identity (streaks, tints).
  */
 export const ContextualFab = ({ navHidden = false }: { navHidden?: boolean }) => {
   const { action } = useFab();
@@ -41,7 +45,7 @@ export const ContextualFab = ({ navHidden = false }: { navHidden?: boolean }) =>
       aria-label={action.label}
       data-testid="contextual-fab"
       data-nav-hidden={navHidden ? 'true' : 'false'}
-      className={`fixed right-4 z-40 inline-flex items-center gap-2 h-14 min-w-14 px-4 rounded-full bg-task-600 text-white shadow-lg shadow-task-600/30 active:scale-[0.97] transition-all duration-200 motion-reduce:transition-none ${navHidden ? 'translate-y-24 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
+      className={`fixed right-4 z-40 inline-flex items-center gap-2 h-14 min-w-14 px-4 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-600/30 active:scale-[0.97] transition-all duration-200 motion-reduce:transition-none ${navHidden ? 'translate-y-24 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
       style={{ bottom: 'calc(var(--bottom-nav-height, 49px) + 1rem)' }}
     >
       <Plus className="w-5 h-5" aria-hidden="true" />

@@ -37,7 +37,17 @@ export const EnvironmentBanner: React.FC = () => {
     <div
       data-testid="environment-banner"
       data-environment={env}
-      className={`fixed top-0 left-0 right-0 ${treatment.className} flex items-center justify-center text-xs font-bold tracking-widest uppercase whitespace-nowrap overflow-hidden z-50`}
+      /*
+       * z-30: a status strip, below every overlay.
+       *
+       * It was z-50, the same layer as Modal and the sheets, so on staging it
+       * painted over an open sheet's header and clipped titles. A status strip is
+       * not an overlay — the layer ladder is:
+       *   z-30  status strips (this banner)
+       *   z-40  the contextual FAB
+       *   z-50  overlays (Modal, ActionSheet, date/time/month sheets, PopoverMenu)
+       */
+      className={`fixed top-0 left-0 right-0 ${treatment.className} flex items-center justify-center text-xs font-bold tracking-widest uppercase whitespace-nowrap overflow-hidden z-30`}
       style={{ paddingTop: 'env(safe-area-inset-top, 0px)', height: 'calc(24px + env(safe-area-inset-top, 0px))' }}
     >
       {treatment.label}

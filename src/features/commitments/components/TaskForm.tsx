@@ -12,7 +12,7 @@ import { Button } from '@anchor-os/ui';
 import { ChevronDown } from 'lucide-react';
 import { Modal } from '../../../components/shared/Modal';
 import { PopoverMenu, TimeWheelPicker } from '../../../components/shared';
-import { DailyTimeField, WeeklyDaysField, MonthlyDatesField, RepeatFields } from './TaskFormParts';
+import { DailyTimeField, WeeklyDaysField, MonthlyDatesField, RepeatFields, reminderOutsidePreferredWindow } from './TaskFormParts';
 import { PriorityIndicator } from './PriorityIndicator';
 import type { QuickAddDraft } from '../utils/parseQuickAdd';
 import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
@@ -156,7 +156,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                         id="commitment-name"
                         type="text"
                         placeholder="e.g. Morning Prayer, Gym, Rent Payment"
-                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400"
                         value={newTaskTitle}
                         onChange={(e) => setNewTaskTitle(e.target.value)}
                         data-testid="task-name"
@@ -210,7 +210,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                         {showMoreOptions ? 'Fewer options' : 'More options'}
                     </span>
                     {hasRefinements && !showMoreOptions && (
-                        <span data-testid="composer-more-set" className="text-[10px] font-bold uppercase tracking-wider text-task-600 dark:text-task-400">
+                        <span data-testid="composer-more-set" className="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400">
                             Set
                         </span>
                     )}
@@ -274,18 +274,36 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                                 value={newTaskNotes}
                                 onChange={(e) => setNewTaskNotes(e.target.value)}
                                 data-testid="task-notes"
-                                className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none text-sm"
+                                className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none text-sm"
                             />
                         </div>
                         {/* Reminder field: full-width row (BUG-092) */}
-                        <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-card bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                            <TimeWheelPicker
-                                label="Reminder"
-                                value={newTaskReminder}
-                                onChange={setNewTaskReminder}
-                                placeholder="Optional"
-                                testId="reminder-input"
-                            />
+                        <div className="flex flex-col gap-1.5">
+                            <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-card bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                                <TimeWheelPicker
+                                    label="Reminder"
+                                    value={newTaskReminder}
+                                    onChange={setNewTaskReminder}
+                                    placeholder="Optional"
+                                    testId="reminder-input"
+                                />
+                            </div>
+                            {/*
+                              * The two time controls were reported as competing:
+                              * "Preferred time: Afternoon" beside "Reminder: 9:00 AM"
+                              * with nothing explaining how they relate. The reminder
+                              * is a notification; the preferred time only orders the
+                              * day. When they disagree, say so instead of leaving the
+                              * user to notice.
+                              */}
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                Sends a notification at this exact time — separate from your preferred time of day.
+                            </p>
+                            {newTaskType === 'daily' && reminderOutsidePreferredWindow(newTaskTime, newTaskReminder) && (
+                                <p data-testid="reminder-window-note" className="text-[11px] text-amber-600 dark:text-amber-400">
+                                    This reminder is at {newTaskReminder}, outside your preferred {newTaskTime}.
+                                </p>
+                            )}
                         </div>
                     </div>
                 )}

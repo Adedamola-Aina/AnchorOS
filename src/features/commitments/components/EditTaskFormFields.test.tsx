@@ -6,17 +6,20 @@ import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
 
 describe('EditTaskFormFields', () => {
   describe('DailyFields', () => {
-    it('renders time-of-day options', () => {
+    /**
+     * The composer uses a pull-down for this field; the editor used to render four
+     * buttons for the same choice. Two controls for one field was the drift.
+     */
+    it('offers the time of day as a pull-down', () => {
       render(<DailyFields editTime="morning" setEditTime={vi.fn()} />);
-      expect(screen.getByText(/morning/i)).toBeInTheDocument();
-      expect(screen.getByText(/afternoon/i)).toBeInTheDocument();
-      expect(screen.getByText(/evening/i)).toBeInTheDocument();
+      expect(screen.getByTestId('edit-time-of-day-select')).toHaveTextContent('Morning');
     });
 
     it('calls setEditTime on selection', () => {
       const setEditTime = vi.fn();
       render(<DailyFields editTime="morning" setEditTime={setEditTime} />);
-      fireEvent.click(screen.getByText(/evening/i));
+      fireEvent.click(screen.getByTestId('edit-time-of-day-select'));
+      fireEvent.click(screen.getByRole('option', { name: 'Evening' }));
       expect(setEditTime).toHaveBeenCalledWith('evening');
     });
   });
@@ -43,17 +46,27 @@ describe('EditTaskFormFields', () => {
   });
 
   describe('MonthlyFields', () => {
-    it('renders day-of-month buttons', () => {
+    /**
+     * The composer opens a half sheet for this; the editor used to render its own
+     * inline 7x5 grid of 31 buttons — a second full calendar in a form.
+     */
+    it('opens the day-of-month picker in a half sheet', () => {
       render(<MonthlyFields editDaysOfMonth={[1]} setEditDaysOfMonth={vi.fn()} />);
-      expect(screen.getByText('1')).toBeInTheDocument();
-      expect(screen.getByText('15')).toBeInTheDocument();
-      expect(screen.getByText('31')).toBeInTheDocument();
+
+      expect(screen.getByTestId('month-days-row')).toHaveTextContent('1');
+      expect(screen.queryByTestId('month-days-sheet')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('month-days-row'));
+      expect(screen.getByTestId('month-days-sheet')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Day 31' })).toBeInTheDocument();
     });
 
     it('toggles day-of-month selection', () => {
       const setEditDaysOfMonth = vi.fn();
       render(<MonthlyFields editDaysOfMonth={[1]} setEditDaysOfMonth={setEditDaysOfMonth} />);
-      fireEvent.click(screen.getByText('15'));
+
+      fireEvent.click(screen.getByTestId('month-days-row'));
+      fireEvent.click(screen.getByRole('button', { name: 'Day 15' }));
       expect(setEditDaysOfMonth).toHaveBeenCalled();
     });
   });

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import type { AnchorTask, TimeOfDay, TaskPriority } from '../../../types';
 import { Button } from '@anchor-os/ui';
-import { Modal } from '../../../components/shared/Modal';
 import { PopoverMenu, SegmentedControl } from '../../../components/shared';
 import { DailyFields, WeeklyFields, MonthlyFields } from './EditTaskFormFields';
 import { RepeatFields } from './TaskFormParts';
@@ -79,27 +78,15 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
 
     return (
         /*
-         * A sheet, not a Card in the page flow.
+         * The form body only.
          *
-         * This used to render inline as a <Card> with its own "Editing monthly
-         * Commitment" header, so a single task took 2–3 screens of page scroll to
-         * reach Cancel / Save, and the floating + New commitment button and the
-         * staging banner sat on top of it. As a modal sheet it is bounded, the
-         * actions are pinned in the footer, and the shell's FAB stands down.
+         * This used to be a `<Card>` rendered inline in the page flow — which is
+         * why one task took 2-3 screens of page scroll to reach Cancel / Save and
+         * why the floating + New commitment button and the staging banner sat on
+         * top of it. It is now rendered by the `/commitments/:id/edit` route, with
+         * the actions in a bar pinned to the bottom of that page.
          */
-        <Modal
-            isOpen
-            onClose={onCancel}
-            title="Edit commitment"
-            maxWidth="max-w-2xl"
-            footer={
-                <div className="flex justify-end gap-3">
-                    <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
-                    <Button onClick={handleSave} isLoading={isSaving} size="sm" className="px-6">Save Changes</Button>
-                </div>
-            }
-        >
-            <div className="space-y-4">
+        <div className="space-y-4">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Title</label>
                     <input
@@ -107,7 +94,7 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
                         placeholder="Commitment title"
-                        className="w-full px-4 py-3 rounded-card bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all"
+                        className="w-full px-4 py-3 rounded-card bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                     />
                 </div>
 
@@ -185,10 +172,21 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({
                         value={editNotes}
                         onChange={(e) => setEditNotes(e.target.value)}
                         data-testid="edit-task-notes"
-                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none text-sm"
+                        className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none text-sm"
                     />
                 </div>
+
+            {/*
+              * The action bar sticks to the bottom of the *page*, so it is always
+              * reachable and never scrolls over a field.
+              */}
+            <div
+                data-testid="edit-actions"
+                className="sticky bottom-0 z-10 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] border-t border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur flex justify-end gap-3"
+            >
+                <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
+                <Button onClick={handleSave} isLoading={isSaving} size="sm" className="px-6">Save Changes</Button>
             </div>
-        </Modal>
+        </div>
     );
 };

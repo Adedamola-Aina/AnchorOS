@@ -198,9 +198,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                 </span>
                             )}
                         </div>
-                        {/* Badges row - compact, single line with overflow hidden */}
+                        {/* Badges row — wraps instead of clipping, on a 6px rhythm */}
                         {!task.completed && !isAnimating && (
-                            <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
+                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
                                 <Badge type={task.type}>{task.type}</Badge>
                                 {task.priority && task.priority !== 'medium' && (
                                     <span className={`inline-flex items-center px-1.5 py-0.5 rounded-pill text-[10px] font-semibold border ${task.priority === 'high' ? 'bg-danger-surface text-danger border-danger-border' : 'bg-success-surface text-success border-success-border'}`}>
@@ -238,8 +238,18 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                 {task.notes}
                             </p>
                         )}
-                        {/* Gentle nudge (COMM-001) */}
-                        {!task.completed && !isAnimating && (() => {
+                        {/*
+                          * Streak nudge — only where it adds something.
+                          *
+                          * It used to render for every state ("3 more days to
+                          * One Week", "Incredible 12-day streak!"), so a list of
+                          * commitments repeated the same encouragement line on
+                          * every card and buried the actual signal. The streak
+                          * badge already shows the count, so the nudge is kept for
+                          * the one case the badge cannot show: a streak that has
+                          * lapsed and can be recovered.
+                          */}
+                        {!task.completed && !isAnimating && (task.currentStreak || 0) === 0 && (task.longestStreak || 0) > 0 && (() => {
                             const nudge = getStreakNudge(task.currentStreak || 0, task.longestStreak || 0);
                             return nudge ? <p className="mt-0.5 text-[10px] text-slate-400 dark:text-slate-500 truncate" data-testid="streak-nudge">{nudge}</p> : null;
                         })()}
@@ -263,7 +273,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                             variant="ghost"
                             size="icon"
                             onClick={() => onStartEdit(task.id)}
-                            className="text-slate-400 hover:text-task-500 hover:bg-task-50 dark:hover:bg-task-900/20"
+                            className="text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20"
                         >
                             <Pencil className="w-4 h-4" />
                         </Button>
