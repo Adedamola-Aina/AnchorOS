@@ -307,17 +307,32 @@ export async function loginOrSignup(page: Page, user: { email: string; password:
             await financeBtn.click({ timeout: 5000 }).catch(() => undefined);
             await page.waitForTimeout(5000);
 
-            // Detect empty state
-            const noAccountsYet = page.locator('h3:has-text("No accounts yet"), text=No accounts yet').first();
-            const createFirstAccountCta = page.getByRole('button', { name: /Create your first account/i }).first();
-            const addAccountBtn = page.getByRole('button', { name: /Add Account/i }).first();
+            /*
+             * UX-FN-01 gave the landing ONE "+" affordance whose accessible name
+             * is "Add account or record a transaction". The old `/Add Account/i`
+             * locator matched that by substring, so the helper clicked the "+",
+             * opened the action sheet, and then waited for a form that never
+             * appeared — the failure that was recorded against this line. The
+             * locators are now disjoint: the empty-state card, the "+" itself,
+             * and the sheet item it opens.
+             */
+            const noAccountsYet = page.locator('h3:has-text("No accounts yet")').first();
+            const createFirstAccountCta = page.locator('[aria-label="Create your first account"]').first();
+            const addAffordance = page.locator('[aria-label="Add account or record a transaction"]').first();
+            const addAccountSheetItem = page.getByRole('button', { name: 'Add account', exact: true }).first();
 
-            if (await noAccountsYet.isVisible().catch(() => false) || await createFirstAccountCta.isVisible().catch(() => false) || await addAccountBtn.isVisible().catch(() => false)) {
+            const hasEmptyState = await noAccountsYet.isVisible().catch(() => false)
+                || await createFirstAccountCta.isVisible().catch(() => false);
+
+            if (hasEmptyState) {
                 console.log("[E2E] Creating initial account...");
                 if (await createFirstAccountCta.isVisible().catch(() => false)) {
+                    // The empty state opens the account form directly.
                     await createFirstAccountCta.click();
-                } else if (await addAccountBtn.isVisible().catch(() => false)) {
-                    await addAccountBtn.click();
+                } else {
+                    // Otherwise go through the "+" and pick the sheet's account option.
+                    await addAffordance.click({ timeout: 5000 }).catch(() => undefined);
+                    await addAccountSheetItem.click({ timeout: 5000 }).catch(() => undefined);
                 }
 
                 const form = page.locator('form').filter({ hasText: /Account Name|Account/i });
