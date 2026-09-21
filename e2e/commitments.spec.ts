@@ -119,16 +119,17 @@ test.describe('Commitments - Read', () => {
         expect(typeof hasEmpty).toBe('boolean');
     });
 
-    test('Frequency filter tabs exist', async ({ page }) => {
-        const allTab = page.locator('button:has-text("All")');
-        const dailyTab = page.locator('button:has-text("Daily")');
-        const weeklyTab = page.locator('button:has-text("Weekly")');
+    test('leads with one field and one view switcher, with no filter bars', async ({ page }) => {
+        // "Show me" (six smart views) and "Show" (five cadence chips) were fifteen
+        // controls before any content, and "Select" was an unexplained word that
+        // turned rows into checkboxes. All three are gone.
+        expect(await page.getByTestId('commitment-find-or-add').isVisible()).toBe(true);
+        expect(await page.getByTestId('smart-view-bar').count()).toBe(0);
+        expect(await page.getByRole('group', { name: /^Show$/i }).count()).toBe(0);
+        expect(await page.getByRole('button', { name: /^Select$/ }).count()).toBe(0);
 
-        const hasFilters = await allTab.isVisible().catch(() => false) ||
-            await dailyTab.isVisible().catch(() => false) ||
-            await weeklyTab.isVisible().catch(() => false);
-
-        expect(typeof hasFilters).toBe('boolean');
+        // The view switcher stays — it changes the layout rather than filtering.
+        expect(await page.getByRole('group', { name: 'Commitment view' }).isVisible()).toBe(true);
     });
 });
 

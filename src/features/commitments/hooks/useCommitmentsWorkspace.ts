@@ -34,7 +34,15 @@ interface WorkspaceArgs {
 }
 
 export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask, now }: WorkspaceArgs) {
-    const [smartView, setSmartView] = useState<SmartViewId>('today');
+    /**
+     * 'all', not 'today'.
+     *
+     * The default used to be 'today', which meant a user with commitments but
+     * nothing scheduled *today* landed on an empty page and could reasonably
+     * conclude their data was gone. The list shows everything unless the user
+     * narrows it themselves.
+     */
+    const [smartView, setSmartView] = useState<SmartViewId>('all');
     const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
     const [query, setQuery] = useState('');
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());

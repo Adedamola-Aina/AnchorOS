@@ -307,66 +307,36 @@ describe('CommitmentsView', () => {
       expect(screen.getByText('Monthly Bill Payment')).toBeInTheDocument();
     });
 
-    it('filters to show only daily tasks', async () => {
+    /**
+     * The cadence filter ("Show: All / Daily / Weekly / Monthly / One-off") was
+     * removed on purpose: filtering your day by how a commitment is *stored* is a
+     * question about the database, not about your day. Asserting the removal keeps
+     * it from quietly returning as another row of chips.
+     */
+    it('offers no cadence filter, and shows every commitment without one', async () => {
       renderWithContext(<CommitmentsView />);
-      const user = userEvent.setup();
 
-      const dailyFilter = screen.getByRole('button', { name: /^daily$/i });
-      await user.click(dailyFilter);
+      for (const label of ['Daily', 'Weekly', 'Monthly', 'One-off']) {
+        expect(screen.queryByRole('button', { name: new RegExp(`^${label}$`, 'i') })).not.toBeInTheDocument();
+      }
 
-      await waitFor(() => {
-        expect(screen.getByText('Morning Meditation')).toBeInTheDocument();
-        expect(screen.getByText('Evening Workout')).toBeInTheDocument();
-        expect(screen.queryByText('Weekly Review')).not.toBeInTheDocument();
-        expect(screen.queryByText('Monthly Bill Payment')).not.toBeInTheDocument();
-      });
+      // Nothing is filtered away: every fixture commitment is on screen.
+      expect(await screen.findByText('Morning Meditation')).toBeInTheDocument();
+      expect(screen.getByText('Weekly Review')).toBeInTheDocument();
+      expect(screen.getByText('Monthly Bill Payment')).toBeInTheDocument();
     });
 
-    it('filters to show only weekly tasks', async () => {
+    /**
+     * The smart-view default used to be "Today", so a user with commitments but
+     * nothing due today landed on an empty page and could reasonably conclude
+     * their data was gone. There is no smart-view bar any more, and the list
+     * defaults to everything.
+     */
+    it('has no smart-view bar and never hides the list behind a default view', async () => {
       renderWithContext(<CommitmentsView />);
-      const user = userEvent.setup();
 
-      const weeklyFilter = screen.getByRole('button', { name: /^weekly$/i });
-      await user.click(weeklyFilter);
-
-      await waitFor(() => {
-        expect(screen.getByText('Weekly Review')).toBeInTheDocument();
-        expect(screen.queryByText('Morning Meditation')).not.toBeInTheDocument();
-        expect(screen.queryByText('Monthly Bill Payment')).not.toBeInTheDocument();
-      });
-    });
-
-    it('filters to show only monthly tasks', async () => {
-      renderWithContext(<CommitmentsView />);
-      const user = userEvent.setup();
-
-      const monthlyFilter = screen.getByRole('button', { name: /^monthly$/i });
-      await user.click(monthlyFilter);
-
-      await waitFor(() => {
-        expect(screen.getByText('Monthly Bill Payment')).toBeInTheDocument();
-        expect(screen.queryByText('Morning Meditation')).not.toBeInTheDocument();
-        expect(screen.queryByText('Weekly Review')).not.toBeInTheDocument();
-      });
-    });
-
-    it('returns to all tasks when "all" filter is selected', async () => {
-      renderWithContext(<CommitmentsView />);
-      const user = userEvent.setup();
-
-      // First filter to daily
-      const dailyFilter = screen.getByRole('button', { name: /^daily$/i });
-      await user.click(dailyFilter);
-
-      // Then back to all
-      const allFilter = screen.getByRole('button', { name: /^all$/i });
-      await user.click(allFilter);
-
-      await waitFor(() => {
-        expect(screen.getByText('Morning Meditation')).toBeInTheDocument();
-        expect(screen.getByText('Weekly Review')).toBeInTheDocument();
-        expect(screen.getByText('Monthly Bill Payment')).toBeInTheDocument();
-      });
+      expect(screen.queryByTestId('smart-view-bar')).not.toBeInTheDocument();
+      expect(await screen.findByText('Morning Meditation')).toBeInTheDocument();
     });
   });
 

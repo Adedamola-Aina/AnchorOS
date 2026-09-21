@@ -29,7 +29,7 @@ export const CommitmentsEmptyState: React.FC<EmptyStateProps> = ({ filter, hasFa
     </div>
 );
 
-interface FilterBarProps { filter: string; viewMode: string; onFilterChange: (f: 'all' | 'daily' | 'weekly' | 'monthly' | 'todo') => void; onViewChange: (v: 'timeline' | 'list' | 'calendar') => void; }
+interface ViewSwitcherProps { viewMode: string; onViewChange: (v: 'timeline' | 'list' | 'calendar') => void; }
 
 /** UX-CM-11: the switcher is labelled and its selected state is exposed to assistive tech. */
 const VIEW_OPTIONS = [
@@ -39,49 +39,37 @@ const VIEW_OPTIONS = [
 ] as const;
 
 /**
- * CM-04 / CM-10: this control used to render five UNLABELLED chips whose words
- * ("DAILY", "WEEKLY", "MONTHLY", "TODO") were identical to the composer's cadence
- * cards rendered on the same screen — one vocabulary doing two jobs, with a
- * one-off type presented as if it were a frequency.
+ * The view switcher — the only control above the list.
  *
- * Now the group says what it does ("Show"), so the two controls are
- * distinguishable by context, and the one-off option is named for what it is
- * instead of borrowing a cadence word. The stored task type values are unchanged.
+ * Two filter bars used to sit here as well: "Show me" (Today / Overdue / This
+ * week / Later / Done / All) and "Show" (All / Daily / Weekly / Monthly /
+ * One-off). Together with this switcher, the "Select" button and the find field,
+ * that was fifteen controls before a single commitment was on screen — and all
+ * of it rendered on an empty page.
+ *
+ * "Show" asked the user to filter their day by how a commitment is *stored*,
+ * which is a question about the database rather than about their day, and the
+ * six smart views mostly restated what the rows already say. Both are gone and
+ * the list shows everything.
+ *
+ * The switcher stays because it changes the layout rather than filtering it.
  */
-const FILTER_OPTIONS = [
-    { value: 'all', label: 'All' },
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'todo', label: 'One-off' },
-] as const;
-
-export const CommitmentsFilterBar: React.FC<FilterBarProps> = ({ filter, viewMode, onFilterChange, onViewChange }) => (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex flex-col gap-1.5">
-            <span id="commitments-filter-label" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Show</span>
-            <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mb-2" role="group" aria-labelledby="commitments-filter-label">
-                {FILTER_OPTIONS.map(({ value, label }) => (
-                    <Button key={value} onClick={() => onFilterChange(value)} variant={filter === value ? 'primary' : 'secondary'} size="sm" className="uppercase tracking-widest text-[10px]">{label}</Button>
-                ))}
-            </div>
-        </div>
-        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start sm:self-auto" role="group" aria-label="Commitment view">
-            {VIEW_OPTIONS.map(({ id, label, icon: Icon }) => {
-                const isActive = viewMode === id;
-                return (
-                    <button
-                        key={id}
-                        type="button"
-                        onClick={() => onViewChange(id)}
-                        aria-pressed={isActive}
-                        className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all min-h-[44px] ${isActive ? 'bg-white dark:bg-slate-600 shadow-elevation-subtle text-task-600 dark:text-task-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-                    >
-                        <Icon className="w-4 h-4" aria-hidden="true" />
-                        <span>{label}</span>
-                    </button>
-                );
-            })}
-        </div>
+export const CommitmentsViewSwitcher: React.FC<ViewSwitcherProps> = ({ viewMode, onViewChange }) => (
+    <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start" role="group" aria-label="Commitment view">
+        {VIEW_OPTIONS.map(({ id, label, icon: Icon }) => {
+            const isActive = viewMode === id;
+            return (
+                <button
+                    key={id}
+                    type="button"
+                    onClick={() => onViewChange(id)}
+                    aria-pressed={isActive}
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all min-h-[44px] ${isActive ? 'bg-white dark:bg-slate-600 shadow-elevation-subtle text-task-600 dark:text-task-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                >
+                    <Icon className="w-4 h-4" aria-hidden="true" />
+                    <span>{label}</span>
+                </button>
+            );
+        })}
     </div>
 );
