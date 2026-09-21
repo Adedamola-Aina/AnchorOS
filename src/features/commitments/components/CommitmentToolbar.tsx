@@ -1,59 +1,19 @@
 /**
- * CM-21 / CM-15 — the Commitments toolbar.
+ * CM-15 / CM-16 — the Commitments toolbar.
  *
- * The page used to lead with a cadence filter ("Daily/Weekly/…"), which is a
- * question about storage, not about the user's day. It now leads with the smart
- * views — Today, Overdue, This week, Later, Done — and search, so the first
- * thing on screen answers "what do I owe right now?".
+ * There is one control here now: a single field that finds an existing commitment
+ * *or* adds a new one.
+ *
+ * The "Show me" smart-view bar (Today / Overdue / This week / Later / Done / All)
+ * used to sit above it — six more buttons whose views mostly restated what the
+ * rows already say, and whose "Today" default meant a list with nothing due today
+ * looked empty.
  */
 
 import React from 'react';
 import { Search, X } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
-import { SMART_VIEWS, type SmartViewId } from '../utils/smartViews';
 import { describeQuickAdd, parseQuickAdd, type QuickAddDraft } from '../utils/parseQuickAdd';
-
-interface SmartViewBarProps {
-    view: SmartViewId;
-    onViewChange: (view: SmartViewId) => void;
-    /** Counts per view, so the bar states the size of each answer. */
-    counts: Partial<Record<SmartViewId, number>>;
-}
-
-export const SmartViewBar: React.FC<SmartViewBarProps> = ({ view, onViewChange, counts }) => (
-    <div className="flex flex-col gap-1.5">
-        <span id="commitments-view-label" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-            Show me
-        </span>
-        <div
-            className="flex flex-wrap gap-2"
-            role="group"
-            aria-labelledby="commitments-view-label"
-            data-testid="smart-view-bar"
-        >
-            {SMART_VIEWS.map((entry) => {
-                const isActive = view === entry.id;
-                const count = counts[entry.id];
-                return (
-                    <Button
-                        key={entry.id}
-                        onClick={() => onViewChange(entry.id)}
-                        variant={isActive ? 'primary' : 'secondary'}
-                        size="sm"
-                        aria-pressed={isActive}
-                        aria-label={`${entry.label} — ${entry.description}`}
-                        className="min-h-[44px] text-[11px] uppercase tracking-widest"
-                    >
-                        {entry.label}
-                        {typeof count === 'number' && count > 0 && (
-                            <span className="ml-1.5 text-[10px] font-black opacity-70">{count}</span>
-                        )}
-                    </Button>
-                );
-            })}
-        </div>
-    </div>
-);
 
 /**
  * CM-16 / CM-15 — one field that finds *or* adds.

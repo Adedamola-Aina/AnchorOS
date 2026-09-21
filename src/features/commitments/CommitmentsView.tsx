@@ -7,7 +7,6 @@
 
 
 import { useState, useMemo } from 'react';
-import { CheckSquare } from 'lucide-react';
 import { captureError } from '../../utils/error';
 import type { AnchorTask } from '../../types';
 import { useApp } from '../../context/AnchorContext';
@@ -23,9 +22,9 @@ import { Button } from '@anchor-os/ui';
 import { WeeklyView } from './components/WeeklyView';
 import { MonthCalendarView } from './components/MonthCalendarView';
 import { TimelineView } from './components/TimelineView';
-import { CommitmentsEmptyState, CommitmentsFilterBar } from './components/CommitmentsViewParts';
-import { SmartViewBar, CommitmentFindOrAdd } from './components/CommitmentToolbar';
-import { DoneHistory, CommitmentUndoBar, BulkActionBar } from './components/CommitmentHistory';
+import { CommitmentsEmptyState, CommitmentsViewSwitcher } from './components/CommitmentsViewParts';
+import { CommitmentFindOrAdd } from './components/CommitmentToolbar';
+import { CommitmentUndoBar } from './components/CommitmentHistory';
 import { useCommitmentsWorkspace } from './hooks/useCommitmentsWorkspace';
 import { useRegisterFab } from '../../context/FabContext';
 import type { QuickAddDraft } from './utils/parseQuickAdd';
@@ -118,67 +117,48 @@ const CommitmentsView = () => {
     }
   };
 
-  /** CM-23: bulk delete confirms once, and is undoable immediately afterwards. */
-  const handleBulkDelete = async () => {
-    const count = workspace.selectedIds.size;
-    if (await confirm({ title: 'Delete commitments?', message: `Delete ${count} selected ${count === 1 ? 'commitment' : 'commitments'}? You can undo this straight afterwards.`, confirmText: 'Delete', cancelText: 'Keep', type: 'danger' })) {
-      try { await workspace.bulkDelete(); } catch (err) { captureError(err, 'Commitments.bulkDelete'); showToast('Could not delete commitments', 'error'); }
-    }
-  };
-
   const { activeTasks, completedTasks, totalFiltered, allFiltered } = useMemo(() => {
     const filtered = workspace.visible;
     return { activeTasks: filtered.filter(t => !t.completed), completedTasks: filtered.filter(t => t.completed), totalFiltered: filtered.length, allFiltered: filtered };
   }, [workspace.visible]);
 
   const editingTask = useMemo(() => editingTaskId ? tasks.find(t => t.id === editingTaskId) : null, [editingTaskId, tasks]);
-  const showingDoneHistory = workspace.smartView === 'done';
 
   return (
     <FeatureErrorBoundary featureName="Commitments">
       <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8">
         {/*
-          * One create affordance, not two.
+          * One control stack, not four.
           *
-          * This header used to carry its own "New Commitment" button while the
-          * FAB rendered a second one with the identical handler — two buttons,
-          * one action, both on screen. Creating is the FAB's job (UX-GL-04: the
-          * page's primary action belongs under the thumb), and the FAB now exists
-          * at every width, so the header keeps only the bulk-selection control.
+          * This header carried a "Select" button for bulk complete/delete, and the
+          * "Show me" bar (six smart views) and "Show" filter (five cadences) sat
+          * below it. Fifteen controls appeared before a single commitment did.
+          *
+          * Select is gone: it was an unexplained word that turned the rows into
+          * checkboxes. The "Show me" bar is gone: its six views mostly restated
+          * what each row already says, and — because its default was "Today" — a
+          * user with commitments but nothing due today saw an empty page. The list
+          * now shows everything, always.
+          *
+          * "Show" is gone: filtering your day by how a commitment is *stored* is a
+          * question about the database, not about your day.
           */}
-        <SectionHeader title="Commitments" subtitle={hasFamilyActive ? "Manage your daily obligations, goals, and family duties." : "Manage your daily obligations and goals."} action={<div className="flex items-center gap-2">
-          <Button onClick={workspace.startSelection} variant="secondary" className="gap-2" aria-pressed={workspace.selectable}>
-            <CheckSquare className="w-4 h-4" /><span>Select</span>
-          </Button>
-        </div>} />
+        <SectionHeader title="Commitments" subtitle={hasFamilyActive ? "Manage your daily obligations, goals, and family duties." : "Manage your daily obligations and goals."} />
 
-        {/*
-          * CM-21 / CM-15 / CM-16: "what do I owe right now?" first, then one field
-          * that both finds an existing commitment and adds a new one.
-          */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-          <SmartViewBar view={workspace.smartView} onViewChange={workspace.setSmartView} counts={workspace.counts} />
-          <div className="lg:w-80">
-            <CommitmentFindOrAdd
-              value={workspace.query}
-              onChange={workspace.setQuery}
-              resultCount={totalFiltered}
-              onSaveDraft={(draft) => { void handleAdd(draftToTask(draft)); workspace.setQuery(''); }}
-              onAdjustDraft={(draft) => { setQuickAddDraft(draft); setShowAdd(true); workspace.setQuery(''); }}
-            />
-          </div>
-        </div>
+        <CommitmentFindOrAdd
+          value={workspace.query}
+          onChange={workspace.setQuery}
+          resultCount={totalFiltered}
+          onSaveDraft={(draft) => { void handleAdd(draftToTask(draft)); workspace.setQuery(''); }}
+          onAdjustDraft={(draft) => { setQuickAddDraft(draft); setShowAdd(true); workspace.setQuery(''); }}
+        />
 
-        <CommitmentsFilterBar filter={workspace.typeFilter} viewMode={viewMode} onFilterChange={workspace.setTypeFilter} onViewChange={setViewMode} />
-
-        <BulkActionBar count={workspace.selectedIds.size} onComplete={workspace.bulkComplete} onDelete={handleBulkDelete} onClear={workspace.clearSelection} />
+        <CommitmentsViewSwitcher viewMode={viewMode} onViewChange={setViewMode} />
 
         {showAdd && <TaskForm onClose={closeComposer} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} initialDraft={quickAddDraft} />}
         {editingTask && <EditTaskForm task={editingTask} hasFamilyActive={hasFamilyActive} onSave={handleSaveEdit} onCancel={() => setEditingTaskId(null)} />}
         <div className={loadingTasks ? 'opacity-50' : ''}>
-          {showingDoneHistory ? (
-            <DoneHistory groups={workspace.doneGroups} hasFamilyActive={hasFamilyActive} onToggle={handleToggle} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} selectedIds={workspace.selectedIds} onSelect={workspace.selectable ? workspace.toggleSelect : undefined} />
-          ) : viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={handleToggle} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={handleToggle} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} selectedIds={workspace.selectedIds} onSelect={workspace.selectable ? workspace.toggleSelect : undefined} /> : (
+          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={handleToggle} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={editingTaskId} onToggle={handleToggle} onStartEdit={setEditingTaskId} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} /> : (
             <div className="space-y-3">
               <div className="flex gap-2">
                 {(['week', 'month'] as const).map(r => (<Button key={r} variant={calendarRange === r ? 'primary' : 'secondary'} size="sm" onClick={() => setCalendarRange(r)} className="capitalize text-xs">{r}</Button>))}
