@@ -34,7 +34,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
 }) => {
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-primary-50/30 dark:bg-primary-900/10">
+            <CardHeader className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-primary-50/30 dark:bg-primary-900/10">
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
                     <div className="p-2 bg-primary-500/10 rounded-lg">
                         <Bell className="w-5 h-5 text-primary-500" />
@@ -82,7 +82,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
                 </div>
 
                 {emailEnabled && (
-                    <div className="animate-in slide-in-from-top-2 duration-300 space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                    <div className="animate-in slide-in-from-top-2 duration-300 space-y-6 pt-4 sm:pt-6 border-t border-slate-100 dark:border-slate-800">
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] uppercase font-bold text-slate-400">Notification Email</label>
                             <input

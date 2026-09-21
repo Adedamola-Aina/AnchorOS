@@ -27,7 +27,7 @@ const FONT_SIZES: { value: AccessibilityPreferences['fontSize']; label: string }
 ];
 
 export const AccessibilityControls: React.FC<Props> = ({ preferences, onUpdate }) => (
-  <div className="space-y-6 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+  <div className="space-y-6 mt-6 pt-4 sm:pt-6 border-t border-slate-100 dark:border-slate-800">
     <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Accessibility</p>
 
     {/* Font Size */}

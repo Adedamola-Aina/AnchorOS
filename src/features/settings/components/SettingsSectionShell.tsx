@@ -18,7 +18,7 @@ interface SettingsSectionShellProps {
 }
 
 export const SettingsSectionShell: React.FC<SettingsSectionShellProps> = ({ section, children }) => (
-    <div data-testid={`settings-section-${section.id}`} className="space-y-4">
+    <div data-testid={`settings-section-${section.id}`} className="space-y-3">
         <Link
             to={SETTINGS_ROOT}
             data-testid="settings-back"
@@ -28,9 +28,16 @@ export const SettingsSectionShell: React.FC<SettingsSectionShellProps> = ({ sect
             Settings
         </Link>
 
-        <header className="space-y-1">
-            <h1 className="text-h1 lg:text-h1-lg text-slate-900 dark:text-white tracking-tight">{section.label}</h1>
-            <p className="text-slate-500 dark:text-slate-400">{section.description}</p>
+        {/*
+          * Mobile-first type scale. The section title used to reuse the hub's
+          * display size (`text-h1` / 30px, 36px at lg), in the same container —
+          * so tapping "Profile" produced a page that looked like nothing had
+          * changed. A detail page is a step *into* the hub, so its title is one
+          * step down the scale and the supporting line is body size.
+          */}
+        <header className="space-y-0.5">
+            <h1 className="text-h2 text-slate-900 dark:text-white tracking-tight">{section.label}</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{section.description}</p>
         </header>
 
         {children}

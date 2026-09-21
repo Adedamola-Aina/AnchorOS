@@ -103,10 +103,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
 
     return (
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
+            <CardHeader className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800">
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3"><div className="p-2 bg-blue-500/10 rounded-lg"><User className="w-5 h-5 text-blue-500" /></div>User Profile</CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-5">
+            <CardContent className="p-4 sm:p-6 space-y-5">
                 <div className="flex items-center gap-4">
                     <div className="relative shrink-0">
                         {profile?.photoURL ? <img src={profile.photoURL} alt="Profile photo" className="w-16 h-16 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700" /> : <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300 ring-2 ring-slate-200 dark:ring-slate-700">{initials}</div>}
@@ -123,7 +123,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ name, uid, onU
                     <input ref={fileInputRef} type="file" accept="image/jpeg,image/png" className="hidden" onChange={handleAvatarChange} />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div className="flex flex-col gap-1.5">
                         <label htmlFor="profile-display-name" className="text-[10px] uppercase font-bold text-slate-400">Display Name</label>
                         <input

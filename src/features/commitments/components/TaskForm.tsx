@@ -9,6 +9,7 @@
 import React, { useState, useMemo } from 'react';
 import type { TaskType, TimeOfDay, TaskPriority, AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
+import { SlidersHorizontal } from 'lucide-react';
 import { Modal } from '../../../components/shared/Modal';
 import { PopoverMenu, TimeWheelPicker } from '../../../components/shared';
 import { DailyTimeField, WeeklyDaysField, MonthlyDatesField, RepeatFields } from './TaskFormParts';
@@ -56,12 +57,39 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
     const [newTaskNotes, setNewTaskNotes] = useState('');
     const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('medium');
     const [isSaving, setIsSaving] = useState(false);
+    /**
+     * The composer used to open with every field it owned — Area, Priority,
+     * Context, the whole recurrence model, Notes and a reminder — so a
+     * commitment that needs none of them still had to be read past all of them
+     * ("the options are endless"). Capture is name + cadence + when; everything
+     * else is a refinement, so it lives one deliberate tap away. Nothing was
+     * removed: every field is reachable, and a non-default value is flagged on
+     * the toggle so a collapsed option can never hide itself.
+     */
+    const [showMoreOptions, setShowMoreOptions] = useState(false);
 
     const domains = ['Health', 'Fitness', 'Work', 'Bible', 'Personal Development', 'Financial'];
 
     // Guard against losing unsaved form data on accidental tab switch
     const isDirty = useMemo(() => !!(newTaskTitle.trim() || newTaskReminder || newTaskNotes.trim()), [newTaskTitle, newTaskReminder, newTaskNotes]);
     useUnsavedChanges(isDirty);
+
+    /**
+     * A refinement the user actually set must never hide behind the toggle, so
+     * the toggle states that "More options" is carrying something non-default.
+     */
+    const hasRefinements = useMemo(
+        () => newTaskDomain !== 'Personal Development'
+            || newTaskPriority !== 'medium'
+            || newTaskScope !== 'personal'
+            || !!newTaskNotes.trim()
+            || !!newTaskReminder
+            || newTaskInterval > 1
+            || !!newTaskStart
+            || !!newTaskEnd
+            || !!newTaskDue,
+        [newTaskDomain, newTaskPriority, newTaskScope, newTaskNotes, newTaskReminder, newTaskInterval, newTaskStart, newTaskEnd, newTaskDue],
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -112,8 +140,46 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
+                {/*
+                    * When. The cadence and its specific day/time define the
+                    * commitment, so they stay in the default view.
+                    */}
+                <div className="space-y-3 min-w-0">
+                    {newTaskType === 'daily' && <DailyTimeField value={newTaskTime} onChange={setNewTaskTime} />}
+                    {newTaskType === 'weekly' && <WeeklyDaysField value={newTaskDays} onChange={setNewTaskDays} />}
+                    {newTaskType === 'monthly' && <MonthlyDatesField value={newTaskDates} onChange={setNewTaskDates} />}
+                </div>
+
+                {/*
+                  * Everything below is a refinement, not part of capturing the
+                  * commitment. It is one tap away rather than permanently in the
+                  * way — and the toggle states when it is holding something, so a
+                  * collapsed option can never hide itself.
+                  */}
+                <button
+                    type="button"
+                    onClick={() => setShowMoreOptions((open) => !open)}
+                    aria-expanded={showMoreOptions}
+                    aria-controls="composer-more-options"
+                    data-testid="composer-more-toggle"
+                    className="flex w-full items-center justify-between gap-2 min-h-11 px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+                >
+                    <span className="flex items-center gap-2">
+                        <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+                        More options
+                    </span>
+                    <span className="flex items-center gap-2">
+                        {hasRefinements && !showMoreOptions && (
+                            <span data-testid="composer-more-set" className="text-[10px] font-bold uppercase tracking-wider text-task-600 dark:text-task-400">
+                                Set
+                            </span>
+                        )}
+                        <span className="text-xs text-slate-400" aria-hidden="true">{showMoreOptions ? 'Hide' : 'Show'}</span>
+                    </span>
+                </button>
+
+                {showMoreOptions && (
+                    <div id="composer-more-options" data-testid="composer-more-options" className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="flex flex-col gap-1.5">
                             <PopoverMenu
                                 label="Area"
@@ -133,63 +199,59 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onClose, onAdd, hasFamilyAct
                                 ))}
                             </div>
                         </div>
-                            {hasFamilyActive && (
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-[10px] uppercase font-bold text-slate-400">Context</label>
-                                    <div className="flex gap-2">
-                                        {['personal', 'family'].map((s) => (<Button key={s} type="button" onClick={() => setNewTaskScope(s as 'personal' | 'family')} variant={newTaskScope === s ? 'primary' : 'secondary'} className="flex-1 capitalize">{s}</Button>))}
-                                    </div>
+                        {hasFamilyActive && (
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] uppercase font-bold text-slate-400">Context</label>
+                                <div className="flex gap-2">
+                                    {['personal', 'family'].map((s) => (<Button key={s} type="button" onClick={() => setNewTaskScope(s as 'personal' | 'family')} variant={newTaskScope === s ? 'primary' : 'secondary'} className="flex-1 capitalize">{s}</Button>))}
                                 </div>
-                            )}
+                            </div>
+                        )}
+                        {/* CM-17: interval, anchor and end date — and the due date
+                            for a one-off. Optional; the preset is unchanged if
+                            the user ignores them. */}
+                        <RepeatFields
+                            type={newTaskType}
+                            interval={newTaskInterval}
+                            onIntervalChange={setNewTaskInterval}
+                            startDate={newTaskStart}
+                            onStartDateChange={setNewTaskStart}
+                            endDate={newTaskEnd}
+                            onEndDateChange={setNewTaskEnd}
+                            dueDate={newTaskDue}
+                            onDueDateChange={setNewTaskDue}
+                        />
+                    {/* Notes field (COMM-006) */}
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] uppercase font-bold text-slate-400">Notes</label>
+                            <textarea
+                                placeholder="Add details, motivation, or context (optional)"
+                                maxLength={500}
+                                rows={2}
+                                value={newTaskNotes}
+                                onChange={(e) => setNewTaskNotes(e.target.value)}
+                                data-testid="task-notes"
+                                className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
+                            />
                         </div>
-                        <div className="space-y-3 min-w-0">
-                            {newTaskType === 'daily' && <DailyTimeField value={newTaskTime} onChange={setNewTaskTime} />}
-                            {newTaskType === 'weekly' && <WeeklyDaysField value={newTaskDays} onChange={setNewTaskDays} />}
-                            {newTaskType === 'monthly' && <MonthlyDatesField value={newTaskDates} onChange={setNewTaskDates} />}
-                            {/* CM-17: interval, anchor and end date — and the due date
-                                for a one-off. Optional; the preset is unchanged if
-                                the user ignores them. */}
-                            <RepeatFields
-                                type={newTaskType}
-                                interval={newTaskInterval}
-                                onIntervalChange={setNewTaskInterval}
-                                startDate={newTaskStart}
-                                onStartDateChange={setNewTaskStart}
-                                endDate={newTaskEnd}
-                                onEndDateChange={setNewTaskEnd}
-                                dueDate={newTaskDue}
-                                onDueDateChange={setNewTaskDue}
+                        {/* Reminder field: full-width row (BUG-092) */}
+                        <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-card bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                            <TimeWheelPicker
+                                label="Reminder"
+                                value={newTaskReminder}
+                                onChange={setNewTaskReminder}
+                                placeholder="Optional"
+                                testId="reminder-input"
                             />
                         </div>
                     </div>
-                    {/* Notes field (COMM-006) */}
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] uppercase font-bold text-slate-400">Notes</label>
-                        <textarea
-                            placeholder="Add details, motivation, or context (optional)"
-                            maxLength={500}
-                            rows={2}
-                            value={newTaskNotes}
-                            onChange={(e) => setNewTaskNotes(e.target.value)}
-                            data-testid="task-notes"
-                            className="w-full min-h-[44px] px-3 py-2.5 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-task-500/20 focus:border-task-500 transition-all placeholder:text-slate-400 resize-none text-sm"
-                        />
-                    </div>
-                    {/* Reminder field: inline compact layout (BUG-092) */}
-                    <div data-testid="reminder-field" className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-card bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                        <TimeWheelPicker
-                            label="Reminder"
-                            value={newTaskReminder}
-                            onChange={setNewTaskReminder}
-                            placeholder="Optional"
-                            testId="reminder-input"
-                        />
-                    </div>
-                    {/* UX-CM-02: one dismiss (the sheet's own close) and a pinned Save,
-                        so the primary action is reachable without scrolling. */}
-                    <div className="sticky bottom-0 -mx-1 px-1 pt-3 pb-1 flex justify-end bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-100 dark:border-slate-800">
-                        <Button type="submit" isLoading={isSaving} className="px-8">Save Commitment</Button>
-                    </div>
+                )}
+
+                {/* UX-CM-02: one dismiss (the sheet's own close) and a pinned Save,
+                    so the primary action is reachable without scrolling. */}
+                <div className="sticky bottom-0 -mx-1 px-1 pt-3 pb-1 flex justify-end bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-100 dark:border-slate-800">
+                    <Button type="submit" isLoading={isSaving} className="px-8">Save Commitment</Button>
+                </div>
                 </form>
         </Modal>
     );

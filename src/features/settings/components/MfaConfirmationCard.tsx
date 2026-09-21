@@ -36,7 +36,7 @@ export function MfaConfirmationCard({
     return (
         <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
-            <CardHeader className="p-6 pb-4">
+            <CardHeader className="p-4 sm:p-6 pb-4">
                 <CardTitle className="text-base font-bold text-blue-900 dark:text-blue-400 flex items-center gap-3">
                     <div className="p-2 bg-blue-500/10 rounded-lg">
                         <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -44,7 +44,7 @@ export function MfaConfirmationCard({
                     Two-Factor Authentication
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 pt-0">
+            <CardContent className="p-4 sm:p-6 pt-0">
                 <form onSubmit={onMfaSubmit} className="space-y-4">
                     <div className="p-4 rounded-card bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800">
                         <p className="text-sm text-slate-600 dark:text-slate-300">Connecting with: <span className="font-semibold">{inviteeEmail}</span></p>

@@ -16,6 +16,7 @@ import { useTasks } from '../../context/TaskContext';
 import { useHaptic } from '../../hooks/useHaptic';
 import { useFabric } from '../../hooks/useFabric';
 import { FabricMoodCard } from '../fabric/FabricMoodCard';
+import { HomeAnchorSection } from './components/HomeAnchorSection';
 import { getAssetDistribution, getPortfolioTotals } from '../../utils/financeInsights';
 import { getProductivityMetrics } from '../../utils/taskInsights';
 import { AssetAllocationWidget } from './components/AssetAllocationWidget';
@@ -44,7 +45,17 @@ const DashboardView = () => {
   // UX-AI-04/UX-AI-09: the mood check-in lives on Home, not inside the
   // assistant, and Home is also the doorway to the assistant now that it is no
   // longer a nav destination.
-  const { isEnabled: anchorAIEnabled, moodToday, saveMood } = useFabric();
+  //
+  // The substance comes with it: Home renders the assistant's briefing and its
+  // top insights in place, so the dashboard *shows* what the assistant knows
+  // rather than only linking to a page that does.
+  const {
+    isEnabled: anchorAIEnabled,
+    moodToday,
+    saveMood,
+    briefing,
+    insights: anchorInsights,
+  } = useFabric();
   const haptic = useHaptic();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
@@ -160,6 +171,21 @@ const DashboardView = () => {
             )}
           </div>
         </div>
+
+        {/*
+          * Mobile-first: the assistant's briefing and insights render *here*, in
+          * the dashboard the user already opens — not behind a link. Reading
+          * Anchor's view of your commitments and money costs no navigation; only
+          * asking a question takes you to the full assistant.
+          */}
+        {anchorAIEnabled && (
+          <HomeAnchorSection
+            todayStats={briefing?.todayStats}
+            insights={anchorInsights}
+            onOpenCommitments={() => navigateTo('commitments')}
+            onOpenAssistant={() => { haptic.trigger('light'); navigateTo('fabric'); }}
+          />
+        )}
 
         <BeyondBasicsChecklist
           items={beyondBasics.items}

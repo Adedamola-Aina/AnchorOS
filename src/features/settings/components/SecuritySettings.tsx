@@ -59,13 +59,13 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
     return (
         <>
         <Card className="overflow-hidden">
-            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-blue-50/30 dark:bg-blue-900/10">
+            <CardHeader className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-blue-50/30 dark:bg-blue-900/10">
                 <CardTitle className="text-base font-bold text-blue-900 dark:text-blue-400 flex items-center gap-3">
                     <div className="p-2 bg-blue-500/10 rounded-lg"><Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" /></div>
                     Identity & Security
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:justify-between">
                     <div>
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Two-Factor Authentication (2FA)</p>
@@ -78,7 +78,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
 
                 {show2FASetup && (
                     <div className="mt-8 bg-slate-50 dark:bg-slate-900/40 rounded-sheet border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-500 overflow-hidden">
-                        <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+                        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
                             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                                 <span className={step >= 1 ? "text-blue-600 dark:text-blue-400" : ""}>Step 1</span><span className="text-slate-300 dark:text-slate-700">→</span>
                                 <span className={step >= 2 ? "text-blue-600 dark:text-blue-400" : ""}>Step 2</span><span className="text-slate-300 dark:text-slate-700">→</span>
@@ -96,7 +96,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ mfaEnabled, 
                 <PasswordChange />
                 <EmailVerificationCard />
                 <EmailChangeForm />
-                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                <div className="mt-6 pt-4 sm:pt-6 border-t border-slate-100 dark:border-slate-800">
                     <PasskeySection />
                 </div>
             </CardContent>

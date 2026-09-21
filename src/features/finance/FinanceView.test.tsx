@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import FinanceView from './FinanceView';
@@ -358,16 +358,20 @@ describe('FinanceView', () => {
       expect(screen.getByText('Total: 3 accounts')).toBeInTheDocument();
     });
 
-    // UX-FN-04: the overlapping stack exposed only a sliver of the inactive
-    // accounts and offered no comparable view.
-    it('lists every account as a comparable row under the stack (UX-FN-04)', () => {
+    /**
+     * The Wallet stack is the *only* account surface on Finance.
+     *
+     * It used to render a second "All accounts" list of the very same accounts
+     * underneath the stack, which read as two competing lists — and because the
+     * stack was never capped, that list was not "the rest of the accounts"
+     * either. Mobile-first: one page, one list.
+     */
+    it('renders the Wallet stack as the only account surface', () => {
       renderWithContext(<FinanceView />);
 
-      const list = screen.getByTestId('all-accounts-list');
-      expect(list).toBeInTheDocument();
-      expect(within(list).getAllByRole('button').length).toBe(3);
-      // Name, type · currency and balance are all present, so accounts compare.
-      expect(within(list).getByText(/checking · NGN/i)).toBeInTheDocument();
+      expect(screen.getByTestId('card-stack')).toBeInTheDocument();
+      expect(screen.queryByTestId('all-accounts-list')).toBeNull();
+      expect(screen.queryByRole('heading', { name: /^all accounts$/i })).toBeNull();
     });
 
     it('renders CardStack with active accounts in collapsed mode by default', () => {

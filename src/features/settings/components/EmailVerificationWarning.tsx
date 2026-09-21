@@ -25,7 +25,7 @@ export function EmailVerificationWarning() {
 
     return (
         <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/20">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
                 <div className="flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 mt-0.5 shrink-0" />
                     <div className="flex-1">

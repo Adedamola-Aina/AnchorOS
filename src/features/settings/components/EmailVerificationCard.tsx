@@ -34,7 +34,7 @@ export function EmailVerificationCard() {
 
     return (
         <Card className={`overflow-hidden mt-6 ${verified ? '' : 'border-amber-200 dark:border-amber-800'}`}>
-            <CardHeader className="p-6 border-b border-slate-100 dark:border-slate-800">
+            <CardHeader className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800">
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
                     <div className="p-2 bg-slate-500/10 rounded-lg">
                         {verified
@@ -44,7 +44,7 @@ export function EmailVerificationCard() {
                     Email Verification
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:justify-between">
                     <div className="min-w-0">
                         <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs" data-testid="email-verification-status">

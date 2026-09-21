@@ -59,7 +59,7 @@ export const PasswordChange: React.FC = () => {
 
   if (!open) {
     return (
-      <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:justify-between mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:justify-between mt-6 pt-4 sm:pt-6 border-t border-slate-100 dark:border-slate-800">
         <div>
           <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Password</p>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Change your account password.</p>
@@ -72,7 +72,7 @@ export const PasswordChange: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4 animate-in fade-in duration-300">
+    <form onSubmit={handleSubmit} className="mt-6 pt-4 sm:pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4 animate-in fade-in duration-300">
       <p className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs flex items-center gap-2">
         <KeyRound className="w-4 h-4" />Change Password
       </p>
