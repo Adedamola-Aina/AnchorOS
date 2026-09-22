@@ -36,6 +36,7 @@
     "check:index-usage": "npx tsx tools/ci/check-index-usage.ts",
     "check:dead-code": "knip",
     "emulator:start": "firebase emulators:start --project demo-anchor-os --only auth,firestore,functions,storage",
+    "seed:local": "E2E_RUN_ID=local-dev FIREBASE_PROJECT_ID=demo-anchor-os node scripts/ci/seed-e2e-finance.mjs",
     "build:dev": "tsc -b config/tsconfig.app.json config/tsconfig.node.json && vite build --mode development --config config/vite.config.ts",
     "deploy:staging": "./scripts/DEPLOY_PIPELINE.sh --env=staging",
     "deploy:production": "./scripts/DEPLOY_PIPELINE.sh --env=production",
