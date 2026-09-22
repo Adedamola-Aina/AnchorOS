@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.33](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.32...v1.21.0-rc.33) (2026-09-22)
+
+
+### Bug Fixes
+
+* **commitments:** repair the shipped timeline, unify create/edit, clear the FAB band (CM-26) ([#255](https://github.com/Adedamola-Aina/AnchorOS/issues/255)) ([9d84509](https://github.com/Adedamola-Aina/AnchorOS/commit/9d8450946a58da7df91aee61f4d95f3d9931d14a))
+
 ## [1.21.0-rc.32](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.31...v1.21.0-rc.32) (2026-09-22)
 
 
