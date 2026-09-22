@@ -70,7 +70,7 @@ describe('DashboardView — Home shell', () => {
     taskState = {
       tasks: [
         { ...base, id: 't1', title: 'Daily one', type: 'daily', completed: false },
-        { ...base, id: 't2', title: 'Daily two', type: 'daily', completed: true, lastCompletedAt: new Date(2026, 8, 20, 8, 0, 0) },
+        { ...base, id: 't2', title: 'Daily two', type: 'daily', completed: true, lastCompletedAt: new Date(2026, 8, 20, 8, 0, 0).toISOString() },
         { ...base, id: 't3', title: 'Monday slot', type: 'weekly', daysOfWeek: [1], completed: false },
         { ...base, id: 't4', title: 'Wednesday slot', type: 'weekly', daysOfWeek: [3], completed: false },
       ],

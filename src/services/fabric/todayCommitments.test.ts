@@ -33,7 +33,7 @@ describe('the canonical today (CM-30)', () => {
     it('separates what is done from what is outstanding without double counting', () => {
         const view = selectTodayCommitments([
             dailyToday('a'),
-            dailyToday('b', { completed: true, lastCompletedAt: SUNDAY }),
+            dailyToday('b', { completed: true, lastCompletedAt: SUNDAY.toISOString() }),
             weeklyMonday('c'),
         ], SUNDAY);
 
@@ -61,7 +61,7 @@ describe('the canonical today (CM-30)', () => {
 
     it('draws the focus shortlist from the outstanding work only', () => {
         const view = selectTodayCommitments([
-            dailyToday('done', { completed: true, lastCompletedAt: SUNDAY }),
+            dailyToday('done', { completed: true, lastCompletedAt: SUNDAY.toISOString() }),
             dailyToday('one'), dailyToday('two'), dailyToday('three'), dailyToday('four'),
         ], SUNDAY);
 
@@ -98,7 +98,7 @@ describe('the canonical today (CM-30)', () => {
     it('agrees with the assistant briefing about today', () => {
         const tasks = [
             dailyToday('a'),
-            dailyToday('b', { completed: true, lastCompletedAt: SUNDAY }),
+            dailyToday('b', { completed: true, lastCompletedAt: SUNDAY.toISOString() }),
             weeklyMonday('c'),
             weeklyMonday('d'),
             task({ id: 'future', title: 'future', type: 'daily', startDate: '2026-09-21' }),
