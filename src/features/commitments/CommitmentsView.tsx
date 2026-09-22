@@ -22,7 +22,7 @@ import { Button } from '@anchor-os/ui';
 import { WeeklyView } from './components/WeeklyView';
 import { MonthCalendarView } from './components/MonthCalendarView';
 import { TimelineView } from './components/TimelineView';
-import { CommitmentsEmptyState, CommitmentsViewSwitcher } from './components/CommitmentsViewParts';
+import { CommitmentsEmptyState, CommitmentsLoadingState, CommitmentsViewSwitcher } from './components/CommitmentsViewParts';
 import { CommitmentFindOrAdd } from './components/CommitmentToolbar';
 import { CommitmentUndoBar } from './components/CommitmentHistory';
 import { useCommitmentsWorkspace } from './hooks/useCommitmentsWorkspace';
@@ -124,6 +124,13 @@ const CommitmentsView = () => {
     return { activeTasks: filtered.filter(t => !t.completed), completedTasks: filtered.filter(t => t.completed), totalFiltered: filtered.length, allFiltered: filtered };
   }, [workspace.visible]);
 
+  /**
+   * Loading is only "first load" when there is nothing to show yet: a refresh of a
+   * populated list must not replace the rows with a skeleton.
+   */
+  const isFirstLoad = loadingTasks && tasks.length === 0;
+  const activeQuery = workspace.query.trim();
+
   return (
     <FeatureErrorBoundary featureName="Commitments">
       <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 space-y-8">
@@ -156,8 +163,11 @@ const CommitmentsView = () => {
         <CommitmentsViewSwitcher viewMode={viewMode} onViewChange={setViewMode} />
 
         {showAdd && <TaskForm onClose={closeComposer} onAdd={handleAdd} hasFamilyActive={hasFamilyActive} initialDraft={quickAddDraft} />}
-        <div className={loadingTasks ? 'opacity-50' : ''}>
-          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={handleToggle} onStartFocus={(_id) => showToast('Focus mode coming soon!', 'info')} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={null} onToggle={handleToggle} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} /> : (
+        {isFirstLoad ? (
+          <CommitmentsLoadingState />
+        ) : (
+        <div>
+          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={handleToggle} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={null} onToggle={handleToggle} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} /> : (
             <div className="space-y-3">
               <div className="flex gap-2">
                 {(['week', 'month'] as const).map(r => (<Button key={r} variant={calendarRange === r ? 'primary' : 'secondary'} size="sm" onClick={() => setCalendarRange(r)} className="capitalize text-xs">{r}</Button>))}
@@ -166,7 +176,21 @@ const CommitmentsView = () => {
             </div>
           )}
         </div>
-        {totalFiltered === 0 && !showAdd && <CommitmentsEmptyState filter={workspace.typeFilter} hasFamilyActive={hasFamilyActive} onCreateFirst={() => setShowAdd(true)} onLearnMore={() => showToast('Commitment exports will be available in the next update.', 'info')} />}
+        )}
+        {/*
+          * The empty state is gated on loading. It was not, so a cold open told
+          * users with commitments that they had none for the ~450ms before the
+          * first read landed, and a search with no matches was answered with
+          * "Welcome to your Commitments" plus a create button they did not need.
+          */}
+        {!loadingTasks && totalFiltered === 0 && !showAdd && (
+          <CommitmentsEmptyState
+            hasFamilyActive={hasFamilyActive}
+            onCreateFirst={() => setShowAdd(true)}
+            query={activeQuery || undefined}
+            onClearSearch={() => workspace.setQuery('')}
+          />
+        )}
         {/* CM-23: the safety net after completing or deleting. */}
         <CommitmentUndoBar state={workspace.undo} onDismiss={workspace.dismissUndo} />
       </div>

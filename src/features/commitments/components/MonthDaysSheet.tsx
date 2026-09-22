@@ -48,7 +48,7 @@ export const MonthDaysSheet: React.FC<MonthDaysSheetProps> = ({ isOpen, value, o
       />
       <div
         data-testid="month-days-sheet"
-        className="relative z-10 w-full max-w-md mx-4 mb-safe animate-in slide-in-from-bottom-4 fade-in duration-300"
+        className="relative z-10 w-full max-w-md mx-4 animate-in slide-in-from-bottom-4 fade-in duration-300"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
       >
         <div className="rounded-2xl bg-white dark:bg-slate-800 overflow-hidden shadow-2xl">

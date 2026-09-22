@@ -6,132 +6,109 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { TimelineView } from './TimelineView';
 
 vi.mock('@anchor-os/ui', () => ({
-  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div data-testid="timeline-card" className={className}>{children}</div>
+  ),
 }));
 
-describe('TimelineView', () => {
-  it('renders empty state when no tasks are provided', () => {
-    render(
-      <TimelineView
-        tasks={[]}
-        onToggle={vi.fn()}
-        onStartFocus={vi.fn()}
-        onStartEdit={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+const task = (overrides: Record<string, unknown> = {}) => ({
+  id: 't1',
+  title: 'Morning prayer',
+  type: 'daily',
+  completed: false,
+  category: 'personal',
+  createdAt: new Date(),
+  ...overrides,
+});
 
-    expect(screen.getByText('No timeline events available.')).toBeInTheDocument();
+const renderTimeline = (tasks: any[], extra: Record<string, unknown> = {}) => render(
+  <TimelineView
+    tasks={tasks}
+    onToggle={extra.onToggle ?? vi.fn()}
+    onStartEdit={extra.onStartEdit ?? vi.fn()}
+    onDelete={vi.fn()}
+    now={new Date('2026-09-22T08:00:00')}
+  />,
+);
+
+describe('TimelineView', () => {
+  it('says why it is empty instead of showing nothing', () => {
+    renderTimeline([]);
+    expect(screen.getByTestId('timeline-empty')).toBeInTheDocument();
+    expect(screen.getByText('Nothing to lay out yet.')).toBeInTheDocument();
   });
 
   it('sorts tasks by time of day', () => {
-    render(
-      <TimelineView
-        tasks={[
-          {
-            id: 'evening',
-            title: 'Evening review',
-            type: 'daily',
-            completed: false,
-            category: 'personal',
-            timeOfDay: 'evening',
-            createdAt: new Date(),
-          },
-          {
-            id: 'morning',
-            title: 'Morning prayer',
-            type: 'daily',
-            completed: false,
-            category: 'personal',
-            timeOfDay: 'morning',
-            createdAt: new Date(),
-          },
-        ]}
-        onToggle={vi.fn()}
-        onStartFocus={vi.fn()}
-        onStartEdit={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+    renderTimeline([
+      task({ id: 'evening', title: 'Evening review', timeOfDay: 'evening' }),
+      task({ id: 'morning', title: 'Morning prayer', timeOfDay: 'morning' }),
+    ]);
 
     const headings = screen.getAllByRole('heading');
     expect(headings[0]).toHaveTextContent('Morning prayer');
     expect(headings[1]).toHaveTextContent('Evening review');
   });
 
-  it('calls onStartFocus for upcoming task', () => {
-    const onStartFocus = vi.fn();
-    render(
-      <TimelineView
-        tasks={[
-          {
-            id: 'task-1',
-            title: 'Workout',
-            type: 'daily',
-            completed: false,
-            category: 'personal',
-            createdAt: new Date(),
-          },
-        ]}
-        onToggle={vi.fn()}
-        onStartFocus={onStartFocus}
-        onStartEdit={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+  /**
+   * The regression this view shipped with: an automated edit split Tailwind tokens
+   * ("p-0" → "p - 0", "overflow-hidden" → "overflow - hidden"), and the stray
+   * `hidden` token compiled to `display: none` — so every row of a 16-commitment
+   * timeline rendered invisibly and the page looked empty.
+   */
+  it('renders rows with real layout classes and no stray `hidden` token', () => {
+    renderTimeline([task({ id: 'visible', title: 'Visible commitment' })]);
 
-    fireEvent.click(screen.getByTitle('Start Task Focus Timer'));
-    expect(onStartFocus).toHaveBeenCalledWith('task-1');
+    const card = screen.getByTestId('timeline-card');
+    expect(card.className).toContain('p-0');
+    expect(card.className).toContain('overflow-hidden');
+    // The bare token is what applied `display: none`.
+    expect(card.className.split(/\s+/)).not.toContain('hidden');
+    // Split tokens (" - ") are the corruption signature.
+    expect(card.className).not.toMatch(/\s-\s/);
+    expect(screen.getByText('Visible commitment')).toBeInTheDocument();
   });
 
-  it('calls onToggle with current completed state', () => {
-    const onToggle = vi.fn();
-    render(
-      <TimelineView
-        tasks={[
-          {
-            id: 'task-2',
-            title: 'Completed task',
-            type: 'daily',
-            completed: true,
-            category: 'personal',
-            createdAt: new Date(),
-          },
-        ]}
-        onToggle={onToggle}
-        onStartFocus={vi.fn()}
-        onStartEdit={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+  it('gives the completion control a name and a 44px target', () => {
+    renderTimeline([task({ id: 'a11y', title: 'Stretch' })]);
 
-    fireEvent.click(screen.getByRole('button'));
+    const toggle = screen.getByTestId('timeline-toggle');
+    expect(toggle).toHaveAttribute('aria-label', 'Mark Stretch as done');
+    expect(toggle.className).toContain('h-11');
+    expect(toggle.className).toContain('w-11');
+  });
+
+  it('completes the commitment from the row control', () => {
+    const onToggle = vi.fn();
+    renderTimeline([task({ id: 'task-2', title: 'Completed task', completed: true })], { onToggle });
+
+    fireEvent.click(screen.getByTestId('timeline-toggle'));
     expect(onToggle).toHaveBeenCalledWith('task-2', true);
   });
 
-  it('renders domain labels and hides focus button for completed tasks', () => {
-    render(
-      <TimelineView
-        tasks={[
-          { id: 'd1', title: 'Health', type: 'daily', completed: true, category: 'personal', domain: 'Health', createdAt: new Date() },
-          { id: 'd2', title: 'Fitness', type: 'daily', completed: true, category: 'personal', domain: 'Fitness', createdAt: new Date() },
-          { id: 'd3', title: 'Work', type: 'daily', completed: true, category: 'personal', domain: 'Work', createdAt: new Date() },
-          { id: 'd4', title: 'Bible', type: 'daily', completed: true, category: 'personal', domain: 'Bible', createdAt: new Date() },
-          { id: 'd5', title: 'Financial', type: 'daily', completed: true, category: 'personal', domain: 'Financial', createdAt: new Date() },
-          { id: 'd6', title: 'Default', type: 'daily', completed: true, category: 'personal', createdAt: new Date() },
-        ]}
-        onToggle={vi.fn()}
-        onStartFocus={vi.fn()}
-        onStartEdit={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+  it('opens the commitment for editing from the row', () => {
+    const onStartEdit = vi.fn();
+    renderTimeline([task({ id: 'task-1', title: 'Workout' })], { onStartEdit });
 
-    expect(screen.getAllByText('Health').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Fitness').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Work').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Bible').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Financial').length).toBeGreaterThan(0);
-    expect(screen.queryByTitle('Start Task Focus Timer')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Workout' }));
+    expect(onStartEdit).toHaveBeenCalledWith('task-1');
+  });
+
+  it('shows the domain as a label, never as colour alone', () => {
+    renderTimeline([
+      task({ id: 'd1', title: 'Health', domain: 'Health' }),
+      task({ id: 'd2', title: 'Fitness', domain: 'Fitness' }),
+      task({ id: 'd3', title: 'Work', domain: 'Work' }),
+      task({ id: 'd4', title: 'Bible', domain: 'Bible' }),
+      task({ id: 'd5', title: 'Financial', domain: 'Financial' }),
+    ]);
+
+    for (const label of ['Health', 'Fitness', 'Work', 'Bible', 'Financial']) {
+      expect(screen.getAllByText(label).length).toBeGreaterThan(0);
+    }
+  });
+
+  it('shows when the commitment next comes round', () => {
+    renderTimeline([task({ id: 'next', title: 'Pay rent', type: 'monthly', daysOfMonth: [1] })]);
+    expect(screen.getByTestId('timeline-next-due')).toBeInTheDocument();
   });
 });

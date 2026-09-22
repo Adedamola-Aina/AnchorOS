@@ -56,6 +56,8 @@ export const WeeklyView: React.FC<WeeklyViewProps> = ({ tasks, onToggle }) => {
                                         {isToday ? (
                                             <button
                                                 onClick={() => onToggle(task.id, task.completed)}
+                                                aria-pressed={task.completed}
+                                                aria-label={task.completed ? `Mark ${task.title} as not done` : `Mark ${task.title} as done`}
                                                 className={`mt-1 min-w-11 min-h-11 flex items-center justify-center rounded-full transition-colors ${task.completed ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'text-slate-300 hover:text-emerald-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                             >
                                                 {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
