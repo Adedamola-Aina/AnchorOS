@@ -183,13 +183,19 @@ const SettingsView = () => {
                 data sources are configured, and it mirrors the assistant surface's
                 own transparency link (UX-AI-05). */}
             <AnchorAISettings userId={user?.uid} showToast={showToast} />
+            {/*
+              * CM-30: one entry point is named "What Anchor AI knows" (the disclosure
+              * inside AnchorAISettings). This route to the assistant's own transparency
+              * page is labelled for what it is, so the same question is not asked twice
+              * with two different behaviours.
+              */}
             <Link
               to="/fabric/transparency"
               data-testid="assistant-transparency-link"
               className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
               <ShieldCheck className="w-4 h-4" aria-hidden="true" />
-              What Anchor AI knows
+              See the full transparency page
             </Link>
           </>
         );
