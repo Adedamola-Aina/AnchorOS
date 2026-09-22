@@ -484,6 +484,24 @@ a, button, input, select, textarea, [role="button"], [tabindex] {
 :root {
   --bottom-nav-height: calc(49px + env(safe-area-inset-bottom, 0px));
   /*
+   * The contextual FAB's band: its height plus the gap it floats above the
+   * navigation. One definition, read by the button itself and by the clearance
+   * the shell reserves, so the button and the space it occupies cannot drift.
+   */
+  --fab-height: 56px;
+  --fab-offset: 1rem;
+  --fab-band-height: calc(var(--fab-height) + var(--fab-offset));
+  /*
+   * How much room the end of a scrollable page must leave. The SHELL owns this:
+   * pages do not add their own bottom spacers or safe-area padding.
+   *
+   * A page that has registered a FAB reserves its band too. It did not before —
+   * only the navigation was reserved (73px) while the FAB's band reaches 121px up
+   * from the bottom edge — so the final row of a list could sit under the button.
+   */
+  --shell-bottom-clearance: calc(var(--bottom-nav-height) + 1.5rem);
+  --shell-bottom-clearance-fab: calc(var(--bottom-nav-height) + var(--fab-band-height) + 0.75rem);
+  /*
    * UX-GL-06 / UX-FN-12: the non-production environment strip's height, shared
    * by the strip itself and by the app shell's top offset, so the two cannot
    * disagree. It is intentionally slim: the strip must be unmissable, not

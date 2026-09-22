@@ -10,6 +10,7 @@ import { useKeyboardAvoidance } from '../hooks/useKeyboardAvoidance';
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChanges';
 import { BottomNavigation } from '../components/mobile/BottomNavigation';
 import { ContextualFab } from '../components/mobile/ContextualFab';
+import { useFab } from '../context/FabContext';
 import { useNavScrollVisibility } from '../components/mobile/useNavScrollVisibility';
 import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { useFinanceService } from '../hooks/useFinanceService';
@@ -58,6 +59,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
     const { isMobile } = useResponsive();
     // UX-GL-04: hide the bar (and the FAB) while scrolling down.
     const navHidden = useNavScrollVisibility();
+    /**
+     * Does this page have a floating action? If it does, the shell reserves the
+     * FAB's band as well as the navigation — the one place that knows about both.
+     * Otherwise the final row of a list can end up underneath the button (the FAB
+     * band reaches 121px up; only 73px was reserved).
+     */
+    const { action: fabAction } = useFab();
+    const bottomClearance = fabAction ? 'var(--shell-bottom-clearance-fab)' : 'var(--shell-bottom-clearance)';
     const { accounts } = useFinanceService(user);
     const accountColors = useMemo(() => accounts.map(a => a.color).filter(Boolean), [accounts]);
 
@@ -117,7 +126,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
             <main
                 data-scroll
                 className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0"
-                style={isMobile ? { paddingBottom: 'calc(var(--bottom-nav-height, 49px) + 1.5rem)', scrollPaddingBottom: 'var(--bottom-nav-height, 49px)' } : undefined}
+                style={isMobile ? { paddingBottom: bottomClearance, scrollPaddingBottom: bottomClearance } : undefined}
             >
                 {/* On mobile, pad bottom is now handled by parent main container */}
                 <div

@@ -5,7 +5,7 @@
  * 44px minimum touch targets per Apple HIG.
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 
@@ -28,6 +28,41 @@ interface PopoverMenuProps {
   testId?: string;
 }
 
+/**
+ * Where the menu goes.
+ *
+ * Coordinates come from the trigger's viewport rect, but `position: fixed` only
+ * resolves against the viewport when NO ancestor creates a containing block. Every
+ * sheet in this app animates with a lingering `transform` (`animate-in zoom-in-95`
+ * on the Modal), and a transformed ancestor becomes the containing block for fixed
+ * descendants — which is why a menu opened inside the composer rendered hundreds of
+ * pixels from its trigger, over the NAME field and the cadence buttons.
+ *
+ * So the menu is placed in viewport coordinates and then shifted by the origin of
+ * whatever containing block it actually landed in. The origin is read from the
+ * ancestor chain — not from the menu's own rect, which would be a measurement of
+ * the position React has not committed yet.
+ */
+const containingBlockOrigin = (element: HTMLElement | null): { x: number; y: number } => {
+    let node: HTMLElement | null = element?.parentElement ?? null;
+    while (node && node !== document.documentElement) {
+        const style = getComputedStyle(node);
+        if (
+            style.transform !== 'none'
+            || style.filter !== 'none'
+            || style.perspective !== 'none'
+            || style.backdropFilter !== 'none'
+            || style.willChange === 'transform'
+            || style.contain !== 'none'
+        ) {
+            const rect = node.getBoundingClientRect();
+            return { x: rect.left, y: rect.top };
+        }
+        node = node.parentElement;
+    }
+    return { x: 0, y: 0 };
+};
+
 export const PopoverMenu: React.FC<PopoverMenuProps> = ({
   items,
   value,
@@ -41,28 +76,68 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 320 });
+  // The visible label is a real label for the control: tapping it does nothing and
+  // assistive tech announced only the value ("Personal Development") without the
+  // question it answers ("Area"). `aria-labelledby` names the control from both.
+  const labelId = React.useId();
+  const valueId = React.useId();
 
   const selectedItem = items.find((item) => item.value === value);
 
-  const updatePosition = useCallback(() => {
-    if (!triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const menuHeight = Math.min(items.length * 52 + 16, 320);
-    const spaceBelow = window.innerHeight - rect.bottom - 8;
-    const showAbove = spaceBelow < menuHeight && rect.top > menuHeight;
+  /**
+   * Places the menu, and re-places it on scroll and resize — the old one-shot
+   * calculation never re-anchored, so a menu opened in a sheet stayed at stale
+   * coordinates the moment the sheet scrolled.
+   */
+  const place = useCallback(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    // Measure the menu when it exists, so the gap is the 4px it promises rather
+    // than the estimate's leftover; fall back to the estimate before first paint.
+    const measuredHeight = menuRef.current?.getBoundingClientRect().height ?? 0;
+    const menuHeight = measuredHeight > 0 ? measuredHeight : Math.min(items.length * 52 + 16, 320);
+    const width = Math.max(rect.width, 200);
+
+    const GAP = 4;   // between the trigger and the menu
+    const EDGE = 8;  // between the menu and the viewport edge
+    const spaceBelow = window.innerHeight - (rect.bottom + GAP) - EDGE;
+    const spaceAbove = rect.top - GAP - EDGE;
+    // Above the trigger when below cannot hold it and above has more room.
+    const showAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;
+    // Never taller than the room it has: it scrolls instead of touching the edge.
+    const maxHeight = Math.min(320, Math.max(showAbove ? spaceAbove : spaceBelow, 120));
+    const height = Math.min(menuHeight, maxHeight);
+    const origin = containingBlockOrigin(menuRef.current);
 
     setPosition({
-      top: showAbove ? rect.top - menuHeight - 4 : rect.bottom + 4,
-      left: rect.left,
-      width: Math.max(rect.width, 200),
+      top: (showAbove ? Math.max(rect.top - height - GAP, EDGE) : rect.bottom + GAP) - origin.y,
+      // Keep it on screen horizontally: a wide trigger near the right edge used to
+      // push the menu off the viewport.
+      left: Math.min(Math.max(rect.left, EDGE), Math.max(window.innerWidth - width - EDGE, EDGE)) - origin.x,
+      width,
+      maxHeight,
     });
   }, [items.length]);
 
   const open = useCallback(() => {
-    updatePosition();
     setIsOpen(true);
-  }, [updatePosition]);
+  }, []);
+
+  // Place once the menu exists (it must be measurable), then keep it anchored.
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    place();
+    const reanchor = () => place();
+    window.addEventListener('scroll', reanchor, true);
+    window.addEventListener('resize', reanchor);
+    return () => {
+      window.removeEventListener('scroll', reanchor, true);
+      window.removeEventListener('resize', reanchor);
+    };
+  }, [isOpen, place]);
 
   const close = useCallback(() => {
     setIsOpen(false);
@@ -111,9 +186,9 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
   return (
     <>
       {label && (
-        <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
+        <span id={labelId} className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
           {label}
-        </label>
+        </span>
       )}
       <button
         ref={triggerRef}
@@ -122,12 +197,13 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
         data-testid={testId}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        aria-labelledby={label ? `${labelId} ${valueId}` : undefined}
         className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 min-h-[44px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-base transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/20 ${className}`}
       >
         <span className="flex min-w-0 items-center gap-2 text-left">
           {icon}
           {selectedItem?.icon}
-          {selectedItem?.label ?? placeholder}
+          <span id={valueId} className="truncate">{selectedItem?.label ?? placeholder}</span>
         </span>
         <ChevronDown
           className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -147,13 +223,14 @@ export const PopoverMenu: React.FC<PopoverMenuProps> = ({
             <div
               ref={menuRef}
               role="listbox"
+              aria-labelledby={label ? labelId : undefined}
               aria-activedescendant={value ? `popover-item-${value}` : undefined}
               className="fixed z-50 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-150 py-1"
               style={{
                 top: position.top,
                 left: position.left,
                 width: position.width,
-                maxHeight: 320,
+                maxHeight: position.maxHeight,
                 overflowY: 'auto',
               }}
             >

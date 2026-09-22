@@ -46,7 +46,7 @@ export const ContextualFab = ({ navHidden = false }: { navHidden?: boolean }) =>
       data-testid="contextual-fab"
       data-nav-hidden={navHidden ? 'true' : 'false'}
       className={`fixed right-4 z-40 inline-flex items-center gap-2 h-14 min-w-14 px-4 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-600/30 active:scale-[0.97] transition-all duration-200 motion-reduce:transition-none ${navHidden ? 'translate-y-24 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
-      style={{ bottom: 'calc(var(--bottom-nav-height, 49px) + 1rem)' }}
+      style={{ bottom: 'calc(var(--bottom-nav-height, 49px) + var(--fab-offset, 1rem))' }}
     >
       <Plus className="w-5 h-5" aria-hidden="true" />
       <span className="text-sm font-semibold">{action.label}</span>

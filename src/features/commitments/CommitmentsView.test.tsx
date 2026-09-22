@@ -282,7 +282,7 @@ describe('CommitmentsView', () => {
 
     it('shows empty state when no tasks match filter', async () => {
       renderWithContext(<CommitmentsView />, { tasks: { tasks: [] } });
-      expect(screen.getByText('Welcome to your Commitments')).toBeInTheDocument();
+      expect(screen.getByText('No commitments yet')).toBeInTheDocument();
     });
 
     it('visually distinguishes completed tasks in list view', async () => {
@@ -450,6 +450,11 @@ describe('CommitmentsView', () => {
       expect(sheet.getByRole('button', { name: 'Day 31' })).toBeInTheDocument();
     });
 
+    // The first test in this file pays for transforming and mounting the whole
+    // Commitments surface (providers, toolbar, composer). That is ~180ms warm and
+    // can exceed vitest's 5s default when the suite runs with full parallelism, so
+    // the assertion below is given room to be about behaviour, not about the
+    // machine's load.
     it('calls addTask with correct daily task data', async () => {
       const { tasks } = createMockContexts();
       renderWithContext(<CommitmentsView />, { tasks });
@@ -474,7 +479,7 @@ describe('CommitmentsView', () => {
           })
         );
       });
-    });
+    }, 20000);
 
     it('calls addTask with correct weekly task data', async () => {
       const { tasks } = createMockContexts();
@@ -652,7 +657,8 @@ describe('CommitmentsView', () => {
 
       // Context is a refinement: one deliberate tap reveals it.
       await user.click(screen.getByTestId('composer-more-toggle'));
-      const familyButton = screen.getByRole('button', { name: /^family$/i });
+      // Scope is a segmented control (radiogroup), not a pair of buttons.
+      const familyButton = screen.getByRole('radio', { name: /^family$/i });
       await user.click(familyButton);
 
       const saveButton = screen.getByRole('button', { name: /Save Commitment/i });
@@ -799,7 +805,7 @@ describe('CommitmentsView', () => {
 
     it('renders empty commitments list', () => {
       renderWithContext(<CommitmentsView />, { tasks: { tasks: [] } });
-      expect(screen.getByText('Welcome to your Commitments')).toBeInTheDocument();
+      expect(screen.getByText('No commitments yet')).toBeInTheDocument();
     });
 
     it('handles very long task titles', () => {

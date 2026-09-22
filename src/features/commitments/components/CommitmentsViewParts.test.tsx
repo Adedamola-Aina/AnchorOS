@@ -2,33 +2,63 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { CommitmentsEmptyState, CommitmentsViewSwitcher } from './CommitmentsViewParts';
+import { CommitmentsEmptyState, CommitmentsLoadingState, CommitmentsViewSwitcher } from './CommitmentsViewParts';
 
 describe('CommitmentsEmptyState', () => {
-  const defaults = { filter: 'all', hasFamilyActive: false, onCreateFirst: vi.fn(), onLearnMore: vi.fn() };
+  const defaults = { hasFamilyActive: false, onCreateFirst: vi.fn() };
 
-  it('renders welcome message for all filter', () => {
+  it('names the state, explains it, and offers the one action it names', () => {
     render(<CommitmentsEmptyState {...defaults} />);
-    expect(screen.getByText('Welcome to your Commitments')).toBeInTheDocument();
-    expect(screen.getByText(/build consistency/i)).toBeInTheDocument();
+    expect(screen.getByText('No commitments yet')).toBeInTheDocument();
+    expect(screen.getByText(/things you keep doing/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create a commitment' })).toBeInTheDocument();
   });
 
-  it('renders filter-specific message', () => {
-    render(<CommitmentsEmptyState {...defaults} filter="daily" />);
-    expect(screen.getByText('No daily commitments')).toBeInTheDocument();
-  });
-
-  it('shows family message when family active', () => {
+  it('mentions the family when family sharing is active', () => {
     render(<CommitmentsEmptyState {...defaults} hasFamilyActive />);
     expect(screen.getByText(/you and your family/i)).toBeInTheDocument();
   });
 
   it('calls onCreateFirst', () => {
     render(<CommitmentsEmptyState {...defaults} />);
-    fireEvent.click(screen.getByText('Create First Commitment'));
+    fireEvent.click(screen.getByRole('button', { name: 'Create a commitment' }));
     expect(defaults.onCreateFirst).toHaveBeenCalled();
   });
+
+  /**
+   * A search with no matches used to fall through to "Welcome to your
+   * Commitments" — a lie to someone with sixteen commitments who mistyped a word,
+   * offering to create the first one.
+   */
+  it('answers a search with no matches as a search, not as an empty account', () => {
+    const onClearSearch = vi.fn();
+    render(<CommitmentsEmptyState {...defaults} query="gymm" onClearSearch={onClearSearch} />);
+
+    expect(screen.getByTestId('commitments-empty-search')).toBeInTheDocument();
+    expect(screen.getByText(/No matches for “gymm”/)).toBeInTheDocument();
+    expect(screen.queryByText('No commitments yet')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+    expect(onClearSearch).toHaveBeenCalled();
+  });
+
+  /** The dead "Learn More" button (a toast that promised a future feature) is gone. */
+  it('offers no action it cannot perform', () => {
+    render(<CommitmentsEmptyState {...defaults} />);
+    expect(screen.queryByRole('button', { name: /learn more/i })).not.toBeInTheDocument();
+  });
 });
+
+describe('CommitmentsLoadingState', () => {
+  it('announces that it is loading and shows placeholder rows', () => {
+    render(<CommitmentsLoadingState rows={3} />);
+    const region = screen.getByTestId('commitments-loading');
+    expect(region).toHaveAttribute('aria-busy', 'true');
+    expect(region.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
+    expect(screen.getByText('Loading your commitments…')).toBeInTheDocument();
+  });
+});
+
 
 describe('CommitmentsViewSwitcher', () => {
   const defaults = { viewMode: 'list', onViewChange: vi.fn() };

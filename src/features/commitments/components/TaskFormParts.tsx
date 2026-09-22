@@ -86,8 +86,14 @@ interface WeeklyDaysFieldProps { value: number[]; onChange: (days: number[]) => 
  */
 export const WeeklyDaysField: React.FC<WeeklyDaysFieldProps> = ({ value, onChange }) => (
     <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">On which days?</label>
-        <div className="flex justify-between gap-1">
+        <span id="weekday-label" className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">On which days?</span>
+        {/*
+          * `flex-wrap`, not `justify-between`: seven 44px targets fit a 375px
+          * viewport, but not with larger text, and a wrapped strip is better than
+          * a squeezed one. Two-letter labels, because "S M T W T F S" made T and S
+          * each stand for two different days (CM-18).
+          */}
+        <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="weekday-label" data-testid="weekday-selector">
             {WEEKDAY_FULL_LABELS.map((day, index) => (
                 <button key={day} type="button" onClick={() => onChange(value.includes(index) ? value.filter(d => d !== index) : [...value, index])}
                     aria-pressed={value.includes(index)} aria-label={day}
@@ -206,7 +212,7 @@ export const RepeatFields: React.FC<RepeatFieldsProps> = ({
                         <div className="flex items-center justify-between gap-2">
                             <label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Ends <span className="normal-case font-medium">(optional)</span></label>
                             {endDate && (
-                                <Button type="button" variant="ghost" size="sm" onClick={() => onEndDateChange('')} className="text-xs h-6 px-1.5">
+                                <Button type="button" variant="ghost" size="sm" onClick={() => onEndDateChange('')} className="text-xs min-h-[44px] px-2" aria-label="Clear the end date">
                                     Clear
                                 </Button>
                             )}

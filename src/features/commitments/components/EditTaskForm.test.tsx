@@ -3,16 +3,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import React from 'react';
 
-// Mock child components
-vi.mock('./EditTaskFormFields', () => ({
-  DailyFields: ({ editTime, setEditTime }: any) => (
-    <select data-testid="daily-fields" value={editTime} onChange={e => setEditTime(e.target.value)}>
-      <option value="morning">Morning</option>
-      <option value="evening">Evening</option>
-    </select>
-  ),
-  WeeklyFields: () => <div data-testid="weekly-fields" />,
-  MonthlyFields: () => <div data-testid="monthly-fields" />,
+// Mock the heavy shared field primitives. The editor renders the SAME
+// `CommitmentForm` the composer does, so these are the composer's testids.
+vi.mock('./TaskFormParts', () => ({
+  DailyTimeField: () => <div data-testid="time-of-day-select" />,
+  WeeklyDaysField: () => <div data-testid="weekday-selector" />,
+  MonthlyDatesField: () => <div data-testid="month-days-row" />,
+  RepeatFields: () => <div data-testid="repeat-fields" />,
+  reminderOutsidePreferredWindow: () => false,
 }));
 
 vi.mock('../../../components/shared', () => ({
@@ -39,6 +37,13 @@ vi.mock('../../../components/shared', () => ({
           {opt.label}
         </button>
       ))}
+    </div>
+  ),
+  // The reminder row (the shared CommitmentForm renders it in both modes).
+  TimeWheelPicker: ({ label, value, onChange, testId }: any) => (
+    <div data-testid={testId}>
+      {label && <span>{label}</span>}
+      <input type="time" value={value || ''} onChange={(e: any) => onChange(e.target.value)} data-testid="reminder-time-input" />
     </div>
   ),
 }));
@@ -78,30 +83,48 @@ describe('EditTaskForm', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('shows DailyFields for daily tasks', () => {
+  it('shows the time of day for daily tasks', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.getByTestId('daily-fields')).toBeInTheDocument();
+    expect(screen.getByTestId('time-of-day-select')).toBeInTheDocument();
   });
 
-  it('shows WeeklyFields for weekly tasks', () => {
+  it('shows the weekday selector for weekly tasks', () => {
     render(<EditTaskForm task={{ ...baseTask, type: 'weekly' }} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.getByTestId('weekly-fields')).toBeInTheDocument();
+    expect(screen.getByTestId('weekday-selector')).toBeInTheDocument();
   });
 
-  it('shows MonthlyFields for monthly tasks', () => {
+  it('shows the day-of-month row for monthly tasks', () => {
     render(<EditTaskForm task={{ ...baseTask, type: 'monthly' }} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.getByTestId('monthly-fields')).toBeInTheDocument();
+    expect(screen.getByTestId('month-days-row')).toBeInTheDocument();
+  });
+
+  /**
+   * The cadence is part of the stored document, so the editor states it read-only
+   * rather than offering a control that would silently rewrite the schedule.
+   */
+  it('states the cadence without offering to change it', () => {
+    render(<EditTaskForm task={{ ...baseTask, type: 'weekly' }} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
+    expect(screen.getByTestId('cadence-locked')).toHaveTextContent('Weekly');
+    expect(screen.queryByTestId('cadence-selector')).not.toBeInTheDocument();
   });
 
   it('shows scope selector when hasFamilyActive', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={true} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.getByTestId('edit-scope-control')).toBeInTheDocument();
+    expect(screen.getByTestId('scope-selector')).toBeInTheDocument();
     expect(screen.getByText('Personal')).toBeInTheDocument();
   });
 
   it('hides scope selector when no family', () => {
     render(<EditTaskForm task={baseTask} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
-    expect(screen.queryByTestId('edit-scope-control')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('scope-selector')).not.toBeInTheDocument();
+  });
+
+  /** Edit had no validation at all: a nameless commitment could be saved. */
+  it('refuses to save without a name, and says why', () => {
+    render(<EditTaskForm task={{ ...baseTask, title: '' }} hasFamilyActive={false} onSave={onSave} onCancel={onCancel} />);
+    fireEvent.click(screen.getByText('Save Changes'));
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByTestId('commitment-name-error')).toBeInTheDocument();
   });
 
   it('calls onCancel', () => {

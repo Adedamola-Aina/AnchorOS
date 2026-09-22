@@ -1,31 +1,80 @@
 /**
- * CommitmentsView Empty State & Helpers
- * Extracted from CommitmentsView.tsx per CLAUDE.md §3.2
+ * Commitments view parts — the switcher, the loading state, and the empty states.
+ *
+ * UX-DS-07: the bespoke empty state (a gradient disc, a floating plus badge, and
+ * a "Learn More" button whose only job was to toast "coming soon") is replaced by
+ * the shared EmptyState primitive, which exists so an empty state answers the
+ * user: what this is, why it is empty, and the one action its sentence names.
+ *
+ * A search that matches nothing is now its own state. It used to fall through to
+ * "Welcome to your Commitments" — a lie to someone with sixteen commitments who
+ * mistyped a word, and it offered "Create First Commitment" for a commitment they
+ * already have.
  */
 // @ts-nocheck
 
 
 import React from 'react';
-import { Plus, CheckCircle2, LayoutList, CalendarDays, Clock } from 'lucide-react';
-import { Button } from '@anchor-os/ui';
+import { CalendarDays, CheckCircle2, Clock, LayoutList, Search } from 'lucide-react';
+import { EmptyState } from '../../../components/shared/EmptyState';
 
-interface EmptyStateProps { filter: string; hasFamilyActive: boolean; onCreateFirst: () => void; onLearnMore: () => void; }
-export const CommitmentsEmptyState: React.FC<EmptyStateProps> = ({ filter, hasFamilyActive, onCreateFirst, onLearnMore }) => (
-    <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="relative mb-8">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="w-12 h-12 text-task-500/60 dark:text-task-400/60" />
+interface EmptyStateProps {
+    hasFamilyActive: boolean;
+    onCreateFirst: () => void;
+    /** Set when the list is empty because a search matched nothing. */
+    query?: string;
+    onClearSearch?: () => void;
+}
+
+export const CommitmentsEmptyState: React.FC<EmptyStateProps> = ({
+    hasFamilyActive, onCreateFirst, query, onClearSearch,
+}) => {
+    if (query) {
+        return (
+            <EmptyState
+                testId="commitments-empty-search"
+                icon={Search}
+                title={`No matches for “${query}”`}
+                description="Check the spelling, or clear the search to see every commitment."
+                action={{ label: 'Clear search', onClick: () => onClearSearch?.() }}
+            />
+        );
+    }
+
+    return (
+        <EmptyState
+            testId="commitments-empty"
+            icon={CheckCircle2}
+            title="No commitments yet"
+            description={hasFamilyActive
+                ? 'Commitments are the things you keep doing — daily, weekly or monthly — for you and your family.'
+                : 'Commitments are the things you keep doing — daily, weekly or monthly.'}
+            action={{ label: 'Create a commitment', onClick: onCreateFirst }}
+        />
+    );
+};
+
+/**
+ * Loading is a state, not a dimmed blank page.
+ *
+ * While the first read was in flight the list simply dropped to 50% opacity, so a
+ * cold open showed an empty region with nothing to explain it — and because the
+ * empty state was not gated on loading, it also told users with commitments that
+ * they had none. The placeholder mirrors a row's shape, so the page does not jump
+ * when the data lands.
+ */
+export const CommitmentsLoadingState: React.FC<{ rows?: number }> = ({ rows = 4 }) => (
+    <div className="space-y-3" data-testid="commitments-loading" aria-busy="true" aria-live="polite">
+        <span className="sr-only">Loading your commitments…</span>
+        {Array.from({ length: rows }, (_, index) => (
+            <div key={index} className="flex items-center gap-3 rounded-card border border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+                <div className="h-11 w-11 shrink-0 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+                <div className="min-w-0 flex-1 space-y-2">
+                    <div className="h-3.5 w-2/5 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-3 w-3/5 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+                </div>
             </div>
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center"><Plus className="w-4 h-4 text-emerald-500" /></div>
-        </div>
-        <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-2">{filter === 'all' ? 'Welcome to your Commitments' : `No ${filter} commitments`}</h3>
-        <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-8">
-            {filter === 'all' ? (hasFamilyActive ? "This is where you'll build consistency. Commitments are recurring obligations that keep you and your family on track." : "This is where you'll build consistency. Commitments are recurring obligations that keep you on track.") : `You don't have any ${filter} commitments. Create one to get started.`}
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-            <Button onClick={onCreateFirst} className="gap-3" size="lg"><Plus className="w-5 h-4" /><span>Create First Commitment</span></Button>
-            <Button onClick={onLearnMore} variant="secondary" size="lg">Learn More</Button>
-        </div>
+        ))}
     </div>
 );
 

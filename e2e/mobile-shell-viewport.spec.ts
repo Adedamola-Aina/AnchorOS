@@ -125,4 +125,43 @@ test.describe('Mobile shell — one viewport, no blank region below the nav', ()
             expect(Math.abs(m.navBottom - m.innerHeight)).toBeLessThanOrEqual(1);
         }
     });
+
+    /**
+     * The contextual FAB floats ABOVE the navigation, so a page that reserves only
+     * the navigation still lets its last row end up underneath the button
+     * (measured on /commitments: the final row's bottom sat at 763 while the FAB's
+     * band began at 731).
+     *
+     * The invariant: the clearance the shell reserves at the end of the scrollable
+     * content must cover the FAB's band, so every row can be scrolled clear of it.
+     */
+    test('reserves the FAB band, so the last row can clear the button', async ({ page }) => {
+        await page.goto('/');
+        await loginOrSignup(page, TEST_USER, true);
+        await page.goto('/commitments');
+        await page.waitForLoadState('domcontentloaded');
+
+        const fab = page.locator('[data-testid="contextual-fab"]');
+        await expect(fab).toBeVisible();
+
+        const geometry = await page.evaluate(() => {
+            const main = document.querySelector('main[data-scroll]') as HTMLElement | null;
+            const fabEl = document.querySelector('[data-testid="contextual-fab"]') as HTMLElement | null;
+            const nav = document.querySelector('[data-bottom-nav]') as HTMLElement | null;
+            return {
+                paddingBottom: main ? parseFloat(getComputedStyle(main).paddingBottom) : 0,
+                fabTop: fabEl ? fabEl.getBoundingClientRect().top : 0,
+                navTop: nav ? nav.getBoundingClientRect().top : 0,
+                viewportHeight: window.innerHeight,
+            };
+        });
+
+        // How much room the FAB's band actually takes above the bottom edge.
+        const fabBand = geometry.viewportHeight - geometry.fabTop;
+        expect(fabBand).toBeGreaterThan(0);
+        expect(geometry.paddingBottom).toBeGreaterThanOrEqual(fabBand);
+
+        // …and the navigation is still reserved as well.
+        expect(geometry.paddingBottom).toBeGreaterThanOrEqual(geometry.viewportHeight - geometry.navTop);
+    });
 });
