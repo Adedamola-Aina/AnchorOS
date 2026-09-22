@@ -10,14 +10,17 @@ const makeAccount = (id: string, currency: 'NGN' | 'USD', balanceCents: number):
 });
 
 /**
- * UX-FN-02 regression guard, in its corrected form.
+ * UX-FN-02 regression guard, in its final form.
  *
- * The old component printed per-currency figures under a "TOTAL ASSETS" heading:
- * a heading that promises a single total, over numbers that were never summed.
- * The redesign renames the block to what it actually is ("Balances"), states the
- * account count once, and — when more than one currency is present — says plainly
- * that no exchange rate was applied. Adding NGN to USD is not a number this
- * product may print, so no code path here can produce one.
+ * The old component printed per-currency figures under a "TOTAL ASSETS" heading: a
+ * heading that promised a single total over numbers that were never summed. That was
+ * fixed by renaming the block and adding an account count plus a "no exchange rate is
+ * applied" sentence — which then became the clutter: three lines of furniture around
+ * one number, under a page that already says "your accounts, balances and spending in
+ * one place".
+ *
+ * What actually prevents a misleading total is structural, and these tests hold it:
+ * every figure is labelled with its own currency, and the figures are never summed.
  */
 describe('BalancesSummary (UX-FN-02)', () => {
     it('renders nothing when there are no accounts', () => {
@@ -25,39 +28,47 @@ describe('BalancesSummary (UX-FN-02)', () => {
         expect(container).toBeEmptyDOMElement();
     });
 
-    it('labels the block "Balances", never "Total Assets"', () => {
+    it('never claims a total', () => {
         render(<BalancesSummary accounts={[makeAccount('1', 'USD', 500000)]} />);
         expect(screen.getByTestId('balances-summary')).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: 'Balances' })).toBeInTheDocument();
         expect(screen.queryByText(/total assets/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/^total$/i)).not.toBeInTheDocument();
     });
 
-    it('shows a single currency with its amount and the account count', () => {
-        render(<BalancesSummary accounts={[makeAccount('1', 'USD', 500000)]} />);
+    /** The heading and the count/disclosure line were reported as clutter. */
+    it('shows the figures with no heading, no account count and no FX note', () => {
+        render(<BalancesSummary accounts={[
+            makeAccount('1', 'NGN', 50000000),
+            makeAccount('2', 'USD', 500000),
+        ]} />);
+
+        expect(screen.getByTestId('balances-NGN')).toHaveTextContent(/₦500,000\.00/);
         expect(screen.getByTestId('balances-USD')).toHaveTextContent(/\$5,000\.00/);
-        expect(screen.getByText(/^1 account$/)).toBeInTheDocument();
-        // One currency means no conversion caveat is needed.
+
+        expect(screen.queryByRole('heading', { name: /balances/i })).not.toBeInTheDocument();
+        expect(screen.queryByText(/^\d+ accounts?$/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/no exchange rate/i)).not.toBeInTheDocument();
         expect(screen.queryByTestId('balances-fx-note')).not.toBeInTheDocument();
     });
 
-    it('groups mixed currencies separately with their own counts', () => {
-        render(<BalancesSummary accounts={[
-            makeAccount('1', 'NGN', 50000000),
-            makeAccount('2', 'NGN', 5000000),
-            makeAccount('3', 'USD', 500000),
-        ]} />);
-
-        expect(screen.getByTestId('balances-NGN')).toHaveTextContent(/₦550,000\.00/);
-        expect(screen.getByTestId('balances-USD')).toHaveTextContent(/\$5,000\.00/);
-        expect(screen.getByText(/3 accounts/)).toBeInTheDocument();
-    });
-
-    it('discloses that no exchange rate was applied when currencies are mixed', () => {
+    it('keeps each currency labelled, so no figure can be read as a sum', () => {
         render(<BalancesSummary accounts={[
             makeAccount('1', 'NGN', 100000),
             makeAccount('2', 'USD', 100000),
         ]} />);
-        expect(screen.getByTestId('balances-fx-note')).toHaveTextContent(/no exchange rate is applied/i);
+
+        // Two currencies, two separate figures — never one added number.
+        expect(screen.getByTestId('balances-NGN')).toBeInTheDocument();
+        expect(screen.getByTestId('balances-USD')).toBeInTheDocument();
+    });
+
+    it('keeps the account count in the accessible name', () => {
+        render(<BalancesSummary accounts={[
+            makeAccount('1', 'NGN', 100000),
+            makeAccount('2', 'NGN', 100000),
+        ]} />);
+
+        expect(screen.getByText(/balance across 2 accounts/i)).toBeInTheDocument();
     });
 
     it('never prints a combined figure across currencies', () => {

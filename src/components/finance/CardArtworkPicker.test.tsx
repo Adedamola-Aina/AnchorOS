@@ -71,7 +71,10 @@ describe('CardArtworkPicker', () => {
     // "None" + each preset label + "Done" button
     expect(screen.getByText('None')).toBeInTheDocument();
     expect(screen.getByText('Waves')).toBeInTheDocument();
-    expect(screen.getByText('Topo')).toBeInTheDocument();
+    // The label describes the pattern: "Topo" was horizontal stripes, not contours.
+    expect(screen.getByText('Contour')).toBeInTheDocument();
+    expect(screen.getByText('Hexagons')).toBeInTheDocument();
+    expect(screen.getByText('Circuit')).toBeInTheDocument();
     expect(screen.getByText('Card Pattern')).toBeInTheDocument();
   });
 
