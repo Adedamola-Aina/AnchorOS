@@ -78,7 +78,15 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     const currentBalance = sourceAccount?.balanceCents || 0;
     const expenseAmount = toCents(amount);
     const projectedBalance = (formState.type === 'expense' || formState.type === 'transfer') ? currentBalance - expenseAmount : currentBalance + expenseAmount;
-    const isOverdraft = (formState.type === 'expense' || formState.type === 'transfer') && projectedBalance < 0;
+    /**
+     * UX-FN-03 (cont.): a projection only exists once there is an amount to
+     * apply. With an empty composer the preview printed a before and an after
+     * that were the same number ("Main Checking balance: ₦5,000.00 →
+     * ₦5,000.00"), and an account already below zero raised an overdraft warning
+     * about a transaction that had not been entered. Both now wait for an amount.
+     */
+    const hasAmount = expenseAmount > 0;
+    const isOverdraft = hasAmount && (formState.type === 'expense' || formState.type === 'transfer') && projectedBalance < 0;
 
     const { isSubmitting, didJustSave, errors, setErrors, handleSubmit } = useTransactionSubmit({
         formState, amount, setAmount, transactionDate, setTransactionDate,
@@ -102,14 +110,16 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
                 {isPayBill ? 'Pay Bill' : getTransactionLabel(formState.type).header}
             </h3>
-            {isOverdraft && <OverdraftWarning projectedBalance={projectedBalance} amountCents={toCents(amount)} />}
+            {isOverdraft && <OverdraftWarning projectedBalance={projectedBalance} amountCents={expenseAmount} />}
             {/*
               * UX-FN-03: recording a transaction never showed the account's
               * resulting position, so cause and effect were invisible. The
               * preview below states the balance before → after, in the account's
-              * own currency, and turns red when it would go negative.
+              * own currency, and turns red when it would go negative. It renders
+              * only once an amount exists, so it never states a result nobody
+              * entered; the account's current balance is on the account row.
               */}
-            {sourceAccount && (
+            {sourceAccount && hasAmount && (
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-3" data-testid="balance-preview">
                 {sourceAccount.name} balance:{' '}
                 <span className="font-semibold tabular-nums text-slate-600 dark:text-slate-300">
