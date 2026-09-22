@@ -55,8 +55,8 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     const parentVirtualizer = useVirtualizer({
         count: safeTransactions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 88, // Row height: ~80px card + 8px gap
-        overscan: 5,
+        estimateSize: () => 64, // Native-style row: 56px + 8px separator breathing room
+        overscan: 6,
     });
 
     const rowVirtualizer = parentVirtualizer;
@@ -147,7 +147,7 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                                 width: '100%',
                                 transform: `translateY(${virtualRow.start}px)`,
                             }}
-                            className="pb-2" // Gap between transaction cards only
+                            className="border-b border-slate-100 dark:border-slate-800/70"
                         >
                             {/* Carry-over divider */}
                             {carryoverStartIndex != null && carryoverStartIndex > 0 && virtualRow.index === carryoverStartIndex && (
@@ -179,13 +179,9 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
                 })}
             </div>
             {!loading && safeTransactions.length > 0 && (
-                <div className="py-6 text-center">
-                    <div className="inline-flex items-center justify-center p-2 rounded-full bg-slate-100 dark:bg-slate-800/50 text-xs font-medium text-slate-400 dark:text-slate-500">
-                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 mr-2"></span>
-                        End of list
-                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 ml-2"></span>
-                    </div>
-                </div>
+                <p className="py-4 text-center text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                    End of list
+                </p>
             )}
         </div>
     );

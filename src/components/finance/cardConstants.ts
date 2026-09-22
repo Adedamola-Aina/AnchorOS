@@ -1,17 +1,27 @@
 /**
  * Card visual constants — colors, patterns, dimensions.
  * Shared between AccountCard, CardStack, and pickers.
- * UX-041 Phase 2 §4.3.
+ * UX-041 Phase 2 §4.3 · UX-FN-04 (identity) · UX-FN-09 (tighter cards).
  */
 
-/** ISO 7810 ID-1 credit card ratio — widened for compact mobile display */
-export const CARD_ASPECT_RATIO = 2.2;
+/**
+ * ISO 7810 ID-1 credit card ratio, tightened for mobile display.
+ *
+ * UX-FN-09: the expanded cards were 2.2 (≈156px tall at 343px wide) and read as
+ * half-empty panels — the content they carry is a name, a balance and one
+ * identity line. 2.75 (≈125px) is ~20% shorter while staying unmistakably a
+ * card rather than a list row, which is what the account stack is for.
+ */
+export const CARD_ASPECT_RATIO = 2.75;
 export const CARD_CORNER_RADIUS = 20;
 export const CARD_HEADER_FONT_SIZE = 15;
-export const CARD_BALANCE_FONT_SIZE = 15;
+export const CARD_BALANCE_FONT_SIZE = 16;
 export const CARD_HEADER_LETTER_SPACING = '-0.3px';
-/** Height of the peek strip visible per card (~48px like Apple Wallet) */
-export const CARD_HEADER_REVEAL = 48;
+/**
+ * Height of the peek strip visible per card (~44px — Apple Wallet-like overlap,
+ * and still a full 44px touch target for the strip button in UX-FN-07).
+ */
+export const CARD_HEADER_REVEAL = 44;
 export const STACK_STAGGER_MS = 40;
 /** Account-type-based gradient colors (checking→slate, savings→emerald, etc.) */
 export const TYPE_COLORS: Record<string, string> = {

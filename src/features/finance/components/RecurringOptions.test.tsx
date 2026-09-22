@@ -36,10 +36,9 @@ describe('RecurringOptions', () => {
     expect(input).toHaveValue(1);
   });
 
-  it('calls onChange when toggle clicked', () => {
-    const { container } = render(<RecurringOptions {...defaultProps} isRecurring={false} />);
-    const toggle = container.querySelector('[class*="cursor-pointer"]');
-    if (toggle) fireEvent.click(toggle);
+  it('calls onChange when the switch is toggled', () => {
+    render(<RecurringOptions {...defaultProps} isRecurring={false} />);
+    fireEvent.click(screen.getByRole('switch'));
     expect(defaultProps.onChange).toHaveBeenCalledWith(true);
   });
 
@@ -59,6 +58,17 @@ describe('RecurringOptions', () => {
 
   it('shows correct frequency label', () => {
     render(<RecurringOptions {...defaultProps} isRecurring={true} frequency="weekly" />);
-    expect(screen.getByText(/week\(s\)/)).toBeInTheDocument();
+    expect(screen.getByText('week')).toBeInTheDocument();
+  });
+
+  /**
+   * UX-FN-21: the toggle is a real switch, so its state is announced and it can
+   * be operated from the keyboard — the old hand-rolled div could do neither.
+   */
+  it('exposes the recurring state as a switch', () => {
+    const { rerender } = render(<RecurringOptions {...defaultProps} isRecurring={false} />);
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false');
+    rerender(<RecurringOptions {...defaultProps} isRecurring={true} />);
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
   });
 });

@@ -49,14 +49,14 @@ const queryClient = new QueryClient({
 });
 
 const renderForm = (props: any = {}) => {
-    const { defaultAccountId = 'acc1', ...restProps } = props;
+    const { defaultAccountId = 'acc1', accounts = mockAccounts, ...restProps } = props;
     return render(
         <QueryClientProvider client={queryClient}>
             <AuthContext.Provider value={{ user: mockUser, loading: false, profileLoaded: true } as any}>
                 <NotificationContext.Provider value={{ showToast: mockShowToast } as any}>
                     <FinanceContext.Provider value={{
                         transactions: [],
-                        accounts: mockAccounts,
+                        accounts,
                         addTransaction: mockAddTransaction,
                         updateTransaction: mockUpdateTransaction,
                         refetch: mockRefetch,
@@ -102,19 +102,36 @@ describe('TransactionForm', () => {
     });
 
     // UX-FN-03: recording a transaction never showed the account's resulting
-    // position, so cause and effect were invisible.
-    it('shows the account balance before → after the transaction (UX-FN-03)', async () => {
+    // position, so cause and effect were invisible — but the projection must
+    // also not state a result nobody entered (an empty composer used to read
+    // "Main Checking balance: ₦5,000.00 → ₦5,000.00").
+    it('shows the account balance before → after the transaction, once an amount exists (UX-FN-03)', async () => {
         const user = userEvent.setup();
         renderForm({ defaultAccountId: 'acc1' });
 
-        const preview = screen.getByTestId('balance-preview');
-        expect(preview).toHaveTextContent(/Main Checking/);
-        expect(preview).toHaveTextContent(/₦5,000\.00/);
+        // Nothing typed: there is no "after" yet, so there is no projection.
+        expect(screen.queryByTestId('balance-preview')).toBeNull();
 
         await user.type(screen.getByLabelText(/Amount/i), '100');
 
         // ₦5,000.00 − ₦100.00 — the "after" figure is now visible before saving.
-        expect(screen.getByTestId('balance-preview')).toHaveTextContent(/₦4,900\.00/);
+        const preview = screen.getByTestId('balance-preview');
+        expect(preview).toHaveTextContent(/Main Checking/);
+        expect(preview).toHaveTextContent(/₦5,000\.00/);
+        expect(preview).toHaveTextContent(/₦4,900\.00/);
+    });
+
+    // The overdraft warning describes the result of the transaction being
+    // entered, so an empty composer must not raise it either.
+    it('does not warn about overdraft until an amount is entered (UX-FN-03)', async () => {
+        const user = userEvent.setup();
+        renderForm({ defaultAccountId: 'acc1', accounts: [{ ...mockAccounts[0], balanceCents: -50000 }] });
+
+        expect(screen.queryByText(/Overdraft Risk/i)).toBeNull();
+
+        await user.type(screen.getByLabelText(/Amount/i), '100');
+
+        expect(screen.getByText(/Overdraft Risk/i)).toBeInTheDocument();
     });
 
     // BUG-033: scope field must be included in addTransaction call
@@ -179,19 +196,30 @@ describe('TransactionForm', () => {
 
     // ── Context-aware form behavior ─────────────────────────────────
     describe('context-aware layout', () => {
-        it('shows compact account badge when lockedAccount is true', () => {
+        it('shows a compact account row when lockedAccount is true', () => {
             renderForm({ defaultAccountId: 'acc1', lockedAccount: true });
-            // Compact badge shows account name as text, not inside a button grid
-            expect(screen.getByText('Main Checking')).toBeInTheDocument();
-            // The full account selector grid should NOT be rendered
-            expect(screen.queryByText('Savings')).not.toBeInTheDocument();
+            // The account row states the choice; it never renders every account.
+            expect(screen.getByTestId('tx-account')).toHaveTextContent('Main Checking');
+            expect(screen.queryByTestId('tx-account-option-acc2')).not.toBeInTheDocument();
         });
 
-        it('shows full account grid when lockedAccount is false (main view)', () => {
+        /**
+         * UX-FN-17: the composer used to render every account as a permanent tile,
+         * pushing the amount field below the fold. The account is now one row that
+         * opens a dedicated picker — so other accounts exist only inside the sheet.
+         */
+        it('keeps other accounts out of the form and inside the picker (UX-FN-17)', async () => {
+            const user = userEvent.setup();
             renderForm({ defaultAccountId: 'acc1' });
-            // All accounts visible as selectable cards
-            expect(screen.getByText('Main Checking')).toBeInTheDocument();
-            expect(screen.getByText('Savings')).toBeInTheDocument();
+
+            expect(screen.getByTestId('tx-account')).toHaveTextContent('Main Checking');
+            expect(screen.queryByTestId('tx-account-option-acc2')).not.toBeInTheDocument();
+
+            await user.click(screen.getByTestId('tx-account'));
+            expect(screen.getByTestId('tx-account-option-acc2')).toHaveTextContent('Savings');
+
+            await user.click(screen.getByTestId('tx-account-option-acc2'));
+            expect(screen.getByTestId('tx-account')).toHaveTextContent('Savings');
         });
 
         it('hides type selector for transfer intent (lockedAccount + transfer)', () => {
@@ -255,7 +283,7 @@ describe('TransactionForm', () => {
 
         it('shows notice banner for synced transactions', () => {
             renderForm({ initialData: syncedTx });
-            expect(screen.getByText(/only category can be changed/i)).toBeInTheDocument();
+            expect(screen.getByText(/only the category can be changed/i)).toBeInTheDocument();
         });
 
         it('hides type selector for synced transactions', () => {

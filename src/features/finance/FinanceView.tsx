@@ -16,9 +16,8 @@ import { AccountDetailsContainer } from './components/AccountDetailsContainer';
 import { EmptyAccountsState } from './components/EmptyAccountsState';
 import { ConfirmationModal } from '../../components/shared/ConfirmationModal';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
-import { useRegisterFab } from '../../context/FabContext';
 import { CardStack } from '../../components/finance/CardStack';
-import { TotalAssetsSummaryBar } from '../../components/finance/TotalAssetsSummaryBar';
+import { BalancesSummary } from '../../components/finance/BalancesSummary';
 import { SkeletonCards } from '../../components/finance/SkeletonCards';
 import { useReorderAccounts } from '../../hooks/useReorderAccounts';
 import { logProductEvent } from '../../services/telemetry';
@@ -47,8 +46,15 @@ const FinanceView = () => {
   /** UX-FN-08: the landing page previously had no way to record a transaction. */
   const [showCreateSheet, setShowCreateSheet] = useState(false);
 
-  // UX-GL-04: the mobile FAB records a transaction — the page's primary action.
-  useRegisterFab({ label: 'Record transaction', onClick: () => setShowCreateSheet(true) });
+  /**
+   * UX-FN-11: Finance deliberately registers **no** floating action button.
+   *
+   * The page already owns a `+` in its header (below), so the FAB was a second,
+   * competing control for the same action — and because it floated over the
+   * page it covered the summary chart and the transaction rows. Account detail
+   * owns its own single CTA. Other surfaces (Home, Commitments) keep the FAB;
+   * Finance does not, so nothing floats over the ledger here.
+   */
   /**
    * UX-FN-03: the account just created in the success state, so the transaction
    * form can preselect it — creation and recording are one journey.
@@ -73,7 +79,17 @@ const FinanceView = () => {
   const showAllAccountsRoute = useMemo(() => isAccountsListPath(location.pathname), [location.pathname]);
   const selectedAccountId = useMemo(() => getAccountIdFromPath(location.pathname), [location.pathname]);
   const selectedAccount = useMemo(() => selectedAccountId ? accounts.find(a => a.id === selectedAccountId) || null : null, [selectedAccountId, accounts]);
-  const showModal = accounts.length >= 3;
+  /**
+   * UX-FN-23: every form on Finance is a sheet, always.
+   *
+   * The presentation used to depend on how many accounts the user had
+   * (`accounts.length >= 3` → sheet, otherwise the same form was appended inline
+   * at the *bottom of the page*, below the transaction list). One action
+   * therefore behaved differently for different users, and with one or two
+   * accounts the composer opened out of sight of the control that launched it.
+   * There is now one presentation, and it is the intentional one.
+   */
+  const showModal = mode !== 'view';
 
   const globalTransactions = useMemo(() => {
     if (!transactions) return [];
@@ -164,7 +180,7 @@ const FinanceView = () => {
         <AccountDetailsContainer account={selectedAccount} mode={mode} editingTransaction={editingTransaction} initialTransactionType={initialTransactionType}
           accountToDelete={accountToDelete} accountToUnshare={accountToUnshare} familyMemberUid={familyMemberUid || undefined} familyMemberName={familyMemberName || undefined} prefillData={prefillData}
           onBack={() => { void runFinanceViewTransition(() => navigate('/finance')); }} onShare={() => { if (!familyMemberUid) return; const isShared = selectedAccount.sharedWith?.[familyMemberUid]; if (isShared) setAccountToUnshare(selectedAccount); else toggleShareAccount(selectedAccount.id, true); }}
-          onAddTransaction={() => { setInitialTransactionType('expense'); setPrefillData(undefined); setMode('addTx'); }}
+          onAddTransaction={(type) => { setInitialTransactionType(type ?? 'expense'); setPrefillData(undefined); setMode('addTx'); }}
           onEdit={handleEdit} onDelete={() => setAccountToDelete(selectedAccount)} onCloseForm={handleCloseForm}
           onDeleteAccount={() => { if (accountToDelete) { logProductEvent('finance_account_deleted', { accountId: accountToDelete.id }); deleteAccount(accountToDelete.id); setAccountToDelete(null); navigate('/finance'); } }}
           setAccountToDelete={setAccountToDelete}
@@ -205,7 +221,7 @@ const FinanceView = () => {
           * When there are more accounts than a comfortable stack, the stack
           * offers its own way into the full searchable list (`/finance/accounts`).
           */}
-        <TotalAssetsSummaryBar accounts={activeAccounts} />
+        <BalancesSummary accounts={activeAccounts} />
         {loadingFinance && accounts.length === 0 && <SkeletonCards count={3} />}
         {activeAccounts.length > 0 && (
           <CardStack accounts={activeAccounts} mode={viewMode} onCardTap={handleCardTap} onReorder={handleReorder} onShowAll={() => navigate('/finance/accounts')} />
@@ -228,11 +244,8 @@ const FinanceView = () => {
           />
         )}
 
-        {/* Forms / Modals */}
-        {!showModal && mode === 'addAcc' && <div className="animate-in fade-in zoom-in-95 duration-200"><AccountForm onClose={handleCloseForm} onRecordFirstTransaction={handleRecordFirstTransaction} /></div>}
-        {!showModal && (mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={newAccountIdForTx ?? activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
-
-        <Modal isOpen={showModal && mode !== 'view'} onClose={handleCloseForm} title={mode === 'addAcc' ? 'Create Account' : mode === 'editTx' ? 'Edit Transaction' : 'New Transaction'} maxWidth="max-w-2xl">
+        {/* Forms / Modals — one presentation, always a sheet (UX-FN-23). */}
+        <Modal isOpen={showModal} onClose={handleCloseForm} title={mode === 'addAcc' ? 'Create Account' : mode === 'editTx' ? 'Edit Transaction' : 'New Transaction'} maxWidth="max-w-2xl">
           {mode === 'addAcc' && <AccountForm onClose={handleCloseForm} onRecordFirstTransaction={handleRecordFirstTransaction} />}
           {(mode === 'addTx' || mode === 'editTx') && <TransactionForm onClose={handleCloseForm} defaultAccountId={newAccountIdForTx ?? activeAccounts[0]?.id} defaultType={editingTransaction?.type || initialTransactionType} initialData={editingTransaction} prefillData={prefillData} />}
         </Modal>

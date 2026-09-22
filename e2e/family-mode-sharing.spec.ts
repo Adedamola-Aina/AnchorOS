@@ -119,7 +119,7 @@ test.describe('Family Mode Account Sharing', () => {
             await page.click('.account-card:has(.lucide-users)');
 
             // Verify transactions are visible
-            await expect(page.locator('text=History')).toBeVisible();
+            await expect(page.getByRole('heading', { name: 'Transactions' })).toBeVisible();
             await expect(page.locator('.divide-y')).toBeVisible();
         });
 

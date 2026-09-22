@@ -133,7 +133,7 @@ test.describe('Finance - Accounts', () => {
         await expect(page.getByRole('heading', { name: renamedName })).toBeVisible({ timeout: 10000 });
 
         // Navigate back and assert the updated name on the Finance overview.
-        await page.getByRole('button', { name: 'Close account details' }).click();
+        await page.getByRole('button', { name: 'Back to Finance' }).click();
         await expect(page.getByRole('heading', { name: 'Finance' })).toBeVisible({ timeout: 10000 });
         await expect(page.getByText(renamedName).first()).toBeVisible({ timeout: 10000 });
 
@@ -175,7 +175,10 @@ test.describe('Finance - Accounts', () => {
             return;
         }
 
-        await expect(page.locator('[class*="glass-card"]').first()).toBeVisible({ timeout: 10000 });
+        // No empty state to assert, so the page itself must be present. Asserting
+        // a styling class (`glass-card`) here was a proxy for "the page rendered";
+        // it broke the moment a surface was restyled, which is not a regression.
+        await expect(page.getByRole('heading', { name: 'Finance' }).first()).toBeVisible({ timeout: 10000 });
     });
 });
 

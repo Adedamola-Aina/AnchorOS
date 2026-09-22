@@ -1,15 +1,32 @@
 /**
- * SpendingTrendsChart - 30-day spending trends visualization
- * 
- * CLAUDE.md Design Philosophy:
- * - Clarity over cleverness: Clear income vs expense comparison
- * - Quiet over loud: Minimal visual noise
- * - Useful over impressive: Actionable insights at a glance
+ * SpendingTrendsChart — the account's month at a glance, with inspectable weeks.
+ *
+ * UX-FN-10: this used to be three enormous pastel cards (IN / OUT / NET) stacked
+ * above a decorative bar chart, inside a glass panel — a large footprint for
+ * four numbers. It is now:
+ *
+ *   September                            (the month, stated)
+ *   In ₦1.39m · Out ₦847k · Net +₦540k   (one compact, labelled line)
+ *   [week bars, each one tappable]        (values inspectable per week)
+ *
+ * Every value is labelled in text (In / Out / Net) as well as coloured, so the
+ * meaning never depends on green-vs-red alone. Selecting a week reports that
+ * week's date range and its own In / Out / Net in a live region — the "make
+ * weekly values inspectable" requirement, with no charting dependency.
+ *
+ * Transfers: the ledger stores an internal transfer as an expense leg on the
+ * source account and an income leg on the destination account (both carrying
+ * category "Transfer"), so at ACCOUNT level they legitimately count as money
+ * leaving/arriving — see docs/audits §10 of the Finance redesign spec. The
+ * caption says so when the month contains one, because a number that includes
+ * movement between the user's own accounts must not be read as economic income
+ * or spending.
  */
 // @ts-nocheck
 
 
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useMemo } from 'react';
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { formatCurrencyCompact } from '../../../utils/format';
 import type { Currency } from '../../../types';
 
@@ -26,7 +43,13 @@ interface SpendingTrendsChartProps {
     selectedWeekStart: Date | null;
     onSelectWeek: (weekStart: Date | null) => void;
     maxAmount: number;
+    /** e.g. "September 2026". Falls back to a generic label. */
+    monthLabel?: string;
+    /** True when the month contains a leg of a transfer between the user's own accounts. */
+    hasTransfers?: boolean;
 }
+
+const dayLabel = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
 export const SpendingTrendsChart = ({
     weeklyData,
@@ -34,129 +57,175 @@ export const SpendingTrendsChart = ({
     selectedWeekStart,
     onSelectWeek,
     maxAmount,
+    monthLabel,
+    hasTransfers = false,
 }: SpendingTrendsChartProps) => {
-    // Calculate 30-day totals
-    const totals = weeklyData.reduce(
-        (acc, d) => ({
-            income: acc.income + d.income,
-            expense: acc.expense + d.expense,
-        }),
-        { income: 0, expense: 0 }
+    const totals = useMemo(
+        () => weeklyData.reduce(
+            (acc, d) => ({ income: acc.income + d.income, expense: acc.expense + d.expense }),
+            { income: 0, expense: 0 },
+        ),
+        [weeklyData],
     );
-    const net = totals.income - totals.expense;
 
-    // Selected week summary
     const selectedWeek = selectedWeekStart
         ? weeklyData.find(d => d.weekStart.getTime() === selectedWeekStart.getTime())
         : null;
 
+    // What the three stats currently describe: the selected week, or the month.
+    const shown = selectedWeek
+        ? { income: selectedWeek.income, expense: selectedWeek.expense, net: selectedWeek.net }
+        : { income: totals.income, expense: totals.expense, net: totals.income - totals.expense };
+
+    const selectedRange = selectedWeek
+        ? (() => {
+            const end = new Date(selectedWeek.weekStart);
+            end.setDate(end.getDate() + 6);
+            return `${dayLabel(selectedWeek.weekStart)} – ${dayLabel(end)}`;
+        })()
+        : null;
+
+    const stats = [
+        {
+            key: 'in',
+            label: 'In',
+            value: shown.income,
+            icon: <ArrowDownRight className="w-3.5 h-3.5" aria-hidden="true" />,
+            tone: 'text-finance-700 dark:text-finance-400',
+            prefix: shown.income > 0 ? '+' : '',
+        },
+        {
+            key: 'out',
+            label: 'Out',
+            value: shown.expense,
+            icon: <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />,
+            tone: 'text-rose-600 dark:text-rose-400',
+            prefix: shown.expense > 0 ? '−' : '',
+        },
+        {
+            key: 'net',
+            /**
+             * Financial correctness: a negative net must carry its minus sign.
+             * Rendering the absolute value in red was a number that said the
+             * opposite of the truth.
+             */
+            label: 'Net',
+            value: shown.net,
+            icon: null,
+            tone: shown.net < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white',
+            prefix: shown.net < 0 ? '−' : shown.net > 0 ? '+' : '',
+        },
+    ];
+
     return (
-        <div className="glass-card p-5">
-            {/* Header with Summary */}
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    {selectedWeek ? 'Weekly Summary' : 'Monthly Summary'}
+        <section
+            data-testid="monthly-summary"
+            aria-labelledby="monthly-summary-heading"
+            className="rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 px-4 py-3"
+        >
+            <div className="flex items-baseline justify-between gap-3">
+                <h3
+                    id="monthly-summary-heading"
+                    className="text-[15px] font-semibold text-slate-900 dark:text-white"
+                >
+                    {monthLabel ?? 'This month'}
                 </h3>
                 {selectedWeekStart && (
                     <button
+                        type="button"
                         onClick={() => onSelectWeek(null)}
-                        className="text-[10px] font-bold text-primary-500 hover:text-primary-600 dark:text-primary-400"
+                        className="text-xs font-semibold text-primary-600 dark:text-primary-400 min-h-[32px] px-1"
                     >
-                        Clear Filter
+                        Show whole month
                     </button>
                 )}
             </div>
 
-            {/* Summary Stats — shows selected week totals when filtered, monthly totals otherwise */}
-            <div className="grid grid-cols-3 gap-3 mb-5">
-                <div className="text-center p-3 rounded-card bg-finance-50 dark:bg-finance-900/20">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                        <ArrowUpRight className="w-3 h-3 text-finance-500" />
-                        <span className="text-[9px] font-bold text-finance-600 dark:text-finance-400 uppercase">In</span>
-                    </div>
-                    <p className="font-bold text-sm text-finance-600 dark:text-finance-400 tabular-nums">
-                        {formatCurrencyCompact(selectedWeek ? selectedWeek.income : totals.income, currency)}
-                    </p>
-                </div>
-                <div className="text-center p-3 rounded-card bg-rose-50 dark:bg-rose-900/20">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                        <ArrowDownRight className="w-3 h-3 text-rose-500" />
-                        <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase">Out</span>
-                    </div>
-                    <p className="font-bold text-sm text-rose-600 dark:text-rose-400 tabular-nums">
-                        {formatCurrencyCompact(selectedWeek ? selectedWeek.expense : totals.expense, currency)}
-                    </p>
-                </div>
-                <div className={`text-center p-3 rounded-card ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                        {(selectedWeek ? selectedWeek.net : net) >= 0 ? <TrendingUp className="w-3 h-3 text-blue-500" /> : <TrendingDown className="w-3 h-3 text-amber-500" />}
-                        <span className={`text-[9px] font-bold uppercase ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>Net</span>
-                    </div>
-                    <p className={`font-bold text-sm tabular-nums ${(selectedWeek ? selectedWeek.net : net) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                        {(selectedWeek ? selectedWeek.net : net) > 0 ? '+' : ''}{formatCurrencyCompact(selectedWeek ? selectedWeek.net : net, currency)}
-                    </p>
-                </div>
-            </div>
-
-            {/* Weekly Chart with clear label */}
-            <div className="mt-1">
-                <p className="text-[9px] text-slate-400 dark:text-slate-500 mb-2 text-center">
-                    Week by week breakdown
+            {selectedRange && (
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400" data-testid="selected-week-range">
+                    Week of {selectedRange}
                 </p>
-                <div className="h-20 flex items-end gap-1">
-                    {weeklyData.map((d, i) => {
-                        const isSelected = selectedWeekStart && d.weekStart.getTime() === selectedWeekStart.getTime();
-                        const isDimmed = selectedWeekStart && !isSelected;
-                        const incomeHeight = (d.income / maxAmount) * 100;
-                        const expenseHeight = (d.expense / maxAmount) * 100;
-                        const weekNum = i + 1;
-                        const weekEnd = new Date(d.weekStart);
-                        weekEnd.setDate(weekEnd.getDate() + 6);
+            )}
 
-                        return (
-                            <button
-                                key={i}
-                                onClick={() => onSelectWeek(isSelected ? null : d.weekStart)}
-                                className={`flex-1 flex flex-col items-center gap-1 group transition-all ${isDimmed ? 'opacity-20' : 'opacity-100'}`}
-                                title={`${d.weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
-                            >
-                                <div className="w-full flex gap-0.5 items-end h-14">
-                                    {/* Income Bar */}
-                                    <div className="flex-1 h-full flex items-end">
-                                        <div
-                                            style={{ height: `${Math.max(incomeHeight, 4)}%` }}
-                                            className={`w-full rounded-t transition-colors ${isSelected ? 'bg-finance-400' : 'bg-finance-500/70 group-hover:bg-finance-500'}`}
-                                        />
-                                    </div>
-                                    {/* Expense Bar */}
-                                    <div className="flex-1 h-full flex items-end">
-                                        <div
-                                            style={{ height: `${Math.max(expenseHeight, 4)}%` }}
-                                            className={`w-full rounded-t transition-colors ${isSelected ? 'bg-rose-400' : 'bg-rose-500/70 group-hover:bg-rose-500'}`}
-                                        />
-                                    </div>
-                                </div>
-                                <span className={`text-[9px] font-bold ${isSelected ? 'text-primary-500' : 'text-slate-400'}`}>
-                                    W{weekNum}
+            {/* Three labelled stats — one compact line, not three cards. */}
+            <dl
+                className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1"
+                aria-live="polite"
+                data-testid="monthly-summary-stats"
+            >
+                {stats.map(stat => (
+                    <div key={stat.key} className="flex items-baseline gap-1.5">
+                        <dt className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                            {stat.icon}
+                            {stat.label}
+                        </dt>
+                        <dd className={`text-sm font-bold tabular-nums ${stat.tone}`}>
+                            {stat.prefix}
+                            {formatCurrencyCompact(Math.abs(stat.value), currency)}
+                        </dd>
+                    </div>
+                ))}
+            </dl>
+
+            {/* Weekly bars — each week is a real control with its values in its name. */}
+            <div className="mt-3 h-16 flex items-end gap-1.5" role="group" aria-label="Weekly income and spending">
+                {weeklyData.map((d, i) => {
+                    const isSelected = !!selectedWeekStart && d.weekStart.getTime() === selectedWeekStart.getTime();
+                    const isDimmed = !!selectedWeekStart && !isSelected;
+                    const weekEnd = new Date(d.weekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+                    const range = `${dayLabel(d.weekStart)} – ${dayLabel(weekEnd)}`;
+                    return (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => onSelectWeek(isSelected ? null : d.weekStart)}
+                            aria-pressed={isSelected}
+                            aria-label={`Week of ${range}: in ${formatCurrencyCompact(d.income, currency)}, out ${formatCurrencyCompact(d.expense, currency)}, net ${formatCurrencyCompact(d.net, currency)}`}
+                            className={`flex-1 min-h-[44px] flex flex-col items-center justify-end gap-1 transition-opacity ${isDimmed ? 'opacity-40' : 'opacity-100'}`}
+                        >
+                            <span aria-hidden="true" className="w-full flex gap-0.5 items-end h-12">
+                                <span className="flex-1 h-full flex items-end">
+                                    <span
+                                        style={{ height: `${Math.max((d.income / maxAmount) * 100, 4)}%` }}
+                                        className={`w-full rounded-t ${isSelected ? 'bg-finance-500' : 'bg-finance-500/60'}`}
+                                    />
                                 </span>
-                            </button>
-                        );
-                    })}
-                </div>
+                                <span className="flex-1 h-full flex items-end">
+                                    <span
+                                        style={{ height: `${Math.max((d.expense / maxAmount) * 100, 4)}%` }}
+                                        className={`w-full rounded-t ${isSelected ? 'bg-rose-500' : 'bg-rose-500/60'}`}
+                                    />
+                                </span>
+                            </span>
+                            <span
+                                aria-hidden="true"
+                                className={`text-[10px] font-semibold ${isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 dark:text-slate-500'}`}
+                            >
+                                W{i + 1}
+                            </span>
+                        </button>
+                    );
+                })}
             </div>
 
-            {/* Compact Legend */}
-            <div className="flex justify-center gap-4 mt-3 text-[9px] font-bold text-slate-400">
-                <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-finance-500 rounded-sm" />
-                    <span>Income</span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-rose-500 rounded-sm" />
-                    <span>Expenses</span>
-                </div>
+            <div className="mt-1 flex items-center gap-4 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="w-2 h-2 rounded-sm bg-finance-500" />
+                    In
+                </span>
+                <span className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="w-2 h-2 rounded-sm bg-rose-500" />
+                    Out
+                </span>
             </div>
-        </div>
+
+            {hasTransfers && (
+                <p className="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
+                    Includes transfers between your own accounts.
+                </p>
+            )}
+        </section>
     );
 };
+

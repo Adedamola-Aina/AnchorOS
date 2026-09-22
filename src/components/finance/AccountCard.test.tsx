@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AccountCard } from './AccountCard';
+import { CARD_ASPECT_RATIO, CARD_HEADER_REVEAL } from './cardConstants';
 import type { AnchorAccount } from '../../types';
 
 vi.mock('../../utils/format', () => ({
@@ -44,7 +45,7 @@ describe('AccountCard — Apple Wallet panel', () => {
   it('uses clean panel typography for the header row', () => {
     render(card());
     expect(screen.getByText('Chase Bank')).toHaveStyle({ fontSize: '15px', fontWeight: '600', letterSpacing: '-0.3px' });
-    expect(screen.getByText('$1500.00')).toHaveStyle({ fontSize: '15px', fontWeight: '500', letterSpacing: '-0.3px' });
+    expect(screen.getByText('$1500.00')).toHaveStyle({ fontSize: '16px', fontWeight: '500', letterSpacing: '-0.3px' });
   });
 
   it('shows sub-name when different from institution', () => {
@@ -57,9 +58,24 @@ describe('AccountCard — Apple Wallet panel', () => {
     expect(screen.getByText(/5678/)).toBeInTheDocument();
   });
 
-  it('renders account type in footer', () => {
+  /**
+   * UX-FN-04: identity must not depend on the card's colour, and two accounts may
+   * share a name — so the footer states type, currency and (when linked) the
+   * masked account number, all from real domain fields.
+   */
+  it('states account type, currency and masked number in the footer', () => {
     render(card());
-    expect(screen.getByText('checking')).toBeInTheDocument();
+    const identity = screen.getByTestId('account-card-identity-acc-1');
+    expect(identity).toHaveTextContent('Checking');
+    expect(identity).toHaveTextContent('USD');
+    expect(identity).toHaveTextContent('5678');
+  });
+
+  it('renders the type label from the domain model, not the raw stored value', () => {
+    render(card({ account: { ...baseAccount, type: 'investment', externalConnection: undefined } }));
+    const identity = screen.getByTestId('account-card-identity-acc-1');
+    expect(identity).toHaveTextContent('Investment');
+    expect(identity).not.toHaveTextContent('checking');
   });
 
   it('uses type-based color for checking accounts', () => {
@@ -89,9 +105,9 @@ describe('AccountCard — Apple Wallet panel', () => {
     expect(container.querySelector('.rounded-sm')).not.toBeInTheDocument();
   });
 
-  it('uses credit card aspect ratio', () => {
+  it('uses the shared card aspect ratio', () => {
     const { container } = render(card());
-    expect(container.querySelector('.account-card')).toHaveStyle({ aspectRatio: '1.586' });
+    expect(container.querySelector('.account-card')).toHaveStyle({ aspectRatio: `${CARD_ASPECT_RATIO}` });
   });
 });
 
@@ -102,11 +118,13 @@ describe('AccountCard — Apple Wallet panel', () => {
  * the account could not be opened at all. Only the peek strip is reachable.
  */
 describe('AccountCard — stacked peek strip is a real hit target (UX-FN-07)', () => {
-  it('gives a non-front card a tappable 48px strip', () => {
+  it('gives a non-front card a tappable peek strip', () => {
     render(card({ isActive: false }));
     const strip = screen.getByTestId('account-card-acc-1');
     expect(strip).toHaveAttribute('data-account-card-strip', 'true');
-    expect(strip).toHaveStyle({ height: '48px', pointerEvents: 'auto' });
+    expect(strip).toHaveStyle({ height: `${CARD_HEADER_REVEAL}px`, pointerEvents: 'auto' });
+    // The strip must still be a real 44px touch target (WCAG 2.5.5 / HIG).
+    expect(CARD_HEADER_REVEAL).toBeGreaterThanOrEqual(44);
   });
 
   it('removes the non-front card body from the hit-test surface', () => {

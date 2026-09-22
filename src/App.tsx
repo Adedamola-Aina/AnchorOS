@@ -129,10 +129,19 @@ export default function App() {
           <AuthProvider>
             <AppProvider>
               <div
+                data-app-shell="true"
                 className="flex flex-col flex-1 w-full min-h-0"
                 style={{
+                  /*
+                   * Top offset = whatever chrome sits above the app: the
+                   * non-production environment strip (whose height is the shared
+                   * --env-banner-height token) plus the status-bar safe area.
+                   * Production has no strip, so it offsets by the safe area only.
+                   * The inset is applied here exactly once — the strip itself
+                   * pads its own content, it is not double-counted.
+                   */
                   paddingTop: import.meta.env.VITE_APP_ENV && import.meta.env.VITE_APP_ENV !== 'production'
-                    ? 'calc(24px + env(safe-area-inset-top, 0px))'
+                    ? 'calc(var(--env-banner-height, 20px) + env(safe-area-inset-top, 0px))'
                     : 'env(safe-area-inset-top, 0px)',
                   paddingLeft: 'env(safe-area-inset-left, 0px)',
                   paddingRight: 'env(safe-area-inset-right, 0px)'

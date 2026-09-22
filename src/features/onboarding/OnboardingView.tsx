@@ -199,7 +199,7 @@ export const OnboardingView = () => {
   };
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
+    <div className="h-full w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
       <div className="w-full max-w-lg">
         <div className="mb-2 flex justify-center">
           <StateIllustration kind="onboarding" className="w-52 h-32" testId="onboarding-illustration" />

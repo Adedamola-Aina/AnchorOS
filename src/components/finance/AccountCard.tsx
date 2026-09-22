@@ -8,6 +8,7 @@ import { fromCents } from '../../utils/moneyUtils';
 import type { AnchorAccount } from '../../types';
 import { getFinanceViewTransitionName } from '../../features/finance/financeViewTransition';
 import { resolveAccountArtworkUrl, revokeAccountArtworkUrl } from '../../services/accountArtworkStorage';
+import { accountTypeLabel } from '../../utils/accountTypes';
 import {
   CARD_ASPECT_RATIO, CARD_BALANCE_FONT_SIZE, CARD_CORNER_RADIUS,
   CARD_HEADER_FONT_SIZE, CARD_HEADER_LETTER_SPACING, CARD_HEADER_REVEAL,
@@ -36,10 +37,24 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
     ?? DEFAULT_CARD_COLORS[index % DEFAULT_CARD_COLORS.length];
   const balance = fromCents(account.balanceCents);
   const last4 = account.externalConnection?.maskedAccountNumber?.slice(-4) ?? '';
-  const instName = account.externalConnection?.institutionName ?? account.name;
+  const institution = account.externalConnection?.institutionName;
+  const instName = institution ?? account.name;
   const [artworkUrl, setArtworkUrl] = useState<string | undefined>(account.cardArtwork || undefined);
   const showSecondaryName = (mode === 'expanded' || isActive) && account.name !== instName;
   const showFooter = mode === 'expanded' || isActive;
+  /**
+   * UX-FN-04: identity must not rest on colour alone, and two accounts may share
+   * a name. The footer line therefore carries the *meaningful* identity the
+   * domain model actually has — account type (from the real `type` field, never
+   * invented), currency, and the masked account number when the account is
+   * linked — so "Investment Portfolio" × 2 is distinguishable without relying on
+   * the card's colour.
+   */
+  const identity = [
+    accountTypeLabel(account.type),
+    account.currency,
+    last4 ? `•••• ${last4}` : null,
+  ].filter(Boolean).join(' · ');
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap(); }
@@ -153,20 +168,16 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
         </div>
         {showFooter && (
           <div className="flex items-end justify-between gap-2">
-            <span style={{
-              fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.55)',
-              textTransform: 'capitalize' as const,
-            }}>
-              {account.type}
+            <span
+              data-testid={`account-card-identity-${account.id}`}
+              className="truncate"
+              style={{
+                fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.62)',
+                letterSpacing: '0.01em',
+              }}
+            >
+              {identity}
             </span>
-            {last4 && (
-              <span style={{
-                fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.45)',
-                fontFamily: 'monospace', letterSpacing: '0.12em',
-              }}>
-                •••• {last4}
-              </span>
-            )}
           </div>
         )}
       </div>

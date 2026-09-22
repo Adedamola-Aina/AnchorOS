@@ -36,7 +36,17 @@ export function useTransactionFormState({
     const [type, setType] = useState<TransactionType>(initialData?.type || defaultType);
     const [category, setCategory] = useState(initialData?.category || prefillData?.category || 'General');
     const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
-    const [exchangeRate, setExchangeRate] = useState('1.0');
+    /**
+     * FX rate for cross-currency transfers.
+     *
+     * UX-FN-19: this defaulted to '1.0', which pre-filled the UI with
+     * "1 NGN = 1 USD" — a rate AnchorOS has no source for, presented as if it were
+     * a fact. AnchorOS has no FX feed (audit doc 18, decision D5), so the field
+     * starts empty and the user must state the rate they were given; the composer
+     * shows what the destination will receive and refuses to submit without a
+     * positive rate (existing validation in `useTransactionSubmit`).
+     */
+    const [exchangeRate, setExchangeRate] = useState('');
     const [title, setTitle] = useState(initialData?.title || prefillData?.title || '');
 
     const suggestionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -56,7 +66,7 @@ export function useTransactionFormState({
 
     const handleSetAccount = (id: string) => {
         setSelectedAccId(id);
-        setExchangeRate('1.0');
+        setExchangeRate('');
         if (destinationAccId === id && accounts.length > 1) {
             setDestinationAccIdState(accounts.find(a => a.id !== id)?.id || '');
         }
@@ -68,7 +78,9 @@ export function useTransactionFormState({
             ? accounts.find(a => a.id !== selectedAccId)?.id || ''
             : id;
         setDestinationAccIdState(nextId);
-        setExchangeRate('1.0');
+        // A different destination is a different currency pair — never carry a
+        // rate the user entered for another pair (UX-FN-19).
+        setExchangeRate('');
     };
 
     return {

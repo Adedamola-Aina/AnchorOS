@@ -5,7 +5,6 @@
  */
 
 export { AccountCard } from './AccountCard';
-export { AccountSelector } from './AccountSelector';
 export { CategorySelector } from './CategorySelector';
 export { OverdraftWarning } from './OverdraftWarning';
 export { SpendingTrendsChart } from './SpendingTrendsChart';
