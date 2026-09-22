@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.34](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.33...v1.21.0-rc.34) (2026-09-22)
+
+
+### Features
+
+* **home,commitments,finance:** dashboard intelligence, intent parser, and the reported interaction defects (CM-27..CM-30, UX-FN-24) ([#256](https://github.com/Adedamola-Aina/AnchorOS/issues/256)) ([b3a78b7](https://github.com/Adedamola-Aina/AnchorOS/commit/b3a78b7a4ff1f59fe63ad90119dbbb1f2fb6884e))
+
 ## [1.21.0-rc.33](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.32...v1.21.0-rc.33) (2026-09-22)
 
 
