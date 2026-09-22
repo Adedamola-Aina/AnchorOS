@@ -7,6 +7,7 @@
 import { useMemo } from 'react';
 import type { AnchorAccount, AnchorTransaction } from '../../../types';
 import { getWeeklySpending } from '../../../utils/financeInsights';
+import { isTransferLeg } from '../../../utils/financeInsights';
 import { useTransactionsQuery } from '../../../hooks/queries/useFinanceQueries';
 
 const CARRYOVER_DAYS = 14;
@@ -39,6 +40,21 @@ export function useAccountTransactions(
   const weeklyData = useMemo(() => getWeeklySpending(accountTransactions, currentMonth), [accountTransactions, currentMonth]);
   const maxWeeklyAmount = useMemo(() => Math.max(...weeklyData.flatMap(d => [d.income, d.expense]), 1), [weeklyData]);
 
+  /**
+   * Transfers (spec §10): the ledger stores an internal transfer as an *expense*
+   * leg on the source account and an *income* leg on the destination account,
+   * both with `category: 'Transfer'` and a shared `linkId` (see
+   * `services/TransferOperations.ts`). At ACCOUNT level that is financially
+   * correct — the money really did leave / arrive — but the account summary must
+   * say when a transfer is inside the number, or "In/Out" reads as economic
+   * income and spending. Detecting the legs here (never rewriting the ledger)
+   * lets the summary disclose it.
+   */
+  const transferLegCount = useMemo(
+    () => accountTransactions.filter(t => t && !t.isSoftDeleted && isTransferLeg(t)).length,
+    [accountTransactions],
+  );
+
   const monthlyBalance = useMemo(() => {
     const now = new Date();
     const isCurrentMonth = currentMonth.getMonth() === now.getMonth() && currentMonth.getFullYear() === now.getFullYear();
@@ -64,7 +80,19 @@ export function useAccountTransactions(
     const { searchQuery, filterType, selectedWeekStart } = filters;
     const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
     const sorted = accountTransactions.filter(t => {
-      if (!t || (filterType !== 'all' && t.type !== filterType)) return false;
+      if (!t) return false;
+      /**
+       * Scope semantics (UX-FN-15). A transfer leg is stored as income/expense,
+       * so "Money in / Money out" must exclude it or the filter would silently
+       * answer a different question than its label ("Transfers" is its own
+       * scope). `all` shows everything.
+       */
+      const transfer = isTransferLeg(t);
+      if (filterType === 'transfer') {
+        if (!transfer) return false;
+      } else if (filterType !== 'all') {
+        if (transfer || t.type !== filterType) return false;
+      }
       if (selectedWeekStart && t.date) {
         const d = new Date(t.date);
         const end = new Date(selectedWeekStart);
@@ -79,5 +107,5 @@ export function useAccountTransactions(
     return { filteredList: sorted, carryoverDividerIndex: divider >= 0 ? divider : undefined };
   }, [accountTransactions, filters, currentMonth]);
 
-  return { accountTransactions, weeklyData, maxWeeklyAmount, monthlyBalance, filteredList, carryoverDividerIndex };
+  return { accountTransactions, weeklyData, maxWeeklyAmount, monthlyBalance, filteredList, carryoverDividerIndex, transferLegCount };
 }

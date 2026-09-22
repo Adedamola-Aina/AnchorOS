@@ -4,12 +4,14 @@
  */
 // @ts-nocheck
 
-import { useState, useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, Search } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useFinance } from '../../../context/FinanceContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useFamilySharing } from '../../../hooks/useFamilySharing';
 import { VirtualTransactionList } from './VirtualTransactionList';
+import { TransactionFilterHeader } from './TransactionListParts';
+import { isTransferLeg } from '../../../utils/financeInsights';
 import { useInfiniteTransactionsQuery } from '../../../hooks/queries/useFinanceQueries';
 import type { AnchorTransaction } from '../../../types';
 
@@ -29,7 +31,7 @@ export const TransactionHistorySection = ({ transactions, onEdit, onDelete, onRe
   const { user } = useAuth();
   const { isOwner, connection } = useFamilySharing(user?.uid);
   const [searchQuery, setSearchQuery] = useState('');
-  const searchRef = useRef<HTMLInputElement>(null);
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
   const hasConnection = !!connection;
   const shouldUsePaginatedOwn = !!user?.uid && (!hasConnection || isOwner);
 
@@ -56,73 +58,88 @@ export const TransactionHistorySection = ({ transactions, onEdit, onDelete, onRe
   const activeTransactions = shouldUsePaginatedOwn ? pagedTransactions : transactions;
 
   const filtered = useMemo(() => {
-    if (!searchQuery.trim()) return activeTransactions;
+    const scoped = activeTransactions.filter(tx => {
+      const transfer = isTransferLeg(tx);
+      if (filterType === 'transfer') return transfer;
+      if (filterType === 'all') return true;
+      // "Money in / Money out" are economic directions, so an internal transfer
+      // leg (stored as income/expense) is excluded — it has its own scope.
+      return !transfer && tx.type === filterType;
+    });
+    if (!searchQuery.trim()) return scoped;
     const q = searchQuery.toLowerCase();
-    return activeTransactions.filter(tx =>
+    return scoped.filter(tx =>
       tx.title?.toLowerCase().includes(q) ||
       tx.category?.toLowerCase().includes(q) ||
       tx.accountName?.toLowerCase().includes(q)
     );
-  }, [activeTransactions, searchQuery]);
+  }, [activeTransactions, searchQuery, filterType]);
 
   return (
-    <div>
-      {/* Toolbar: month nav + search */}
-      <div className="flex items-center gap-2 mb-3 flex-wrap">
-        {/* Month navigation */}
-        <div className="flex items-center bg-white dark:bg-slate-900 rounded-card p-1 shadow-elevation-subtle border border-slate-200 dark:border-slate-800">
-          <button type="button" onClick={prevMonth} className="h-11 w-11 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Previous month">
-            <ChevronLeft className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+    <section aria-labelledby="finance-transactions-heading">
+      {/*
+        * UX-FN-15: one heading, one period control, one search, one scope row —
+        * and the rows themselves are list rows, not cards inside a card.
+        */}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <h3 id="finance-transactions-heading" className="text-lg font-bold text-slate-900 dark:text-white">
+          Transactions
+        </h3>
+        <div className="flex items-center rounded-full bg-slate-100 dark:bg-slate-800 p-0.5">
+          <button
+            type="button"
+            onClick={prevMonth}
+            className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-white dark:hover:bg-slate-700 transition-colors"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="w-4 h-4 text-slate-600 dark:text-slate-300" aria-hidden="true" />
           </button>
-          <div className="px-2 flex items-center gap-2 min-w-[140px] justify-center text-sm font-bold text-slate-900 dark:text-white select-none">
-            <Calendar className="w-4 h-4 text-slate-400" />
-            <span>{monthLabel}</span>
-          </div>
-          <button type="button" onClick={nextMonth} className="h-11 w-11 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Next month">
-            <ChevronRight className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+          <span className="px-1 text-xs font-semibold text-slate-700 dark:text-slate-200 select-none min-w-[86px] text-center">
+            {monthLabel}
+          </span>
+          <button
+            type="button"
+            onClick={nextMonth}
+            className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-white dark:hover:bg-slate-700 transition-colors"
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-4 h-4 text-slate-600 dark:text-slate-300" aria-hidden="true" />
           </button>
-        </div>
-
-        {/* Search */}
-        <div className="relative flex-1 min-w-[120px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            ref={searchRef}
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder={`Search in ${currentMonth.toLocaleDateString('en-US', { month: 'long' })}...`}
-            className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all dark:text-white shadow-elevation-subtle"
-          />
         </div>
       </div>
 
-      {/* Transaction list */}
-      <div className="bg-white dark:bg-slate-900 rounded-panel border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <VirtualTransactionList
-          transactions={filtered}
-          searchQuery={searchQuery}
-          onClearSearch={() => setSearchQuery('')}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onRecordTransaction={onRecordTransaction}
-          latestActivityLabel={latestActivityLabel}
-          onJumpToLatestActivity={onJumpToLatestActivity}
-          className="min-h-[200px] max-h-[calc(100vh-250px)]"
-        />
-        {shouldUsePaginatedOwn && hasNextPage && !searchQuery.trim() && (
-          <div className="px-3 pb-3 pt-1 flex justify-center">
-            <button
-              type="button"
-              onClick={() => void fetchNextPage()}
-              disabled={isFetchingNextPage}
-              className="min-h-[44px] px-4 py-2 rounded-card border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isFetchingNextPage ? 'Loading...' : 'Load more'}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+      <TransactionFilterHeader
+        searchQuery={searchQuery}
+        filterType={filterType}
+        hasWeekFilter={false}
+        onSearchChange={setSearchQuery}
+        onFilterChange={setFilterType}
+        searchPlaceholder={`Search in ${currentMonth.toLocaleDateString('en-US', { month: 'long' })}…`}
+      />
+
+      <VirtualTransactionList
+        transactions={filtered}
+        searchQuery={searchQuery}
+        onClearSearch={() => setSearchQuery('')}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onRecordTransaction={onRecordTransaction}
+        latestActivityLabel={latestActivityLabel}
+        onJumpToLatestActivity={onJumpToLatestActivity}
+        className="min-h-[200px] max-h-[65vh]"
+      />
+      {shouldUsePaginatedOwn && hasNextPage && !searchQuery.trim() && (
+        <div className="pb-3 pt-1 flex justify-center">
+          <button
+            type="button"
+            onClick={() => void fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isFetchingNextPage ? 'Loading...' : 'Load more'}
+          </button>
+        </div>
+      )}
+    </section>
   );
 };

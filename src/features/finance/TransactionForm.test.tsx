@@ -179,19 +179,30 @@ describe('TransactionForm', () => {
 
     // ── Context-aware form behavior ─────────────────────────────────
     describe('context-aware layout', () => {
-        it('shows compact account badge when lockedAccount is true', () => {
+        it('shows a compact account row when lockedAccount is true', () => {
             renderForm({ defaultAccountId: 'acc1', lockedAccount: true });
-            // Compact badge shows account name as text, not inside a button grid
-            expect(screen.getByText('Main Checking')).toBeInTheDocument();
-            // The full account selector grid should NOT be rendered
-            expect(screen.queryByText('Savings')).not.toBeInTheDocument();
+            // The account row states the choice; it never renders every account.
+            expect(screen.getByTestId('tx-account')).toHaveTextContent('Main Checking');
+            expect(screen.queryByTestId('tx-account-option-acc2')).not.toBeInTheDocument();
         });
 
-        it('shows full account grid when lockedAccount is false (main view)', () => {
+        /**
+         * UX-FN-17: the composer used to render every account as a permanent tile,
+         * pushing the amount field below the fold. The account is now one row that
+         * opens a dedicated picker — so other accounts exist only inside the sheet.
+         */
+        it('keeps other accounts out of the form and inside the picker (UX-FN-17)', async () => {
+            const user = userEvent.setup();
             renderForm({ defaultAccountId: 'acc1' });
-            // All accounts visible as selectable cards
-            expect(screen.getByText('Main Checking')).toBeInTheDocument();
-            expect(screen.getByText('Savings')).toBeInTheDocument();
+
+            expect(screen.getByTestId('tx-account')).toHaveTextContent('Main Checking');
+            expect(screen.queryByTestId('tx-account-option-acc2')).not.toBeInTheDocument();
+
+            await user.click(screen.getByTestId('tx-account'));
+            expect(screen.getByTestId('tx-account-option-acc2')).toHaveTextContent('Savings');
+
+            await user.click(screen.getByTestId('tx-account-option-acc2'));
+            expect(screen.getByTestId('tx-account')).toHaveTextContent('Savings');
         });
 
         it('hides type selector for transfer intent (lockedAccount + transfer)', () => {
@@ -255,7 +266,7 @@ describe('TransactionForm', () => {
 
         it('shows notice banner for synced transactions', () => {
             renderForm({ initialData: syncedTx });
-            expect(screen.getByText(/only category can be changed/i)).toBeInTheDocument();
+            expect(screen.getByText(/only the category can be changed/i)).toBeInTheDocument();
         });
 
         it('hides type selector for synced transactions', () => {

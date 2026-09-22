@@ -76,11 +76,10 @@ vi.mock('../../components/finance/CardStack', () => ({
   ),
 }));
 
-vi.mock('../../components/finance/TotalAssetsSummaryBar', () => ({
-  TotalAssetsSummaryBar: ({ accounts, onShowDetails }: any) => (
-    <div data-testid="total-assets-bar">
-      <span>Total: {accounts.length} accounts</span>
-      <button type="button" onClick={() => onShowDetails?.()}>Show Details</button>
+vi.mock('../../components/finance/BalancesSummary', () => ({
+  BalancesSummary: ({ accounts }: any) => (
+    <div data-testid="balances-summary">
+      <span>Balances: {accounts.length} accounts</span>
     </div>
   ),
 }));
@@ -352,10 +351,10 @@ describe('FinanceView', () => {
       expect(screen.queryByTestId('wired-jump-to-latest')).not.toBeInTheDocument();
     });
 
-    it('renders TotalAssetsSummaryBar with active accounts', () => {
+    it('renders BalancesSummary with active accounts', () => {
       renderWithContext(<FinanceView />);
-      expect(screen.getByTestId('total-assets-bar')).toBeInTheDocument();
-      expect(screen.getByText('Total: 3 accounts')).toBeInTheDocument();
+      expect(screen.getByTestId('balances-summary')).toBeInTheDocument();
+      expect(screen.getByText('Balances: 3 accounts')).toBeInTheDocument();
     });
 
     /**

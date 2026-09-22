@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { SkeletonCards } from './SkeletonCards';
+import { CARD_ASPECT_RATIO } from './cardConstants';
 
 describe('SkeletonCards', () => {
   it('renders the specified number of skeleton cards', () => {
@@ -24,9 +25,9 @@ describe('SkeletonCards', () => {
     expect(cards[2].style.animationDelay).toBe('240ms');
   });
 
-  it('uses credit card aspect ratio', () => {
+  it('uses the shared card aspect ratio', () => {
     const { container } = render(<SkeletonCards count={1} />);
     const card = container.querySelector('.animate-pulse');
-    expect(card?.style.aspectRatio).toContain('2.2');
+    expect(card?.style.aspectRatio).toContain(`${CARD_ASPECT_RATIO}`);
   });
 });

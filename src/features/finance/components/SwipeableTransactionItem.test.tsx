@@ -7,7 +7,7 @@
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { SwipeableTransactionItem } from './SwipeableTransactionItem';
 import type { AnchorTransaction } from '../../../types';
 
@@ -95,7 +95,7 @@ describe('SwipeableTransactionItem', () => {
             expect(screen.getByTestId('swipeable-row')).toBeInTheDocument();
         });
 
-        it('renders swipe action indicators', () => {
+        it('reveals the swipe actions while the row is being swiped', () => {
             render(
                 <SwipeableTransactionItem
                     transaction={mockTransaction}
@@ -103,6 +103,16 @@ describe('SwipeableTransactionItem', () => {
                     onDelete={mockOnDelete}
                 />
             );
+
+            // At rest the action layers are not rendered at all: they sit behind
+            // the row and their colour used to leak through the rounded corners
+            // as a halo around every transaction.
+            expect(screen.queryByTestId('left-action')).not.toBeInTheDocument();
+            expect(screen.queryByTestId('right-action')).not.toBeInTheDocument();
+
+            fireEvent.touchStart(screen.getByTestId('swipeable-content'), {
+                touches: [{ clientX: 200, clientY: 100 }],
+            });
 
             expect(screen.getByTestId('left-action')).toBeInTheDocument();
             expect(screen.getByTestId('right-action')).toBeInTheDocument();
@@ -133,8 +143,12 @@ describe('SwipeableTransactionItem', () => {
                 />
             );
 
-            // $50.00 formatted from 5000 cents
-            expect(screen.getByText(/-\$50\.00/)).toBeInTheDocument();
+            const row = screen.getByTestId('transaction-row');
+            // $50.00 formatted from 5000 cents, with the minus sign for an expense.
+            expect(row).toHaveTextContent(/50\.00/);
+            expect(row).toHaveTextContent(/−/);
+            // Direction is stated in words for assistive tech, never colour alone.
+            expect(row).toHaveTextContent(/Money out/);
         });
 
         it('displays category', () => {

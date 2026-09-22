@@ -20,7 +20,7 @@ export const OnboardingShell: React.FC = () => (
     <FabricProvider>
         <FinanceProvider>
             <TaskProvider>
-                <React.Suspense fallback={<div className="h-screen w-full" />}>
+                <React.Suspense fallback={<div className="h-full w-full" />}>
                     <LazyOnboardingView />
                 </React.Suspense>
             </TaskProvider>

@@ -194,9 +194,12 @@ body.platform-android {
    document-level scrollbar from painting under the bar. */
 
 /* ─── Modal / dialog safe areas ─────────────────────────── */
+/* The modal overlay is `fixed inset-0`, i.e. it is measured in the layout
+   viewport — so its cap must be expressed in the same space (100%), not in a
+   viewport unit that can disagree with it. */
 .platform-native [role="dialog"],
 .platform-pwa [role="dialog"] {
-  max-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+  max-height: 100%;
 }
 
 /* ─── Native-style sheet drag handle (iOS) ──────────────── */
@@ -216,6 +219,8 @@ body.platform-android {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  width: 100vw;
+  /* 100% of the shell, which is itself the layout viewport (see the viewport
+     contract in index.css). */
+  height: 100%;
+  width: 100%;
 }

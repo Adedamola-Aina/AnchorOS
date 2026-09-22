@@ -1,17 +1,35 @@
 /**
- * TransferDetails
- * 
- * Transfer-specific form fields including destination account and exchange rate.
- * Extracted from TransactionForm for modularity.
+ * TransferDetails — where the money goes, and what it becomes.
+ *
+ * A transfer is a distinct financial operation, not an expense with a different
+ * colour (UX-FN-20):
+ *
+ *   From  [Main Checking · Checking · NGN · ₦694,419.10]
+ *           ↓
+ *   To    [Investment Portfolio · Investment · NGN · ₦878.63]
+ *
+ * The destination is a compact picker (never a wall of tiles), the source account
+ * is excluded from it, and when the two currencies differ the exchange-rate
+ * controls appear — and ONLY then. AnchorOS has no FX feed (audit doc 18,
+ * decision D5), so:
+ *
+ *   - the rate is never pre-filled with an invented value like "1 NGN = 1 USD";
+ *   - the panel is labelled "Manual · no live rate" and says where the number
+ *     comes from;
+ *   - the destination amount is calculated and shown BEFORE confirmation, so the
+ *     user sees the outcome of the rate they typed;
+ *   - an empty or invalid rate blocks submission (the existing validation in
+ *     `useTransactionSubmit` already refuses a non-positive rate).
  */
 // @ts-nocheck
 
 
 import React from 'react';
-import { ArrowRightLeft } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 import { formatCurrency } from '../../../utils/format';
+import { toCents, fromCents } from '../../../utils/moneyUtils';
+import { AccountPickerRow } from './AccountPickerRow';
 import type { AnchorAccount } from '../../../types';
-import { PopoverMenu } from '../../../components/shared';
 
 interface TransferDetailsProps {
     accounts: AnchorAccount[];
@@ -35,70 +53,98 @@ export const TransferDetails: React.FC<TransferDetailsProps> = ({
     onExchangeRateChange,
     amount,
     error,
-    lockedAccount
 }) => {
     const destAccount = accounts.find(a => a.id === destinationAccId);
-    const isDifferentCurrency = sourceAccount && destAccount && sourceAccount.currency !== destAccount.currency;
-    const filteredAccounts = accounts.filter(a => a.id !== sourceAccount?.id);
+    const isDifferentCurrency = !!sourceAccount && !!destAccount && sourceAccount.currency !== destAccount.currency;
 
     if (accounts.length < 2) {
         return (
-            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-lg text-xs text-amber-600 dark:text-amber-400">
-                <p className="font-bold mb-1">Transfer Unavailable</p>
-                Transfers require at least two accounts. Please create another account first, or switch to Expense/Income.
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-xl text-xs text-amber-700 dark:text-amber-400">
+                <p className="font-semibold mb-1">Transfers need two accounts</p>
+                A transfer moves money between your accounts. Create a second account
+                first, or record this as an expense or income instead.
             </div>
         );
     }
 
-    return (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-200 space-y-3">
-            <label htmlFor="tx-destination" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">
-                <ArrowRightLeft className="w-3 h-3 inline mr-1" /> To Account
-                {error && <span className="text-rose-500 ml-2 normal-case font-normal">{error}</span>}
-            </label>
+    // Preview the destination amount from the user's own rate. `toCents` handles
+    // a comma-formatted amount ("1,000.00") correctly, which the old
+    // `parseFloat(amount)` preview did not.
+    const sentAmount = fromCents(toCents(amount || '0'));
+    const rate = parseFloat(exchangeRate);
+    const hasRate = !Number.isNaN(rate) && rate > 0;
+    const receives = hasRate ? sentAmount * rate : 0;
 
-            <div className="p-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50 dark:bg-slate-800/50 flex flex-col gap-2">
-                {!lockedAccount && (
-                    <>
-                        <div className="flex items-center justify-between text-xs text-slate-500">
-                            <span>From:</span>
-                            <span className="font-bold text-slate-700 dark:text-slate-300">{sourceAccount?.name}</span>
-                        </div>
-                        <div className="h-px bg-slate-200 dark:bg-slate-700" />
-                    </>
-                )}
-                <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">To:</span>
-                    <PopoverMenu
-                        items={filteredAccounts.map(acc => ({ value: acc.id, label: acc.name }))}
-                        value={destinationAccId}
-                        onChange={onDestinationChange}
-                        testId="tx-destination"
-                    />
-                </div>
+
+    return (
+        <div className="space-y-3">
+            <div className="flex items-center justify-center text-slate-300 dark:text-slate-600" aria-hidden="true">
+                <ArrowDown className="w-4 h-4" />
             </div>
 
+            <AccountPickerRow
+                accounts={accounts}
+                selectedId={destinationAccId}
+                onSelect={onDestinationChange}
+                label="To"
+                excludeId={sourceAccount?.id}
+                testId="tx-destination"
+            />
+
+            {error && (
+                <p role="alert" className="text-xs font-medium text-rose-500">{error}</p>
+            )}
+
             {isDifferentCurrency && (
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-800">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-bold text-blue-800 dark:text-blue-300">Exchange Rate</span>
-                        <span className="text-[10px] bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-200 px-1.5 py-0.5 rounded">
-                            Manual
+                <div
+                    data-testid="fx-panel"
+                    className="rounded-xl border border-blue-200/70 dark:border-blue-900/50 bg-blue-50/70 dark:bg-blue-900/10 p-3"
+                >
+                    <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-900 dark:text-blue-200">
+                            Exchange rate
+                        </span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-blue-700/80 dark:text-blue-300/80">
+                            Manual · no live rate
                         </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-slate-500">1 {sourceAccount?.currency} =</span>
-                        <input
-                            type="number"
-                            step="0.0001"
-                            value={exchangeRate}
-                            onChange={(e) => onExchangeRateChange(e.target.value)}
-                            className="flex-1 p-1.5 text-right text-sm font-bold rounded border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-900 focus:outline-none focus:border-blue-500"
-                        />
-                        <span className="text-xs font-mono text-slate-500">{destAccount?.currency}</span>
+
+                    <div className="mt-2 flex items-center gap-2">
+                        <label htmlFor="tx-exchange-rate" className="flex flex-1 items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                            <span className="shrink-0 font-semibold">1 {sourceAccount?.currency} =</span>
+                            <input
+                                id="tx-exchange-rate"
+                                type="text"
+                                inputMode="decimal"
+                                autoComplete="off"
+                                placeholder="0.00"
+                                value={exchangeRate}
+                                onChange={(e) => {
+                                    // Digits and a single decimal point only — the rate
+                                    // is parsed and validated on submit.
+                                    if (/^[0-9]*\.?[0-9]*$/.test(e.target.value)) onExchangeRateChange(e.target.value);
+                                }}
+                                aria-describedby="tx-exchange-rate-help"
+                                className="min-w-0 flex-1 rounded-lg border border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 px-2 py-2 min-h-[44px] text-right text-base font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                            <span className="shrink-0 font-semibold">{destAccount?.currency}</span>
+                        </label>
                     </div>
-                    <p className="text-[10px] text-blue-600/70 dark:text-blue-400/70 mt-1 text-right">
-                        Receives: {formatCurrency(parseFloat(amount || '0') * parseFloat(exchangeRate || '0'), destAccount?.currency || '')}
+
+                    <p id="tx-exchange-rate-help" className="mt-2 text-xs text-slate-600 dark:text-slate-300">
+                        {hasRate ? (
+                            <>
+                                You&apos;re sending {formatCurrency(sentAmount, sourceAccount?.currency || 'NGN')} —{' '}
+                                <span className="font-semibold" data-testid="fx-receives">
+                                    {destAccount?.name} receives {formatCurrency(receives, destAccount?.currency || 'USD')}
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                Enter the rate you were given. AnchorOS has no exchange-rate feed, so it
+                                cannot fill this in for you.
+                            </>
+                        )}
                     </p>
                 </div>
             )}

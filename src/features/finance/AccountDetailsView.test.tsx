@@ -158,8 +158,10 @@ describe('AccountDetailsView', () => {
         expect(screen.getAllByText('Checking Account').length).toBeGreaterThanOrEqual(1);
         // Balance strip shows formatted balance
         expect(screen.getAllByText(/\$5,000\.00/).length).toBeGreaterThanOrEqual(1);
-        // History section heading
-        expect(screen.getAllByText('History').length).toBeGreaterThanOrEqual(1);
+        // One Transactions section heading (UX-FN-15: the duplicate "History"
+        // heading inside the list is gone).
+        expect(screen.getByRole('heading', { name: 'Transactions' })).toBeInTheDocument();
+        expect(screen.queryByText('History')).not.toBeInTheDocument();
     });
 
     it('renders only transactions for selected account', () => {
@@ -181,7 +183,7 @@ describe('AccountDetailsView', () => {
             />
         );
         const user = userEvent.setup();
-        const searchInput = screen.getByPlaceholderText('Search...');
+        const searchInput = screen.getByPlaceholderText('Search this account…');
 
         await user.type(searchInput, 'Grocery');
         expect(screen.getByText('Grocery Shopping')).toBeInTheDocument();
@@ -191,7 +193,7 @@ describe('AccountDetailsView', () => {
         expect(screen.queryByText('Grocery Shopping')).not.toBeInTheDocument();
     });
 
-    it('calls onBack when close button is clicked', async () => {
+    it('goes back with the Finance back affordance, not an X (UX-FN-13)', async () => {
         const onBack = vi.fn();
         renderWithContext(
             <AccountDetailsView
@@ -200,21 +202,59 @@ describe('AccountDetailsView', () => {
             />
         );
         const user = userEvent.setup();
-        const closeButton = screen.getByLabelText('Close account details');
-        await user.click(closeButton);
+        const backButton = screen.getByRole('button', { name: 'Back to Finance' });
+        expect(backButton).toHaveTextContent('Finance');
+        await user.click(backButton);
         expect(onBack).toHaveBeenCalled();
     });
 
-    it('shows Record Transaction button when onAddTransaction is provided', () => {
+    /**
+     * UX-FN-14: three intents, one affordance each, and never two copies of the
+     * same CTA. Each maps to the composer's existing `defaultType`.
+     */
+    it('offers Add money, Spend and Transfer when a second account exists', async () => {
         const onAdd = vi.fn();
         renderWithContext(
             <AccountDetailsView
                 account={mockAccount}
                 onBack={vi.fn()}
                 onAddTransaction={onAdd}
+            />,
+            {
+                finance: {
+                    accounts: [
+                        mockAccount,
+                        {
+                            id: 'acc-2', name: 'Investment Portfolio', type: 'investment',
+                            currency: 'NGN', balanceCents: 87863, color: '#6B21A8',
+                            scope: 'personal', isArchived: false,
+                        },
+                    ],
+                },
+            }
+        );
+        const user = userEvent.setup();
+        await user.click(screen.getByRole('button', { name: 'Add money' }));
+        await user.click(screen.getByRole('button', { name: 'Spend' }));
+        await user.click(screen.getByRole('button', { name: 'Transfer', exact: true }));
+        expect(onAdd.mock.calls.map(call => call[0])).toEqual(['income', 'expense', 'transfer']);
+        // No duplicated "Record Transaction" CTA anywhere on the page.
+        expect(screen.queryByText('Record Transaction')).not.toBeInTheDocument();
+    });
+
+    /**
+     * A transfer with one account is not something the product can do, so the
+     * affordance must not offer it (the composer refuses it too).
+     */
+    it('does not offer Transfer when the user has only one account', () => {
+        renderWithContext(
+            <AccountDetailsView
+                account={mockAccount}
+                onBack={vi.fn()}
+                onAddTransaction={vi.fn()}
             />
         );
-        expect(screen.getByText('Record Transaction')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Transfer', exact: true })).not.toBeInTheDocument();
     });
 
     it('opens action sheet when ellipsis is clicked', async () => {

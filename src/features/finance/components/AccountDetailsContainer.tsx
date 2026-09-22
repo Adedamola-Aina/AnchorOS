@@ -25,7 +25,8 @@ interface AccountDetailsContainerProps {
     prefillData?: { amount?: number; title?: string; category?: string };
     onBack: () => void;
     onShare: () => void;
-    onAddTransaction: () => void;
+    /** UX-FN-14: the intent the user stated in the account's action row. */
+    onAddTransaction: (type: 'expense' | 'income' | 'transfer') => void;
     onEdit: (tx: AnchorTransaction) => void;
     onDelete: () => void;
     onCloseForm: () => void;

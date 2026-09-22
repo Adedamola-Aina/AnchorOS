@@ -241,7 +241,14 @@
 
   html {
     font-size: 16px;
+    /* See "Viewport contract" below — the shell is sized against the LAYOUT
+       viewport (100% of the initial containing block), never against a
+       viewport unit that can disagree with it. */
     height: 100%;
+    /* Paint the canvas with the app surface. Any area the platform draws
+       outside the layout viewport (installed-PWA chrome, overscroll gutter)
+       then reads as part of the app instead of a blank white strip. */
+    background-color: var(--surface-1);
 
     @media (min-width: 640px)  { font-size: 17px; }
     @media (min-width: 1024px) { font-size: 18px; }
@@ -250,7 +257,12 @@
   body {
     @apply antialiased text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans font-medium;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    min-height: 100dvh;
+    /* One height strategy: body fills the layout viewport and never grows past
+       it. `overflow: hidden` here is what makes the document unscrollable, so a
+       viewport-unit/layout-viewport mismatch can never expose a strip of canvas
+       beneath the bottom navigation. Scrolling belongs to <main>. */
+    height: 100%;
+    overflow: hidden;
     background-color: var(--surface-1);
   }
 
@@ -266,6 +278,21 @@
 
   /* Suppress glow on elements with their own ring utility */
   .focus\:ring-4:focus { box-shadow: none; }
+}
+
+/*
+ * Hero amount field (transaction composer).
+ *
+ * The global focus treatment draws a ring + glow around the focused control.
+ * Around a full-width 34px number that reads as a giant input box — the opposite
+ * of "the amount is the hero". The field keeps a visible focus indicator through
+ * its underline (which turns Anchor Blue on focus, via group-focus-within), so
+ * the ring is suppressed here and nowhere else. Unlayered rule, so it wins over
+ * the layered base rule above.
+ */
+.amount-hero:focus,
+.amount-hero:focus-visible {
+  box-shadow: none;
 }
 
 
@@ -402,8 +429,34 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ─── Viewport contract (one authoritative strategy) ─────────
+ *
+ * AnchorOS is an app shell: the page never scrolls, <main> scrolls inside it.
+ * That means the shell height and the anchoring of the fixed bottom navigation
+ * MUST be measured in the same coordinate space — the LAYOUT viewport, which is
+ * what `position: fixed; bottom: 0` resolves against.
+ *
+ * `html { height: 100% }` → `body { height: 100% }` → `#root { height: 100% }`
+ * is that single space: 100% of the initial containing block. Nothing here adds
+ * the bottom navigation's height to it, and nothing adds a safe-area inset to
+ * it — the navigation reserves its own height inside <main> instead
+ * (see --bottom-nav-height), and it carries env(safe-area-inset-bottom) once.
+ *
+ * Why not 100dvh: `dvh` is the *visual* viewport. In an installed iOS PWA the
+ * platform can report a visual viewport taller than the layout viewport the
+ * fixed navigation anchors to. Sizing #root with 100dvh then made the shell
+ * (and the document) taller than the viewport by exactly that difference, which
+ * painted a strip of app surface underneath the bottom navigation — the
+ * "blank area below the nav" defect. With the percentage chain the shell, the
+ * fixed navigation and the canvas all end at the same pixel.
+ *
+ * Invariants (asserted by e2e/mobile-shell-viewport.spec.ts):
+ *   - document scrollHeight === layout viewport height (no document scroll)
+ *   - the bottom nav's bottom edge === the layout viewport bottom
+ *   - the shell is never taller than the layout viewport
+ */
 #root {
-  height: 100dvh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -424,9 +477,19 @@ a, button, input, select, textarea, [role="button"], [tabindex] {
  * UX-GL-04: one source of truth for the bottom nav's height. The nav, the
  * content reserve and the contextual FAB all read this, so the bar, the space it
  * occupies and the button above it cannot drift apart.
+ *
+ * The inset appears exactly once — inside this height. It is never added to the
+ * root viewport height (see the viewport contract above).
  */
 :root {
   --bottom-nav-height: calc(49px + env(safe-area-inset-bottom, 0px));
+  /*
+   * UX-GL-06 / UX-FN-12: the non-production environment strip's height, shared
+   * by the strip itself and by the app shell's top offset, so the two cannot
+   * disagree. It is intentionally slim: the strip must be unmissable, not
+   * dominant.
+   */
+  --env-banner-height: 20px;
 }
 
 

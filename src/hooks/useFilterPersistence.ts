@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-type FilterType = 'all' | 'income' | 'expense';
+export type FilterType = 'all' | 'income' | 'expense' | 'transfer';
 
 interface PersistedFilters {
     filterType: FilterType;

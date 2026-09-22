@@ -42,7 +42,7 @@ test.describe('Advanced Security (Staging)', () => {
 
         // Try to add Transaction with XSS payload via Record Transaction button
         console.log("[E2E] Attempt Transaction with XSS payload...");
-        const recordBtn = page.getByRole('button', { name: /Record Transaction|Add Transaction/i });
+        const recordBtn = page.getByRole('button', { name: /^(Spend|Add money|Record Transaction|Add Transaction)$/i });
         if (await recordBtn.isVisible({ timeout: 3000 })) {
             await recordBtn.click();
         } else {

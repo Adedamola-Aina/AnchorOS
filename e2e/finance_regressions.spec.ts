@@ -9,13 +9,20 @@ test.describe('Finance Regressions and Fixes', () => {
     });
 
     const openAccountCreateFlow = async (page: any) => {
-        const addBtn = page.getByRole('button', { name: /Add Account/i }).first();
+        const addBtn = page.getByRole('button', { name: /Add account/i }).first();
         const cta = page.getByRole('button', { name: /Create your first account/i }).first();
 
         if (await cta.isVisible().catch(() => false)) {
             await cta.click();
         } else if (await addBtn.isVisible().catch(() => false)) {
             await addBtn.click();
+            // UX-FN-08: the page's `+` opens an action sheet (Record transaction /
+            // Add account) rather than jumping straight into the account form, so
+            // the sheet's own entry has to be chosen.
+            const sheetAddAccount = page.getByRole('button', { name: 'Add account', exact: true });
+            if (await sheetAddAccount.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await sheetAddAccount.click();
+            }
         } else {
             return false;
         }
@@ -80,7 +87,7 @@ test.describe('Finance Regressions and Fixes', () => {
 
         // 4. Case A: Positive Savings (Income > Expense)
         // Add Income: $2000
-        await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
+        await page.getByRole('button', { name: /^(Spend|Add money|Record Transaction|Add Transaction)$/i }).click();
         const txDialog = page.getByRole('dialog');
         await txDialog.getByLabel('Amount').fill('2000');
         await txDialog.getByRole('button', { name: 'Income', exact: true }).click();
@@ -88,7 +95,7 @@ test.describe('Finance Regressions and Fixes', () => {
         await txDialog.getByRole('button', { name: 'Record Income', exact: true }).click();
 
         // Add Expense: $500
-        await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
+        await page.getByRole('button', { name: /^(Spend|Add money|Record Transaction|Add Transaction)$/i }).click();
         const expenseDialog1 = page.getByRole('dialog');
         await expenseDialog1.getByLabel('Amount').fill('500');
         await expenseDialog1.getByRole('button', { name: 'Expense', exact: true }).click();
@@ -101,7 +108,7 @@ test.describe('Finance Regressions and Fixes', () => {
 
         // 5. Case B: Overspending (Expense > Income)
         // Add Expense: $3000 (Total Expense 3500 > Income 2000)
-        await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
+        await page.getByRole('button', { name: /^(Spend|Add money|Record Transaction|Add Transaction)$/i }).click();
         const expenseDialog2 = page.getByRole('dialog');
         await expenseDialog2.getByLabel('Amount').fill('3000');
         await expenseDialog2.getByRole('button', { name: 'Expense', exact: true }).click();
@@ -137,7 +144,7 @@ test.describe('Finance Regressions and Fixes', () => {
 
         // 3. Add Transaction
         const txTitle = `Tx to Delete ${Date.now()}`;
-        await page.getByRole('button', { name: /Record Transaction|Add Transaction/i }).click();
+        await page.getByRole('button', { name: /^(Spend|Add money|Record Transaction|Add Transaction)$/i }).click();
         const deleteTxDialog = page.getByRole('dialog');
         await deleteTxDialog.getByLabel('Amount').fill('123');
         await deleteTxDialog.getByLabel('Description').fill(txTitle);

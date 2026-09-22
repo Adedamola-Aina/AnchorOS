@@ -1,9 +1,28 @@
 /**
- * TransactionItem - Individual transaction row in the transaction list
- * 
- * Follows the Calm Computing design philosophy:
- * - Clarity over cleverness: obvious purpose for each element
- * - Quiet over loud: minimal decoration, semantic colors only
+ * TransactionItem — one transaction, as a native-style list row.
+ *
+ * UX-FN-16: the row used to be a bordered card containing an icon, a title, a
+ * date, a category pill, an account pill, an amount, plus optional recurring /
+ * backdated / bank / family pills — nine visual objects for two facts. The
+ * hierarchy was flat, so nothing led.
+ *
+ * Now it reads like a list, not a dashboard:
+ *
+ *   [icon]  Netflix                          −₦120.56
+ *           Food · Feb 25 · Main Checking
+ *
+ * Primary:   description + amount (the two things a user scans for).
+ * Secondary: category · date · account, plus at most a couple of word markers
+ *            (Recurring, Backdated, Bank, or the family member's name) — text,
+ *            never pills, and never the only signal for anything.
+ *
+ * Direction is carried by the sign, the colour, and an `sr-only` word, so the
+ * meaning survives greyscale and screen readers. A transfer leg is stored as an
+ * income/expense document with `category: 'Transfer'`, so it is labelled
+ * "Transfer" in words rather than being silently presented as economic income or
+ * spending (spec §10).
+ *
+ * Calm Computing: clarity over cleverness, quiet over loud, semantic colour only.
  */
 // @ts-nocheck
 
@@ -12,8 +31,8 @@ import React from 'react';
 import { CategoryIcon } from '../../../components/shared';
 import { formatCurrencyCompact } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
+import { isTransferLeg } from '../../../utils/financeInsights';
 import type { AnchorTransaction } from '../../../types';
-import { Card } from '@anchor-os/ui';
 
 interface TransactionItemProps {
     transaction: AnchorTransaction;
@@ -43,89 +62,63 @@ export const TransactionItem: React.FC<TransactionItemProps> = React.memo(({
     // Display date - use transactionDate if available, otherwise use entry date
     const displayDate = transaction.transactionDate || transaction.date;
 
-    // Determine amount color based on transaction type
-    const amountColor = transaction.type === 'income'
-        ? 'text-finance-600 dark:text-finance-400'
-        : transaction.type === 'transfer'
-            ? 'text-primary-600 dark:text-primary-400'
-            : 'text-slate-900 dark:text-white';
+    const transfer = isTransferLeg(transaction);
+    const isInflow = transaction.type === 'income';
 
-    const amountPrefix = transaction.type === 'expense' ? '-' : transaction.type === 'income' ? '+' : '';
+    // Direction: sign + colour + a word for assistive tech (never colour alone).
+    const amountColor = isInflow
+        ? 'text-finance-700 dark:text-finance-400'
+        : 'text-slate-900 dark:text-white';
+    const amountPrefix = isInflow ? '+' : '−';
+    const directionLabel = transfer
+        ? (isInflow ? 'Transfer in' : 'Transfer out')
+        : (isInflow ? 'Money in' : 'Money out');
+
+    const markers: string[] = [];
+    if (transfer) markers.push('Transfer');
+    if (transaction.recurringId) markers.push('Recurring');
+    if (isBackdated) markers.push('Backdated');
+    if (transaction.source === 'synced') markers.push('Bank');
+    if (transaction.createdBy && currentUserId && transaction.createdBy !== currentUserId) {
+        markers.push(transaction.createdByName || 'Family');
+    }
+
+    const secondary = [
+        transfer ? null : transaction.category,
+        new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        accountName,
+        ...markers,
+    ].filter(Boolean) as string[];
 
     return (
-        <Card className="group p-3 sm:p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700">
-            {/* Mobile: Horizontal layout with amount on right */}
-            <div className="flex items-center gap-3">
-                {/* Icon */}
-                <CategoryIcon
-                    category={transaction.category}
-                    className="shrink-0"
-                />
+        <div
+            data-testid="transaction-row"
+            data-transaction-id={transaction.id}
+            className="group flex items-center gap-3 px-1 py-2.5 min-h-[56px]"
+        >
+            <CategoryIcon category={transaction.category} className="shrink-0" />
 
-                {/* Title + Meta */}
-                <div className="min-w-0 flex-1 flex flex-col justify-center">
-                    <div className="flex items-center justify-between gap-2">
-                        <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate leading-tight">
-                            {transaction.title}
-                        </h4>
-                        {/* Amount - centered with title line */}
-                        <p className={`font-bold text-sm tabular-nums shrink-0 truncate ${amountColor}`}>
-                            {amountPrefix}
-                            {formatCurrencyCompact(fromCents(transaction.amountCents || 0), transaction.currency || 'USD')}
-                        </p>
-                    </div>
-
-                    {/* Metadata row - badges/pills */}
-                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5 min-w-0">
-                        <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">
-                            {new Date(displayDate).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric'
-                            })}
-                        </span>
-
-                        {/* Category Pill */}
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 truncate max-w-[120px]">
-                            {transaction.category}
-                        </span>
-
-                        {/* Account / Bank Pill */}
-                        {accountName && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/50 truncate max-w-[120px]">
-                                {accountName}
-                            </span>
-                        )}
-
-                        {/* Family Member Pill */}
-                        {transaction.createdBy && currentUserId && transaction.createdBy !== currentUserId && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 truncate max-w-[100px]">
-                                {transaction.createdByName || 'Family'}
-                            </span>
-                        )}
-
-                        {/* Recurring Pill */}
-                        {transaction.recurringId && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 border border-purple-100 dark:border-purple-800/50">
-                                Recurring
-                            </span>
-                        )}
-
-                        {/* Backdated Pill */}
-                        {isBackdated && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 border border-amber-100 dark:border-amber-800/50">
-                                Backdated
-                            </span>
-                        )}
-
-                        {/* Bank-synced Pill */}
-                        {transaction.source === 'synced' && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 border border-sky-100 dark:border-sky-800/50">
-                                Bank
-                            </span>
-                        )}
-                    </div>
+            <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-3">
+                    <p className="min-w-0 truncate text-[15px] font-semibold leading-tight text-slate-900 dark:text-white">
+                        {transaction.title}
+                    </p>
+                    <p className={`shrink-0 text-[15px] font-semibold tabular-nums leading-tight ${amountColor}`}>
+                        <span className="sr-only">{directionLabel}: </span>
+                        <span aria-hidden="true">{amountPrefix}</span>
+                        {formatCurrencyCompact(fromCents(transaction.amountCents || 0), transaction.currency || 'USD')}
+                    </p>
                 </div>
+
+                <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    {secondary.map((part, index) => (
+                        <React.Fragment key={`${part}-${index}`}>
+                            {index > 0 && <span aria-hidden="true" className="text-slate-300 dark:text-slate-600">·</span>}
+                            <span className="truncate max-w-[45%]">{part}</span>
+                        </React.Fragment>
+                    ))}
+                </p>
             </div>
-        </Card>
+        </div>
     );
 });

@@ -41,13 +41,21 @@ export function SwipeableRow({
   const { translateX, isDragging, handleTouchStart, handleTouchMove, handleTouchEnd } =
     useSwipeGesture({ onSwipeLeft, onSwipeRight, threshold, disabled });
 
+  const actionsVisible = isDragging || translateX !== 0;
+
   return (
     <div
       data-testid="swipeable-row"
       className={`relative overflow-hidden rounded-2xl ${className}`}
     >
-      {/* Left action (revealed when swiping right) */}
-      {leftAction && (
+      {/*
+        * The action layers sit BEHIND the content row. At rest the content row's
+        * rounded corners leave a sliver of the action colour showing through at
+        * the corners (a thin blue/red halo around every row). They are therefore
+        * rendered only while the row is actually being swiped — the affordance
+        * exists exactly when it is needed.
+        */}
+      {leftAction && actionsVisible && (
         <div
           data-testid="left-action"
           aria-hidden="true"
@@ -59,8 +67,7 @@ export function SwipeableRow({
         </div>
       )}
 
-      {/* Right action (revealed when swiping left) */}
-      {rightAction && (
+      {rightAction && actionsVisible && (
         <div
           data-testid="right-action"
           aria-hidden="true"

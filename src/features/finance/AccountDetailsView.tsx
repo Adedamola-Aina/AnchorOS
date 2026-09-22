@@ -34,14 +34,19 @@ import { ActionSheet } from '../../components/shared/ActionSheet';
 import { Modal } from '../../components/shared/Modal';
 import { CardColorPicker } from '../../components/finance/CardColorPicker';
 import { CardArtworkPicker } from '../../components/finance/CardArtworkPicker';
-import { Pencil, Palette, Download, Trash2, RefreshCw } from 'lucide-react';
+import { Pencil, Palette, Download, Trash2, RefreshCw, ArrowDownRight, ArrowUpRight, ArrowRightLeft } from 'lucide-react';
+import type { TransactionType } from '../../types';
 
 interface AccountDetailsViewProps {
   account: AnchorAccount;
   onBack: () => void;
   onDelete?: () => void;
   onShare?: () => void;
-  onAddTransaction?: () => void;
+  /**
+   * UX-FN-14: opens the composer on a stated intent. The type is the same
+   * `defaultType` the composer already accepts — no new write path.
+   */
+  onAddTransaction?: (type: TransactionType) => void;
   onEdit?: (tx: AnchorTransaction) => void;
   familyMemberId?: string | null;
 }
@@ -49,7 +54,7 @@ interface AccountDetailsViewProps {
 export const AccountDetailsView = ({
   account, onBack, onDelete, onShare: _onShare, onAddTransaction, onEdit, familyMemberId: _familyMemberId,
 }: AccountDetailsViewProps) => {
-  const { transactions, deleteTransaction, updateAccountPersonalization, renameAccount, currentMonth } = useFinance();
+  const { accounts, transactions, deleteTransaction, updateAccountPersonalization, renameAccount, currentMonth } = useFinance();
   const { user } = useAuth();
   const { showToast } = useNotifications();
   const { searchQuery, setSearchQuery, filterType, setFilterType } = useFilterPersistence(`account-${account.id}`);
@@ -74,8 +79,15 @@ export const AccountDetailsView = ({
   const { activities, loading: loadingActivities } = useAccountActivity({
     accountId: account.id, accountOwnerId: account.ownerId || user?.uid || '', enabled: isSharedAccount,
   });
-  const { accountTransactions, weeklyData, maxWeeklyAmount, monthlyBalance: _monthlyBalance, filteredList, carryoverDividerIndex } =
+  const { accountTransactions, weeklyData, maxWeeklyAmount, monthlyBalance: _monthlyBalance, filteredList, carryoverDividerIndex, transferLegCount } =
     useAccountTransactions(account, currentMonth, transactions, user?.uid, { searchQuery, filterType, selectedWeekStart });
+
+  /**
+   * A transfer needs somewhere to go. The composer already refuses a
+   * single-account transfer (`SingleAccountTransferMessage`); the affordance
+   * should not offer what the flow cannot do.
+   */
+  const canTransfer = (accounts ?? []).filter(a => !a.isArchived).length > 1;
 
   const handleExportCsv = useCallback(() => {
     logProductEvent('finance_transaction_exported', { accountId: account.id, transactionCount: filteredList.length });
@@ -178,32 +190,84 @@ export const AccountDetailsView = ({
 
   return (
     <>
-      <div className="animate-in fade-in slide-in-from-bottom-6 duration-500 space-y-5" style={{ viewTransitionName: getFinanceViewTransitionName(account.id) }}>
+      <div className="animate-in fade-in slide-in-from-bottom-6 duration-500 space-y-4" style={{ viewTransitionName: getFinanceViewTransitionName(account.id) }}>
         {isOwner && <NotificationBanner accountId={account.id} />}
         {isSharedAccount && <FamilyNotificationBanner accountId={account.id} />}
 
+        {/*
+          * UX-FN-13: `‹ Finance` is the way back, not an X. An X means "dismiss
+          * this thing"; this screen is a destination pushed from Finance, so it
+          * gets the app's normal back affordance and keeps the `…` menu for
+          * account-specific secondary actions.
+          */}
         <AccountDetailHeader accountName={account.name} onBack={onBack} onOpenOptions={() => setIsActionsOpen(true)} optionsButtonRef={optionsButtonRef} />
 
+        {/* The account object — its own visual identity, tightened (UX-FN-09). */}
         <div className="px-1">
           <AccountCard account={account} index={0} totalCards={1} mode="expanded" isActive={false} onTap={() => {}} skipViewTransition />
         </div>
 
-        <div className="flex items-center justify-between px-1">
-          <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Balance</p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
-              {formatCurrency(fromCents(account.balanceCents), account.currency)}
-            </p>
-          </div>
-          {onAddTransaction && (
-            <button type="button" onClick={onAddTransaction} className="rounded-full bg-slate-900 dark:bg-white px-5 py-2.5 text-sm font-semibold text-white dark:text-slate-900 transition hover:opacity-90 active:scale-95 min-h-[44px]">
-              Record Transaction
-            </button>
-          )}
+        {/* Balance: prominent, but it must not compete with the account card. */}
+        <div className="px-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">Balance</p>
+          <p className="mt-0.5 text-3xl font-bold tabular-nums leading-tight text-slate-900 dark:text-white">
+            {formatCurrency(fromCents(account.balanceCents), account.currency)}
+          </p>
         </div>
 
+        {/*
+          * UX-FN-14: one affordance per intent, and never two identical CTAs.
+          * Each of these opens the composer on the intent the user just stated —
+          * the same `defaultType` the composer already supports, with the account
+          * locked, so nothing about the write path changes. Transfer is offered
+          * only when a second account exists, because a transfer with one account
+          * is not a thing the product can do.
+          */}
+        {onAddTransaction && (
+          <div className={`px-1 grid gap-2 ${canTransfer ? 'grid-cols-3' : 'grid-cols-2'}`} role="group" aria-label="Record a transaction">
+            <button
+              type="button"
+              onClick={() => onAddTransaction('income')}
+              aria-label="Add money"
+              className="min-h-[44px] rounded-xl bg-slate-100 dark:bg-slate-800 px-2 py-2 text-[13px] font-semibold text-slate-800 dark:text-slate-100 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] flex flex-col items-center justify-center gap-0.5"
+            >
+              <ArrowDownRight className="w-4 h-4 text-finance-600 dark:text-finance-400" aria-hidden="true" />
+              Add money
+            </button>
+            <button
+              type="button"
+              onClick={() => onAddTransaction('expense')}
+              aria-label="Spend"
+              className="min-h-[44px] rounded-xl bg-slate-900 dark:bg-white px-2 py-2 text-[13px] font-semibold text-white dark:text-slate-900 transition-opacity hover:opacity-90 active:scale-[0.98] flex flex-col items-center justify-center gap-0.5"
+            >
+              <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+              Spend
+            </button>
+            {canTransfer ? (
+              <button
+                type="button"
+                onClick={() => onAddTransaction('transfer')}
+                aria-label="Transfer"
+                className="min-h-[44px] rounded-xl bg-slate-100 dark:bg-slate-800 px-2 py-2 text-[13px] font-semibold text-slate-800 dark:text-slate-100 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] flex flex-col items-center justify-center gap-0.5"
+              >
+                <ArrowRightLeft className="w-4 h-4 text-primary-600 dark:text-primary-400" aria-hidden="true" />
+                Transfer
+              </button>
+            ) : null}
+          </div>
+        )}
+
+        {/* Period summary + insight — compact, and it must stay above the list. */}
         {accountTransactions.length > 0 && (
-          <SpendingTrendsChart weeklyData={weeklyData} currency={account.currency} selectedWeekStart={selectedWeekStart} onSelectWeek={setSelectedWeekStart} maxAmount={maxWeeklyAmount} />
+          <SpendingTrendsChart
+            weeklyData={weeklyData}
+            currency={account.currency}
+            selectedWeekStart={selectedWeekStart}
+            onSelectWeek={setSelectedWeekStart}
+            maxAmount={maxWeeklyAmount}
+            monthLabel={currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            hasTransfers={transferLegCount > 0}
+          />
         )}
 
         {isOwner && account.sharedWith && Object.entries(account.sharedWith).map(([uid, meta]) => (
@@ -211,13 +275,36 @@ export const AccountDetailsView = ({
         ))}
         {isSharedAccount && <SharedActivitySection activities={activities} currentUserId={user?.uid} loading={loadingActivities} />}
 
-        <div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white px-1 mb-3">History</h3>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-            <TransactionFilterHeader searchQuery={searchQuery} filterType={filterType} hasWeekFilter={!!selectedWeekStart} onSearchChange={setSearchQuery} onFilterChange={setFilterType} />
-            <VirtualTransactionList transactions={filteredList} onEdit={onEdit || (() => {})} onDelete={(tx) => tx.source === 'synced' ? undefined : setTransactionToDelete(tx)} loading={loadingActivities} searchQuery={searchQuery} onClearSearch={() => setSearchQuery('')} className="min-h-[200px] max-h-[calc(100vh-250px)]" carryoverStartIndex={carryoverDividerIndex} />
-          </div>
-        </div>
+        {/*
+          * UX-FN-15: one heading ("Transactions"), and the section owns its own
+          * search/filter — the month/period control lives above, in the summary.
+          * The old markup said "History" twice (a section heading plus the list's
+          * own header) inside a bordered card wrapped around every row.
+          */}
+        <section className="px-1" aria-labelledby="account-transactions-heading">
+          <h3 id="account-transactions-heading" className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+            Transactions
+          </h3>
+          <TransactionFilterHeader
+            searchQuery={searchQuery}
+            filterType={filterType}
+            hasWeekFilter={!!selectedWeekStart}
+            onSearchChange={setSearchQuery}
+            onFilterChange={setFilterType}
+            onClearWeekFilter={() => setSelectedWeekStart(null)}
+            searchPlaceholder="Search this account…"
+          />
+          <VirtualTransactionList
+            transactions={filteredList}
+            onEdit={onEdit || (() => {})}
+            onDelete={(tx) => tx.source === 'synced' ? undefined : setTransactionToDelete(tx)}
+            loading={loadingActivities}
+            searchQuery={searchQuery}
+            onClearSearch={() => setSearchQuery('')}
+            className="min-h-[200px] max-h-[65vh]"
+            carryoverStartIndex={carryoverDividerIndex}
+          />
+        </section>
       </div>
 
       <ActionSheet isOpen={isActionsOpen} onClose={() => setIsActionsOpen(false)} items={actionItems} />

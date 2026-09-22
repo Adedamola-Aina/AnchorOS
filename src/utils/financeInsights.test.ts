@@ -292,6 +292,74 @@ describe('financeInsights', () => {
             expect(analysis.income).toBe(0);
         });
 
+        /**
+         * Spec §10 — internal transfers are movement of assets, not income or
+         * spending.
+         *
+         * `services/TransferOperations.processTransferTransaction` writes an
+         * internal transfer as TWO documents: an `expense` leg on the source
+         * account and an `income` leg on the destination, both tagged
+         * `category: 'Transfer'` and sharing a `linkId`. Reading `type` alone
+         * therefore counted one internal move as both income AND expense at
+         * portfolio level. These tests pin the corrected behaviour.
+         */
+        describe('internal transfers do not inflate portfolio income or expenses (spec §10)', () => {
+            const now = new Date().toISOString();
+            const transferPair: AnchorTransaction[] = [
+                {
+                    id: 'out-leg', title: 'Transfer to Investment Portfolio', amountCents: 46408,
+                    type: 'expense', category: 'Transfer', linkId: 'link-1',
+                    date: now, accountId: 'main', currency: 'NGN', scope: 'personal',
+                },
+                {
+                    id: 'in-leg', title: 'Transfer from Main Checking', amountCents: 46408,
+                    type: 'income', category: 'Transfer', linkId: 'link-1',
+                    date: now, accountId: 'invest', currency: 'NGN', scope: 'personal',
+                },
+            ];
+
+            it('excludes both legs from income and expense', () => {
+                const analysis = getCashFlowAnalysis(transferPair);
+                expect(analysis.income).toBe(0);
+                expect(analysis.expense).toBe(0);
+                expect(analysis.net).toBe(0);
+            });
+
+            it('reports the movement separately', () => {
+                const analysis = getCashFlowAnalysis(transferPair);
+                expect(analysis.transferOut).toBeCloseTo(464.08, 2);
+                expect(analysis.transferIn).toBeCloseTo(464.08, 2);
+            });
+
+            it('leaves genuine income and spending untouched when a transfer is present', () => {
+                const analysis = getCashFlowAnalysis([
+                    ...transferPair,
+                    { id: 'salary', title: 'Salary', amountCents: 138641, type: 'income', category: 'Salary', date: now, accountId: 'main', currency: 'NGN', scope: 'personal' },
+                    { id: 'food', title: 'Groceries', amountCents: 84658, type: 'expense', category: 'Food', date: now, accountId: 'main', currency: 'NGN', scope: 'personal' },
+                ]);
+                expect(analysis.income).toBeCloseTo(1386.41, 2);
+                expect(analysis.expense).toBeCloseTo(846.58, 2);
+                expect(analysis.net).toBeCloseTo(539.83, 2);
+            });
+
+            it('classifies a leg by its link even if the category label is missing', () => {
+                const analysis = getCashFlowAnalysis([
+                    { id: 'legacy-leg', title: 'Transfer to Savings', amountCents: 10000, type: 'expense', category: 'General', linkId: 'link-9', date: now, accountId: 'main', currency: 'NGN', scope: 'personal' },
+                ]);
+                expect(analysis.expense).toBe(0);
+                expect(analysis.transferOut).toBe(100);
+            });
+        });
+
+        it('classifies a transfer leg before normalisation too', () => {
+            const now = new Date().toISOString();
+            const analysis = getCashFlowAnalysis([
+                { id: 'leg', title: 'Transfer', amountCents: 10000, type: 'transfer', category: 'Transfer', date: now, accountId: 'a', currency: 'NGN', scope: 'personal' },
+            ]);
+            expect(analysis.income).toBe(0);
+            expect(analysis.expense).toBe(0);
+        });
+
         it('skips transactions without date', () => {
             const txs: AnchorTransaction[] = [
                 { id: 'nd1', title: 'NoDate', amountCents: 50000, type: 'income', category: 'Pay', date: undefined as any, accountId: 'a', currency: 'USD', scope: 'personal' },

@@ -20,7 +20,7 @@ import {
   STACK_STAGGER_MS,
 } from './cardConstants';
 
-const EXPANDED_STACK_GAP = 16;
+const EXPANDED_STACK_GAP = 12;
 const MAX_RENDERED_CARDS = 10;
 const SWIPE_THRESHOLD_RATIO = 0.32;
 const SWIPE_VELOCITY_THRESHOLD = 380;

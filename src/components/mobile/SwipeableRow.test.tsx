@@ -60,7 +60,13 @@ describe('SwipeableRow', () => {
   });
 
   describe('Action Indicators', () => {
-    it('renders left action indicator when leftAction is provided', () => {
+    /**
+     * The action layers sit behind the row. At rest they must not be rendered —
+     * their colour leaked through the content row's rounded corners as a thin
+     * blue/red halo around every row. They appear exactly while a swipe is in
+     * progress.
+     */
+    it('renders the left action only while swiping', () => {
       render(
         <SwipeableRow 
           onSwipeLeft={mockOnSwipeLeft} 
@@ -71,11 +77,17 @@ describe('SwipeableRow', () => {
         </SwipeableRow>
       );
 
+      expect(screen.queryByTestId('left-action')).not.toBeInTheDocument();
+
+      fireEvent.touchStart(screen.getByTestId('swipeable-content'), {
+        touches: [{ clientX: 200, clientY: 100 }],
+      });
+
       expect(screen.getByTestId('left-action')).toBeInTheDocument();
       expect(screen.getByText('Edit')).toBeInTheDocument();
     });
 
-    it('renders right action indicator when rightAction is provided', () => {
+    it('renders the right action only while swiping', () => {
       render(
         <SwipeableRow 
           onSwipeLeft={mockOnSwipeLeft} 
@@ -85,6 +97,12 @@ describe('SwipeableRow', () => {
           <div>Row Content</div>
         </SwipeableRow>
       );
+
+      expect(screen.queryByTestId('right-action')).not.toBeInTheDocument();
+
+      fireEvent.touchStart(screen.getByTestId('swipeable-content'), {
+        touches: [{ clientX: 200, clientY: 100 }],
+      });
 
       expect(screen.getByTestId('right-action')).toBeInTheDocument();
       expect(screen.getByText('Delete')).toBeInTheDocument();
@@ -145,7 +163,7 @@ describe('SwipeableRow', () => {
       expect(row).toBeInTheDocument();
     });
 
-    it('action indicators have aria-hidden when not visible', () => {
+    it('keeps the actions out of the accessibility tree while they are hidden', () => {
       render(
         <SwipeableRow 
           onSwipeLeft={mockOnSwipeLeft} 
@@ -157,12 +175,18 @@ describe('SwipeableRow', () => {
         </SwipeableRow>
       );
 
-      // Actions should be aria-hidden when not swiped
-      const leftAction = screen.getByTestId('left-action');
-      const rightAction = screen.getByTestId('right-action');
-      
-      expect(leftAction).toHaveAttribute('aria-hidden', 'true');
-      expect(rightAction).toHaveAttribute('aria-hidden', 'true');
+      // At rest the actions do not exist; once swiping they are rendered but
+      // marked aria-hidden, because the gesture is the interaction — the labels
+      // are visual affordances, not controls.
+      expect(screen.queryByTestId('left-action')).toBeNull();
+      expect(screen.queryByTestId('right-action')).toBeNull();
+
+      fireEvent.touchStart(screen.getByTestId('swipeable-content'), {
+        touches: [{ clientX: 200, clientY: 100 }],
+      });
+
+      expect(screen.getByTestId('left-action')).toHaveAttribute('aria-hidden', 'true');
+      expect(screen.getByTestId('right-action')).toHaveAttribute('aria-hidden', 'true');
     });
   });
 

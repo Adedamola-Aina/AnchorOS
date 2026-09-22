@@ -1,16 +1,16 @@
 // @ts-nocheck
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRightLeft, Wallet } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 import { getTransactionLabel } from '../../utils/finance';
 import { formatCurrency } from '../../utils/format';
 import { toCents, fromCents } from '../../utils/moneyUtils';
 import type { TransactionType, AnchorTransaction, RecurringFrequency } from '../../types';
 import {
-    AccountSelector, CategorySelector, OverdraftWarning,
+    CategorySelector, OverdraftWarning,
     TransactionTypeSelector, TransferDetails
 } from './components';
+import { AccountPickerRow } from './components/AccountPickerRow';
 import { RecurringOptions } from './components/RecurringOptions';
 import {
     useTransactionFormState, NoAccountsMessage, SingleAccountTransferMessage,
@@ -98,8 +98,8 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         : formState.type === 'income' ? 'Record Income' : 'Record Expense';
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-1 rounded-xl">
-            <h3 className="text-h3 lg:text-h3-lg text-slate-800 dark:text-white mb-4">
+        <div className="flex min-h-full flex-col">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
                 {isPayBill ? 'Pay Bill' : getTransactionLabel(formState.type).header}
             </h3>
             {isOverdraft && <OverdraftWarning projectedBalance={projectedBalance} amountCents={toCents(amount)} />}
@@ -110,7 +110,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               * own currency, and turns red when it would go negative.
               */}
             {sourceAccount && (
-              <p className="text-xs text-slate-500 dark:text-slate-400" data-testid="balance-preview">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3" data-testid="balance-preview">
                 {sourceAccount.name} balance:{' '}
                 <span className="font-semibold tabular-nums text-slate-600 dark:text-slate-300">
                   {formatCurrency(fromCents(currentBalance), sourceAccount.currency)}
@@ -122,57 +122,42 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               </p>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Account context: compact badge when known, full grid when browsing */}
-                {hasAccountContext && sourceAccount ? (
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200/50 dark:border-slate-700/50">
-                        <div className="p-2 rounded-full bg-slate-200 dark:bg-slate-600">
-                            {formState.type === 'transfer'
-                                ? <ArrowRightLeft className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                : <Wallet className="w-4 h-4 text-slate-600 dark:text-slate-300" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                {formState.type === 'income' ? 'Deposit to' : 'From'}
-                            </p>
-                            <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{sourceAccount.name}</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                                {formatCurrency(fromCents(currentBalance), sourceAccount.currency)}
-                            </p>
-                        </div>
-                    </div>
-                ) : (
-                    <AccountSelector accounts={accounts} selectedId={formState.selectedAccId} onSelect={formState.setSelectedAccId} label={getTransactionLabel(formState.type).accountLabel} />
-                )}
-
-                {/* Synced bank transaction notice */}
-                {isSyncedTx && (
-                    <div className="px-3 py-2 rounded-lg bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 text-xs font-medium">
-                        Bank-synced transaction — only category can be changed.
-                    </div>
-                )}
-
-                {/* Type selector: hidden for intentional actions (transfer, pay bill) or synced txns */}
+            <form id="tx-form" onSubmit={handleSubmit} className="flex-1 space-y-4">
+                {/* Type first: it decides the direction of everything below. */}
                 {!isIntentLocked && !isSyncedTx && (
                     <TransactionTypeSelector type={formState.type} onChange={formState.setType} />
                 )}
 
-                {/* Core fields: description + amount always first */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <DescriptionField value={formState.title} onChange={formState.setTitle} error={errors.title} onClearError={() => setErrors({ ...errors, title: undefined })} disabled={isSyncedTx} />
-                    <AmountField value={amount} onChange={setAmount} error={errors.amount} onClearError={() => setErrors({ ...errors, amount: undefined })} currency={sourceAccount?.currency} disabled={isSyncedTx} />
-                </div>
+                {/* Amount is the hero — the one thing every transaction has. */}
+                <AmountField value={amount} onChange={setAmount} error={errors.amount} onClearError={() => setErrors({ ...errors, amount: undefined })} currency={sourceAccount?.currency} disabled={isSyncedTx} />
 
-                {/* Transfer: destination + exchange rate */}
+                {/* Which account — one compact row, not a wall of tiles (UX-FN-17). */}
+                <AccountPickerRow
+                    accounts={accounts}
+                    selectedId={formState.selectedAccId}
+                    onSelect={formState.setSelectedAccId}
+                    label={formState.type === 'income' ? 'To' : 'From'}
+                    testId="tx-account"
+                />
+
+                {/* Transfer: destination + (only when currencies differ) the rate. */}
                 {formState.type === 'transfer' && (
                     <TransferDetails accounts={accounts} sourceAccount={sourceAccount} destinationAccId={formState.destinationAccId}
                         onDestinationChange={(id) => { formState.setDestinationAccId(id); if (errors.destination) setErrors({ ...errors, destination: undefined }); }}
                         exchangeRate={formState.exchangeRate} onExchangeRateChange={formState.setExchangeRate} amount={amount} error={errors.destination} lockedAccount={hasAccountContext} />
                 )}
 
-                {/* Category + Date row (category hidden for transfers) */}
+                {/* Synced bank transaction notice */}
+                {isSyncedTx && (
+                    <div className="px-3 py-2 rounded-xl bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 text-xs font-medium">
+                        Bank-synced transaction — only the category can be changed.
+                    </div>
+                )}
+
+                {/* Description — secondary to the amount, never louder than it. */}
+                <DescriptionField value={formState.title} onChange={formState.setTitle} error={errors.title} onClearError={() => setErrors({ ...errors, title: undefined })} disabled={isSyncedTx} />
+
+                {/* Category + Date — details, secondary to amount and account. */}
                 <div className={`grid gap-4 ${formState.type === 'transfer' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
                     {formState.type !== 'transfer' && (
                         <CategorySelector category={formState.category} onChange={(c) => { formState.setCategory(c); formState.setSuggestedCategory(null); }}
@@ -189,21 +174,36 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                         interval={interval} onIntervalChange={setInterval}
                     />
                 )}
+            </form>
 
-                <div className="flex justify-end gap-3 pt-2">
-                    <button type="button" onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-sm">Cancel</button>
+            {/*
+              * Confirmation is pinned to the bottom of the sheet so it is
+              * reachable without scrolling and never sits over a field the user
+              * is still filling in (`form="tx-form"` submits the form above).
+              * The safe-area inset is carried here, once.
+              */}
+            <div className="sticky bottom-0 mt-4 bg-white dark:bg-slate-800 pt-3 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
+                <div className="flex items-center justify-end gap-2">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="min-h-[44px] px-4 text-[15px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+                    >
+                        Cancel
+                    </button>
                     <motion.button
+                        form="tx-form"
                         type="submit"
                         disabled={isSubmitting}
                         variants={microMotion.savePulse}
                         initial="idle"
                         animate={isSubmitting ? 'saving' : didJustSave ? 'done' : 'idle'}
-                        className="bg-slate-800 dark:bg-slate-600 hover:bg-slate-900 dark:hover:bg-slate-500 text-white px-6 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="min-h-[48px] rounded-xl bg-slate-900 dark:bg-white px-5 text-[15px] font-semibold text-white dark:text-slate-900 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {submitLabel}
                     </motion.button>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };

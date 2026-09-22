@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TransactionForm } from './TransactionForm';
@@ -103,11 +103,10 @@ describe('TransactionForm (Transfers)', () => {
         const transferBtn = screen.getByRole('button', { name: /Transfer/i });
         await user.click(transferBtn);
 
-        // 3. Select Destination
-        // TransferDetails uses a select with id="tx-destination" (label "To Account")
-        const destSelect = screen.getByLabelText(/To Account/i);
-        // By default it might select the first available different account (acc2)
-        expect(destSelect).toHaveValue('acc2');
+        // 3. Select Destination — a compact picker, not a wall of tiles.
+        // The default destination is the first account that is not the source.
+        const destTrigger = screen.getByTestId('tx-destination');
+        expect(destTrigger).toHaveAttribute('aria-label', 'To: Savings');
 
         // 4. Submit
         const submitBtn = screen.getByRole('button', { name: /Record Transfer/i });
@@ -138,20 +137,23 @@ describe('TransactionForm (Transfers)', () => {
         const transferBtn = screen.getByRole('button', { name: /Transfer/i });
         await user.click(transferBtn);
 
-        // 3. Select Destination (acc3 is USD)
-        const destSelect = screen.getByLabelText(/To Account/i);
-        await user.selectOptions(destSelect, 'acc3');
+        // 3. Select Destination (acc3 is USD) through the picker sheet
+        await user.click(screen.getByTestId('tx-destination'));
+        await user.click(screen.getByTestId('tx-destination-option-acc3'));
 
-        // 4. Check Exchange Rate field appears
-        // Input type="number" with value "1.0" initially
-        const rateInput = screen.getByDisplayValue('1.0');
-        expect(rateInput).toBeInTheDocument();
+        // 4. The FX panel appears only for a cross-currency transfer, and the rate
+        //    starts EMPTY — AnchorOS has no FX feed, so it must not invent one
+        //    (UX-FN-19).
+        expect(screen.getByTestId('fx-panel')).toBeInTheDocument();
+        const rateInput = screen.getByLabelText(/1 NGN =/i);
+        expect(rateInput).toHaveValue('');
+        expect(screen.queryByTestId('fx-receives')).not.toBeInTheDocument();
 
-        // Change rate to 0.001 (1 NGN = 0.001 USD roughly)
-        await user.clear(rateInput);
-        await user.type(rateInput, '0.001');
+        // 5. State the rate the user was given
+        fireEvent.change(rateInput, { target: { value: '0.001' } });
+        expect(screen.getByTestId('fx-receives')).toHaveTextContent(/\$1\.00/);
 
-        // 5. Submit
+        // 6. Submit
         const submitBtn = screen.getByRole('button', { name: /Record Transfer/i });
         await user.click(submitBtn);
 
@@ -170,25 +172,35 @@ describe('TransactionForm (Transfers)', () => {
         expect(payload.exchangeRate).toBe(0.001);
     });
 
-    it('shows validation error if destination is same as source', async () => {
+    it('refuses to submit a cross-currency transfer without a rate', async () => {
         const user = userEvent.setup();
         renderForm({ defaultAccountId: 'acc1' });
 
-        await user.type(screen.getByLabelText(/Description/i), 'Bad Transfer');
-        await user.type(screen.getByLabelText(/Amount/i), '10.00');
+        await user.type(screen.getByLabelText(/Description/i), 'Transfer with no rate');
+        await user.type(screen.getByLabelText(/Amount/i), '1000.00');
+        await user.click(screen.getByRole('button', { name: /Transfer/i }));
+        await user.click(screen.getByTestId('tx-destination'));
+        await user.click(screen.getByTestId('tx-destination-option-acc3'));
 
-        const transferBtn = screen.getByRole('button', { name: /Transfer/i });
-        await user.click(transferBtn);
+        await user.click(screen.getByRole('button', { name: /Record Transfer/i }));
 
-        // Force select same account (if UI allows it, or check if logic prevents it)
-        // useTransactionFormState tries to prevent it, but let's try.
-        // If the select contains source account, we can select it.
-        // TransferDetails filters out source account: accounts.filter(a => a.id !== sourceAccount?.id)
-        // So we can't select it via UI. 
-        // This test might verify that the source account is NOT in the list.
-        const destSelect = screen.getByLabelText(/To Account/i);
-        const options = Array.from(destSelect.querySelectorAll('option'));
-        const acc1Option = options.find(o => o.value === 'acc1');
-        expect(acc1Option).toBeUndefined();
+        // The transfer writes two paired ledger documents — with no rate there is
+        // no honest destination amount, so nothing may be written.
+        await waitFor(() => {
+            expect(mockAddTransaction).not.toHaveBeenCalled();
+        });
+    });
+
+    it('never offers the source account as the destination', async () => {
+        const user = userEvent.setup();
+        renderForm({ defaultAccountId: 'acc1' });
+
+        await user.click(screen.getByRole('button', { name: /Transfer/i }));
+        await user.click(screen.getByTestId('tx-destination'));
+
+        // TransferDetails excludes the source account from the picker, so the
+        // "same account" state is unreachable from the UI.
+        expect(screen.queryByTestId('tx-destination-option-acc1')).not.toBeInTheDocument();
+        expect(screen.getByTestId('tx-destination-option-acc2')).toBeInTheDocument();
     });
 });
