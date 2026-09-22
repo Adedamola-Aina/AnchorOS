@@ -45,12 +45,11 @@ export const PRESET_COLORS = [
   '#6B21A8', '#7C3AED', '#9333EA',
 ];
 
-const PATTERNS = [
-  `repeating-linear-gradient(45deg,rgba(255,255,255,0.06) 0px,rgba(255,255,255,0.06) 1px,transparent 1px,transparent 8px)`,
-  `radial-gradient(circle,rgba(255,255,255,0.12) 1px,transparent 1px)`,
-  `repeating-linear-gradient(45deg,rgba(255,255,255,0.05) 0,rgba(255,255,255,0.05) 1px,transparent 0,transparent 50%),repeating-linear-gradient(-45deg,rgba(255,255,255,0.05) 0,rgba(255,255,255,0.05) 1px,transparent 0,transparent 50%)`,
-  `repeating-linear-gradient(0deg,rgba(255,255,255,0.05) 0px,rgba(255,255,255,0.05) 1px,transparent 1px,transparent 10px)`,
-];
+/*
+ * The old `PATTERNS` array that lived here is gone with the presets it fed: its four
+ * entries were the mislabelled ones ("hexagons" was a dot grid, "circuit" a diagonal
+ * cross-hatch, "topo" horizontal stripes) and nothing else referenced them.
+ */
 
 export const SHADOW_ACTIVE =
   '0 4px 30px rgba(15,23,42,0.14), 0 18px 48px rgba(15,23,42,0.16)';

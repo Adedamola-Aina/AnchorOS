@@ -65,6 +65,13 @@ describe('preset catalogue', () => {
             if (preset.css.startsWith('url(')) expect(preset.css).toContain('data:image/svg+xml');
         }
     });
+
+    /** The four mislabelled patterns are retired, not left exported and unused. */
+    it('exports no legacy pattern set', async () => {
+        const constants = await import('./cardConstants');
+        expect(constants).not.toHaveProperty('PATTERNS');
+        expect(constants).not.toHaveProperty('_LEGACY_PATTERNS');
+    });
 });
 
 describe('AccountCard renders the chosen artwork', () => {

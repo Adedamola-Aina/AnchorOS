@@ -52,6 +52,9 @@ export const NODE_INCLUDE = [
   // Design foundation (W-D1 / doc 24): token, motion and sensory invariants.
   // Pure Node (filesystem + a fake Document) — no DOM, so it belongs here.
   'src/design/**/*.{test,spec}.ts',
+  // CM-28: the shell's bottom-edge arithmetic is a pure function over two inputs.
+  // The layout *components* are covered by their .tsx tests below.
+  'src/layouts/**/*.{test,spec}.ts',
   'src/services/**/*.{test,spec}.ts',
   'src/types/**/*.{test,spec}.ts',
   'src/utils/**/*.{test,spec}.ts',
@@ -93,6 +96,8 @@ export const JSDOM_INCLUDE = [
   'src/features/**/*.{test,spec}.ts',
   'src/hooks/**/*.{test,spec}.ts',
   'src/context/**/*.{test,spec}.ts',
+  // A layout test that renders MainLayout needs the DOM, and only .tsx may do so.
+  'src/layouts/**/*.{test,spec}.tsx',
   ...NODE_EXCLUDE,
 ]
 
