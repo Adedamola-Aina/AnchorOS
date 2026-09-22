@@ -14,6 +14,7 @@ import AuthGate from './components/auth/AuthGate';
 import { getSystemTheme, subscribeToSystemTheme } from './utils/systemTheme';
 import { NotificationProvider } from './context/NotificationContext';
 import { FabProvider } from './context/FabContext';
+import { ActionBarProvider } from './context/ActionBarContext';
 import { isDevSurfaceEnabled } from './utils/devSurface';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OfflineIndicator } from './components/shared/OfflineIndicator';
@@ -126,6 +127,7 @@ export default function App() {
       >
         <NotificationProvider>
           <FabProvider>
+          <ActionBarProvider>
           <AuthProvider>
             <AppProvider>
               <div
@@ -151,6 +153,7 @@ export default function App() {
               </div>
             </AppProvider>
           </AuthProvider>
+          </ActionBarProvider>
           </FabProvider>
         </NotificationProvider>
         {isDevSurfaceEnabled() && <ReactQueryDevtools initialIsOpen={false} />}

@@ -11,6 +11,8 @@ import { useUnsavedChangesGuard } from '../hooks/useUnsavedChanges';
 import { BottomNavigation } from '../components/mobile/BottomNavigation';
 import { ContextualFab } from '../components/mobile/ContextualFab';
 import { useFab } from '../context/FabContext';
+import { useActionBarHeight } from '../context/ActionBarContext';
+import { shellBottomClearance, shellScrollPadding } from './shellClearance';
 import { useNavScrollVisibility } from '../components/mobile/useNavScrollVisibility';
 import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { useFinanceService } from '../hooks/useFinanceService';
@@ -66,7 +68,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
      * band reaches 121px up; only 73px was reserved).
      */
     const { action: fabAction } = useFab();
-    const bottomClearance = fabAction ? 'var(--shell-bottom-clearance-fab)' : 'var(--shell-bottom-clearance)';
+    /**
+     * CM-28: the shell owns the bottom edge. `--shell-bottom-clearance` is the
+     * navigation plus, when the page registered one, the contextual FAB's band.
+     *
+     * A form's own action bar does NOT need to be added here: `FormActionBar` is
+     * sticky *inside* the scrolling content, so it is the last element in the flow
+     * and everything before it already ends above it. Adding its height as well
+     * double-counted and left ~70px of dead space under the bar at the end of the
+     * scroll (measured). The clearance is deliberately the whole of this
+     * reservation — see shellClearance.ts.
+     */
+    const bottomClearance = shellBottomClearance(!!fabAction);
+    /**
+     * …and the scrollport's own obscured region, which DOES include the action bar:
+     * a field scrolled to (or focused) must stop above Save/Cancel, not under it.
+     */
+    const scrollPadding = shellScrollPadding(!!fabAction, useActionBarHeight());
     const { accounts } = useFinanceService(user);
     const accountColors = useMemo(() => accounts.map(a => a.color).filter(Boolean), [accounts]);
 
@@ -126,7 +144,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
             <main
                 data-scroll
                 className="flex flex-col relative w-full flex-1 overflow-y-auto min-h-0"
-                style={isMobile ? { paddingBottom: bottomClearance, scrollPaddingBottom: bottomClearance } : undefined}
+                style={isMobile ? { paddingBottom: bottomClearance, scrollPaddingBottom: scrollPadding } : undefined}
             >
                 {/* On mobile, pad bottom is now handled by parent main container */}
                 <div
