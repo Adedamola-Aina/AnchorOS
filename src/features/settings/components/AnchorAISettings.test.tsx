@@ -97,11 +97,37 @@ describe('AnchorAISettings', () => {
 
     renderSettings();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'What Anchor AI Knows' }));
+    // CM-30: sentence case, and the label names the question rather than the feature.
+    fireEvent.click(await screen.findByRole('button', { name: 'What Anchor AI knows' }));
 
     await waitFor(() => {
       expect(screen.getByText(/Learned patterns:/i)).toBeInTheDocument();
       expect(screen.getByText(/2/)).toBeInTheDocument();
     });
+  });
+
+  /**
+   * The Section used to name the same question twice: this disclosure and a link with
+   * the identical label pointing at the assistant's transparency page. Exactly one entry
+   * point may carry the name.
+   */
+  it('exposes exactly one control named "What Anchor AI knows"', async () => {
+    getDocument.mockResolvedValue({ enabled: true, dataCollectionEnabled: true });
+    renderSettings();
+
+    expect(await screen.findAllByRole('button', { name: /what anchor ai knows/i })).toHaveLength(1);
+  });
+
+  it('announces the disclosure state to assistive tech', async () => {
+    getDocument.mockResolvedValue({ enabled: true, dataCollectionEnabled: true });
+    renderSettings();
+
+    const toggle = await screen.findByRole('button', { name: 'What Anchor AI knows' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(toggle);
+
+    expect(await screen.findByRole('button', { name: 'Hide what Anchor AI knows' }))
+      .toHaveAttribute('aria-expanded', 'true');
   });
 });

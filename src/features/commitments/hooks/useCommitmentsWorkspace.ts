@@ -6,18 +6,30 @@
  * testable without rendering the page.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { AnchorTask } from '../../../types';
 import {
     filterBySmartView,
     groupCompletedByPeriod,
     searchCommitments,
-    SMART_VIEWS,
     type CompletedGroup,
     type SmartViewId,
 } from '../utils/smartViews';
 
 export type TypeFilter = 'all' | 'daily' | 'weekly' | 'monthly' | 'todo';
+
+/**
+ * How long an undo affordance stays on screen.
+ *
+ * The bar used to live until the user pressed Undo or Dismiss — measured still
+ * present nine seconds after the completion — so an action chip became permanent
+ * furniture over the list. An undo is a *window*, not a state: long enough to
+ * notice and act on (6s clears the ~1s it takes to read the message and react),
+ * after which the action simply stands. The window is owned here, next to the
+ * state it governs, so a consumer cannot accidentally make it immortal by passing
+ * a fresh callback on every render.
+ */
+export const UNDO_WINDOW_MS = 6000;
 
 export interface UndoState {
     message: string;
@@ -29,11 +41,20 @@ interface WorkspaceArgs {
     addTask: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>;
     toggleTask: (id: string, completed: boolean) => Promise<void>;
     deleteTask: (id: string) => Promise<void>;
+    /** The field's value, owned by the page so the intent can be parsed from it first. */
+    query: string;
+    setQuery: (query: string) => void;
+    /**
+     * What the list actually filters by. The raw text, unless the page has read it as
+     * a commitment (`"Gym Mon Wed Fri"` → `Gym`) — schedule words must not stop a user
+     * finding the commitment those words describe.
+     */
+    searchText?: string;
     /** Injectable clock so tests and screenshots are deterministic. */
     now?: Date;
 }
 
-export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask, now }: WorkspaceArgs) {
+export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask, query, setQuery, searchText, now }: WorkspaceArgs) {
     /**
      * 'all', not 'today'.
      *
@@ -44,32 +65,33 @@ export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask
      */
     const [smartView, setSmartView] = useState<SmartViewId>('all');
     const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
-    const [query, setQuery] = useState('');
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [selectionMode, setSelectionMode] = useState(false);
     const [undo, setUndo] = useState<UndoState | null>(null);
+    const dismissUndo = useCallback(() => setUndo(null), []);
+
+    /**
+     * The undo window closes by itself. Keyed on the undo *state*, not on a
+     * callback: `dismissUndo` is stable, so a re-render cannot restart the clock.
+     */
+    useEffect(() => {
+        if (!undo) return;
+        const timer = window.setTimeout(() => setUndo(null), UNDO_WINDOW_MS);
+        return () => window.clearTimeout(timer);
+    }, [undo]);
 
     const reference = useMemo(() => now ?? new Date(), [now]);
 
     /** Search → type filter. Every view and count derives from this. */
     const scoped = useMemo(() => {
-        const searched = searchCommitments(tasks, query);
+        const searched = searchCommitments(tasks, searchText ?? query);
         return searched.filter((task) => typeFilter === 'all' || task.type === typeFilter);
-    }, [tasks, query, typeFilter]);
+    }, [tasks, query, searchText, typeFilter]);
 
     const visible = useMemo(
         () => filterBySmartView(scoped, smartView, reference),
         [scoped, smartView, reference],
     );
-
-    /** The size of each answer, so the bar is not a set of blind buttons. */
-    const counts = useMemo(() => {
-        const result: Partial<Record<SmartViewId, number>> = {};
-        for (const entry of SMART_VIEWS) {
-            result[entry.id] = filterBySmartView(scoped, entry.id, reference).length;
-        }
-        return result;
-    }, [scoped, reference]);
 
     const doneGroups: CompletedGroup[] = useMemo(
         () => groupCompletedByPeriod(visible, reference),
@@ -138,10 +160,9 @@ export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask
         typeFilter, setTypeFilter,
         query, setQuery,
         visible,
-        counts,
         doneGroups,
         selectable, selectedIds, toggleSelect, clearSelection, startSelection,
         completeWithUndo, deleteWithUndo, bulkComplete, bulkDelete,
-        undo, setUndo, dismissUndo: () => setUndo(null),
+        undo, setUndo, dismissUndo,
     };
 }

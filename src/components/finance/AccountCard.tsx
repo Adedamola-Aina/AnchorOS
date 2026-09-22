@@ -7,6 +7,7 @@ import { formatCurrency } from '../../utils/format';
 import { fromCents } from '../../utils/moneyUtils';
 import type { AnchorAccount } from '../../types';
 import { getFinanceViewTransitionName } from '../../features/finance/financeViewTransition';
+import { accountArtworkPresetId, artworkPresetCss } from './cardArtwork';
 import { resolveAccountArtworkUrl, revokeAccountArtworkUrl } from '../../services/accountArtworkStorage';
 import { accountTypeLabel } from '../../utils/accountTypes';
 import {
@@ -40,6 +41,12 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
   const institution = account.externalConnection?.institutionName;
   const instName = institution ?? account.name;
   const [artworkUrl, setArtworkUrl] = useState<string | undefined>(account.cardArtwork || undefined);
+  /**
+   * UX-FN-04: the pattern the account is wearing. Until now the picker wrote
+   * `cardArtworkPreset` and nothing read it, so choosing artwork changed the account
+   * document and nothing on screen.
+   */
+  const presetCss = artworkPresetCss(accountArtworkPresetId(account));
   const showSecondaryName = (mode === 'expanded' || isActive) && account.name !== instName;
   const showFooter = mode === 'expanded' || isActive;
   /**
@@ -126,7 +133,7 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
         background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 40%)',
         borderRadius: 'inherit',
       }} />
-      {/* Custom artwork */}
+      {/* Custom artwork: an uploaded image, or a preset pattern (UX-FN-04). */}
       {artworkUrl && (<>
         <div className="absolute inset-0" style={{
           backgroundImage: `url(${artworkUrl})`, backgroundSize: 'cover',
@@ -136,6 +143,15 @@ export const AccountCard: React.FC<AccountCardProps> = React.memo(({
           background: 'rgba(0,0,0,0.35)', borderRadius: 'inherit',
         }} />
       </>)}
+      {presetCss && (
+        /*
+         * A pattern is CSS, not a URL — painting it through `url()` was the reason
+         * chosen artwork never appeared. It needs no darkening overlay: the patterns
+         * are low-alpha white over the card's own colour, which is also what the
+         * picker's preview shows, so what the user chose is what they get.
+         */
+        <div className="absolute inset-0 pointer-events-none" data-testid={`account-artwork-${account.id}`} style={{ background: presetCss, borderRadius: 'inherit' }} />
+      )}
       {/* Content — header at top fits within peek strip */}
       <div className="relative z-[2] flex h-full flex-col justify-between px-5 py-4">
         <div className="card-header flex items-start justify-between gap-3">

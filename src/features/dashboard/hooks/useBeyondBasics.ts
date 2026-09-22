@@ -30,34 +30,40 @@ export interface BeyondBasicsItemState {
 interface ItemMeta { label: string; description: string; route: BeyondBasicsRoute }
 
 const ITEM_META: Record<BeyondBasicsItem, ItemMeta> = {
+  /*
+   * CM-30: these are written as outcomes, not as implementation steps. "Enable
+   * Two-Factor Auth" is a setting's name; "Secure your account" is what the user gets.
+   * Each route deep-links into the Settings *section* that owns the work, so the
+   * checklist never duplicates configuration.
+   */
   explore_finance: {
-    label: 'Explore Finance',
-    description: 'Add a transaction to your account',
+    label: 'Track your first transaction',
+    description: 'Record what you spend or earn, and see it add up',
     route: { tab: 'finance', params: { action: 'add-transaction' } },
   },
   recurring_commitment: {
-    label: 'Set a Recurring Commitment',
-    description: 'Try a weekly or monthly commitment',
+    label: 'Set up a commitment that repeats',
+    description: 'A weekly or monthly commitment runs itself',
     route: { tab: 'commitments', params: { action: 'add-recurring' } },
   },
   review_dashboard: {
-    label: 'Review Your Dashboard',
-    description: 'Visit the Dashboard with data to see your life at a glance',
+    label: 'See your day at a glance',
+    description: 'Home pulls your commitments, money and goals together',
     route: { tab: 'dashboard' },
   },
   customize_settings: {
-    label: 'Customize Settings',
-    description: 'Make Anchor OS yours — theme, notifications',
+    label: 'Make AnchorOS yours',
+    description: 'Theme and notifications, in Settings',
     route: { tab: 'settings', params: { section: 'appearance' } },
   },
   verify_email: {
-    label: 'Verify Your Email',
-    description: 'Confirm your email address to secure account ownership',
+    label: 'Confirm your email',
+    description: 'It is how you recover your account',
     route: { tab: 'settings', params: { section: 'security' } },
   },
   enable_mfa: {
-    label: 'Enable Two-Factor Auth',
-    description: 'Add an extra layer of protection with 2FA',
+    label: 'Secure your account',
+    description: 'A second step at sign-in, so a stolen password is not enough',
     route: { tab: 'settings', params: { section: 'security' } },
   },
 };

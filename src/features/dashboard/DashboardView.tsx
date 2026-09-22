@@ -6,7 +6,7 @@
 // @ts-nocheck
 
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CheckCircle2, Sparkles, X } from 'lucide-react';
 import { useApp } from '../../context/AnchorContext';
 import { useAuth } from '../../context/AuthContext';
@@ -16,7 +16,11 @@ import { useTasks } from '../../context/TaskContext';
 import { useHaptic } from '../../hooks/useHaptic';
 import { useFabric } from '../../hooks/useFabric';
 import { FabricMoodCard } from '../fabric/FabricMoodCard';
-import { HomeAnchorSection } from './components/HomeAnchorSection';
+import { HomeTodaySection } from './components/HomeTodaySection';
+import { HomeInsightCard } from './components/HomeInsightCard';
+import { AskAnchorRow } from './components/AskAnchorRow';
+import { selectTodayCommitments, selectTodayAlerts } from '../../services/fabric/todayCommitments';
+import { selectHomeInsight } from '../../services/fabric/insights/homeInsight';
 import { getAssetDistribution, getPortfolioTotals } from '../../utils/financeInsights';
 import { getProductivityMetrics } from '../../utils/taskInsights';
 import { AssetAllocationWidget } from './components/AssetAllocationWidget';
@@ -38,6 +42,12 @@ const getTimeGreeting = () => {
 
 const DashboardView = () => {
   const { navigateTo } = useApp();
+  /**
+   * Deep links from an insight or an alert are paths ("/commitments"). The app's own
+   * `navigateTo` is the single navigation abstraction — Home does not reach for the raw
+   * router, so a section of Home cannot drift into navigating somewhere unexpected.
+   */
+  const goTo = (path: string) => navigateTo((path.replace(/^\//, '').split('/')[0] || 'dashboard') as never);
   const { profile, user, updateProfile } = useAuth();
   const { tasks } = useTasks();
   const { accounts, recentActivity, cashFlow, refetch } = useFinance();
@@ -60,6 +70,13 @@ const DashboardView = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
   const beyondBasics = useBeyondBasics();
+  /**
+   * CM-30: one clock for the whole page, refreshed when the user pulls to refresh, so the
+   * brief, the focus shortlist and the insight all agree about what "today" is.
+   */
+  const [now, setNow] = useState(() => new Date());
+  /** Dismissals are session-scoped; remembering them across devices needs a profile field. */
+  const [dismissedInsightIds, setDismissedInsightIds] = useState<string[]>([]);
 
   /**
    * UX-OB-05: the acknowledgement is dismissed deliberately and remembered, so
@@ -80,7 +97,23 @@ const DashboardView = () => {
 
   const productivity = getProductivityMetrics(tasks);
   const hasCommitments = tasks.length > 0;
-  const todaysPriorities = tasks.filter(t => t.type === 'daily' && !t.completed).slice(0, 3);
+  /**
+   * CM-30: the canonical "today", used by the brief, the focus shortlist and the insight
+   * — and by the assistant's own briefing, so Home and Ask Anchor cannot disagree.
+   */
+  const today = useMemo(() => selectTodayCommitments(tasks, now), [tasks, now]);
+  /**
+   * The interpretation layer. Deterministic readings first, then the assistant's own
+   * insights when it is enabled — and nothing at all when neither has anything to say.
+   */
+  const insight = useMemo(() => selectHomeInsight({
+    today,
+    insights: anchorAIEnabled ? anchorInsights : null,
+    dismissedIds: dismissedInsightIds,
+    now,
+  }), [today, anchorAIEnabled, anchorInsights, dismissedInsightIds, now]);
+  /** Alerts stand down when the insight already made the same point. */
+  const alerts = useMemo(() => selectTodayAlerts(today, { shownInsightId: insight?.id ?? null }), [today, insight]);
   const assets = getAssetDistribution(accounts);
   const totals = getPortfolioTotals(accounts);
   const primaryCurrency: Currency = accounts.length > 0 ? (accounts[0].currency as Currency) : 'NGN';
@@ -89,6 +122,7 @@ const DashboardView = () => {
     setIsRefreshing(true);
     haptic.trigger('light');
     await refetch();
+    setNow(new Date());
     haptic.trigger('success');
     setIsRefreshing(false);
   };
@@ -173,17 +207,44 @@ const DashboardView = () => {
         </div>
 
         {/*
-          * Mobile-first: the assistant's briefing and insights render *here*, in
-          * the dashboard the user already opens — not behind a link. Reading
-          * Anchor's view of your commitments and money costs no navigation; only
-          * asking a question takes you to the full assistant.
+          * CM-30: the top of Home answers "what is happening", "what matters" and "what
+          * next" — deterministic first (Today), interpretation second (the insight),
+          * then anything genuinely actionable. Conversation is one row at the bottom,
+          * not the price of admission.
           */}
-        {anchorAIEnabled && (
-          <HomeAnchorSection
-            todayStats={briefing?.todayStats}
-            insights={anchorInsights}
-            onOpenCommitments={() => navigateTo('commitments')}
-            onOpenAssistant={() => { haptic.trigger('light'); navigateTo('fabric'); }}
+        <HomeTodaySection
+          today={today}
+          trackedCommitments={tasks.length}
+          nextDueLabel={briefing?.todayStats?.nextDueLabel}
+          onOpenCommitments={() => navigateTo('commitments')}
+        />
+
+        {alerts.length > 0 && (
+          <section aria-labelledby="home-alerts-heading" data-testid="home-alerts" className="space-y-2">
+            <h2 id="home-alerts-heading" className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+              Needs attention
+            </h2>
+            {alerts.map((alert) => (
+              <div key={alert.id} data-testid={`home-alert-${alert.id}`} className="rounded-xl border border-warning-border bg-warning-surface p-4">
+                <p className="text-sm font-semibold text-slate-800 dark:text-white">{alert.title}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">{alert.detail}</p>
+                <button
+                  type="button"
+                  onClick={() => goTo(alert.href)}
+                  className="mt-2 inline-flex items-center min-h-11 text-xs font-semibold text-primary-700 dark:text-primary-400"
+                >
+                  {alert.actionLabel}
+                </button>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {insight && (
+          <HomeInsightCard
+            insight={insight}
+            onAction={goTo}
+            onDismiss={(id) => setDismissedInsightIds((ids) => [...ids, id])}
           />
         )}
 
@@ -216,9 +277,18 @@ const DashboardView = () => {
           {/* Column 3: Focus */}
           <div className="space-y-5">
             <ProductivityWidget productivity={productivity} hasCommitments={hasCommitments} onNavigate={() => navigateTo('commitments')} />
-            <TodaysFocusWidget priorities={todaysPriorities} onNavigate={() => navigateTo('commitments')} />
+            <TodaysFocusWidget priorities={today.focus} remaining={today.remaining} onNavigate={() => navigateTo('commitments')} />
           </div>
         </div>
+
+        {/*
+          * CM-30: the conversational entry point, at the bottom where a deeper question
+          * belongs — after the dashboard has already told the user what it knows. Hidden
+          * entirely when Anchor AI is off rather than nagging to be switched back on.
+          */}
+        {anchorAIEnabled && (
+          <AskAnchorRow onOpenAssistant={() => { haptic.trigger('light'); navigateTo('fabric'); }} />
+        )}
 
         {/*
           * UX-AI-04 / UX-AI-09: the mood check-in used to be the first

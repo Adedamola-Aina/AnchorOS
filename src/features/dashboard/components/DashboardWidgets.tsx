@@ -123,14 +123,27 @@ export const ProductivityWidget: React.FC<ProductivityWidgetProps> = ({ producti
     </div>
 );
 
-interface TodaysFocusWidgetProps { priorities: AnchorTask[]; onNavigate: () => void; }
-export const TodaysFocusWidget: React.FC<TodaysFocusWidgetProps> = ({ priorities, onNavigate }) => {
+/**
+ * Today's Focus.
+ *
+ * The subtitle used to read "3 Tasks Remaining" while the page's own brief said
+ * "15 tasks remaining" — the same words for two different numbers, which is what made
+ * the dashboard look self-contradictory (CM-30). It now states the relationship: these
+ * are the priorities chosen from that outstanding work.
+ */
+interface TodaysFocusWidgetProps { priorities: AnchorTask[]; remaining: number; onNavigate: () => void; }
+export const TodaysFocusWidget: React.FC<TodaysFocusWidgetProps> = ({ priorities, remaining, onNavigate }) => {
     if (priorities.length === 0) return null;
     return (
         <div onClick={onNavigate} className="glass-card p-5 cursor-pointer hover:shadow-elevation-overlay transition-all group active:scale-[0.99]">
             <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400"><Target className="w-5 h-5" /></div>
-                <div><h3 className="font-bold text-slate-700 dark:text-slate-200">Today's Focus</h3><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{priorities.length} Tasks Remaining</p></div>
+                <div>
+                    <h3 className="font-bold text-slate-700 dark:text-slate-200">Today's Focus</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest" data-testid="focus-subtitle">
+                        {priorities.length} of {remaining} remaining
+                    </p>
+                </div>
             </div>
             <div className="space-y-3">
                 {priorities.map(task => (

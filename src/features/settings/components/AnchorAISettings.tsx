@@ -53,10 +53,20 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({ userId, show
                 <div className="h-px bg-slate-100 dark:bg-slate-800" />
 
                 <div className="space-y-3">
+                    {/*
+                      * CM-30: this is the ONE entry point named "What Anchor AI knows".
+                      * The section also carried a link with the same name pointing at the
+                      * assistant's transparency page, so the same question appeared twice
+                      * with two different behaviours (expand here vs. navigate away).
+                      * The disclosure stays; the other route is now labelled for what it
+                      * is — the fuller page.
+                      */}
                     <Button
                         variant="ghost"
                         size="sm"
                         className="min-h-11"
+                        aria-expanded={showKnowledge}
+                        aria-controls="anchor-ai-knowledge"
                         onClick={() => {
                             const next = !showKnowledge;
                             setShowKnowledge(next);
@@ -64,17 +74,19 @@ export const AnchorAISettings: React.FC<AnchorAISettingsProps> = ({ userId, show
                         }}
                         disabled={!userId || isLoading}
                     >
-                        {showKnowledge ? 'Hide Anchor AI Knowledge' : 'What Anchor AI Knows'}
+                        {showKnowledge ? 'Hide what Anchor AI knows' : 'What Anchor AI knows'}
                     </Button>
                 </div>
                 {showKnowledge && (
-                    <AnchorAIKnowledgePanel
-                        patternCount={patternCount}
-                        patternGroups={patternGroups}
-                        userId={userId}
-                        isSaving={isSaving}
-                        onClearLearnedPatterns={clearLearnedPatterns}
-                    />
+                    <div id="anchor-ai-knowledge">
+                        <AnchorAIKnowledgePanel
+                            patternCount={patternCount}
+                            patternGroups={patternGroups}
+                            userId={userId}
+                            isSaving={isSaving}
+                            onClearLearnedPatterns={clearLearnedPatterns}
+                        />
+                    </div>
                 )}
             </CardContent>
         </Card>

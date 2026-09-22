@@ -10,8 +10,6 @@ import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { captureError } from '../../utils/error';
-import { formatCurrency } from '../../utils/format';
-import { fromCents } from '../../utils/moneyUtils';
 import { exportAccountCsv } from '../../utils/accountExport';
 import { logProductEvent } from '../../services/telemetry';
 import { uploadAccountArtwork } from '../../services/accountArtworkStorage';
@@ -207,13 +205,12 @@ export const AccountDetailsView = ({
           <AccountCard account={account} index={0} totalCards={1} mode="expanded" isActive={false} onTap={() => {}} skipViewTransition />
         </div>
 
-        {/* Balance: prominent, but it must not compete with the account card. */}
-        <div className="px-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">Balance</p>
-          <p className="mt-0.5 text-3xl font-bold tabular-nums leading-tight text-slate-900 dark:text-white">
-            {formatCurrency(fromCents(account.balanceCents), account.currency)}
-          </p>
-        </div>
+        {/*
+          * The balance used to be printed a second time here, as a "Balance" label
+          * with a 3xl figure, immediately under a card that already shows it. Two
+          * places, one number — reported as duplication. The card is the account's
+          * identity *and* its balance, so the strip is gone rather than restyled.
+          */}
 
         {/*
           * UX-FN-14: one affordance per intent, and never two identical CTAs.

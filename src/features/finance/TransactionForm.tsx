@@ -11,6 +11,7 @@ import {
     TransactionTypeSelector, TransferDetails
 } from './components';
 import { AccountPickerRow } from './components/AccountPickerRow';
+import { FormActionBar } from '../../components/shared/FormActionBar';
 import { RecurringOptions } from './components/RecurringOptions';
 import {
     useTransactionFormState, NoAccountsMessage, SingleAccountTransferMessage,
@@ -187,12 +188,15 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             </form>
 
             {/*
-              * Confirmation is pinned to the bottom of the sheet so it is
-              * reachable without scrolling and never sits over a field the user
-              * is still filling in (`form="tx-form"` submits the form above).
-              * The safe-area inset is carried here, once.
+              * Confirmation is pinned to the bottom of the form so it is
+              * reachable without scrolling (`form="tx-form"` submits the form
+              * above), and CM-28 makes sure it can never become a lid over the
+              * fields: `FormActionBar` is opaque, applies no safe-area inset of its
+              * own (the shell carries the inset once, inside `--bottom-nav-height`),
+              * and reports its measured height so the shell reserves room for it at
+              * the end of the scroll.
               */}
-            <div className="sticky bottom-0 mt-4 bg-white dark:bg-slate-800 pt-3 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
+            <FormActionBar className="pt-3 pb-3">
                 <div className="flex items-center justify-end gap-2">
                     <button
                         type="button"
@@ -213,7 +217,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                         {submitLabel}
                     </motion.button>
                 </div>
-            </div>
+            </FormActionBar>
         </div>
     );
 };

@@ -44,23 +44,18 @@ export function getStreakMilestone(streak: number): StreakMilestone | null {
   return MILESTONES.find((m) => m.days === streak) ?? null;
 }
 
-export function getStreakNudge(
-  currentStreak: number,
-  longestStreak: number,
-): string | null {
-  if (currentStreak === 0 && longestStreak === 0) return null;
-
-  if (currentStreak === 0 && longestStreak > 0) {
-    return `Your best was ${longestStreak} days — you can get back there!`;
-  }
-
-  const nextMilestone = MILESTONES.find((m) => m.days > currentStreak);
-  if (nextMilestone) {
-    const remaining = nextMilestone.days - currentStreak;
-    // UX-DS-01: the milestone icon now renders as a component next to this
-    // text, so the nudge string no longer interpolates a glyph.
-    return `${remaining} more day${remaining === 1 ? '' : 's'} to ${nextMilestone.label}`;
-  }
-
-  return `Incredible ${currentStreak}-day streak! Keep it going!`;
-}
+/*
+ * `getStreakNudge` used to live here. It produced two things:
+ *
+ *   "Your best was 1 days — you can get back there!"
+ *   "2 more days to 1 week strong!"
+ *
+ * The first was the only one actually rendered (TaskItem asked for it in the one
+ * case the badge cannot show — a lapsed streak) and it was reported as noise: it
+ * told the user their best was "1 days", which is both ungrammatical and not worth
+ * saying, and it read as a reprimand under a commitment they had not done yet.
+ * The second was unreachable. Encouragement that only appears to point out a
+ * failure is not encouragement, so the whole helper is gone rather than reworded.
+ * The streak itself is untouched: the badge still shows a live streak, and the
+ * calculation still feeds the assistant.
+ */

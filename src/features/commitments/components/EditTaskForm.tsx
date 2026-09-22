@@ -15,6 +15,7 @@ import React, { useState } from 'react';
 import type { AnchorTask } from '../../../types';
 import { Button } from '@anchor-os/ui';
 import { CommitmentForm } from './CommitmentForm';
+import { FormActionBar } from '../../../components/shared/FormActionBar';
 
 const FORM_ID = 'commitment-editor-form';
 
@@ -40,23 +41,22 @@ export const EditTaskForm: React.FC<EditTaskFormProps> = ({ task, hasFamilyActiv
             />
 
             {/*
-              * The action bar.
+              * The action bar (CM-28). It used to be a translucent `sticky bottom-0`
+              * pill with a backdrop blur AND its own `env(safe-area-inset-bottom)`
+              * padding: fields read straight through it, and the bottom inset was
+              * compensated twice — once here, once by the shell's
+              * `--bottom-nav-height`, which already contains it.
               *
-              * It used to be a translucent `sticky bottom-0` pill with a backdrop
-              * blur AND its own `env(safe-area-inset-bottom)` padding: fields
-              * scrolled through it (so NOTES / REMINDER / STARTS read as covered),
-              * and the bottom inset was compensated twice — once here and once by
-              * the shell's `--bottom-nav-height`, which already contains it. It is
-              * opaque now, and the shell stays the single owner of the bottom inset,
-              * so the bar settles above the bottom navigation instead of behind it.
+              * `FormActionBar` is opaque, carries no inset of its own, and reports
+              * its measured height so the shell reserves room for it — which is what
+              * makes the last field (Notes, Reminder) scrollable completely above it.
               */}
-            <div
-                data-testid="edit-actions"
-                className="sticky bottom-0 z-10 mt-4 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-1 pt-3 pb-3"
-            >
-                <Button type="button" variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
-                <Button type="submit" form={FORM_ID} isLoading={isSaving} size="sm" className="px-6">Save Changes</Button>
-            </div>
+            <FormActionBar className="px-1 pt-3 pb-3" testId="edit-actions">
+                <div className="flex items-center justify-end gap-3">
+                    <Button type="button" variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
+                    <Button type="submit" form={FORM_ID} isLoading={isSaving} size="sm" className="px-6">Save Changes</Button>
+                </div>
+            </FormActionBar>
         </div>
     );
 };
