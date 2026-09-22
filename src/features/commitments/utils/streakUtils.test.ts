@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getStreakMilestone, getStreakNudge } from './streakUtils';
+import { getStreakMilestone } from './streakUtils';
 
 describe('getStreakMilestone', () => {
   it('returns null for streak 0', () => {
@@ -28,7 +28,7 @@ describe('getStreakMilestone', () => {
 });
 
 // UX-DS-01: the milestone used to carry an emoji (🔥); it now carries a Lucide
-// component, and the nudge string no longer interpolates a glyph.
+// component, and nothing in this module interpolates a glyph.
 describe('UX-DS-01: milestones are Lucide icons, not emoji', () => {
   it('exposes an icon component instead of an emoji field', () => {
     const m = getStreakMilestone(7);
@@ -37,33 +37,23 @@ describe('UX-DS-01: milestones are Lucide icons, not emoji', () => {
     expect(m).not.toHaveProperty('emoji');
   });
 
-  it('never returns a glyph in the nudge text', () => {
+  it('never exposes a glyph in any milestone label', () => {
     const emojiPattern = /\p{Extended_Pictographic}/u;
-    for (const streak of [0, 1, 3, 6, 13, 29, 364]) {
-      const nudge = getStreakNudge(streak, streak + 2);
-      if (nudge) expect(emojiPattern.test(nudge)).toBe(false);
+    for (const days of [3, 7, 14, 21, 30, 60, 90, 180, 365]) {
+      expect(emojiPattern.test(getStreakMilestone(days)!.label)).toBe(false);
     }
   });
 });
 
-describe('getStreakNudge', () => {
-  it('returns encouragement when streak is 0 and longest > 0', () => {
-    const nudge = getStreakNudge(0, 5);
-    expect(nudge).toBeTruthy();
-    expect(nudge).toContain('5');
-  });
-
-  it('returns progress message when streak is active', () => {
-    const nudge = getStreakNudge(3, 10);
-    expect(nudge).toBeTruthy();
-  });
-
-  it('returns null when no meaningful streak data', () => {
-    expect(getStreakNudge(0, 0)).toBeNull();
-  });
-
-  it('returns celebration for high active streaks', () => {
-    const nudge = getStreakNudge(14, 14);
-    expect(nudge).toBeTruthy();
+/**
+ * The lapsed-streak "encouragement" used to be the only nudge anybody saw:
+ * "Your best was 1 days — you can get back there!" — ungrammatical, and shown
+ * under a commitment the user had not done yet. It is gone; this pins the removal
+ * so it cannot quietly come back.
+ */
+describe('no lapsed-streak nagging', () => {
+  it('exposes no nudge helper at all', async () => {
+    const module = await import('./streakUtils');
+    expect(module).not.toHaveProperty('getStreakNudge');
   });
 });

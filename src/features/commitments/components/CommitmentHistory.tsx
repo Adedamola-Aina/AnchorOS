@@ -87,7 +87,7 @@ export const CommitmentUndoBar: React.FC<UndoBarProps> = ({ state, onDismiss }) 
                     <Undo2 className="w-4 h-4" aria-hidden="true" />
                     Undo
                 </Button>
-                <Button variant="ghost" size="icon" onClick={onDismiss} aria-label="Dismiss" className="text-white/70 hover:text-white h-8 w-8">
+                <Button variant="ghost" size="icon" onClick={onDismiss} aria-label="Dismiss" className="text-white/70 hover:text-white min-h-11 min-w-11">
                     <X className="w-4 h-4" aria-hidden="true" />
                 </Button>
             </div>

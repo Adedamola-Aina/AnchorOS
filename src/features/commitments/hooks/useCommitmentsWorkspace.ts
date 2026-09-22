@@ -6,7 +6,7 @@
  * testable without rendering the page.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { AnchorTask } from '../../../types';
 import {
     filterBySmartView,
@@ -18,6 +18,19 @@ import {
 } from '../utils/smartViews';
 
 export type TypeFilter = 'all' | 'daily' | 'weekly' | 'monthly' | 'todo';
+
+/**
+ * How long an undo affordance stays on screen.
+ *
+ * The bar used to live until the user pressed Undo or Dismiss — measured still
+ * present nine seconds after the completion — so an action chip became permanent
+ * furniture over the list. An undo is a *window*, not a state: long enough to
+ * notice and act on (6s clears the ~1s it takes to read the message and react),
+ * after which the action simply stands. The window is owned here, next to the
+ * state it governs, so a consumer cannot accidentally make it immortal by passing
+ * a fresh callback on every render.
+ */
+export const UNDO_WINDOW_MS = 6000;
 
 export interface UndoState {
     message: string;
@@ -48,6 +61,17 @@ export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [selectionMode, setSelectionMode] = useState(false);
     const [undo, setUndo] = useState<UndoState | null>(null);
+    const dismissUndo = useCallback(() => setUndo(null), []);
+
+    /**
+     * The undo window closes by itself. Keyed on the undo *state*, not on a
+     * callback: `dismissUndo` is stable, so a re-render cannot restart the clock.
+     */
+    useEffect(() => {
+        if (!undo) return;
+        const timer = window.setTimeout(() => setUndo(null), UNDO_WINDOW_MS);
+        return () => window.clearTimeout(timer);
+    }, [undo]);
 
     const reference = useMemo(() => now ?? new Date(), [now]);
 
@@ -142,6 +166,6 @@ export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask
         doneGroups,
         selectable, selectedIds, toggleSelect, clearSelection, startSelection,
         completeWithUndo, deleteWithUndo, bulkComplete, bulkDelete,
-        undo, setUndo, dismissUndo: () => setUndo(null),
+        undo, setUndo, dismissUndo,
     };
 }

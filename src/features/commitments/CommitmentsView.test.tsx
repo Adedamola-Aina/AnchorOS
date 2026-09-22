@@ -967,3 +967,53 @@ describe('CommitmentsView', () => {
     });
   });
 });
+
+/**
+ * Completion feedback across the views (reported defect).
+ *
+ * In the list, completing a commitment shows the green "Done!" acknowledgement.
+ * The timeline and the week grid showed nothing, because both were handed only
+ * active rows — the completed commitment vanished from them entirely (measured:
+ * absent from the timeline right after completion).
+ */
+describe('CommitmentsView — completion is acknowledged in every view', () => {
+  const completedToday: AnchorTask = {
+    id: 'done-today',
+    title: 'Walked the dog',
+    type: 'daily',
+    completed: true,
+    category: 'personal',
+    createdAt: new Date('2024-01-01'),
+    lastCompletedAt: new Date(),
+    timeOfDay: 'morning',
+  };
+
+  it('keeps a commitment completed today on the timeline, in its completed state', async () => {
+    renderWithContext(<CommitmentsView />, { tasks: { tasks: [mockTasks[0], completedToday] } });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByTestId('clock-icon').closest('button')!);
+
+    const heading = await screen.findByRole('heading', { name: 'Walked the dog' });
+    expect(heading.className).toContain('line-through');
+    // …and the active row is still there, so the timeline is not just the history.
+    expect(screen.getByRole('heading', { name: 'Morning Meditation' })).toBeInTheDocument();
+  });
+
+  it('does not fill the timeline with older completions', async () => {
+    const completedLastMonth: AnchorTask = {
+      ...completedToday,
+      id: 'done-old',
+      title: 'Old completion',
+      lastCompletedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    };
+    renderWithContext(<CommitmentsView />, { tasks: { tasks: [mockTasks[0], completedLastMonth] } });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByTestId('clock-icon').closest('button')!);
+
+    await screen.findByRole('heading', { name: 'Morning Meditation' });
+    expect(screen.queryByRole('heading', { name: 'Old completion' })).not.toBeInTheDocument();
+  });
+});
+

@@ -8,7 +8,7 @@ import { PriorityIndicator } from './PriorityIndicator';
 import type { AnchorTask } from '../../../types';
 import { Card } from '@anchor-os/ui';
 import { Button } from '@anchor-os/ui';
-import { getStreakMilestone, getStreakNudge } from '../utils/streakUtils';
+import { getStreakMilestone } from '../utils/streakUtils';
 import { microMotion } from '../../../animations/microInteractions';
 import { describeNextDue, describeSchedule, nextScheduledOnOrAfter } from '../../../services/fabric/commitmentSchedule';
 
@@ -239,20 +239,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                             </p>
                         )}
                         {/*
-                          * Streak nudge — only where it adds something.
-                          *
-                          * It used to render for every state ("3 more days to
-                          * One Week", "Incredible 12-day streak!"), so a list of
-                          * commitments repeated the same encouragement line on
-                          * every card and buried the actual signal. The streak
-                          * badge already shows the count, so the nudge is kept for
-                          * the one case the badge cannot show: a streak that has
-                          * lapsed and can be recovered.
+                          * The streak nudge that lived here has been removed (see
+                          * `streakUtils`): its only reachable output was "Your best
+                          * was N days — you can get back there!" under a
+                          * commitment the user had not done, which reads as a
+                          * reprimand. The streak badge above still reports a live
+                          * streak; there is nothing useful to say about a lapsed one.
                           */}
-                        {!task.completed && !isAnimating && (task.currentStreak || 0) === 0 && (task.longestStreak || 0) > 0 && (() => {
-                            const nudge = getStreakNudge(task.currentStreak || 0, task.longestStreak || 0);
-                            return nudge ? <p className="mt-0.5 text-[10px] text-slate-400 dark:text-slate-500 truncate" data-testid="streak-nudge">{nudge}</p> : null;
-                        })()}
                         {/*
                           * CM-08: the transaction offer used to be a blocking
                           * cross-domain modal ("Financial Transaction?"). It is now

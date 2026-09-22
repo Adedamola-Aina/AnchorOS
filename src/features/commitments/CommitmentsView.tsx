@@ -125,6 +125,26 @@ const CommitmentsView = () => {
   }, [workspace.visible]);
 
   /**
+   * The rows the timeline and the week grid show.
+   *
+   * Completing from the list used to make the commitment vanish from both of those
+   * views (they were handed `activeTasks` only), so the tap produced no
+   * acknowledgement anywhere except the list — measured: the completed row was
+   * simply absent from the timeline. They now also receive what was completed
+   * *today*, and both already render a completed row as completed (filled node,
+   * strikethrough), so the acknowledgement happens where the user is looking.
+   * Earlier completions stay out of the way, which is what those views are for.
+   */
+  const completedToday = useMemo(
+    () => workspace.doneGroups.find((group) => group.label === 'Today')?.tasks ?? [],
+    [workspace.doneGroups],
+  );
+  const scheduledTasks = useMemo(
+    () => [...activeTasks, ...completedToday],
+    [activeTasks, completedToday],
+  );
+
+  /**
    * Loading is only "first load" when there is nothing to show yet: a refresh of a
    * populated list must not replace the rows with a skeleton.
    */
@@ -167,12 +187,12 @@ const CommitmentsView = () => {
           <CommitmentsLoadingState />
         ) : (
         <div>
-          {viewMode === 'timeline' ? <TimelineView tasks={activeTasks} onToggle={handleToggle} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={null} onToggle={handleToggle} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} /> : (
+          {viewMode === 'timeline' ? <TimelineView tasks={scheduledTasks} onToggle={handleToggle} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} /> : viewMode === 'list' ? <TaskList activeTasks={activeTasks} completedTasks={completedTasks} hasFamilyActive={hasFamilyActive} editingTaskId={null} onToggle={handleToggle} onStartEdit={handleStartEdit} onDelete={handleDeleteTask} financialNudgeTaskId={activeFinancialNudgeId} onFinancialNudge={handleFinancialNudge} onRecordTransaction={handleRecordTransaction} onDismissFinancialNudge={() => setFinancialNudgeTaskId(null)} /> : (
             <div className="space-y-3">
               <div className="flex gap-2">
                 {(['week', 'month'] as const).map(r => (<Button key={r} variant={calendarRange === r ? 'primary' : 'secondary'} size="sm" onClick={() => setCalendarRange(r)} className="capitalize text-xs">{r}</Button>))}
               </div>
-              {calendarRange === 'week' ? <WeeklyView tasks={allFiltered} onToggle={toggleTask} /> : <MonthCalendarView tasks={allFiltered} onToggle={toggleTask} />}
+              {calendarRange === 'week' ? <WeeklyView tasks={scheduledTasks} onToggle={toggleTask} onOpen={handleStartEdit} /> : <MonthCalendarView tasks={allFiltered} onToggle={toggleTask} />}
             </div>
           )}
         </div>
