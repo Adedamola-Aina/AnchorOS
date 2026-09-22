@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.32](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.31...v1.21.0-rc.32) (2026-09-22)
+
+
+### Features
+
+* **finance:** iOS-grade Finance UX refinement + one viewport contract (UX-FN-01..UX-FN-23) ([#253](https://github.com/Adedamola-Aina/AnchorOS/issues/253)) ([55d8c98](https://github.com/Adedamola-Aina/AnchorOS/commit/55d8c980bac6db61164ae77e9c37387b097f5572))
+
 ## [1.21.0-rc.31](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.30...v1.21.0-rc.31) (2026-09-21)
 
 
