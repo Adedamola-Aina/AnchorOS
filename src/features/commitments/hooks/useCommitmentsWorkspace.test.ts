@@ -19,8 +19,9 @@ const setup = (tasks = [task()]) => {
   const addTask = vi.fn().mockResolvedValue(undefined);
   const toggleTask = vi.fn().mockResolvedValue(undefined);
   const deleteTask = vi.fn().mockResolvedValue(undefined);
-  const hook = renderHook(() => useCommitmentsWorkspace({
-    tasks, addTask, toggleTask, deleteTask, now: new Date('2026-09-22T09:00:00'),
+  // The field's value is owned by the page (CM-29) and passed in.
+  const hook = renderHook(({ query = '' } = {}) => useCommitmentsWorkspace({
+    tasks, addTask, toggleTask, deleteTask, query, setQuery: () => {}, now: new Date('2026-09-22T09:00:00'),
   }));
   return { ...hook, addTask, toggleTask, deleteTask };
 };

@@ -932,18 +932,23 @@ describe('CommitmentsView', () => {
 
       // It reports what it matched…
       expect(screen.getByTestId('search-result-count')).toHaveTextContent(/match/i);
-      // …and, in the same breath, offers to create it — parse shown back.
-      const preview = screen.getByTestId('quick-add-preview');
-      expect(within(preview).getByText('Morning')).toBeInTheDocument();
+      // …and, in the same breath, offers to create it — in its own block, with the
+      // interpretation shown back, never mixed into the matches.
+      const createNew = screen.getByTestId('create-new');
+      expect(within(createNew).getByText(/\+ Create “Morning”/)).toBeInTheDocument();
+      expect(screen.getByTestId('matching-commitments')).toBeInTheDocument();
     });
 
-    it('adds the parsed commitment from the same field', async () => {
+    it('creates exactly what the preview showed, and only when Create is pressed', async () => {
       const { tasks } = createMockContexts();
       renderWithContext(<CommitmentsView />, { tasks });
       const user = userEvent.setup();
 
       await user.type(screen.getByTestId('commitment-find-or-add'), 'Read daily');
-      await user.click(within(screen.getByTestId('quick-add-preview')).getByRole('button', { name: 'Add' }));
+      expect(screen.getByTestId('create-summary')).toHaveTextContent('daily');
+      expect(tasks.addTask).not.toHaveBeenCalled();
+
+      await user.click(screen.getByTestId('create-commitment'));
 
       await waitFor(() => {
         expect(tasks.addTask).toHaveBeenCalledWith(
@@ -957,7 +962,9 @@ describe('CommitmentsView', () => {
       const user = userEvent.setup();
 
       await user.type(screen.getByTestId('commitment-find-or-add'), 'Pay rent monthly');
-      await user.click(within(screen.getByTestId('quick-add-preview')).getByRole('button', { name: 'Adjust' }));
+      // Monthly with no date: the parse is honest about what is missing.
+      expect(screen.getByTestId('create-summary')).toHaveTextContent('Choose date');
+      await user.click(screen.getByTestId('edit-details'));
 
       // The composer opens pre-filled from the parse, not empty.
       await waitFor(() => {
@@ -1017,3 +1024,100 @@ describe('CommitmentsView — completion is acknowledged in every view', () => {
   });
 });
 
+/**
+ * CM-29 — the find-or-add journey, end to end through the page.
+ *
+ * Search and creation share one field, but they are no longer the same interaction:
+ * matches are the list, creation is its own block, and nothing is persisted without an
+ * explicit press on a named action.
+ */
+describe('CommitmentsView — find-or-add journey (CM-29)', () => {
+  const typeInField = async (user: any, text: string) => {
+    await user.type(screen.getByTestId('commitment-find-or-add'), text);
+  };
+
+  it('pre-fills the composer with everything the parse recognised', async () => {
+    renderWithContext(<CommitmentsView />);
+    const user = userEvent.setup();
+
+    await typeInField(user, 'Gym Mon Wed Fri');
+    await user.click(screen.getByTestId('edit-details'));
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(screen.getByPlaceholderText(/e.g. Morning Prayer/i)).toHaveValue('Gym');
+    // Cadence and days arrive pre-selected from the intent, not empty.
+    const weekdaySelector = screen.getByTestId('weekday-selector');
+    for (const day of ['Mo', 'We', 'Fr']) {
+      expect(within(weekdaySelector).getByText(day)).toHaveAttribute('aria-pressed', 'true');
+    }
+    expect(within(screen.getByTestId('cadence-selector')).getByText('Weekly')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('creates exactly one commitment from a complete preview', async () => {
+    const { tasks } = createMockContexts();
+    renderWithContext(<CommitmentsView />, { tasks });
+    const user = userEvent.setup();
+
+    await typeInField(user, 'Gym Mon Wed Fri');
+    await user.click(screen.getByTestId('create-commitment'));
+
+    await waitFor(() => expect(tasks.addTask).toHaveBeenCalledTimes(1));
+    expect(tasks.addTask).toHaveBeenCalledWith(expect.objectContaining({
+      title: 'Gym', type: 'weekly', daysOfWeek: [1, 3, 5],
+    }));
+    // The field is cleared, so the same text cannot be created twice by accident.
+    expect(screen.getByTestId('commitment-find-or-add')).toHaveValue('');
+  });
+
+  it('creates nothing when the composer is cancelled', async () => {
+    const { tasks } = createMockContexts();
+    renderWithContext(<CommitmentsView />, { tasks });
+    const user = userEvent.setup();
+
+    await typeInField(user, 'Gym Mon Wed Fri');
+    await user.click(screen.getByTestId('edit-details'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /cancel|close/i }));
+
+    expect(tasks.addTask).not.toHaveBeenCalled();
+  });
+
+  it('does not modify an existing commitment when a new one shares its name', async () => {
+    const { tasks } = createMockContexts();
+    renderWithContext(<CommitmentsView />, { tasks });
+    const user = userEvent.setup();
+
+    // "Morning Meditation" already exists in the fixture.
+    await typeInField(user, 'Morning Meditation');
+    expect(screen.getByTestId('matching-commitments')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('create-commitment'));
+
+    await waitFor(() => expect(tasks.addTask).toHaveBeenCalledTimes(1));
+    expect(tasks.toggleTask).not.toHaveBeenCalled();
+    expect(tasks.deleteTask).not.toHaveBeenCalled();
+  });
+
+  it('keeps the floating action available for the full creation flow', async () => {
+    renderWithContext(<CommitmentsView />);
+    const user = userEvent.setup();
+
+    await user.click(screen.getByTestId('contextual-fab'));
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: /save commitment/i })).toBeInTheDocument();
+  });
+
+  it('finds an existing commitment when the line carries schedule words', async () => {
+    const { tasks } = createMockContexts();
+    renderWithContext(<CommitmentsView />, { tasks });
+    const user = userEvent.setup();
+
+    // The raw text would match nothing; the parsed title matches the commitment.
+    await typeInField(user, 'Morning daily');
+
+    expect(screen.getByTestId('matching-commitments')).toBeInTheDocument();
+    expect(screen.getByTestId('search-result-count')).toHaveTextContent(/match/i);
+  });
+});

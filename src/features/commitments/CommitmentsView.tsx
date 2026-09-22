@@ -27,7 +27,7 @@ import { CommitmentFindOrAdd } from './components/CommitmentToolbar';
 import { CommitmentUndoBar } from './components/CommitmentHistory';
 import { useCommitmentsWorkspace } from './hooks/useCommitmentsWorkspace';
 import { useRegisterFab } from '../../context/FabContext';
-import type { QuickAddDraft } from './utils/parseQuickAdd';
+import { parseQuickAdd, type QuickAddDraft } from './utils/parseQuickAdd';
 import { FeatureErrorBoundary } from '../../components/shared/FeatureErrorBoundary';
 
 const CommitmentsView = () => {
@@ -42,9 +42,25 @@ const CommitmentsView = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [viewMode, setViewMode] = useState<'timeline' | 'list' | 'calendar'>('list');
   const [calendarRange, setCalendarRange] = useState<'week' | 'month'>('week');
+  /**
+   * CM-29: the field's value lives here, not in the workspace, because the page reads
+   * it as an intent *before* the workspace decides what the list filters by — and that
+   * reading also feeds the "Create new" block below the field.
+   */
+  const [query, setQuery] = useState('');
+  const activeQuery = query.trim();
+  const intent = useMemo(
+    () => (activeQuery ? parseQuickAdd(activeQuery, new Date()) : null),
+    [activeQuery],
+  );
+  /**
+   * Schedule words must not hide what they describe: "Gym Mon Wed Fri" searches for
+   * "Gym", so a matching commitment is still found. A fallback reading changes nothing.
+   */
+  const searchText = intent && intent.confidence !== 'fallback' ? intent.title : query;
 
   // CM-21 / CM-23 / CM-25: smart views, search, selection and undo.
-  const workspace = useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask });
+  const workspace = useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask, query, setQuery, searchText });
   // CM-16: a parsed quick-add draft, handed to the composer when the user adjusts.
   const [quickAddDraft, setQuickAddDraft] = useState<QuickAddDraft | null>(null);
 
@@ -149,7 +165,16 @@ const CommitmentsView = () => {
    * populated list must not replace the rows with a skeleton.
    */
   const isFirstLoad = loadingTasks && tasks.length === 0;
-  const activeQuery = workspace.query.trim();
+
+  /**
+   * Direct creation (CM-29). It is reachable only from the "Create" button, only for a
+   * complete reading, and it goes through the same domain path as the composer — so
+   * there is exactly one way a commitment is written.
+   */
+  const handleCreateIntent = (draft: QuickAddDraft) => {
+    void handleAdd(draftToTask(draft));
+    setQuery('');
+  };
 
   return (
     <FeatureErrorBoundary featureName="Commitments">
@@ -173,12 +198,24 @@ const CommitmentsView = () => {
         <SectionHeader title="Commitments" subtitle={hasFamilyActive ? "Manage your daily obligations, goals, and family duties." : "Manage your daily obligations and goals."} />
 
         <CommitmentFindOrAdd
-          value={workspace.query}
-          onChange={workspace.setQuery}
+          value={query}
+          onChange={setQuery}
           resultCount={totalFiltered}
-          onSaveDraft={(draft) => { void handleAdd(draftToTask(draft)); workspace.setQuery(''); }}
-          onAdjustDraft={(draft) => { setQuickAddDraft(draft); setShowAdd(true); workspace.setQuery(''); }}
+          intent={intent}
+          onCreateDraft={handleCreateIntent}
+          onEditDetails={(draft) => { setQuickAddDraft(draft); setShowAdd(true); setQuery(''); }}
         />
+
+        {/*
+          * The matches are the list itself — nothing synthetic is injected among them.
+          * This header is what separates "what you already have" from the creation
+          * block above it, which is the distinction the old Add/Adjust row blurred.
+          */}
+        {activeQuery && !loadingTasks && totalFiltered > 0 && (
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500" data-testid="matching-commitments">
+            Matching commitments
+          </h2>
+        )}
 
         <CommitmentsViewSwitcher viewMode={viewMode} onViewChange={setViewMode} />
 
@@ -208,7 +245,7 @@ const CommitmentsView = () => {
             hasFamilyActive={hasFamilyActive}
             onCreateFirst={() => setShowAdd(true)}
             query={activeQuery || undefined}
-            onClearSearch={() => workspace.setQuery('')}
+            onClearSearch={() => setQuery('')}
           />
         )}
         {/* CM-23: the safety net after completing or deleting. */}

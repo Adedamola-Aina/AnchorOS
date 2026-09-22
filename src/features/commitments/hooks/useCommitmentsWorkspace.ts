@@ -12,7 +12,6 @@ import {
     filterBySmartView,
     groupCompletedByPeriod,
     searchCommitments,
-    SMART_VIEWS,
     type CompletedGroup,
     type SmartViewId,
 } from '../utils/smartViews';
@@ -42,11 +41,20 @@ interface WorkspaceArgs {
     addTask: (task: Omit<AnchorTask, 'id' | 'createdAt'>) => Promise<void>;
     toggleTask: (id: string, completed: boolean) => Promise<void>;
     deleteTask: (id: string) => Promise<void>;
+    /** The field's value, owned by the page so the intent can be parsed from it first. */
+    query: string;
+    setQuery: (query: string) => void;
+    /**
+     * What the list actually filters by. The raw text, unless the page has read it as
+     * a commitment (`"Gym Mon Wed Fri"` → `Gym`) — schedule words must not stop a user
+     * finding the commitment those words describe.
+     */
+    searchText?: string;
     /** Injectable clock so tests and screenshots are deterministic. */
     now?: Date;
 }
 
-export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask, now }: WorkspaceArgs) {
+export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask, query, setQuery, searchText, now }: WorkspaceArgs) {
     /**
      * 'all', not 'today'.
      *
@@ -57,7 +65,6 @@ export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask
      */
     const [smartView, setSmartView] = useState<SmartViewId>('all');
     const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
-    const [query, setQuery] = useState('');
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [selectionMode, setSelectionMode] = useState(false);
     const [undo, setUndo] = useState<UndoState | null>(null);
@@ -77,23 +84,14 @@ export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask
 
     /** Search → type filter. Every view and count derives from this. */
     const scoped = useMemo(() => {
-        const searched = searchCommitments(tasks, query);
+        const searched = searchCommitments(tasks, searchText ?? query);
         return searched.filter((task) => typeFilter === 'all' || task.type === typeFilter);
-    }, [tasks, query, typeFilter]);
+    }, [tasks, query, searchText, typeFilter]);
 
     const visible = useMemo(
         () => filterBySmartView(scoped, smartView, reference),
         [scoped, smartView, reference],
     );
-
-    /** The size of each answer, so the bar is not a set of blind buttons. */
-    const counts = useMemo(() => {
-        const result: Partial<Record<SmartViewId, number>> = {};
-        for (const entry of SMART_VIEWS) {
-            result[entry.id] = filterBySmartView(scoped, entry.id, reference).length;
-        }
-        return result;
-    }, [scoped, reference]);
 
     const doneGroups: CompletedGroup[] = useMemo(
         () => groupCompletedByPeriod(visible, reference),
@@ -162,7 +160,6 @@ export function useCommitmentsWorkspace({ tasks, addTask, toggleTask, deleteTask
         typeFilter, setTypeFilter,
         query, setQuery,
         visible,
-        counts,
         doneGroups,
         selectable, selectedIds, toggleSelect, clearSelection, startSelection,
         completeWithUndo, deleteWithUndo, bulkComplete, bulkDelete,

@@ -1,66 +1,81 @@
 /**
- * CM-15 / CM-16 — the Commitments toolbar.
+ * CM-15 / CM-16 / CM-29 — the Commitments find-or-add field.
  *
- * There is one control here now: a single field that finds an existing commitment
- * *or* adds a new one.
+ * One field, two jobs: what you type filters what you already have, and when the same
+ * text reads as something new, it offers to become it. That property is worth keeping.
  *
- * The "Show me" smart-view bar (Today / Overdue / This week / Later / Done / All)
- * used to sit above it — six more buttons whose views mostly restated what the
- * rows already say, and whose "Today" default meant a list with nothing due today
- * looked empty.
+ * What it used to do is not: a synthetic result row appeared among the matches with two
+ * unlabelled verbs, **Add** and **Adjust**. "Add" silently persisted whatever was in the
+ * field — including a single character — and "Adjust" was a different word for the same
+ * intent. Creation was merged into the result list, so it read as one of the things you
+ * already had.
+ *
+ * Now:
+ *   - matches are the list below (nothing synthetic is injected into them),
+ *   - creation is its own labelled block, "Create new", with the interpretation shown
+ *     before anything is persisted,
+ *   - the primary action is named for what it does — `Create`, `Continue setup` (a
+ *     cadence that still needs a day), or `Edit details` (when the text is not a
+ *     schedule v1 can claim),
+ *   - nothing is created by typing, and nothing is created by Enter.
  */
-
-import React from 'react';
-import { Search, X } from 'lucide-react';
+import React, { useRef } from 'react';
+import { ArrowRight, Search, X } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
-import { describeQuickAdd, parseQuickAdd, type QuickAddDraft } from '../utils/parseQuickAdd';
+import { describeCadence, describeQuickAdd, isDirectlyCreatable, type CommitmentIntent } from '../utils/parseQuickAdd';
 
-/**
- * CM-16 / CM-15 — one field that finds *or* adds.
- *
- * These were two adjacent full-width inputs: a "Find" search box and a separate
- * "Quick add" line, both asking the user to type a commitment title, stacked one
- * above the other. The platform pattern is a single field — what you type filters
- * what you already have, and when the same text reads as something new, it offers
- * to become it. Nothing is captured by surprise: the parse is shown back with its
- * cadence and schedule first, and Enter adds it.
- */
 interface CommitmentFindOrAddProps {
-    /** One value, two jobs: it filters the list *and* it is parsed for a new commitment. */
+    /** One value, two jobs: it filters the list *and* it is read for a new commitment. */
     value: string;
     onChange: (value: string) => void;
     /** What the current text matched, so the field reports its own effect. */
     resultCount: number;
-    onSaveDraft: (draft: QuickAddDraft) => void;
-    onAdjustDraft: (draft: QuickAddDraft) => void;
-    now?: Date;
+    /** The reading of the current text, parsed by the caller (one parse, one source). */
+    intent: CommitmentIntent | null;
+    /** Direct creation — only ever offered for a complete, deterministic reading. */
+    onCreateDraft: (intent: CommitmentIntent) => void;
+    /** Opens the existing composer with every recognised field pre-filled. */
+    onEditDetails: (intent: CommitmentIntent) => void;
 }
 
 export const CommitmentFindOrAdd: React.FC<CommitmentFindOrAddProps> = ({
     value,
     onChange,
     resultCount,
-    onSaveDraft,
-    onAdjustDraft,
-    now,
+    intent,
+    onCreateDraft,
+    onEditDetails,
 }) => {
     const query = value.trim();
-    const draft = query ? parseQuickAdd(query, now ?? new Date()) : null;
+    const primaryActionRef = useRef<HTMLButtonElement>(null);
 
+    const canCreateDirectly = isDirectlyCreatable(intent);
+    const needsSetup = !!intent && intent.missing.length > 0;
+
+    /**
+     * Enter never persists. It moves focus to the one action this text offers, so the
+     * keyboard does something useful and the user still makes the decision — a partial
+     * line such as "g" can never become a commitment by pressing a key.
+     */
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
-        // Enter adds the parsed commitment. The iOS keyboard fix only forces an
-        // `enterkeyhint` when one is absent, so the hint is set here explicitly —
-        // otherwise the key reads "done" and never submits.
-        if (draft) onSaveDraft(draft);
+        primaryActionRef.current?.focus();
     };
+
+    /**
+     * What the block promises. A fallback says nothing about the schedule (it cannot),
+     * so it asks for the details instead of claiming "One-off".
+     */
+    const summary = !intent || intent.confidence === 'fallback'
+        ? ''
+        : (describeQuickAdd(intent) || describeCadence(intent.type));
 
     return (
         <div className="flex flex-col gap-1.5">
             <label htmlFor="commitment-find" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                 Find or add
             </label>
-            <form onSubmit={submit}>
+            <form onSubmit={submit} role="search">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
                     <input
@@ -70,7 +85,12 @@ export const CommitmentFindOrAdd: React.FC<CommitmentFindOrAddProps> = ({
                         onChange={(event) => onChange(event.target.value)}
                         placeholder="Find a commitment, or type a new one"
                         data-testid="commitment-find-or-add"
-                        enterKeyHint={draft ? 'done' : 'search'}
+                        /*
+                         * Always "search": Enter no longer submits anything, so the key
+                         * must not promise "done". It moves focus to the action the text
+                         * offers, and the user still decides.
+                         */
+                        enterKeyHint="search"
                         className="w-full min-h-[44px] pl-9 pr-10 rounded-card border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                     />
                     {value && (
@@ -89,24 +109,54 @@ export const CommitmentFindOrAdd: React.FC<CommitmentFindOrAddProps> = ({
             {query && (
                 <p className="text-[11px] text-slate-500 dark:text-slate-400" role="status" data-testid="search-result-count">
                     {resultCount === 0
-                        ? `No commitments match “${query}”.`
-                        : `${resultCount} ${resultCount === 1 ? 'match' : 'matches'} for “${query}”.`}
+                        ? `No commitments found for “${query}”`
+                        : `${resultCount} ${resultCount === 1 ? 'match' : 'matches'} for “${query}”`}
                 </p>
             )}
 
-            {draft && (
-                <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-card bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700" data-testid="quick-add-preview">
-                    <span className="text-xs text-slate-600 dark:text-slate-300">
-                        <strong className="font-semibold text-slate-800 dark:text-white">{draft.title}</strong>
-                        {describeQuickAdd(draft) && <span> · {describeQuickAdd(draft)}</span>}
-                    </span>
-                    <div className="flex items-center gap-1 ml-auto">
-                        <Button type="button" size="sm" className="min-h-[44px]" onClick={() => onSaveDraft(draft)}>Add</Button>
-                        <Button type="button" size="sm" variant="secondary" className="min-h-[44px]" onClick={() => onAdjustDraft(draft)}>Adjust</Button>
+            {intent && (
+                <section aria-labelledby="create-new-heading" data-testid="create-new" className="mt-1">
+                    <h3 id="create-new-heading" className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        Create new
+                    </h3>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 px-3 py-2 rounded-card bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                        <span className="min-w-0 flex-1 text-xs text-slate-600 dark:text-slate-300">
+                            <strong className="font-semibold text-slate-800 dark:text-white">
+                                + Create “{intent.title}”
+                            </strong>
+                            <span className="block text-[11px] text-slate-500 dark:text-slate-400" data-testid="create-summary">
+                                {summary || 'Set schedule and details'}
+                            </span>
+                        </span>
+                        <div className="flex items-center gap-1">
+                            {canCreateDirectly && (
+                                <Button
+                                    ref={primaryActionRef}
+                                    type="button"
+                                    size="sm"
+                                    className="min-h-[44px]"
+                                    data-testid="create-commitment"
+                                    onClick={() => onCreateDraft(intent)}
+                                >
+                                    Create
+                                </Button>
+                            )}
+                            <Button
+                                ref={canCreateDirectly ? undefined : primaryActionRef}
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                className="min-h-[44px]"
+                                data-testid="edit-details"
+                                onClick={() => onEditDetails(intent)}
+                            >
+                                {needsSetup ? 'Continue setup' : 'Edit details'}
+                                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                            </Button>
+                        </div>
                     </div>
-                </div>
+                </section>
             )}
         </div>
     );
 };
-
