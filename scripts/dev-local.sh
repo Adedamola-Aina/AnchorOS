@@ -15,6 +15,12 @@
 # Port policy: 5173 is the canonical dev port. If it is occupied (e.g. old VM
 # residue such as a PM2-managed dev server), this script REPORTS the owning
 # process and temporarily serves on 5199 instead — it never kills anything.
+#
+# It also seeds the disposable fixture identity (TEST_USER in
+# e2e/fixtures/test-data.ts) into the auth emulator. An emulator suite starts
+# EMPTY, so without this the app runs but nothing can be signed into — the
+# sign-in screen can only answer "Incorrect email or password", which reads like
+# a wrong password instead of missing data. Skip it with ANCHOR_SKIP_SEED=1.
 # ============================================================================
 set -euo pipefail
 
@@ -48,6 +54,22 @@ else
         exit 1
     fi
     echo "✓ Emulators ready (auth:9099 firestore:8080 functions:5001 storage:9199)"
+fi
+
+# --- 2b. Seed the local login identity --------------------------------------
+# Idempotent: the run id is fixed, so re-running overwrites the same documents
+# rather than piling up accounts. The password is deliberately NOT printed here —
+# it is committed in e2e/fixtures/test-data.ts (TEST_USER).
+if [ "${ANCHOR_SKIP_SEED:-0}" = "1" ]; then
+    echo "⏭️  ANCHOR_SKIP_SEED=1 — leaving the emulator with no seeded login"
+else
+    echo "🌱 Seeding the local login identity (fixture: e2e/fixtures/test-data.ts)…"
+    if npm run --silent seed:local; then
+        echo "✓ Sign in with TEST_USER from e2e/fixtures/test-data.ts (email + password)"
+    else
+        echo "⚠️  Could not seed the login identity (see above). The app still runs, but no" >&2
+        echo "   local account exists to sign in with. Retry with: npm run seed:local" >&2
+    fi
 fi
 
 # --- 3. Vite dev server (foreground; Ctrl+C also stops emulators we started)
