@@ -2,12 +2,14 @@
 // PSE-003: Per-route performance budgets — LCP and CLS targets enforced per screen
 //
 // The budgets are unchanged. What changed is that they are now measured against the
-// screens they name: the audited server is a production-shaped bundle wired to the
-// local emulator (scripts/ci/lighthouse-server.mjs) and the audit signs in with the
-// disposable fixture identity first (scripts/ci/lighthouse-auth.cjs). Before this, every
-// authenticated route was audited with no session — the app showed its boot splash and
-// redirected — so "/settings: LCP ≤ 2800ms" was asserted against a page that was never
-// /settings, and the gate could not pass on any commit.
+// screens they name. scripts/ci/lighthouse-server.mjs serves either the production
+// artifact the workflow downloaded (release mode, LIGHTHOUSE_USE_PREBUILT=1) or a
+// production-shaped bundle wired to the local emulator (developer mode), and
+// scripts/ci/lighthouse-auth.cjs signs in first — with the production canary in release
+// mode, the disposable fixture on loopback. Before this, every authenticated route was
+// audited with no session — the app showed its boot splash and redirected — so
+// "/settings: LCP <= 2800ms" was asserted against a page that was never /settings, and
+// the gate could not pass on any commit.
 module.exports = {
   ci: {
     collect: {
