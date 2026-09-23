@@ -1,12 +1,24 @@
 // @ts-nocheck
 // PSE-003: Per-route performance budgets — LCP and CLS targets enforced per screen
+//
+// The budgets are unchanged. What changed is that they are now measured against the
+// screens they name: the audited server is a production-shaped bundle wired to the
+// local emulator (scripts/ci/lighthouse-server.mjs) and the audit signs in with the
+// disposable fixture identity first (scripts/ci/lighthouse-auth.cjs). Before this, every
+// authenticated route was audited with no session — the app showed its boot splash and
+// redirected — so "/settings: LCP ≤ 2800ms" was asserted against a page that was never
+// /settings, and the gate could not pass on any commit.
 module.exports = {
   ci: {
     collect: {
-      // Serve the production build with vite preview (SPA fallback for
-      // deep routes). LHCI's static server 404s on client-side routes.
-      startServerCommand: 'npx vite preview --config config/vite.config.ts --port 4173 --strictPort',
+      // Serve a production-shaped build against the local emulator (SPA fallback for
+      // deep routes is handled by vite preview). The pinned emulator env comes from
+      // scripts/ci/emulator-harness.mjs — one definition, shared with the E2E suite.
+      startServerCommand: 'node scripts/ci/lighthouse-server.mjs',
       startServerReadyPattern: 'Local:',
+      // Sign in before each URL, so the budgets describe the screen rather than the
+      // splash. Refuses a non-loopback target by design.
+      puppeteerScript: 'scripts/ci/lighthouse-auth.cjs',
       numberOfRuns: 3,
       url: [
         'http://localhost:4173/',
@@ -17,7 +29,6 @@ module.exports = {
         'http://localhost:4173/settings',
       ],
       settings: {
-        chromeFlags: '--no-sandbox',
         formFactor: 'mobile',
         throttling: {
           rttMs: 150,
@@ -30,6 +41,13 @@ module.exports = {
           height: 812,
           deviceScaleFactor: 2,
         },
+      },
+      // The launch flags live here, not in `settings.chromeFlags`: LHCI IGNORES
+      // `chromeFlags` as soon as a `puppeteerScript` is configured (it warns about
+      // exactly this), which silently dropped `--no-sandbox` and made the browser fail
+      // to launch as root. Same flag, the place that is actually read.
+      puppeteerLaunchOptions: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
       },
     },
     assert: {
