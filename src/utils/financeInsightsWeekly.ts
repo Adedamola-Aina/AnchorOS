@@ -1,6 +1,6 @@
 /**
  * Finance Insights - Weekly & Recurring Analysis
- * Extracted from financeInsights.ts per CLAUDE.md §3.2
+ * Extracted from financeInsights.ts
  */
 
 import type { AnchorTransaction } from '../types';

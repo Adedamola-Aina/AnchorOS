@@ -1,6 +1,6 @@
 /**
  * TaskForm field components
- * Extracted from TaskForm.tsx per CLAUDE.md §3.2
+ * Extracted from TaskForm.tsx
  *
  * The old `FrequencyStep` ("Choose Frequency") and `DetailsHeader` are gone:
  * UX-CM-01 removed the classification-first step, so the composer opens on the

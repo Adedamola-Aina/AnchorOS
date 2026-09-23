@@ -3,7 +3,7 @@
  *
  * Part 1 of the two-part onboarding system.
  * Steps: Welcome → Account → Commitment → Security
- * Refactored per CLAUDE.md 200-line rule.
+ * Refactored.
  */
 // @ts-nocheck
 

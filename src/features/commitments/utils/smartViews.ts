@@ -11,7 +11,7 @@ import { isOverdue, isScheduledOn, nextScheduledOnOrAfter } from '../../../servi
 
 export type SmartViewId = 'today' | 'overdue' | 'week' | 'later' | 'done' | 'all';
 
-export interface SmartView {
+interface SmartView {
     id: SmartViewId;
     label: string;
     /** Spoken description, so the view is not just a word. */
@@ -34,7 +34,7 @@ function startOfDay(date: Date): Date {
 }
 
 /** Whole days from `now` to `date` (negative when in the past). */
-export function daysUntil(date: Date, now: Date): number {
+function daysUntil(date: Date, now: Date): number {
     return Math.round((startOfDay(date).getTime() - startOfDay(now).getTime()) / 86400000);
 }
 

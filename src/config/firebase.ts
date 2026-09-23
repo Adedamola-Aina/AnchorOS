@@ -98,7 +98,7 @@ export const app = initializeApp(firebaseConfig);
 // on one, so the token is honoured only in emulator development. Staging and
 // production always rely on real reCAPTCHA Enterprise attestation.
 const appCheckDebugToken = import.meta.env.VITE_APP_CHECK_DEBUG_TOKEN as string | undefined;
-if (isEmulatorDevelopment && appCheckDebugToken && typeof window !== 'undefined' && window.location.protocol !== 'capacitor:') {
+if (isEmulatorDevelopment && appCheckDebugToken && typeof window !== 'undefined') {
   (window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN =
     appCheckDebugToken === 'true' ? true : appCheckDebugToken;
 }
@@ -108,7 +108,7 @@ if (isEmulatorDevelopment && appCheckDebugToken && typeof window !== 'undefined'
 // is no real site key locally.
 // This protects Firestore/Functions from scripted abuse in web environments.
 const appCheckSiteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY as string | undefined;
-if (!isEmulatorDevelopment && appCheckSiteKey && typeof window !== 'undefined' && window.location.protocol !== 'capacitor:') {
+if (!isEmulatorDevelopment && appCheckSiteKey && typeof window !== 'undefined') {
   try {
     initializeAppCheck(app, {
       provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
@@ -121,9 +121,8 @@ if (!isEmulatorDevelopment && appCheckSiteKey && typeof window !== 'undefined' &
 }
 
 // PLT-001: Always use browserLocalPersistence (localStorage-based).
-// getAuth() defaults to indexedDB persistence which hangs in Capacitor's
-// capacitor:// origin WebView. browserLocalPersistence works everywhere
-// and is sufficient for auth token storage.
+// IndexedDB persistence can hang in embedded webviews; localStorage works
+// everywhere and is sufficient for auth token storage.
 export const auth = initializeAuth(app, {
   persistence: browserLocalPersistence,
   popupRedirectResolver: browserPopupRedirectResolver,

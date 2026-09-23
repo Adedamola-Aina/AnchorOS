@@ -2,7 +2,7 @@
  * Secure Database Utility Layer
  * 
  * Centralized Firestore wrapper with timeout handling, error mapping, and type-safe operations.
- * Refactored per CLAUDE.md §3.2 - core helpers extracted to secureDbCore.ts
+ * Refactored - core helpers extracted to secureDbCore.ts
  *
  * ALL Firestore imports in production src/ must route through this file.
  * Direct 'firebase/firestore' imports are a ARCH violation (BUG-111).

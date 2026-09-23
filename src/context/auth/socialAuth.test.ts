@@ -15,7 +15,6 @@ vi.mock('firebase/auth', () => {
     GoogleAuthProvider,
     OAuthProvider,
     signInWithPopup: vi.fn(),
-    signInWithRedirect: vi.fn(),
   };
 });
 
@@ -27,16 +26,12 @@ vi.mock('../../services/authEventService', () => ({
   recordAuthEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('../../utils/platform', () => ({ isNative: vi.fn(() => false) }));
-
-import { signInWithPopup, signInWithRedirect } from 'firebase/auth';
-import { isNative } from '../../utils/platform';
+import { signInWithPopup } from 'firebase/auth';
 import { doSocialSignIn, makeGoogleProvider, makeAppleProvider } from './socialAuth';
 
 describe('socialAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (isNative as any).mockReturnValue(false);
   });
 
   it('makeGoogleProvider adds email + profile scopes', () => {
@@ -56,14 +51,6 @@ describe('socialAuth', () => {
     const result = await doSocialSignIn(makeGoogleProvider() as any, 'google');
     expect(signInWithPopup).toHaveBeenCalled();
     expect(result).toBe(cred);
-  });
-
-  it('doSocialSignIn uses redirect on native and returns null', async () => {
-    (isNative as any).mockReturnValue(true);
-    (signInWithRedirect as any).mockResolvedValueOnce(undefined);
-    const result = await doSocialSignIn(makeAppleProvider() as any, 'apple');
-    expect(signInWithRedirect).toHaveBeenCalled();
-    expect(result).toBeNull();
   });
 
   it('doSocialSignIn swallows popup-closed-by-user errors and returns null', async () => {

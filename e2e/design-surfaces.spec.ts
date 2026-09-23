@@ -17,7 +17,7 @@
  *   - the four surfaces render distinctly, and light differs from dark —
  *     the precise failure mode described above.
  *
- * Writes review evidence (doc 24 §9.4 Squint Test included):
+ * Writes review evidence (Squint Test included):
  *   design-evidence/<viewport>/<surface>-<theme>.png
  *   design-evidence/<viewport>/<surface>-<theme>-squint10.png
  * That directory is gitignored and deliberately NOT under test-results/, which

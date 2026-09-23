@@ -1,7 +1,7 @@
 /**
  * Finance Insights Utility Module
  * 
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * Weekly/recurring analysis extracted to financeInsightsWeekly.ts
  */
 

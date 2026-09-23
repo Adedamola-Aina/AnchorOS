@@ -24,10 +24,11 @@ Anchor OS is a multi-tenant web application for managing shared household financ
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19, TypeScript 5.9 (strict), Vite 7 |
-| Styling | Tailwind CSS 3.4, custom design tokens |
+| Frontend | React 19, TypeScript (strict), Vite |
+| Styling | Tailwind CSS 4, semantic design tokens |
+| Platform | Installable PWA (service worker, install prompt, app badge) |
 | Backend | Firebase Auth, Firestore, Cloud Functions v2, Hosting |
-| Testing | Vitest (unit), Playwright (E2E), Stryker (mutation) |
+| Testing | Vitest (unit/integration), Playwright (E2E), Stryker (mutation) |
 | CI/CD | GitHub Actions, Lighthouse CI gates |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the system architecture.
@@ -89,19 +90,18 @@ src/
 ├── components/       # Shared UI components
 ├── config/           # Firebase initialization, environment setup
 ├── context/          # React contexts (Auth, App, Notifications)
-├── features/
-│   ├── commitments/  # Goal tracking
-│   ├── dashboard/    # Main dashboard
-│   ├── finance/      # Accounts, transactions, net worth
-│   ├── onboarding/   # New user setup flow
-│   └── settings/     # Preferences, security, family management
-├── hooks/            # Custom React hooks (34)
-├── services/         # Firebase services, audit logging
+├── features/         # Vertical slices: auth, finance, commitments,
+│                     # family, dashboard, onboarding, settings, fabric
+├── hooks/            # Custom React hooks
+├── services/         # Firebase services, Fabric engine, audit logging
+├── styles/           # App-shell (installed PWA) styles
 └── types/            # Shared TypeScript types
 config/               # Build, test, and lint configuration
 e2e/                  # Playwright E2E tests
-functions/            # Firebase Cloud Functions (16)
-docs/                 # Architecture docs, ADRs, specifications
+functions/            # Firebase Cloud Functions
+packages/ui/          # Shared @anchor-os/ui component package
+public/               # Static assets, manifest, service worker
+docs/                 # Architecture, data model, design system, operations
 scripts/              # Deploy pipeline, emulator helpers
 ```
 
@@ -115,7 +115,11 @@ See [docs/OPERATIONS.md](docs/OPERATIONS.md) for the release pipeline and enviro
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for branching strategy, commit conventions, and PR requirements, and [AGENTS.md](AGENTS.md) for the canonical engineering contract.
+Branch from `master` and land every change through a PR — no direct pushes. Use Conventional
+Commits (`fix:`, `feat:`, `refactor:`, `test:`, `docs:`, `chore:`); commitlint is enforced by Husky.
+High-risk surfaces (auth, Firestore rules/schema, family permissions, financial integrity,
+deployment) need a short risk plan in the PR. Production deploys and migration applies require
+explicit Product Owner approval. See [AGENTS.md](AGENTS.md) for the canonical engineering contract.
 
 ## Product Ownership & Support
 

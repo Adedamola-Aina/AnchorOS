@@ -1,6 +1,6 @@
 /**
  * SecuritySettings MFA Wizard Steps
- * Extracted from SecuritySettings.tsx per CLAUDE.md §3.2
+ * Extracted from SecuritySettings.tsx
  */
 // @ts-nocheck
 

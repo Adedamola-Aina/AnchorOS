@@ -1,6 +1,6 @@
 /**
  * TransactionForm Field Components
- * Extracted from TransactionForm.tsx per CLAUDE.md §3.2
+ * Extracted from TransactionForm.tsx
  */
 // @ts-nocheck
 

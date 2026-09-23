@@ -1,6 +1,6 @@
 /**
  * Finance View Account Details Section
- * Extracted from FinanceView.tsx per CLAUDE.md §3.2
+ * Extracted from FinanceView.tsx
  */
 // @ts-nocheck
 

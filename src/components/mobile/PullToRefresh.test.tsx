@@ -1,7 +1,7 @@
 /**
  * PullToRefresh Component Tests
  * 
- * TDD: Write tests FIRST before implementation (CLAUDE.md Article 2)
+ * TDD: Write tests FIRST before implementation
  * 
  * Tests the pull-to-refresh gesture component for mobile devices.
  * Note: Touch event simulation is limited in jsdom, so we test

@@ -9,4 +9,3 @@ export { AnimatedHomeIcon } from './animated-icons/AnimatedHomeIcon';
 export { AnimatedTasksIcon } from './animated-icons/AnimatedTasksIcon';
 export { AnimatedFinanceIcon } from './animated-icons/AnimatedFinanceIcon';
 export { AnimatedSettingsIcon } from './animated-icons/AnimatedSettingsIcon';
-export { AnimatedAnchorAIIcon } from './animated-icons/AnimatedAnchorAIIcon';

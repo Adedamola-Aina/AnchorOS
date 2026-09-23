@@ -1,6 +1,6 @@
 /**
  * DashboardView - Central intelligence hub showing wealth, activity, and focus
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * Widget components extracted to DashboardWidgets.tsx
  */
 // @ts-nocheck
@@ -190,7 +190,7 @@ const DashboardView = () => {
               *
               * UX-AI-09: this slot now carries the doorway to the assistant,
               * which is no longer a nav destination — "Anchor belongs inside
-              * Home, not in the bar" (doc 20 §4.1).
+              * Home, not in the bar".
               */}
             {anchorAIEnabled && (
               <button

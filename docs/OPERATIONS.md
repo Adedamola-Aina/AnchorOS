@@ -77,12 +77,13 @@ Classification is computed by `scripts/ci/deploy-surface-classifier.js` from ALL
 - Release-smoke failures upload traces/screenshots as workflow artifacts.
 - Weekly scheduled full E2E regression runs against staging (sharded, in `ci.yml`).
 
-## Native shells (Capacitor)
+## PWA distribution
 
-- Config: `capacitor.config.ts`; platforms under `ios/` and `android/` (generated shells — regenerated via `npx cap add/sync`, never hand-edited web assets).
-- Web build first (`npm run build:production`), then `npx cap sync`, then `npx cap open ios|android`.
-- iOS requires macOS + Xcode 15+; Android requires Android Studio (SDK 33+).
-- Product logic never moves into Swift/Kotlin — native code is shells/bridges only.
+AnchorOS ships as an installable PWA — there are no native shells.
+
+- Manifest: `public/manifest.webmanifest`; icons under `public/icons/`; service worker `public/sw.js` (cache + background messaging), registered from `src/main.tsx`.
+- Install/update UX lives in `src/components/pwa/`; installed-app styling is `src/styles/app-shell.css`, applied via the platform classes from `src/utils/platform.ts`.
+- The service worker cache name is version-stamped during the build.
 
 ## Developer tools (dev/staging builds only)
 

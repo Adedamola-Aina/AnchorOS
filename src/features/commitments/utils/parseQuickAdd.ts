@@ -111,7 +111,7 @@ function capitalise(text: string): string {
 }
 
 /** Weekday index → the two-letter label the UI uses everywhere (CM-18). */
-export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 
 /**
  * Comparisons that are meaningless without a stated schedule: "Exercise more" says

@@ -1,6 +1,6 @@
 /**
  * AuthGate - Central authentication orchestrator
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * Loading and gate UI components extracted to AuthGateParts.tsx
  */
 // @ts-nocheck
@@ -23,7 +23,7 @@ const LazyOnboardingShell = React.lazy(() =>
 );
 import { consumeMfaRecoveryCode } from '../../api/MfaRecoveryApi';
 
-// PLT-001: Timeout wrapper for auth calls that may hang in Capacitor WebView
+// PLT-001: Timeout wrapper for auth calls that can hang on a slow connection
 const withTimeout = <T,>(promise: Promise<T>, ms = 15000): Promise<T> =>
     Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Authentication timed out. Please check your connection and try again.')), ms))]);
 
@@ -66,7 +66,7 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
         return () => window.removeEventListener('anchor:session_expired', handleExpiry);
     }, [user, loading]);
 
-    // AUTH-001/005: Handle redirect result from native Capacitor (Google/Apple)
+    // AUTH-001/005: surface a redirect result if the OAuth popup fell back to redirect.
     React.useEffect(() => {
         getRedirectResult(auth).catch(() => undefined);
     }, []);

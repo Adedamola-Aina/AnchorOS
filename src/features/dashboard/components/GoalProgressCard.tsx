@@ -48,7 +48,7 @@ export function GoalProgressCard({ goals, isLoading = false }: GoalProgressCardP
                 /* DB-05: this used to instruct "set one during onboarding" while
                  * offering no control to do it — a dead end. Goals can only be
                  * created during onboarding today, so per the EmptyState contract
-                 * (doc 24 §5) the action is omitted and the copy stays honest
+                 * the action is omitted and the copy stays honest
                  * rather than promising a control that does not exist. The action
                  * comes back when a goal surface ships. */
                 <EmptyState

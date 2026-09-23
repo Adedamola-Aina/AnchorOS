@@ -1,6 +1,6 @@
 /**
  * Family Mode v2 - Pending Confirmation Component
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * Handlers extracted to pendingConfirmationHandlers.ts
  */
 // @ts-nocheck

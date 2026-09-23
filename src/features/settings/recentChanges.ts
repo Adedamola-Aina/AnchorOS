@@ -27,7 +27,7 @@ export const SETTINGS_FIELD_LABELS: Record<string, string> = {
     onboardingProgress: 'Getting started progress',
 };
 
-export interface RecentChange {
+interface RecentChange {
     id: string;
     label: string;
     at: number;

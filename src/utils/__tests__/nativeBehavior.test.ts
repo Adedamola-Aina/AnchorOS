@@ -1,63 +1,61 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+const setInstalled = () => {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: (query: string) => ({ matches: query.includes('standalone') }),
+  });
+};
+
+const setBrowserTab = () => {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: () => ({ matches: false }),
+  });
+  Object.defineProperty(navigator, 'standalone', { configurable: true, value: false });
+};
 
 describe('nativeBehavior', () => {
-  const originalWindow = globalThis.window;
-
   beforeEach(() => {
     vi.resetModules();
     document.documentElement.className = '';
     document.body.className = '';
   });
 
-  afterEach(() => {
-    // Restore window.Capacitor if tests modified it
-    if ('Capacitor' in window) {
-      delete (window as { Capacitor?: unknown }).Capacitor;
-    }
-    globalThis.window = originalWindow;
-  });
-
   describe('applyPlatformClasses', () => {
-    it('adds platform-web class to html and body on web', async () => {
+    it('adds platform-web class to html and body in a browser tab', async () => {
+      setBrowserTab();
       const { applyPlatformClasses } = await import('../nativeBehavior');
       applyPlatformClasses();
       expect(document.documentElement.className).toContain('platform-web');
       expect(document.body.className).toContain('platform-web');
     });
 
-    it('adds platform-ios + platform-native when Capacitor reports iOS', async () => {
-      (window as unknown as { Capacitor: unknown }).Capacitor = {
-        getPlatform: () => 'ios',
-        isNativePlatform: () => true,
-        isPluginAvailable: () => false,
-      };
+    it('adds platform-pwa + platform-app classes when installed', async () => {
+      setInstalled();
       const { applyPlatformClasses } = await import('../nativeBehavior');
       applyPlatformClasses();
-      expect(document.documentElement.className).toContain('platform-ios');
-      expect(document.documentElement.className).toContain('platform-native');
-      expect(document.body.className).toContain('platform-ios');
-      expect(document.body.className).toContain('platform-native');
+      expect(document.documentElement.className).toContain('platform-pwa');
+      expect(document.documentElement.className).toContain('platform-app');
+      expect(document.body.className).toContain('platform-pwa');
     });
   });
 
-  describe('initNativeBehavior', () => {
-    it('is a no-op listener setup on web (context menu still fires)', async () => {
-      const { initNativeBehavior } = await import('../nativeBehavior');
-      initNativeBehavior();
+  describe('initAppShellBehavior', () => {
+    it('is a no-op in a browser tab (context menu still fires)', async () => {
+      setBrowserTab();
+      const { initAppShellBehavior } = await import('../nativeBehavior');
+      initAppShellBehavior();
 
       const ev = new Event('contextmenu', { bubbles: true, cancelable: true });
       document.body.dispatchEvent(ev);
       expect(ev.defaultPrevented).toBe(false);
     });
 
-    it('prevents contextmenu on native (long-press / right-click)', async () => {
-      (window as unknown as { Capacitor: unknown }).Capacitor = {
-        getPlatform: () => 'ios',
-        isNativePlatform: () => true,
-        isPluginAvailable: () => false,
-      };
-      const { initNativeBehavior } = await import('../nativeBehavior');
-      initNativeBehavior();
+    it('prevents contextmenu when installed (long-press / right-click)', async () => {
+      setInstalled();
+      const { initAppShellBehavior } = await import('../nativeBehavior');
+      initAppShellBehavior();
 
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -66,14 +64,10 @@ describe('nativeBehavior', () => {
       expect(ev.defaultPrevented).toBe(true);
     });
 
-    it('allows contextmenu on editable inputs on native', async () => {
-      (window as unknown as { Capacitor: unknown }).Capacitor = {
-        getPlatform: () => 'ios',
-        isNativePlatform: () => true,
-        isPluginAvailable: () => false,
-      };
-      const { initNativeBehavior } = await import('../nativeBehavior');
-      initNativeBehavior();
+    it('allows contextmenu on editable inputs when installed', async () => {
+      setInstalled();
+      const { initAppShellBehavior } = await import('../nativeBehavior');
+      initAppShellBehavior();
 
       const input = document.createElement('input');
       document.body.appendChild(input);
@@ -82,14 +76,10 @@ describe('nativeBehavior', () => {
       expect(ev.defaultPrevented).toBe(false);
     });
 
-    it('allows contextmenu inside .selectable regions on native', async () => {
-      (window as unknown as { Capacitor: unknown }).Capacitor = {
-        getPlatform: () => 'ios',
-        isNativePlatform: () => true,
-        isPluginAvailable: () => false,
-      };
-      const { initNativeBehavior } = await import('../nativeBehavior');
-      initNativeBehavior();
+    it('allows contextmenu inside .selectable regions when installed', async () => {
+      setInstalled();
+      const { initAppShellBehavior } = await import('../nativeBehavior');
+      initAppShellBehavior();
 
       const wrap = document.createElement('div');
       wrap.className = 'selectable';
@@ -102,14 +92,10 @@ describe('nativeBehavior', () => {
       expect(ev.defaultPrevented).toBe(false);
     });
 
-    it('prevents dragstart on native', async () => {
-      (window as unknown as { Capacitor: unknown }).Capacitor = {
-        getPlatform: () => 'android',
-        isNativePlatform: () => true,
-        isPluginAvailable: () => false,
-      };
-      const { initNativeBehavior } = await import('../nativeBehavior');
-      initNativeBehavior();
+    it('prevents dragstart when installed', async () => {
+      setInstalled();
+      const { initAppShellBehavior } = await import('../nativeBehavior');
+      initAppShellBehavior();
 
       const img = document.createElement('img');
       document.body.appendChild(img);

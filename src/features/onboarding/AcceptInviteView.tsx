@@ -3,7 +3,7 @@
  * 
  * Orchestrates the invitation acceptance flow.
  * 
- * Refactored per CLAUDE.md 200-line rule.
+ * Refactored.
  */
 // @ts-nocheck
 

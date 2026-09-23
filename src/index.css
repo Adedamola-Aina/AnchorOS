@@ -596,7 +596,7 @@ input::-webkit-credentials-auto-fill-button {
 /* (kept for feature parity — used by finance charts) */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   W-D1 — Design foundation (doc 24 §5)
+   W-D1 — Design foundation
    Semantic ROLE tokens with dark parity by construction, money
    numerals, and the motion/sensory contract.
 
@@ -606,7 +606,7 @@ input::-webkit-credentials-auto-fill-button {
    on .dark, and @theme maps them to utilities — so a missing dark
    value is an invariant-test failure, not a bug nobody notices.
 
-   Rule from doc 24: COLOUR IS NEVER THE ONLY SIGNAL. Every role must
+   Rule: COLOUR IS NEVER THE ONLY SIGNAL. Every role must
    be paired with an icon, sign or label.
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -625,7 +625,7 @@ input::-webkit-credentials-auto-fill-button {
   --role-info-surface:     #eff6ff;
   --role-info-border:      #bfdbfe;
 
-  /* Surfaces — light. Aliased to the Radix-style step roles (doc 24 §9.3):
+  /* Surfaces — light. Aliased to the Radix-style step roles:
      base↔1-2, raised↔3, hover↔4, active↔5, border-subtle↔6,
      border-interactive↔7, focus-ring↔8, solid↔9, solid-hover↔10. */
   --surface-base:          #ffffff;
@@ -730,7 +730,7 @@ input::-webkit-credentials-auto-fill-button {
 
 /* ─── Reduced motion: honour BOTH the OS setting and the in-app one ──
    The in-app switch (.a11y-reduced-motion) already existed; the OS
-   preference was never honoured. Doc 24 §4 requires both. */
+   preference is honoured here too. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration:        0.01ms !important;
@@ -740,7 +740,7 @@ input::-webkit-credentials-auto-fill-button {
   }
 }
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   W-D1 — Geometry & elevation scale (UX-DS-06, doc 24 §5)
+   W-D1 — Geometry & elevation scale (UX-DS-06)
    One radius family, one elevation set, one spacing rhythm.
 
    Until this landed there was NO radius, spacing or elevation scale
@@ -817,7 +817,7 @@ input::-webkit-credentials-auto-fill-button {
   --spacing-inline:        0.75rem;
   --spacing-inline-roomy:  1rem;
 
-  /* Row heights — from reference rule R1 (doc 25 §3): the industry
+  /* Row heights — from reference rule R1: the industry
      row is 44–56px with label left and value on a shared right rail.
      Consumed by the Finance/Settings rows and the Done history. */
   --spacing-row-compact:     44px;

@@ -1,6 +1,6 @@
 /**
  * ContactModal Form Components
- * Extracted from ContactModal.tsx per CLAUDE.md §3.2
+ * Extracted from ContactModal.tsx
  */
 // @ts-nocheck
 

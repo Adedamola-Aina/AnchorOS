@@ -8,7 +8,7 @@ import type {
 /**
  * Creates an IndexedDB persister for TanStack Query.
  */
-export function createIndexedDBPersister(idbKey: string = 'react-query-cache'): Persister {
+function createIndexedDBPersister(idbKey: string = 'react-query-cache'): Persister {
     return {
         persistClient: async (client: PersistedClient) => {
             await set(idbKey, client);

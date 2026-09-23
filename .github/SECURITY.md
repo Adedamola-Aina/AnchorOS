@@ -19,4 +19,4 @@ Confirmed vulnerabilities are triaged by the Product Owner, tracked privately, a
 
 ## Security model
 
-The full security architecture (rules design, App Check enforcement, data isolation, secrets handling) is documented in [docs/SECURITY.md](../docs/SECURITY.md).
+The full security architecture (rules design, App Check enforcement, data isolation, secrets handling) is documented in [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md).

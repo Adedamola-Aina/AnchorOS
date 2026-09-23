@@ -1,7 +1,7 @@
 /**
  * Family Mode v2 - Family Settings Component
  * 
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * UI states extracted to FamilySettingsStates.tsx
  * PERF-002: Accepts connection prop from parent to avoid duplicate Firestore listeners.
  */

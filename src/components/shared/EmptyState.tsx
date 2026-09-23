@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
 
 /**
- * The single empty-state pattern (UX-DS-07, doc 24 §5).
+ * The single empty-state pattern (UX-DS-07).
  *
  * Why this exists: we had at least six bespoke empty states and two of them were
  * dead ends (an empty month that looked like "no data", a dashboard card whose
@@ -20,11 +20,11 @@ import { Button } from '@anchor-os/ui';
  * could do, pass it. If genuinely nothing can be done, omit it and keep the copy
  * honest ("Nothing due today") rather than promising a control that isn't there.
  */
-export interface EmptyStateProps {
+interface EmptyStateProps {
     icon: LucideIcon;
     title: string;
     description?: string;
-    /** The action the copy names. One primary action, per doc 24 §6. */
+    /** The action the copy names. One primary action. */
     action?: { label: string; onClick: () => void };
     /** Optional quieter route (e.g. "Learn more"). Never a second primary. */
     secondaryAction?: { label: string; onClick: () => void };

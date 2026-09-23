@@ -1,4 +1,10 @@
-import { Badge } from '@capawesome/capacitor-badge';
+/**
+ * App badge (the count on the installed PWA's icon).
+ *
+ * Uses the standard Badging API, which is what an installed PWA exposes. There
+ * is no native path to fall back to — Anchor is web/PWA only.
+ */
+
 import { captureError } from './error';
 
 type NavigatorWithBadge = Navigator & {
@@ -6,47 +12,17 @@ type NavigatorWithBadge = Navigator & {
   clearAppBadge?: () => Promise<void>;
 };
 
-function getNavigator(): NavigatorWithBadge | null {
-  if (typeof navigator === 'undefined') return null;
-  return navigator as NavigatorWithBadge;
-}
-
-async function applyWebBadge(count: number): Promise<boolean> {
-  const nav = getNavigator();
-  if (!nav) return false;
-
-  if (count > 0 && typeof nav.setAppBadge === 'function') {
-    await nav.setAppBadge(count);
-    return true;
-  }
-
-  if (count <= 0 && typeof nav.clearAppBadge === 'function') {
-    await nav.clearAppBadge();
-    return true;
-  }
-
-  return false;
-}
-
 export async function setAppBadgeCount(count: number): Promise<void> {
   const safeCount = Math.max(0, Math.floor(count));
+  if (typeof navigator === 'undefined') return;
+  const nav = navigator as NavigatorWithBadge;
 
   try {
-    const support = await Badge.isSupported();
-    if (support.isSupported) {
-      if (safeCount > 0) {
-        await Badge.set({ count: safeCount });
-      } else {
-        await Badge.clear();
-      }
-      return;
+    if (safeCount > 0 && typeof nav.setAppBadge === 'function') {
+      await nav.setAppBadge(safeCount);
+    } else if (safeCount <= 0 && typeof nav.clearAppBadge === 'function') {
+      await nav.clearAppBadge();
     }
-  } catch (error) {
-    captureError(error, 'Badge.nativeUpdate');
-  }
-
-  try {
-    await applyWebBadge(safeCount);
   } catch (error) {
     captureError(error, 'Badge.webUpdate');
   }

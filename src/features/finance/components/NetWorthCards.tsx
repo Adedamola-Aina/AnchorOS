@@ -1,6 +1,6 @@
 /**
  * NetWorthCards - Displays net worth by currency
- * Extracted from FinanceView per CLAUDE.md 200-line rule
+ * Extracted from FinanceView
  */
 // @ts-nocheck
 

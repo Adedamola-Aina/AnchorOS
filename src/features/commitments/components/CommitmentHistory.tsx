@@ -1,62 +1,15 @@
 /**
- * CM-25 / CM-23 — done history, undo and bulk actions.
+ * CM-23 — the commitment undo bar.
  *
- * CM-25: completed commitments used to vanish into a collapsed "Completed (n)"
- * list. They are now grouped by period, because progress you cannot see is not
- * motivation — and it is the source for streaks.
- *
- * CM-23: completing a commitment is emotionally loaded, so the row offers Undo;
- * and a selection mode makes bulk complete/delete possible without repeating a
- * tap per row.
+ * Completing or deleting a commitment is emotionally loaded, so the action offers
+ * an Undo affordance. This is the safety net for that window.
  */
 
 import React from 'react';
 import { Undo2, X } from 'lucide-react';
 import { Button } from '@anchor-os/ui';
-import { SwipeableTaskItem } from './SwipeableTaskItem';
-import type { CompletedGroup } from '../utils/smartViews';
 
-interface DoneHistoryProps {
-    groups: CompletedGroup[];
-    hasFamilyActive: boolean;
-    onToggle: (id: string, completed: boolean) => void;
-    onStartEdit: (id: string) => void;
-    onDelete: (id: string) => void;
-    /** CM-23: selection mode, so bulk actions are available here too. */
-    selectedIds?: Set<string>;
-    onSelect?: (id: string) => void;
-}
-
-export const DoneHistory: React.FC<DoneHistoryProps> = ({
-    groups, hasFamilyActive, onToggle, onStartEdit, onDelete, selectedIds, onSelect,
-}) => (
-    <div className="space-y-6" data-testid="done-history">
-        {groups.map((group) => (
-            <section key={group.label} className="space-y-3">
-                <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-                    {group.label}
-                    <span className="ml-2 text-slate-300 dark:text-slate-600">{group.tasks.length}</span>
-                </h3>
-                {group.tasks.map((task) => (
-                    <SwipeableTaskItem
-                        key={task.id}
-                        task={task}
-                        hasFamilyActive={hasFamilyActive}
-                        isEditing={false}
-                        onToggle={onToggle}
-                        onStartEdit={onStartEdit}
-                        onDelete={onDelete}
-                        selectable={Boolean(onSelect)}
-                        selected={selectedIds?.has(task.id) ?? false}
-                        onSelect={onSelect}
-                    />
-                ))}
-            </section>
-        ))}
-    </div>
-);
-
-export interface UndoState {
+interface UndoState {
     message: string;
     run: () => void | Promise<void>;
 }

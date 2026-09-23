@@ -1,22 +1,10 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildTask } from '../test/factories';
 
 const mockState = vi.hoisted(() => ({
-  addListener: vi.fn((..._args: unknown[]) => Promise.resolve({ remove: vi.fn() })),
-  isAppPluginAvailable: false,
   setAppBadgeCount: vi.fn((..._args: unknown[]) => Promise.resolve()),
   clearAppBadge: vi.fn((..._args: unknown[]) => Promise.resolve()),
-}));
-
-vi.mock('@capacitor/app', () => ({
-  App: {
-    addListener: (...args: unknown[]) => mockState.addListener(...args),
-  },
-}));
-
-vi.mock('../utils/platform', () => ({
-  isPluginAvailable: (name: string) => name === 'App' && mockState.isAppPluginAvailable,
 }));
 
 vi.mock('../utils/appBadge', () => ({
@@ -29,7 +17,6 @@ import { getPendingCountForToday, useCommitmentBadge } from './useCommitmentBadg
 describe('useCommitmentBadge', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockState.isAppPluginAvailable = false;
   });
 
   it('computes pending work due today: scheduled today plus anything carried over (UX-AI-06)', () => {
@@ -75,13 +62,24 @@ describe('useCommitmentBadge', () => {
     });
   });
 
-  it('registers app resume listener when App plugin is available', async () => {
-    mockState.isAppPluginAvailable = true;
+  it('re-syncs the badge when the app becomes visible again', async () => {
+    const tasks = [buildTask({ type: 'daily', completed: false })];
 
-    renderHook(() => useCommitmentBadge({ userId: 'user-1', tasks: [] }));
+    renderHook(() => useCommitmentBadge({ userId: 'user-1', tasks }));
 
     await waitFor(() => {
-      expect(mockState.addListener).toHaveBeenCalledWith('appStateChange', expect.any(Function));
+      expect(mockState.setAppBadgeCount).toHaveBeenCalledWith(1);
+    });
+
+    mockState.setAppBadgeCount.mockClear();
+
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    await waitFor(() => {
+      expect(mockState.setAppBadgeCount).toHaveBeenCalledWith(1);
     });
   });
 });

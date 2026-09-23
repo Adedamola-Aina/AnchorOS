@@ -13,7 +13,7 @@
  *      markers and fails the build if any survive.
  */
 
-export interface DevSurfaceEnv {
+interface DevSurfaceEnv {
     DEV?: boolean;
     PROD?: boolean;
     MODE?: string;

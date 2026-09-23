@@ -1,6 +1,6 @@
 /**
  * Reauthentication Modal
- * Extracted from SettingsView.tsx per CLAUDE.md §3.2
+ * Extracted from SettingsView.tsx
  */
 // @ts-nocheck
 

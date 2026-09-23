@@ -1,6 +1,6 @@
 /**
  * ContactModal - User feedback form with dual-delivery strategy
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * Form components extracted to ContactModalParts.tsx
  */
 // @ts-nocheck

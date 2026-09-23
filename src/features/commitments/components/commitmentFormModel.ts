@@ -40,7 +40,7 @@ export interface CommitmentFormValues {
     dueDate: string;
 }
 
-export const DEFAULT_AREA = 'Personal Development';
+const DEFAULT_AREA = 'Personal Development';
 
 /** The Areas the product offers. One list, so create and edit cannot disagree. */
 export const COMMITMENT_AREAS = ['Health', 'Fitness', 'Work', 'Bible', 'Personal Development', 'Financial'] as const;

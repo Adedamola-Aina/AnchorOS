@@ -1,6 +1,6 @@
 /**
  * Family Settings UI States
- * Extracted from FamilySettingsV2.tsx per CLAUDE.md §3.2
+ * Extracted from FamilySettingsV2.tsx
  */
 // @ts-nocheck
 

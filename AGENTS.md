@@ -1,14 +1,13 @@
 # AnchorOS Engineering Contract
 
-This file is the canonical operating contract for coding agents and human contributors.
-Provider-specific instruction files (CLAUDE.md, .github/copilot-instructions.md, .clinerules/) are
-minimal bridges that point here. When any instruction surface conflicts with this file, this file wins.
+This file is the canonical operating contract for coding agents and human contributors, and the
+single source of project policy.
 
 ## Product architecture
 
-AnchorOS is a privacy-first household finance and commitment platform built with React 19, TypeScript strict mode, Firebase, and Capacitor. Mobile is the primary experience; design for a 375px baseline and at least 44px touch targets.
+AnchorOS is a privacy-first household finance and commitment platform built with React 19, TypeScript strict mode, Firebase, and an installable PWA shell. Mobile is the primary experience; design for a 375px baseline and at least 44px touch targets.
 
-**One product implementation.** React + TypeScript is the sole canonical implementation, distributed as Web/PWA plus Capacitor iOS/Android shells. Native Swift/Kotlin may exist only for OS integration, Capacitor plugins/bridges, generated shell code, platform lifecycle, and permissions. Product/business logic stays in TypeScript unless a future explicit architecture decision says otherwise. Do not reintroduce or maintain parallel product implementations.
+**One product implementation.** React + TypeScript is the sole canonical implementation, shipped as a web app and installable PWA. There are no native shells, plugins, or bridges — product/business logic stays in TypeScript. Do not reintroduce or maintain parallel product implementations.
 
 Firebase remains the current backend during remediation.
 
@@ -36,7 +35,7 @@ Use the least ceremony that safely fits the change.
 - Targeted search before broad search; read only the minimum surrounding code.
 - Targeted tests before broad tests; risk-based, not ceremony-based.
 - No mandatory GATHER/PLAN/BUILD/CLOSE ceremony and no mandatory large walkthrough documents.
-- No duplicate implementation documentation: record durable decisions in `docs/adr/`; executable behavior belongs in code, tests, and workflows — not prose.
+- No duplicate implementation documentation: record durable decisions in `docs/ARCHITECTURE.md`; executable behavior belongs in code, tests, and workflows — not prose.
 
 Small/obvious changes (copy, isolated styling, narrow bug with obvious cause) go straight to a focused edit plus targeted verification. Normal feature/bug work gets a short plan (files, behavior, verification) before implementing the smallest coherent slice. High-risk areas — auth, Firestore rules/schema, shared finances/family permissions, financial integrity, production infrastructure, deployment logic, core Fabric AI behavior — get a short design/risk plan (data/security impact, rollback, verification, rollout) before broad edits.
 
@@ -87,13 +86,13 @@ Test by **risk**, not by ritual: every change is validated, but not every change
 
 Only open references relevant to the current change. Useful entry points:
 
-- `docs/ARCHITECTURE.md` — architecture changes
+- `docs/ARCHITECTURE.md` — architecture changes and durable decisions
 - `docs/DATA_MODEL.md` — schema/query changes
-- `docs/SECURITY.md` (Git history) / `.github/SECURITY.md` — security reporting
+- `docs/FIRESTORE_INDEXES.md` — index catalog
 - `docs/OPERATIONS.md` — environments, releases, runbook
 - `docs/DESIGN_SYSTEM.md` — UI work
 - `docs/PRODUCT.md` — finance behavior/product semantics
-- `docs/adr/` — decisions for the affected subsystem
+- `.github/SECURITY.md` — security reporting
 
 Do not read `CHANGELOG.md` during ordinary coding; use Git history or targeted searches instead.
 

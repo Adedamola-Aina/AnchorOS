@@ -1,6 +1,6 @@
 /**
  * SecuritySettings - MFA enrollment and security configuration
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * MFA wizard steps extracted to SecuritySettingsParts.tsx
  */
 // @ts-nocheck

@@ -1,6 +1,6 @@
 /**
  * Seeder Data Constants
- * Extracted from seeder.ts per CLAUDE.md §3.2
+ * Extracted from seeder.ts
  */
 
 export const TITLES = ['Groceries', 'Rent', 'Salary', 'Netflix', 'Coffee', 'Gym', 'Internet', 'Electricity', 'Dining Out', 'Freelance Project', 'Gas', 'Insurance', 'Phone Bill', 'School Fees', 'Books', 'Amazon', 'Apple', 'Spotify', 'Pharmacy', 'Vet'];

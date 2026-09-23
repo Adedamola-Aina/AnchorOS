@@ -46,17 +46,9 @@ const isEngineeringCodePath = (f) =>
 
 const isEngineeringOnlyPath = (f) =>
     f === 'AGENTS.md' ||
-    f === 'CLAUDE.md' ||
-    f === 'CONTRIBUTING.md' ||
     f === '.clineignore' ||
-    f.startsWith('.clinerules/') ||
     f.startsWith('.claude/') ||
     f.startsWith('.cline/') ||
-    f.startsWith('.anchor/') ||
-    f.startsWith('.github/.agent/') ||
-    f.startsWith('.github/agents/') ||
-    f.startsWith('.github/instructions/') ||
-    f === '.github/copilot-instructions.md' ||
     f.startsWith('.github/ISSUE_TEMPLATE/') ||
     f === '.github/PULL_REQUEST_TEMPLATE.md' ||
     f.startsWith('docs/') ||
@@ -71,11 +63,8 @@ const isProductPath = (f) =>
     f.startsWith('src/') ||
     f.startsWith('public/') ||
     f.startsWith('packages/') ||
-    f.startsWith('android/') ||
-    f.startsWith('ios/') ||
     f === 'index.html' ||
     f === 'vite.config.ts' ||
-    f === 'capacitor.config.ts' ||
     f === 'config/tsconfig.app.json' ||
     f === 'package.json' ||
     f === 'package-lock.json' ||
@@ -136,7 +125,7 @@ function classifyFiles(files) {
         /^src\/services\/fabric\/QueryEngine(?:\.|\/)/.test(f)
     );
     const smokeRequired = normalized.some((f) => {
-        if (f === 'package.json' || f === 'package-lock.json' || f === 'index.html' || f === 'vite.config.ts' || f === 'capacitor.config.ts') return true;
+        if (f === 'package.json' || f === 'package-lock.json' || f === 'index.html' || f === 'vite.config.ts') return true;
         if (f.startsWith('public/')) return true;
         if (f.startsWith('src/') && !isTestFile(f)) return true;
         if (f === 'config/playwright.release-smoke.config.ts') return true;

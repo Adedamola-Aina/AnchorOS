@@ -3,7 +3,7 @@
  * 
  * Orchestrates the login, signup, MFA, and reset password flows.
  * 
- * Refactored per CLAUDE.md 200-line rule.
+ * Refactored.
  * Extracted: AuthLeftPanel, AuthFormFields, PasswordStrengthMeter, AuthSubmitButton
  */
 // @ts-nocheck

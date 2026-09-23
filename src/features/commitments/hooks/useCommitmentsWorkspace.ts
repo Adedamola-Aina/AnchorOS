@@ -16,7 +16,7 @@ import {
     type SmartViewId,
 } from '../utils/smartViews';
 
-export type TypeFilter = 'all' | 'daily' | 'weekly' | 'monthly' | 'todo';
+type TypeFilter = 'all' | 'daily' | 'weekly' | 'monthly' | 'todo';
 
 /**
  * How long an undo affordance stays on screen.
@@ -31,7 +31,7 @@ export type TypeFilter = 'all' | 'daily' | 'weekly' | 'monthly' | 'todo';
  */
 export const UNDO_WINDOW_MS = 6000;
 
-export interface UndoState {
+interface UndoState {
     message: string;
     run: () => void | Promise<void>;
 }

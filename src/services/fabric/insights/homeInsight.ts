@@ -91,7 +91,7 @@ function fromAssistant(insight: Insight): HomeInsight {
     };
 }
 
-export interface HomeInsightInput {
+interface HomeInsightInput {
     today: TodayCommitmentsView;
     /** The assistant's own ranked insights, when Anchor AI is enabled. */
     insights?: Insight[] | null;

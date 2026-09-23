@@ -25,7 +25,7 @@ import { getMessagingInstance } from '../config/firebase';
 import { deleteStoredPushToken, upsertPushToken } from '../api/PushTokenApi';
 import { captureError } from '../utils/error';
 
-export const PUSH_DISABLED_STORAGE_KEY_PREFIX = 'anchor_push_disabled';
+const PUSH_DISABLED_STORAGE_KEY_PREFIX = 'anchor_push_disabled';
 
 /**
  * Storage key holding the FCM registration this device most recently wrote.
@@ -34,7 +34,7 @@ export const PUSH_DISABLED_STORAGE_KEY_PREFIX = 'anchor_push_disabled';
  * this registration — without enumerating or touching the account's other
  * devices.
  */
-export const PUSH_REGISTRATION_STORAGE_KEY = 'anchor_push_registration';
+const PUSH_REGISTRATION_STORAGE_KEY = 'anchor_push_registration';
 
 export interface StoredPushRegistration {
     uid: string;
@@ -81,7 +81,7 @@ export function setPushDisabledForUser(uid: string | null | undefined, disabled:
     }
 }
 
-export function readStoredPushRegistration(): StoredPushRegistration | null {
+function readStoredPushRegistration(): StoredPushRegistration | null {
     const storage = safeStorage();
     if (!storage) return null;
     try {
@@ -97,7 +97,7 @@ export function readStoredPushRegistration(): StoredPushRegistration | null {
     }
 }
 
-export function writeStoredPushRegistration(registration: StoredPushRegistration): void {
+function writeStoredPushRegistration(registration: StoredPushRegistration): void {
     const storage = safeStorage();
     if (!storage) return;
     try {
@@ -108,7 +108,7 @@ export function writeStoredPushRegistration(registration: StoredPushRegistration
     }
 }
 
-export function clearStoredPushRegistration(): void {
+function clearStoredPushRegistration(): void {
     const storage = safeStorage();
     if (!storage) return;
     try {
@@ -133,7 +133,7 @@ export interface PushTokenLifecycleDeps {
     userAgent: () => string;
 }
 
-export interface PushTokenLifecycle {
+interface PushTokenLifecycle {
     register: (uid: string, token: string, platform?: string) => Promise<boolean>;
     deregister: (uid?: string | null) => Promise<boolean>;
 }
@@ -210,7 +210,7 @@ async function deleteLocalFirebaseRegistration(): Promise<void> {
     await deleteToken(messaging);
 }
 
-export const pushTokenLifecycle = createPushTokenLifecycle({
+const pushTokenLifecycle = createPushTokenLifecycle({
     upsertToken: (uid, token, userAgent, platform) =>
         upsertPushToken(uid, token, userAgent, platform),
     deleteToken: (uid, token) => deleteStoredPushToken(uid, token),

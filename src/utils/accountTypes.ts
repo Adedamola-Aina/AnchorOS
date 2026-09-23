@@ -13,7 +13,7 @@
  */
 import type { AnchorAccount } from '../types';
 
-export const ACCOUNT_TYPE_LABELS: Record<AnchorAccount['type'], string> = {
+const ACCOUNT_TYPE_LABELS: Record<AnchorAccount['type'], string> = {
   checking: 'Checking',
   savings: 'Savings',
   salary: 'Salary',

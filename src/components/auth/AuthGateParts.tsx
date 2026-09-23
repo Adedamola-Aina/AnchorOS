@@ -1,6 +1,6 @@
 /**
  * AuthGate Loading & Gate Components
- * Extracted from AuthGate.tsx per CLAUDE.md §3.2
+ * Extracted from AuthGate.tsx
  */
 
 import React from 'react';

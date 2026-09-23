@@ -1,6 +1,6 @@
 /**
  * SharedActivitySection - Activity feed for shared accounts
- * Extracted from AccountDetailsView per CLAUDE.md §3.2
+ * Extracted from AccountDetailsView
  */
 // @ts-nocheck
 

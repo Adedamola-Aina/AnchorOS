@@ -20,7 +20,7 @@ import type { AnchorTask } from '../../types';
  *   - A completed commitment never counts as overdue (no guilt for old work).
  */
 
-export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 export const WEEKDAY_FULL_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 /**
  * Two-letter labels. A single letter cannot distinguish Tuesday from Thursday or
@@ -117,7 +117,7 @@ function addDays(date: Date, amount: number): Date {
   return copy;
 }
 
-export function isSameDay(a: Date, b: Date): boolean {
+function isSameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
@@ -264,7 +264,7 @@ export function migrateTasksSchedule(tasks: AnchorTask[]): AnchorTask[] {
 }
 
 /** Most recent scheduled day strictly before `today`, or null. */
-export function lastScheduledBefore(task: AnchorTask, today: Date): Date | null {
+function lastScheduledBefore(task: AnchorTask, today: Date): Date | null {
   const start = startOfDay(today);
   for (let offset = 1; offset <= MAX_LOOKBACK_DAYS; offset += 1) {
     const candidate = addDays(start, -offset);

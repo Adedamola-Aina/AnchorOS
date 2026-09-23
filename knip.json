@@ -26,7 +26,6 @@
     "open"
   ],
   "ignoreDependencies": [
-    "@capacitor/*",
     "@tailwindcss/postcss",
     "postcss",
     "tailwindcss",

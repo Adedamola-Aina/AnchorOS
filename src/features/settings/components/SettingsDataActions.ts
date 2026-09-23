@@ -1,6 +1,6 @@
 /**
  * SettingsDataActions - Data wipe and account deletion handlers
- * Extracted from SettingsView.tsx per CLAUDE.md §3.2 (200-line rule)
+ * Extracted from SettingsView.tsx
  * BATCH-001: Fixed Firestore 500-op limit in wipe data
  */
 // @ts-nocheck

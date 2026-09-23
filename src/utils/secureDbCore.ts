@@ -1,6 +1,6 @@
 /**
  * Secure Database Core Utilities
- * Extracted from secureDb.ts per CLAUDE.md §3.2
+ * Extracted from secureDb.ts
  */
 
 import { doc, collection, type DocumentReference } from 'firebase/firestore';
@@ -12,7 +12,7 @@ const DEFAULT_TIMEOUT_MS = 5000;
  * Log operation in development mode — no-op in production
  */
 export const logOp = (_operation: string, _path: string, _data?: unknown) => {
-    // Intentionally silent — console.log removed per CLAUDE.md privacy rule
+    // Intentionally silent — console.log removed for privacy
 };
 
 /**

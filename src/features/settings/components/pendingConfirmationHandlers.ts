@@ -1,6 +1,6 @@
 /**
  * Family Mode v2 - Pending Confirmation Handlers
- * Extracted from PendingConfirmation.tsx per CLAUDE.md §3.2
+ * Extracted from PendingConfirmation.tsx
  */
 // @ts-nocheck
 

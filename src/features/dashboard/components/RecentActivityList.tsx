@@ -1,7 +1,6 @@
 /**
  * RecentActivityList - Shows recent transactions
  * 
- * Follows CLAUDE.md design system with consistent styling
  */
 // @ts-nocheck
 

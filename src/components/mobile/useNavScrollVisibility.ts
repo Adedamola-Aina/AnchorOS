@@ -18,9 +18,9 @@ export interface NavVisibilityState {
 }
 
 /** Scrolling up within this many pixels of the top always shows the bar. */
-export const TOP_ZONE = 24;
+const TOP_ZONE = 24;
 /** Movement smaller than this is ignored, so slow scrolls do not flicker. */
-export const SCROLL_THRESHOLD = 12;
+const SCROLL_THRESHOLD = 12;
 
 export function nextNavVisibility(
     state: NavVisibilityState,

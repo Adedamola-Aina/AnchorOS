@@ -8,11 +8,9 @@ import {
     GoogleAuthProvider,
     OAuthProvider,
     signInWithPopup,
-    signInWithRedirect,
     type UserCredential,
 } from 'firebase/auth';
 import { auth } from '../../config/firebase';
-import { isNative } from '../../utils/platform';
 import { auditAuth } from '../../services/AuditService';
 import { recordAuthEvent } from '../../services/authEventService';
 
@@ -26,10 +24,6 @@ export async function doSocialSignIn(
     method: 'google' | 'apple',
 ): Promise<UserCredential | null> {
     try {
-        if (isNative()) {
-            await signInWithRedirect(auth, provider);
-            return null;
-        }
         const cred = await signInWithPopup(auth, provider);
         if (cred) {
             auditAuth.loginSuccess(method);

@@ -1,7 +1,7 @@
 /**
  * useHaptic Hook Tests
  * 
- * TDD: Write tests FIRST before implementation (CLAUDE.md Article 2)
+ * TDD: Write tests FIRST before implementation
  * 
  * Tests haptic feedback patterns for mobile interactions.
  * Note: Navigator.vibrate() is not available in jsdom, so we mock it.

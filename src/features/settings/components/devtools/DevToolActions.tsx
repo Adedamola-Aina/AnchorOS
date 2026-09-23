@@ -1,6 +1,6 @@
 /**
  * Developer Tools Action Components
- * Split from DeveloperTools.tsx per CLAUDE.md §3.2 (200-line rule)
+ * Split from DeveloperTools.tsx
  */
 // @ts-nocheck
 

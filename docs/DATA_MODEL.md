@@ -54,7 +54,7 @@ artifacts/anchor-os/
 ## Consistency patterns
 
 - Transfers write two linked transactions transactionally; editing/deleting one updates/removes the other.
-- Disconnect/revoke resets `scope` and strips stale `accountShares` entries (see B1 remediation in `docs/audits/`).
+- Disconnect/revoke resets `scope` and strips stale `accountShares` entries.
 - Audit events for sensitive actions are appended to `audit_log` via Cloud Functions.
 
 ## Analytics contract

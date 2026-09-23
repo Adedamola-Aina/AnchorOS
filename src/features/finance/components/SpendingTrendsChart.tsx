@@ -17,7 +17,7 @@
  * Transfers: the ledger stores an internal transfer as an expense leg on the
  * source account and an income leg on the destination account (both carrying
  * category "Transfer"), so at ACCOUNT level they legitimately count as money
- * leaving/arriving — see docs/audits §10 of the Finance redesign spec. The
+ * leaving/arriving. The
  * caption says so when the month contains one, because a number that includes
  * movement between the user's own accounts must not be read as economic income
  * or spending.

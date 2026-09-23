@@ -211,8 +211,8 @@ const FinanceView = () => {
         </div>
 
         {/*
-          * Mobile-first, single surface. AnchorOS ships to iOS/Android through
-          * Capacitor, so there is one layout at every width.
+          * Mobile-first, single surface. AnchorOS ships as one responsive web
+          * app / installable PWA, so there is one layout at every width.
           *
           * The Wallet stack is the *only* account surface on this page. It used
           * to be drawn twice — the stack, plus a duplicate "All accounts" list of

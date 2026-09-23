@@ -1,5 +1,5 @@
 /**
- * Sensory contract — haptics by INTENT, never by raw pattern (UX-DS-05, doc 24 §5).
+ * Sensory contract — haptics by INTENT, never by raw pattern (UX-DS-05).
  *
  * Research basis: Apple praised Denim for "custom haptics" and CapWords for a
  * sound that "helps the word stick" — sensory detail earns its place by
@@ -14,7 +14,7 @@
 
 import type { HapticPattern } from '../hooks/useHaptic';
 
-export type HapticIntent =
+type HapticIntent =
     | 'taskComplete'
     | 'taskUncomplete'
     | 'recordSaved'
@@ -45,5 +45,5 @@ export function patternForIntent(intent: HapticIntent): HapticPattern {
     return HAPTIC_INTENTS[intent];
 }
 
-/** Sound is off by default (doc 24 §4). Nothing in the product plays audio today. */
+/** Sound is off by default. Nothing in the product plays audio today. */
 export const SOUND_DEFAULT_ENABLED = false;

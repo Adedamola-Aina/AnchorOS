@@ -1,16 +1,14 @@
 /**
- * Capacitor + PWA Native Styles
+ * App-shell (installed PWA) styles.
  *
- * Strips browser chrome/behaviour so a Capacitor-wrapped web bundle
- * OR an installed PWA (display-mode: standalone) feels like a native
- * iOS / Android app.
+ * Strips browser chrome/behaviour so an installed PWA (display-mode: standalone)
+ * feels like a native app. Paired with src/utils/nativeBehavior.ts (runtime JS
+ * guards); both activate only when the app is launched from the home screen.
  *
- * Activates via these body classes (set by src/utils/platform.ts):
- *   .platform-native  — Capacitor iOS/Android shell
- *   .platform-pwa     — installed PWA (home-screen launched)
- *   .platform-app     — union of the two (use this for "app-like" rules)
- *
- * Paired with: src/utils/nativeBehavior.ts (runtime JS guards)
+ * Body/html classes are set by src/utils/platform.ts:
+ *   .platform-pwa  — installed PWA
+ *   .platform-app  — app-like union (currently the same set)
+ *   .platform-web  — ordinary browser tab (no app-shell overrides)
  */
 
 /* ─── Safe-area CSS variables ───────────────────────────── */
@@ -33,9 +31,7 @@ html, body {
 }
 
 /* ─── App-mode root: kill browser behaviours ─────────────
-   Applies to BOTH Capacitor native AND installed PWA. */
-html.platform-native,
-body.platform-native,
+   Applies to an installed PWA (home-screen launched). */
 html.platform-pwa,
 body.platform-pwa,
 html.platform-app,
@@ -54,14 +50,11 @@ body.platform-app {
   /* Disable text-size auto-inflation in landscape on iOS. */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  /* Stop image drag-out on native-WebKit. */
+  /* Stop image drag-out on WebKit. */
   -webkit-user-drag: none;
 }
 
 /* Everything inside an app-mode shell: suppress the same web-isms by default. */
-body.platform-native *,
-body.platform-native *::before,
-body.platform-native *::after,
 body.platform-pwa *,
 body.platform-pwa *::before,
 body.platform-pwa *::after,
@@ -74,10 +67,6 @@ body.platform-app *::after {
 }
 
 /* Images / media cannot be dragged out of the app. */
-body.platform-native img,
-body.platform-native svg,
-body.platform-native video,
-body.platform-native canvas,
 body.platform-pwa img,
 body.platform-pwa svg,
 body.platform-pwa video,
@@ -90,11 +79,6 @@ body.platform-pwa canvas {
 /* ─── Selectable regions (opt-in) ───────────────────────── */
 /* Everything is non-selectable by default in app mode; wrap copyable
    things in .selectable (e.g. balances, account numbers, IDs). */
-body.platform-native input,
-body.platform-native textarea,
-body.platform-native [contenteditable="true"],
-body.platform-native .selectable,
-body.platform-native .selectable *,
 body.platform-pwa input,
 body.platform-pwa textarea,
 body.platform-pwa [contenteditable="true"],
@@ -105,29 +89,21 @@ body.platform-pwa .selectable * {
   -webkit-touch-callout: default;
 }
 
-/* Inputs ≥16px so iOS Safari doesn't auto-zoom on focus. */
+/* iOS zooms the page when a control smaller than 16px receives focus. */
 body.platform-pwa input,
 body.platform-pwa textarea,
-body.platform-pwa select,
-body.platform-native input,
-body.platform-native textarea,
-body.platform-native select {
+body.platform-pwa select {
   font-size: max(16px, 1rem);
 }
 
 /* ─── Native-feeling focus / press states ───────────────── */
 /* Remove default browser focus outlines in app mode; render our own. */
-body.platform-native :focus,
-body.platform-native :focus-visible,
 body.platform-pwa :focus,
 body.platform-pwa :focus-visible {
   outline: none;
 }
 
 /* Instant UIControl-style press feedback. */
-body.platform-native button:active,
-body.platform-native [role="button"]:active,
-body.platform-native a:active,
 body.platform-pwa button:active,
 body.platform-pwa [role="button"]:active,
 body.platform-pwa a:active {
@@ -136,27 +112,16 @@ body.platform-pwa a:active {
 }
 
 /* ─── Scrolling ─────────────────────────────────────────── */
-body.platform-native,
 body.platform-pwa {
   /* Hide the document-level scrollbar track entirely. */
   scrollbar-width: none;
 }
-body.platform-native::-webkit-scrollbar,
 body.platform-pwa::-webkit-scrollbar { display: none; }
 
-.platform-ios {
-  -webkit-overflow-scrolling: touch;
-}
-
 /* No double-tap zoom anywhere interactive in app mode. */
-body.platform-native *,
 body.platform-pwa * { touch-action: manipulation; }
 
 /* Scroll containers need pan-y preserved + contained over-scroll. */
-body.platform-native [data-scroll],
-body.platform-native .overflow-y-auto,
-body.platform-native .overflow-auto,
-body.platform-native .overflow-y-scroll,
 body.platform-pwa [data-scroll],
 body.platform-pwa .overflow-y-auto,
 body.platform-pwa .overflow-auto,
@@ -165,45 +130,16 @@ body.platform-pwa .overflow-y-scroll {
   overscroll-behavior: contain;
 }
 
-/* ─── Platform font stacks (UIKit / Material parity) ───── */
-body.platform-ios {
-  font-family:
-    -apple-system,
-    "SF Pro Text",
-    "SF Pro Display",
-    "Helvetica Neue",
-    system-ui,
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body.platform-android {
-  font-family:
-    "Roboto",
-    "Roboto Flex",
-    "Google Sans",
-    system-ui,
-    -apple-system,
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ─── Bottom navigation (iOS 26 floating glass pill) ────
-   The component owns all its visual styling. We only stop the iOS Safari
-   document-level scrollbar from painting under the bar. */
-
 /* ─── Modal / dialog safe areas ─────────────────────────── */
 /* The modal overlay is `fixed inset-0`, i.e. it is measured in the layout
    viewport — so its cap must be expressed in the same space (100%), not in a
    viewport unit that can disagree with it. */
-.platform-native [role="dialog"],
 .platform-pwa [role="dialog"] {
   max-height: 100%;
 }
 
-/* ─── Native-style sheet drag handle (iOS) ──────────────── */
-.platform-ios [data-sheet-handle]::before {
+/* ─── Sheet drag handle (installed PWA) ─────────────────── */
+.platform-pwa [data-sheet-handle]::before {
   content: "";
   position: absolute;
   top: 8px; left: 50%;

@@ -1,6 +1,6 @@
 /**
  * Auth Email Templates
- * Extracted from AuthContext.tsx per CLAUDE.md §3.2
+ * Extracted from AuthContext.tsx
  */
 // @ts-nocheck
 

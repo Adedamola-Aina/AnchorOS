@@ -1,6 +1,6 @@
 /**
  * Data Seeder Utility
- * Refactored per CLAUDE.md §3.2 - data constants extracted to seederData.ts
+ * Refactored - data constants extracted to seederData.ts
  */
 // @ts-nocheck
 

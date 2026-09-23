@@ -1,7 +1,7 @@
 /**
  * Input Validation Utilities
  * 
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * Entity validation schemas moved to entityValidation.ts
  * 
  * Philosophy:

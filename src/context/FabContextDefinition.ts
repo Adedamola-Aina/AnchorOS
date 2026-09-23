@@ -15,7 +15,7 @@ export interface FabAction {
     onClick: () => void;
 }
 
-export interface FabContextValue {
+interface FabContextValue {
     action: FabAction | null;
     setAction: (action: FabAction | null) => void;
 }

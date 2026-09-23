@@ -3,7 +3,7 @@
  * 
  * Developer-only tools for seeding data and simulating scenarios.
  * 
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * Logic extracted to devtools/ subfolder.
  */
 // @ts-nocheck

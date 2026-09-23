@@ -24,12 +24,3 @@ reports/
 # Large/history-heavy material that should be pulled explicitly only when needed
 CHANGELOG.md
 **/package-lock.json
-docs/archive/
-
-# Internal dashboard is optional during normal app development.
-# Explicitly @-include it when the task is about the dashboard/MCP tooling.
-
-# Native/generated caches
-ios/App/Pods/
-android/.gradle/
-android/build/

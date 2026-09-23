@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 
 /** Cooldown between verification-email resends (matches Firebase anti-abuse expectations). */
-export const RESEND_COOLDOWN_SECONDS = 60;
+const RESEND_COOLDOWN_SECONDS = 60;
 
 /**
  * RA-11 (#167): shared email-verification status/resend logic.

@@ -22,7 +22,6 @@ import { EnvironmentBanner } from './components/shared/EnvironmentBanner';
 import { useVersionCheck } from './hooks/useVersionCheck';
 import { useAccessibility } from './hooks/useAccessibility';
 import { useIOSKeyboardFix } from './hooks/useIOSKeyboardFix';
-import { useAndroidBackButton } from './hooks/useAndroidBackButton';
 
 const AppContent = () => {
   const { user, profile, loading, profileLoaded } = useAuth();
@@ -30,7 +29,6 @@ const AppContent = () => {
   const isPublicMarketingRoute = location.pathname === '/';
   useAccessibility(profile?.accessibility);
   useIOSKeyboardFix();
-  useAndroidBackButton();
 
   React.useEffect(() => {
     const userPref = profile?.theme;

@@ -1,7 +1,7 @@
 /**
  * Tests for useKeyboardAvoidance hook
  * 
- * Per CLAUDE.md TDD mandate - write tests FIRST
+ * Write tests first
  * BUG-002: iOS keyboard covers input fields
  */
 // @ts-nocheck

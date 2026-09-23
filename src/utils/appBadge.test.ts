@@ -1,20 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mockState = vi.hoisted(() => ({
-  isSupported: false,
-  set: vi.fn((..._args: unknown[]) => Promise.resolve()),
-  clear: vi.fn((..._args: unknown[]) => Promise.resolve()),
-  isSupportedFn: vi.fn((..._args: unknown[]) => Promise.resolve({ isSupported: false })),
-}));
-
-vi.mock('@capawesome/capacitor-badge', () => ({
-  Badge: {
-    isSupported: (...args: unknown[]) => mockState.isSupportedFn(...args),
-    set: (...args: unknown[]) => mockState.set(...args),
-    clear: (...args: unknown[]) => mockState.clear(...args),
-  },
-}));
-
 const captureError = vi.fn();
 vi.mock('./error', () => ({
   captureError: (...args: unknown[]) => captureError(...args),
@@ -28,17 +13,11 @@ describe('appBadge', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockState.isSupported = false;
-    mockState.set.mockResolvedValue(undefined);
-    mockState.clear.mockResolvedValue(undefined);
-    mockState.isSupportedFn.mockResolvedValue({ isSupported: false });
-
     Object.defineProperty(navigator, 'setAppBadge', {
       configurable: true,
       writable: true,
       value: setAppBadge,
     });
-
     Object.defineProperty(navigator, 'clearAppBadge', {
       configurable: true,
       writable: true,
@@ -46,13 +25,10 @@ describe('appBadge', () => {
     });
   });
 
-  it('uses native badge plugin on native platforms', async () => {
-    mockState.isSupportedFn.mockResolvedValue({ isSupported: true });
-
+  it('sets the badge for a positive count', async () => {
     await setAppBadgeCount(3);
 
-    expect(mockState.set).toHaveBeenCalledWith({ count: 3 });
-    expect(setAppBadge).not.toHaveBeenCalled();
+    expect(setAppBadge).toHaveBeenCalledWith(3);
   });
 
   it('clears badge when count is zero', async () => {
@@ -71,13 +47,23 @@ describe('appBadge', () => {
     expect(setAppBadge).toHaveBeenCalledWith(4);
   });
 
-  it('falls back to web API when native plugin fails', async () => {
-    mockState.isSupportedFn.mockRejectedValueOnce(new Error('native fail'));
+  it('is a no-op when the Badging API is unavailable', async () => {
+    Object.defineProperty(navigator, 'setAppBadge', {
+      configurable: true,
+      writable: true,
+      value: undefined,
+    });
+
+    await expect(setAppBadgeCount(5)).resolves.toBeUndefined();
+    expect(captureError).not.toHaveBeenCalled();
+  });
+
+  it('captures errors when the badge API throws', async () => {
+    setAppBadge.mockRejectedValueOnce(new Error('badge fail'));
 
     await setAppBadgeCount(5);
 
-    expect(captureError).toHaveBeenCalledWith(expect.any(Error), 'Badge.nativeUpdate');
-    expect(setAppBadge).toHaveBeenCalledWith(5);
+    expect(captureError).toHaveBeenCalledWith(expect.any(Error), 'Badge.webUpdate');
   });
 
   it('supports clear helper', async () => {

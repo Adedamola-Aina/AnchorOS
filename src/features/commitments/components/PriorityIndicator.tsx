@@ -16,7 +16,7 @@
  */
 import React from 'react';
 
-export type PriorityLevel = 'high' | 'medium' | 'low';
+type PriorityLevel = 'high' | 'medium' | 'low';
 
 const PRIORITY: Record<PriorityLevel, { dots: number; label: string; tone: string }> = {
     high: { dots: 3, label: 'High', tone: 'text-rose-500' },

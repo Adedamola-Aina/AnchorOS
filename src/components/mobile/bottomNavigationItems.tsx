@@ -39,7 +39,7 @@ interface BuildBottomNavItemsInput {
  * aliases are retired.
  *
  * Anchor AI is deliberately NOT a tab: "Anchor belongs inside Home, not in the
- * bar" (doc 20 §4.1). The assistant stays addressable at `/fabric` for deep
+ * bar". The assistant stays addressable at `/fabric` for deep
  * links, and Home carries the doorway.
  */
 export function buildBottomNavItems({

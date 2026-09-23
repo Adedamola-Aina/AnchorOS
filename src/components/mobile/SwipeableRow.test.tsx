@@ -1,7 +1,7 @@
 /**
  * SwipeableRow Component Tests
  * 
- * TDD: Write tests FIRST before implementation (CLAUDE.md Article 2)
+ * TDD: Write tests FIRST before implementation
  * 
  * Tests the swipeable row component for mobile gesture actions.
  * Note: Touch gesture simulation is limited in jsdom, so we test

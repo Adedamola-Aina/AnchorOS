@@ -73,7 +73,7 @@ export function selectTodayCommitments(tasks: AnchorTask[], now: Date): TodayCom
     };
 }
 
-export interface TodayAlert {
+interface TodayAlert {
     id: string;
     title: string;
     detail: string;

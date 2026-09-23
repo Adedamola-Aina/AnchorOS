@@ -1,7 +1,7 @@
 /**
  * UX-CM-08: the transaction offer shown on a just-completed commitment.
  *
- * Extracted from TaskItem per CLAUDE.md §3.2 (200-line rule).
+ * Extracted from TaskItem.
  *
  * This replaced a blocking cross-domain "Financial Transaction?" modal: the same
  * offer, but inline, dismissible, and without moving the user off the page.

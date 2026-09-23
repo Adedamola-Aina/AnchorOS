@@ -83,7 +83,7 @@ describe('semantic role tokens (UX-DS-02 / UX-DS-03)', () => {
             }
         }
         for (const token of [
-            // Radix-style 12-step aliases (doc 24 §9.3): every role must exist in
+            // Radix-style 12-step aliases: every role must exist in
             // BOTH themes, so a new alias cannot be added light-only.
             '--surface-base', '--surface-raised', '--surface-hover', '--surface-active',
             '--surface-sunken', '--surface-border',
@@ -130,7 +130,7 @@ describe('geometry, elevation and spacing scale (UX-DS-06)', () => {
         'stack-tight', 'stack', 'stack-roomy', 'stack-section',
         // inline = horizontal gap
         'inline-tight', 'inline', 'inline-roomy',
-        // row heights, from reference rule R1 (doc 25 §3)
+        // row heights, from reference rule R1
         'row-compact', 'row-standard', 'row-comfortable',
     ];
 

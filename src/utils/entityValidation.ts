@@ -1,6 +1,6 @@
 /**
  * Entity Validation Schemas
- * Extracted from validation.ts per CLAUDE.md §3.2
+ * Extracted from validation.ts
  */
 
 import { validateString, validateNumber, validateDate, type ValidationError, type ValidationResult } from './validation';

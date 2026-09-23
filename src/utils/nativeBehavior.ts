@@ -1,9 +1,9 @@
 /**
- * Native-behaviour guards for Capacitor-wrapped apps.
+ * App-shell behaviour guards for the installed PWA.
  *
- * CSS handles the visual layer (see src/styles/capacitor.css).
- * This file handles the runtime events the WebView still fires
- * by default — the ones that make a WebView feel "web-y":
+ * CSS handles the visual layer (see src/styles/app-shell.css). This file handles
+ * the runtime events the browser still fires by default — the ones that make an
+ * installed app feel "web-y":
  *
  *   - Long-press → iOS share sheet / copy-link menu
  *   - Right-click / two-finger-tap → context menu
@@ -11,15 +11,16 @@
  *   - Pinch-zoom the document
  *   - Double-tap zoom
  *
- * Only active on native platforms. Web/PWA keeps normal behaviour.
+ * Only active when installed as a PWA. A normal browser tab keeps normal
+ * behaviour.
  */
 
-import { isNative, isPWA, getPlatformClasses } from './platform';
+import { isPWA, getPlatformClasses } from './platform';
 
 /**
- * Apply the platform-{ios,android,native,web} classes to BOTH
- * <html> and <body>. `capacitor.css` uses the html-level class
- * to suppress document-level overscroll / pinch-zoom reliably.
+ * Apply the platform-{pwa,app,web} classes to BOTH <html> and <body>.
+ * `app-shell.css` uses the html-level class to suppress document-level overscroll
+ * / pinch-zoom reliably.
  */
 export function applyPlatformClasses(): void {
   const classes = getPlatformClasses();
@@ -38,22 +39,16 @@ export function applyPlatformClasses(): void {
 }
 
 /**
- * Initialise native-only event guards. Safe to call on web (no-ops).
- *
- * Activates when running:
- *   - inside a Capacitor native shell, OR
- *   - as an installed PWA (display-mode: standalone / fullscreen / minimal-ui).
- *
- * The same guards are correct for both: an installed PWA should not show
- * "Open in new tab", iOS share sheets, or pinch-zoom the document.
+ * Initialise app-shell-only event guards. Safe to call in a browser tab
+ * (no-ops).
  */
-export function initNativeBehavior(): void {
+export function initAppShellBehavior(): void {
   applyPlatformClasses();
 
-  if (!isNative() && !isPWA()) return;
+  if (!isPWA()) return;
 
-  // 1) Context menu (iOS long-press share sheet, Android long-press
-  //    selection menu, desktop right-click during staging on Safari).
+  // 1) Context menu (iOS long-press share sheet, Android long-press selection
+  //    menu, desktop right-click).
   document.addEventListener(
     'contextmenu',
     (e) => {

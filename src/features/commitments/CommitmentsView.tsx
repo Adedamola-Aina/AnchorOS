@@ -1,6 +1,6 @@
 /**
  * CommitmentsView - Task management page orchestrator
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * UI components extracted to CommitmentsViewParts.tsx
  */
 // @ts-nocheck

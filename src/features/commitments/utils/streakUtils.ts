@@ -22,7 +22,7 @@ import {
  * badge can render it at the right size and mark it `aria-hidden`, with the
  * label carrying the meaning.
  */
-export interface StreakMilestone {
+interface StreakMilestone {
   days: number;
   icon: LucideIcon;
   label: string;

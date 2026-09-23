@@ -1,7 +1,7 @@
 /**
  * AuthContext - Unified authentication state management
  * 
- * Refactored per CLAUDE.md §3.2 (200-line rule).
+ * Refactored.
  * MFA operations extracted to auth/useMfaOperations.ts
  * Email templates extracted to auth/emailTemplates.ts
  */

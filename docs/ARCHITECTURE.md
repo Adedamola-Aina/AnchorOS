@@ -4,7 +4,7 @@ Durable architecture contract. Executable behavior lives in code, tests, and wor
 
 ## One product implementation
 
-AnchorOS is a privacy-first household finance and commitment platform. **React 19 + TypeScript (strict) is the sole canonical product implementation**, shipped as a Web/PWA bundle via Vite and wrapped by Capacitor for iOS/Android shells. Native Swift/Kotlin exists only for OS integration, Capacitor bridges/plugins, generated shell code, platform lifecycle, and permissions — never product/business logic. Do not reintroduce parallel implementations (the former native SwiftUI path is retired; see git history).
+AnchorOS is a privacy-first household finance and commitment platform. **React 19 + TypeScript (strict) is the sole canonical product implementation**, shipped as a web app / installable PWA bundle via Vite. There are no native wrappers — product/business logic lives entirely in TypeScript. Do not reintroduce parallel implementations (the former native SwiftUI path is retired; see git history).
 
 ## System boundaries
 
@@ -28,15 +28,19 @@ Firebase
 
 - All privileged mutations go through callable Cloud Functions with staged App Check enforcement (`ENFORCE_APPCHECK`).
 - Family sharing is isolation-critical: household membership, roles (read-only / read-write), and per-account sharing are enforced server-side in rules and functions, never in the client alone.
-- Authentication, financial integrity, and shared-data isolation are the highest-risk surfaces. Security architecture summary below; full model in Git history (`docs/SECURITY.md`) and rules in `config/firestore.rules`.
+- Authentication, financial integrity, and shared-data isolation are the highest-risk surfaces. The security model is summarized below and enforced in `config/firestore.rules`.
 
 ## Anchor AI (Fabric)
 
 The Fabric query engine (`src/services/fabric/`) is the single sanctioned AI-assistance surface: deterministic query routes, typed results, no free-form data export. Coverage of the query engine is CI-gated (`test:coverage:query-gate`).
 
-## Decisions
+## Durable decisions
 
-Durable architectural decisions are recorded as ADRs in [`adr/`](adr/). When code and documentation disagree, follow the source-of-truth rule in [`../AGENTS.md`](../AGENTS.md).
+Architectural decisions live here (there is no separate ADR directory). When code and documentation disagree, follow the source-of-truth rule in [`../AGENTS.md`](../AGENTS.md).
+
+- **Shared UI package (`@anchor-os/ui`).** Core atoms (Button, Badge, Card, Skeleton) live in `packages/ui` and are imported as `@anchor-os/ui`, so shared vs. feature-specific components are explicit and a future npm extraction needs no import changes.
+- **Anchor AI (Fabric).** A privacy-first, feature-agnostic intelligence layer under `src/services/fabric/` (it must not import from `src/features/`): typed deterministic query routes, an `anchor_ai_enabled` flag plus a per-user Settings toggle backed by `fabric_settings`, recency-weighted confidence, and a two-tier store (`recentActions` rolling 100 entries with 90-day TTL, `confirmedPatterns` until explicitly deleted). No external AI API calls; all DB access via `src/utils/secureDb.ts`.
+- **No micro-frontends.** A micro-frontend split was explored and rejected: one Vite SPA is simpler and the app is not large enough to justify the runtime cost.
 
 ## Error handling rules
 

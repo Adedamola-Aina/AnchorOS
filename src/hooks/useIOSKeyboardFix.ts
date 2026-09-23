@@ -1,5 +1,5 @@
 /**
- * useIOSKeyboardFix — make iOS actually open the keyboard.
+ * useIOSKeyboardFix — iOS keyboard input hints.
  *
  * BUG-093 originally chased the iOS input accessory bar (the Previous/Next/Done
  * strip above the keyboard). Two of the mitigations it shipped traded the
@@ -16,8 +16,7 @@
  *      moving between fields and fought the modal's own focus trap.
  *
  * Both are removed. What remains is the part that is safe and useful: the
- * `is-ios` marker for CSS, the autocorrect/autocapitalise hints, and hiding the
- * native accessory bar through the Capacitor Keyboard plugin.
+ * `is-ios` marker for CSS and the autocorrect/autocapitalise hints.
  *
  * `enterkeyhint` is only set when the field has not declared one — a caller that
  * needs the key to submit sets it explicitly (see `CommitmentFindOrAdd`).
@@ -25,8 +24,6 @@
 // @ts-nocheck
 
 import { useEffect } from 'react';
-import { Keyboard } from '@capacitor/keyboard';
-import { isIOS as isCapacitorIOS, isNative, isPluginAvailable } from '../utils/platform';
 
 const isIOS = (): boolean => {
   if (typeof navigator === 'undefined') return false;
@@ -36,12 +33,6 @@ const isIOS = (): boolean => {
 
 export function useIOSKeyboardFix(): void {
   useEffect(() => {
-    // Hide iOS keyboard accessory bar (Prev/Next/Done) in the native app. This is
-    // the supported, non-invasive way to do it — no DOM tricks required.
-    if (isNative() && isCapacitorIOS() && isPluginAvailable('Keyboard')) {
-      void Keyboard.setAccessoryBarVisible({ isVisible: false });
-    }
-
     if (!isIOS()) return;
 
     // Mark <html> so CSS can target iOS-specific overrides

@@ -1,6 +1,6 @@
 /**
  * Dashboard Widget Components
- * Extracted from DashboardView.tsx per CLAUDE.md §3.2
+ * Extracted from DashboardView.tsx
  */
 // @ts-nocheck
 

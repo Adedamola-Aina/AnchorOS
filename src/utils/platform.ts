@@ -1,103 +1,24 @@
 /**
- * Platform Detection & Capacitor Utilities
+ * Platform detection for the installable PWA.
  *
- * Provides reliable platform detection for web, iOS, and Android.
- * Use these instead of user agent sniffing for Capacitor apps.
+ * Anchor ships as a web app / installable PWA only (there are no native
+ * wrappers), so the only distinction that matters is browser tab vs installed
+ * app. `isPWA()` answers that; `getPlatformClasses()` exposes it to CSS.
  */
 
-// Capacitor is available at runtime via window.Capacitor
-declare global {
-  interface Window {
-    Capacitor?: {
-      getPlatform: () => string;
-      isNativePlatform: () => boolean;
-      isPluginAvailable: (name: string) => boolean;
-    };
-  }
-}
-
-// Access Capacitor from global - it's available at runtime
-const getCapacitor = () => {
-  if (typeof window !== 'undefined' && window.Capacitor) {
-    return window.Capacitor;
-  }
-  return undefined;
-};
-
-type Platform = 'web' | 'ios' | 'android';
-
-/**
- * Get the current platform the app is running on
- */
-export function getPlatform(): Platform {
-  const cap = getCapacitor();
-  return (cap?.getPlatform() as Platform) ?? 'web';
-}
-
-/**
- * Check if running as a native app (iOS or Android)
- */
-export function isNative(): boolean {
-  const cap = getCapacitor();
-  return cap?.isNativePlatform() ?? false;
-}
-
-/**
- * Check if running on iOS
- */
-export function isIOS(): boolean {
-  return getPlatform() === 'ios';
-}
-
-/**
- * Check if running on Android
- */
-export function isAndroid(): boolean {
-  return getPlatform() === 'android';
-}
-
-/**
- * Check if running as an installed PWA (standalone display mode).
- * True when launched from home-screen on iOS/Android or installed PWA on desktop.
- * Always false inside Capacitor (use isNative() instead).
- */
+/** True when running as an installed PWA (standalone/fullscreen/minimal-ui). */
 export function isPWA(): boolean {
   if (typeof window === 'undefined') return false;
-  if (isNative()) return false;
-  // Standard standalone PWA
+  // Standard installed-PWA display modes.
   if (window.matchMedia?.('(display-mode: standalone)').matches) return true;
   if (window.matchMedia?.('(display-mode: fullscreen)').matches) return true;
   if (window.matchMedia?.('(display-mode: minimal-ui)').matches) return true;
-  // iOS Safari uses a non-standard property
+  // iOS Safari uses a non-standard property instead of display-mode.
   const navAny = window.navigator as Navigator & { standalone?: boolean };
   return navAny.standalone === true;
 }
 
-/**
- * Check if a Capacitor plugin is available
- */
-export function isPluginAvailable(pluginName: string): boolean {
-  const cap = getCapacitor();
-  return cap?.isPluginAvailable(pluginName) ?? false;
-}
-
-/**
- * Platform-specific class names for styling
- */
+/** Body/html classes consumed by src/styles/app-shell.css. */
 export function getPlatformClasses(): string {
-  const platform = getPlatform();
-  const classes = [`platform-${platform}`];
-
-  if (isNative()) {
-    classes.push('platform-native');
-  }
-  if (isPWA()) {
-    // Installed PWA: apply native-style web-feel suppression too.
-    classes.push('platform-pwa', 'platform-app');
-  }
-  if (isNative()) {
-    classes.push('platform-app');
-  }
-
-  return classes.join(' ');
+  return isPWA() ? 'platform-pwa platform-app' : 'platform-web';
 }

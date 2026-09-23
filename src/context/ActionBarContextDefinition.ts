@@ -14,7 +14,7 @@ import { createContext, useContext, useEffect } from 'react';
  * is the space content occupies, the other is where the scrollport considers itself
  * "obscured".
  */
-export interface ActionBarContextValue {
+interface ActionBarContextValue {
     /** Measured height of the page's action bar in CSS px; 0 when there is none. */
     height: number;
     setHeight: (height: number) => void;

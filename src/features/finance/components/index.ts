@@ -1,7 +1,6 @@
 /**
  * Finance Components Barrel Export
  *
- * Following CLAUDE.md architecture standards for clean imports.
  */
 
 export { AccountCard } from './AccountCard';

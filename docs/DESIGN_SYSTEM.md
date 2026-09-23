@@ -52,15 +52,15 @@ Destructive actions use the danger token and require confirmation.
 - Keyboard navigable; focus rings visible (`focus:ring-2`).
 - Color never carries meaning alone.
 
-## Semantics, motion and sensory law (W-D1 — research basis in doc 24)
+## Semantics, motion and sensory law (W-D1)
 
-Durable additions from `24-DESIGN-EXCELLENCE-RESEARCH-AND-SURFACE-STRATEGY.md`. These are not aspirations; they are enforced by `src/design/designFoundation.test.ts`.
+These are not aspirations; they are enforced by `src/design/designFoundation.test.ts`.
 
 ### Semantic role tokens (`UX-DS-02`)
 
 Roles live in `src/index.css`: `--role-{success,warning,danger,info}[-surface|-border]` plus the **12-step alias set** below. Light values are on `:root`, dark values on `.dark`, and `@theme` maps both to utilities — so **a missing dark value fails a test** instead of shipping as a bug.
 
-**The 12-step alias convention** (adopted from the Radix Colors spec, doc 24 §9.3 — each step has one job, so colour stops being a vibe):
+**The 12-step alias convention** (adopted from the Radix Colors spec — each step has one job, so colour stops being a vibe):
 
 | Step | Purpose | Token | Utility |
 |---|---|---|---|
@@ -116,11 +116,11 @@ One radius family, one elevation set, one spacing rhythm — published in `src/i
 
 **Elevation** — five roles, ending the thirteen-weight shadow free-for-all: `flat` (border only) · `subtle` · `raised` · `overlay` · `modal`. These are **dual-theme** (`:root` + `.dark`) because a shadow tuned for a white surface disappears on `#020617`; a missing dark value fails a test. Utilities: `shadow-elevation-{role}`.
 
-**Spacing rhythm** — three axes × three steps, so a surface never invents a fourth: `inset` (padding inside a container) · `stack` (vertical rhythm between blocks) · `inline` (horizontal gap), each as `-tight` / default / `-roomy` (`stack` also has `-section`). Row heights come from reference rule R1 (doc 25 §3): `--spacing-row-compact` 44px · `-standard` 48px · `-comfortable` 56px — label left, value right-aligned on a shared rail, **no divider inside a group**.
+**Spacing rhythm** — three axes × three steps, so a surface never invents a fourth: `inset` (padding inside a container) · `stack` (vertical rhythm between blocks) · `inline` (horizontal gap), each as `-tight` / default / `-roomy` (`stack` also has `-section`). Row heights: `--spacing-row-compact` 44px · `-standard` 48px · `-comfortable` 56px — label left, value right-aligned on a shared rail, **no divider inside a group**.
 
 **Rules.** Choose the role that describes the job; never an arbitrary-value radius (a bracketed size). A new radius, elevation or spacing step is a **system** decision, not a component decision — if a screen seems to need a fourth step, the screen is wrong, not the rhythm. (Write bracketed class examples as prose, not as literal class names: Tailwind auto-scans the repo and would ship a utility for them.)
 
-**Before/after evidence for a migration (required — doc 24 W-D1 exit criteria).** `e2e/design-surfaces.spec.ts` renders Home, Commitments, Finance and Settings at 375×812 and 1280×720 in **both** themes, writing each screen plus a 10px-blur **Squint Test** variant (doc 24 §9.4) to `design-evidence/`:
+**Before/after evidence for a migration (required).** `e2e/design-surfaces.spec.ts` renders Home, Commitments, Finance and Settings at 375×812 and 1280×720 in **both** themes, writing each screen plus a 10px-blur **Squint Test** variant to `design-evidence/`:
 
 ```bash
 DESIGN_EVIDENCE=1 npm run test:e2e:local -- --project=design-evidence
@@ -128,7 +128,7 @@ DESIGN_EVIDENCE=1 npm run test:e2e:local -- --project=design-evidence
 
 It is opt-in because it drives the **real theme control** (`App.tsx` applies the profile's `theme` field, and both seeds pin that to `light`, so `colorScheme` alone can never reach dark mode), which makes a full pass take minutes. It also **asserts** what the older suite never could: no two surface/theme captures may be byte-identical.
 
-That assertion exists because `e2e/visual.spec.ts` imports `test` from `@playwright/test` instead of the authenticated fixture in `e2e/fixtures/base.ts` — so five of its eight committed baselines are byte-identical captures of the *unauthenticated* screen, and one of its tests swallows its own wait failure with `.catch(() => {})`. **Do not treat that suite as evidence that a surface still looks right.** Regenerating or retiring those baselines is tracked in the finding register.
+That assertion exists because `e2e/visual.spec.ts` imports `test` from `@playwright/test` instead of the authenticated fixture in `e2e/fixtures/base.ts` — so five of its eight committed baselines are byte-identical captures of the *unauthenticated* screen, and one of its tests swallows its own wait failure with `.catch(() => {})`. **Do not treat that suite as evidence that a surface still looks right.** Regenerating or retiring those baselines is outstanding work.
 
 ### Empty states (`UX-DS-07`)
 

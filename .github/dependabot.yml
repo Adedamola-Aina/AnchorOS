@@ -14,8 +14,6 @@ updates:
         patterns: ["@sentry/*"]
       tanstack:
         patterns: ["@tanstack/*"]
-      capacitor:
-        patterns: ["@capacitor/*", "@capawesome/*"]
       # Everything else: ONE grouped PR for routine minor/patch updates so
       # dependency automation never floods the queue with low-value PRs.
       routine-minor-patch:

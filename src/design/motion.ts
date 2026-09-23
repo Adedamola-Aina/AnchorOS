@@ -1,5 +1,5 @@
 /**
- * Motion contract — ONE source of truth (UX-DS-04, doc 24 §4).
+ * Motion contract — ONE source of truth (UX-DS-04).
  *
  * Sourced rules from the research (NN/g "The Role of Animation and Motion in UX"):
  * motion "must be unobtrusive, brief, and subtle"; it is appropriate as *feedback*
@@ -34,7 +34,7 @@ export const EASING = {
     exit: 'cubic-bezier(0.4, 0, 1, 1)',
 } as const;
 
-export type MotionPurpose = 'feedback' | 'stateChange' | 'spatialContinuity';
+type MotionPurpose = 'feedback' | 'stateChange' | 'spatialContinuity';
 
 const ALLOWED_PURPOSES: readonly MotionPurpose[] = ['feedback', 'stateChange', 'spatialContinuity'];
 
@@ -48,7 +48,7 @@ export function isAllowedPurpose(purpose: string): purpose is MotionPurpose {
  *   - the OS/browser preference `prefers-reduced-motion: reduce`
  *   - the in-app accessibility switch (`.a11y-reduced-motion` on the root)
  */
-export function prefersReducedMotion(doc: Document | undefined = typeof document === 'undefined' ? undefined : document): boolean {
+function prefersReducedMotion(doc: Document | undefined = typeof document === 'undefined' ? undefined : document): boolean {
     if (!doc) return false;
     try {
         if (typeof doc.defaultView?.matchMedia === 'function'

@@ -19,7 +19,7 @@
 
 export type SettingsGroupId = 'personal' | 'access' | 'intelligence' | 'data';
 
-export interface SettingsGroupDef {
+interface SettingsGroupDef {
     id: SettingsGroupId;
     label: string;
 }

@@ -49,7 +49,7 @@ export const NODE_INCLUDE = [
   'src/api/**/*.{test,spec}.ts',
   'src/analytics/**/*.{test,spec}.ts',
   'src/config/**/*.{test,spec}.ts',
-  // Design foundation (W-D1 / doc 24): token, motion and sensory invariants.
+  // Design foundation (W-D1): token, motion and sensory invariants.
   // Pure Node (filesystem + a fake Document) — no DOM, so it belongs here.
   'src/design/**/*.{test,spec}.ts',
   // CM-28: the shell's bottom-edge arithmetic is a pure function over two inputs.

@@ -29,7 +29,7 @@ describe('EmptyState (UX-DS-07 — the one empty-state pattern)', () => {
         expect(screen.queryAllByRole('button')).toHaveLength(0);
     });
 
-    it('never offers more than one primary action (doc 24 §6)', () => {
+    it('never offers more than one primary action', () => {
         render(
             <EmptyState
                 icon={Inbox}
