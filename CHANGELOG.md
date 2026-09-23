@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0-rc.38](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.37...v1.21.0-rc.38) (2026-09-23)
+
+
+### Bug Fixes
+
+* **deploy:** retire functions removed from source before deploying (RA-01) ([#260](https://github.com/Adedamola-Aina/AnchorOS/issues/260)) ([9fcd12b](https://github.com/Adedamola-Aina/AnchorOS/commit/9fcd12ba8a2ee3b6f1910a86d7cbbb134e7c167d)), closes [#147](https://github.com/Adedamola-Aina/AnchorOS/issues/147) [#155](https://github.com/Adedamola-Aina/AnchorOS/issues/155)
+
 ## [1.21.0-rc.37](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.36...v1.21.0-rc.37) (2026-09-23)
 
 ## [1.21.0-rc.36](https://github.com/Adedamola-Aina/AnchorOS/compare/v1.21.0-rc.35...v1.21.0-rc.36) (2026-09-23)
