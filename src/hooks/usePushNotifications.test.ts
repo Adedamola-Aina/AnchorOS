@@ -1,11 +1,11 @@
-// @ts-nocheck
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockState = vi.hoisted(() => ({
-    messaging: {},
+    messaging: {} as any,
     getMessagingInstance: () => Promise.resolve({}),
-    auth: { currentUser: { uid: 'user-1' } },
+    auth: { currentUser: { uid: 'user-1' } } as any,
     onMessageCallback: undefined as ((payload: Record<string, unknown>) => void) | undefined,
     onMessageUnsubscribe: vi.fn(),
 }));
@@ -71,7 +71,7 @@ describe('usePushNotifications', () => {
 
     it('restores token on mount when permission is already granted', async () => {
         const showToast = vi.fn();
-        globalThis.Notification.permission = 'granted';
+        Object.defineProperty(globalThis.Notification, 'permission', { value: 'granted', configurable: true });
         vi.mocked(getFcmTokenWithRetry).mockResolvedValue('restored-token');
 
         const { result } = renderHook(() => usePushNotifications({ showToast }));
@@ -90,7 +90,7 @@ describe('usePushNotifications', () => {
 
     it('does not re-persist a restore that resolves after the user changed (SN-01)', async () => {
         const showToast = vi.fn();
-        globalThis.Notification.permission = 'granted';
+        Object.defineProperty(globalThis.Notification, 'permission', { value: 'granted', configurable: true });
         let resolveToken: (value: string) => void = () => undefined;
         vi.mocked(getFcmTokenWithRetry).mockReturnValue(
             new Promise<string>((resolve) => { resolveToken = resolve; }) as never,
@@ -151,7 +151,7 @@ describe('usePushNotifications', () => {
 
     it('disables notifications when currently granted and token exists', async () => {
         const showToast = vi.fn();
-        globalThis.Notification.permission = 'granted';
+        Object.defineProperty(globalThis.Notification, 'permission', { value: 'granted', configurable: true });
         vi.mocked(getFcmTokenWithRetry).mockResolvedValue('existing-token');
 
         const { result } = renderHook(() => usePushNotifications({ showToast }));
@@ -176,7 +176,7 @@ describe('usePushNotifications', () => {
 
     it('re-enables after disabling (SN-03 toggle state machine)', async () => {
         const showToast = vi.fn();
-        globalThis.Notification.permission = 'granted';
+        Object.defineProperty(globalThis.Notification, 'permission', { value: 'granted', configurable: true });
         vi.mocked(getFcmTokenWithRetry).mockResolvedValue('existing-token');
 
         const { result } = renderHook(() => usePushNotifications({ showToast }));

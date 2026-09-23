@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * DB-03: the Portfolio card advertised "Total across N accounts" and never
  * printed a total.

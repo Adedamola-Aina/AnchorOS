@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   subscribeToSharedAccountTransactions,
@@ -39,7 +39,7 @@ describe('SharedAccountSubscriptionsApi', () => {
 
   describe('subscribeToSharedAccountTransactions', () => {
     it('queries the finance subcollection filtered by accountId', () => {
-      const allTransactions = new Map();
+      const allTransactions = new Map<string, any>();
       subscribeToSharedAccountTransactions(
         { id: 'account-1', ownerUid: 'owner-1' },
         allTransactions,
@@ -56,7 +56,7 @@ describe('SharedAccountSubscriptionsApi', () => {
 
     it('attaches accountOwnerId to each transaction from the snapshot', () => {
       const onUpdate = vi.fn();
-      const allTransactions = new Map();
+      const allTransactions = new Map<string, any>();
       onSnapshot.mockImplementation((_q, cb) => {
         cb({
           docs: [
@@ -81,7 +81,7 @@ describe('SharedAccountSubscriptionsApi', () => {
 
     it('merges transactions from multiple accounts in the Map', () => {
       const onUpdate = vi.fn();
-      const allTransactions = new Map([
+      const allTransactions = new Map<string, any>([
         ['owner-1:other-account', [{ id: 'old-tx', amount: 50, date: '2024-01-05' }]],
       ]);
       onSnapshot.mockImplementation((_q, cb) => {
@@ -106,7 +106,7 @@ describe('SharedAccountSubscriptionsApi', () => {
     it('returns the unsubscribe function', () => {
       const unsub = vi.fn();
       onSnapshot.mockReturnValue(unsub);
-      const allTransactions = new Map();
+      const allTransactions = new Map<string, any>();
 
       const result = subscribeToSharedAccountTransactions(
         { id: 'account-1', ownerUid: 'owner-1' },

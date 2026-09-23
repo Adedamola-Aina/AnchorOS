@@ -1,7 +1,7 @@
 /**
  * OnboardingProgress tests — TDD
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect } from 'vitest';

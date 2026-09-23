@@ -8,7 +8,7 @@
  * component rendering and props handling. Full gesture testing
  * requires a real browser and is not covered here.
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -45,7 +45,7 @@ vi.mock('../../hooks/useFamilySharing', () => ({
 
 // Mock HIG components to render as native elements for test interaction
 vi.mock('../../components/shared', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
     PopoverMenu: ({ items, value, onChange, label, testId }: any) => (
@@ -991,7 +991,7 @@ describe('CommitmentsView — completion is acknowledged in every view', () => {
     completed: true,
     category: 'personal',
     createdAt: new Date('2024-01-01'),
-    lastCompletedAt: new Date(),
+    lastCompletedAt: new Date().toISOString(),
     timeOfDay: 'morning',
   };
 
@@ -1012,7 +1012,7 @@ describe('CommitmentsView — completion is acknowledged in every view', () => {
       ...completedToday,
       id: 'done-old',
       title: 'Old completion',
-      lastCompletedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      lastCompletedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     };
     renderWithContext(<CommitmentsView />, { tasks: { tasks: [mockTasks[0], completedLastMonth] } });
     const user = userEvent.setup();

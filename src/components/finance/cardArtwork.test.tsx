@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * Card artwork: the link that was missing (UX-FN-04).
  *
@@ -12,11 +12,12 @@ import React from 'react';
 import { ARTWORK_PRESETS } from './cardConstants';
 import { accountArtworkPresetId, artworkPresetCss, isImageArtwork } from './cardArtwork';
 import { AccountCard } from './AccountCard';
+import type { AnchorAccount } from '../../types';
 
-const account = (overrides = {}) => ({
+const account = (overrides: Record<string, unknown> = {}): AnchorAccount => ({
     id: 'acc-1', name: 'Everyday', type: 'checking', currency: 'USD', balanceCents: 123400,
     color: '#000', scope: 'personal', isArchived: false, ...overrides,
-});
+} as AnchorAccount);
 
 describe('artwork resolution', () => {
     it('treats only real URLs as images', () => {

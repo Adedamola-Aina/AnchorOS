@@ -2,7 +2,7 @@
  * financeActivityLogging — activity logging for shared/non-owner transactions
  * Target: 90%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -23,7 +23,7 @@ describe('financeActivityLogging', () => {
 
     describe('logTransactionAdded', () => {
         it('logs when account is shared', () => {
-            const account = buildAccount({ ownerId: 'user-1', sharedWith: { 'user-2': true } });
+            const account = buildAccount({ ownerId: 'user-1', sharedWith: { 'user-2': { grantedAt: '2026-01-01', grantedBy: 'owner-1' } } });
             const tx = { title: 'Lunch', amountCents: 1500, type: 'expense' as const, category: 'Food', accountId: 'acc-1', currency: 'NGN' as const, scope: 'personal' as const, date: '2024-01-01' };
 
             logTransactionAdded(user, userName, account, tx);
@@ -57,7 +57,7 @@ describe('financeActivityLogging', () => {
 
     describe('logTransactionDeleted', () => {
         it('logs deletion when account is shared', () => {
-            const account = buildAccount({ ownerId: 'user-1', sharedWith: { 'user-2': true } });
+            const account = buildAccount({ ownerId: 'user-1', sharedWith: { 'user-2': { grantedAt: '2026-01-01', grantedBy: 'owner-1' } } });
             const tx = buildTransaction({ id: 'tx-1', title: 'Old TX' });
 
             logTransactionDeleted(user, userName, account, 'tx-1', tx);
@@ -87,7 +87,7 @@ describe('financeActivityLogging', () => {
 
     describe('logTransactionEdited', () => {
         it('logs edit when account is shared', () => {
-            const account = buildAccount({ ownerId: 'user-1', sharedWith: { 'user-2': true } });
+            const account = buildAccount({ ownerId: 'user-1', sharedWith: { 'user-2': { grantedAt: '2026-01-01', grantedBy: 'owner-1' } } });
             const original = buildTransaction({ id: 'tx-1', title: 'Before', amountCents: 1000 });
 
             logTransactionEdited(user, userName, account, 'tx-1', { title: 'After' }, original);

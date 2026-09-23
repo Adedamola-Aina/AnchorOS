@@ -2,7 +2,7 @@
  * Tests for csvExport.ts — downloadCsv, escapeCell, toCsv
  * Target: 95%+ coverage, high mutation kill rate
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -41,8 +41,8 @@ describe('downloadCsv', () => {
         vi.spyOn(document.body, 'removeChild').mockImplementation((node) => node);
         createObjectURLSpy = vi.fn(() => 'blob:http://localhost/fake');
         revokeObjectURLSpy = vi.fn();
-        globalThis.URL.createObjectURL = createObjectURLSpy;
-        globalThis.URL.revokeObjectURL = revokeObjectURLSpy;
+        globalThis.URL.createObjectURL = createObjectURLSpy as unknown as typeof URL.createObjectURL;
+        globalThis.URL.revokeObjectURL = revokeObjectURLSpy as unknown as typeof URL.revokeObjectURL;
     });
 
     afterEach(() => {

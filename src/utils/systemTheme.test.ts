@@ -2,7 +2,7 @@
  * systemTheme — theme detection and subscription
  * Target: 95%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';

@@ -2,7 +2,7 @@
  * AuthContext — authentication state, profile sync, sign-in/up/out
  * Target: 80%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -18,12 +18,12 @@ const mockSendEmailVerification = vi.fn();
 const mockMultiFactor = vi.fn(() => ({ enrolledFactors: [] }));
 
 vi.mock('firebase/auth', () => ({
-    onAuthStateChanged: (...a: any[]) => mockOnAuthStateChanged(...a),
-    signInWithEmailAndPassword: (...a: any[]) => mockSignInWithEmailAndPassword(...a),
-    createUserWithEmailAndPassword: (...a: any[]) => mockCreateUserWithEmailAndPassword(...a),
-    signOut: (...a: any[]) => mockSignOut(...a),
-    sendEmailVerification: (...a: any[]) => mockSendEmailVerification(...a),
-    multiFactor: (...a: any[]) => mockMultiFactor(...a),
+    onAuthStateChanged: (...a: any[]) => (mockOnAuthStateChanged as any)(...a),
+    signInWithEmailAndPassword: (...a: any[]) => (mockSignInWithEmailAndPassword as any)(...a),
+    createUserWithEmailAndPassword: (...a: any[]) => (mockCreateUserWithEmailAndPassword as any)(...a),
+    signOut: (...a: any[]) => (mockSignOut as any)(...a),
+    sendEmailVerification: (...a: any[]) => (mockSendEmailVerification as any)(...a),
+    multiFactor: (...a: any[]) => (mockMultiFactor as any)(...a),
     sendPasswordResetEmail: vi.fn(),
 }));
 
@@ -35,12 +35,12 @@ const mockDoc = vi.fn((..._a: any[]) => 'mock-doc-ref');
 const mockCollection = vi.fn((..._a: any[]) => 'mock-col-ref');
 
 vi.mock('firebase/firestore', () => ({
-    doc: (...a: any[]) => mockDoc(...a),
-    collection: (...a: any[]) => mockCollection(...a),
-    onSnapshot: (...a: any[]) => mockOnSnapshot(...a),
-    updateDoc: (...a: any[]) => mockUpdateDoc(...a),
-    setDoc: (...a: any[]) => mockSetDoc(...a),
-    addDoc: (...a: any[]) => mockAddDoc(...a),
+    doc: (...a: any[]) => (mockDoc as any)(...a),
+    collection: (...a: any[]) => (mockCollection as any)(...a),
+    onSnapshot: (...a: any[]) => (mockOnSnapshot as any)(...a),
+    updateDoc: (...a: any[]) => (mockUpdateDoc as any)(...a),
+    setDoc: (...a: any[]) => (mockSetDoc as any)(...a),
+    addDoc: (...a: any[]) => (mockAddDoc as any)(...a),
 }));
 
 vi.mock('../config/firebase', () => ({
@@ -91,7 +91,7 @@ vi.mock('../services/AuditService', () => ({
 
 const mockDeregisterDevicePushToken = vi.fn(async () => false);
 vi.mock('../services/pushTokenLifecycle', () => ({
-    deregisterDevicePushToken: (...a: any[]) => mockDeregisterDevicePushToken(...a),
+    deregisterDevicePushToken: (...a: any[]) => (mockDeregisterDevicePushToken as any)(...a),
 }));
 
 // ── Import after mocks ─────────────────────────────────────────────────────
@@ -344,7 +344,7 @@ describe('AuthContext', () => {
 
     it('auto-corrects MFA mismatch (enrolled but profile says no)', async () => {
         // multiFactor returns enrolled factor
-        mockMultiFactor.mockReturnValueOnce({ enrolledFactors: [{ uid: 'mfa-1' }] });
+        mockMultiFactor.mockReturnValueOnce({ enrolledFactors: [{ uid: 'mfa-1' }] } as any);
         mockUpdateDoc.mockResolvedValue(undefined);
 
         renderHook(() => useAuth(), { wrapper: createWrapper() });

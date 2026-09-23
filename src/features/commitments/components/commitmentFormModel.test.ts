@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * The persisted contract of the commitment form.
  *
@@ -13,7 +13,7 @@ import {
     emptyCommitmentValues, hasRefinements, validateCommitmentForm,
 } from './commitmentFormModel';
 
-const baseTask = (overrides: Partial<AnchorTask> = {}): AnchorTask => ({
+const baseTask = (overrides: Record<string, unknown> = {}): AnchorTask => ({
     id: 't1',
     title: 'Read Bible',
     type: 'daily',
@@ -85,7 +85,7 @@ describe('edit patch', () => {
             title: 'Bins', type: 'monthly', daysOfMonth: [1], daysOfWeek: [2],
         }));
 
-        expect(patch.type).toBeUndefined();
+        expect((patch as Record<string, unknown>).type).toBeUndefined();
         expect(patch.daysOfWeek).toEqual([2]);
         expect(patch.daysOfMonth).toBeUndefined();
     });

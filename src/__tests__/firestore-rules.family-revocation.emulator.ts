@@ -14,7 +14,7 @@
  *
  * @vitest-environment node
  */
-// @ts-nocheck
+
 
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collectionGroup, getDocs, query, where,
@@ -32,7 +32,7 @@ const OWNER = 'owner-a';
 const MEMBER = 'member-b';
 const STRANGER = 'stranger-c';
 
-const connPath = (id) => `${PREFIX}/family_connections/${id}`;
+const connPath = (id: string) => `${PREFIX}/family_connections/${id}`;
 const accountPath = `${PREFIX}/users/${OWNER}/accounts/acc1`;
 const scopeRowPath = `${PREFIX}/users/${OWNER}/finance/tx-scope-row`;
 const indexRowPath = `${PREFIX}/users/${OWNER}/finance/tx-index-row`;
@@ -47,7 +47,7 @@ const dashboardPath = `${PREFIX}/users/${OWNER}/dashboard/summary`;
  * cleanup while `scope: 'family'` may linger — the worst case the rules must
  * reject).
  */
-async function seedLifecycle({ connId = `${OWNER}_${MEMBER}`, status, grantMember = true } = {}) {
+async function seedLifecycle({ connId = `${OWNER}_${MEMBER}`, status, grantMember = true }: { connId?: string; status?: string; grantMember?: boolean } = {}) {
   await ctx.getEnv().withSecurityRulesDisabled(async (c) => {
     const fs = c.firestore();
 

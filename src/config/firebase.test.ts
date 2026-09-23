@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockState = vi.hoisted(() => ({
@@ -64,7 +64,7 @@ function setBaseEnv(overrides: Record<string, string> = {}) {
     vi.stubEnv('VITE_FIREBASE_APP_ID', 'app-id');
     vi.stubEnv('VITE_FIREBASE_MEASUREMENT_ID', 'measurement-id');
     vi.stubEnv('VITE_APP_ENV', 'development');
-    vi.stubEnv('DEV', 'true');
+    (vi.stubEnv as any)('DEV', 'true');
     vi.stubEnv('VITE_FIREBASE_APP_CHECK_SITE_KEY', '');
     vi.stubEnv('VITE_APP_CHECK_DEBUG_TOKEN', '');
 

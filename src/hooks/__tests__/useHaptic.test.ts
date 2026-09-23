@@ -6,7 +6,7 @@
  * Tests haptic feedback patterns for mobile interactions.
  * Note: Navigator.vibrate() is not available in jsdom, so we mock it.
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';

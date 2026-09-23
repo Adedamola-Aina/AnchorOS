@@ -5,7 +5,7 @@
  *
  * @vitest-environment node
  */
-// @ts-nocheck
+
 
 import {
   initializeTestEnvironment,
@@ -92,9 +92,9 @@ describe('storage account artwork rules', () => {
 
   it('allows the owner to upload image artwork', async () => {
     await assertSucceeds(
-      ownerStorage('owner-1').ref(artworkPath).putString('image-data', 'raw', {
+      Promise.resolve(ownerStorage('owner-1').ref(artworkPath).putString('image-data', 'raw', {
         contentType: 'image/png',
-      }),
+      })),
     );
   });
 
@@ -114,25 +114,25 @@ describe('storage account artwork rules', () => {
 
   it('rejects upload from a different authenticated user', async () => {
     await assertFails(
-      ownerStorage('viewer-1').ref(artworkPath).putString('image-data', 'raw', {
+      Promise.resolve(ownerStorage('viewer-1').ref(artworkPath).putString('image-data', 'raw', {
         contentType: 'image/png',
-      }),
+      })),
     );
   });
 
   it('rejects unauthenticated upload', async () => {
     await assertFails(
-      unauthStorage().ref(artworkPath).putString('image-data', 'raw', {
+      Promise.resolve(unauthStorage().ref(artworkPath).putString('image-data', 'raw', {
         contentType: 'image/png',
-      }),
+      })),
     );
   });
 
   it('rejects non-image uploads even for the owner', async () => {
     await assertFails(
-      ownerStorage('owner-1').ref(artworkPath).putString('not-an-image', 'raw', {
+      Promise.resolve(ownerStorage('owner-1').ref(artworkPath).putString('not-an-image', 'raw', {
         contentType: 'text/plain',
-      }),
+      })),
     );
   });
 });

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('firebase/auth', () => {
@@ -8,7 +8,8 @@ vi.mock('firebase/auth', () => {
   }
   class OAuthProvider {
     scopes: string[] = [];
-    constructor(public providerId: string) {}
+    providerId: string;
+    constructor(providerId: string) { this.providerId = providerId; }
     addScope(s: string) { this.scopes.push(s); }
   }
   return {
@@ -36,13 +37,13 @@ describe('socialAuth', () => {
 
   it('makeGoogleProvider adds email + profile scopes', () => {
     const p = makeGoogleProvider();
-    expect(p.scopes).toEqual(['email', 'profile']);
+    expect((p as any).scopes).toEqual(['email', 'profile']);
   });
 
   it('makeAppleProvider has apple.com providerId and email/name scopes', () => {
     const p = makeAppleProvider();
     expect((p as any).providerId).toBe('apple.com');
-    expect(p.scopes).toEqual(['email', 'name']);
+    expect((p as any).scopes).toEqual(['email', 'name']);
   });
 
   it('doSocialSignIn uses popup on web and returns credential', async () => {

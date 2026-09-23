@@ -2,7 +2,7 @@
  * useRecurringQueries — React Query hooks for recurring transactions
  * Target: 80%+ coverage of optimistic updates + rollback
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

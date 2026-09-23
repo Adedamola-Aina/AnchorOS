@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -32,7 +32,7 @@ vi.mock('../../../../utils/secureDb', () => ({
   where: vi.fn(),
   getDocs: (...args: unknown[]) => mockState.mockGetDocs(...args),
   doc: vi.fn(),
-  writeBatch: (...args: unknown[]) => mockState.mockWriteBatch(...args),
+  writeBatch: (...args: unknown[]) => (mockState.mockWriteBatch as any)(...args),
 }));
 
 import { AutoAcceptInvitationAction } from './AutoAcceptAction';

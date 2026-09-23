@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /// <reference types="@testing-library/jest-dom/vitest" />
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';

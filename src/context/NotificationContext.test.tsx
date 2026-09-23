@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { NotificationProvider, useNotifications } from './NotificationContext';
@@ -43,7 +43,7 @@ const requestPermissionMock = vi.fn();
 global.Notification = {
     requestPermission: requestPermissionMock,
     permission: 'default'
-};
+} as unknown as typeof Notification;
 
 const TestComponent = () => {
     const { requestPushPermission, fcmToken } = useNotifications();
@@ -62,7 +62,7 @@ describe('NotificationContext Token Management', () => {
         vi.stubEnv('VITE_FIREBASE_VAPID_KEY', 'test-vapid-key');
         requestPermissionMock.mockResolvedValue('granted');
         //  -- Mocking permission property
-        global.Notification.permission = 'default';
+        Object.defineProperty(global.Notification, 'permission', { value: 'default', configurable: true });
     });
 
     // Fixed: mock getFcmTokenWithRetry instead of raw getToken

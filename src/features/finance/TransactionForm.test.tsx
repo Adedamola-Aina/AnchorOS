@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -10,7 +10,7 @@ import { AuthContext } from '../../context/AuthContext';
 
 // Mock HIG components to render as native elements for test interaction
 vi.mock('../../components/shared', async (importOriginal) => {
-    const actual = await importOriginal();
+    const actual = (await importOriginal()) as Record<string, unknown>;
     return {
         ...actual,
         PopoverMenu: ({ items, value, onChange, label, testId }: any) => (

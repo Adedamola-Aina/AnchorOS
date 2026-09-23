@@ -2,7 +2,7 @@
  * Tests for taskInsights.ts — getProductivityMetrics
  * Target: 90%+ mutation kill rate
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect } from 'vitest';

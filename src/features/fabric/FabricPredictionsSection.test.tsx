@@ -1,7 +1,8 @@
-// @ts-nocheck
+
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FabricPredictionsSection } from './FabricPredictionsSection';
+import type { Prediction } from '../../types';
 
 vi.mock('../../services/telemetry', () => ({
   logProductEvent: vi.fn(),
@@ -14,7 +15,7 @@ const mockPrediction = {
   type: 'budget_alert',
   message: 'You are close to your dining budget',
   confidence: 0.85,
-};
+} as unknown as Prediction;
 
 describe('FabricPredictionsSection', () => {
   it('returns null when predictions array is empty', () => {

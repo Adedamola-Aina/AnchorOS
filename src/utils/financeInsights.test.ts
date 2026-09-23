@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect } from 'vitest';
 import { getWeeklySpending, detectRecurring, getCashFlowAnalysis, getAssetDistribution, getPortfolioTotals } from './financeInsights';
 import type { AnchorTransaction } from '../types';

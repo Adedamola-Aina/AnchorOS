@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   subscribeToProfile,
@@ -6,6 +6,7 @@ import {
   createUserProfile,
   queueWelcomeEmail,
 } from './AuthProfileApi';
+import type { UserProfile } from '../types';
 
 const addDoc = vi.fn();
 const collection = vi.fn();
@@ -69,16 +70,16 @@ describe('AuthProfileApi', () => {
 
   describe('updateUserProfile', () => {
     it('calls updateDoc with the partial profile updates', async () => {
-      await updateUserProfile('user-1', { displayName: 'New Name' });
+      await updateUserProfile('user-1', { name: 'New Name' });
 
       expect(updateDoc).toHaveBeenCalledWith(
         expect.any(Object),
-        { displayName: 'New Name' },
+        { name: 'New Name' },
       );
     });
 
     it('uses the correct user document path', async () => {
-      await updateUserProfile('user-1', { email: 'new@example.com' });
+      await updateUserProfile('user-1', { timezone: 'Africa/Lagos' });
 
       expect(doc).toHaveBeenCalledWith(
         expect.anything(),
@@ -89,7 +90,7 @@ describe('AuthProfileApi', () => {
 
   describe('createUserProfile', () => {
     it('calls setDoc with the full profile data', async () => {
-      const profileData = { displayName: 'New User', email: 'new@example.com' };
+      const profileData: UserProfile = { name: 'New User', familyMode: false, theme: 'light' };
       await createUserProfile('user-1', profileData);
 
       expect(setDoc).toHaveBeenCalledWith(
@@ -99,7 +100,7 @@ describe('AuthProfileApi', () => {
     });
 
     it('uses the correct user document path', async () => {
-      await createUserProfile('user-1', {});
+      await createUserProfile('user-1', {} as unknown as UserProfile);
 
       expect(doc).toHaveBeenCalledWith(
         expect.anything(),

@@ -2,7 +2,7 @@
  * Tests for rateLimit.ts — checkRateLimit, resetRateLimit, formatRetryTime
  * Target: 95%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
@@ -65,7 +65,7 @@ describe('EmailChangeForm', () => {
     expand();
     fireEvent.change(screen.getByPlaceholderText(/new email/i), { target: { value: 'notanemail' } });
     fireEvent.change(screen.getByPlaceholderText(/current password/i), { target: { value: 'pass123' } });
-    fireEvent.submit(screen.getByPlaceholderText(/new email/i).closest('form'));
+    fireEvent.submit(screen.getByPlaceholderText(/new email/i).closest('form')!);
     await waitFor(() => expect(screen.getByText(/enter a valid email/i)).toBeInTheDocument());
   });
 

@@ -3,7 +3,7 @@
  * 
  * Tests the mobile-optimized transaction item wrapper.
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

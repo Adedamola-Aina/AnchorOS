@@ -4,7 +4,7 @@
  * Write tests first
  * BUG-002: iOS keyboard covers input fields
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * The action-bar contract (CM-28).
  *

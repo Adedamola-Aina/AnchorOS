@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
@@ -26,7 +26,7 @@ vi.mock('../utils/rateLimit', () => ({
 }));
 
 // Mock the task queries
-const mockTasks = vi.fn(() => []);
+const mockTasks = vi.fn((): any[] => []);
 vi.mock('./queries/useTaskQueries', () => ({
   useTasksQuery: vi.fn(() => ({ data: mockTasks(), isLoading: false })),
   TASK_KEYS: {

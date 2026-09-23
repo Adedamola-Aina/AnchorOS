@@ -14,7 +14,7 @@
  * Skips cleanly when the Firestore emulator is not running so ordinary unit
  * runs stay green.
  */
-// @ts-nocheck
+
 
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import { initializeTestEnvironment } from '@firebase/rules-unit-testing';
@@ -29,11 +29,11 @@ const APP_ID = 'anchor-os';
 describe('Push token ownership Integration (SN-01)', () => {
     let testEnv: RulesTestEnvironment;
 
-    const tokens = (db, uid) =>
+    const tokens = (db: any, uid: string) =>
         db.collection('artifacts').doc(APP_ID).collection('users').doc(uid).collection('fcmTokens');
-    const tokenRef = (db, uid, token) => tokens(db, uid).doc(token);
+    const tokenRef = (db: any, uid: string, token: string) => tokens(db, uid).doc(token);
 
-    const existsAsAdmin = async (uid, token) => {
+    const existsAsAdmin = async (uid: string, token: string) => {
         let exists = false;
         await testEnv.withSecurityRulesDisabled(async (context) => {
             const snap = await tokenRef(context.firestore(), uid, token).get();

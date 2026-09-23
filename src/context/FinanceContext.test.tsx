@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
@@ -6,7 +6,7 @@ import { FinanceProvider, useFinance } from './FinanceContext';
 
 // Mock dependencies
 const mockFinanceService = {
-  transactions: [],
+  transactions: [] as any[],
   accounts: [],
   loadingFinance: false,
   addAccount: vi.fn(),

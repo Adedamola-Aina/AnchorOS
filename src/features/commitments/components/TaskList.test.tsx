@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * UX-CM-08: completing a financial-looking commitment used to open a blocking
  * cross-domain "Financial Transaction?" modal. The offer is now an inline,

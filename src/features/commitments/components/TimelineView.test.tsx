@@ -1,5 +1,5 @@
 /// <reference types="@testing-library/jest-dom/vitest" />
-// @ts-nocheck
+
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -24,8 +24,8 @@ const task = (overrides: Record<string, unknown> = {}) => ({
 const renderTimeline = (tasks: any[], extra: Record<string, unknown> = {}) => render(
   <TimelineView
     tasks={tasks}
-    onToggle={extra.onToggle ?? vi.fn()}
-    onStartEdit={extra.onStartEdit ?? vi.fn()}
+    onToggle={(extra.onToggle as ((id: string, completed: boolean) => void) | undefined) ?? vi.fn()}
+    onStartEdit={(extra.onStartEdit as ((id: string) => void) | undefined) ?? vi.fn()}
     onDelete={vi.fn()}
     now={new Date('2026-09-22T08:00:00')}
   />,

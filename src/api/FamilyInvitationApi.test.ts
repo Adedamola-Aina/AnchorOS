@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { subscribeToOwnerPendingInvitations } from './FamilyInvitationApi';
 
@@ -60,7 +60,7 @@ describe('FamilyInvitationApi', () => {
       const onData = vi.fn();
       subscribeToOwnerPendingInvitations('owner-1', onData);
 
-      capturedCallback({
+      (capturedCallback as ((snap: unknown) => void) | null)?.({
         docs: [
           {
             id: 'inv-1',
@@ -101,7 +101,7 @@ describe('FamilyInvitationApi', () => {
 
       const onData = vi.fn();
       subscribeToOwnerPendingInvitations('owner-1', onData);
-      capturedCallback({ docs: [] });
+      (capturedCallback as ((snap: unknown) => void) | null)?.({ docs: [] });
 
       expect(onData).toHaveBeenCalledWith([]);
     });

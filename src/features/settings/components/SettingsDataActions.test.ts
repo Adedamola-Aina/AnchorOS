@@ -2,7 +2,7 @@
  * SettingsDataActions — handleWipeData, handleDeleteAccount
  * Target: 80%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

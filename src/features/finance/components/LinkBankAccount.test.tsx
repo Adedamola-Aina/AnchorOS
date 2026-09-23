@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LinkBankAccount } from './LinkBankAccount';
@@ -91,7 +91,7 @@ describe('LinkBankAccount', () => {
     expect(setup).toHaveBeenCalledTimes(1);
     expect(open).toHaveBeenCalledTimes(1);
 
-    const config = ctor.mock.calls[0][0];
+    const config = (ctor.mock.calls[0] as any)[0];
     await config.onSuccess({ code: 'mono-code' });
 
     expect(mockBankState.linkBank).toHaveBeenCalledWith('mono-code');
@@ -111,7 +111,7 @@ describe('LinkBankAccount', () => {
     render(<LinkBankAccount {...defaultProps} />);
     fireEvent.click(screen.getByRole('button', { name: /link bank account/i }));
 
-    const config = ctor.mock.calls[0][0];
+    const config = (ctor.mock.calls[0] as any)[0];
     await config.onSuccess({ code: 'mono-code' });
 
     expect(mockShowToast).toHaveBeenCalledWith('Failed to link bank account', 'error');

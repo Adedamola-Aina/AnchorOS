@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {

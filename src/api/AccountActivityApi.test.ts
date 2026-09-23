@@ -1,6 +1,7 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { subscribeToAccountActivity, createAccountActivity } from './AccountActivityApi';
+import type { AccountActivity } from '../types/activity';
 
 const addDoc = vi.fn();
 const collection = vi.fn();
@@ -97,7 +98,7 @@ describe('AccountActivityApi', () => {
 
   describe('createAccountActivity', () => {
     it('adds an activity document to the nested activity subcollection', async () => {
-      const activityData = { type: 'transfer', amount: 250 };
+      const activityData = { type: 'transfer', amount: 250 } as unknown as Omit<AccountActivity, 'id'>;
       await createAccountActivity('account-1', 'owner-1', activityData);
 
       expect(addDoc).toHaveBeenCalledWith(
@@ -107,7 +108,7 @@ describe('AccountActivityApi', () => {
     });
 
     it('uses the correct nested collection path', async () => {
-      await createAccountActivity('account-1', 'owner-1', {});
+      await createAccountActivity('account-1', 'owner-1', {} as unknown as Omit<AccountActivity, 'id'>);
 
       expect(collection).toHaveBeenCalledWith(
         expect.anything(),

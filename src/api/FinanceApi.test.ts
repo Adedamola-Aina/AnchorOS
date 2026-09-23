@@ -2,7 +2,7 @@
  * Tests for FinanceApi.ts — subscription methods and search
  * Target: 85%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

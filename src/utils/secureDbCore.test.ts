@@ -2,7 +2,7 @@
  * Tests for secureDbCore.ts — withTimeout, mapSecureDbError, logOp, getUserDocRef, getUserCollectionPath
  * Target: 90%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

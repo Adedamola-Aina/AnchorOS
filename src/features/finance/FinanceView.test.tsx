@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -317,7 +317,7 @@ describe('FinanceView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    delete (document as Document & { startViewTransition?: unknown }).startViewTransition;
+    delete (document as unknown as { startViewTransition?: unknown }).startViewTransition;
   });
 
   describe('3-Zone Layout', () => {

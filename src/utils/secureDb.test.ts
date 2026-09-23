@@ -3,7 +3,7 @@
  * ALL Firestore operations in the app go through this module.
  * Target: 90%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

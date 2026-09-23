@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * CM-29 — the find-or-add field's contract.
  *

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -236,7 +236,7 @@ describe('AccountDetailsView', () => {
         const user = userEvent.setup();
         await user.click(screen.getByRole('button', { name: 'Add money' }));
         await user.click(screen.getByRole('button', { name: 'Spend' }));
-        await user.click(screen.getByRole('button', { name: 'Transfer', exact: true }));
+        await user.click(screen.getByRole('button', { name: /^Transfer$/ }));
         expect(onAdd.mock.calls.map(call => call[0])).toEqual(['income', 'expense', 'transfer']);
         // No duplicated "Record Transaction" CTA anywhere on the page.
         expect(screen.queryByText('Record Transaction')).not.toBeInTheDocument();
@@ -254,7 +254,7 @@ describe('AccountDetailsView', () => {
                 onAddTransaction={vi.fn()}
             />
         );
-        expect(screen.queryByRole('button', { name: 'Transfer', exact: true })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /^Transfer$/ })).not.toBeInTheDocument();
     });
 
     it('opens action sheet when ellipsis is clicked', async () => {
@@ -362,7 +362,7 @@ describe('AccountDetailsView rename (Issue #142)', () => {
         const sharedAccount: AnchorAccount = {
             ...mockAccount,
             ownerId: 'owner-1',
-            sharedWith: { 'test-user': { permission: 'read' } },
+            sharedWith: { 'test-user': { grantedAt: '2026-01-01', grantedBy: 'owner-1', permission: 'read' } },
         };
         const renameAccount = vi.fn();
         const user = userEvent.setup();

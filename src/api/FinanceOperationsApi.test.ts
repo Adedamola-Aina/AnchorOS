@@ -1,6 +1,7 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { convertCurrencyAcrossAccounts, restoreSoftDeletedTransaction } from './FinanceOperationsApi';
+import type { AnchorAccount } from '../types';
 
 const collection = vi.fn();
 const doc = vi.fn();
@@ -52,20 +53,20 @@ describe('FinanceOperationsApi', () => {
   it('creates linked conversion entries and updates both account balances', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-16T12:00:00.000Z'));
-    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('link-123');
+    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('link-123' as any);
 
     const fromAcc = {
       id: 'acc-usd',
       name: 'USD Wallet',
       currency: 'USD',
       ownerId: 'owner-a',
-    };
+    } as unknown as AnchorAccount;
     const toAcc = {
       id: 'acc-ngn',
       name: 'NGN Wallet',
       currency: 'NGN',
       ownerId: 'owner-b',
-    };
+    } as unknown as AnchorAccount;
 
     await convertCurrencyAcrossAccounts('actor-1', fromAcc, toAcc, 10_000, 1.5);
 
@@ -85,9 +86,9 @@ describe('FinanceOperationsApi', () => {
   });
 
   it('falls back to acting user as owner when account owner is missing', async () => {
-    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('link-fallback');
-    const fromAcc = { id: 'acc-1', name: 'Main', currency: 'USD' };
-    const toAcc = { id: 'acc-2', name: 'Savings', currency: 'USD' };
+    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('link-fallback' as any);
+    const fromAcc = { id: 'acc-1', name: 'Main', currency: 'USD' } as unknown as AnchorAccount;
+    const toAcc = { id: 'acc-2', name: 'Savings', currency: 'USD' } as unknown as AnchorAccount;
 
     await convertCurrencyAcrossAccounts('user-acting', fromAcc, toAcc, 5000, 1);
 

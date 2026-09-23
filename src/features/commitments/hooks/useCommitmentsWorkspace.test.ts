@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * The undo window and the completion message.
  *
@@ -10,17 +10,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { UNDO_WINDOW_MS, useCommitmentsWorkspace } from './useCommitmentsWorkspace';
+import type { AnchorTask } from '../../../types';
 
-const task = (overrides: Record<string, unknown> = {}) => ({
+const task = (overrides: Partial<AnchorTask> = {}): AnchorTask => ({
   id: 't1', title: 'Gym', type: 'daily', completed: false, category: 'personal', createdAt: new Date('2026-09-01'), ...overrides,
-});
+} as AnchorTask);
 
-const setup = (tasks = [task()]) => {
+const setup = (tasks: AnchorTask[] = [task()]) => {
   const addTask = vi.fn().mockResolvedValue(undefined);
   const toggleTask = vi.fn().mockResolvedValue(undefined);
   const deleteTask = vi.fn().mockResolvedValue(undefined);
   // The field's value is owned by the page (CM-29) and passed in.
-  const hook = renderHook(({ query = '' } = {}) => useCommitmentsWorkspace({
+  const hook = renderHook(({ query = '' }: { query?: string } = {}) => useCommitmentsWorkspace({
     tasks, addTask, toggleTask, deleteTask, query, setQuery: () => {}, now: new Date('2026-09-22T09:00:00'),
   }));
   return { ...hook, addTask, toggleTask, deleteTask };

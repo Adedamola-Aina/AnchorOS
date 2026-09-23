@@ -4,13 +4,16 @@
  * These encode contracts that otherwise live only in prose (ARCHITECTURE.md /
  * AGENTS.md) so drift fails a test instead of accumulating:
  *
- *   1. production code never opts out of TypeScript (`@ts-nocheck`);
+ *   1. no source file opts out of TypeScript;
  *   2. Firestore is reached only through `src/utils/secureDb`;
- *   3. test-file `@ts-nocheck` debt can only shrink (a ratchet).
+ *   3. any source file — production or test — carrying it.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
+
+/** The opt-out directive, assembled so this file does not match itself. */
+const OPT_OUT_DIRECTIVE = ['@ts-', 'nocheck'].join('');
 
 const SRC = join(process.cwd(), 'src');
 
@@ -35,13 +38,10 @@ const FIRESTORE_ALLOWED = new Set([
     'config/firebase.ts',
 ]);
 
-/** Test-file @ts-nocheck count when the ratchet was introduced. Only ever lower it. */
-const TEST_TS_NOCHECK_BASELINE = 212;
-
 describe('architecture boundaries', () => {
-    it('production code never opts out of type checking (@ts-nocheck)', () => {
-        const offenders = productionFiles
-            .filter((file) => readFileSync(file, 'utf8').includes('@ts-nocheck'))
+    it('no source file opts out of type checking', () => {
+        const offenders = allFiles
+            .filter((file) => readFileSync(file, 'utf8').includes(OPT_OUT_DIRECTIVE))
             .map(rel);
         expect(offenders).toEqual([]);
     });
@@ -54,12 +54,5 @@ describe('architecture boundaries', () => {
             })
             .map(rel);
         expect(offenders).toEqual([]);
-    });
-
-    it('test-file @ts-nocheck debt does not grow (ratchet)', () => {
-        const count = allFiles
-            .filter((file) => isTestFile(file) && readFileSync(file, 'utf8').includes('@ts-nocheck'))
-            .length;
-        expect(count).toBeLessThanOrEqual(TEST_TS_NOCHECK_BASELINE);
     });
 });

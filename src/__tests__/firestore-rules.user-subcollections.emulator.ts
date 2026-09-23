@@ -4,7 +4,7 @@
  *
  * @vitest-environment node
  */
-// @ts-nocheck
+
 
 import {
   doc, getDoc, setDoc, deleteDoc,

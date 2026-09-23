@@ -9,7 +9,7 @@
  *
  * @vitest-environment node
  */
-// @ts-nocheck
+
 
 import { doc, getDoc, setDoc, describe, it, beforeAll, afterAll, beforeEach, assertSucceeds, assertFails, PREFIX, makeTestEnv } from './firestore-rules.helpers';
 

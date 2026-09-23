@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createCommitment,
@@ -6,6 +6,7 @@ import {
   deleteCommitment,
   updateCommitment,
 } from './CommitmentApi';
+import type { AnchorTask } from '../types';
 
 const addDoc = vi.fn();
 const collection = vi.fn();
@@ -51,7 +52,7 @@ describe('CommitmentApi', () => {
 
   describe('createCommitment', () => {
     it('adds a document to the commitments collection with timestamps and streak defaults', async () => {
-      const task = { title: 'Morning Run', type: 'daily', completed: false };
+      const task = { title: 'Morning Run', type: 'daily', completed: false } as unknown as Omit<AnchorTask, 'id' | 'createdAt'>;
       await createCommitment('user-1', task);
 
       expect(addDoc).toHaveBeenCalledWith(
@@ -67,7 +68,7 @@ describe('CommitmentApi', () => {
     });
 
     it('uses the correct collection path', async () => {
-      await createCommitment('user-1', { title: 'Test', type: 'daily', completed: false });
+      await createCommitment('user-1', { title: 'Test', type: 'daily', completed: false } as unknown as Omit<AnchorTask, 'id' | 'createdAt'>);
 
       expect(collection).toHaveBeenCalledWith(
         expect.anything(),
@@ -76,7 +77,7 @@ describe('CommitmentApi', () => {
     });
 
     it('returns the document reference from addDoc', async () => {
-      const result = await createCommitment('user-1', { title: 'Test', type: 'daily', completed: false });
+      const result = await createCommitment('user-1', { title: 'Test', type: 'daily', completed: false } as unknown as Omit<AnchorTask, 'id' | 'createdAt'>);
       expect(result).toEqual({ id: 'new-commitment-id' });
     });
   });

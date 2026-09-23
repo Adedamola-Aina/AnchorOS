@@ -46,10 +46,8 @@ Architectural decisions live here (there is no separate ADR directory). When cod
 
 Two contracts are machine-checked (not just documented) by `src/__tests__/architecture-boundaries.test.ts`:
 
-- **Production code is type-checked.** No non-test file may carry `@ts-nocheck`; the ESLint config also bans it outside tests.
+- **Production code is type-checked.** No source file — production or test — may carry `@ts-nocheck`; the ESLint config also bans it.
 - **Firestore has one entry point.** Only `src/utils/secureDb.ts`, `src/utils/secureDbCore.ts`, and `src/config/firebase.ts` may import `firebase/firestore`.
-
-Test-file `@ts-nocheck` is permitted but ratcheted: the count may only decrease.
 
 ## Error handling rules
 

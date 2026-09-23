@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * The shared form, driven the way a user drives it.
  *
@@ -31,7 +31,7 @@ vi.mock('./TaskFormParts', async (importOriginal) => {
         WeeklyDaysField: ({ value, onChange }: any) => (
             <div data-testid="weekday-selector">
                 {[0, 1, 2, 3, 4, 5, 6].map((day) => (
-                    <button key={day} type="button" aria-pressed={value.includes(day)} onClick={() => onChange(value.includes(day) ? value.filter((d) => d !== day) : [...value, day])}>
+                    <button key={day} type="button" aria-pressed={value.includes(day)} onClick={() => onChange(value.includes(day) ? value.filter((d: number) => d !== day) : [...value, day])}>
                         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'][day]}
                     </button>
                 ))}
@@ -40,7 +40,7 @@ vi.mock('./TaskFormParts', async (importOriginal) => {
         MonthlyDatesField: ({ value, onChange }: any) => (
             <div data-testid="month-days-row">
                 {[1, 15, 28].map((day) => (
-                    <button key={day} type="button" aria-pressed={value.includes(day)} onClick={() => onChange(value.includes(day) ? value.filter((d) => d !== day) : [...value, day])}>
+                    <button key={day} type="button" aria-pressed={value.includes(day)} onClick={() => onChange(value.includes(day) ? value.filter((d: number) => d !== day) : [...value, day])}>
                         {day}
                     </button>
                 ))}

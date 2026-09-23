@@ -2,7 +2,7 @@
  * Telemetry service — trace, logEvent, createTracer
  * Target: 90%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useMfaEnrollmentUI } from './useMfaEnrollmentUI';
@@ -75,7 +75,7 @@ describe('useMfaEnrollmentUI', () => {
         generateMfaSecret: vi.fn(() => Promise.reject(new Error('Network error'))),
       };
 
-      const { result } = renderHook(() => useMfaEnrollmentUI(opts));
+      const { result } = renderHook(() => useMfaEnrollmentUI(opts as any));
 
       await act(async () => {
         await result.current.handleGenerateSecret();
@@ -94,7 +94,7 @@ describe('useMfaEnrollmentUI', () => {
         generateMfaSecret: vi.fn(() => new Promise(() => {})),
       };
 
-      const { result } = renderHook(() => useMfaEnrollmentUI(opts));
+      const { result } = renderHook(() => useMfaEnrollmentUI(opts as any));
 
       act(() => {
         result.current.handleGenerateSecret();
@@ -140,7 +140,7 @@ describe('useMfaEnrollmentUI', () => {
         enrollMfa: vi.fn(() => Promise.reject(new Error('requires-recent-login'))),
       };
 
-      const { result } = renderHook(() => useMfaEnrollmentUI(opts));
+      const { result } = renderHook(() => useMfaEnrollmentUI(opts as any));
 
       await act(async () => {
         await result.current.handleEnroll('123456');
@@ -158,7 +158,7 @@ describe('useMfaEnrollmentUI', () => {
         enrollMfa: vi.fn(() => Promise.reject(err)),
       };
 
-      const { result } = renderHook(() => useMfaEnrollmentUI(opts));
+      const { result } = renderHook(() => useMfaEnrollmentUI(opts as any));
 
       await act(async () => {
         await result.current.handleEnroll('123456');
@@ -175,7 +175,7 @@ describe('useMfaEnrollmentUI', () => {
         ),
       };
 
-      const { result } = renderHook(() => useMfaEnrollmentUI(opts));
+      const { result } = renderHook(() => useMfaEnrollmentUI(opts as any));
 
       await act(async () => {
         await result.current.handleEnroll('000000');
@@ -192,7 +192,7 @@ describe('useMfaEnrollmentUI', () => {
         enrollMfa: vi.fn(() => Promise.reject(new Error('Unknown error'))),
       };
 
-      const { result } = renderHook(() => useMfaEnrollmentUI(opts));
+      const { result } = renderHook(() => useMfaEnrollmentUI(opts as any));
 
       await act(async () => {
         await result.current.handleEnroll('123456');

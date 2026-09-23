@@ -2,7 +2,7 @@
  * Tests for entityValidation.ts — validateAccount, validateTransaction, validateProfileUpdate, formatValidationErrors
  * Target: 90%+ mutation kill rate
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect } from 'vitest';

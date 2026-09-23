@@ -9,7 +9,7 @@
  * 
  * Phase 5 of ARCH-003: Comprehensive end-to-end scenarios
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';

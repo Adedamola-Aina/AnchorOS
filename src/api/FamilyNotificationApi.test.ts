@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   subscribeToUnreadNotifications,
@@ -64,7 +64,7 @@ describe('FamilyNotificationApi', () => {
       const onData = vi.fn();
       subscribeToUnreadNotifications('user-123', onData);
 
-      capturedCallback?.({
+      (capturedCallback as ((snap: unknown) => void) | null)?.({
         docs: [
           { id: 'notif-1', data: () => ({ type: 'share', title: 'Alice shared an account', read: false, dismissed: false, actorUid: 'u2', actorName: 'Alice', message: 'msg', createdAt: { seconds: 0 } }) },
           { id: 'notif-2', data: () => ({ type: 'transaction', title: 'New transaction', read: false, dismissed: false, actorUid: 'u3', actorName: 'Bob', message: 'msg2', createdAt: { seconds: 1 } }) },

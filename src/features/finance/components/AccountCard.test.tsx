@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
@@ -100,7 +100,7 @@ describe('AccountCard', () => {
         externalConnection: {
           ...linkedAccount.externalConnection,
           syncStatus: 'reconnect_required',
-        },
+        } as any,
       });
       render(<AccountCard account={reconnectAccount} userId="u1" onEdit={vi.fn()} />);
       expect(screen.getByText(/reconnect/i)).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe('AccountCard', () => {
         externalConnection: {
           ...linkedAccount.externalConnection,
           syncStatus: 'reconnect_required',
-        },
+        } as any,
       });
       render(<AccountCard account={reconnectAccount} userId="u1" onEdit={vi.fn()} onReconnect={onReconnect} />);
       const badge = screen.getByRole('button', { name: /reconnect/i });

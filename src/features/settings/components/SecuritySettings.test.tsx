@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
@@ -60,6 +60,7 @@ const baseProps = {
   onGenerateMfaSecret: vi.fn().mockResolvedValue(undefined),
   onEnrollMfa: vi.fn().mockResolvedValue(undefined),
   onUnenrollMfa: vi.fn().mockResolvedValue(undefined),
+  onRequiresReauthForUnenroll: vi.fn(),
 };
 
 describe('SecuritySettings', () => {

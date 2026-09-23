@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { deleteStoredPushToken, upsertPushToken } from './PushTokenApi';
 

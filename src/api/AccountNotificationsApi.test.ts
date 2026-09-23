@@ -1,10 +1,11 @@
-// @ts-nocheck
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   markAccountNotificationAsRead,
   markAllAccountNotificationsAsRead,
   subscribeToAccountNotifications,
 } from './AccountNotificationsApi';
+import type { AnchorNotification } from '../types';
 
 const collection = vi.fn();
 const doc = vi.fn();
@@ -64,7 +65,7 @@ describe('AccountNotificationsApi', () => {
     expect(where).toHaveBeenCalledWith('accountId', '==', 'acc-1');
     expect(limit).toHaveBeenCalledWith(20);
 
-    callback?.({
+    (callback as ((snap: unknown) => void) | null)?.({
       docs: [{ id: 'n1', data: () => ({ title: 'Alert', read: false }) }],
     });
     expect(onData).toHaveBeenCalledWith([{ id: 'n1', title: 'Alert', read: false }]);
@@ -93,7 +94,7 @@ describe('AccountNotificationsApi', () => {
       { id: 'n1', read: false },
       { id: 'n2', read: true },
       { id: 'n3', read: false },
-    ]);
+    ] as unknown as AnchorNotification[]);
 
     expect(batch.update).toHaveBeenCalledTimes(2);
     expect(batch.commit).toHaveBeenCalledTimes(1);
@@ -103,7 +104,7 @@ describe('AccountNotificationsApi', () => {
     await markAllAccountNotificationsAsRead('user-1', [
       { id: 'n1', read: true },
       { id: 'n2', read: true },
-    ]);
+    ] as unknown as AnchorNotification[]);
 
     expect(batch.update).not.toHaveBeenCalled();
     expect(batch.commit).not.toHaveBeenCalled();

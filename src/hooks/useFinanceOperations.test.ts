@@ -2,7 +2,7 @@
  * Tests for useFinanceOperations — all 8 finance CRUD operations
  * Target: 85%+ coverage
  */
-// @ts-nocheck
+
 
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -30,12 +30,12 @@ const mockFinanceService = {
 };
 vi.mock('../services/FinanceService', () => ({
     financeService: {
-        addAccount: (...args: any[]) => mockFinanceService.addAccount(...args),
-        deleteAccount: (...args: any[]) => mockFinanceService.deleteAccount(...args),
-        renameAccount: (...args: any[]) => mockFinanceService.renameAccount(...args),
-        addTransaction: (...args: any[]) => mockFinanceService.addTransaction(...args),
-        deleteTransaction: (...args: any[]) => mockFinanceService.deleteTransaction(...args),
-        updateTransaction: (...args: any[]) => mockFinanceService.updateTransaction(...args),
+        addAccount: (...args: any[]) => (mockFinanceService.addAccount as any)(...args),
+        deleteAccount: (...args: any[]) => (mockFinanceService.deleteAccount as any)(...args),
+        renameAccount: (...args: any[]) => (mockFinanceService.renameAccount as any)(...args),
+        addTransaction: (...args: any[]) => (mockFinanceService.addTransaction as any)(...args),
+        deleteTransaction: (...args: any[]) => (mockFinanceService.deleteTransaction as any)(...args),
+        updateTransaction: (...args: any[]) => (mockFinanceService.updateTransaction as any)(...args),
     },
 }));
 
@@ -64,8 +64,8 @@ vi.mock('../utils/error', () => ({
 const mockRestoreSoftDeletedTransaction = vi.fn(async () => {});
 const mockConvertCurrencyAcrossAccounts = vi.fn(async () => {});
 vi.mock('../api/FinanceOperationsApi', () => ({
-    restoreSoftDeletedTransaction: (...args: any[]) => mockRestoreSoftDeletedTransaction(...args),
-    convertCurrencyAcrossAccounts: (...args: any[]) => mockConvertCurrencyAcrossAccounts(...args),
+    restoreSoftDeletedTransaction: (...args: any[]) => (mockRestoreSoftDeletedTransaction as any)(...args),
+    convertCurrencyAcrossAccounts: (...args: any[]) => (mockConvertCurrencyAcrossAccounts as any)(...args),
 }));
 
 describe('useFinanceOperations', () => {

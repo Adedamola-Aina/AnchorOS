@@ -1,6 +1,8 @@
-// @ts-nocheck
+
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { User } from 'firebase/auth';
+import type { AnchorTask } from '../types';
 
 const resetCompletion = vi.fn().mockResolvedValue(undefined);
 const resetStreak = vi.fn().mockResolvedValue(undefined);
@@ -19,7 +21,7 @@ const YESTERDAY = '2024-01-14';
 const EIGHT_DAYS_AGO = '2024-01-07';
 const LAST_MONTH = '2023-12-15';
 
-const fakeUser = { uid: 'user-1' };
+const fakeUser = { uid: 'user-1' } as unknown as User;
 
 describe('useCommitmentResetEffect', () => {
   beforeEach(() => {
@@ -33,7 +35,7 @@ describe('useCommitmentResetEffect', () => {
 
   it('does nothing when user is null', () => {
     const task = { id: 't1', type: 'daily', completed: true, lastCompletedAt: YESTERDAY, currentStreak: 1 };
-    renderHook(() => useCommitmentResetEffect(null, [task]));
+    renderHook(() => useCommitmentResetEffect(null, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).not.toHaveBeenCalled();
   });
 
@@ -46,19 +48,19 @@ describe('useCommitmentResetEffect', () => {
 
   it('resets daily task when lastCompletedAt is a different day', () => {
     const task = { id: 't1', type: 'daily', completed: true, lastCompletedAt: YESTERDAY, currentStreak: 1 };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).toHaveBeenCalledWith('user-1', 't1');
   });
 
   it('does NOT reset daily task when lastCompletedAt is today', () => {
     const task = { id: 't1', type: 'daily', completed: true, lastCompletedAt: TODAY, currentStreak: 1 };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).not.toHaveBeenCalled();
   });
 
   it('does NOT reset daily task that is not yet completed', () => {
     const task = { id: 't1', type: 'daily', completed: false, lastCompletedAt: YESTERDAY, currentStreak: 0 };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).not.toHaveBeenCalled();
   });
 
@@ -72,7 +74,7 @@ describe('useCommitmentResetEffect', () => {
       daysOfWeek: [1],
       currentStreak: 2,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).toHaveBeenCalledWith('user-1', 't2');
   });
 
@@ -83,7 +85,7 @@ describe('useCommitmentResetEffect', () => {
       daysOfWeek: [6], // today is Monday — won't match
       currentStreak: 2,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).toHaveBeenCalledWith('user-1', 't2');
   });
 
@@ -94,7 +96,7 @@ describe('useCommitmentResetEffect', () => {
       daysOfWeek: [6], // doesn't match Monday
       currentStreak: 2,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).not.toHaveBeenCalled();
   });
 
@@ -108,7 +110,7 @@ describe('useCommitmentResetEffect', () => {
       daysOfMonth: [15],
       currentStreak: 3,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).toHaveBeenCalledWith('user-1', 't3');
   });
 
@@ -119,7 +121,7 @@ describe('useCommitmentResetEffect', () => {
       dayOfMonth: 15,
       currentStreak: 3,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).toHaveBeenCalledWith('user-1', 't3');
   });
 
@@ -130,7 +132,7 @@ describe('useCommitmentResetEffect', () => {
       daysOfMonth: [20], // today is 15, not 20
       currentStreak: 3,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).toHaveBeenCalledWith('user-1', 't3');
   });
 
@@ -141,7 +143,7 @@ describe('useCommitmentResetEffect', () => {
       daysOfMonth: [20], // today is the 15th, not the 20th
       currentStreak: 3,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetCompletion).not.toHaveBeenCalled();
   });
 
@@ -154,7 +156,7 @@ describe('useCommitmentResetEffect', () => {
       lastCompletedAt: '2024-01-13T00:00:00.000Z',
       currentStreak: 5,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetStreak).toHaveBeenCalledWith('user-1', 't4');
   });
 
@@ -165,7 +167,7 @@ describe('useCommitmentResetEffect', () => {
       lastCompletedAt: '2024-01-14T20:00:00.000Z',
       currentStreak: 5,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetStreak).not.toHaveBeenCalled();
   });
 
@@ -175,7 +177,7 @@ describe('useCommitmentResetEffect', () => {
       lastCompletedAt: '2024-01-05T00:00:00.000Z', // 10 days ago
       currentStreak: 3,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetStreak).toHaveBeenCalledWith('user-1', 't5');
   });
 
@@ -185,7 +187,7 @@ describe('useCommitmentResetEffect', () => {
       lastCompletedAt: '2023-12-10T00:00:00.000Z', // 36 days ago
       currentStreak: 2,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetStreak).toHaveBeenCalledWith('user-1', 't6');
   });
 
@@ -195,13 +197,13 @@ describe('useCommitmentResetEffect', () => {
       lastCompletedAt: '2024-01-10T00:00:00.000Z',
       currentStreak: 0,
     };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetStreak).not.toHaveBeenCalled();
   });
 
   it('does NOT break streak when lastCompletedAt is absent', () => {
     const task = { id: 't8', type: 'daily', completed: false, currentStreak: 5 };
-    renderHook(() => useCommitmentResetEffect(fakeUser, [task]));
+    renderHook(() => useCommitmentResetEffect(fakeUser, [task] as unknown as AnchorTask[]));
     expect(resetStreak).not.toHaveBeenCalled();
   });
 
@@ -209,7 +211,7 @@ describe('useCommitmentResetEffect', () => {
     const tasks = [
       { id: 't-daily', type: 'daily', completed: true, lastCompletedAt: YESTERDAY, currentStreak: 1 },
       { id: 't-missed', type: 'daily', completed: false, lastCompletedAt: '2024-01-12T00:00:00.000Z', currentStreak: 4 },
-    ];
+    ] as unknown as AnchorTask[];
     renderHook(() => useCommitmentResetEffect(fakeUser, tasks));
     expect(resetCompletion).toHaveBeenCalledWith('user-1', 't-daily');
     expect(resetStreak).toHaveBeenCalledWith('user-1', 't-missed');
