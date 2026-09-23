@@ -32,7 +32,7 @@ Firebase
 
 ## Anchor AI (Fabric)
 
-The Fabric query engine (`src/services/fabric/`) is the single sanctioned AI-assistance surface: deterministic query routes, typed results, no free-form data export. Coverage of the query engine is CI-gated (`test:coverage:query-gate`).
+The Fabric query engine (`src/services/fabric/`) is the single sanctioned AI-assistance surface: deterministic query routes, typed results, no free-form data export.
 
 ## Durable decisions
 
