@@ -11,7 +11,7 @@
  * mistyped a word, and it offered "Create First Commitment" for a commitment they
  * already have.
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

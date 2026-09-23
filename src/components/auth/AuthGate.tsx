@@ -3,7 +3,7 @@
  * Refactored.
  * Loading and gate UI components extracted to AuthGateParts.tsx
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

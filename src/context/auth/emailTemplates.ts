@@ -2,7 +2,7 @@
  * Auth Email Templates
  * Extracted from AuthContext.tsx
  */
-// @ts-nocheck
+
 
 
 export const getWelcomeEmailHtml = (name: string): string => `

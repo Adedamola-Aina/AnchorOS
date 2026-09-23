@@ -2,7 +2,7 @@
  * OnboardingProgress - Step indicator with pill dots
  * Extracted for reuse and testability.
  */
-// @ts-nocheck
+
 
 
 interface OnboardingProgressProps {

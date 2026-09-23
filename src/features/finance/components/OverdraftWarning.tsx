@@ -4,7 +4,7 @@
  * Warning banner displayed when a transaction would cause overdraft.
  * Extracted from TransactionForm for modularity.
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

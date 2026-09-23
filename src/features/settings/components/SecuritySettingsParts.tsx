@@ -2,7 +2,7 @@
  * SecuritySettings MFA Wizard Steps
  * Extracted from SecuritySettings.tsx
  */
-// @ts-nocheck
+
 
 
 import React, { useEffect, useRef, lazy, Suspense } from 'react';

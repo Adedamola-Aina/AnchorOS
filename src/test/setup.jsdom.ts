@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 // jsdom-only setup: DOM/browser globals and @testing-library/jest-dom matchers.
 // Loaded exclusively by the `jsdom` Vitest project, after the shared setup
 // (src/test/setup.ts) which provides the Firebase mocks.

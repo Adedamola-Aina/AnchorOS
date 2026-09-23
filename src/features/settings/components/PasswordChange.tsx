@@ -2,7 +2,7 @@
  * PasswordChange - Inline password change form
  * Reauthenticates with current password then updates via Firebase Auth.
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

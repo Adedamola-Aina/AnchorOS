@@ -4,7 +4,7 @@
  * Settings entry point so a user can see whether their email is verified and
  * request another verification email after onboarding.
  */
-// @ts-nocheck
+
 
 
 import { MailCheck, MailWarning, RefreshCw } from 'lucide-react';

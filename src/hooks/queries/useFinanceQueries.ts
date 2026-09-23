@@ -3,7 +3,7 @@
  * 
  * Family member shared data is handled by useSharedAccounts hook separately
  */
-// @ts-nocheck
+
 
 
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';

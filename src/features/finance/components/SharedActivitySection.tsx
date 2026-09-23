@@ -2,7 +2,7 @@
  * SharedActivitySection - Activity feed for shared accounts
  * Extracted from AccountDetailsView
  */
-// @ts-nocheck
+
 
 
 import { Users } from 'lucide-react';

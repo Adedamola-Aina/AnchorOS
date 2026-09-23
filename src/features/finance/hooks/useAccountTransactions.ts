@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * useAccountTransactions — transaction computation logic for AccountDetailsView.
  * Extracted per ARCH-001 (200-line rule).

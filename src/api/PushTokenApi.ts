@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { deleteDoc, doc, serverTimestamp, setDoc, db } from '../utils/secureDb';
 import { APP_ID } from '../config/firebase';
 

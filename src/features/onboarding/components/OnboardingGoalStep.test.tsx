@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { OnboardingGoalStep } from './OnboardingGoalStep';
+import { OnboardingGoalStep, type GoalType } from './OnboardingGoalStep';
 
 /**
  * RA-13 (#171): unparseable/zero amounts must be blocked client-side with a
@@ -11,7 +11,7 @@ import { OnboardingGoalStep } from './OnboardingGoalStep';
 function Harness({ onSubmit = vi.fn() }: { onSubmit?: () => void }) {
     const [title, setTitle] = useState('Emergency Fund');
     const [amount, setAmount] = useState('');
-    const [type, setType] = useState('emergency_fund');
+    const [type, setType] = useState<GoalType>('emergency_fund');
 
     return (
         <OnboardingGoalStep

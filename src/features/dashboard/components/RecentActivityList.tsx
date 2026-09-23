@@ -2,7 +2,7 @@
  * RecentActivityList - Shows recent transactions
  * 
  */
-// @ts-nocheck
+
 
 
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';

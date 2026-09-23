@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * AccountDetailsView — Apple-inspired account detail page.
  * Layout: X/... header → Card → Balance strip → Monthly chart → Transaction history.

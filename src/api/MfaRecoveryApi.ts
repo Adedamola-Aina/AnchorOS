@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { doc, setDoc, db } from '../utils/secureDb';
 import { httpsCallable } from 'firebase/functions';
 import { APP_ID, functions } from '../config/firebase';

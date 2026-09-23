@@ -15,7 +15,7 @@
  * written at all — so a plain daily commitment still stores the plain shape it
  * always did.
  */
-// @ts-nocheck
+
 
 import type { AnchorTask, TaskPriority, TaskType, TimeOfDay } from '../../../types';
 import { parseWeekdays, toDateOnly } from '../../../services/fabric/commitmentSchedule';

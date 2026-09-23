@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
@@ -140,7 +140,7 @@ export const Modal: React.FC<ModalProps> = ({
             {/* Content - Full screen on mobile, centered modal on desktop */}
             <div
                 ref={modalRef}
-                onKeyDown={(e) => handleKeyDown(e)}
+                onKeyDown={(e) => handleKeyDown(e.nativeEvent)}
                 className={`relative z-10 pointer-events-auto bg-white dark:bg-slate-800 shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 overflow-hidden ${fullScreenMobile
                     ? `w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:${maxWidth} sm:rounded-2xl`
                     : `w-full ${maxWidth} max-h-[90vh] rounded-2xl`

@@ -10,7 +10,7 @@
  * The section list lives in `./sections` (single source of truth, reused by the
  * hub, this router branch and any deep-linking call site).
  */
-// @ts-nocheck
+
 
 import { useState, lazy, Suspense } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';

@@ -7,7 +7,7 @@
  * 
  * @module features/finance/components/SwipeableTransactionItem
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

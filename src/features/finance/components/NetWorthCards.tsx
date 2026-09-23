@@ -2,7 +2,7 @@
  * NetWorthCards - Displays net worth by currency
  * Extracted from FinanceView
  */
-// @ts-nocheck
+
 
 
 import { Landmark, DollarSign } from 'lucide-react';

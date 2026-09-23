@@ -3,7 +3,7 @@
  * 
  * Handles the 6-digit code input with validation.
  */
-// @ts-nocheck
+
 
 
 import { useEffect, useRef } from 'react';

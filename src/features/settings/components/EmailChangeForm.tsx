@@ -3,7 +3,7 @@
  * Reauthenticates with current password then sends a verification link
  * to the new address via Firebase verifyBeforeUpdateEmail.
  */
-// @ts-nocheck
+
 
 import React, { useState } from 'react';
 import { Mail } from 'lucide-react';
@@ -40,6 +40,10 @@ export const EmailChangeForm: React.FC = () => {
     }
     if (!password) {
       setError('Password is required to change email.');
+      return;
+    }
+    if (!user) {
+      setError('You need to be signed in to change your email.');
       return;
     }
     setSubmitting(true);

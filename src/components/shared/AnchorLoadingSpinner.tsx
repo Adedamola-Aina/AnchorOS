@@ -7,7 +7,7 @@
  *
  * @module components/shared/AnchorLoadingSpinner
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

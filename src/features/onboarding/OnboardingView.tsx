@@ -5,7 +5,7 @@
  * Steps: Welcome → Account → Commitment → Security
  * Refactored.
  */
-// @ts-nocheck
+
 
 
 import { useState, useCallback } from 'react';
@@ -19,7 +19,7 @@ import { toCents } from '../../utils/moneyUtils';
 import { secureDb } from '../../utils/secureDb';
 import { GettingStartedWelcome } from './components/GettingStartedWelcome';
 import { OnboardingAccountStep } from './components/OnboardingAccountStep';
-import { OnboardingGoalStep } from './components/OnboardingGoalStep';
+import { OnboardingGoalStep, type GoalType } from './components/OnboardingGoalStep';
 import { OnboardingHabitStep } from './components/OnboardingHabitStep';
 import { GettingStartedSecurity } from './components/GettingStartedSecurity';
 import { OnboardingProgress } from './components/OnboardingProgress';
@@ -27,7 +27,6 @@ import { StateIllustration } from '../../components/illustrations';
 
 const TOTAL_STEPS = 5;
 type AccountType = 'checking' | 'savings' | 'salary' | 'investment';
-type GoalType = 'savings' | 'debt_payoff' | 'investment' | 'emergency_fund' | 'other';
 
 export const OnboardingView = () => {
   useKeyboardAvoidance();
@@ -127,14 +126,16 @@ export const OnboardingView = () => {
     }
     await runStep(
       'your account',
-      () => addAccount({
-        name: accName.trim(),
-        type: accountType,
-        currency,
-        balanceCents: toCents(balance),
-        color: 'bg-blue-500',
-        scope: profile.familyMode ? 'family' : 'personal',
-      }),
+      async () => {
+        await addAccount({
+          name: accName.trim(),
+          type: accountType,
+          currency,
+          balanceCents: toCents(balance),
+          color: 'bg-blue-500',
+          scope: profile.familyMode ? 'family' : 'personal',
+        });
+      },
       () => goToStep(3),
     );
   };
@@ -153,15 +154,17 @@ export const OnboardingView = () => {
     }
     await runStep(
       'your goal',
-      () => secureDb.addDocument(uid, 'goals', {
-        title: goalTitle,
-        targetAmountCents,
-        currentAmountCents: 0,
-        currency,
-        goalType,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }),
+      async () => {
+        await secureDb.addDocument(uid, 'goals', {
+          title: goalTitle,
+          targetAmountCents,
+          currentAmountCents: 0,
+          currency,
+          goalType,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      },
       () => goToStep(4),
     );
   };

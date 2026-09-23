@@ -21,7 +21,7 @@
  *   - an empty or invalid rate blocks submission (the existing validation in
  *     `useTransactionSubmit` already refuses a non-positive rate).
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

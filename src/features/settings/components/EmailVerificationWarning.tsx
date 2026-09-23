@@ -3,7 +3,7 @@
  * 
  * Displays a warning that email verification is required before inviting.
  */
-// @ts-nocheck
+
 
 
 import { AlertCircle } from 'lucide-react';

@@ -1,7 +1,7 @@
 /**
  * AwaitingConfirmationCard - Shows when invitee has entered correct code
  */
-// @ts-nocheck
+
 
 
 import { Check, X, Lock, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';

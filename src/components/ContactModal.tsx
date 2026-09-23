@@ -3,7 +3,7 @@
  * Refactored.
  * Form components extracted to ContactModalParts.tsx
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

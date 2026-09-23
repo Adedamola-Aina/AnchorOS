@@ -12,7 +12,7 @@
  * pair of income/expense legs (see `isTransferLeg`) — so it is neither economic
  * income nor economic spending, and the user must be able to see just those.
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

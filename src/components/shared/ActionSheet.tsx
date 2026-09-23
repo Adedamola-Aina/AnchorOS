@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * ActionSheet — iOS-style pull-down action sheet.
  * Slides up from bottom with backdrop blur. 44px touch targets.

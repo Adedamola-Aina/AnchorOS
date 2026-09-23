@@ -2,7 +2,7 @@
  * TransactionForm Empty States
  * Extracted from TransactionForm.tsx
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

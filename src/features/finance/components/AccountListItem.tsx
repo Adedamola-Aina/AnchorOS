@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /** Account list row — extracted per ARCH-001 (200-line rule). */
 
 import type { AnchorAccount } from '../../../types';

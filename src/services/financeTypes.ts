@@ -6,7 +6,7 @@
  * 
  * @module services/financeTypes
  */
-// @ts-nocheck
+
 
 
 import type { TransactionType, Currency } from '../types';

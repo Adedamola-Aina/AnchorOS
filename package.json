@@ -14,7 +14,7 @@
     "build:production": "tsc -b config/tsconfig.app.json config/tsconfig.node.json && vite build --mode production --config config/vite.config.ts",
     "preview": "vite preview --config config/vite.config.ts",
     "lint": "eslint --config config/eslint.config.js .",
-    "typecheck": "tsc -b config/tsconfig.app.json config/tsconfig.node.json",
+    "typecheck": "tsc -b config/tsconfig.app.json config/tsconfig.node.json && tsc -p config/tsconfig.spec.json --noEmit",
     "test": "vitest --config config/vitest.config.ts",
     "test:run": "vitest --run --config config/vitest.config.ts",
     "test:coverage": "vitest --coverage --run --config config/vitest.config.ts",

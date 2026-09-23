@@ -2,7 +2,7 @@
  * MFA (Multi-Factor Authentication) Hook
  * Extracted from AuthContext.tsx
  */
-// @ts-nocheck
+
 
 
 import { useRef, useCallback, useMemo } from 'react';

@@ -2,7 +2,7 @@
  * Family Mode v2 - Pending Confirmation Handlers
  * Extracted from PendingConfirmation.tsx
  */
-// @ts-nocheck
+
 
 
 import { getFunctions, httpsCallable } from 'firebase/functions';

@@ -4,7 +4,7 @@
  * Category input with datalist suggestions, smart category hints,
  * and custom user-defined categories (PRD-010).
  */
-// @ts-nocheck
+
 
 
 import React, { useState, useMemo } from 'react';

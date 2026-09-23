@@ -1,7 +1,7 @@
 /**
  * Command palette result builder and recent action tracking.
  */
-// @ts-nocheck
+
 
 
 import { useMemo, useCallback } from 'react';

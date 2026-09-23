@@ -10,7 +10,7 @@
  * sheet owns the choosing. Multi-select, because a monthly commitment can fall
  * on more than one date, and the sheet stays open while you pick.
  */
-// @ts-nocheck
+
 
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';

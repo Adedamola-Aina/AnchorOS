@@ -2,7 +2,7 @@
  * GettingStartedWelcome - Step 1: Welcome + set display name
  * Replaces OnboardingWelcome with editable name field.
  */
-// @ts-nocheck
+
 
 
 import { useState } from 'react';

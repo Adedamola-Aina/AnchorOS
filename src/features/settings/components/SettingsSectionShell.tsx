@@ -5,7 +5,7 @@
  * back affordance to the hub, so browser back/forward and reload behave the way
  * the URL implies. Before this, "sections" were scroll offsets.
  */
-// @ts-nocheck
+
 
 import React from 'react';
 import { Link } from 'react-router-dom';

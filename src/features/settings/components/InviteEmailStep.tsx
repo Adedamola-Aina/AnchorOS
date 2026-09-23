@@ -3,7 +3,7 @@
  * 
  * Collects the invitee's email address.
  */
-// @ts-nocheck
+
 
 
 import { Mail, ArrowRight, AlertCircle } from 'lucide-react';

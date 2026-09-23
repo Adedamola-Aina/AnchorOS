@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { useState, useCallback, useMemo } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../config/firebase';

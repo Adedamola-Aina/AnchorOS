@@ -2,7 +2,7 @@
  * Reauthentication Modal
  * Extracted from SettingsView.tsx
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

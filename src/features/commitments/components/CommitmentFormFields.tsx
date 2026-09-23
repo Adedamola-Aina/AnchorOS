@@ -14,7 +14,7 @@
  *   - a selected state is carried by `aria-pressed`/`aria-checked` as well as colour;
  *   - a field that cannot be changed says so instead of offering a dead control.
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

@@ -12,7 +12,7 @@
  * *which pot of money* to act on — and two accounts can share a name (UX-FN-04).
  * Every value is text, so nothing depends on colour.
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

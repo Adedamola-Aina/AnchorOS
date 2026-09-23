@@ -4,7 +4,7 @@
  * Optional step in the onboarding flow that lets the user define
  * a simple savings or financial goal before creating their first commitment.
  */
-// @ts-nocheck
+
 
 
 import { Target, AlertCircle } from 'lucide-react';
@@ -15,20 +15,22 @@ interface OnboardingGoalStepProps {
     setGoalTitle: (title: string) => void;
     goalAmount: string;
     setGoalAmount: (amount: string) => void;
-    goalType: string;
-    setGoalType: (type: string) => void;
+    goalType: GoalType;
+    setGoalType: (type: GoalType) => void;
     loading: boolean;
     onSubmit: () => void;
     onSkip: () => void;
     onBack: () => void;
 }
 
+export type GoalType = 'savings' | 'debt_payoff' | 'investment' | 'emergency_fund' | 'other';
+
 const GOAL_SUGGESTIONS = [
     { title: 'Emergency Fund', type: 'emergency_fund' },
     { title: 'Save for Vacation', type: 'savings' },
     { title: 'Pay Off Debt', type: 'debt_payoff' },
     { title: 'Start Investing', type: 'investment' },
-];
+] as const;
 
 const GOAL_TYPES = [
     { value: 'savings', label: 'Savings' },
@@ -36,7 +38,7 @@ const GOAL_TYPES = [
     { value: 'investment', label: 'Investment' },
     { value: 'emergency_fund', label: 'Emergency Fund' },
     { value: 'other', label: 'Other' },
-];
+] as const;
 
 export function OnboardingGoalStep({
     goalTitle, setGoalTitle, goalAmount, setGoalAmount,

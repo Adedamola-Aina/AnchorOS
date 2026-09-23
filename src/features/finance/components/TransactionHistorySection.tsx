@@ -2,7 +2,7 @@
  * TransactionHistorySection — Month nav + search + transaction list
  * Extracted from FinanceView per ARCH-001 200-line rule.
  */
-// @ts-nocheck
+
 
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';

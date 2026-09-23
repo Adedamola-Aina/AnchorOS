@@ -13,7 +13,7 @@
  * The form itself now comes from `CommitmentForm`, which the editor shares, so the
  * two can no longer disagree about labels, spacing, validation or accessibility.
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

@@ -68,7 +68,7 @@ function scrubBreadcrumb(breadcrumb: Breadcrumb): Breadcrumb {
 /**
  * Pass this as Sentry.init({ beforeSend }) to redact PII from all events.
  */
-export function sentryBeforeSend(event: Event): Event | null {
+export function sentryBeforeSend<T extends Event = Event>(event: T): T | null {
     const scrubbed: Event = { ...event };
 
     // Scrub extra data
@@ -102,5 +102,5 @@ export function sentryBeforeSend(event: Event): Event | null {
         scrubbed.user = id ? { id } : undefined;
     }
 
-    return scrubbed;
+    return scrubbed as T;
 }

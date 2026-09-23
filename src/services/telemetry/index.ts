@@ -6,7 +6,7 @@
  * 
  * @module services/telemetry
  */
-// @ts-nocheck
+
 
 import { getSentry } from '../../utils/lazySentry';
 import { validateAnalyticsEvent, type AnalyticsEventName } from '../../analytics/contract';

@@ -3,7 +3,7 @@
  * Extracted from SettingsView.tsx
  * BATCH-001: Fixed Firestore 500-op limit in wipe data
  */
-// @ts-nocheck
+
 
 import { captureError } from '../../../utils/error';
 import { httpsCallable } from 'firebase/functions';

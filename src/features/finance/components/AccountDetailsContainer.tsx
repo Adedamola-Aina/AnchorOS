@@ -2,7 +2,7 @@
  * Finance View Account Details Section
  * Extracted from FinanceView.tsx
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

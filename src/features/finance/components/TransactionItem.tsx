@@ -24,7 +24,7 @@
  *
  * Calm Computing: clarity over cleverness, quiet over loud, semantic colour only.
  */
-// @ts-nocheck
+
 
 
 import React from 'react';
@@ -38,7 +38,7 @@ interface TransactionItemProps {
     transaction: AnchorTransaction;
     accountName?: string;
     onEdit: (tx: AnchorTransaction) => void;
-    onDelete: (tx: AnchorTransaction) => void;
+    onDelete?: (tx: AnchorTransaction) => void;
     currentUserId?: string;
 }
 

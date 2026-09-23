@@ -10,7 +10,7 @@
  * - Finance: Credit card swipe motion
  * - Settings: Subtle gear rotation
  */
-// @ts-nocheck
+
 
 
 // CSS Keyframes for nav icon animations

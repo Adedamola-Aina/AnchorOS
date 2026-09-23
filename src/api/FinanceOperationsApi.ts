@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { collection, doc, increment, writeBatch, db } from '../utils/secureDb';
 import { APP_ID } from '../config/firebase';
 import type { AnchorAccount, TransactionType } from '../types';

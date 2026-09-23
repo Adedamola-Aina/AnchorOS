@@ -3,7 +3,7 @@
  * Refactored.
  * UI components extracted to CommitmentsViewParts.tsx
  */
-// @ts-nocheck
+
 
 
 import { useState, useMemo } from 'react';

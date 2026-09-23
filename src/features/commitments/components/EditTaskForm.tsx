@@ -8,7 +8,7 @@
  * below it, the interval, the days, the dates and the bounds are all editable),
  * and the panel opens expanded, because the user came here to change something.
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

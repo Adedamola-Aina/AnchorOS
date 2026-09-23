@@ -3,7 +3,7 @@
  * Refactored.
  * MFA wizard steps extracted to SecuritySettingsParts.tsx
  */
-// @ts-nocheck
+
 
 
 import React, { useState, useEffect } from 'react';

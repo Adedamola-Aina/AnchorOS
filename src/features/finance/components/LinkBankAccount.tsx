@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React, { useCallback } from 'react';
 import { Link2, Shield } from 'lucide-react';
 import { useBankConnection } from '../../../hooks/useBankConnection';

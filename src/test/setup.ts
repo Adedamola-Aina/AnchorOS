@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 // Shared setup for ALL frontend tests (both `node` and `jsdom` projects).
 // Contains only genuinely shared mocks (Firebase). DOM/browser-only setup
 // (jest-dom matchers, ResizeObserver, matchMedia, ...) lives in setup.jsdom.ts

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { useMemo, useState } from 'react';
 import { PieChart, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCurrency } from '../../../utils/format';

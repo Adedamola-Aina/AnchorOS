@@ -3,7 +3,7 @@
  * 
  * Displays the verification code after successful invitation.
  */
-// @ts-nocheck
+
 
 
 import { Copy, Check } from 'lucide-react';

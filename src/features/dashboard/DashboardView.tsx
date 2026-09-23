@@ -3,7 +3,7 @@
  * Refactored.
  * Widget components extracted to DashboardWidgets.tsx
  */
-// @ts-nocheck
+
 
 
 import { useState, useMemo } from 'react';

@@ -13,7 +13,7 @@
  * 
  * @module hooks/useHaptic
  */
-// @ts-nocheck
+
 
 
 import { useCallback, useMemo } from 'react';

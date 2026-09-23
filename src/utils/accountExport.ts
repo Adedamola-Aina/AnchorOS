@@ -3,7 +3,7 @@
  */
 
 interface ExportableTransaction {
-    date: string;
+    date: string | Date;
     title: string;
     category: string;
     type: string;

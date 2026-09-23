@@ -2,7 +2,7 @@
  * Data Seeder Utility
  * Refactored - data constants extracted to seederData.ts
  */
-// @ts-nocheck
+
 
 
 import { collection, doc, writeBatch, serverTimestamp, getDoc, type FieldValue, db } from '../utils/secureDb';

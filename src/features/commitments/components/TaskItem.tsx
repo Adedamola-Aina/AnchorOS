@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Circle, Check, Pencil, Trash2, Flame, CalendarClock } from 'lucide-react';

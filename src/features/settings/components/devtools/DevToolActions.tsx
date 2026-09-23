@@ -2,7 +2,7 @@
  * Developer Tools Action Components
  * Split from DeveloperTools.tsx
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

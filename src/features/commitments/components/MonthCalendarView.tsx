@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Circle, CheckCircle2 } from 'lucide-react';
 import type { AnchorTask } from '../../../types';

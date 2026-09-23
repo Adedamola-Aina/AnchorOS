@@ -1,5 +1,5 @@
 /** useFinanceOperations: finance CRUD + activity logging. */
-// @ts-nocheck
+
 
 import { useCallback, useMemo } from 'react';
 import type { User } from 'firebase/auth';

@@ -6,7 +6,7 @@
  * Refactored.
  * Logic extracted to devtools/ subfolder.
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

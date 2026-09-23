@@ -3,7 +3,7 @@
  * 
  * Shows strength bar and requirement badges.
  */
-// @ts-nocheck
+
 
 
 import { Check, Circle } from 'lucide-react';

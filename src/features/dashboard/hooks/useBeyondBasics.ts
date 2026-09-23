@@ -4,7 +4,7 @@
  * Each item has a route for deep-linking (Fix #2) and verify_email / enable_mfa
  * are tracked independently (Fix #3).
  */
-// @ts-nocheck
+
 
 
 import { useMemo } from 'react';

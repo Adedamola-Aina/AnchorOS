@@ -1,7 +1,7 @@
 /**
  * TransactionForm Barrel Export
  */
-// @ts-nocheck
+
 
 
 export { useTransactionFormState } from './useTransactionFormState';

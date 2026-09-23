@@ -3,7 +3,7 @@
  * 
  * Displays branding, illustration, and tagline.
  */
-// @ts-nocheck
+
 
 
 import { AnchorLogo } from '../../components/shared';

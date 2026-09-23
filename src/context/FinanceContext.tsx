@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React, { useContext, useCallback } from 'react';
 import { useFinanceService } from '../hooks/useFinanceService';
 import { useAuth } from './AuthContext';
@@ -15,7 +15,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const { learnFrom } = useFabricContext();
     const financeService = useFinanceService(user, familyMemberUid, profile?.name);
 
-    const addTransactionWithLearn = useCallback(async (tx) => {
+    const addTransactionWithLearn = useCallback(async (tx: Parameters<typeof financeService.addTransaction>[0]) => {
         await financeService.addTransaction(tx);
         if (tx.type === 'expense') {
             try {
@@ -27,7 +27,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
     }, [financeService, learnFrom]);
 
-    const deleteTransactionWithLearn = useCallback(async (id, accountId) => {
+    const deleteTransactionWithLearn = useCallback(async (id: string, accountId: string) => {
         const tx = financeService.transactions.find(t => t.id === id);
         await financeService.deleteTransaction(id, accountId);
         if (tx && tx.type === 'expense') {

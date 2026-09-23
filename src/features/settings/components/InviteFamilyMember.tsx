@@ -5,7 +5,7 @@
  * the invitation Cloud Function. The function returns a manual verification
  * code so invitations remain usable if transactional email is unavailable.
  */
-// @ts-nocheck
+
 
 import { useState } from 'react';
 import { useNotifications } from '../../../context/NotificationContext';

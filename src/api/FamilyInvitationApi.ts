@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { collection, onSnapshot, query, where, type Unsubscribe } from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 

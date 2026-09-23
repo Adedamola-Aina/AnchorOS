@@ -6,7 +6,7 @@
  * Refactored.
  * Extracted: AuthLeftPanel, AuthFormFields, PasswordStrengthMeter, AuthSubmitButton
  */
-// @ts-nocheck
+
 
 
 import React, { useState } from 'react';

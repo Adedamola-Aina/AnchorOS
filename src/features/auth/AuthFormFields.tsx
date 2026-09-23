@@ -3,7 +3,7 @@
  * 
  * Handles email, password, and MFA code inputs.
  */
-// @ts-nocheck
+
 
 
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';

@@ -2,7 +2,7 @@
  * EmptyAccountsState - Empty state card matching ISO 7810 card ratio.
  * UX-041 Phase 5. Dashed outline invites first account creation.
  */
-// @ts-nocheck
+
 
 
 import { Landmark, Plus } from 'lucide-react';

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React from 'react';
 import { isDevSurfaceEnabled } from '../../utils/devSurface';
 

@@ -10,7 +10,7 @@
  * It owns the save, so it also clears the shell's FAB — the page's primary action
  * is the Save button, not "+ New commitment".
  */
-// @ts-nocheck
+
 
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';

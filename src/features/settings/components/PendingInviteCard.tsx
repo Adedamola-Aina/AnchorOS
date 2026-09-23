@@ -1,7 +1,7 @@
 /**
  * PendingInviteCard - Shows when waiting for invitee to accept
  */
-// @ts-nocheck
+
 
 
 import { Users } from 'lucide-react';

@@ -1,5 +1,5 @@
 /** FinanceView — Apple Wallet-inspired finance page (UX-041 Phase 2) */
-// @ts-nocheck
+
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';

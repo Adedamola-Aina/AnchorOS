@@ -14,6 +14,8 @@ import {
 } from 'firebase/firestore';
 import { withTimeout, logOp, getUserDocRef, getUserCollectionPath } from './secureDbCore';
 
+export type { QuerySnapshot, DocumentData, FirestoreError } from 'firebase/firestore';
+
 interface SecureDbOptions { timeoutMs?: number; }
 
 export const secureDb = {

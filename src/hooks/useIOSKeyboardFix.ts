@@ -21,7 +21,7 @@
  * `enterkeyhint` is only set when the field has not declared one — a caller that
  * needs the key to submit sets it explicitly (see `CommitmentFindOrAdd`).
  */
-// @ts-nocheck
+
 
 import { useEffect } from 'react';
 

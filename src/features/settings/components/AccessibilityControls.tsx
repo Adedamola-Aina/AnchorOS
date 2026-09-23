@@ -2,7 +2,7 @@
  * AccessibilityControls - Font size, high contrast, and reduced motion settings.
  * Persisted through profile preferences, applied via CSS custom properties + classes.
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

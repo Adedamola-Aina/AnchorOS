@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React, { useState, useRef } from 'react';
 import { User, Mail, Globe, Camera, Trash2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button } from '@anchor-os/ui';

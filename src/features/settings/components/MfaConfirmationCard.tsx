@@ -1,7 +1,7 @@
 /**
  * MfaConfirmationCard - MFA verification step for family connection confirmation
  */
-// @ts-nocheck
+
 
 
 import { useEffect, useRef } from 'react';

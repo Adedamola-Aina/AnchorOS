@@ -77,8 +77,8 @@ Test by **risk**, not by ritual: every change is validated, but not every change
 
 ## Non-negotiable engineering invariants
 
-- Keep TypeScript strict. Do not introduce `any` to bypass type design.
-- Client Firestore access goes through `src/utils/secureDb.ts`; do not create new direct client database paths.
+- Keep TypeScript strict. Do not introduce `any` to bypass type design. **Production code must not carry `@ts-nocheck`** — it is banned by lint and by `src/__tests__/architecture-boundaries.test.ts`. (`@ts-nocheck` is still permitted in test files, where the count is ratcheted down over time.)
+- Client Firestore access goes through `src/utils/secureDb.ts`; do not create new direct client database paths. This is enforced by `src/__tests__/architecture-boundaries.test.ts`.
 - Treat authentication, family sharing, financial data, Firestore rules, and Cloud Functions as security-sensitive.
 - Preserve mobile usability, accessibility, dark mode, and family-data isolation when relevant.
 

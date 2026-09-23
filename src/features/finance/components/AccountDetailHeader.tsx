@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * AccountDetailHeader — the account's own navigation bar.
  *

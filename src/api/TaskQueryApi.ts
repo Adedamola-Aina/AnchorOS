@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { collection, getDocs, limit, orderBy, query, db } from '../utils/secureDb';
 import { APP_ID } from '../config/firebase';
 import type { AnchorTask } from '../types';

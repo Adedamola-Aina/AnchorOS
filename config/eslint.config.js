@@ -55,6 +55,16 @@ export default defineConfig([
     },
   },
   {
+    // Production code must not opt out of TypeScript. Tests may still carry
+    // @ts-nocheck while their (tracked) debt is retired — see
+    // src/__tests__/architecture-boundaries.test.ts.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/__tests__/**', '**/*.emulator.ts', 'src/test/**'],
+    rules: {
+      '@typescript-eslint/ban-ts-comment': ['error', { 'ts-nocheck': true }],
+    },
+  },
+  {
     files: [
       '**/*.config.{js,ts,mjs,cjs}',
       'config/**/*.{js,ts,mjs,cjs}',

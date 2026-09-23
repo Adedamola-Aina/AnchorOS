@@ -2,7 +2,7 @@
  * Dashboard Widget Components
  * Extracted from DashboardView.tsx
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

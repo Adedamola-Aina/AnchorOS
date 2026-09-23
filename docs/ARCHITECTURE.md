@@ -42,6 +42,15 @@ Architectural decisions live here (there is no separate ADR directory). When cod
 - **Anchor AI (Fabric).** A privacy-first, feature-agnostic intelligence layer under `src/services/fabric/` (it must not import from `src/features/`): typed deterministic query routes, an `anchor_ai_enabled` flag plus a per-user Settings toggle backed by `fabric_settings`, recency-weighted confidence, and a two-tier store (`recentActions` rolling 100 entries with 90-day TTL, `confirmedPatterns` until explicitly deleted). No external AI API calls; all DB access via `src/utils/secureDb.ts`.
 - **No micro-frontends.** A micro-frontend split was explored and rejected: one Vite SPA is simpler and the app is not large enough to justify the runtime cost.
 
+## Enforced boundaries
+
+Two contracts are machine-checked (not just documented) by `src/__tests__/architecture-boundaries.test.ts`:
+
+- **Production code is type-checked.** No non-test file may carry `@ts-nocheck`; the ESLint config also bans it outside tests.
+- **Firestore has one entry point.** Only `src/utils/secureDb.ts`, `src/utils/secureDbCore.ts`, and `src/config/firebase.ts` may import `firebase/firestore`.
+
+Test-file `@ts-nocheck` is permitted but ratcheted: the count may only decrease.
+
 ## Error handling rules
 
 - **Fail gracefully**: never white screens or lost data; always a recovery path.

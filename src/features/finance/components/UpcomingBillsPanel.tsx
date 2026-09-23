@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import React from 'react';
 import { Calendar, AlertCircle } from 'lucide-react';
 import type { RecurringTransaction } from '../../../types';

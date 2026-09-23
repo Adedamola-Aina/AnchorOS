@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { useAuth } from '../../../context/AuthContext';
 import { useRecurringTransactions } from '../../../hooks/useRecurringQueries';
 import { UpcomingBillsPanel } from './UpcomingBillsPanel';

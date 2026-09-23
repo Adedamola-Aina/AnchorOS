@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /** Card stack interaction logic — extracted per ARCH-001 (200-line rule). */
 
 import { useState, useCallback } from 'react';

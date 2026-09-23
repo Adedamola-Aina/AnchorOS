@@ -2,7 +2,7 @@
  * useFinanceOfflineSync — offline queue flush logic for finance operations.
  * Extracted from useFinanceOperations per ARCH-001 (200-line rule).
  */
-// @ts-nocheck
+
 import { useCallback, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import type { AnchorAccount } from '../types';
@@ -15,6 +15,11 @@ import { isOperationTimeoutError } from '../utils/secureDbCore';
 import { captureError } from '../utils/error';
 
 const OPERATION_TIMEOUT = 10000;
+
+/** Safari/iOS expose Background Sync on the registration; the DOM lib types omit it. */
+interface SyncCapableRegistration extends ServiceWorkerRegistration {
+    sync: { register(tag: string): Promise<void> };
+}
 
 export function useFinanceOfflineSync(
     user: User | null,
@@ -64,7 +69,7 @@ export function useFinanceOfflineSync(
         if (!user) return false;
         await enqueueTransaction(user.uid, tx);
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
-            const reg = await navigator.serviceWorker.ready;
+            const reg = (await navigator.serviceWorker.ready) as SyncCapableRegistration;
             await reg.sync.register('sync-transactions');
         }
         return true;

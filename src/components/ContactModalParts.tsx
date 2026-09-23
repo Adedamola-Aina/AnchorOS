@@ -2,7 +2,7 @@
  * ContactModal Form Components
  * Extracted from ContactModal.tsx
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

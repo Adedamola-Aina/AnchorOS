@@ -8,7 +8,7 @@
  * 
  * @module features/commitments/components/SwipeableTaskItem
  */
-// @ts-nocheck
+
 
 
 import React from 'react';

@@ -3,7 +3,7 @@
  * 
  * Handles MFA verification when required during invitation.
  */
-// @ts-nocheck
+
 
 
 import { useEffect, useRef } from 'react';

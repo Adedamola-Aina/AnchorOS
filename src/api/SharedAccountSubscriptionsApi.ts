@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { collection, doc, onSnapshot, orderBy, query, where, db } from '../utils/secureDb';
 import type { DocumentSnapshot, QuerySnapshot, DocumentData, FirestoreError } from '../utils/secureDb';
 import { APP_ID } from '../config/firebase';

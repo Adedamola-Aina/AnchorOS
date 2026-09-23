@@ -3,7 +3,7 @@
  * Refactored.
  * Handlers extracted to pendingConfirmationHandlers.ts
  */
-// @ts-nocheck
+
 
 
 import { useState, useEffect } from 'react';

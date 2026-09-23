@@ -11,7 +11,7 @@
  * the description **and** the synonyms in the registry. There is no horizontal
  * scrolling anywhere, and no second-level nav competing with the shell.
  */
-// @ts-nocheck
+
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';

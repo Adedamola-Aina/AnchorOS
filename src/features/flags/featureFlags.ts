@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 type AppEnv = 'development' | 'staging' | 'production';
 
 export type FeatureFlagKey = 'anchor_ai_enabled';
