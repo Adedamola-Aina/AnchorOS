@@ -287,16 +287,42 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.plan.outputs.sha }}
-      - name: Download build artifacts
+      # The audit uses the production hosting artifact — the exact bundle users download,
+      # pointed at the real backend — and signs in with a dedicated production canary.
+      # A cloud release path must never run local emulators or a local fixture identity.
+      #
+      # Why a session is required at all: the budgets are per *screen*, and every budgeted
+      # route is authenticated (/settings, /dashboard, /finance, /commitments, /fabric).
+      # Auditing with no session measured the boot splash on every route (LCP/TTI ~9.0s,
+      # identical across routes and samples), so "/settings <= 2800ms" was asserted against
+      # a page that was never /settings. The gate had never passed on any commit.
+      - name: Download the production hosting artifact
         uses: actions/download-artifact@v4
         with:
           name: production-build
-          path: dist/
+          path: dist
+      - name: Require the production canary credentials
+        # Fail closed and early, with the reason, rather than deep inside the audit.
+        env:
+          CANARY_EMAIL: ${{ secrets.PRODUCTION_SMOKE_EMAIL }}
+          CANARY_PASSWORD: ${{ secrets.PRODUCTION_SMOKE_PASSWORD }}
+        run: |
+          if [ -z "$CANARY_EMAIL" ] || [ -z "$CANARY_PASSWORD" ]; then
+            echo "::error::PRODUCTION_SMOKE_EMAIL / PRODUCTION_SMOKE_PASSWORD are not configured."
+            echo "The performance budget audits authenticated screens, so it must sign in."
+            echo "Add a dedicated production canary account and store its credentials as these"
+            echo "repository secrets (the same pair the post-deploy smoke uses)."
+            exit 1
+          fi
       - uses: actions/setup-node@v6
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci
-      - name: Run Lighthouse CI
+      - name: Run Lighthouse CI (signed in as the production canary, against the real screens)
         run: npm run lighthouse
+        env:
+          LIGHTHOUSE_USE_PREBUILT: '1'
+          LIGHTHOUSE_CANARY_EMAIL: ${{ secrets.PRODUCTION_SMOKE_EMAIL }}
+          LIGHTHOUSE_CANARY_PASSWORD: ${{ secrets.PRODUCTION_SMOKE_PASSWORD }}
       - uses: actions/upload-artifact@v7
         if: always()
         with:
