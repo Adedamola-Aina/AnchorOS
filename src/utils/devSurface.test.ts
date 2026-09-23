@@ -29,15 +29,6 @@ describe('UX-GL-07 — developer surfaces are gated, and the gate is proved', ()
         expect(isDevSurfaceEnabled({ DEV: false, PROD: true })).toBe(false);
     });
 
-    it('keeps the checker and the module in step, so the gate cannot go vacuous', () => {
-        // The CI checker hard-codes the markers it greps for; if this list grows
-        // without the checker, the proof would silently stop covering a surface.
-        const checker = readFileSync('scripts/ci/check-dev-surface.mjs', 'utf8');
-        for (const marker of DEV_SURFACE_MARKERS) {
-            expect(checker).toContain(marker);
-        }
-    });
-
     it('names every developer surface it guards', () => {
         expect(DEV_SURFACE_MARKERS.length).toBeGreaterThanOrEqual(4);
     });

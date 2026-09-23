@@ -24,7 +24,7 @@ const pkg = JSON.parse(fs.readFileSync(path.resolve(rootDir, 'package.json'), 'u
 //
 // Foreign suites stay outside both projects: functions tests by
 // functions/vitest.config.ts, emulator tests by functions/vitest.emulator.config.ts
-// and config/vitest.rules.config.ts, and E2E by config/playwright.config.ts.
+// and config/vitest.rules.config.ts.
 // ============================================================================
 
 /** The complete supported frontend test surface. */
@@ -34,9 +34,6 @@ export const FRONTEND_TEST_INCLUDE = 'src/**/*.{test,spec}.{ts,tsx}'
 export const FOREIGN_EXCLUDE = [
   '**/node_modules/**',
   '**/dist/**',
-  'e2e/**',
-  '.stryker-tmp/**',
-  'tools/**',
   '**/*.emulator.test.ts',
   '**/*.emulator.ts',
 ]
@@ -135,7 +132,6 @@ export default defineConfig({
         '**/*.test.{ts,tsx}',
         '**/*.spec.{ts,tsx}',
         '**/test-setup.ts',
-        'e2e/**',
       ],
       thresholds: {
         statements: 86,

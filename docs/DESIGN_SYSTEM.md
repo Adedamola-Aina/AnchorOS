@@ -120,15 +120,7 @@ One radius family, one elevation set, one spacing rhythm — published in `src/i
 
 **Rules.** Choose the role that describes the job; never an arbitrary-value radius (a bracketed size). A new radius, elevation or spacing step is a **system** decision, not a component decision — if a screen seems to need a fourth step, the screen is wrong, not the rhythm. (Write bracketed class examples as prose, not as literal class names: Tailwind auto-scans the repo and would ship a utility for them.)
 
-**Before/after evidence for a migration (required).** `e2e/design-surfaces.spec.ts` renders Home, Commitments, Finance and Settings at 375×812 and 1280×720 in **both** themes, writing each screen plus a 10px-blur **Squint Test** variant to `design-evidence/`:
-
-```bash
-DESIGN_EVIDENCE=1 npm run test:e2e:local -- --project=design-evidence
-```
-
-It is opt-in because it drives the **real theme control** (`App.tsx` applies the profile's `theme` field, and both seeds pin that to `light`, so `colorScheme` alone can never reach dark mode), which makes a full pass take minutes. It also **asserts** what the older suite never could: no two surface/theme captures may be byte-identical.
-
-That assertion exists because `e2e/visual.spec.ts` imports `test` from `@playwright/test` instead of the authenticated fixture in `e2e/fixtures/base.ts` — so five of its eight committed baselines are byte-identical captures of the *unauthenticated* screen, and one of its tests swallows its own wait failure with `.catch(() => {})`. **Do not treat that suite as evidence that a surface still looks right.** Regenerating or retiring those baselines is outstanding work.
+**Before/after evidence for a migration.** For visual changes, capture the affected surface at 375×812 and 1280×720 in **both** themes (light + dark) and attach it to the PR.
 
 ### Empty states (`UX-DS-07`)
 

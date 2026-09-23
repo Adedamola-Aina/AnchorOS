@@ -43,7 +43,7 @@ Define exact trigger(s) and exact rollback action.
 Events, traces, logs, dashboards, and alert thresholds to add/update.
 
 ## Test strategy (required)
-Map key failure modes to tests (unit/integration/e2e/rules).
+Map key failure modes to tests (unit/integration/rules).
 
 ## Dependencies and sequencing
 List technical/process dependencies and ordering constraints.

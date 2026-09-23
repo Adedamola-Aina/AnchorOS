@@ -59,4 +59,4 @@ Architectural decisions live here (there is no separate ADR directory). When cod
 
 ## Testing philosophy
 
-Risk-based, not ceremony-based (see AGENTS.md). Suites: Vitest unit/integration (colocated), Firestore rules emulator tests, Playwright E2E (`smoke` project gates PRs; full suite runs weekly/post-deploy), Stryker mutation testing for finance/security cores, Lighthouse budgets for frontend changes. Coverage gates exist where risk demands them (e.g., the Fabric query engine gate).
+Risk-based, not ceremony-based (see AGENTS.md). Suites: Vitest unit/integration (colocated) and Firestore/storage rules emulator tests. `.github/workflows/ci.yml` runs lint, typecheck, unit tests and a production build.

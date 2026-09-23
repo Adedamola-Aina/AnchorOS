@@ -7,10 +7,9 @@
  * (`VITE_APP_ENV === 'development'`) is a runtime string comparison, so the code
  * and its labels still shipped inside the bundle.
  *
- * There is now one rule, and it is proved rather than intended:
- *   1. every surface asks this module, so the gate cannot drift;
- *   2. `scripts/ci/check-dev-surface.mjs` scans a real production build for the
- *      markers and fails the build if any survive.
+ * There is now one rule: every developer surface asks this module, so the gate
+ * cannot drift. `DEV_SURFACE_MARKERS` below names the strings that must never
+ * reach a production bundle.
  */
 
 interface DevSurfaceEnv {

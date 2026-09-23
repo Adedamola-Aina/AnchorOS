@@ -63,11 +63,8 @@ const difference = (a: string[], b: string[]): string[] => {
 /** Foreign suites that must never be owned by a frontend project. */
 const isForeign = (file: string): boolean =>
   file.startsWith('functions/') ||
-  file.startsWith('e2e/') ||
-  file.startsWith('tools/') ||
   file.startsWith('dist/') ||
   file.includes('node_modules/') ||
-  file.includes('/.stryker-tmp/') ||
   /\.emulator\.(test\.)?ts$/.test(file);
 
 describe('root frontend Vitest runtime ownership', () => {
@@ -146,7 +143,7 @@ describe('root frontend Vitest runtime ownership', () => {
     expect(nodeOwned.filter(isForeign)).toEqual([]);
     expect(jsdomOwned.filter(isForeign)).toEqual([]);
     // The exported foreign excludes name every foreign surface.
-    for (const pattern of ['e2e/**', 'tools/**', '**/*.emulator.test.ts', '**/*.emulator.ts']) {
+    for (const pattern of ['**/*.emulator.test.ts', '**/*.emulator.ts']) {
       expect(FOREIGN_EXCLUDE).toContain(pattern);
     }
   });

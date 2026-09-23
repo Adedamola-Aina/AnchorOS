@@ -53,7 +53,7 @@ Small/obvious changes (copy, isolated styling, narrow bug with obvious cause) go
 
 Prefer the smallest architecture that stays correct. Default order of preference is **DELETE → CONSOLIDATE → SIMPLIFY → ADD**.
 
-- **One canonical path per engineering operation** (dev, test, build, deploy, release). No duplicate sources of truth for deploy-target selection, environment identity, Firebase project selection, CI change classification, release provenance, release-smoke identity, test commands, or app configuration.
+- **One canonical path per engineering operation** (dev, test, build, deploy). No duplicate sources of truth for Firebase project selection, test commands, or app configuration.
 - **No speculative abstractions**: no one-step service layers, generic repository/event-bus frameworks, internal platforms, microservices, plugin systems, or extra state frameworks. A new abstraction must remove more complexity than it adds, and any addition must justify its recurring operational/maintenance cost.
 - **Delete obsolete code instead of preserving it** — Git history is the archive. Do not keep code "for the future".
 - **Cohesion over file size**: there is no line-count gate. Decompose a touched file only around real domain boundaries; a large but cohesive file stays.
@@ -73,7 +73,7 @@ When documentation disagrees with executable code:
 
 ## Testing
 
-Test by **risk**, not by ritual: every change is validated, but not every change runs every test. Keep many cheap domain/unit tests, fewer integration/security tests, a very small release smoke, and full E2E only where high-value or scheduled. Do not regenerate broad coverage for unrelated changes; keep strict, targeted coverage where it protects critical logic. Bug fixes should normally reproduce the failure with a test when practical. New domain/business logic needs focused unit/integration coverage. Security rules and auth paths require dedicated tests. UI changes should be checked at mobile width with accessibility considerations. Do not create low-value tests solely to satisfy a universal TDD ritual. Use the existing deterministic gates: TypeScript, lint, unit/integration tests, Playwright, Firebase emulator/rules tests, and CI as applicable.
+Test by **risk**, not by ritual: every change is validated, but not every change runs every test. Keep many cheap domain/unit tests and fewer integration/security tests. Do not regenerate broad coverage for unrelated changes; keep strict, targeted coverage where it protects critical logic. Bug fixes should normally reproduce the failure with a test when practical. New domain/business logic needs focused unit/integration coverage. Security rules and auth paths require dedicated tests. UI changes should be checked at mobile width with accessibility considerations. Do not create low-value tests solely to satisfy a universal TDD ritual. Use the existing deterministic gates: TypeScript, lint, unit/integration tests, Firebase emulator/rules tests, and CI.
 
 ## Non-negotiable engineering invariants
 
@@ -104,4 +104,4 @@ One task should have one goal. After a goal is complete and committed, start a f
 
 Use focused conventional commits (`fix:`, `feat:`, `refactor:`, `test:`, `docs:`, `chore:`). Keep unrelated work out of the same commit/PR. Staging precedes production for release-sensitive changes.
 
-One release model: **CI proves the SHA → staging deploys → smoke verifies → production promotes.** Workflows orchestrate; `.github/workflows/` calls the guarded environment deploy scripts (`scripts/DEPLOY_PIPELINE.sh`). Never raw `firebase deploy`, never a deploy on merge. A deployed release smoke uses a dedicated per-environment canary supplied only as secrets and **fails closed** without it (never the committed fixture identity); local/PR smoke uses the disposable `demo-anchor-os` fixture. Production requires staging evidence and the `production` environment approval.
+One release model: **CI verifies (lint, typecheck, unit tests, build) → deploy staging from the workflow → verify → deploy production.** Deploys run from `.github/workflows/deploy.yml`, which calls `scripts/deploy.sh`. Never deploy a dirty tree; production requires explicit confirmation. `.github/workflows/ci.yml` is the only quality gate.

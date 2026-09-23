@@ -6,7 +6,7 @@
  * Tests the pull-to-refresh gesture component for mobile devices.
  * Note: Touch event simulation is limited in jsdom, so we test
  * component rendering and props handling. Full gesture testing
- * is covered in E2E tests.
+ * requires a real browser and is not covered here.
  */
 // @ts-nocheck
 

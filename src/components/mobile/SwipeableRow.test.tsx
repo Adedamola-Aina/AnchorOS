@@ -6,7 +6,7 @@
  * Tests the swipeable row component for mobile gesture actions.
  * Note: Touch gesture simulation is limited in jsdom, so we test
  * component rendering and props handling. Full gesture testing
- * is covered in E2E tests.
+ * requires a real browser and is not covered here.
  */
 // @ts-nocheck
 

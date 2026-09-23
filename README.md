@@ -28,8 +28,8 @@ Anchor OS is a multi-tenant web application for managing shared household financ
 | Styling | Tailwind CSS 4, semantic design tokens |
 | Platform | Installable PWA (service worker, install prompt, app badge) |
 | Backend | Firebase Auth, Firestore, Cloud Functions v2, Hosting |
-| Testing | Vitest (unit/integration), Playwright (E2E), Stryker (mutation) |
-| CI/CD | GitHub Actions, Lighthouse CI gates |
+| Testing | Vitest (unit/integration), Firebase rules emulator tests |
+| CI/CD | GitHub Actions |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the system architecture.
 
@@ -68,11 +68,11 @@ Local development is **local app + Firebase Emulator Suite**. There is no deploy
 ### Testing
 
 ```bash
-npm test                # Unit tests (Vitest)
-npm run test:run        # Single run (CI mode)
-npm run test:e2e        # E2E tests (Playwright)
-npm run test:mutation   # Mutation tests (Stryker)
-npm run test:rules      # Firestore security rules
+npm run test            # Unit tests (Vitest)
+npm run test:run        # Single run
+npm run test:rules      # Firestore/storage security rules (emulators)
+npm run test:functions:emulator
+npm run verify          # lint + typecheck + unit tests + build
 ```
 
 ### Build
@@ -97,21 +97,18 @@ src/
 ├── styles/           # App-shell (installed PWA) styles
 └── types/            # Shared TypeScript types
 config/               # Build, test, and lint configuration
-e2e/                  # Playwright E2E tests
-functions/            # Firebase Cloud Functions
+functions/             # Firebase Cloud Functions
 packages/ui/          # Shared @anchor-os/ui component package
 public/               # Static assets, manifest, service worker
 docs/                 # Architecture, data model, design system, operations
-scripts/              # Deploy pipeline, emulator helpers
+scripts/              # Local dev + deploy helpers
 ```
 
 ## CI/CD
 
-Every push triggers: lint → type check → unit tests → E2E tests.
+`.github/workflows/ci.yml` runs lint, typecheck, unit tests and a production build on every pull request and push to `master`.
 
-Production deploys additionally require mutation tests, Firestore rules tests, Lighthouse CI, and manual approval.
-
-See [docs/OPERATIONS.md](docs/OPERATIONS.md) for the release pipeline and environment model.
+Shipping is manual: **Actions → Deploy → Run workflow**, choose `staging` or `production`. It builds and runs `scripts/deploy.sh` (hosting + Firestore rules/indexes + storage rules + Functions). See [docs/OPERATIONS.md](docs/OPERATIONS.md) for the environment model.
 
 ## Contributing
 

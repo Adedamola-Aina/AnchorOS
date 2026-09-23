@@ -13,17 +13,12 @@
   ],
   "ignore": [
     "src/test/**",
-    "e2e/**",
     "functions/**",
-    "android/**",
-    "ios/**",
     "packages/**",
-    "tools/**",
     "scripts/**"
   ],
   "ignoreBinaries": [
-    "firebase",
-    "open"
+    "firebase"
   ],
   "ignoreDependencies": [
     "@tailwindcss/postcss",
@@ -32,8 +27,6 @@
     "tailwindcss-animate",
     "autoprefixer",
     "@commitlint/config-conventional",
-    "@stryker-mutator/typescript-checker",
-    "@stryker-mutator/vitest-runner",
     "firebase-admin"
   ]
 }

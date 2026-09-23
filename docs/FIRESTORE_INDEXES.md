@@ -1,8 +1,7 @@
 # Firestore Index Catalog
 
 Canonical documentation for every composite index and field override in
-`config/firestore.indexes.json`. `npm run check:indexes`
-(`tools/ci/check-index-catalog.ts`) fails if an entry here is missing.
+`config/firestore.indexes.json`.
 
 ## Composite indexes
 

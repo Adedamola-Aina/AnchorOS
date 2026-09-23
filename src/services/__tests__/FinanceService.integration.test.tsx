@@ -5,7 +5,7 @@
  * 1. Firebase Emulator must be running: firebase emulators:start
  * 2. Run with: npm run test:integration
  * 
- * Or use the helper script: ./scripts/test-with-emulator.sh
+ * Or use the helper script: npm run test:run (needs emulators)
  * 
  * Phase 5 of ARCH-003: Comprehensive end-to-end scenarios
  */
@@ -31,7 +31,7 @@ describe('FinanceService Integration', () => {
         // Skip if emulator is not running
         if (!isEmulatorRunning()) {
             console.log('⚠️  Skipping integration tests: FIRESTORE_EMULATOR_HOST not set');
-            console.log('   Run with: ./scripts/test-with-emulator.sh');
+            console.log('   Run with: npm run test:run (needs emulators)');
             return;
         }
 
