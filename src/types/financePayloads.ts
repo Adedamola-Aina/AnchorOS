@@ -9,7 +9,7 @@
 
 
 
-import type { TransactionType, Currency } from '../types';
+import type { TransactionType, Currency } from './financeTypes';
 
 /**
  * Payload for creating a new account

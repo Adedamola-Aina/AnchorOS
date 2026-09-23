@@ -13,11 +13,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { processTransferTransaction, processStandardTransaction } from '../TransferOperations';
 import { AnchorError } from '../../utils/error';
 import type { AnchorAccount } from '../../types';
-import type { CreateTransactionPayload } from '../financeTypes';
+import type { CreateTransactionPayload } from '../../types';
 import * as firestore from 'firebase/firestore';
 
 // Mock the permission utilities
-vi.mock('../../features/finance/utils/permissions', () => ({
+vi.mock('../financePermissions', () => ({
     canAddTransaction: vi.fn((account, userId) => account.ownerId === userId || account.shares?.[userId]),
 }));
 
@@ -382,7 +382,7 @@ describe('TransferOperations', () => {
                 scope: 'personal',
             };
 
-            const { canAddTransaction } = await import('../../features/finance/utils/permissions');
+            const { canAddTransaction } = await import('../financePermissions');
             vi.mocked(canAddTransaction).mockReturnValueOnce(false);
 
             // Act & Assert

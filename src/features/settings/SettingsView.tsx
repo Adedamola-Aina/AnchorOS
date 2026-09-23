@@ -20,7 +20,7 @@ import { captureError } from '../../utils/error';
 import { useNotifications } from '../../context/NotificationContext';
 import { useApp } from '../../context/AnchorContext';
 import { useFamilySharing } from '../../hooks/useFamilySharing';
-import { useFeatureFlag } from '../flags/useFeatureFlag';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useMfaEnrollmentUI } from './hooks/useMfaEnrollmentUI';
 import ContactModal from '../../components/ContactModal';
 

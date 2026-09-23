@@ -4,7 +4,7 @@
  */
 
 import { useEffect } from 'react';
-import type { AccessibilityPreferences } from '../features/settings/components/AccessibilityControls';
+import type { AccessibilityPreferences } from '../types';
 
 const FONT_SIZE_MAP: Record<AccessibilityPreferences['fontSize'], string> = {
   default: '',

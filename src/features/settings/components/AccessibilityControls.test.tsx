@@ -2,7 +2,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { AccessibilityControls, type AccessibilityPreferences } from './AccessibilityControls';
+import { AccessibilityControls } from './AccessibilityControls';
+import type { AccessibilityPreferences } from '../../../types';
 
 vi.mock('../../../components/shared', () => ({
   ToggleSwitch: ({ enabled, onToggle, label }: { enabled: boolean; onToggle: () => void; label: string }) => (

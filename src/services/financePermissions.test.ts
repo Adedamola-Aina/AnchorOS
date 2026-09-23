@@ -7,7 +7,7 @@ import {
   canEditTransaction,
   canDeleteTransaction,
   canManageAccount,
-} from './permissions';
+} from './financePermissions';
 
 describe('permissions', () => {
   const ownerAccount = {

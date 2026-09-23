@@ -55,4 +55,47 @@ describe('architecture boundaries', () => {
             .map(rel);
         expect(offenders).toEqual([]);
     });
+
+    it('the access layer never depends on the domain or UI layers', () => {
+        const offenders = allFiles
+            .filter((file) => !isTestFile(file) && rel(file).startsWith('api/'))
+            .filter((file) => /from ['"][^'"]*\/(services|features)\//.test(readFileSync(file, 'utf8')))
+            .map(rel);
+        expect(offenders).toEqual([]);
+    });
+
+    it('the domain layer never depends on features', () => {
+        const offenders = allFiles
+            .filter((file) => !isTestFile(file) && rel(file).startsWith('services/'))
+            .filter((file) => /from ['"][^'"]*\/features\//.test(readFileSync(file, 'utf8')))
+            .map(rel);
+        expect(offenders).toEqual([]);
+    });
+
+    it('utils and types never import the layers above them', () => {
+        const upwward = /from ['"][^'"]*\/(api|services|features|hooks|context)\//;
+        const offenders = allFiles
+            .filter((file) => !isTestFile(file) && /^(utils|types)\//.test(rel(file)))
+            .filter((file) => upwward.test(readFileSync(file, 'utf8')))
+            .map(rel);
+        expect(offenders).toEqual([]);
+    });
+
+    it('react-query stays in the data hooks', () => {
+        const allowed = (r: string): boolean =>
+            r.startsWith('hooks/') || r.startsWith('config/') || r === 'App.tsx';
+        const offenders = allFiles
+            .filter((file) => !isTestFile(file) && !allowed(rel(file)))
+            .filter((file) => readFileSync(file, 'utf8').includes('@tanstack/react-query'))
+            .map(rel);
+        expect(offenders).toEqual([]);
+    });
+
+    it('hooks and context never depend on features', () => {
+        const offenders = allFiles
+            .filter((file) => !isTestFile(file) && /^(hooks|context)\//.test(rel(file)))
+            .filter((file) => /from ['"][^'"]*\/features\//.test(readFileSync(file, 'utf8')))
+            .map(rel);
+        expect(offenders).toEqual([]);
+    });
 });

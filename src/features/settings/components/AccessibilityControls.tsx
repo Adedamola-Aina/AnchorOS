@@ -8,12 +8,7 @@
 import React from 'react';
 import { Type, Eye, Zap } from 'lucide-react';
 import { ToggleSwitch } from '../../../components/shared';
-
-export interface AccessibilityPreferences {
-  fontSize: 'default' | 'large' | 'xl';
-  highContrast: boolean;
-  reducedMotion: boolean;
-}
+import type { AccessibilityPreferences } from '../../../types';
 
 interface Props {
   preferences: AccessibilityPreferences;

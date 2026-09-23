@@ -13,13 +13,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AccountService } from '../AccountService';
 import { AnchorError } from '../../utils/error';
 import type { AnchorAccount } from '../../types';
-import type { CreateAccountPayload } from '../financeTypes';
+import type { CreateAccountPayload } from '../../types';
 
 // Import Firebase functions to mock
 import * as firestore from 'firebase/firestore';
 
 // Mock the permission utility
-vi.mock('../../features/finance/utils/permissions', () => ({
+vi.mock('../financePermissions', () => ({
     canManageAccount: vi.fn((account, userId) => account.ownerId === userId),
 }));
 
@@ -314,7 +314,7 @@ describe('AccountService', () => {
             };
 
             // Mock permission check to deny access
-            const { canManageAccount } = await import('../../features/finance/utils/permissions');
+            const { canManageAccount } = await import('../financePermissions');
             vi.mocked(canManageAccount).mockReturnValueOnce(false);
 
             // Act & Assert
@@ -603,7 +603,7 @@ describe('AccountService', () => {
                 ownerId,
             };
 
-            const { canManageAccount } = await import('../../features/finance/utils/permissions');
+            const { canManageAccount } = await import('../financePermissions');
             vi.mocked(canManageAccount).mockReturnValueOnce(false);
 
             // Act & Assert

@@ -11,9 +11,9 @@ import { collection, doc, increment, type WriteBatch, type Firestore } from '../
 import { APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import type { AnchorAccount } from '../types';
-import { canAddTransaction } from '../features/finance/utils/permissions';
-import type { CreateTransactionPayload } from './financeTypes';
-import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from './FieldEncryption';
+import { canAddTransaction } from './financePermissions';
+import type { CreateTransactionPayload } from '../types';
+import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from '../utils/fieldEncryption';
 
 function buildAccountShareIndex(account: AnchorAccount): Record<string, true> {
     const index: Record<string, true> = {};

@@ -6,12 +6,12 @@ import {
   canManageAccount,
   canViewAccount,
   getAccountPermission,
-} from '../features/finance/utils/permissions';
+} from '../services/financePermissions';
 import type { AnchorAccount } from '../types';
 
 /**
  * Tier-1 typing prerequisite (Wave 1 B1): guards the client-side permission
- * contract for `src/features/finance/utils/permissions.ts` now that the file is
+ * contract for `src/services/financePermissions.ts` now that the file is
  * fully typed. Client checks are cosmetic; server rules/functions are authoritative.
  */
 

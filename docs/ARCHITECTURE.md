@@ -48,6 +48,23 @@ Two contracts are machine-checked (not just documented) by `src/__tests__/archit
 
 - **Production code is type-checked.** No source file — production or test — may carry `@ts-nocheck`; the ESLint config also bans it.
 - **Firestore has one entry point.** Only `src/utils/secureDb.ts`, `src/utils/secureDbCore.ts`, and `src/config/firebase.ts` may import `firebase/firestore`.
+- **One dependency direction.** `api/` never imports `services/` or `features/`; `services/` never imports `features/`; `hooks/` and `context/` never import `features/`; `utils/` and `types/` never import `api/`, `services/`, `features/`, `hooks/` or `context/`.
+- **One server-state layer.** `@tanstack/react-query` lives only in `src/hooks/`, `src/config/`, and `App.tsx`.
+
+## Data access flow
+
+One direction only:
+
+```
+UI (src/features) → React bindings (src/hooks, src/context)
+                      ├─ reads:  src/api/*       (Firestore subscriptions + paged reads, via react-query)
+                      └─ writes: src/services/*  (domain operations)
+                    → src/types/*  (shared contracts)
+                    → src/utils/secureDb  (the only Firestore entry point)
+                    → Firestore
+```
+
+`src/api/*` is the **read/access layer**; `src/services/*` is the **domain/write layer**. They are complementary (not two implementations of the same thing). Server reads are cached by react-query inside `src/hooks/*`; contexts compose those hooks and hold session/UI state.
 
 ## Error handling rules
 

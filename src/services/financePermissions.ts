@@ -1,4 +1,4 @@
-import type { AnchorAccount } from '../../../types';
+import type { AnchorAccount } from '../types';
 
 // Permission levels for Family Mode
 type AccountPermission = 'owner' | 'read' | 'transact' | 'manage' | null;

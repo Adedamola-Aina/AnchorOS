@@ -6,7 +6,7 @@ import { useFabricInitialization } from './useFabricInitialization';
 const evaluateFeatureFlag = vi.fn();
 const logEvent = vi.fn();
 
-vi.mock('../../features/flags/featureFlags', () => ({
+vi.mock('../../utils/featureFlags', () => ({
   evaluateFeatureFlag: (...args: unknown[]) => evaluateFeatureFlag(...args),
 }));
 

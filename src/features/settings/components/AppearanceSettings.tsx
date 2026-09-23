@@ -3,7 +3,8 @@ import React from 'react';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { ThemeToggle, type Theme } from '../../../components/shared';
 import { Card, CardHeader, CardTitle, CardContent } from '@anchor-os/ui';
-import { AccessibilityControls, type AccessibilityPreferences } from './AccessibilityControls';
+import { AccessibilityControls } from './AccessibilityControls';
+import type { AccessibilityPreferences } from '../../../types';
 
 interface AppearanceSettingsProps {
     theme: Theme;

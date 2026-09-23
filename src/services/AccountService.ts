@@ -9,9 +9,9 @@ import { AnchorError } from '../utils/error';
 import { checkRateLimit, formatRetryTime, RATE_LIMIT_CONFIGS } from '../utils/rateLimit';
 import { auditFinance } from './AuditService';
 import type { AnchorAccount } from '../types';
-import { canManageAccount } from '../features/finance/utils/permissions';
-import type { CreateAccountPayload } from './financeTypes';
-import { FieldEncryption, ENCRYPTED_ACCOUNT_FIELDS } from './FieldEncryption';
+import { canManageAccount } from './financePermissions';
+import type { CreateAccountPayload } from '../types';
+import { FieldEncryption, ENCRYPTED_ACCOUNT_FIELDS } from '../utils/fieldEncryption';
 import { updateAccountPersonalization as updatePersonalization } from './AccountPersonalizationService';
 import { enforceServerRateLimit } from './serverRateLimit';
 

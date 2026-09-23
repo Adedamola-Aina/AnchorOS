@@ -9,7 +9,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { AnchorAccount } from '../types';
-import type { CreateTransactionPayload } from './financeTypes';
+import type { CreateTransactionPayload } from '../types';
 
 const mocks = vi.hoisted(() => ({
     runTransaction: vi.fn(),
@@ -43,7 +43,7 @@ vi.mock('./AuditService', () => ({
     auditFinance: { transactionCreated: mocks.auditCreated, operationFailed: vi.fn(), operationSucceeded: vi.fn() },
 }));
 vi.mock('./LedgerService', () => ({ LedgerService: { record: mocks.ledgerRecord } }));
-vi.mock('../features/finance/utils/permissions', () => ({
+vi.mock('./financePermissions', () => ({
     canAddTransaction: () => true,
     canDeleteTransaction: () => true,
 }));

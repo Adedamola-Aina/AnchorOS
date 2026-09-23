@@ -1,4 +1,4 @@
-import type { CreateTransactionPayload } from '../services/FinanceService';
+import type { CreateTransactionPayload } from '../types';
 import { safeGet, safeSet, safeDel, type ProcessResult } from './offlineQueueStorage';
 
 const IDB_KEY = 'anchor_offline_queue';

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ENCRYPTED_ACCOUNT_FIELDS, ENCRYPTED_TRANSACTION_FIELDS, FieldEncryption } from './FieldEncryption';
+import { ENCRYPTED_ACCOUNT_FIELDS, ENCRYPTED_TRANSACTION_FIELDS, FieldEncryption } from './fieldEncryption';
 
 const KEY = 'test-encryption-key-32-chars-ok!';
 

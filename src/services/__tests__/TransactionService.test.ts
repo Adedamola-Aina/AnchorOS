@@ -13,14 +13,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TransactionService } from '../TransactionService';
 import { AnchorError } from '../../utils/error';
 import type { AnchorAccount, AnchorTransaction } from '../../types';
-import type { CreateTransactionPayload, UpdateTransactionPayload } from '../financeTypes';
+import type { CreateTransactionPayload, UpdateTransactionPayload } from '../../types';
 
 // Import Firebase functions to mock
 import * as firestore from 'firebase/firestore';
 import * as transferOps from '../TransferOperations';
 
 // Mock the permission utilities
-vi.mock('../../features/finance/utils/permissions', () => ({
+vi.mock('../financePermissions', () => ({
     canAddTransaction: vi.fn((account, userId) => account.ownerId === userId || account.shares?.[userId]),
     canDeleteTransaction: vi.fn((account, userId) => account.ownerId === userId || account.shares?.[userId] === 'manage'),
     canEditTransaction: vi.fn((account, userId) => account.ownerId === userId || account.shares?.[userId] === 'manage'),
@@ -177,7 +177,7 @@ describe('TransactionService', () => {
             };
 
             // Mock permission check to deny
-            const { canAddTransaction } = await import('../../features/finance/utils/permissions');
+            const { canAddTransaction } = await import('../financePermissions');
             vi.mocked(canAddTransaction).mockReturnValueOnce(false);
 
             // Act & Assert
@@ -463,7 +463,7 @@ describe('TransactionService', () => {
             };
             const tx = createMockTransaction('tx-1', 'expense', 1000);
 
-            const { canDeleteTransaction } = await import('../../features/finance/utils/permissions');
+            const { canDeleteTransaction } = await import('../financePermissions');
             vi.mocked(canDeleteTransaction).mockReturnValueOnce(false);
 
             // Act & Assert
@@ -760,7 +760,7 @@ describe('TransactionService', () => {
             };
             const updates: UpdateTransactionPayload = { title: 'Hacked' };
 
-            const { canEditTransaction } = await import('../../features/finance/utils/permissions');
+            const { canEditTransaction } = await import('../financePermissions');
             vi.mocked(canEditTransaction).mockReturnValueOnce(false);
 
             // Act & Assert

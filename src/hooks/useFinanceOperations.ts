@@ -8,7 +8,7 @@ import { financeService } from '../services/FinanceService';
 import type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from '../services/FinanceService';
 import { handleError } from '../utils/error';
 import { withTimeout } from '../utils/secureDb';
-import { canDeleteTransaction } from '../features/finance/utils/permissions';
+import { canDeleteTransaction } from '../services/financePermissions';
 import { logTransactionAdded, logTransactionDeleted, logTransactionEdited } from './financeActivityLogging';
 import { createTracer } from '../services/telemetry';
 import { convertCurrencyAcrossAccounts, restoreSoftDeletedTransaction } from '../api/FinanceOperationsApi';

@@ -40,7 +40,7 @@ vi.mock('../services/FinanceService', () => ({
 }));
 
 // Mock permissions
-vi.mock('../features/finance/utils/permissions', () => ({
+vi.mock('../services/financePermissions', () => ({
     canDeleteTransaction: vi.fn(() => true),
 }));
 
@@ -207,7 +207,7 @@ describe('useFinanceOperations', () => {
         });
 
         it('throws when user lacks delete permission', async () => {
-            const { canDeleteTransaction } = await import('../features/finance/utils/permissions');
+            const { canDeleteTransaction } = await import('../services/financePermissions');
             vi.mocked(canDeleteTransaction).mockReturnValueOnce(false);
 
             const { result } = getHook();

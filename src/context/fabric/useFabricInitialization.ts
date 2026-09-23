@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { evaluateFeatureFlag } from '../../features/flags/featureFlags';
+import { evaluateFeatureFlag } from '../../utils/featureFlags';
 import { logEvent } from '../../services/telemetry';
 import type { FabricService } from '../../services/fabric/FabricService';
 

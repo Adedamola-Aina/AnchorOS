@@ -41,7 +41,7 @@ vi.mock('../../hooks/useFamilySharing', () => ({
   useFamilySharing: () => ({ connection: null, loading: false, disconnectFamily: vi.fn() }),
 }));
 
-vi.mock('../flags/useFeatureFlag', () => ({
+vi.mock('../../hooks/useFeatureFlag', () => ({
   useFeatureFlag: () => flagEnabled,
 }));
 

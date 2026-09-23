@@ -11,10 +11,10 @@ import { db, type Firestore } from '../utils/secureDb';
 import { AccountService } from './AccountService';
 import { TransactionService } from './TransactionService';
 import type { AnchorAccount, AnchorTransaction } from '../types';
-import type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from './financeTypes';
+import type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from '../types';
 
 // Re-export types for backward compatibility
-export type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from './financeTypes';
+export type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from '../types';
 
 /**
  * FinanceService - Unified facade combining account and transaction operations

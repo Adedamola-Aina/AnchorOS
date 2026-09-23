@@ -12,6 +12,12 @@ export type {
   RecurringTransaction,
 } from './financeTypes';
 
+export type {
+  CreateAccountPayload,
+  CreateTransactionPayload,
+  UpdateTransactionPayload,
+} from './financePayloads';
+
 export interface AnchorTask {
   id: string;
   title: string;
@@ -77,6 +83,12 @@ export const BEYOND_BASICS_ITEMS = [
 
 export type BeyondBasicsItem = typeof BEYOND_BASICS_ITEMS[number];
 
+export interface AccessibilityPreferences {
+  fontSize: 'default' | 'large' | 'xl';
+  highContrast: boolean;
+  reducedMotion: boolean;
+}
+
 export interface UserProfile {
   name: string;
   photoURL?: string;
@@ -102,11 +114,7 @@ export interface UserProfile {
       endTime: string;
     };
   };
-  accessibility?: {
-    fontSize: 'default' | 'large' | 'xl';
-    highContrast: boolean;
-    reducedMotion: boolean;
-  };
+  accessibility?: AccessibilityPreferences;
 }
 
 export interface AnchorNotification {

@@ -8,10 +8,10 @@ import { doc, increment, runTransaction, type Firestore } from '../utils/secureD
 import { APP_ID } from '../config/firebase';
 import { AnchorError } from '../utils/error';
 import { auditFinance } from './AuditService';
-import { canEditTransaction } from '../features/finance/utils/permissions';
+import { canEditTransaction } from './financePermissions';
 import type { AnchorTransaction, AnchorAccount } from '../types';
-import type { UpdateTransactionPayload } from './financeTypes';
-import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from './FieldEncryption';
+import type { UpdateTransactionPayload } from '../types';
+import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS } from '../utils/fieldEncryption';
 
 export async function updateTransaction(
     firestore: Firestore,

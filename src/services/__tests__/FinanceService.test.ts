@@ -14,7 +14,7 @@ import { FinanceService } from '../FinanceService';
 import { AccountService } from '../AccountService';
 import { TransactionService } from '../TransactionService';
 import type { AnchorAccount, AnchorTransaction } from '../../types';
-import type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from '../financeTypes';
+import type { CreateAccountPayload, CreateTransactionPayload, UpdateTransactionPayload } from '../../types';
 
 describe('FinanceService', () => {
     let service: FinanceService;

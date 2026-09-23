@@ -4,7 +4,7 @@
 import type { AnchorAccount } from '../../../types';
 import { formatCurrency } from '../../../utils/format';
 import { fromCents } from '../../../utils/moneyUtils';
-import { getAccountPermission } from '../utils/permissions';
+import { getAccountPermission } from '../../../services/financePermissions';
 
 export function getAccessBadge(account: AnchorAccount, currentUserId?: string): string {
   const permission = currentUserId ? getAccountPermission(account, currentUserId) : null;

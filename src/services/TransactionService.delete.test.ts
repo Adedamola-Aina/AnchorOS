@@ -29,7 +29,7 @@ vi.mock('./AuditService', () => ({
     auditFinance: { transactionDeleted: mocks.auditDeleted, operationFailed: vi.fn(), operationSucceeded: vi.fn() },
 }));
 vi.mock('./LedgerService', () => ({ LedgerService: { record: mocks.ledgerRecord } }));
-vi.mock('../features/finance/utils/permissions', () => ({
+vi.mock('./financePermissions', () => ({
     canDeleteTransaction: () => true,
     canAddTransaction: () => true,
 }));

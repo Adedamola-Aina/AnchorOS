@@ -21,7 +21,7 @@ import * as firestore from 'firebase/firestore';
 import { AccountService } from '../AccountService';
 import type { AnchorAccount } from '../../types';
 
-vi.mock('../../features/finance/utils/permissions', () => ({
+vi.mock('../financePermissions', () => ({
     canManageAccount: vi.fn((account, userId) => account.ownerId === userId || !account.ownerId),
 }));
 vi.mock('../serverRateLimit', () => ({ enforceServerRateLimit: vi.fn().mockResolvedValue(undefined) }));

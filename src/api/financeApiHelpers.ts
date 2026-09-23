@@ -1,7 +1,7 @@
 import { collection, getDocs, query } from '../utils/secureDb';
 import { db, APP_ID } from '../config/firebase';
 import type { AnchorAccount, AnchorTransaction } from '../types';
-import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS, ENCRYPTED_ACCOUNT_FIELDS } from '../services/FieldEncryption';
+import { FieldEncryption, ENCRYPTED_TRANSACTION_FIELDS, ENCRYPTED_ACCOUNT_FIELDS } from '../utils/fieldEncryption';
 import {
     buildTransactionPageConstraints,
     sliceTransactionPage,
