@@ -278,6 +278,10 @@ jobs:
     name: 🔦 Lighthouse CI (normal mode, Hosting surface only)
     runs-on: ubuntu-latest
     needs: [plan, build-production]
+    # Same environment as deploy-production and the post-deploy smoke, so the canary
+    # credentials resolve from the same scope they are provisioned in. Without this the
+    # job would read only repository secrets while the smoke read environment secrets.
+    environment: production
     if: >-
       needs.plan.outputs.mode == 'normal' &&
       needs.plan.outputs.deploy_hosting == 'true' &&

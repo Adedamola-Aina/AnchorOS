@@ -96,6 +96,15 @@ test('the Lighthouse job fails early and clearly when the canary is unconfigured
     assert.match(block, /exit 1/);
 });
 
+test('the Lighthouse job reads the canary from the same environment as the smoke', () => {
+    // Secret scope, not cosmetics: the post-deploy smoke and deploy-production both
+    // declare `environment: production`. If the audit does not, it reads only repository
+    // secrets while the smoke reads environment secrets, and a canary provisioned in the
+    // documented place is invisible to the audit.
+    const block = lighthouseBlock();
+    assert.match(block, /^ {4}environment: production$/m);
+});
+
 test('the Lighthouse job still gates deploy-production on success-or-skipped', () => {
     assert.match(
         PRODUCTION_WORKFLOW,
