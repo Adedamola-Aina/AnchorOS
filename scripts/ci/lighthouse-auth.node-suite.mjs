@@ -30,6 +30,9 @@ const FIXTURE = { email: 'test@anchor-os.com', password: 'TestPass123!' };
 const lighthouseBlock = () =>
     PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('  lighthouse:'), PRODUCTION_WORKFLOW.indexOf('  deploy-production:'));
 
+const deployBlock = () =>
+    PRODUCTION_WORKFLOW.slice(PRODUCTION_WORKFLOW.indexOf('  deploy-production:'), PRODUCTION_WORKFLOW.indexOf('  deploy-b1:'));
+
 const withEnv = (vars, fn) => {
     const previous = {};
     for (const [key, value] of Object.entries(vars)) {
@@ -89,11 +92,36 @@ test('the Lighthouse job audits the real production artifact', () => {
     assert.match(block, /LIGHTHOUSE_CANARY_PASSWORD: \$\{\{ secrets\.PRODUCTION_SMOKE_PASSWORD \}\}/);
 });
 
-test('the Lighthouse job fails early and clearly when the canary is unconfigured', () => {
+test('the production audit is report-only and never blocks a release', () => {
     const block = lighthouseBlock();
-    assert.match(block, /Require the production canary credentials/);
-    assert.match(block, /::error::PRODUCTION_SMOKE_EMAIL \/ PRODUCTION_SMOKE_PASSWORD are not configured/);
-    assert.match(block, /exit 1/);
+    // It must announce the skip rather than fail.
+    assert.match(block, /Detect the production canary/);
+    assert.match(block, /configured=false/);
+    assert.match(block, /::notice::No production canary configured/);
+    assert.doesNotMatch(block, /::error::PRODUCTION_SMOKE_EMAIL/, 'an unconfigured canary must not be an error');
+    // A red audit must not fail the job, so it cannot block the deploy.
+    assert.match(block, /continue-on-error: true/);
+    // The audit itself only runs when a canary exists (a comment may sit between the
+    // condition and the command, so do not require adjacency).
+    assert.match(block, /if: steps\.canary\.outputs\.configured == 'true'[\s\S]{0,300}run: npm run lighthouse/);
+});
+
+test('the deploy job skips the authenticated smoke without a canary and checks liveness instead', () => {
+    const block = deployBlock();
+    // The smoke still fails closed by policy, so without a canary it is skipped rather than
+    // run against the wrong identity.
+    assert.match(
+        block,
+        /if: steps\.canary\.outputs\.configured == 'true' && \(needs\.plan\.outputs\.deploy_hosting == 'true' \|\| needs\.plan\.outputs\.deploy_functions == 'true'\)/,
+    );
+    // A canary-free deploy is still verified: unauthenticated liveness of the deploy.
+    assert.match(block, /Post-deploy liveness check \(no canary: verify the deploy landed\)/);
+    const liveness = block.slice(block.indexOf('Post-deploy liveness check'));
+    assert.match(liveness, /curl -fsS/, 'liveness must actually request the deployed origin');
+    assert.match(liveness, /div id="root"/, 'and check the app shell is served');
+    assert.match(liveness, /\/assets\//, 'and that a hashed bundle is referenced');
+    // It must need no identity at all.
+    assert.doesNotMatch(liveness, /SMOKE_PASSWORD|E2E_SMOKE_TARGET/, 'the liveness fallback must need no credentials');
 });
 
 test('the Lighthouse job reads the canary from the same environment as the smoke', () => {
