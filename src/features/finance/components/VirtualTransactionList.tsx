@@ -44,18 +44,22 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     /*
      * Deliberately NOT a viewport unit.
      *
-     * This default used to be `h-[calc(100vh-320px)] min-h-[400px]`. `vh` resolves
-     * against the LARGE viewport, which in an installed iOS PWA is taller than the
-     * layout viewport the shell is sized against (`html/body/#root { height: 100% }`
-     * — see the viewport contract in index.css). A `vh`-sized box inside a
-     * `100%`-sized shell is exactly the mismatch that contract exists to prevent:
-     * the box is taller than the space it sits in, the page grows past what was
-     * intended, and the extra height reads as unexplained empty space at the end of
-     * the page.
+     * The previous default was an arbitrary-height utility subtracting 320px from
+     * `100vh`. `vh` resolves against the LARGE viewport, which in an installed iOS PWA
+     * is taller than the layout viewport the shell is sized against (`html/body/#root`
+     * are all `height: 100%` — see the viewport contract in index.css). A `vh`-sized
+     * box inside a `100%`-sized shell is exactly the mismatch that contract exists to
+     * prevent: the box is taller than the space it sits in, the page grows past what
+     * was intended, and the extra height reads as unexplained empty space at the end
+     * of the page.
+     *
+     * (The class is described rather than quoted on purpose: Tailwind v4 scans raw
+     * file text, comments included, so quoting it here would emit the very utility
+     * this change removes. `shellGeometry.test.ts` pins that.)
      *
      * Both current call sites pass their own `className`, so this value is only a
-     * fallback — it is kept free of viewport units so it cannot reintroduce the
-     * mismatch for a future caller.
+     * fallback — kept free of viewport units so it cannot reintroduce the mismatch
+     * for a future caller.
      */
     className = 'min-h-[200px]',
     carryoverStartIndex,

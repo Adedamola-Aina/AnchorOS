@@ -156,11 +156,16 @@ describe('the shell height is measured in the layout viewport', () => {
                 const full = path.join(dir, entry.name);
                 if (entry.isDirectory()) walk(full);
                 else if (/\.tsx?$/.test(entry.name) && !/\.test\./.test(entry.name)) {
-                    // `h-[calc(100vh-…)]` is a box taller than the shell it sits in on
-                    // iOS, where vh is the LARGE viewport. Caps (`max-h-[65vh]`) are a
-                    // different, deliberate thing and are not matched here. Comments are
-                    // stripped so a note *about* the defect is not read as the defect.
-                    if (/h-\[calc\(100vh/.test(stripComments(fs.readFileSync(full, 'utf8')))) {
+                    // A fixed-height box subtracting from 100vh is taller than the shell
+                    // it sits in on iOS, where vh is the LARGE viewport. Caps
+                    // (`max-h-[65vh]`) are a different, deliberate thing.
+                    //
+                    // Scanned WITHOUT stripping comments, because Tailwind v4 scans raw
+                    // file text: a comment that quotes the class still causes the
+                    // utility to be emitted into the shipped stylesheet. This assertion
+                    // caught exactly that — the retired class was still in the deployed
+                    // CSS because a comment describing its removal quoted it.
+                    if (/h-\[calc\(100vh/.test(fs.readFileSync(full, 'utf8'))) {
                         offenders.push(path.relative(process.cwd(), full));
                     }
                 }
