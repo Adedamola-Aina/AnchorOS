@@ -304,3 +304,54 @@ describe('the bottom navigation reads as a bar', () => {
         expect(nav).not.toContain('bg-surface-raised');
     });
 });
+
+/**
+ * The bar's surface is under test on staging (see utils/navMaterial). The shipped
+ * bar must be the ABSENCE of a variant, so every experimental rule has to be
+ * qualified by the probe's attribute on <html> — an unqualified rule would change
+ * the bar in production, where the attribute can never be set.
+ */
+describe('the nav-material experiment cannot reach the shipped bar', () => {
+    const css = stripComments(fromSrc('index.css'));
+    /** Every declaration block that mentions the probe's selector. */
+    const variantBlocks = css.match(/[^{}]*\[data-nav-material[^{}]*\{[^}]*\}/g) ?? [];
+    const navBlocks = css.match(/[^{}]*nav\[data-bottom-nav\][^{}]*\{[^}]*\}/g) ?? [];
+
+    it('has no rule that restyles the navigation without the attribute', () => {
+        for (const block of navBlocks) {
+            expect(block, `unqualified navigation rule: ${block.slice(0, 80)}`)
+                .toMatch(/\[data-nav-material=/);
+        }
+        expect(navBlocks.length).toBeGreaterThan(0);
+    });
+
+    it('scopes every variant to the attribute, in both themes', () => {
+        expect(variantBlocks.length).toBeGreaterThanOrEqual(4);
+        for (const block of variantBlocks) {
+            expect(block).toMatch(/html(\.[a-z]+)?\[data-nav-material=/);
+        }
+        // Two candidates, each with a dark counterpart.
+        expect(css).toMatch(/html\[data-nav-material='translucent'\]/);
+        expect(css).toMatch(/html\.dark\[data-nav-material='translucent'\]/);
+        expect(css).toMatch(/html\[data-nav-material='raised'\]/);
+        expect(css).toMatch(/html\.dark\[data-nav-material='raised'\]/);
+    });
+
+    /**
+     * 'current' is published like any other value and must match nothing: the
+     * shipped bar is the absence of a variant, not a third one kept in step by hand.
+     */
+    it('leaves "current" matching no rule at all', () => {
+        expect(css).not.toMatch(/\[data-nav-material='current'\]/);
+        expect(css).not.toMatch(/\[data-nav-material="current"\]/);
+    });
+
+    it('is published only by the staging probe', () => {
+        const layout = fromSrc('layouts/MainLayout.tsx');
+        expect(layout).toMatch(/import\.meta\.env\.VITE_APP_ENV === 'staging'/);
+        // The attribute is never written anywhere but the probe's state machine.
+        const writers = ['layouts/MainLayout.tsx', 'components/mobile/BottomNavigation.tsx']
+            .filter((file) => fromSrc(file).includes('data-nav-material'));
+        expect(writers).toEqual([]);
+    });
+});

@@ -33,6 +33,23 @@ describe('UX-GL-07 — developer surfaces are gated, and the gate is proved', ()
         expect(DEV_SURFACE_MARKERS.length).toBeGreaterThanOrEqual(4);
     });
 
+    /**
+     * The nav-material probe is a temporary staging-only experiment. The gate only
+     * *works* if the bundler can drop the import, so the shape is guarded here the
+     * same way the Developer Tools section is below.
+     */
+    it('keeps the nav-material probe inside a folded build-time condition', () => {
+        const layout = readFileSync('src/layouts/MainLayout.tsx', 'utf8');
+        expect(layout).toMatch(
+            /import\.meta\.env\.VITE_APP_ENV === 'staging'[\s\S]{0,220}import\(['"]\.\.\/components\/dev\/NavMaterialProbe['"]\)/,
+        );
+        expect(layout).not.toMatch(/^import \{[^}]*NavMaterialProbe[^}]*\} from/m);
+    });
+
+    it('names the probe among the surfaces that must never ship', () => {
+        expect(DEV_SURFACE_MARKERS).toContain('NAV MATERIAL — STAGING ONLY');
+    });
+
     it('keeps the Developer Tools import inside a folded build-time condition', () => {
         // The gate only *works* if the bundler can drop the import. A static
         // import (or a condition read from another module) leaves the section's

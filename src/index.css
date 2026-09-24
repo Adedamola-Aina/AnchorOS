@@ -559,6 +559,56 @@ body[data-fab-visible='true'] .floating-toast {
 }
 
 
+/* ─── Nav-material experiment (staging only) ────────────────
+ * The bottom navigation's surface, as a variable — so the candidates can be judged
+ * on a device instead of in a screenshot. Driven by `utils/navMaterial` through the
+ * `data-nav-material` attribute on <html>; the control that sets it is gated on a
+ * folded build-time condition in `layouts/MainLayout.tsx`.
+ *
+ * The defect being measured, with real iPhone insets in Chromium 153:
+ *
+ *   nav          769 → 852  (83px; its bottom edge IS the viewport bottom, so
+ *                            nothing is unpainted and the geometry is right)
+ *   tab strip    770 → 819  (49px — the h-[49px] list)
+ *   blank band   33px       (39.8% of the bar, i.e. its own home-indicator pad)
+ *   nav fill     rgb(255,255,255) vs page rgb(248,250,252) = 1.05:1
+ *
+ * So two-fifths of the bar is a fill that cannot be told apart from the page, and
+ * the bar reads as a hole with icons in it. A more visible divider (the previous
+ * attempt) only lifts the *edge* to ~1.48:1 and leaves the band blank. No opaque
+ * fill light enough to be a tab bar can clear the threshold either: slate-100 is
+ * 1.05:1, slate-200 1.18:1, slate-300 1.42:1 against the page. Hence a material
+ * (A) and a raised plane (B) rather than more shades of white.
+ *
+ * NOTHING here applies unless the attribute is set. `data-nav-material="current"`
+ * deliberately matches no rule, so the shipped bar is the absence of a variant
+ * rather than a third variant kept in step by hand — and a production bundle, which
+ * cannot set the attribute at all, keeps the bar exactly as it is.
+ *
+ * NOTE the deliberate contrast with CM-28's FormActionBar, which is opaque by rule
+ * because a field showing through it read as a *missing* field. The navigation is
+ * the mirror case: its opacity is what makes a covered row read as missing, because
+ * the bar covers no fields — only content the user is scrolling past.
+ */
+html[data-nav-material='translucent'] nav[data-bottom-nav] {
+  background-color: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-top-color: rgba(15, 23, 42, 0.12);
+}
+html.dark[data-nav-material='translucent'] nav[data-bottom-nav] {
+  background-color: rgba(15, 23, 42, 0.78);
+  border-top-color: rgba(255, 255, 255, 0.14);
+}
+html[data-nav-material='raised'] nav[data-bottom-nav] {
+  border-top-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 -6px 20px -10px rgba(15, 23, 42, 0.45);
+}
+html.dark[data-nav-material='raised'] nav[data-bottom-nav] {
+  border-top-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 -6px 20px -10px rgba(0, 0, 0, 0.65);
+}
+
 /* ─── Scrollbars ────────────────────────────────────────── */
 * {
   scrollbar-width: thin;

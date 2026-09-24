@@ -18,6 +18,19 @@ import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { useFinanceService } from '../hooks/useFinanceService';
 import { useFabric } from '../hooks/useFabric';
 
+/*
+ * The bottom navigation's surface is under test on staging only — see
+ * `utils/navMaterial` and the CSS block in `index.css`. Vite substitutes
+ * `import.meta.env.VITE_APP_ENV` at build time, so a production build folds this
+ * whole expression — dynamic import included — to `null` and emits no chunk for
+ * the probe, exactly as Settings → Developer Tools does (see `utils/devSurface`).
+ * A build with no environment named folds to `null` too, so CI's bare `vite build`
+ * cannot ship it either.
+ */
+const NavMaterialProbe = import.meta.env.VITE_APP_ENV === 'staging'
+    ? React.lazy(() => import('../components/dev/NavMaterialProbe').then((module) => ({ default: module.NavMaterialProbe })))
+    : null;
+
 interface MainLayoutProps {
     children: React.ReactNode;
     version: string;
@@ -158,6 +171,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, version }) => {
 
             {isMobile && <ContextualFab navHidden={navHidden} />}
             {isMobile && <BottomNavigation accountColors={accountColors} hasUnreadInsight={!!proactiveQuestion} hidden={navHidden} />}
+            {/* Staging only (see the folded condition above); absent in production. */}
+            {isMobile && NavMaterialProbe && (
+                <React.Suspense fallback={null}>
+                    <NavMaterialProbe />
+                </React.Suspense>
+            )}
         </div>
     );
 };

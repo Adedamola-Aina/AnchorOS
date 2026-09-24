@@ -64,4 +64,8 @@ export const DEV_SURFACE_MARKERS = [
     'STAGING — TEST DATA',
     'Developer Tools',
     'react-query-devtools',
+    // The temporary bottom-navigation surface switch (see utils/navMaterial). Its
+    // label is the string, so "is the probe gone from the production bundle?" is
+    // answerable by grepping for exactly what a user would see.
+    'NAV MATERIAL — STAGING ONLY',
 ] as const;
