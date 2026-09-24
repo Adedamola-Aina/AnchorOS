@@ -4,8 +4,9 @@
  * Slides up from bottom with backdrop blur. 44px touch targets.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useOverlayBehavior } from '../../hooks/useOverlayBehavior';
 
 interface ActionSheetItem {
   label: string;
@@ -22,20 +23,10 @@ interface ActionSheetProps {
 
 export const ActionSheet: React.FC<ActionSheetProps> = ({ isOpen, onClose, items }) => {
   const sheetRef = useRef<HTMLDivElement>(null);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    document.addEventListener('keydown', handleKeyDown);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
-    };
-  }, [isOpen, handleKeyDown]);
+  // Escape, the focus trap, the scroll lock and the `data-modal-open` marker the
+  // contextual FAB stands down for — all owned by the shared overlay behaviour.
+  // Without the marker the FAB stayed on screen over this sheet.
+  useOverlayBehavior({ isOpen, onClose, panelRef: sheetRef });
 
   if (!isOpen) return null;
 

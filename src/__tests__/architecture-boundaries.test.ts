@@ -46,6 +46,21 @@ describe('architecture boundaries', () => {
         expect(offenders).toEqual([]);
     });
 
+    /**
+     * `packages/ui` is product code: `config/tsconfig.app.json` compiles it, the app
+     * imports it from 48 files, and it was the last place still opting out of type
+     * checking while `src/` was strict. `config/*` is excluded deliberately — those are
+     * build-tooling entry points (vite/vitest), not shipped code.
+     */
+    it('the shared UI package is type-checked too', () => {
+        const packagesRoot = join(process.cwd(), 'packages');
+        const offenders = walk(packagesRoot)
+            .filter((file) => /\.(ts|tsx)$/.test(file))
+            .filter((file) => readFileSync(file, 'utf8').includes(OPT_OUT_DIRECTIVE))
+            .map((file) => file.slice(packagesRoot.length + 1));
+        expect(offenders).toEqual([]);
+    });
+
     it('Firestore is reached only through secureDb', () => {
         const offenders = productionFiles
             .filter((file) => {

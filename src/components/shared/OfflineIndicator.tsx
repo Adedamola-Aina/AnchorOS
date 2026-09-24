@@ -32,7 +32,7 @@ export const OfflineIndicator = () => {
 
     return (
         <div
-            className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl flex items-center gap-3 font-bold text-sm shadow-2xl transition-all duration-500 animate-in slide-in-from-bottom-4 ${isOnline
+            className={`floating-toast fixed left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl flex items-center gap-3 font-bold text-sm shadow-2xl transition-all duration-500 animate-in slide-in-from-bottom-4 ${isOnline
                     ? 'bg-emerald-500 text-white'
                     : 'bg-slate-900 dark:bg-slate-800 text-white'
                 }`}

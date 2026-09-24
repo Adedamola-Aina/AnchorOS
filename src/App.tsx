@@ -100,14 +100,15 @@ const AppContent = () => {
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from './config/queryClient';
-import { queryPersister } from './config/persister';
+import { queryPersister, shouldDehydrateQuery } from './config/persister';
 
 const persister = queryPersister;
 
-const shouldDehydrateQuery = (query: { queryKey: readonly unknown[] }) => {
-  const key = query.queryKey[0];
-  return key !== 'tasks' && key !== 'finance';
-};
+/*
+ * `shouldDehydrateQuery` lives in ./config/persister so it can be unit-tested — see
+ * its doc comment there for why a key-only filter (what used to be inlined here)
+ * made every persisted cache write throw `DataCloneError`.
+ */
 
 export default function App() {
   useVersionCheck();

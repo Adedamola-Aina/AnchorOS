@@ -1,7 +1,8 @@
 
-import React, { useContext, useState, useCallback, type ReactNode } from 'react';
+import React, { useContext, useRef, useState, useCallback, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
+import { useOverlayBehavior } from '../hooks/useOverlayBehavior';
 import { NotificationContext, type ConfirmOptions, type NotificationType } from './NotificationContextDefinition';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 
@@ -43,21 +44,39 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         }
     };
 
+    const confirmPanelRef = useRef<HTMLDivElement>(null);
+    /**
+     * The confirm dialog is a modal in every sense, but it had none of the behaviour:
+     * no Escape to cancel, no focus trap (Tab moved into the page behind it) and no
+     * scroll lock (the page scrolled under the dialog). It also runs through the same
+     * lock as every other overlay now, so it can be stacked without the first closer
+     * handing scrolling back while something is still open.
+     */
+    useOverlayBehavior({
+        isOpen: Boolean(confirmDialog),
+        onClose: () => handleConfirm(false),
+        panelRef: confirmPanelRef,
+    });
+
     return (
         <NotificationContext.Provider value={{ showToast, confirm, requestPushPermission, fcmToken, pushPermissionStatus }}>
             {children}
             {createPortal(
-                <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-[100] flex flex-col gap-3 pointer-events-none">
+                <div className="floating-toast fixed left-4 right-4 sm:left-auto sm:right-6 z-[100] flex flex-col gap-3 pointer-events-none">
                     {notifications.map(n => (
                         <div
                             key={n.id}
-                            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border animate-in slide-in-from-right-8 duration-300 w-full sm:min-w-[300px] sm:max-w-md ${n.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400' :
-                                n.type === 'error' ? 'bg-rose-50 dark:bg-rose-800/20 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-400' :
-                                    'bg-slate-800 text-white border-slate-700'
+                            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border animate-in slide-in-from-right-8 duration-300 w-full sm:min-w-[300px] sm:max-w-md ${n.type === 'success' ? 'bg-success-surface border-success-border text-success' :
+                                n.type === 'error' ? 'bg-danger-surface border-danger-border text-danger' :
+                                    n.type === 'warning' ? 'bg-warning-surface border-warning-border text-warning' :
+                                        'bg-slate-800 text-white border-slate-700'
                                 }`}
                         >
                             {n.type === 'success' && <CheckCircle2 className="w-5 h-5 shrink-0" />}
                             {n.type === 'error' && <AlertCircle className="w-5 h-5 shrink-0" />}
+                            {/* `warning` used to fall through to the dark info style, so an
+                                advisory looked identical to a neutral message. */}
+                            {n.type === 'warning' && <AlertTriangle className="w-5 h-5 shrink-0" />}
                             {n.type === 'info' && <Info className="w-5 h-5 shrink-0" />}
                             <p className="text-sm font-medium pr-4">{n.message}</p>
                             <button
@@ -73,7 +92,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             )}
 
             {confirmDialog && createPortal(
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                <div ref={confirmPanelRef} className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
                         <h3 className="text-h3 lg:text-h3-lg text-slate-900 dark:text-white mb-2">{confirmDialog.options.title}</h3>
                         <p className="text-slate-500 dark:text-slate-400 mb-8 whitespace-pre-wrap">{confirmDialog.options.message}</p>

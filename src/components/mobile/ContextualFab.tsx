@@ -36,7 +36,30 @@ export const ContextualFab = ({ navHidden = false }: { navHidden?: boolean }) =>
     return () => observer.disconnect();
   }, []);
 
-  if (!action || sheetOpen) return null;
+  const visible = Boolean(action) && !sheetOpen;
+
+  /**
+   * Publish whether this button occupies the first rung of the floating layer.
+   *
+   * The transient surfaces above it (toast, offline notice, install prompt) position
+   * themselves with `.floating-toast`, which steps up to the second rung while this
+   * attribute is set. Without it they would have to guess, and guessing is what put
+   * the toast inside the navigation's band. This is the same `data-*`-on-<body>
+   * contract the shell already uses for `data-modal-open`.
+   */
+  useEffect(() => {
+    const body = document.body;
+    if (!visible) {
+      delete body.dataset.fabVisible;
+      return;
+    }
+    body.dataset.fabVisible = 'true';
+    return () => { delete body.dataset.fabVisible; };
+  }, [visible]);
+
+  // `!action` is repeated (not just `!visible`) so the narrowed type reaches the
+  // button below; `visible` alone is a boolean, not a narrowing of `action`.
+  if (!visible || !action) return null;
 
   return (
     <button
@@ -46,7 +69,9 @@ export const ContextualFab = ({ navHidden = false }: { navHidden?: boolean }) =>
       data-testid="contextual-fab"
       data-nav-hidden={navHidden ? 'true' : 'false'}
       className={`fixed right-4 z-40 inline-flex items-center gap-2 h-14 min-w-14 px-4 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-600/30 active:scale-[0.97] transition-all duration-200 motion-reduce:transition-none ${navHidden ? 'translate-y-24 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
-      style={{ bottom: 'calc(var(--bottom-nav-height, 49px) + var(--fab-offset, 1rem))' }}
+      /* The floating layer's first rung — one definition, shared with the clearance
+         the shell reserves and with every other floating surface. */
+      style={{ bottom: 'var(--shell-above-nav)' }}
     >
       <Plus className="w-5 h-5" aria-hidden="true" />
       <span className="text-sm font-semibold">{action.label}</span>

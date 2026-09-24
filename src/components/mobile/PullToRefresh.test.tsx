@@ -130,6 +130,50 @@ describe('PullToRefresh', () => {
       // Wrapper should exist
       expect(wrapper).toBeInTheDocument();
     });
+
+    /**
+     * A resting `translateY(0px)` is still a transform. A transformed element
+     * becomes the containing block for fixed/sticky descendants and starts a new
+     * stacking context, which also changes the backdrop a descendant's
+     * `backdrop-filter` samples — and Home renders seven `.glass-card`
+     * (backdrop-filter) widgets inside this container.
+     */
+    it('does not transform the page while at rest', () => {
+      render(
+        <PullToRefresh onRefresh={mockOnRefresh}>
+          <div>Content</div>
+        </PullToRefresh>
+      );
+
+      expect(screen.getByTestId('pull-to-refresh-content').style.transform).toBe('none');
+    });
+
+    it('applies the pull offset while the user is pulling', async () => {
+      const { fireEvent, act } = await import('@testing-library/react');
+
+      render(
+        <PullToRefresh onRefresh={mockOnRefresh} threshold={60}>
+          <div>Content</div>
+        </PullToRefresh>
+      );
+
+      const pullContainer = screen.getByTestId('pull-to-refresh-container');
+
+      // Separate act boundaries: the move handler only takes effect once the start
+      // handler's `isPulling` state has been committed.
+      await act(async () => {
+        fireEvent.touchStart(pullContainer, { touches: [{ clientY: 0 }] });
+      });
+      await act(async () => {
+        fireEvent.touchMove(pullContainer, { touches: [{ clientY: 120 }] });
+      });
+
+      // Queried by test id, not by position: the indicator is inserted before the
+      // content while pulling, so the wrapper is no longer the first child.
+      expect(screen.getByTestId('pull-to-refresh-content').style.transform).toMatch(
+        /translateY\(\d+(\.\d+)?px\)/
+      );
+    });
   });
 
   describe('Touch Gesture Flow', () => {

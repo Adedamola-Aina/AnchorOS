@@ -72,7 +72,7 @@ export const InstallPrompt = () => {
     if (!showPrompt || !isMobile) return null;
 
     return (
-        <div className="fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="floating-toast fixed left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4">
                 <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">

@@ -41,7 +41,23 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
     loading,
     searchQuery,
     onClearSearch,
-    className = "h-[calc(100vh-320px)] min-h-[400px]",
+    /*
+     * Deliberately NOT a viewport unit.
+     *
+     * This default used to be `h-[calc(100vh-320px)] min-h-[400px]`. `vh` resolves
+     * against the LARGE viewport, which in an installed iOS PWA is taller than the
+     * layout viewport the shell is sized against (`html/body/#root { height: 100% }`
+     * — see the viewport contract in index.css). A `vh`-sized box inside a
+     * `100%`-sized shell is exactly the mismatch that contract exists to prevent:
+     * the box is taller than the space it sits in, the page grows past what was
+     * intended, and the extra height reads as unexplained empty space at the end of
+     * the page.
+     *
+     * Both current call sites pass their own `className`, so this value is only a
+     * fallback — it is kept free of viewport units so it cannot reintroduce the
+     * mismatch for a future caller.
+     */
+    className = 'min-h-[200px]',
     carryoverStartIndex,
     onRecordTransaction,
     latestActivityLabel,
@@ -119,10 +135,17 @@ export const VirtualTransactionList: React.FC<VirtualTransactionListProps> = ({
         );
     }
 
+    /*
+     * The virtualised list keeps its bounded scrollport (the virtualiser needs one)
+     * but no longer declares `overscroll-contain`: containing the gesture made the
+     * list swallow scroll at its end, so the page around it could not continue and the
+     * ledger read as a separate screen. Chaining is the platform default and the
+     * correct behaviour — the list scrolls, then the page carries on.
+     */
     return (
         <div
             ref={parentRef}
-            className={`bg-transparent overflow-y-auto overscroll-contain ${className} ${loading ? 'opacity-40 grayscale-[0.5]' : ''}`}
+            className={`bg-transparent overflow-y-auto ${className} ${loading ? 'opacity-40 grayscale-[0.5]' : ''}`}
         >
             <div
                 style={{

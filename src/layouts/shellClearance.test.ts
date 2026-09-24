@@ -15,6 +15,25 @@ describe('shellBottomClearance', () => {
     });
 
     /**
+     * The two reservations must differ: a page with a FAB reserves strictly more,
+     * and only the FAB variant may name the FAB band. If these ever collapse to one
+     * value, one of the two pages is either clipping its last row under the button or
+     * reserving space for a button it does not have.
+     */
+    it('reserves strictly more when the page has a FAB', () => {
+        expect(shellBottomClearance(true)).not.toBe(shellBottomClearance(false));
+        expect(shellBottomClearance(true)).toContain('fab');
+        expect(shellBottomClearance(false)).not.toContain('fab');
+    });
+
+    it('never expresses clearance in viewport units', () => {
+        for (const hasFab of [true, false]) {
+            expect(shellBottomClearance(hasFab)).not.toMatch(/\d(vh|dvh|svh)/);
+            expect(shellScrollPadding(hasFab, 69)).not.toMatch(/\d(vh|dvh|svh)/);
+        }
+    });
+
+    /**
      * The reported defect was a Save/Cancel region over form fields. The fix is not
      * "add the bar's height here" — the bar is sticky inside the scrolling content,
      * so it is already the last element in the flow. Reserving it again pushed the

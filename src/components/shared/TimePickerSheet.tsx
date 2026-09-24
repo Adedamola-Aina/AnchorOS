@@ -4,7 +4,8 @@
  * Hour/minute/period columns with 44px touch targets per Apple HIG.
  */
 
-import React, { useEffect } from 'react';
+import React, { useRef } from 'react';
+import { useOverlayBehavior } from '../../hooks/useOverlayBehavior';
 
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
 const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
@@ -34,14 +35,9 @@ export const TimePickerSheet: React.FC<TimePickerSheetProps> = ({
   onClear,
   onClose,
 }) => {
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Escape, the Tab trap, the scroll lock and the FAB marker.
+  useOverlayBehavior({ isOpen: true, onClose, panelRef });
 
   const colClass = (active: boolean) =>
     `w-14 min-h-[44px] rounded-xl text-center font-semibold transition-all ${
@@ -57,7 +53,7 @@ export const TimePickerSheet: React.FC<TimePickerSheetProps> = ({
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative z-10 w-full max-w-sm mx-4 mb-safe animate-in slide-in-from-bottom-4 fade-in duration-300"
+      <div ref={panelRef} className="relative z-10 w-full max-w-sm mx-4 mb-safe animate-in slide-in-from-bottom-4 fade-in duration-300"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}>
         <div className="rounded-2xl bg-white dark:bg-slate-800 overflow-hidden shadow-2xl">
           {/* Header */}

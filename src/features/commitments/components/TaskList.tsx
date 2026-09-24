@@ -66,7 +66,20 @@ export const TaskList: React.FC<TaskListProps> = ({
                     <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Active Tasks</h3>
                 )}
                 {useVirtual ? (
-                    <div ref={parentRef} className="max-h-[60vh] overflow-y-auto overscroll-contain">
+                    /*
+                     * The list keeps its own bounded scrollport — it is virtualised, so it
+                     * needs one — but it no longer declares `overscroll-contain`.
+                     *
+                     * With containment, reaching the end of this list swallowed the
+                     * gesture: the page underneath could not continue scrolling, so the
+                     * list read as a separate screen the user was stuck inside (the same
+                     * class of defect the shell's blanket containment rule caused on every
+                     * in-page list, measured at 0px vs 750px of page movement).
+                     *
+                     * Letting the gesture chain is the platform default: the list scrolls
+                     * until it ends, then the page carries on.
+                     */
+                    <div ref={parentRef} className="max-h-[60vh] overflow-y-auto">
                         <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
                             {virtualizer.getVirtualItems().map((virtualRow) => {
                                 const task = activeTasks[virtualRow.index];

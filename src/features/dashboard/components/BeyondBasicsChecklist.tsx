@@ -7,8 +7,10 @@
 
 
 
+import { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle2, Circle, ChevronRight } from 'lucide-react';
+import { useOverlayBehavior } from '../../../hooks/useOverlayBehavior';
 import type { BeyondBasicsItemState } from '../hooks/useBeyondBasics';
 
 interface BeyondBasicsChecklistProps {
@@ -28,6 +30,11 @@ export function BeyondBasicsChecklist({
   onClose,
   onItemClick,
 }: BeyondBasicsChecklistProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Escape, the Tab trap, the scroll lock and the FAB marker — none of which this
+  // sheet had, so Tab escaped into the dashboard behind it.
+  useOverlayBehavior({ isOpen, onClose, panelRef });
+
   if (!isOpen) return null;
 
   return createPortal(
@@ -40,7 +47,7 @@ export function BeyondBasicsChecklist({
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-sheet shadow-elevation-modal animate-in slide-in-from-bottom-8 duration-300 max-h-[80vh] overflow-y-auto">
+      <div ref={panelRef} className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-sheet shadow-elevation-modal animate-in slide-in-from-bottom-8 duration-300 max-h-[80vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-slate-900 p-6 pb-4 border-b border-slate-100 dark:border-slate-800 rounded-t-3xl">
           <div className="flex items-center justify-between">

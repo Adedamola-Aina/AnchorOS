@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { lockDocument, unlockDocument } from '../../hooks/useOverlayBehavior';
 
 interface ModalProps {
     isOpen: boolean;
@@ -25,13 +26,11 @@ interface ModalProps {
 }
 
 /**
- * How many modals are currently open.
- *
- * The contextual FAB hides itself while any modal is open, so a floating primary
- * action can never sit on top of a sheet and block the fields beneath it. A
- * counter rather than a boolean keeps stacked sheets correct.
+ * The open-modal contract the shell reads is `body[data-modal-open]`, published by
+ * `lockDocument` in useOverlayBehavior — shared with every other overlay, so a sheet
+ * opened from a modal and the modal itself cannot disagree about whether the page is
+ * locked or whether the contextual FAB should stand down.
  */
-let openModalCount = 0;
 
 export const Modal: React.FC<ModalProps> = ({
     isOpen,
@@ -71,10 +70,19 @@ export const Modal: React.FC<ModalProps> = ({
             const firstElement = focusableElements[0] as HTMLElement;
             const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
-            if (e.shiftKey && document.activeElement === firstElement) {
+            /*
+             * `activeElement` is frequently `<body>` when a modal opens: the trigger
+             * (the contextual FAB, a row's action button) unmounts as the modal takes
+             * over, and focus falls back to the document. Without this branch the trap
+             * only reacted to being AT the first/last element, so the first Tab did
+             * nothing and focus stayed outside the dialog entirely.
+             */
+            const activeIsInside = modalRef.current.contains(document.activeElement);
+
+            if (e.shiftKey && (!activeIsInside || document.activeElement === firstElement)) {
                 e.preventDefault();
                 lastElement?.focus();
-            } else if (!e.shiftKey && document.activeElement === lastElement) {
+            } else if (!e.shiftKey && (!activeIsInside || document.activeElement === lastElement)) {
                 e.preventDefault();
                 firstElement?.focus();
             }
@@ -82,23 +90,23 @@ export const Modal: React.FC<ModalProps> = ({
     }, [onClose]);
 
     useEffect(() => {
-        if (isOpen) {
-            // Store previous active element
-            previousActiveElement.current = document.activeElement as HTMLElement;
-            document.body.style.overflow = 'hidden';
-            document.addEventListener('keydown', handleKeyDown);
+        if (!isOpen) return undefined;
+        // Store previous active element
+        previousActiveElement.current = document.activeElement as HTMLElement;
+        // Shared, reference-counted lock: it also publishes `data-modal-open`, the
+        // marker the shell's FAB and app-shell.css read. The previous unconditional
+        // `overflow = 'unset'` handed scrolling back to the page while a sheet opened
+        // on top of the modal was still up.
+        lockDocument();
+        document.addEventListener('keydown', handleKeyDown);
 
-            // Tells the shell a sheet is up, so the contextual FAB stands down.
-            openModalCount += 1;
-            document.body.dataset.modalOpen = 'true';
+        // NOTE: no auto-focus here - child components with an `autoFocus` attribute
+        // (like DescriptionField) handle their own, and doing it here stole focus
+        // from those inputs.
 
-            // NOTE: Removed auto-focus logic here - child components with autoFocus
-            // attribute (like DescriptionField) should handle their own focus.
-            // The previous implementation was stealing focus from inputs.
-        } else {
-            document.body.style.overflow = 'unset';
+        return () => {
             document.removeEventListener('keydown', handleKeyDown);
-
+            unlockDocument();
             // Restore focus to the previous element, but only when it is still
             // mounted and can meaningfully hold focus. Trigger elements often
             // unmount with the action sheet that opened the modal (activeElement
@@ -107,15 +115,6 @@ export const Modal: React.FC<ModalProps> = ({
             const previous = previousActiveElement.current;
             if (previous && previous !== document.body && previous.isConnected) {
                 previous.focus();
-            }
-        }
-
-        return () => {
-            document.body.style.overflow = 'unset';
-            document.removeEventListener('keydown', handleKeyDown);
-            if (isOpen) {
-                openModalCount = Math.max(0, openModalCount - 1);
-                if (openModalCount === 0) delete document.body.dataset.modalOpen;
             }
         };
     }, [isOpen, handleKeyDown]);

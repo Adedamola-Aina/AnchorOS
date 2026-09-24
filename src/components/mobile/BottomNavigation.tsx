@@ -87,7 +87,23 @@ export const BottomNavigation = ({
       aria-label="Mobile navigation"
       data-bottom-nav
       data-nav-hidden={hidden ? 'true' : 'false'}
-      className={`md:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200/60 dark:border-white/[0.06] transition-transform duration-200 ease-out motion-reduce:transition-none ${hidden ? 'translate-y-full pointer-events-none' : 'translate-y-0'}`}
+      /*
+       * The bar owns the physical bottom edge, so it must be legible AS a bar.
+       *
+       * Its fill is within a few points of the page background by design (light
+       * #ffffff on #f8fafc; dark #0f172a on #0a0f1a) — that is normal for a tab bar
+       * and is not the problem. The problem was the divider: a 60%-opacity
+       * slate-200 hairline in light and a 6%-white one in dark are both below the
+       * threshold of visibility, so the bar had no perceivable extent. Its own 34px
+       * home-indicator band then read as "empty space under the navigation" and the
+       * icon row as "floating too high" — the two reported symptoms.
+       *
+       * A real divider is what gives a same-coloured bar its edge, so the hairline
+       * is now a visible one in both themes. No fill change, no new surface token
+       * (`--surface-raised` is the *same* value as the page, so it would have made
+       * the bar worse, not better).
+       */
+      className={`md:hidden fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-300 dark:border-white/[0.14] transition-transform duration-200 ease-out motion-reduce:transition-none ${hidden ? 'translate-y-full pointer-events-none' : 'translate-y-0'}`}
       style={{
         height: 'var(--bottom-nav-height, calc(49px + env(safe-area-inset-bottom, 0px)))',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',

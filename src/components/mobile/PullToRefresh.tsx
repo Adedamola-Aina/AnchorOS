@@ -160,10 +160,31 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
         </div>
       )}
 
-      {/* Content with pull offset */}
+      {/*
+       * Content with pull offset.
+       *
+       * The offset is applied only while there IS an offset. `translateY(0px)` looks
+       * inert, but it is still a transform, and a transformed element (a) becomes the
+       * containing block for every `position: fixed`/`sticky` descendant, and (b)
+       * starts a new stacking context, which changes the backdrop a descendant's
+       * `backdrop-filter` samples.
+       *
+       * Home wraps its whole page in this container and renders seven
+       * `backdrop-filter` (`.glass-card`) widgets inside it, so the two consequences
+       * above applied to the entire page for the whole session. There is no
+       * `position: fixed` descendant today (verified: zero), and no visible blur was
+       * reproduced — so this is the removal of a standing hazard rather than a
+       * confirmed on-screen defect. Same defect class as the transformed-ancestor bug
+       * documented in PopoverMenu, which was real.
+       *
+       * `none` rather than dropping the property, so the release still animates:
+       * browsers interpolate `none` as the identity transform, so the
+       * return-to-rest transition is unchanged.
+       */}
       <div
+        data-testid="pull-to-refresh-content"
         style={{
-          transform: `translateY(${pullDistance}px)`,
+          transform: pullDistance > 0 ? `translateY(${pullDistance}px)` : 'none',
           transition: isPulling ? 'none' : 'transform 0.2s ease-out',
         }}
       >

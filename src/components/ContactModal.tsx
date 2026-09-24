@@ -6,9 +6,10 @@
 
 
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
+import { useOverlayBehavior } from '../hooks/useOverlayBehavior';
 import { APP_VERSION } from '../version';
 import { ContactSuccessMessage, ContactHeader, SubjectSelect, MessageInput, IdentityFields, SubmitButton, SUBJECTS } from './ContactModalParts';
 import { createFeedbackBackup } from '../api/FeedbackApi';
@@ -18,6 +19,7 @@ type SubjectType = 'question' | 'problem' | 'feature' | 'testimonial' | 'feedbac
 interface ContactModalProps { onClose: () => void; currentPage?: string; initialSubject?: SubjectType; }
 
 const ContactModal: React.FC<ContactModalProps> = ({ onClose, currentPage = 'unknown', initialSubject = 'feedback' }) => {
+    const panelRef = useRef<HTMLDivElement>(null);
     const { user, profile } = useAuth();
     const [subject, setSubject] = useState<SubjectType>(initialSubject);
     const [message, setMessage] = useState('');
@@ -62,11 +64,15 @@ const ContactModal: React.FC<ContactModalProps> = ({ onClose, currentPage = 'unk
         finally { setIsSubmitting(false); }
     };
 
+    // Escape, the Tab trap, the scroll lock and the FAB marker. This modal had none
+    // of them: Tab walked out into the page behind it and the page still scrolled.
+    useOverlayBehavior({ isOpen: !isSubmitted, onClose, panelRef });
+
     if (isSubmitted) return createPortal(<ContactSuccessMessage />, document.body);
 
     const modalContent = (
         <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 overflow-y-auto" onClick={onClose}>
-            <div className="w-full sm:max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-500 sm:my-8" onClick={e => e.stopPropagation()}>
+            <div ref={panelRef} className="w-full sm:max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-500 sm:my-8" onClick={e => e.stopPropagation()}>
                 <ContactHeader onClose={onClose} />
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <SubjectSelect value={subject} onChange={setSubject} />

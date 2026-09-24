@@ -492,6 +492,20 @@ a, button, input, select, textarea, [role="button"], [tabindex] {
   --fab-offset: 1rem;
   --fab-band-height: calc(var(--fab-height) + var(--fab-offset));
   /*
+   * The floating layer's rungs above the physical bottom edge. Anything that
+   * floats over the page reads one of these, so floating controls cannot drift
+   * apart from each other or from the navigation they sit above.
+   *
+   *   --shell-above-nav  the first rung: clears the navigation. The contextual FAB.
+   *   --shell-above-fab  the second rung: clears BOTH the navigation and the FAB's
+   *                      band. For transient surfaces (toast, offline notice) that
+   *                      must never be covered by a persistent button.
+   *
+   * Both already contain the device inset, via --bottom-nav-height.
+   */
+  --shell-above-nav: calc(var(--bottom-nav-height) + var(--fab-offset));
+  --shell-above-fab: calc(var(--shell-above-nav) + var(--fab-height) + var(--fab-offset));
+  /*
    * How much room the end of a scrollable page must leave. The SHELL owns this:
    * pages do not add their own bottom spacers or safe-area padding.
    *
@@ -513,6 +527,36 @@ a, button, input, select, textarea, [role="button"], [tabindex] {
 
 /* ─── Touch targets (WCAG 2.5.5) ───────────────────────── */
 .touch-target { min-width: 44px; min-height: 44px; }
+
+
+/* ─── The floating layer ───────────────────────────────────
+ * One class for every transient surface that floats over the page (toast, offline
+ * notice, install prompt), so their vertical position comes from the same geometry
+ * as the navigation and the FAB instead of three hand-picked offsets.
+ *
+ * Measured before this existed, on an iPhone-sized viewport with a 34px inset:
+ * the nav occupied 0–83px, the FAB 99–155px, the toast's bottom edge sat at 16px
+ * and the install prompt's at 80px — so the toast overlapped the navigation by
+ * 67px and painted over it (z-100 over z-40), covering the tab labels.
+ *
+ * It steps up to the second rung only while a FAB actually occupies the first one.
+ * `data-fab-visible` is published by ContextualFab (registered AND not standing
+ * down for a sheet), which is the same condition that decides whether the button
+ * is on screen at all.
+ *
+ * The desktop reset is at `md` (768px), not `sm`: the navigation is `md:hidden`, so
+ * 640–767px still has a bar and must keep a rung. (The old `sm:bottom-6` on the
+ * toast put it at 24px on those widths — inside the bar.)
+ */
+.floating-toast {
+  bottom: var(--shell-above-nav);
+}
+body[data-fab-visible='true'] .floating-toast {
+  bottom: var(--shell-above-fab);
+}
+@media (min-width: 768px) {
+  .floating-toast { bottom: 1.5rem; }
+}
 
 
 /* ─── Scrollbars ────────────────────────────────────────── */

@@ -4,8 +4,9 @@
  * Month navigation with 44px touch targets per Apple HIG.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useOverlayBehavior } from '../../hooks/useOverlayBehavior';
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const MONTHS = [
@@ -48,6 +49,7 @@ export const DatePickerSheet: React.FC<DatePickerSheetProps> = ({
   onToday,
   onClose,
 }) => {
+  const panelRef = useRef<HTMLDivElement>(null);
   const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstDay = getFirstDayOfWeek(viewYear, viewMonth);
 
@@ -69,14 +71,8 @@ export const DatePickerSheet: React.FC<DatePickerSheetProps> = ({
     [hasValue, viewYear, viewMonth, selectedYear, selectedMonth, selectedDay],
   );
 
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
+  // Close on Escape, trap Tab within the sheet, lock the page behind it.
+  useOverlayBehavior({ isOpen: true, onClose, panelRef: panelRef });
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label="Date picker">
@@ -85,7 +81,7 @@ export const DatePickerSheet: React.FC<DatePickerSheetProps> = ({
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative z-10 w-full max-w-sm mx-4 mb-safe animate-in slide-in-from-bottom-4 fade-in duration-300"
+      <div ref={panelRef} className="relative z-10 w-full max-w-sm mx-4 mb-safe animate-in slide-in-from-bottom-4 fade-in duration-300"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}>
         <div className="rounded-2xl bg-white dark:bg-slate-800 overflow-hidden shadow-2xl">
           {/* Month navigation */}

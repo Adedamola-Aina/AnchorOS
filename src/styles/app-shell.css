@@ -121,11 +121,26 @@ body.platform-pwa::-webkit-scrollbar { display: none; }
 /* No double-tap zoom anywhere interactive in app mode. */
 body.platform-pwa * { touch-action: manipulation; }
 
-/* Scroll containers need pan-y preserved + contained over-scroll. */
-body.platform-pwa [data-scroll],
-body.platform-pwa .overflow-y-auto,
-body.platform-pwa .overflow-auto,
-body.platform-pwa .overflow-y-scroll {
+/*
+ * The root scrollport needs pan-y preserved and its over-scroll contained: it IS
+ * the app's page scroll, so a fling that runs past the end must not rubber-band
+ * the whole shell or chain out to the platform's own overscroll.
+ *
+ * Scoped deliberately to the ROOT SCROLLPORT (`main[data-scroll]`) and nothing
+ * else. It used to also match `.overflow-y-auto` / `.overflow-auto` /
+ * `.overflow-y-scroll`, which are ordinary Tailwind utilities — so in an
+ * installed PWA the shell silently applied scroll containment to EVERY scrollable
+ * element in the product: the Recent Activity list on Home, the session list in
+ * Settings, the shared-activity list in Finance, and so on. Containing those
+ * stops the page from continuing to scroll once the inner list reaches its end,
+ * which is what makes a page feel like it has turned into a second, empty screen
+ * (the user must lift their finger and drag again to carry on down the page).
+ *
+ * A scroll region that genuinely wants containment declares it itself (the
+ * transaction and commitment lists carry their own `overscroll-contain`), so no
+ * behaviour that was asked for is lost by narrowing this rule.
+ */
+body.platform-pwa [data-scroll] {
   touch-action: pan-y;
   overscroll-behavior: contain;
 }

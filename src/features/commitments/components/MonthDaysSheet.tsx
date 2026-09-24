@@ -12,8 +12,9 @@
  */
 
 
-import React, { useEffect } from 'react';
+import React, { useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useOverlayBehavior } from '../../../hooks/useOverlayBehavior';
 
 const DAYS = Array.from({ length: 31 }, (_, index) => index + 1);
 
@@ -26,12 +27,9 @@ interface MonthDaysSheetProps {
 }
 
 export const MonthDaysSheet: React.FC<MonthDaysSheetProps> = ({ isOpen, value, onChange, onClose }) => {
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [isOpen, onClose]);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Escape, the Tab trap, the scroll lock and the FAB marker.
+  useOverlayBehavior({ isOpen, onClose, panelRef });
 
   if (!isOpen) return null;
 
@@ -47,6 +45,7 @@ export const MonthDaysSheet: React.FC<MonthDaysSheetProps> = ({ isOpen, value, o
         aria-hidden="true"
       />
       <div
+        ref={panelRef}
         data-testid="month-days-sheet"
         className="relative z-10 w-full max-w-md mx-4 animate-in slide-in-from-bottom-4 fade-in duration-300"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
